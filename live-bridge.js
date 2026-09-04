@@ -262,3 +262,43 @@
 
   refresh();setInterval(refresh,REFRESH_MS);
 })();
+
+// CT_VALIDATION_UI_HOTFIX_V1
+(function(){
+  'use strict';
+  function fixAuditUi(){
+    try{
+      const tabs=document.querySelector('.tabs');
+      if(tabs) tabs.style.setProperty('grid-template-columns','repeat(6,minmax(0,1fr))','important');
+      const tr=document.querySelector('.tab[data-tab="trades"]');
+      if(tr){
+        tr.style.setProperty('display','flex','important');
+        tr.style.setProperty('flex-direction','column','important');
+        tr.style.setProperty('align-items','center','important');
+        tr.style.setProperty('justify-content','center','important');
+        tr.style.setProperty('font-size','8px','important');
+      }
+      const legacy=document.getElementById('ctLiveBadge');
+      if(legacy) legacy.style.setProperty('display','none','important');
+      const hero=document.querySelector('.ctOvPrimary');
+      if(hero){
+        const label=hero.querySelector('.ctOvLabel');
+        if(label) label.textContent='KR 세션 MODEL P&L (KB3+TRI-POD)';
+        let scope=document.getElementById('ctHeroScopeWarning');
+        if(!scope){
+          scope=document.createElement('div');
+          scope.id='ctHeroScopeWarning';
+          scope.style.cssText='margin-top:4px;font:800 9px/1.35 system-ui,-apple-system,sans-serif;color:#ffb4bf';
+          hero.appendChild(scope);
+        }
+        scope.textContent='Toss 실제 당일손익·AI 당일손익 제외 · 전체 6계좌 P&L 아님';
+      }
+      const toss=document.getElementById('ctDayNetTOSS');
+      if(toss) toss.innerHTML='오늘 손익 <b>미연결</b> · 순입출금 <b>—</b> · <span style="color:#b45309">TOSS REF는 집계 제외</span>';
+      const strip=document.getElementById('ctTodayNetStrip');
+      if(strip) strip.innerHTML='오늘 손익 검증상태 · <b>KB3 MODEL</b> · <b>TRI-POD MODEL</b> · <span style="color:#b45309">Toss 실제 당일손익 미연결</span> · <span style="color:#b45309">AI 일간손익 미연결</span>';
+    }catch(e){}
+  }
+  fixAuditUi();
+  setInterval(fixAuditUi,1000);
+})();
