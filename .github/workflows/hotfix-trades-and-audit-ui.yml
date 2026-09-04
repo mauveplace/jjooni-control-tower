@@ -22,66 +22,23 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import base64
 
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           s=s.replace('grid-template-columns:repeat(5,minmax(0,1fr))','grid-template-columns:repeat(6,minmax(0,1fr))')
           needle='html.ctTouchTablet .tab[data-tab="overview"],html.ctTouchTablet .tab[data-tab="accounts"]'
-          if needle in s and 'html.ctTouchTablet .tab[data-tab="trades"],.tab[data-tab="trades"],'+needle not in s:
-              s=s.replace(needle,'html.ctTouchTablet .tab[data-tab="trades"],.tab[data-tab="trades"],'+needle,1)
+          add='html.ctTouchTablet .tab[data-tab="trades"],.tab[data-tab="trades"],'+needle
+          if needle in s and add not in s:
+              s=s.replace(needle,add,1)
           p.write_text(s,encoding='utf-8')
 
           p=Path('live-bridge.js')
           s=p.read_text(encoding='utf-8')
           marker='CT_VALIDATION_UI_HOTFIX_V1'
+          patch=base64.b64decode('Ly8gQ1RfVkFMSURBVElPTl9VSV9IT1RGSVhfVjEKKGZ1bmN0aW9uKCl7CiAgJ3VzZSBzdHJpY3QnOwogIGZ1bmN0aW9uIGZpeEF1ZGl0VWkoKXsKICAgIHRyeXsKICAgICAgY29uc3QgdGFicz1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCcudGFicycpOwogICAgICBpZih0YWJzKSB0YWJzLnN0eWxlLnNldFByb3BlcnR5KCdncmlkLXRlbXBsYXRlLWNvbHVtbnMnLCdyZXBlYXQoNixtaW5tYXgoMCwxZnIpKScsJ2ltcG9ydGFudCcpOwogICAgICBjb25zdCB0cj1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCcudGFiW2RhdGEtdGFiPSJ0cmFkZXMiXScpOwogICAgICBpZih0cil7CiAgICAgICAgdHIuc3R5bGUuc2V0UHJvcGVydHkoJ2Rpc3BsYXknLCdmbGV4JywnaW1wb3J0YW50Jyk7CiAgICAgICAgdHIuc3R5bGUuc2V0UHJvcGVydHkoJ2ZsZXgtZGlyZWN0aW9uJywnY29sdW1uJywnaW1wb3J0YW50Jyk7CiAgICAgICAgdHIuc3R5bGUuc2V0UHJvcGVydHkoJ2FsaWduLWl0ZW1zJywnY2VudGVyJywnaW1wb3J0YW50Jyk7CiAgICAgICAgdHIuc3R5bGUuc2V0UHJvcGVydHkoJ2p1c3RpZnktY29udGVudCcsJ2NlbnRlcicsJ2ltcG9ydGFudCcpOwogICAgICAgIHRyLnN0eWxlLnNldFByb3BlcnR5KCdmb250LXNpemUnLCc4cHgnLCdpbXBvcnRhbnQnKTsKICAgICAgfQogICAgICBjb25zdCBsZWdhY3k9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2N0TGl2ZUJhZGdlJyk7CiAgICAgIGlmKGxlZ2FjeSkgbGVnYWN5LnN0eWxlLnNldFByb3BlcnR5KCdkaXNwbGF5Jywnbm9uZScsJ2ltcG9ydGFudCcpOwogICAgICBjb25zdCBoZXJvPWRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJy5jdE92UHJpbWFyeScpOwogICAgICBpZihoZXJvKXsKICAgICAgICBjb25zdCBsYWJlbD1oZXJvLnF1ZXJ5U2VsZWN0b3IoJy5jdE92TGFiZWwnKTsKICAgICAgICBpZihsYWJlbCkgbGFiZWwudGV4dENvbnRlbnQ9J0tSIOyEuOyFmCBNT0RFTCBQJkwgKEtCMytUUkktUE9EKSc7CiAgICAgICAgbGV0IHNjb3BlPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdjdEhlcm9TY29wZVdhcm5pbmcnKTsKICAgICAgICBpZighc2NvcGUpewogICAgICAgICAgc2NvcGU9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7CiAgICAgICAgICBzY29wZS5pZD0nY3RIZXJvU2NvcGVXYXJuaW5nJzsKICAgICAgICAgIHNjb3BlLnN0eWxlLmNzc1RleHQ9J21hcmdpbi10b3A6NHB4O2ZvbnQ6ODAwIDlweC8xLjM1IHN5c3RlbS11aSwtYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWY7Y29sb3I6I2ZmYjRiZic7CiAgICAgICAgICBoZXJvLmFwcGVuZENoaWxkKHNjb3BlKTsKICAgICAgICB9CiAgICAgICAgc2NvcGUudGV4dENvbnRlbnQ9J1Rvc3Mg7Iuk7KCcIOuLueydvOyGkOydtcK3QUkg64u57J287IaQ7J21IOygnOyZuCDCtyDsoITssrQgNuqzhOyijCBQJkwg7JWE64uYJzsKICAgICAgfQogICAgICBjb25zdCB0b3NzPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdjdERheU5ldFRPU1MnKTsKICAgICAgaWYodG9zcykgdG9zcy5pbm5lckhUTUw9J+yYpOuKmCDshpDsnbUgPGI+66+47Jew6rKwPC9iPiDCtyDsiJzsnoXstpzquIggPGI+4oCUPC9iPiDCtyA8c3BhbiBzdHlsZT0iY29sb3I6I2I0NTMwOSI+VE9TUyBSRUbripQg7KeR6rOEIOygnOyZuDwvc3Bhbj4nOwogICAgICBjb25zdCBzdHJpcD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY3RUb2RheU5ldFN0cmlwJyk7CiAgICAgIGlmKHN0cmlwKSBzdHJpcC5pbm5lckhUTUw9J+yYpOuKmCDshpDsnbUg6rKA7Kad7IOB7YOcIMK3IDxiPktCMyBNT0RFTDwvYj4gwrcgPGI+VFJJLVBPRCBNT0RFTDwvYj4gwrcgPHNwYW4gc3R5bGU9ImNvbG9yOiNiNDUzMDkiPlRvc3Mg7Iuk7KCcIOuLueydvOyGkOydtSDrr7jsl7DqsrA8L3NwYW4+IMK3IDxzcGFuIHN0eWxlPSJjb2xvcjojYjQ1MzA5Ij5BSSDsnbzqsITshpDsnbUg66+47Jew6rKwPC9zcGFuPic7CiAgICB9Y2F0Y2goZSl7fQogIH0KICBmaXhBdWRpdFVpKCk7CiAgc2V0SW50ZXJ2YWwoZml4QXVkaXRVaSwxMDAwKTsKfSkoKTsK').decode('utf-8')
           if marker not in s:
-              s += r'''
-
-// CT_VALIDATION_UI_HOTFIX_V1
-(function(){
-  'use strict';
-  function fixAuditUi(){
-    try{
-      const tabs=document.querySelector('.tabs');
-      if(tabs) tabs.style.setProperty('grid-template-columns','repeat(6,minmax(0,1fr))','important');
-      const tr=document.querySelector('.tab[data-tab="trades"]');
-      if(tr){
-        tr.style.setProperty('display','flex','important');
-        tr.style.setProperty('flex-direction','column','important');
-        tr.style.setProperty('align-items','center','important');
-        tr.style.setProperty('justify-content','center','important');
-        tr.style.setProperty('font-size','8px','important');
-      }
-
-      // The legacy Cloud Run live badge is frozen with the recovered static payload.
-      // Hide it; encrypted-feed badge is the active source-status surface.
-      const legacy=document.getElementById('ctLiveBadge');
-      if(legacy) legacy.style.setProperty('display','none','important');
-
-      const hero=document.querySelector('.ctOvPrimary');
-      if(hero){
-        const label=hero.querySelector('.ctOvLabel');
-        if(label) label.textContent='KR 세션 MODEL P&L (KB3+TRI-POD)';
-        let scope=document.getElementById('ctHeroScopeWarning');
-        if(!scope){
-          scope=document.createElement('div');scope.id='ctHeroScopeWarning';
-          scope.style.cssText='margin-top:4px;font:800 9px/1.35 system-ui,-apple-system,sans-serif;color:#ffb4bf';
-          hero.appendChild(scope);
-        }
-        scope.textContent='Toss 실제 당일손익·AI 당일손익 제외 · 전체 6계좌 P&L 아님';
-      }
-
-      const toss=document.getElementById('ctDayNetTOSS');
-      if(toss) toss.innerHTML='오늘 손익 <b>미연결</b> · 순입출금 <b>—</b> · <span style="color:#b45309">TOSS REF는 집계 제외</span>';
-
-      const strip=document.getElementById('ctTodayNetStrip');
-      if(strip) strip.innerHTML='오늘 손익 검증상태 · <b>KB3 MODEL</b> · <b>TRI-POD MODEL</b> · <span style="color:#b45309">Toss 실제 당일손익 미연결</span> · <span style="color:#b45309">AI 일간손익 미연결</span>';
-    }catch(e){}
-  }
-  fixAuditUi();
-  setInterval(fixAuditUi,1000);
-})();
-'''
+              s += '\n'+patch
           p.write_text(s,encoding='utf-8')
           PY
 
