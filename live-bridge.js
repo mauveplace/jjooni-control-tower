@@ -18,7 +18,7 @@ const ORIGINAL={
  openTradePerformanceDetail:typeof window.openTradePerformanceDetail==='function'?window.openTradePerformanceDetail:null
 };
 const b64=s=>Uint8Array.from(atob(String(s||'')),c=>c.charCodeAt(0));
-const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
+const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
 const won=v=>'₩'+Math.round(Math.abs(z(v))).toLocaleString('ko-KR');
@@ -28,6 +28,7 @@ const usd=v=>'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFra
 const clone=x=>JSON.parse(JSON.stringify(x));
 let LAST_LIVE=null;
 let CANON=null;
+let TRADE_QUOTES={};
 
 async function decryptEnvelope(env,password){
  const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
@@ -124,10 +125,15 @@ function mergeTrades(live){
 }
 
 function syncTradeCurrentPrices(){
- if(!CANON||!D.human)return;const px=new Map();Object.values(CANON.accounts).forEach(c=>(c.positions||[]).forEach(p=>{const k=String(c.id)+'|'+sym(p.ticker);if(n(p.current_price||p.price)!=null)px.set(k,z(p.current_price||p.price))}));
- (D.human.trades||[]).forEach(t=>{const id=String(t.account||'').toUpperCase(),p=px.get(id+'|'+sym(t.ticker));if(p>0){t.current_price=p;const ep=z(t.price),side=String(t.side||'').toUpperCase();if(ep>0)t.trade_return=(side.includes('SELL')||side.includes('매도'))?(ep?null:null):((p/ep)-1);}});
+ if(typeof D==='undefined'||!D.human)return;
+ const px=new Map(),src=new Map(),put=(ticker,price,source)=>{const k=sym(ticker),v=n(price);if(k&&v!=null&&v>0&&!px.has(k)){px.set(k,v);src.set(k,source||'CURRENT_QUOTE')}};
+ const side=((TRADE_QUOTES||{}).q)||{};Object.entries(side).forEach(([ticker,q])=>put(ticker,q&&q.p,q&&q.s));
+ if(CANON)Object.values(CANON.accounts||{}).forEach(c=>(c.positions||[]).forEach(p=>put(p.ticker,p.current_price||p.price,p.price_source||c.source)));
+ const wl=(LAST_LIVE&&LAST_LIVE.watchlist)||{};[...(wl.kr||[]),...(wl.us||[])].forEach(x=>put(x.ticker,x.current_price,x.quote_source));
+ const tp=((LAST_LIVE&&LAST_LIVE.accounts)||{}).TRIPOD||{};put('TQQQ',tp.current_price,tp.mode||'TRIPOD_MARKET');
+ (D.human.trades||[]).forEach(t=>{const k=sym(t.ticker),p=px.get(k);if(p>0){t.current_price=p;t.current_price_source=src.get(k)||'CURRENT_QUOTE';const ep=n(t.price),sideText=String(t.side||'').toUpperCase();if(ep!=null&&ep>0){if(sideText.includes('BUY')||sideText.includes('매수'))t.trade_return=(p/ep)-1;else t.trade_return=null;}}});
+ window.__JJOONI_TRADE_QUOTES=TRADE_QUOTES;
 }
-
 function syncLegacyMirrors(){
  if(!CANON||typeof D==='undefined')return;D.human=D.human||{};const humanIds=['TOSS','ISA','PENSION','IRP'],hs=humanIds.map(id=>CANON.accounts[id]).filter(Boolean);
  D.human.current_account_navs=D.human.current_account_navs||{};D.human.current_account_details=D.human.current_account_details||{};
@@ -179,7 +185,7 @@ function applyLive(live){
  else setBadge('SSOT '+CANON.total.known_today_count+'/'+CANON.total.account_count+' · '+t,CANON.total.today_complete?'good':'warn','Canonical feed drives overview, performance, account drilldowns, trade review, TRI-POD and watchlist. Missing daily P&L: '+miss);
 }
 
-async function refresh(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
+async function refresh(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
 
 injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(refresh,REFRESH_MS);setInterval(()=>{if(CANON){updateCards();updateHero();fixLegacyBadges()}},1500);
 })();
