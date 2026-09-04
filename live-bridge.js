@@ -81,6 +81,70 @@
     }
   }
 
+  function kstParts(v){
+    const d=new Date(v||Date.now());
+    if(Number.isNaN(d.getTime()))return null;
+    const parts=new Intl.DateTimeFormat('en-US',{
+      timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',
+      hour:'2-digit',minute:'2-digit',hourCycle:'h23'
+    }).formatToParts(d);
+    const m={};parts.forEach(x=>{if(x.type!=='literal')m[x.type]=x.value;});
+    return {ymd:`${m.year}-${m.month}-${m.day}`,weekday:m.weekday||'',minuteOfDay:Number(m.hour||0)*60+Number(m.minute||0)};
+  }
+
+  function installSessionMetricFilter(){
+    if(window.__jjooniSessionMetricFilterInstalled)return;
+    if(typeof window.buildRegularSessionMetrics!=='function')return;
+    const original=window.buildRegularSessionMetrics;
+    window.buildRegularSessionMetrics=function(){
+      const H=(typeof D!=='undefined'&&D.human)||{};
+      const saved=H.positions;
+      try{
+        if(Array.isArray(saved)){
+          H.positions=saved.filter(p=>String(p.record_type||p.RECORD_TYPE||'POSITION').toUpperCase()!=='FUND');
+        }
+        return original();
+      }finally{
+        H.positions=saved;
+      }
+    };
+    window.__jjooniSessionMetricFilterInstalled=true;
+  }
+
+  function publishQuoteSurface(id,p,observedAt){
+    const rt=String(p.record_type||p.RECORD_TYPE||'POSITION').toUpperCase();
+    const px=Number(p.current_price||p.price||0);
+    if(rt!=='POSITION'||!(px>0))return;
+    const key=sym(p.ticker||p.symbol);
+    if(!key)return;
+    D.human=D.human||{};
+    D.human.trade_quotes=D.human.trade_quotes||{};
+    D.human.trade_quotes[key]={
+      ...(D.human.trade_quotes[key]||{}),
+      price:px,
+      timestamp:String(p.live_price_timestamp||observedAt||''),
+      source:String(p.price_source||'KIS_MARKET_QUOTE'),
+      currency:'KRW',
+      account:id
+    };
+
+    const k=kstParts(p.live_price_timestamp||observedAt);
+    if(!k||['Sat','Sun'].includes(k.weekday)||k.minuteOfDay<930)return;
+    D.human.session_reference_prices=D.human.session_reference_prices||{};
+    const arr=Array.isArray(D.human.session_reference_prices[key])?D.human.session_reference_prices[key]:[];
+    const kept=arr.filter(x=>{
+      const xp=kstParts(x&&x.timestamp);
+      return !(xp&&xp.ymd===k.ymd&&String(x&&x.source||'').startsWith('KIS_'));
+    });
+    kept.push({
+      close:px,
+      timestamp:String(p.live_price_timestamp||observedAt||''),
+      source:'KIS_REGULAR_CLOSE_MODELED',
+      account:id
+    });
+    D.human.session_reference_prices[key]=kept.sort((a,b)=>String(a.timestamp||'').localeCompare(String(b.timestamp||'')));
+  }
+
   function applyAi(live){
     const a=((live.accounts||{}).AI)||null;
     if(!a||String(a.status||'').toUpperCase()!=='LIVE')return false;
@@ -109,6 +173,7 @@
       ...p,
       account:id,
       account_type:id,
+      record_type:String(p.record_type||p.RECORD_TYPE||(idx>=0?D.human.positions[idx].record_type:'POSITION')||'POSITION').toUpperCase(),
       current_price:Number(p.current_price||0),
       market_value:Number(p.market_value||0),
       avg_price:Number(p.avg_price||p.avg||0),
@@ -118,6 +183,7 @@
     };
     if(idx>=0)D.human.positions[idx]=merged;
     else D.human.positions.push(merged);
+    publishQuoteSurface(id,merged,observedAt);
   }
 
   function applyKbModeled(live){
@@ -151,6 +217,7 @@
     if(!live||!['JJOONI_CT_LIVE_V1','JJOONI_CT_LIVE_V2'].includes(String(live.schema||'')))throw new Error('LIVE_SCHEMA_MISMATCH');
     if(typeof D==='undefined')throw new Error('CONTROL_TOWER_DATA_MISSING');
 
+    installSessionMetricFilter();
     const aiOk=applyAi(live);
     const kbCount=String(live.schema)==='JJOONI_CT_LIVE_V2'?applyKbModeled(live):0;
     if(typeof render==='function')render();
