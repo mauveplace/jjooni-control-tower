@@ -22,47 +22,25 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-
           p=Path('live-bridge.js')
           s=p.read_text(encoding='utf-8')
-
           old="const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};"
           new="const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif new not in s:
-              raise SystemExit('NUM_HELPER_PATTERN_NOT_FOUND')
-
+          if old in s: s=s.replace(old,new,1)
+          elif new not in s: raise SystemExit('NUM_HELPER_PATTERN_NOT_FOUND')
           old="let LAST_LIVE=null;\nlet CANON=null;"
           new="let LAST_LIVE=null;\nlet CANON=null;\nlet TRADE_QUOTES={};"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif "let TRADE_QUOTES={};" not in s:
-              raise SystemExit('TRADE_QUOTES_STATE_PATTERN_NOT_FOUND')
-
+          if old in s: s=s.replace(old,new,1)
+          elif "let TRADE_QUOTES={};" not in s: raise SystemExit('TRADE_QUOTES_STATE_PATTERN_NOT_FOUND')
           start=s.find('function syncTradeCurrentPrices(){')
           end=s.find('\nfunction syncLegacyMirrors(){',start)
-          if start<0 or end<0:
-              raise SystemExit('SYNC_TRADE_FUNCTION_NOT_FOUND')
-          replacement=r'''function syncTradeCurrentPrices(){
- if(!D||!D.human)return;
- const px=new Map(),src=new Map(),put=(ticker,price,source)=>{const k=sym(ticker),v=n(price);if(k&&v!=null&&v>0&&!px.has(k)){px.set(k,v);src.set(k,source||'CURRENT_QUOTE')}};
- const side=((TRADE_QUOTES||{}).q)||{};Object.entries(side).forEach(([ticker,q])=>put(ticker,q&&q.p,q&&q.s));
- if(CANON)Object.values(CANON.accounts||{}).forEach(c=>(c.positions||[]).forEach(p=>put(p.ticker,p.current_price||p.price,p.price_source||c.source)));
- const wl=(LAST_LIVE&&LAST_LIVE.watchlist)||{};[...(wl.kr||[]),...(wl.us||[])].forEach(x=>put(x.ticker,x.current_price,x.quote_source));
- const tp=((LAST_LIVE&&LAST_LIVE.accounts)||{}).TRIPOD||{};put('TQQQ',tp.current_price,tp.mode||'TRIPOD_MARKET');
- (D.human.trades||[]).forEach(t=>{const k=sym(t.ticker),p=px.get(k);if(p>0){t.current_price=p;t.current_price_source=src.get(k)||'CURRENT_QUOTE';const ep=n(t.price),sideText=String(t.side||'').toUpperCase();if(ep!=null&&ep>0){if(sideText.includes('BUY')||sideText.includes('매수'))t.trade_return=(p/ep)-1;else t.trade_return=null;}}});
- window.__JJOONI_TRADE_QUOTES=TRADE_QUOTES;
-}'''
+          if start<0 or end<0: raise SystemExit('SYNC_TRADE_FUNCTION_NOT_FOUND')
+          replacement="function syncTradeCurrentPrices(){\n if(typeof D==='undefined'||!D.human)return;\n const px=new Map(),src=new Map(),put=(ticker,price,source)=>{const k=sym(ticker),v=n(price);if(k&&v!=null&&v>0&&!px.has(k)){px.set(k,v);src.set(k,source||'CURRENT_QUOTE')}};\n const side=((TRADE_QUOTES||{}).q)||{};Object.entries(side).forEach(([ticker,q])=>put(ticker,q&&q.p,q&&q.s));\n if(CANON)Object.values(CANON.accounts||{}).forEach(c=>(c.positions||[]).forEach(p=>put(p.ticker,p.current_price||p.price,p.price_source||c.source)));\n const wl=(LAST_LIVE&&LAST_LIVE.watchlist)||{};[...(wl.kr||[]),...(wl.us||[])].forEach(x=>put(x.ticker,x.current_price,x.quote_source));\n const tp=((LAST_LIVE&&LAST_LIVE.accounts)||{}).TRIPOD||{};put('TQQQ',tp.current_price,tp.mode||'TRIPOD_MARKET');\n (D.human.trades||[]).forEach(t=>{const k=sym(t.ticker),p=px.get(k);if(p>0){t.current_price=p;t.current_price_source=src.get(k)||'CURRENT_QUOTE';const ep=n(t.price),sideText=String(t.side||'').toUpperCase();if(ep!=null&&ep>0){if(sideText.includes('BUY')||sideText.includes('매수'))t.trade_return=(p/ep)-1;else t.trade_return=null;}}});\n window.__JJOONI_TRADE_QUOTES=TRADE_QUOTES;\n}"
           s=s[:start]+replacement+s[end:]
-
           old="const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)"
           new="const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif "TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON" not in s:
-              raise SystemExit('REFRESH_PATTERN_NOT_FOUND')
-
+          if old in s: s=s.replace(old,new,1)
+          elif "TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON" not in s: raise SystemExit('REFRESH_PATTERN_NOT_FOUND')
           p.write_text(s,encoding='utf-8')
           print('PATCH_OK',len(s))
           PY
