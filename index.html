@@ -95,7 +95,8 @@ async function openTower(pw){
     let html=new TextDecoder().decode(plain);
     html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
     html=html.replace('</body>',CT_POSTFIX+'</body>');
-    html=html.replace('</body>','<script src="live-bridge.js?v=1"><\/script></body>');document.open();document.write(html);document.close();
+    const CT_LIVE_BOOT=`<script>(function(){var b=document.createElement('div');b.id='ctEncryptedLiveBadge';b.style.cssText='position:fixed;right:12px;bottom:72px;z-index:10001;padding:6px 9px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#b45309;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002';b.textContent='AI FEED LOADING';document.body.appendChild(b);var s=document.createElement('script');s.src='live-bridge.js?v=2&_='+Date.now();s.async=false;s.onerror=function(){b.textContent='AI FEED LOAD FAIL'};(document.head||document.documentElement).appendChild(s);}());<\/script>`;
+    html=html.replace('</body>',CT_LIVE_BOOT+'</body>');document.open();document.write(html);document.close();
   }catch(e){
     sessionStorage.removeItem('jjooni_ct_session_pw'); msg.className='msg bad'; msg.textContent='비밀번호가 맞지 않거나 데이터가 손상되었습니다.';
   }
