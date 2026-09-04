@@ -95,7 +95,7 @@ async function openTower(pw){
     let html=new TextDecoder().decode(plain);
     html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
     html=html.replace('</body>',CT_POSTFIX+'</body>');
-    document.open();document.write(html);document.close();
+    html=html.replace('</body>','<script src="live-bridge.js?v=1"></script></body>');document.open();document.write(html);document.close();
   }catch(e){
     sessionStorage.removeItem('jjooni_ct_session_pw'); msg.className='msg bad'; msg.textContent='비밀번호가 맞지 않거나 데이터가 손상되었습니다.';
   }
