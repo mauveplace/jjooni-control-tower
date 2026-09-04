@@ -1,0 +1,49 @@
+name: Inject Control Tower Live Bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/inject-live-bridge.yml
+
+permissions:
+  contents: write
+
+jobs:
+  inject:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject live bridge script into decrypted Control Tower document
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='document.open();document.write(html);document.close();'
+          new="html=html.replace('</body>','<script src=\"live-bridge.js?v=1\"></script></body>');document.open();document.write(html);document.close();"
+          if new in s:
+              print('LIVE_BRIDGE_ALREADY_INJECTED')
+          elif old in s:
+              s=s.replace(old,new,1)
+              p.write_text(s,encoding='utf-8')
+              print('LIVE_BRIDGE_INJECT=PASS')
+          else:
+              raise SystemExit('INJECT_TARGET_NOT_FOUND')
+          PY
+      - name: Commit patched loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- index.html; then
+            echo 'NO_CHANGE'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Wire encrypted live feed into Control Tower'
+          git push
