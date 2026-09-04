@@ -20,6 +20,70 @@
 <script>
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const CT_PORTRAIT_HOTFIX=`
+<style id="ct-static-portrait-hotfix">
+html,body{max-width:100%!important;overflow-x:hidden!important}
+@media (orientation:portrait) and (max-width:1100px){
+ html.ctTouchTablet .app,.app{margin-left:0!important;width:100%!important;max-width:100%!important;padding:0 10px 76px!important;box-sizing:border-box!important;overflow-x:hidden!important}
+ html.ctTouchTablet .top,.top{position:sticky!important;top:0!important;z-index:500!important;height:56px!important;min-height:56px!important;margin:0 -10px 8px!important;padding:0 12px!important;width:auto!important;max-width:none!important;background:linear-gradient(180deg,#05172e,#061d3b)!important}
+ html.ctTouchTablet .top:before,.top:before{content:"☰"!important;font-size:18px!important;color:#fff!important;margin-right:8px!important}
+ html.ctTouchTablet .brand,.brand{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;display:block!important;font-size:11px!important;letter-spacing:.02em!important;white-space:nowrap!important;color:#fff!important}
+ html.ctTouchTablet .brand:after,.brand:after{content:""!important}
+ html.ctTouchTablet .live,.live{font-size:10px!important;width:auto!important;height:auto!important;min-width:0!important;padding:5px 8px!important;border-radius:999px!important;white-space:nowrap!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;color:#ff8394!important}
+ html.ctTouchTablet .live:after,.live:after{content:""!important}
+ html.ctTouchTablet .tabs,.tabs{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:100%!important;height:60px!important;margin:0!important;padding:5px 7px calc(5px + env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important;background:#061a36!important;border:0!important;z-index:9999!important;overflow:hidden!important;box-shadow:0 -10px 26px rgba(6,24,51,.18)!important}
+ html.ctTouchTablet .tabs:before,html.ctTouchTablet .tabs:after,.tabs:before,.tabs:after{display:none!important}
+ html.ctTouchTablet .tab,.tab{display:none!important;width:auto!important;min-width:0!important;height:48px!important;min-height:0!important;padding:3px 2px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#b9c9dc!important;font-size:8px!important;line-height:1.1!important;text-align:center!important;box-shadow:none!important}
+ html.ctTouchTablet .tab[data-tab="overview"],html.ctTouchTablet .tab[data-tab="accounts"],html.ctTouchTablet .tab[data-tab="compare"],html.ctTouchTablet .tab[data-tab="tripod"],html.ctTouchTablet .tab[data-tab="quality"],.tab[data-tab="overview"],.tab[data-tab="accounts"],.tab[data-tab="compare"],.tab[data-tab="tripod"],.tab[data-tab="quality"]{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px!important}
+ html.ctTouchTablet .tab.on,.tab.on{background:rgba(255,255,255,.08)!important;color:#fff!important}
+ html.ctTouchTablet #panel-overview,#panel-overview{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow:hidden!important}
+ html.ctTouchTablet .ctOvHero,.ctOvHero{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;max-width:100%!important;margin:0 0 10px!important;border-radius:15px!important;overflow:hidden!important}
+ html.ctTouchTablet .ctOvHeroCell,.ctOvHeroCell{min-width:0!important;min-height:0!important;padding:11px 12px!important}
+ html.ctTouchTablet .ctOvPrimary,.ctOvPrimary{grid-column:1/-1!important;padding:15px 13px!important}
+ html.ctTouchTablet .ctOvLabel,.ctOvLabel{font-size:10px!important;line-height:1.25!important}
+ html.ctTouchTablet .ctOvBig,.ctOvBig{font-size:32px!important;line-height:1!important;letter-spacing:-.04em!important;white-space:normal!important}
+ html.ctTouchTablet .ctOvValue,.ctOvValue{font-size:20px!important;line-height:1.05!important;white-space:normal!important}
+ html.ctTouchTablet .ctOvDelta,.ctOvDelta{font-size:18px!important;line-height:1.1!important}
+ html.ctTouchTablet .ctOvMini,.ctOvMini{font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere!important}
+ html.ctTouchTablet .ctOvHeroCell:nth-child(4),.ctOvHeroCell:nth-child(4){display:none!important}
+ html.ctTouchTablet .ctOvHeroCell:nth-child(5),.ctOvHeroCell:nth-child(5){grid-column:1/-1!important;padding:8px 11px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+ html.ctTouchTablet .ctOvMetaRow,.ctOvMetaRow{margin:8px 1px 6px!important;align-items:center!important}
+ html.ctTouchTablet .ctOvMetaRow h2,.ctOvMetaRow h2{font-size:15px!important;line-height:1.25!important}
+ html.ctTouchTablet .ctOvMeta,.ctOvMeta{display:none!important}
+ html.ctTouchTablet #overviewAccounts.ctOvAccounts,html.ctTouchTablet #overviewAccounts,html.ctTouchTablet .ctOvAccounts,#overviewAccounts.ctOvAccounts,#overviewAccounts,.ctOvAccounts{grid-template-columns:1fr!important;gap:0!important;width:100%!important;min-width:0!important}
+ html.ctTouchTablet #overviewAccounts .ctAcct,html.ctTouchTablet .ctOvAccounts .ctAcct,#overviewAccounts .ctAcct,.ctOvAccounts .ctAcct{min-height:58px!important;padding:9px 10px!important;border-radius:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important}
+ html.ctTouchTablet .ctAcctHead,.ctAcctHead{grid-column:1/-1!important;grid-row:1!important;margin:0!important;min-width:0!important}
+ html.ctTouchTablet .ctAcctIcon,.ctAcctIcon{width:20px!important;height:20px!important;font-size:8px!important}
+ html.ctTouchTablet .ctAcctName,.ctAcctName{font-size:11px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ html.ctTouchTablet .ctAcctNav,.ctAcctNav{font-size:11px!important;white-space:nowrap!important}
+ html.ctTouchTablet .ctAcctStats,.ctAcctStats{grid-column:1/-1!important;grid-row:2!important;display:flex!important;justify-content:flex-end!important;gap:8px!important;margin-top:3px!important;font-size:9px!important;min-width:0!important}
+ html.ctTouchTablet .ctAcctStats span,.ctAcctStats span{font-size:9px!important}
+ html.ctTouchTablet .ctAcctStats b,.ctAcctStats b{font-size:9px!important}
+ html.ctTouchTablet .ctAcctSpark,.ctAcctSpark{display:none!important}
+ html.ctTouchTablet .ctOvGrid,html.ctTouchTablet .ctOvGridMain,html.ctTouchTablet .ctOvGridBottom,.ctOvGrid,.ctOvGridMain,.ctOvGridBottom{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important;min-width:0!important;gap:9px!important}
+ html.ctTouchTablet .ctOvGrid .card,.ctOvGrid .card{width:100%!important;max-width:100%!important;min-width:0!important;padding:12px!important;overflow:hidden!important}
+ html.ctTouchTablet .ctOvGrid h3,.ctOvGrid h3{font-size:14px!important}
+ html.ctTouchTablet .ctAttribRow,.ctAttribRow{grid-template-columns:82px minmax(0,1fr) 68px!important;gap:6px!important;font-size:10px!important}
+ html.ctTouchTablet .ctBenchHeader,html.ctTouchTablet .ctBenchRow,.ctBenchHeader,.ctBenchRow{grid-template-columns:minmax(0,1.1fr) minmax(58px,.7fr) minmax(58px,.7fr) minmax(58px,.7fr)!important;gap:4px!important;font-size:9px!important;padding-left:3px!important;padding-right:3px!important}
+ html.ctTouchTablet .ctBenchRow b,.ctBenchRow b{font-size:9px!important}
+ html.ctTouchTablet .ctBenchBm small,.ctBenchBm small{font-size:8px!important}
+ html.ctTouchTablet .ctLossRow,.ctLossRow{grid-template-columns:20px minmax(0,1fr) 76px 54px!important;column-gap:6px!important;font-size:9px!important;padding:7px 0!important}
+ html.ctTouchTablet .ctLossAccount,.ctLossAccount{font-size:8px!important}
+ html.ctTouchTablet .ctAction,.ctAction{grid-template-columns:52px minmax(0,1fr) 44px!important;gap:5px!important;padding:7px!important}
+ html.ctTouchTablet .ctActionWho,html.ctTouchTablet .ctActionState,.ctActionWho,.ctActionState{font-size:8px!important}
+ html.ctTouchTablet .ctActionText,.ctActionText{font-size:9px!important;line-height:1.35!important}
+ html.ctTouchTablet .v2HeroGrid,html.ctTouchTablet .v2AccountGrid,html.ctTouchTablet .v2Grid2,.v2HeroGrid,.v2AccountGrid,.v2Grid2{grid-template-columns:1fr!important}
+ html.ctTouchTablet .v2Kpi,html.ctTouchTablet .v2Account,.v2Kpi,.v2Account{min-width:0!important}
+ html.ctTouchTablet .v2Table,.v2Table{min-width:620px!important}
+ html.ctTouchTablet h1,html.ctTouchTablet h2,html.ctTouchTablet h3,html.ctTouchTablet strong,html.ctTouchTablet .v,html.ctTouchTablet .value,h1,h2,h3,strong,.v,.value{overflow-wrap:anywhere!important;word-break:keep-all!important}
+}
+@media (orientation:portrait) and (max-width:560px){
+ html.ctTouchTablet .ctOvBig,.ctOvBig{font-size:28px!important}
+ html.ctTouchTablet .ctOvValue,.ctOvValue{font-size:18px!important}
+ html.ctTouchTablet .ctBenchHeader,html.ctTouchTablet .ctBenchRow,.ctBenchHeader,.ctBenchRow{font-size:8px!important}
+}
+</style>`;
+const CT_POSTFIX=`<script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
 async function openTower(pw){
   const msg=$('msg'); msg.className='msg'; msg.textContent='암호화된 Control Tower를 여는 중…';
   try{
@@ -28,7 +92,10 @@ async function openTower(pw){
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(p.salt),iterations:p.iterations,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['decrypt']);
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(p.nonce),additionalData:b64(p.aad),tagLength:128},key,b64(p.ciphertext));
     sessionStorage.setItem('jjooni_ct_session_pw',pw);
-    document.open(); document.write(new TextDecoder().decode(plain)); document.close();
+    let html=new TextDecoder().decode(plain);
+    html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
+    html=html.replace('</body>',CT_POSTFIX+'</body>');
+    document.open();document.write(html);document.close();
   }catch(e){
     sessionStorage.removeItem('jjooni_ct_session_pw'); msg.className='msg bad'; msg.textContent='비밀번호가 맞지 않거나 데이터가 손상되었습니다.';
   }
