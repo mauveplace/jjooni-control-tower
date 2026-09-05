@@ -89,3 +89,29 @@ ensureUI();render(true);
 setInterval(()=>{if(!document.hidden)render(false)},3000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render(true)});
 })();
+
+/* Tablet/desktop navigation contract: >=768px always uses left rail. */
+(function(){
+ function install(){
+  if(document.getElementById('ctTabletRailFixV1'))return;
+  const st=document.createElement('style');
+  st.id='ctTabletRailFixV1';
+  st.textContent=`
+@media (min-width:768px){
+ html.ctTouchTablet .tabs,html .tabs,.tabs{position:fixed!important;left:0!important;top:0!important;bottom:0!important;right:auto!important;width:158px!important;height:100vh!important;margin:0!important;padding:108px 12px 18px!important;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;gap:6px!important;overflow-y:auto!important;overflow-x:hidden!important;background:linear-gradient(180deg,#061a36,#07162b)!important;border:0!important;z-index:4500!important;box-shadow:8px 0 28px rgba(6,24,51,.10)!important}
+ html.ctTouchTablet .tabs:before,.tabs:before{content:'CONTROL\\A TOWER'!important;white-space:pre!important;display:block!important;position:absolute!important;left:20px!important;top:28px!important;color:white!important;font:900 17px/1.05 system-ui!important;letter-spacing:.02em!important}
+ html.ctTouchTablet .tabs:after,.tabs:after{content:'INVESTMENT'!important;display:block!important;position:absolute!important;left:20px!important;top:72px!important;color:#8fa4bb!important;font:700 8px/1 system-ui!important;letter-spacing:.18em!important}
+ html.ctTouchTablet .tab,html.ctTouchTablet .tab[data-tab],html .tab,.tab,.tab[data-tab]{display:flex!important;flex:0 0 auto!important;width:100%!important;min-width:0!important;min-height:46px!important;height:auto!important;padding:10px!important;border:0!important;border-radius:9px!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;font-size:11px!important;color:#c3d1e2!important;background:transparent!important;box-shadow:none!important}
+ html.ctTouchTablet .tab.on,.tab.on{background:linear-gradient(90deg,#123e75,#0c2d57)!important;color:#fff!important;box-shadow:inset 3px 0 #62a8ff!important}
+ html.ctTouchTablet .app,html .app,.app{margin-left:158px!important;width:calc(100% - 158px)!important;max-width:none!important;padding-left:18px!important;padding-right:18px!important}
+ html.ctTouchTablet .top,html .top,.top{margin-left:0!important;width:100%!important}
+ html.ctTouchTablet .top:before,.top:before{display:none!important}
+ html.ctTouchTablet .tabPanel,.tabPanel{padding-top:0!important}
+ #ctEncryptedLiveBadge{top:10px!important;right:12px!important;bottom:auto!important}
+}
+`;
+  (document.head||document.documentElement).appendChild(st);
+ }
+ install();
+ window.addEventListener('resize',install,{passive:true});
+})();
