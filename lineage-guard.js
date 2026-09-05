@@ -63,9 +63,10 @@ function repairLegacyMirrors(){
 }
 
 function installFunctions(){
- const C=canon();if(!C)return false;
+ if(!canon())return false;
 
  const latest=function(){
+  const C=canon();if(!C)return {};
   const out={};
   for(const id of IDS){
    const c=(C.accounts||{})[id]||{};
@@ -87,6 +88,8 @@ function installFunctions(){
  window.latestAccountRows=latest;
 
  const accounting=function(){
+  const C=canon();
+  if(!C)return {accounts:{},current_nav:null,actual_nav:null,live_reconciliation_gap:null,live_reconciliation_state:'NO_DATA'};
   const accts={};let current=0,pnl=0,flow=0,navKnown=0,pnlKnown=0,flowKnown=0,prevKnown=0,prevTotal=0;
   for(const id of IDS){
    const c=(C.accounts||{})[id]||{},nav=n(c.nav),p=n(c.today_pnl),f=n(c.net_flow);
@@ -192,7 +195,6 @@ function paintAttribution(){
  e.style.color=state==='RECONCILED'?'#087443':state==='UNATTRIBUTED'?'#be123c':'#b45309';
 }
 
-let lastFns='';
 function enforce(){
  if(!canon())return;
  const signature=[
@@ -205,11 +207,10 @@ function enforce(){
   try{if(typeof window.render==='function')window.render()}catch(e){console.warn('lineage guard render',e)}
  }else repairLegacyMirrors();
  paintAttribution();
- lastFns=signature;
 }
 
 enforce();
 setInterval(()=>{if(!document.hidden)enforce()},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
-window.__JJOONI_LINEAGE_GUARD={version:'1',accounts:IDS.slice(),policy:'NO_SILENT_FALLBACK'};
+window.__JJOONI_LINEAGE_GUARD={version:'1.1',accounts:IDS.slice(),policy:'NO_SILENT_FALLBACK'};
 })();
