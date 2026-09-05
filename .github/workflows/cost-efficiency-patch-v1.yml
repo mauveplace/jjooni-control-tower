@@ -39,18 +39,18 @@ jobs:
 
           marker='CT_COST_BRIDGE_LOADER_V1'
           if marker not in s:
-              s += r'''
-
-/* CT_COST_BRIDGE_LOADER_V1 */
-(function(){
- if(document.getElementById('ctCostBridgeScript'))return;
- const x=document.createElement('script');
- x.id='ctCostBridgeScript';
- x.src='cost-bridge.js?v=1';
- x.async=true;
- (document.head||document.documentElement).appendChild(x);
-})();
-'''
+              loader=(
+                  "\n\n/* CT_COST_BRIDGE_LOADER_V1 */\n"
+                  "(function(){\n"
+                  " if(document.getElementById('ctCostBridgeScript'))return;\n"
+                  " const x=document.createElement('script');\n"
+                  " x.id='ctCostBridgeScript';\n"
+                  " x.src='cost-bridge.js?v=1';\n"
+                  " x.async=true;\n"
+                  " (document.head||document.documentElement).appendChild(x);\n"
+                  "})();\n"
+              )
+              s += loader
           p.write_text(s,encoding='utf-8')
           print('COST_EFFICIENCY_PATCH_OK')
           PY
