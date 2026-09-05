@@ -115,3 +115,13 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)render(tru
  install();
  window.addEventListener('resize',install,{passive:true});
 })();
+
+/* Market-state freshness loader. Keeps normal closed sessions from masquerading as STALE. */
+(function(){
+ if(document.getElementById('ctMarketStateBridgeScript'))return;
+ const s=document.createElement('script');
+ s.id='ctMarketStateBridgeScript';
+ s.src='market-state-bridge.js?v=1&_='+Date.now();
+ s.async=true;
+ (document.head||document.documentElement).appendChild(s);
+})();
