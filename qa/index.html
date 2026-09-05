@@ -7,324 +7,164 @@
 <title>JJOONI Control Tower QA</title>
 <style>
 :root{
-  --bg:#08111c; --panel:#101c29; --panel2:#07101a; --line:#263b52;
-  --fg:#eaf2fb; --muted:#91a6ba;
-  --ok-bg:#123d31; --ok-fg:#b8ffe8;
-  --bad-bg:#5a1f2a; --bad-fg:#ffdbe1;
-  --warn-bg:#4a3813; --warn-fg:#ffe7b0;
-  --dead-bg:#2a2f38; --dead-fg:#c6ced9;
+  --bg:#08111c;--panel:#101c29;--panel2:#07101a;--line:#263b52;
+  --fg:#eaf2fb;--muted:#91a6ba;--ok:#8ce9c7;--okbg:#123d31;
+  --block:#ff647c;--blockbg:#541b29;--fail:#ffad66;--failbg:#3d291c;
+  --warn:#ffd166;--warnbg:#4a3813;--dead:#c6ced9;--deadbg:#2a2f38;
 }
 *{box-sizing:border-box}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--fg);line-height:1.5}
-main{max-width:980px;margin:auto;padding:20px 16px 56px}
-h1{font-size:20px;margin:0 0 4px}
-h2{font-size:15px;margin:0 0 12px;color:var(--muted);font-weight:700}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
-.muted{color:var(--muted);font-size:13px}
-.badge{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;font-weight:800;font-size:14px;background:var(--dead-bg);color:var(--dead-fg)}
-.badge.pass{background:var(--ok-bg);color:var(--ok-fg)}
-.badge.fail{background:var(--bad-bg);color:var(--bad-fg)}
-.badge.stale{background:var(--warn-bg);color:var(--warn-fg)}
-.badge.dead{background:var(--dead-bg);color:var(--dead-fg)}
-.hdr{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.counts{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
-.count{min-width:64px}
-.count b{display:block;font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
-.count span{font-size:11px;color:var(--muted)}
-button{border:1px solid var(--line);background:#16263a;color:var(--fg);border-radius:10px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
-button:hover:not(:disabled){background:#1d3348}
-button:disabled{opacity:.5;cursor:default}
-button:focus-visible{outline:2px solid #6ea8ff;outline-offset:2px}
-.chk{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:12px 14px;margin:9px 0;background:var(--panel2)}
-.chk.blocker{border-left-color:#ff6b81}
-.chk.fail{border-left-color:#ff9d5c}
-.chk.warn{border-left-color:#ffd166}
-.chk-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
-.chk-name{font-weight:800;font-size:14px;word-break:break-all}
-.sev{font-size:11px;font-weight:800;letter-spacing:.03em;color:var(--muted)}
-.kv{margin-top:8px;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
-.kv dt{color:var(--muted)}
-.kv dd{margin:0;font-variant-numeric:tabular-nums;word-break:break-word}
-.gap{color:#ffd166;font-size:12.5px;margin-top:8px}
-.pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:6px;margin-bottom:6px}
-.pill.bad{border-color:#7a2b39;color:#ffb3c0}
-.pill.good{border-color:#1e6b56;color:#a9f0d8}
-details{margin-top:12px}
-summary{cursor:pointer;color:var(--muted);font-size:13px}
-pre{white-space:pre-wrap;word-break:break-word;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:12px;margin:10px 0 0;max-height:60vh;overflow:auto}
-.empty{color:var(--muted);font-size:13.5px}
-@media(prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+main{max-width:1120px;margin:auto;padding:18px 14px 48px}
+h1{font-size:20px;margin:0 0 4px;letter-spacing:-.02em}
+h2{font-size:14px;margin:0;color:var(--muted);font-weight:800}
+.muted{color:var(--muted);font-size:12.5px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:11px 0}
+.hero{padding:16px}
+.heroTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.statusLine{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border-radius:999px;font-weight:900;font-size:13px;background:var(--deadbg);color:var(--dead)}
+.badge.pass{background:var(--okbg);color:#b8ffe8}.badge.fail{background:var(--failbg);color:#ffd2ac}.badge.blocker{background:var(--blockbg);color:#ffdbe1}.badge.stale{background:var(--warnbg);color:#ffe7b0}.badge.dead{background:var(--deadbg);color:var(--dead)}
+.age{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+button{min-height:44px;border:1px solid var(--line);background:#16263a;color:var(--fg);border-radius:10px;padding:9px 13px;font-weight:800;font-size:12px;cursor:pointer}
+button:hover:not(:disabled){background:#1d3348}button:disabled{opacity:.5;cursor:default}button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid #6ea8ff;outline-offset:2px}
+.action{margin:13px 0 0;padding:11px 12px;border-radius:11px;background:#0b1724;border:1px solid var(--line);font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.action.blocker{border-color:#713143}.action.fail{border-color:#6d4930}.action.pass{border-color:#25614f;color:#c3f7e5}
+.countLine{display:flex;align-items:center;gap:8px;margin-top:11px;white-space:nowrap;overflow-x:auto;scrollbar-width:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}.countLine::-webkit-scrollbar{display:none}.countLine b{color:var(--fg)}.dot{opacity:.45}
+.meta{margin:8px 0 0;font-size:11px;color:#6f879e;overflow-wrap:anywhere}
+.integrity{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:11px;color:var(--muted);min-height:20px}.mini{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:800}.mini.good{color:var(--ok);border-color:#235f4e}.mini.bad{color:#ffb4c0;border-color:#713143}
+.gate{margin-top:8px;font-size:11px;color:var(--muted)}.gate strong{color:var(--fg)}
+.workgrid{display:grid;grid-template-columns:1fr;gap:11px;margin-top:11px}.workgrid>.card{margin:0}
+.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.sectionCount{font-size:10px;color:var(--muted);font-weight:800}
+.chk{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--fail);border-radius:11px;padding:11px 12px;margin:8px 0}.chk.blocker{border-left-color:var(--block)}.chk.fail{border-left-color:var(--fail)}.chk.warn{border-left-color:var(--warn)}
+.chkTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.chkName{font-weight:900;font-size:13px;overflow-wrap:anywhere}.sev{font-size:10px;font-weight:900;letter-spacing:.04em;white-space:nowrap}.chk.blocker .sev{color:var(--block)}.chk.fail .sev{color:var(--fail)}.chk.warn .sev{color:var(--warn)}
+.primaryDetail{font-size:12.5px;margin:7px 0 0;color:#dce7f2}.nextAction{font-size:12.5px;margin:7px 0 0;color:#fff;font-weight:800}.nextAction::before{content:'→ ';color:var(--muted)}
+details{margin-top:9px}summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--muted);font-size:12px;font-weight:750;user-select:none}summary::-webkit-details-marker{display:none}summary::before{content:'▸';margin-right:7px;transition:transform .15s}details[open]>summary::before{transform:rotate(90deg)}
+.kv{margin:2px 0 3px;font-size:11.5px;display:grid;grid-template-columns:auto 1fr;gap:5px 10px}.kv dt{color:var(--muted)}.kv dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.diagGap{padding:9px 10px;margin:8px 0 0;border:1px dashed #755b27;border-radius:9px;color:#ffe0a0;font-size:11.5px}
+.empty{color:var(--muted);font-size:12.5px;margin:5px 0}
+.collapsedCard details{margin:0}.passedPills{padding-top:3px}.pill{display:inline-flex;align-items:center;min-height:28px;font-size:10.5px;padding:4px 8px;border-radius:999px;border:1px solid #245e4e;color:#a9f0d8;margin:0 5px 5px 0}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px;font-size:11px;margin:6px 0 0;max-height:55vh;overflow:auto}
+@media(min-width:900px){main{padding-top:26px}.workgrid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:start}.workgrid>.card:only-child{grid-column:1/-1}.hero{padding:18px}.chk{margin:7px 0}.action{max-width:820px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main>
   <h1>JJOONI Control Tower · 구조 점검</h1>
-  <p class="muted">구조 점검 전용입니다. 잔고, 계좌번호, 보유종목, 거래내역은 포함되지 않습니다.</p>
+  <p class="muted" style="margin:3px 0 11px">판단 전에 데이터 구조가 믿을 수 있는지 확인하는 화면입니다. 금융 원문 데이터는 포함하지 않습니다.</p>
 
-  <div class="card">
-    <div class="hdr">
-      <span id="badge" class="badge dead" role="status" aria-live="polite">확인 중</span>
+  <section class="card hero">
+    <div class="heroTop">
+      <div class="statusLine">
+        <span id="badge" class="badge dead" role="status" aria-live="polite">확인 중</span>
+        <span id="age" class="age">–</span>
+      </div>
       <button id="btn" type="button">다시 확인</button>
     </div>
-    <p id="meta" class="muted" style="margin:12px 0 0"></p>
-    <div class="counts" id="counts" hidden>
-      <div class="count"><b id="cTotal">–</b><span>전체 점검</span></div>
-      <div class="count"><b id="cPass" style="color:#7ee0bd">–</b><span>통과</span></div>
-      <div class="count"><b id="cFail" style="color:#ff8fa0">–</b><span>실패</span></div>
-      <div class="count"><b id="cBlock" style="color:#ff6b81">–</b><span>차단</span></div>
-      <div class="count"><b id="cAge">–</b><span>스냅샷 경과</span></div>
+    <div id="action" class="action" hidden></div>
+    <div id="counts" class="countLine" hidden>
+      <span><b id="cTotal">–</b> 점검</span><span class="dot">·</span>
+      <span><b id="cPass">–</b> 통과</span><span class="dot">·</span>
+      <span><b id="cFail">–</b> 실패</span><span class="dot">·</span>
+      <span><b id="cBlock">–</b> 차단</span>
     </div>
-    <p id="integrity" class="muted" style="margin:12px 0 0"></p>
+    <div id="gate" class="gate"></div>
+    <div id="integrity" class="integrity"></div>
+    <p id="meta" class="meta"></p>
+  </section>
+
+  <div class="workgrid">
+    <section class="card" id="warnCard" hidden>
+      <div class="sectionHead"><h2>⛔ 선행 원인</h2><span id="warnCount" class="sectionCount"></span></div>
+      <div id="warns"></div>
+    </section>
+
+    <section class="card">
+      <div class="sectionHead"><h2>조치 필요</h2><span id="failCount" class="sectionCount"></span></div>
+      <div id="diagGap" class="diagGap" hidden>일부 실패 항목에 진단 정보가 없습니다. 프로듀서 V2 적용 상태를 확인해야 합니다.</div>
+      <div id="failed"><p class="empty">불러오는 중</p></div>
+    </section>
   </div>
 
-  <div class="card">
-    <h2>조치가 필요한 항목</h2>
-    <div id="failed"><p class="empty">불러오는 중</p></div>
-  </div>
-
-  <div class="card" id="warnCard" hidden>
-    <h2>경고</h2>
-    <div id="warns"></div>
-  </div>
-
-  <div class="card">
-    <h2>통과한 항목</h2>
-    <div id="passed"><p class="empty">불러오는 중</p></div>
+  <section class="card collapsedCard">
+    <details id="passedDetails">
+      <summary id="passedSummary">통과 항목</summary>
+      <div id="passed" class="passedPills"></div>
+    </details>
     <details>
-      <summary>원본 JSON 보기</summary>
+      <summary>원본 JSON</summary>
       <pre id="raw">불러오는 중</pre>
     </details>
-  </div>
+  </section>
 </main>
-
 <script>
 "use strict";
-const $ = id => document.getElementById(id);
-const TIMEOUT_MS = 8000;
-const DEFAULT_MAX_AGE = 3600;
-const SEV_RANK = { BLOCKER: 0, FAIL: 1, WARN: 2 };
+const $=id=>document.getElementById(id);
+const TIMEOUT_MS=8000,DEFAULT_MAX_AGE=3600,SEV_RANK={BLOCKER:0,FAIL:1,WARN:2};
 
-function setBadge(kind, text) {
-  const b = $('badge');
-  b.className = 'badge ' + kind;
-  b.textContent = text;
+function setBadge(kind,text){const b=$('badge');b.className='badge '+kind;b.textContent=text}
+function fmtAge(sec){if(!isFinite(sec))return '시각 불명';if(sec<60)return Math.max(0,Math.round(sec))+'초 전';if(sec<3600)return Math.round(sec/60)+'분 전';if(sec<86400)return (sec/3600).toFixed(1)+'시간 전';return (sec/86400).toFixed(1)+'일 전'}
+function fmtWhen(raw){
+  const s=String(raw||'');
+  const m=s.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/);
+  if(m)return Number(m[2])+'/'+Number(m[3])+' '+m[4]+':'+m[5];
+  const d=new Date(s);if(!isNaN(d))return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  return s;
 }
+async function fetchJSON(url){const ac=new AbortController();const timer=setTimeout(()=>ac.abort(),TIMEOUT_MS);try{const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error('서버 응답 '+r.status);const buf=await r.arrayBuffer();let json;try{json=JSON.parse(new TextDecoder().decode(buf))}catch(_){throw new Error('JSON 형식이 아닙니다')}return{json,buf}}finally{clearTimeout(timer)}}
+async function sha256Hex(buf){if(!crypto?.subtle?.digest)return null;const d=await crypto.subtle.digest('SHA-256',buf);return[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function clear(el){while(el.firstChild)el.removeChild(el.firstChild)}
+function mini(text,kind){const s=document.createElement('span');s.className='mini '+(kind||'');s.textContent=text;return s}
+async function verifyIntegrity(m){const el=$('integrity');clear(el);if(!m.snapshot_path||!m.snapshot_sha256){el.append(mini('해시 미선언','bad'));return}try{const url=new URL('../'+m.snapshot_path,location.href).href;const{buf}=await fetchJSON(url);const actual=await sha256Hex(buf);if(actual===null){el.textContent='무결성 검증 불가';return}if(actual===m.snapshot_sha256){el.append(mini('무결성 확인','good'));el.append(document.createTextNode('sha256 '+actual.slice(0,10)+'…'))}else{el.append(mini('무결성 불일치','bad'));el.append(document.createTextNode('선언 '+m.snapshot_sha256.slice(0,10)+'… / 실제 '+actual.slice(0,10)+'…'))}}catch(e){el.append(mini('무결성 검증 실패','bad'));el.append(document.createTextNode(String(e.message||e)))}}
 
-function fmtAge(sec) {
-  if (!isFinite(sec)) return '–';
-  if (sec < 60) return Math.max(0, Math.round(sec)) + '초';
-  if (sec < 3600) return Math.round(sec / 60) + '분';
-  if (sec < 86400) return (sec / 3600).toFixed(1) + '시간';
-  return (sec / 86400).toFixed(1) + '일';
-}
-
-async function fetchJSON(url) {
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), TIMEOUT_MS);
-  try {
-    const r = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(),
-                          { cache: 'no-store', signal: ac.signal });
-    if (!r.ok) throw new Error('서버 응답 ' + r.status);
-    const buf = await r.arrayBuffer();
-    let json;
-    try {
-      json = JSON.parse(new TextDecoder().decode(buf));
-    } catch (_) {
-      throw new Error('JSON 형식이 아닙니다 (응답 ' + r.status + ')');
-    }
-    return { json, buf };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function sha256Hex(buf) {
-  if (!crypto?.subtle?.digest) return null;
-  const d = await crypto.subtle.digest('SHA-256', buf);
-  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function verifyIntegrity(m) {
-  const el = $('integrity');
-  if (!m.snapshot_path || !m.snapshot_sha256) {
-    el.textContent = '무결성: 해시 미선언';
-    return;
-  }
-  const canon = m.integrity?.canonicalization;
-  try {
-    const url = new URL('../' + m.snapshot_path, location.href).href;
-    const { buf } = await fetchJSON(url);
-    const actual = await sha256Hex(buf);
-    if (actual === null) { el.textContent = '무결성: 이 브라우저에서 검증 불가'; return; }
-    if (actual === m.snapshot_sha256) {
-      el.innerHTML = '<span class="pill good">무결성 확인</span>' +
-        '<span class="muted">sha256 ' + actual.slice(0, 12) + '…</span>';
-    } else {
-      el.innerHTML = '<span class="pill bad">무결성 불일치</span>' +
-        '<span class="muted">선언 ' + m.snapshot_sha256.slice(0, 12) + '… / 실제 ' + actual.slice(0, 12) + '…' +
-        (canon ? '' : ' · 정규화 규칙이 선언되지 않았습니다') + '</span>';
-    }
-  } catch (e) {
-    el.innerHTML = '<span class="pill bad">무결성 검증 실패</span><span class="muted">' + e.message + '</span>';
-  }
-}
-
-function checkCard(name, c) {
-  const sev = c.severity || (c.pass ? 'PASS' : 'FAIL');
-  const div = document.createElement('div');
-  div.className = 'chk ' + sev.toLowerCase();
-
-  const top = document.createElement('div');
-  top.className = 'chk-top';
-  const n = document.createElement('span');
-  n.className = 'chk-name';
-  n.textContent = c.label || name;
-  const s = document.createElement('span');
-  s.className = 'sev';
-  s.textContent = sev;
-  top.append(n, s);
-  div.append(top);
-
-  const rows = [];
-  if (c.detail) rows.push(['내용', c.detail]);
-  if (c.delta_bps != null) rows.push(['편차', c.delta_bps + ' bp']);
-  if (c.suspect_source) rows.push(['의심 구간', c.suspect_source]);
-  if (c.caused_by) rows.push(['선행 원인', c.caused_by]);
-  if (c.consecutive_failures != null) rows.push(['연속 실패', c.consecutive_failures + '회']);
-  if (c.first_failed_snapshot) rows.push(['최초 발생', c.first_failed_snapshot]);
-  if (c.covered != null && c.total != null) rows.push(['커버리지', c.covered + ' / ' + c.total]);
-  if (c.as_of) rows.push(['기준', c.as_of]);
-  if (c.next_action) rows.push(['다음 조치', c.next_action]);
-
-  if (rows.length) {
-    const dl = document.createElement('dl');
-    dl.className = 'kv';
-    for (const [k, v] of rows) {
-      const dt = document.createElement('dt'); dt.textContent = k;
-      const dd = document.createElement('dd'); dd.textContent = v;
-      dl.append(dt, dd);
-    }
-    div.append(dl);
-  }
-
-  if (!c.pass && !c.detail && c.delta_bps == null) {
-    const g = document.createElement('p');
-    g.className = 'gap';
-    g.textContent = '진단 정보가 없습니다. 프로듀서에서 detail / delta_bps / suspect_source 를 채워야 원인 추적이 가능합니다.';
-    div.append(g);
-  }
+function historyLine(c){if(c.consecutive_failures==null&&!c.first_failed_snapshot)return null;const parts=[];if(c.first_failed_snapshot)parts.push(fmtWhen(c.first_failed_snapshot)+'부터');if(c.consecutive_failures!=null)parts.push(c.consecutive_failures+'회 연속');return parts.join(' ')}
+function checkCard(name,c,opt={}){
+  const sev=String(c.severity||(c.pass?'PASS':'FAIL')).toUpperCase();
+  const div=document.createElement('div');div.className='chk '+sev.toLowerCase();
+  const top=document.createElement('div');top.className='chkTop';
+  const n=document.createElement('span');n.className='chkName';n.textContent=c.label||name;
+  const s=document.createElement('span');s.className='sev';s.textContent=sev;top.append(n,s);div.append(top);
+  if(c.detail){const p=document.createElement('p');p.className='primaryDetail';p.textContent=c.detail;div.append(p)}
+  if(c.next_action){const p=document.createElement('p');p.className='nextAction';p.textContent=c.next_action;div.append(p)}
+  const rows=[];if(c.delta_bps!=null)rows.push(['편차',c.delta_bps+' bp']);if(c.suspect_source)rows.push(['의심 구간',c.suspect_source]);if(c.caused_by)rows.push(['선행 원인',c.caused_by]);const h=historyLine(c);if(h)rows.push(['이력',h]);if(c.covered!=null&&c.total!=null)rows.push(['커버리지',c.covered+' / '+c.total]);if(c.as_of)rows.push(['기준',fmtWhen(c.as_of)]);
+  if(rows.length){const det=document.createElement('details'),sum=document.createElement('summary');sum.textContent='상세 · 편차 / 이력 / 원인';const dl=document.createElement('dl');dl.className='kv';for(const[k,v]of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;dl.append(dt,dd)}det.append(sum,dl);div.append(det)}
   return div;
 }
-
-function render(m) {
-  const checks = m.checks || {};
-  const names = Object.keys(checks);
-  const failed = names.filter(n => checks[n].pass === false);
-  const passed = names.filter(n => checks[n].pass === true);
-  const blockers = failed.filter(n => (checks[n].severity || '').toUpperCase() === 'BLOCKER');
-
-  const gen = m.generated_kst ? new Date(m.generated_kst) : null;
-  const ageSec = gen && !isNaN(gen) ? (Date.now() - gen.getTime()) / 1000 : NaN;
-  const maxAge = m.max_age_seconds || DEFAULT_MAX_AGE;
-  const stale = isFinite(ageSec) && ageSec > maxAge;
-
-  if (stale) {
-    setBadge('stale', '스냅샷 오래됨 · ' + fmtAge(ageSec) + ' 경과');
-  } else if (m.overall_status === 'PASS' && failed.length === 0) {
-    setBadge('pass', '정상');
-  } else {
-    setBadge('fail', '점검 실패 ' + failed.length + '건');
-  }
-
-  $('meta').textContent =
-    '스냅샷 ' + (m.snapshot_id || '-') + ' · 생성 ' + (m.generated_kst || '-') +
-    (m.previous_snapshot_id ? ' · 직전 ' + m.previous_snapshot_id : '');
-
-  $('counts').hidden = false;
-  $('cTotal').textContent = names.length;
-  $('cPass').textContent = passed.length;
-  $('cFail').textContent = failed.length;
-  $('cBlock').textContent = blockers.length;
-  $('cAge').textContent = fmtAge(ageSec);
-  $('cAge').style.color = stale ? '#ffd166' : '';
-
-  const fEl = $('failed');
-  fEl.textContent = '';
-  if (!failed.length) {
-    fEl.innerHTML = '<p class="empty">조치가 필요한 항목이 없습니다.</p>';
-  } else {
-    failed.sort((a, b) =>
-      (SEV_RANK[(checks[a].severity || 'FAIL').toUpperCase()] ?? 1) -
-      (SEV_RANK[(checks[b].severity || 'FAIL').toUpperCase()] ?? 1));
-    failed.forEach(n => fEl.append(checkCard(n, checks[n])));
-  }
-
-  const warns = m.warnings || [];
-  $('warnCard').hidden = warns.length === 0;
-  const wEl = $('warns');
-  wEl.textContent = '';
-  warns.forEach(w => {
-    const blocking = (w.severity || '').toUpperCase() === 'BLOCKER' ||
-                     failed.some(n => checks[n].caused_by === w.code);
-    wEl.append(checkCard(w.code || 'WARNING', {
-      pass: true,
-      severity: blocking ? 'BLOCKER' : (w.severity || 'WARN'),
-      label: w.code,
-      detail: w.message + (blocking ? ' — 실패 항목의 선행 원인입니다.' : ''),
-      next_action: w.next_action
-    }));
-  });
-
-  const pEl = $('passed');
-  pEl.textContent = '';
-  if (!passed.length) {
-    pEl.innerHTML = '<p class="empty">통과한 항목이 없습니다.</p>';
-  } else {
-    passed.forEach(n => {
-      const p = document.createElement('span');
-      p.className = 'pill good';
-      const c = checks[n];
-      p.textContent = (c.label || n) + (c.covered != null ? ' ' + c.covered + '/' + c.total : '');
-      pEl.append(p);
-    });
-  }
-
-  $('raw').textContent = JSON.stringify(m, null, 2);
+function highestAction(m,failed,checks,warns){
+  const blockerWarn=warns.find(w=>String(w.severity||'').toUpperCase()==='BLOCKER'||failed.some(n=>checks[n]?.caused_by===w.code));
+  if(blockerWarn?.next_action)return{kind:'blocker',text:blockerWarn.next_action};
+  const blocker=failed.find(n=>String(checks[n]?.severity||'').toUpperCase()==='BLOCKER'&&checks[n]?.next_action);if(blocker)return{kind:'blocker',text:checks[blocker].next_action};
+  const first=failed.find(n=>checks[n]?.next_action);if(first)return{kind:'fail',text:checks[first].next_action};
+  if(m.decision_gate?.status==='BLOCKED')return{kind:'blocker',text:m.decision_gate.reason||'오염된 판단 영역을 사용하지 마십시오.'};
+  if(!failed.length)return{kind:'pass',text:'현재 구조 점검에서 추가 조치가 필요하지 않습니다.'};
+  return{kind:'fail',text:'실패 항목의 원인 정보를 먼저 확인하십시오.'};
 }
+function render(m){
+  const checks=m.checks||{},names=Object.keys(checks),failed=names.filter(n=>checks[n].pass===false),passed=names.filter(n=>checks[n].pass===true),warns=Array.isArray(m.warnings)?m.warnings:[];
+  const blockers=failed.filter(n=>String(checks[n].severity||'').toUpperCase()==='BLOCKER');
+  const gen=m.generated_kst?new Date(m.generated_kst):null,ageSec=gen&&!isNaN(gen)?(Date.now()-gen.getTime())/1000:NaN,maxAge=m.max_age_seconds||DEFAULT_MAX_AGE,stale=isFinite(ageSec)&&ageSec>maxAge;
+  if(stale)setBadge('stale','스냅샷 오래됨');else if(blockers.length)setBadge('blocker','차단 '+blockers.length+'건');else if(m.overall_status==='PASS'&&!failed.length)setBadge('pass','정상');else setBadge('fail','점검 실패 '+failed.length+'건');
+  $('age').textContent=fmtAge(ageSec);$('age').style.color=stale?'var(--warn)':'';
+  const act=highestAction(m,failed,checks,warns);$('action').hidden=false;$('action').className='action '+act.kind;$('action').textContent='지금: '+act.text;
+  $('counts').hidden=false;$('cTotal').textContent=names.length;$('cPass').textContent=passed.length;$('cFail').textContent=failed.length;$('cBlock').textContent=blockers.length;
+  const gate=m.decision_gate;if(gate){$('gate').textContent='';const strong=document.createElement('strong');strong.textContent='Decision gate '+String(gate.status||'UNKNOWN');$('gate').append(strong,document.createTextNode(gate.status==='BLOCKED'?' · 오염된 비중/레버리지/MDD 판단 금지':' · '+String(gate.reason||'')))}else{$('gate').textContent='Decision gate 미선언 · QA 결과만으로 판단하십시오.'}
+  $('meta').textContent='스냅샷 '+(m.snapshot_id||'-')+' · 생성 '+(m.generated_kst||'-');
 
-function renderError(e) {
-  setBadge('dead', '상태 확인 불가');
-  $('meta').textContent = e.message + ' · 화면의 값은 갱신되지 않았습니다.';
-  $('counts').hidden = true;
-  $('integrity').textContent = '';
-  $('failed').innerHTML =
-    '<p class="empty">상태 파일을 읽지 못했습니다. 네트워크를 확인하거나 프로듀서 실행 결과를 확인하십시오.</p>';
-  $('passed').innerHTML = '<p class="empty">–</p>';
-  $('raw').textContent = String(e.stack || e.message);
+  const blockingWarns=warns.filter(w=>String(w.severity||'').toUpperCase()==='BLOCKER'||failed.some(n=>checks[n]?.caused_by===w.code));
+  const otherWarns=warns.filter(w=>!blockingWarns.includes(w));const orderedWarns=[...blockingWarns,...otherWarns];
+  $('warnCard').hidden=orderedWarns.length===0;$('warnCount').textContent=orderedWarns.length?orderedWarns.length+'건':'';clear($('warns'));
+  orderedWarns.forEach(w=>$('warns').append(checkCard(w.code||'WARNING',{pass:true,severity:blockingWarns.includes(w)?'BLOCKER':(w.severity||'WARN'),label:w.code,detail:w.message,next_action:w.next_action})));
+
+  failed.sort((a,b)=>(SEV_RANK[String(checks[a].severity||'FAIL').toUpperCase()]??1)-(SEV_RANK[String(checks[b].severity||'FAIL').toUpperCase()]??1));
+  $('failCount').textContent=failed.length+'건';clear($('failed'));const missingDiag=failed.some(n=>!checks[n].detail&&checks[n].delta_bps==null);$('diagGap').hidden=!missingDiag;
+  if(!failed.length){const p=document.createElement('p');p.className='empty';p.textContent='조치가 필요한 항목이 없습니다.';$('failed').append(p)}else failed.forEach(n=>$('failed').append(checkCard(n,checks[n])));
+
+  $('passedSummary').textContent='통과 '+passed.length+'건';clear($('passed'));passed.forEach(n=>{const p=document.createElement('span');p.className='pill';const c=checks[n];p.textContent=(c.label||n)+(c.covered!=null?' '+c.covered+'/'+c.total:'');$('passed').append(p)});
+  $('raw').textContent=JSON.stringify(m,null,2);
 }
-
-async function load() {
-  const btn = $('btn');
-  btn.disabled = true;
-  btn.textContent = '확인 중';
-  setBadge('dead', '확인 중');
-  try {
-    const { json } = await fetchJSON('./status.json');
-    render(json);
-    await verifyIntegrity(json);
-  } catch (e) {
-    renderError(e instanceof Error ? e : new Error(String(e)));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '다시 확인';
-  }
-}
-
-$('btn').addEventListener('click', () => { load(); });
-load();
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') load();
-});
+function renderError(e){setBadge('dead','상태 확인 불가');$('age').textContent='';$('action').hidden=false;$('action').className='action fail';$('action').textContent='지금: 상태 파일과 producer 실행 결과를 확인하십시오.';$('counts').hidden=true;$('gate').textContent='';$('integrity').textContent='';$('meta').textContent=String(e.message||e);$('warnCard').hidden=true;$('failed').innerHTML='<p class="empty">상태 파일을 읽지 못했습니다.</p>';$('passedSummary').textContent='통과 항목';$('passed').textContent='';$('raw').textContent=String(e.stack||e)}
+async function load(){const btn=$('btn');btn.disabled=true;btn.textContent='확인 중';setBadge('dead','확인 중');try{const{json}=await fetchJSON('./status.json');render(json);await verifyIntegrity(json)}catch(e){renderError(e instanceof Error?e:new Error(String(e)))}finally{btn.disabled=false;btn.textContent='다시 확인'}}
+$('btn').addEventListener('click',load);load();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')load()});
 </script>
 </body>
 </html>
