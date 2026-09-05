@@ -50,7 +50,7 @@ function ensureUI(){
 }
 
 function statusClass(s){s=String(s||'').toUpperCase();return s==='NORMAL'?'':s==='WARN'?'warn':'pending'}
-function currentCost(){return (window.__JJOONI_LIVE_PAYLOAD||{}).cost||null}
+function currentCost(){return window.__JJOONI_COST_SIDECAR||(window.__JJOONI_LIVE_PAYLOAD||{}).cost||null}
 function row(label,value){return `<div class="ctCostRow"><span>${label}</span><b>${value}</b></div>`}
 
 function render(force){
@@ -81,7 +81,7 @@ function render(force){
      <div class="ctCostCard"><h3>Worker Runtime</h3>${row('Platform',String(rt.platform||'—').replaceAll('_',' '))}${row('Worker',rt.worker_pool||'—')}${row('Instances',integer(rt.instances))}${row('오늘 billable',duration(rt.billable_seconds_today))}${row('오늘 예상비용',money(rt.estimated_usd_today))}${row('Telemetry',rt.telemetry||'—')}</div>
      <div class="ctCostCard"><h3>AI Usage</h3>${row('Luna calls',integer(ai.luna_calls_today))}${row('Terra calls',integer(ai.terra_calls_today))}${row('Sol calls',integer(ai.sol_calls_today))}${row('Input tokens',integer(ai.input_tokens))}${row('Cached input',integer(ai.cached_input_tokens))}${row('Output tokens',integer(ai.output_tokens))}${row('오늘 AI 비용',money(ai.estimated_usd_today))}</div>
      <div class="ctCostCard"><h3>Google Billing</h3>${row('Source',bill.source||'—')}${row('오늘 실제비용',money(bill.actual_today_usd))}${row('월 누적비용',money(bill.month_to_date_usd))}${row('Billing lag',ageText(bill.lag_minutes))}${row('Currency',bill.currency||'USD')}</div>
-     <div class="ctCostCard"><h3>Cost Guard</h3>${alerts.length?alerts.map(x=>`<div class="ctCostAlert">${String(x)}</div>`).join(''):`<div class="ctCostOk">비용 이상징후 없음</div>`}<div class="ctCostFoot">COST 화면은 기존 encrypted SSOT만 읽습니다. 별도 Google/BigQuery polling을 하지 않습니다.</div></div>
+     <div class="ctCostCard"><h3>Cost Guard</h3>${alerts.length?alerts.map(x=>`<div class="ctCostAlert">${String(x)}</div>`).join(''):`<div class="ctCostOk">비용 이상징후 없음</div>`}<div class="ctCostFoot">COST는 기존 Sheet 응답의 COST_JSON sidecar를 우선 사용합니다. 별도 Google/BigQuery browser polling은 없습니다.</div></div>
    </div>`;
 }
 
