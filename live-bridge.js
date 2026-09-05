@@ -282,7 +282,7 @@ injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!documen
  if(document.getElementById('ctCostBridgeScript'))return;
  const x=document.createElement('script');
  x.id='ctCostBridgeScript';
- x.src='cost-bridge.js?v=1';
+ x.src='cost-bridge.js?v=2&_='+Date.now();
  x.async=true;
  (document.head||document.documentElement).appendChild(x);
 })();
