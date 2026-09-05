@@ -1,0 +1,69 @@
+name: Cost Efficiency Patch V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cost-efficiency-patch-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply additive cost/efficiency patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('live-bridge.js')
+          s=p.read_text(encoding='utf-8')
+
+          old="injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(refresh,REFRESH_MS);setInterval(()=>{if(CANON){updateCards();updateHero();fixLegacyBadges()}},1500);"
+          new="injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden&&CANON){updateCards();updateHero();fixLegacyBadges()}},1500);"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('REFRESH_CONTRACT_NOT_FOUND')
+
+          old_labels="watchlist:'WATCHLIST'};"
+          new_labels="watchlist:'WATCHLIST',cost:'COST'};"
+          if old_labels in s:
+              s=s.replace(old_labels,new_labels,1)
+
+          marker='CT_COST_BRIDGE_LOADER_V1'
+          if marker not in s:
+              s += r'''
+
+/* CT_COST_BRIDGE_LOADER_V1 */
+(function(){
+ if(document.getElementById('ctCostBridgeScript'))return;
+ const x=document.createElement('script');
+ x.id='ctCostBridgeScript';
+ x.src='cost-bridge.js?v=1';
+ x.async=true;
+ (document.head||document.documentElement).appendChild(x);
+})();
+'''
+          p.write_text(s,encoding='utf-8')
+          print('COST_EFFICIENCY_PATCH_OK')
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add live-bridge.js
+          if git diff --cached --quiet; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git commit -m 'Add COST bridge and visibility-aware refresh'
+          git push
