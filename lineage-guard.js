@@ -183,6 +183,17 @@ function installFunctions(){
  return true;
 }
 
+function wrapRender(){
+ if(typeof window.render!=='function'||window.render.__jjooniLineageWrapped)return;
+ const base=window.render;
+ const wrapped=function(){
+  if(canon()){installFunctions();repairLegacyMirrors()}
+  return base.apply(this,arguments);
+ };
+ wrapped.__jjooniLineageWrapped=true;
+ window.render=wrapped;
+}
+
 function paintAttribution(){
  const C=canon(),td=tossDiag();if(!C)return;
  const card=[...document.querySelectorAll('.ctAcct')].find(x=>String((x.querySelector('.ctAcctName')||{}).textContent||'').toLowerCase().includes('toss'));
@@ -196,6 +207,7 @@ function paintAttribution(){
 }
 
 function enforce(){
+ wrapRender();
  if(!canon())return;
  const signature=[
   !!(window.latestAccountRows&&window.latestAccountRows.__jjooniLineageGuard),
@@ -209,8 +221,9 @@ function enforce(){
  paintAttribution();
 }
 
+wrapRender();
 enforce();
 setInterval(()=>{if(!document.hidden)enforce()},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
-window.__JJOONI_LINEAGE_GUARD={version:'1.1',accounts:IDS.slice(),policy:'NO_SILENT_FALLBACK'};
+window.__JJOONI_LINEAGE_GUARD={version:'1.2',accounts:IDS.slice(),policy:'NO_SILENT_FALLBACK_BEFORE_RENDER'};
 })();
