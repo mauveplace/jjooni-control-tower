@@ -1,57 +1,68 @@
 (function(){
 'use strict';
 
-const KST='Asia/Seoul';
-const NY='America/New_York';
+const BADGE_ID='ctProducerFreshnessBadge';
 
-function parts(tz){
-  const fmt=new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false});
-  const out={};
-  for(const p of fmt.formatToParts(new Date()))out[p.type]=p.value;
-  return {weekday:out.weekday||'',hour:Number(out.hour||0),minute:Number(out.minute||0)};
+function ensureBadge(){
+  const legacy=document.getElementById('ctEncryptedLiveBadge');
+  if(legacy)legacy.style.display='none';
+  let b=document.getElementById(BADGE_ID);
+  if(!b){
+    b=document.createElement('div');
+    b.id=BADGE_ID;
+    b.style.cssText='position:fixed;right:12px;top:10px;z-index:100002;padding:6px 10px;border-radius:999px;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002;white-space:nowrap';
+    document.body.appendChild(b);
+  }
+  return b;
 }
-function mins(x){return x.hour*60+x.minute}
-function weekday(x){return !['Sat','Sun'].includes(x.weekday)}
-function phase(){
-  const kr=parts(KST),ny=parts(NY),km=mins(kr),nm=mins(ny);
-  if(weekday(ny)&&nm>=4*60&&nm<9*60+30)return {id:'US_PRE',label:'미국 프리마켓',max:75*60*1000};
-  if(weekday(ny)&&nm>=9*60+30&&nm<16*60)return {id:'US_REGULAR',label:'미국 정규장',max:15*60*1000};
-  if(weekday(ny)&&nm>=16*60&&nm<20*60)return {id:'US_POST',label:'미국 애프터마켓',max:75*60*1000};
-  if(weekday(kr)&&km>=9*60&&km<=15*60+30)return {id:'KR_REGULAR',label:'한국 정규장',max:25*60*1000};
-  if(weekday(kr)&&km>15*60+30&&km<18*60)return {id:'KR_POST',label:'한국 장후 · 종가 기준',max:180*60*1000};
-  return {id:'MARKET_CLOSED',label:'장 마감 · 마지막 종가 기준',max:null};
+function paintStyle(b,state){
+  const s=state==='good'?['#ecfdf3','#abefc6','#087443']:state==='closed'?['#f2f4f7','#d0d5dd','#475467']:state==='warn'?['#fff7ed','#fed7aa','#b45309']:['#fff1f2','#fecdd3','#be123c'];
+  b.style.background=s[0];b.style.border='1px solid '+s[1];b.style.color=s[2];
 }
-function observed(){
-  const live=window.__JJOONI_LIVE_PAYLOAD||{};
-  const ts=Date.parse(String(live.observed_at||''));
-  return Number.isFinite(ts)?ts:null;
-}
-function stamp(){
-  const live=window.__JJOONI_LIVE_PAYLOAD||{};
-  return String(live.observed_at||'').replace('T',' ').slice(5,16);
-}
+function stamp(v){return String(v||'').replace('T',' ').slice(5,16)}
 function paint(){
-  const b=document.getElementById('ctEncryptedLiveBadge');
-  if(!b)return;
-  const p=phase(),ts=observed(),age=ts==null?Infinity:Date.now()-ts;
-  b.dataset.marketPhase=p.id;
-  if(p.id==='MARKET_CLOSED'){
-    b.textContent='● '+p.label;
-    b.title='정상적인 휴장/비거래 시간입니다. 마지막 검증 스냅샷을 표시합니다.';
-    b.style.background='#f2f4f7';b.style.border='1px solid #d0d5dd';b.style.color='#475467';
+  const b=ensureBadge();
+  const live=window.__JJOONI_LIVE_PAYLOAD||{};
+  const session=live.session||{};
+  const authority=String(live.freshness_authority||'');
+  const next=Date.parse(String(live.next_expected_update_kst||''));
+  const staleAfter=Date.parse(String(live.stale_after_kst||''));
+
+  // Backward-compatible neutral state until the first producer snapshot carrying
+  // PRODUCER_SCHEDULE_V1 arrives. Do not reconstruct KR/US sessions in-browser.
+  if(authority!=='PRODUCER_SCHEDULE_V1'||!Number.isFinite(next)||!Number.isFinite(staleAfter)){
+    b.textContent='SSOT REF · 일정 메타데이터 대기';
+    b.title='다음 producer snapshot부터 session / next_expected_update_kst 계약을 사용합니다.';
+    paintStyle(b,'closed');
     return;
   }
-  if(age>p.max){
-    b.textContent='SSOT STALE · '+p.label+' · '+stamp();
-    b.title='현재 '+p.label+' 허용 지연을 초과했습니다.';
-    b.style.background='#fff7ed';b.style.border='1px solid #fed7aa';b.style.color='#b45309';
+
+  const nextText=stamp(live.next_expected_update_kst);
+  if(Date.now()>staleAfter){
+    b.textContent='SSOT STALE · 예정 '+nextText;
+    b.title='Producer가 선언한 stale_after_kst를 지났는데 새 snapshot이 도착하지 않았습니다.';
+    paintStyle(b,'warn');
     return;
   }
-  if(/^SSOT STALE/.test(String(b.textContent||''))){
-    b.textContent='SSOT LIVE · '+p.label+' · '+stamp();
-    b.title='현재 세션 SLO 안의 최신 스냅샷입니다.';
-    b.style.background='#ecfdf3';b.style.border='1px solid #abefc6';b.style.color='#087443';
+
+  const liquidity=((live.price_liquidity_quality||{}).state||'').toUpperCase();
+  if(String(session.state||'').toUpperCase()==='CLOSED'){
+    b.textContent='● '+(live.freshness_display||'장 마감 · 마지막 검증값 기준');
+    b.title='정상 휴장/비거래 구간입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
+    paintStyle(b,'closed');
+    return;
   }
+
+  if(liquidity==='THIN'){
+    b.textContent='SSOT LIVE · '+String(session.id||'OPEN')+' · THIN';
+    b.title='04:00–06:00 ET YAHOO_EXTENDED_5M 저유동성 구간입니다. 손익 판단은 LIMITED입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
+    paintStyle(b,'warn');
+    return;
+  }
+
+  b.textContent='SSOT LIVE · '+String(session.id||'OPEN')+' · 다음 '+nextText;
+  b.title='Freshness authority: PRODUCER_SCHEDULE_V1. 브라우저는 세션 시각을 자체 계산하지 않습니다.';
+  paintStyle(b,'good');
 }
 
 let busy=false;
