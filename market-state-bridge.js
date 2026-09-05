@@ -111,3 +111,16 @@ setInterval(()=>{if(!document.hidden)run()},15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(_){}
 })();
+
+/* Data-lineage guard is intentionally loaded after live-bridge.  It replaces
+   legacy 4-account / silent-recompute compatibility functions with the
+   six-account no-silent-fallback contract and reasserts itself after refresh. */
+(function(){
+ if(document.getElementById('ctLineageGuardScript'))return;
+ const s=document.createElement('script');
+ s.id='ctLineageGuardScript';
+ s.src='lineage-guard.js?v=1&_='+Date.now();
+ s.async=true;
+ s.onerror=function(){console.error('CT lineage guard load failed')};
+ (document.head||document.documentElement).appendChild(s);
+})();
