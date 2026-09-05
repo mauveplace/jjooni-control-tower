@@ -1,0 +1,30 @@
+name: COST Sidecar Patch V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cost-sidecar-patch-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python tools/patch_cost_sidecar_v1.py
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add live-bridge.js cost-bridge.js
+          if git diff --cached --quiet; then echo NO_CHANGES; exit 0; fi
+          git commit -m 'Read COST_JSON sidecar without extra browser polling'
+          git push
