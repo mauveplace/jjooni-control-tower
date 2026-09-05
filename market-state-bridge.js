@@ -20,6 +20,19 @@ function paintStyle(b,state){
   b.style.background=s[0];b.style.border='1px solid '+s[1];b.style.color=s[2];
 }
 function stamp(v){return String(v||'').replace('T',' ').slice(5,16)}
+function liquidityState(live){
+  const declared=String(((live.price_liquidity_quality||{}).state)||'').toUpperCase();
+  if(declared)return declared;
+  const accounts=live.accounts||{};
+  for(const a of Object.values(accounts)){
+    if(!a||typeof a!=='object')continue;
+    for(const key of ['positions','holdings','holdings_kr','holdings_us']){
+      const rows=Array.isArray(a[key])?a[key]:[];
+      if(rows.some(r=>String((r||{}).price_liquidity||'').toUpperCase()==='THIN'))return 'THIN';
+    }
+  }
+  return 'NORMAL';
+}
 function paint(){
   const b=ensureBadge();
   const live=window.__JJOONI_LIVE_PAYLOAD||{};
@@ -45,7 +58,7 @@ function paint(){
     return;
   }
 
-  const liquidity=((live.price_liquidity_quality||{}).state||'').toUpperCase();
+  const liquidity=liquidityState(live);
   if(String(session.state||'').toUpperCase()==='CLOSED'){
     b.textContent='● '+(live.freshness_display||'장 마감 · 마지막 검증값 기준');
     b.title='정상 휴장/비거래 구간입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
