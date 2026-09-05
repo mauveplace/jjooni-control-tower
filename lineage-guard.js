@@ -1,13 +1,17 @@
 (function(){
 'use strict';
 
-const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const DEFAULT_IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
-const z=v=>n(v)==null?0:n(v);
 const won=v=>n(v)==null?'—':'₩'+Math.round(Math.abs(Number(v))).toLocaleString('ko-KR');
 const signed=v=>n(v)==null?'—':(Number(v)>=0?'+':'-')+won(v);
 const canon=()=>window.__JJOONI_CANONICAL_SSOT||null;
 const live=()=>window.__JJOONI_LIVE_PAYLOAD||null;
+function ids(){
+ const C=canon();
+ const xs=C&&Array.isArray(C.registry)?C.registry.map(x=>String((x||{}).id||'').toUpperCase()).filter(Boolean):[];
+ return xs.length?xs:DEFAULT_IDS.slice();
+}
 
 function validFx(v){const x=n(v);return x!=null&&x>500&&x<3000?x:null}
 function fxFor(c,p){
@@ -25,7 +29,7 @@ function tossDiag(){
 }
 
 function repairLegacyMirrors(){
- const C=canon();
+ const C=canon(),IDS=ids();
  if(!C||typeof D==='undefined')return;
  D.human=D.human||{};
  D.human.current_account_navs=D.human.current_account_navs||{};
@@ -48,16 +52,15 @@ function repairLegacyMirrors(){
  if(n((C.total||{}).pnl)!=null)D.human.total_pnl=Number(C.total.pnl);
  if(n((C.total||{}).return_pct)!=null)D.human.return_pct=Number(C.total.return_pct);
 
- const hp=n((C.total||{}).today_pnl),hf=n((C.total||{}).net_flow);
  D.human.latest_performance={
   ...(D.human.latest_performance||{}),
   total_asset:n((C.total||{}).nav),
   principal:n((C.total||{}).principal),
   total_pnl:n((C.total||{}).pnl),
   return_pct:n((C.total||{}).return_pct),
-  market_pnl:hp,
-  net_cash_flow:hf,
-  data_state:'CANONICAL_6_ACCOUNT_LINEAGE_GUARD',
+  market_pnl:n((C.total||{}).today_pnl),
+  net_cash_flow:n((C.total||{}).net_flow),
+  data_state:'CANONICAL_REGISTRY_LINEAGE_GUARD',
   sync_kst:C.observed_at
  };
 }
@@ -68,7 +71,7 @@ function installFunctions(){
  const latest=function(){
   const C=canon();if(!C)return {};
   const out={};
-  for(const id of IDS){
+  for(const id of ids()){
    const c=(C.accounts||{})[id]||{};
    out[id]={
     account:id,
@@ -88,7 +91,7 @@ function installFunctions(){
  window.latestAccountRows=latest;
 
  const accounting=function(){
-  const C=canon();
+  const C=canon(),IDS=ids();
   if(!C)return {accounts:{},current_nav:null,actual_nav:null,live_reconciliation_gap:null,live_reconciliation_state:'NO_DATA'};
   const accts={};let current=0,pnl=0,flow=0,navKnown=0,pnlKnown=0,flowKnown=0,prevKnown=0,prevTotal=0;
   for(const id of IDS){
@@ -107,7 +110,7 @@ function installFunctions(){
    };
   }
   const canonicalNav=n((C.total||{}).nav);
-  const navGap=canonicalNav!=null&&navKnown===IDS.length?canonicalNav-current:null;
+  const accountSumGap=canonicalNav!=null&&navKnown===IDS.length?canonicalNav-current:null;
   const td=tossDiag();
   return {
    accounts:accts,
@@ -123,8 +126,10 @@ function installFunctions(){
    daily_return:prevKnown===IDS.length&&prevTotal>0&&pnlKnown===IDS.length?pnl/prevTotal:null,
    explained_gap:null,
    explained_gap_state:'NO_INDEPENDENT_PREVIOUS_NAV_BASELINE',
-   live_reconciliation_gap:navGap,
-   live_reconciliation_state:navGap==null?'NO_DATA':Math.abs(navGap)<1?'RECONCILED':'MISMATCH',
+   live_reconciliation_gap:null,
+   live_reconciliation_state:'NO_INDEPENDENT_PREVIOUS_NAV_BASELINE',
+   nav_account_sum_gap:accountSumGap,
+   nav_account_sum_state:accountSumGap==null?'NO_DATA':Math.abs(accountSumGap)<1?'ARITHMETIC_MATCH':'MISMATCH',
    toss_attribution_gap:td?n(td.unattributed_daily_pnl_krw_equiv):null,
    toss_attribution_state:td?String(td.state||'UNKNOWN'):'NO_DATA',
    account_count:IDS.length
@@ -134,7 +139,7 @@ function installFunctions(){
  window.buildTodayAccounting=accounting;
 
  const metrics=function(){
-  const C2=canon();if(!C2)return {accounts:{},positions:[],context:{source:'NO_DATA'}};
+  const C2=canon(),IDS=ids();if(!C2)return {accounts:{},positions:[],context:{source:'NO_DATA'}};
   const accounts={},positions=[];
   for(const id of IDS){
    const c=(C2.accounts||{})[id]||{};let priced=0,total=0;
@@ -176,7 +181,7 @@ function installFunctions(){
     quality:c.quality,priced,positions:total,session_label:c.source
    };
   }
-  return {accounts,positions,context:{source:'CANONICAL_LINEAGE_GUARD_V1',observed_at:C2.observed_at,account_count:IDS.length}};
+  return {accounts,positions,context:{source:'CANONICAL_LINEAGE_GUARD_V2',observed_at:C2.observed_at,account_count:IDS.length}};
  };
  metrics.__jjooniLineageGuard=true;
  window.buildRegularSessionMetrics=metrics;
@@ -225,5 +230,5 @@ wrapRender();
 enforce();
 setInterval(()=>{if(!document.hidden)enforce()},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
-window.__JJOONI_LINEAGE_GUARD={version:'1.2',accounts:IDS.slice(),policy:'NO_SILENT_FALLBACK_BEFORE_RENDER'};
+window.__JJOONI_LINEAGE_GUARD={version:'2.0',accounts:ids(),policy:'NO_SILENT_FALLBACK_NO_FAKE_RECONCILIATION'};
 })();
