@@ -50,9 +50,6 @@ function paint(){
   const next=Date.parse(String(live.next_expected_update_kst||''));
   const staleAfter=Date.parse(String(live.stale_after_kst||''));
 
-  // A cron/producer schedule mismatch is a timing-quality defect, not a price
-  // collection outage. Producer intentionally nulls next/stale metadata and
-  // keeps NAV/positions/P&L flowing under a LIMITED decision gate.
   if(scheduleState==='MISMATCH'){
     b.textContent='SSOT LIVE · 일정 계약 불일치';
     b.title='가격·계좌 데이터 수집은 계속됩니다. next_expected/stale_after는 신뢰할 수 없어 일정·freshness 판단만 LIMITED입니다.';
@@ -60,8 +57,6 @@ function paint(){
     return;
   }
 
-  // Backward-compatible bridge while old snapshots age out. Neutral waiting is
-  // bounded: after 24h without producer schedule metadata this becomes a warning.
   if(authority!=='PRODUCER_SCHEDULE_V1'||!Number.isFinite(next)||!Number.isFinite(staleAfter)){
     const obs=observedMs(live);
     if(Number.isFinite(obs)&&Date.now()-obs>REF_MAX_AGE_MS){
@@ -112,9 +107,6 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(_){}
 })();
 
-/* Data-lineage guard is intentionally loaded after live-bridge.  It replaces
-   legacy 4-account / silent-recompute compatibility functions with the
-   six-account no-silent-fallback contract and reasserts itself after refresh. */
 (function(){
  if(document.getElementById('ctLineageGuardScript'))return;
  const s=document.createElement('script');
@@ -122,5 +114,15 @@ try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:tr
  s.src='lineage-guard.js?v=1&_='+Date.now();
  s.async=true;
  s.onerror=function(){console.error('CT lineage guard load failed')};
+ (document.head||document.documentElement).appendChild(s);
+})();
+
+(function(){
+ if(document.getElementById('ctUiRefactorScript'))return;
+ const s=document.createElement('script');
+ s.id='ctUiRefactorScript';
+ s.src='ui-refactor.js?v=1&_='+Date.now();
+ s.async=true;
+ s.onerror=function(){console.error('CT UI refactor load failed');window.__JJOONI_UI_REFACTOR={state:'LOAD_FAILED'}};
  (document.head||document.documentElement).appendChild(s);
 })();
