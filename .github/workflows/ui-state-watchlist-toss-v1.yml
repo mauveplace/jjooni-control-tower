@@ -1,0 +1,162 @@
+name: UI State + Watchlist + Toss V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ui-state-watchlist-toss-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch dashboard UI state and Toss live positions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          # 1) One watchlist implementation only. live-bridge.js is canonical.
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="var w=document.createElement('script');w.src='watchlist-bridge.js?v=1&_='+Date.now();w.async=false;w.onerror=function(){console.warn('WATCHLIST FEED LOAD FAIL')};(document.head||document.documentElement).appendChild(w);"
+          if old in s:
+              s=s.replace(old,'',1)
+          p.write_text(s,encoding='utf-8')
+
+          # 2) Let broker-live Toss positions drive Toss holdings/current prices.
+          p=Path('live-bridge.js')
+          s=p.read_text(encoding='utf-8')
+          old="positions:humanStaticPositions('TOSS')"
+          new="positions:(Array.isArray(toss.positions)&&toss.positions.length?toss.positions:humanStaticPositions('TOSS'))"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('TOSS_CANONICAL_POSITION_PATTERN_NOT_FOUND')
+
+          old="['ISA','PENSION','IRP'].forEach(id=>"
+          new="['TOSS','ISA','PENSION','IRP'].forEach(id=>"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('TOSS_MERGE_POSITION_PATTERN_NOT_FOUND')
+
+          marker='CT_UI_STATE_WATCHLIST_V1'
+          if marker not in s:
+              s += r'''
+
+/* CT_UI_STATE_WATCHLIST_V1 */
+(function(){
+ 'use strict';
+ const KEY='jjooni_ct_active_tab_v1';
+ const LABELS={overview:'OVERVIEW',accounts:'보유분석',ai:'AI BOT',compare:'성과분석',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'WATCHLIST'};
+ let restoring=false;
+
+ function ensureStyle(){
+   if(document.getElementById('ctUiStateStyle'))return;
+   const st=document.createElement('style');st.id='ctUiStateStyle';st.textContent=`
+#ctWatchlistSectionHead{padding:14px 10px 5px;color:#8fa4bb;font:800 9px/1 system-ui;letter-spacing:.12em;text-transform:uppercase;pointer-events:none}
+@media(max-width:767px){#ctWatchlistSectionHead{display:none!important}}
+`;document.head.appendChild(st);
+ }
+
+ function ensureWatchHead(){
+   const tab=document.querySelector('.tab[data-tab="watchlist"]');
+   if(!tab||!tab.parentNode)return false;
+   if(!document.getElementById('ctWatchlistSectionHead')){
+     const h=document.createElement('div');h.id='ctWatchlistSectionHead';h.textContent='WATCHLIST';
+     tab.parentNode.insertBefore(h,tab);
+   }
+   return true;
+ }
+
+ function pageHeading(){
+   let h=document.querySelector('[data-ct-context-heading="1"]');
+   if(h)return h;
+   const candidates=[...document.querySelectorAll('h1,h2,.pageTitle,.page-title,.sectionTitle,.section-title')];
+   h=candidates.find(x=>String(x.textContent||'').trim().toUpperCase()==='OVERVIEW');
+   if(h)h.dataset.ctContextHeading='1';
+   return h||null;
+ }
+
+ function syncHeading(name){
+   const h=pageHeading();
+   if(h&&LABELS[name])h.textContent=LABELS[name];
+ }
+
+ function save(name){
+   if(!name)return;
+   try{sessionStorage.setItem(KEY,name)}catch(_){}
+   syncHeading(name);
+ }
+
+ function activate(name){
+   if(restoring||!name)return false;
+   const tab=document.querySelector('.tab[data-tab="'+CSS.escape(name)+'"]');
+   if(!tab)return false;
+   restoring=true;
+   try{
+     tab.click();
+     // Some legacy handlers only toggle the tab and do not restore a dynamic
+     // panel after a document rewrite. Enforce the panel state as a fallback.
+     setTimeout(()=>{
+       const panel=document.getElementById('panel-'+name);
+       if(panel&&!panel.classList.contains('on')){
+         document.querySelectorAll('.tabPanel').forEach(x=>x.classList.remove('on'));
+         panel.classList.add('on');
+       }
+       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===tab));
+       syncHeading(name);
+       restoring=false;
+     },30);
+   }catch(_){restoring=false;return false}
+   return true;
+ }
+
+ document.addEventListener('click',e=>{
+   const t=e.target&&e.target.closest?e.target.closest('.tab[data-tab]'):null;
+   if(t&&!restoring)save(t.dataset.tab);
+ },true);
+
+ function restore(){
+   ensureStyle();ensureWatchHead();
+   let name='overview';
+   try{name=sessionStorage.getItem(KEY)||'overview'}catch(_){}
+   if(activate(name))return true;
+   return false;
+ }
+
+ let tries=0;
+ const timer=setInterval(()=>{
+   ensureStyle();ensureWatchHead();
+   if(restore()||++tries>24)clearInterval(timer);
+ },125);
+ setTimeout(restore,0);
+ setTimeout(restore,600);
+ setTimeout(restore,1600);
+})();
+'''
+          p.write_text(s,encoding='utf-8')
+          print('PATCH_OK')
+          PY
+
+      - name: Commit UI patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html live-bridge.js
+          if git diff --cached --quiet; then
+            echo NO_CHANGES
+            exit 0
+          fi
+          git commit -m 'Fix watchlist refresh state and use Toss live positions'
+          git push
