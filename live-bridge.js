@@ -101,8 +101,8 @@ function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filte
 function makeCanonical(live){
  const A=live.accounts||{},out={};
  const toss=A.TOSS||{},tossFlow=staticNetFlow('TOSS');
- out.TOSS={id:'TOSS',type:'HUMAN',nav:n(toss.nav),principal:n(toss.principal)||staticPrincipal('TOSS'),pnl:n(toss.total_pnl),return_pct:n(toss.total_return_pct),today_pnl:n(toss.today_pnl),today_return:n(toss.today_return),net_flow:tossFlow,cash_krw:n(toss.cash_krw),cash_usd:n(toss.cash_usd),positions:humanStaticPositions('TOSS'),source:String(toss.mode||toss.status||'TOSS_REFERENCE'),quality:String(toss.status||'REFERENCE_STALE')};
- ['ISA','PENSION','IRP'].forEach(id=>{const a=A[id]||{},ps=Array.isArray(a.positions)?a.positions:humanStaticPositions(id),pr=staticPrincipal(id),nav=n(a.nav),flow=staticNetFlow(id);out[id]={id,type:'HUMAN',nav,principal:pr,pnl:nav!=null&&pr>0?nav-pr:null,return_pct:nav!=null&&pr>0?(nav/pr-1)*100:null,today_pnl:n(a.today_pnl),today_return:n(a.today_return),net_flow:flow,cash_krw:n(a.cash_krw??a.cash),cash_usd:null,positions:ps,source:String(a.mode||''),quality:String(a.status||'PARTIAL_MODELED'),quote_coverage_pct:n(a.quote_coverage_pct)};});
+ out.TOSS={id:'TOSS',type:'HUMAN',nav:n(toss.nav),principal:n(toss.principal)||staticPrincipal('TOSS'),pnl:n(toss.total_pnl),return_pct:n(toss.total_return_pct),today_pnl:n(toss.today_pnl),today_return:n(toss.today_return),net_flow:tossFlow,cash_krw:n(toss.cash_krw),cash_usd:n(toss.cash_usd),positions:(Array.isArray(toss.positions)&&toss.positions.length?toss.positions:humanStaticPositions('TOSS')),source:String(toss.mode||toss.status||'TOSS_REFERENCE'),quality:String(toss.status||'REFERENCE_STALE')};
+ ['TOSS','ISA','PENSION','IRP'].forEach(id=>{const a=A[id]||{},ps=Array.isArray(a.positions)?a.positions:humanStaticPositions(id),pr=staticPrincipal(id),nav=n(a.nav),flow=staticNetFlow(id);out[id]={id,type:'HUMAN',nav,principal:pr,pnl:nav!=null&&pr>0?nav-pr:null,return_pct:nav!=null&&pr>0?(nav/pr-1)*100:null,today_pnl:n(a.today_pnl),today_return:n(a.today_return),net_flow:flow,cash_krw:n(a.cash_krw??a.cash),cash_usd:null,positions:ps,source:String(a.mode||''),quality:String(a.status||'PARTIAL_MODELED'),quote_coverage_pct:n(a.quote_coverage_pct)};});
  const ai=A.AI||{},aiPs=[...(ai.holdings_kr||[]).map(x=>({...x,account:'AI',account_type:'AI',current_price:z(x.current_price||x.price),avg_price:z(x.avg),market_value:z(x.value),prev_close:n(x.prev_close),record_type:'POSITION',currency:'KRW',market:'KR'})),...(ai.holdings_us||[]).map(x=>({...x,account:'AI',account_type:'AI',current_price:z(x.current_price||x.price),avg_price:z(x.avg),market_value:z(x.value_krw||z(x.value)*z(ai.fx_krw_per_usd)),prev_close:n(x.prev_close),record_type:'POSITION',currency:x.currency||'USD',market:'US'}))],aip=z(((D.ai||{}).inception_nav)),ain=n(ai.nav);
  out.AI={id:'AI',type:'AI',nav:ain,principal:aip||null,pnl:ain!=null&&aip>0?ain-aip:null,return_pct:ain!=null&&aip>0?(ain/aip-1)*100:null,today_pnl:n(ai.today_pnl),today_return:n(ai.today_return),net_flow:0,cash_krw:n(ai.cash_krw),cash_usd:n(ai.cash_usd),positions:aiPs,source:String(ai.mode||'KIS_BROKER_DIRECT'),quality:String(ai.today_pnl_quality||ai.status||'MISSING'),account_quality:String(ai.status||'MISSING')};
  const tp=A.TRIPOD||{},tpn=n(tp.nav),tpQty=z(tp.qty),tpAvg=z(tp.avg_price),tpFx=z(tp.fx),tpPr=tpQty>0&&tpAvg>0&&tpFx>0?tpQty*tpAvg*tpFx:null;
@@ -188,4 +188,90 @@ function applyLive(live){
 async function refresh(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
 
 injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(refresh,REFRESH_MS);setInterval(()=>{if(CANON){updateCards();updateHero();fixLegacyBadges()}},1500);
+})();
+
+/* CT_UI_STATE_WATCHLIST_V1 */
+(function(){
+ 'use strict';
+ const KEY='jjooni_ct_active_tab_v1';
+ const LABELS={overview:'OVERVIEW',accounts:'보유분석',ai:'AI BOT',compare:'성과분석',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'WATCHLIST'};
+ let restoring=false;
+
+ function ensureStyle(){
+   if(document.getElementById('ctUiStateStyle'))return;
+   const st=document.createElement('style');st.id='ctUiStateStyle';st.textContent='#ctWatchlistSectionHead{padding:14px 10px 5px;color:#8fa4bb;font:800 9px/1 system-ui;letter-spacing:.12em;text-transform:uppercase;pointer-events:none}@media(max-width:767px){#ctWatchlistSectionHead{display:none!important}}';document.head.appendChild(st);
+ }
+
+ function ensureWatchHead(){
+   const tab=document.querySelector('.tab[data-tab="watchlist"]');
+   if(!tab||!tab.parentNode)return false;
+   if(!document.getElementById('ctWatchlistSectionHead')){
+     const h=document.createElement('div');h.id='ctWatchlistSectionHead';h.textContent='WATCHLIST';
+     tab.parentNode.insertBefore(h,tab);
+   }
+   return true;
+ }
+
+ function pageHeading(){
+   let h=document.querySelector('[data-ct-context-heading="1"]');
+   if(h)return h;
+   const candidates=[...document.querySelectorAll('h1,h2,.pageTitle,.page-title,.sectionTitle,.section-title')];
+   h=candidates.find(x=>String(x.textContent||'').trim().toUpperCase()==='OVERVIEW');
+   if(h)h.dataset.ctContextHeading='1';
+   return h||null;
+ }
+
+ function syncHeading(name){
+   const h=pageHeading();
+   if(h&&LABELS[name])h.textContent=LABELS[name];
+ }
+
+ function save(name){
+   if(!name)return;
+   try{sessionStorage.setItem(KEY,name)}catch(_){}
+   syncHeading(name);
+ }
+
+ function activate(name){
+   if(restoring||!name)return false;
+   const tab=document.querySelector('.tab[data-tab="'+CSS.escape(name)+'"]');
+   if(!tab)return false;
+   restoring=true;
+   try{
+     tab.click();
+     setTimeout(()=>{
+       const panel=document.getElementById('panel-'+name);
+       if(panel&&!panel.classList.contains('on')){
+         document.querySelectorAll('.tabPanel').forEach(x=>x.classList.remove('on'));
+         panel.classList.add('on');
+       }
+       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===tab));
+       syncHeading(name);
+       restoring=false;
+     },30);
+   }catch(_){restoring=false;return false}
+   return true;
+ }
+
+ document.addEventListener('click',e=>{
+   const t=e.target&&e.target.closest?e.target.closest('.tab[data-tab]'):null;
+   if(t&&!restoring)save(t.dataset.tab);
+ },true);
+
+ function restore(){
+   ensureStyle();ensureWatchHead();
+   let name='overview';
+   try{name=sessionStorage.getItem(KEY)||'overview'}catch(_){}
+   if(activate(name))return true;
+   return false;
+ }
+
+ let tries=0;
+ const timer=setInterval(()=>{
+   ensureStyle();ensureWatchHead();
+   if(restore()||++tries>24)clearInterval(timer);
+ },125);
+ setTimeout(restore,0);
+ setTimeout(restore,600);
+ setTimeout(restore,1600);
 })();
