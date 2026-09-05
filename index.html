@@ -107,7 +107,15 @@ async function openTower(pw){
     let html=new TextDecoder().decode(plain);
     html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
     html=html.replace('</body>',CT_POSTFIX+'</body>');
-    const CT_LIVE_BOOT=`<script>(function(){var b=document.createElement('div');b.id='ctEncryptedLiveBadge';b.style.cssText='position:fixed;right:12px;bottom:72px;z-index:10001;padding:6px 9px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#b45309;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002';b.textContent='AI FEED LOADING';document.body.appendChild(b);var s=document.createElement('script');s.src='live-bridge.js?v=2&_='+Date.now();s.async=false;s.onerror=function(){b.textContent='AI FEED LOAD FAIL'};(document.head||document.documentElement).appendChild(s);}());<\/script>`;
+    const CT_LIVE_BOOT=`<script>(function(){
+      var b=document.createElement('div');
+      b.id='ctEncryptedLiveBadge';
+      b.style.cssText='position:fixed;right:12px;bottom:72px;z-index:10001;padding:6px 9px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#b45309;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002';
+      b.textContent='LINEAGE GUARD LOADING';document.body.appendChild(b);
+      function blocked(msg){window.__LINEAGE_GUARD_ACTIVE=false;b.textContent='SSOT BLOCKED · '+msg;b.style.background='#fff1f2';b.style.borderColor='#fecdd3';b.style.color='#be123c';b.title='안전한 데이터 계보 보호기가 활성화되지 않아 live 숫자 갱신을 차단했습니다.';}
+      function loadLive(){var s=document.createElement('script');s.src='live-bridge.js?v=3&_='+Date.now();s.async=false;s.onerror=function(){blocked('FEED LOAD FAIL')};s.onload=function(){setTimeout(function(){if(window.__LINEAGE_GUARD_ACTIVE!==true)blocked('GUARD LOST')},1500)};(document.head||document.documentElement).appendChild(s);}
+      var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+Date.now();g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='LINEAGE GUARD ACTIVE';loadLive()};(document.head||document.documentElement).appendChild(g);
+    }());<\/script>`;
     html=html.replace('</body>',CT_LIVE_BOOT+'</body>');document.open();document.write(html);document.close();
   }catch(e){
     sessionStorage.removeItem('jjooni_ct_session_pw'); msg.className='msg bad'; msg.textContent='비밀번호가 맞지 않거나 데이터가 손상되었습니다.';
