@@ -2,6 +2,7 @@
 'use strict';
 
 const BADGE_ID='ctProducerFreshnessBadge';
+const REF_MAX_AGE_MS=24*60*60*1000;
 
 function ensureBadge(){
   const legacy=document.getElementById('ctEncryptedLiveBadge');
@@ -33,6 +34,13 @@ function liquidityState(live){
   }
   return 'NORMAL';
 }
+function observedMs(live){
+  for(const v of [live.observed_at,live.generated_kst,live.source_snapshot_kst]){
+    const t=Date.parse(String(v||''));
+    if(Number.isFinite(t))return t;
+  }
+  return null;
+}
 function paint(){
   const b=ensureBadge();
   const live=window.__JJOONI_LIVE_PAYLOAD||{};
@@ -41,12 +49,19 @@ function paint(){
   const next=Date.parse(String(live.next_expected_update_kst||''));
   const staleAfter=Date.parse(String(live.stale_after_kst||''));
 
-  // Backward-compatible neutral state until the first producer snapshot carrying
-  // PRODUCER_SCHEDULE_V1 arrives. Do not reconstruct KR/US sessions in-browser.
+  // Backward-compatible bridge while old snapshots age out. Neutral waiting is
+  // bounded: after 24h without producer schedule metadata this becomes a warning.
   if(authority!=='PRODUCER_SCHEDULE_V1'||!Number.isFinite(next)||!Number.isFinite(staleAfter)){
-    b.textContent='SSOT REF · 일정 메타데이터 대기';
-    b.title='다음 producer snapshot부터 session / next_expected_update_kst 계약을 사용합니다.';
-    paintStyle(b,'closed');
+    const obs=observedMs(live);
+    if(Number.isFinite(obs)&&Date.now()-obs>REF_MAX_AGE_MS){
+      b.textContent='SSOT STALE · 일정 메타데이터 없음 · '+stamp(live.observed_at||live.generated_kst);
+      b.title='Producer schedule metadata가 없고 마지막 관측도 24시간을 넘었습니다.';
+      paintStyle(b,'warn');
+    }else{
+      b.textContent='SSOT REF · 일정 메타데이터 대기';
+      b.title='다음 producer snapshot부터 session / next_expected_update_kst 계약을 사용합니다.';
+      paintStyle(b,'closed');
+    }
     return;
   }
 
@@ -68,7 +83,7 @@ function paint(){
 
   if(liquidity==='THIN'){
     b.textContent='SSOT LIVE · '+String(session.id||'OPEN')+' · THIN';
-    b.title='04:00–06:00 ET YAHOO_EXTENDED_5M 저유동성 구간입니다. 손익 판단은 LIMITED입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
+    b.title='Producer가 지정한 저유동성 시간외 구간(US PRE 04:00–06:00 ET 또는 POST 18:00–20:00 ET)입니다. 손익 판단은 LIMITED입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
     paintStyle(b,'warn');
     return;
   }
