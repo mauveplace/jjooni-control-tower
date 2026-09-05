@@ -46,8 +46,19 @@ function paint(){
   const live=window.__JJOONI_LIVE_PAYLOAD||{};
   const session=live.session||{};
   const authority=String(live.freshness_authority||'');
+  const scheduleState=String(live.schedule_contract_state||'').toUpperCase();
   const next=Date.parse(String(live.next_expected_update_kst||''));
   const staleAfter=Date.parse(String(live.stale_after_kst||''));
+
+  // A cron/producer schedule mismatch is a timing-quality defect, not a price
+  // collection outage. Producer intentionally nulls next/stale metadata and
+  // keeps NAV/positions/P&L flowing under a LIMITED decision gate.
+  if(scheduleState==='MISMATCH'){
+    b.textContent='SSOT LIVE · 일정 계약 불일치';
+    b.title='가격·계좌 데이터 수집은 계속됩니다. next_expected/stale_after는 신뢰할 수 없어 일정·freshness 판단만 LIMITED입니다.';
+    paintStyle(b,'warn');
+    return;
+  }
 
   // Backward-compatible bridge while old snapshots age out. Neutral waiting is
   // bounded: after 24h without producer schedule metadata this becomes a warning.
