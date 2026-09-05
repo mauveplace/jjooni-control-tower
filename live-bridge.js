@@ -187,14 +187,14 @@ function applyLive(live){
 
 async function refresh(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
 
-injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(refresh,REFRESH_MS);setInterval(()=>{if(CANON){updateCards();updateHero();fixLegacyBadges()}},1500);
+injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden&&CANON){updateCards();updateHero();fixLegacyBadges()}},1500);
 })();
 
 /* CT_UI_STATE_WATCHLIST_V1 */
 (function(){
  'use strict';
  const KEY='jjooni_ct_active_tab_v1';
- const LABELS={overview:'OVERVIEW',accounts:'보유분석',ai:'AI BOT',compare:'성과분석',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'WATCHLIST'};
+ const LABELS={overview:'OVERVIEW',accounts:'보유분석',ai:'AI BOT',compare:'성과분석',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'WATCHLIST',cost:'COST'};
  let restoring=false;
 
  function ensureStyle(){
@@ -274,4 +274,15 @@ injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(refresh,REFRESH_
  setTimeout(restore,0);
  setTimeout(restore,600);
  setTimeout(restore,1600);
+})();
+
+
+/* CT_COST_BRIDGE_LOADER_V1 */
+(function(){
+ if(document.getElementById('ctCostBridgeScript'))return;
+ const x=document.createElement('script');
+ x.id='ctCostBridgeScript';
+ x.src='cost-bridge.js?v=1';
+ x.async=true;
+ (document.head||document.documentElement).appendChild(x);
 })();
