@@ -1,0 +1,49 @@
+name: Mobile Tabs Flow Hotfix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/mobile-tabs-flow-hotfix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove fixed mobile tab overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('live-bridge.js')
+          s=p.read_text(encoding='utf-8')
+          old="html.ctTouchTablet .tabs,html .tabs,.tabs{position:fixed!important;left:0!important;right:0!important;top:56px!important;bottom:auto!important;width:100%!important;height:52px!important;margin:0!important;padding:4px 6px!important;display:flex!important;flex-direction:row!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#061a36!important;border:0!important;z-index:4999!important;box-shadow:0 5px 18px rgba(6,24,51,.18)!important;scrollbar-width:none!important}"
+          new="html.ctTouchTablet .tabs,html .tabs,.tabs{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:calc(100% + 20px)!important;height:52px!important;margin:0 -10px 10px!important;padding:4px 6px!important;display:flex!important;flex-direction:row!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#061a36!important;border:0!important;z-index:20!important;box-shadow:0 3px 10px rgba(6,24,51,.10)!important;scrollbar-width:none!important}"
+          if old not in s:
+              raise SystemExit('MOBILE_TABS_PATTERN_NOT_FOUND')
+          s=s.replace(old,new,1)
+          s=s.replace("html.ctTouchTablet .tabPanel,.tabPanel{padding-top:58px!important}","html.ctTouchTablet .tabPanel,.tabPanel{padding-top:0!important}",1)
+          p.write_text(s,encoding='utf-8')
+          print('MOBILE_TABS_OVERLAY=REMOVED')
+          PY
+          git diff --check
+          git diff -- live-bridge.js
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add live-bridge.js
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGE'
+            exit 0
+          fi
+          git commit -m 'Fix mobile tabs overlay and content obstruction'
+          git push
