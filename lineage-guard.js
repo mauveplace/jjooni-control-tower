@@ -232,3 +232,74 @@ setInterval(()=>{if(!document.hidden)enforce()},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
 window.__JJOONI_LINEAGE_GUARD={version:'2.0',accounts:ids(),policy:'NO_SILENT_FALLBACK_NO_FAKE_RECONCILIATION'};
 })();
+
+/* CT_STATIC_HOST_FAIL_CLOSED_V1 */
+(function(){
+'use strict';
+if(!/github\.io$/i.test(String(location.hostname||'')))return;
+
+window.__JJOONI_LIVE_READY=false;
+window.__JJOONI_LEGACY_POLLER_DISABLED=false;
+const started=Date.now();
+
+function disableLegacyPoller(){
+ let stopped=false;
+ try{
+  if(typeof CT_LIVE_BUSY!=='undefined'){
+   CT_LIVE_BUSY=true;
+   stopped=true;
+  }
+ }catch(_){
+  try{eval('CT_LIVE_BUSY=true');stopped=true}catch(__){}
+ }
+ try{
+  if(typeof window.ctLiveRefresh==='function'){
+   const noop=async function(){return null};
+   noop.__jjooniStaticDisabled=true;
+   window.ctLiveRefresh=noop;
+   stopped=true;
+  }
+ }catch(_){}
+ if(stopped)window.__JJOONI_LEGACY_POLLER_DISABLED=true;
+ return stopped;
+}
+
+function ensureShield(){
+ let s=document.getElementById('ctSsotSafetyShield');
+ if(s)return s;
+ s=document.createElement('div');
+ s.id='ctSsotSafetyShield';
+ s.style.cssText='position:fixed;inset:0;z-index:99998;display:grid;place-items:center;padding:24px;background:rgba(244,247,251,.96);backdrop-filter:blur(4px);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#10233d;text-align:center';
+ s.innerHTML='<div style="width:min(92vw,420px);padding:24px;border:1px solid #d7e1ec;border-radius:18px;background:#fff;box-shadow:0 18px 60px #10233d22"><div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:#60758d">CONTROL TOWER · SSOT</div><div id="ctSsotSafetyTitle" style="margin-top:8px;font-size:20px;font-weight:900">실시간 데이터 연결 중</div><div id="ctSsotSafetyText" style="margin-top:8px;font-size:13px;line-height:1.55;color:#66788b">검증된 Canonical 데이터가 도착하기 전에는 금액을 표시하지 않습니다.</div><button id="ctSsotReload" type="button" style="display:none;margin:16px auto 0;padding:10px 14px;border:0;border-radius:10px;background:#0b3b70;color:#fff;font-weight:850;cursor:pointer">새로고침</button></div>';
+ document.body.appendChild(s);
+ const btn=s.querySelector('#ctSsotReload');if(btn)btn.onclick=()=>location.reload();
+ return s;
+}
+
+function blockShield(reason){
+ const s=ensureShield(),t=s.querySelector('#ctSsotSafetyTitle'),x=s.querySelector('#ctSsotSafetyText'),b=s.querySelector('#ctSsotReload');
+ if(t)t.textContent='실시간 데이터 없음';
+ if(x)x.textContent='검증된 live SSOT를 받지 못해 숫자 표시를 차단했습니다. '+String(reason||'').slice(0,120);
+ if(b)b.style.display='inline-block';
+ const badge=document.getElementById('ctEncryptedLiveBadge');
+ if(badge){badge.textContent='SSOT BLOCKED · NO LIVE DATA';badge.style.background='#fff1f2';badge.style.borderColor='#fecdd3';badge.style.color='#be123c';}
+}
+
+function releaseShield(){
+ window.__JJOONI_LIVE_READY=true;
+ const s=document.getElementById('ctSsotSafetyShield');if(s)s.remove();
+}
+
+ensureShield();
+disableLegacyPoller();
+let tries=0;
+const legacyTimer=setInterval(()=>{
+ if(disableLegacyPoller()||++tries>30)clearInterval(legacyTimer);
+},100);
+
+const readyTimer=setInterval(()=>{
+ const ok=!!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD);
+ if(ok){clearInterval(readyTimer);releaseShield();return;}
+ if(Date.now()-started>25000){clearInterval(readyTimer);blockShield('LIVE_READY_TIMEOUT');}
+},100);
+})();
