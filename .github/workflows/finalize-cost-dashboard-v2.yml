@@ -1,0 +1,74 @@
+name: Finalize COST Dashboard V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/finalize-cost-dashboard-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Finalize COST dashboard for tablet/mobile
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          index = Path('index.html')
+          s = index.read_text(encoding='utf-8')
+
+          old_grid = 'grid-template-columns:repeat(6,minmax(0,1fr))!important'
+          new_grid = 'grid-template-columns:repeat(7,minmax(0,1fr))!important'
+          if old_grid in s:
+              s = s.replace(old_grid, new_grid, 1)
+
+          old_tabs = 'html.ctTouchTablet .tab[data-tab="quality"],.tab[data-tab="overview"],.tab[data-tab="accounts"],.tab[data-tab="compare"],.tab[data-tab="tripod"],.tab[data-tab="quality"]{display:flex!important;'
+          new_tabs = 'html.ctTouchTablet .tab[data-tab="quality"],html.ctTouchTablet .tab[data-tab="cost"],.tab[data-tab="overview"],.tab[data-tab="accounts"],.tab[data-tab="compare"],.tab[data-tab="tripod"],.tab[data-tab="quality"],.tab[data-tab="cost"]{display:flex!important;'
+          if old_tabs in s:
+              s = s.replace(old_tabs, new_tabs, 1)
+          elif '.tab[data-tab="cost"]{display:flex!important;' not in s:
+              raise SystemExit('portrait tab selector anchor not found')
+
+          index.write_text(s, encoding='utf-8')
+
+          live = Path('live-bridge.js')
+          j = live.read_text(encoding='utf-8')
+          old_src = "x.src='cost-bridge.js?v=1';"
+          new_src = "x.src='cost-bridge.js?v=2&_='+Date.now();"
+          if old_src in j:
+              j = j.replace(old_src, new_src, 1)
+          elif "cost-bridge.js?v=2" not in j:
+              raise SystemExit('COST loader anchor not found')
+          live.write_text(j, encoding='utf-8')
+          PY
+
+      - name: Validate patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'repeat(7,minmax(0,1fr))' index.html
+          grep -F 'data-tab="cost"' index.html
+          grep -F "cost-bridge.js?v=2&_=" live-bridge.js
+
+      - name: Commit dashboard update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html live-bridge.js
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git commit -m 'Finalize COST dashboard mobile navigation and cache refresh'
+          git push
