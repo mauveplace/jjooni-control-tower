@@ -1,0 +1,44 @@
+{
+  "schema": "JJOONI_CT_AI_QA_PUBLIC_MANIFEST_V1",
+  "snapshot_id": "20260905T182847_run33957661327",
+  "generated_kst": "2026-09-05T18:28:47+09:00",
+  "snapshot_path": "qa/snapshots/20260905T182847_run33957661327.json",
+  "snapshot_sha256": "b6330b198443c2ac686a58a6d4599d67229c19979692a70f7ca4c6711a4a491f",
+  "read_only": true,
+  "privacy": {
+    "contains_account_numbers": false,
+    "contains_balances": false,
+    "contains_holdings_or_trade_details": false
+  },
+  "overall_status": "FAIL",
+  "failed_checks": [
+    "six_accounts_present",
+    "six_account_sum_exact",
+    "toss_position_names"
+  ],
+  "checks": {
+    "six_accounts_present": {"pass": false},
+    "six_account_sum_exact": {"pass": false},
+    "toss_broker_live_full": {"pass": true},
+    "toss_cash_not_reference": {"pass": true},
+    "toss_krw_cash_field": {"pass": true},
+    "toss_usd_cash_field": {"pass": true},
+    "toss_daily_pnl_field": {"pass": true},
+    "toss_nav_formula": {"pass": true},
+    "toss_positions_priced": {"pass": true},
+    "toss_position_names": {"pass": false},
+    "trade_review_quotes": {"pass": true, "covered": 45, "total": 45, "missing": 0}
+  },
+  "warnings": [
+    {
+      "code": "TRIPOD_MASTER_PERMISSION",
+      "severity": "WARN",
+      "message": "Tri-Pod master source read returned HTTP 403 in the producer run."
+    }
+  ],
+  "instructions_for_ai": [
+    "Treat this URL as a structural QA source, not as a trading signal.",
+    "Report failed checks, permission warnings, stale timestamps, and coverage gaps before interpreting dashboard data.",
+    "Do not infer missing financial values. This endpoint intentionally omits balances, account numbers, tickers, holdings, and trades."
+  ]
+}
