@@ -56,12 +56,12 @@ function injectResponsiveCss(){
  html,body{overflow-x:hidden!important}
  html.ctTouchTablet .app,html .app,.app{margin-left:0!important;width:100%!important;max-width:100%!important;padding:0 10px 20px!important;overflow-x:hidden!important}
  html.ctTouchTablet .top,html .top,.top{position:sticky!important;top:0!important;z-index:5000!important;height:56px!important;min-height:56px!important;margin:0 -10px!important;padding:0 12px!important;width:auto!important;background:linear-gradient(180deg,#05172e,#061d3b)!important}
- html.ctTouchTablet .tabs,html .tabs,.tabs{position:fixed!important;left:0!important;right:0!important;top:56px!important;bottom:auto!important;width:100%!important;height:52px!important;margin:0!important;padding:4px 6px!important;display:flex!important;flex-direction:row!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#061a36!important;border:0!important;z-index:4999!important;box-shadow:0 5px 18px rgba(6,24,51,.18)!important;scrollbar-width:none!important}
+ html.ctTouchTablet .tabs,html .tabs,.tabs{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:calc(100% + 20px)!important;height:52px!important;margin:0 -10px 10px!important;padding:4px 6px!important;display:flex!important;flex-direction:row!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#061a36!important;border:0!important;z-index:20!important;box-shadow:0 3px 10px rgba(6,24,51,.10)!important;scrollbar-width:none!important}
  html.ctTouchTablet .tabs::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none!important}
  html.ctTouchTablet .tabs:before,html.ctTouchTablet .tabs:after,.tabs:before,.tabs:after{display:none!important}
  html.ctTouchTablet .tab,html.ctTouchTablet .tab[data-tab],html .tab,.tab,.tab[data-tab]{display:flex!important;flex:0 0 auto!important;min-width:78px!important;width:auto!important;height:44px!important;min-height:44px!important;padding:3px 7px!important;border:0!important;border-radius:8px!important;align-items:center!important;justify-content:center!important;text-align:center!important;font-size:8px!important;line-height:1.15!important;color:#c3d1e2!important;background:transparent!important;box-shadow:none!important}
  html.ctTouchTablet .tab.on,.tab.on{background:rgba(255,255,255,.1)!important;color:#fff!important}
- html.ctTouchTablet .tabPanel,.tabPanel{padding-top:58px!important}
+ html.ctTouchTablet .tabPanel,.tabPanel{padding-top:0!important}
  #ctEncryptedLiveBadge{top:7px!important;right:8px!important;bottom:auto!important}
 }
 @media (min-width:768px) and (max-width:1199px){
