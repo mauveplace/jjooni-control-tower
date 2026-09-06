@@ -2,7 +2,8 @@
 'use strict';
 
 const BADGE_ID='ctProducerFreshnessBadge';
-const REF_MAX_AGE_MS=24*60*60*1000;
+const REF_AGE_MS=30*60*1000;
+const STALE_AGE_MS=24*60*60*1000;
 
 function ensureBadge(){
   const legacy=document.getElementById('ctEncryptedLiveBadge');
@@ -20,7 +21,25 @@ function paintStyle(b,state){
   const s=state==='good'?['#ecfdf3','#abefc6','#087443']:state==='closed'?['#f2f4f7','#d0d5dd','#475467']:state==='warn'?['#fff7ed','#fed7aa','#b45309']:['#fff1f2','#fecdd3','#be123c'];
   b.style.background=s[0];b.style.border='1px solid '+s[1];b.style.color=s[2];
 }
-function stamp(v){return String(v||'').replace('T',' ').slice(5,16)}
+function parseKstMs(v){
+  const raw=String(v||'').trim();if(!raw)return null;
+  let s=raw;
+  if(!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(s)&&/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s))s=s.replace(' ','T')+'+09:00';
+  const ms=Date.parse(s);return Number.isFinite(ms)?ms:null;
+}
+function stamp(v){
+  const ms=parseKstMs(v);if(ms==null)return '시각 확인 중';
+  const parts=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date(ms));
+  const get=t=>(parts.find(x=>x.type===t)||{}).value||'';
+  return `${get('month')}/${get('day')} ${get('hour')}:${get('minute')}`;
+}
+function ageText(ms){
+  const min=Math.max(0,Math.floor(ms/60000));
+  if(min<60)return `${min}분 경과`;
+  const h=Math.floor(min/60),m=min%60;return m>=30?`${h+1}시간 경과`:`${h}시간 경과`;
+}
+function basisRaw(live){return live.generated_kst||live.source_snapshot_kst||live.observed_at||''}
+function basisMs(live){return parseKstMs(basisRaw(live))}
 function liquidityState(live){
   const declared=String(((live.price_liquidity_quality||{}).state)||'').toUpperCase();
   if(declared)return declared;
@@ -34,69 +53,50 @@ function liquidityState(live){
   }
   return 'NORMAL';
 }
-function observedMs(live){
-  for(const v of [live.observed_at,live.generated_kst,live.source_snapshot_kst]){
-    const t=Date.parse(String(v||''));
-    if(Number.isFinite(t))return t;
-  }
-  return null;
-}
+function nextText(live){return live.next_expected_update_kst?stamp(live.next_expected_update_kst):''}
 function paint(){
   const b=ensureBadge();
   const live=window.__JJOONI_LIVE_PAYLOAD||{};
   const session=live.session||{};
-  const authority=String(live.freshness_authority||'');
   const scheduleState=String(live.schedule_contract_state||'').toUpperCase();
-  const next=Date.parse(String(live.next_expected_update_kst||''));
-  const staleAfter=Date.parse(String(live.stale_after_kst||''));
+  const basis=basisMs(live),basisLabel=stamp(basisRaw(live)),age=basis==null?null:Math.max(0,Date.now()-basis),next=nextText(live);
 
+  if(age==null){
+    b.textContent='⚠ 기준시각 확인 필요';
+    b.title='generated_kst를 확인할 수 없어 데이터 신선도를 판정할 수 없습니다.';
+    paintStyle(b,'warn');return;
+  }
+  if(age>STALE_AGE_MS){
+    b.textContent=`⚠ 데이터 ${ageText(age)} · 기준 ${basisLabel}`;
+    b.title='generated_kst 기준 24시간을 초과했습니다. 휴장 여부와 관계없이 마지막 검증값으로만 취급합니다.';
+    paintStyle(b,'warn');return;
+  }
   if(scheduleState==='MISMATCH'){
-    b.textContent='SSOT LIVE · 일정 계약 불일치';
-    b.title='가격·계좌 데이터 수집은 계속됩니다. next_expected/stale_after는 신뢰할 수 없어 일정·freshness 판단만 LIMITED입니다.';
-    paintStyle(b,'warn');
-    return;
+    b.textContent=`⚠ 수집 일정 확인 필요 · 기준 ${basisLabel}`;
+    b.title='데이터는 있으나 producer 일정 계약이 불일치합니다.';
+    paintStyle(b,'warn');return;
   }
-
-  if(authority!=='PRODUCER_SCHEDULE_V1'||!Number.isFinite(next)||!Number.isFinite(staleAfter)){
-    const obs=observedMs(live);
-    if(Number.isFinite(obs)&&Date.now()-obs>REF_MAX_AGE_MS){
-      b.textContent='SSOT STALE · 일정 메타데이터 없음 · '+stamp(live.observed_at||live.generated_kst);
-      b.title='Producer schedule metadata가 없고 마지막 관측도 24시간을 넘었습니다.';
-      paintStyle(b,'warn');
-    }else{
-      b.textContent='SSOT REF · 일정 메타데이터 대기';
-      b.title='다음 producer snapshot부터 session / next_expected_update_kst 계약을 사용합니다.';
-      paintStyle(b,'closed');
-    }
-    return;
-  }
-
-  const nextText=stamp(live.next_expected_update_kst);
-  if(Date.now()>staleAfter){
-    b.textContent='SSOT STALE · 예정 '+nextText;
-    b.title='Producer가 선언한 stale_after_kst를 지났는데 새 snapshot이 도착하지 않았습니다.';
-    paintStyle(b,'warn');
-    return;
-  }
-
-  const liquidity=liquidityState(live);
   if(String(session.state||'').toUpperCase()==='CLOSED'){
-    b.textContent='● '+(live.freshness_display||'장 마감 · 마지막 검증값 기준');
-    b.title='정상 휴장/비거래 구간입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
-    paintStyle(b,'closed');
-    return;
+    const aged=age>REF_AGE_MS?' · '+ageText(age):'';
+    b.textContent=`● 장 마감${aged} · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
+    b.title='generated_kst 기준 마지막 검증값입니다. 24시간을 넘으면 휴장 중에도 경고로 전환합니다.';
+    paintStyle(b,'closed');return;
   }
-
+  const liquidity=liquidityState(live);
+  if(age>REF_AGE_MS){
+    b.textContent=`⚠ 데이터 ${ageText(age)} · 기준 ${basisLabel}`;
+    b.title='시장 진행 중인데 generated_kst 기준 30분을 넘었습니다.';
+    paintStyle(b,'warn');return;
+  }
   if(liquidity==='THIN'){
-    b.textContent='SSOT LIVE · '+String(session.id||'OPEN')+' · THIN';
-    b.title='Producer가 지정한 저유동성 시간외 구간(US PRE 04:00–06:00 ET 또는 POST 18:00–20:00 ET)입니다. 손익 판단은 LIMITED입니다. 다음 예상 수집 '+String(live.next_expected_update_kst||'—');
-    paintStyle(b,'warn');
-    return;
+    b.textContent=`● 저유동성 구간 · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
+    b.title='가격 유동성이 낮아 손익 판단은 제한적으로 봐야 합니다.';
+    paintStyle(b,'warn');return;
   }
-
-  b.textContent='SSOT LIVE · '+String(session.id||'OPEN')+' · 다음 '+nextText;
-  b.title='Freshness authority: PRODUCER_SCHEDULE_V1. 브라우저는 세션 시각을 자체 계산하지 않습니다.';
+  b.textContent=`● 최신 · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
+  b.title='데이터 신선도는 generated_kst 기준입니다. 브라우저 렌더 시각은 사용하지 않습니다.';
   paintStyle(b,'good');
+  window.__JJOONI_MARKET_STATE_BRIDGE={state:'ACTIVE',version:'2.0',freshness_authority:'generated_kst',basis_kst:basisRaw(live),data_age_ms:age};
 }
 
 let busy=false;
@@ -126,5 +126,3 @@ try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:tr
  s.onerror=function(){console.error('CT UI refactor load failed');window.__JJOONI_UI_REFACTOR={state:'LOAD_FAILED'}};
  (document.head||document.documentElement).appendChild(s);
 })();
-
-
