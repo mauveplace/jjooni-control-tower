@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_DECISION_IMPACT_V5)return;
-window.__JJOONI_DECISION_IMPACT_V5={state:'BOOTING',version:'5.0'};
+window.__JJOONI_DECISION_IMPACT_V5={state:'BOOTING',version:'5.1'};
 
 const CFG={recentDays:90,pendingDays:7};
 const state={defaultFilterApplied:false,amountSort:false,applying:false};
@@ -69,11 +69,15 @@ function totals(metrics){
  return {open,openKnown,missed,avoided,net:avoided-missed,pending,pendingCount};
 }
 function trustKind(raw){const s=String(raw||'').toUpperCase();if(s.includes('BROKER')||s==='FULL'||s==='LIVE')return ['measured','● 실측'];if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING'))return ['modeled','◐ 추정'];return ['reference','○ 참고']}
+function tossCard(){return qsa('.ctAcct').find(x=>/\bToss\b/i.test(String(qs('.ctAcctName',x)?.textContent||'')))||null}
+function smallestTextNode(root,re){
+ if(!root)return null;return qsa('div,span,p,small',root).filter(x=>re.test(String(x.textContent||''))).sort((a,b)=>String(a.textContent||'').length-String(b.textContent||'').length)[0]||null;
+}
 function fixTossTrust(){
- const C=window.__JJOONI_CANONICAL_SSOT||{},c=(C.accounts||{}).TOSS||{},kind=trustKind(c.quality||c.source||'NO_DATA'),line=qs('#ctCanonicalTOSS');
+ const C=window.__JJOONI_CANONICAL_SSOT||{},c=(C.accounts||{}).TOSS||{},kind=trustKind(c.quality||c.source||'NO_DATA'),card=tossCard();
+ let line=qs('#ctCanonicalTOSS');if(!line&&card)line=smallestTextNode(card,/예수금\s*KRW.*\bREF\b/i);
  if(line&&/\bREF\b/.test(line.textContent||''))line.innerHTML=line.innerHTML.replace(/\bREF\b/g,'<span class="ctTrustBadge '+kind[0]+'">'+kind[1]+'</span>');
- let attr=qs('#ctTossAttributionLine');
- if(!attr){const card=qsa('.ctAcct').find(x=>/\bToss\b/i.test(String(qs('.ctAcctName',x)?.textContent||'')));if(card)attr=qsa('div',card).find(x=>/당일\s*귀속/.test(x.textContent||'')&&(x.children||[]).length===0)||null}
+ let attr=qs('#ctTossAttributionLine');if(!attr&&card)attr=smallestTextNode(card,/당일\s*귀속/i);
  if(attr&&/NO_DATA|미검증/i.test(attr.textContent||'')){
    if(!attr.dataset.rawV5)attr.dataset.rawV5=(attr.textContent||'').trim();
    attr.innerHTML='당일 P&L <span class="ctTrustBadge '+kind[0]+'">'+kind[1]+'</span> · 귀속 <span class="ctTrustBadge reference">○ 미검증</span>';
@@ -135,13 +139,14 @@ function apply(){
  if(state.applying||window.innerWidth>767)return;state.applying=true;
  try{
    ensureStyle();fixTossTrust();
-   const root=qs('#ctTradeReviewV2');if(!root){window.__JJOONI_DECISION_IMPACT_V5={state:'WAITING',version:'5.0',toss_usd:tossUsdAudit()};return}
+   const root=qs('#ctTradeReviewV2');if(!root){window.__JJOONI_DECISION_IMPACT_V5={state:'WAITING',version:'5.1',toss_usd:tossUsdAudit()};return}
    setDefaultAll(root);const metrics=buildMetrics();ensureSummary(root,metrics);annotateCards(root,metrics);addAmountSort(root,metrics);
    const t=totals(metrics),audit=tossUsdAudit();
-   window.__JJOONI_DECISION_IMPACT_V5={state:'ACTIVE',version:'5.0',default_filter:'all',amount_sort:state.amountSort,fx_krw_per_usd:n(window.__JJOONI_FX_KRW_PER_USD),open_pnl_krw:t.open,missed_gain_krw:t.missed,avoided_loss_krw:t.avoided,net_sell_effect_krw:t.net,pending_sell_count:t.pendingCount,toss_usd:audit};
+   window.__JJOONI_DECISION_IMPACT_V5={state:'ACTIVE',version:'5.1',default_filter:'all',amount_sort:state.amountSort,fx_krw_per_usd:n(window.__JJOONI_FX_KRW_PER_USD),open_pnl_krw:t.open,missed_gain_krw:t.missed,avoided_loss_krw:t.avoided,net_sell_effect_krw:t.net,pending_sell_impact_krw:t.pending,pending_sell_count:t.pendingCount,toss_usd:audit,ui_persisted:!!qs('#ctOpportunitySummaryV5')};
  }finally{state.applying=false}
 }
-document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#ctTradeReviewV2 [data-sort]');if(b){state.amountSort=false;setTimeout(apply,0)}},{capture:true});
-const mo=new MutationObserver(()=>{clearTimeout(mo._t);mo._t=setTimeout(apply,35)});mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
-setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);setInterval(()=>{if(!document.hidden)apply()},700);document.addEventListener('visibilitychange',()=>{if(!document.hidden)apply()});
+function schedule(){requestAnimationFrame(apply);setTimeout(apply,18);setTimeout(apply,85)}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#ctTradeReviewV2 [data-sort]');if(b){state.amountSort=false;schedule()}},{capture:true});
+const mo=new MutationObserver(schedule);mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,900);setInterval(()=>{if(!document.hidden)apply()},180);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
 })();
