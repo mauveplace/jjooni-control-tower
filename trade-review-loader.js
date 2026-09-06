@@ -11,7 +11,7 @@ function loadBottomGuard(){
   load('ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5',null,()=>{window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'LOAD_FAILED'}});
 }
 function loadDecisionImpact(){
-  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5.1',loadBottomGuard,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'};loadBottomGuard()});
+  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2',loadBottomGuard,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'};loadBottomGuard()});
 }
 function loadStability(){
   load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',loadDecisionImpact,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'};loadDecisionImpact()});
