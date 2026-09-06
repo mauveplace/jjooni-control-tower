@@ -1,0 +1,71 @@
+name: Patch Live Bridge Stability Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/patch-live-bridge-stability-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch periodic render and DOM churn
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('live-bridge.js')
+          s=p.read_text(encoding='utf-8')
+          reps=[]
+          reps.append((
+          "function setBadge(text,state,title){const e=badge();e.textContent=text;e.title=title||'';const s=state==='good'?['#ecfdf3','#abefc6','#087443']:state==='warn'?['#fff7ed','#fed7aa','#b45309']:['#fff1f2','#fecdd3','#be123c'];e.style.background=s[0];e.style.border='1px solid '+s[1];e.style.color=s[2]}",
+          "function setBadge(text,state,title){const e=badge(),txt=String(text||''),ttl=String(title||'');if(e.textContent!==txt)e.textContent=txt;if(e.title!==ttl)e.title=ttl;const s=state==='good'?['#ecfdf3','#abefc6','#087443']:state==='warn'?['#fff7ed','#fed7aa','#b45309']:['#fff1f2','#fecdd3','#be123c'];const border='1px solid '+s[1];if(e.style.background!==s[0])e.style.background=s[0];if(e.style.border!==border)e.style.border=border;if(e.style.color!==s[2])e.style.color=s[2]}"
+          ))
+          reps.append((
+          "e.innerHTML=html};\n REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{},card=byName(r.label==='AI BOT'?'ai bot':r.label==='TRI-POD'?'tri-pod':r.label.toLowerCase());if(!card)return;const nav=card.querySelector('.ctAcctNav');if(nav&&n(c.nav)!=null)nav.textContent=won(c.nav);const day=card.querySelector('.ctAcctTodayValue');if(day)day.textContent=n(c.today_pnl)==null?'당일손익 —':signed(c.today_pnl)+' '+pct(c.today_return);",
+          "if(e.innerHTML!==html)e.innerHTML=html};\n REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{},card=byName(r.label==='AI BOT'?'ai bot':r.label==='TRI-POD'?'tri-pod':r.label.toLowerCase());if(!card)return;const nav=card.querySelector('.ctAcctNav'),navText=n(c.nav)!=null?won(c.nav):null;if(nav&&navText!=null&&nav.textContent!==navText)nav.textContent=navText;const day=card.querySelector('.ctAcctTodayValue'),dayText=n(c.today_pnl)==null?'당일손익 —':signed(c.today_pnl)+' '+pct(c.today_return);if(day&&day.textContent!==dayText)day.textContent=dayText;"
+          ))
+          reps.append((
+          "if(strip){strip.innerHTML=`6계좌 SSOT · NAV <b>${won(CANON.total.nav)}</b> · 오늘 투자손익 <b>${signed(CANON.total.today_pnl)}</b> · 순입출금 <b>${CANON.total.flow_complete?signed(CANON.total.net_flow):'PARTIAL'}</b> · 오늘 순증 <b>${CANON.total.flow_complete?signed(CANON.total.today_change):'검증중'}</b>`;}",
+          "if(strip){const html=`6계좌 SSOT · NAV <b>${won(CANON.total.nav)}</b> · 오늘 투자손익 <b>${signed(CANON.total.today_pnl)}</b> · 순입출금 <b>${CANON.total.flow_complete?signed(CANON.total.net_flow):'PARTIAL'}</b> · 오늘 순증 <b>${CANON.total.flow_complete?signed(CANON.total.today_change):'검증중'}</b>`;if(strip.innerHTML!==html)strip.innerHTML=html;}"
+          ))
+          old="function updateHero(){if(!CANON)return;const h=document.querySelector('.ctOvPrimary');if(!h)return;const label=h.querySelector('.ctOvLabel'),big=document.getElementById('overviewNavChange'),ret=document.getElementById('overviewDailyReturn');if(label)label.textContent=`6계좌 오늘 투자손익 (${CANON.total.known_today_count}/${CANON.total.account_count})`;if(big)big.textContent=signed(CANON.total.today_pnl);if(ret)ret.textContent=CANON.total.today_complete?'FULL':'PARTIAL';let w=document.getElementById('ctHeroScopeWarning');if(!w){w=document.createElement('div');w.id='ctHeroScopeWarning';w.style.cssText='margin-top:5px;font:800 9px/1.35 system-ui;color:#ffb4bf';h.appendChild(w)}const sources=REGISTRY.map(r=>r.id+':'+((CANON.accounts[r.id]||{}).quality||'—')).join(' · ');w.textContent=(CANON.total.today_complete?'당일 P&L 6계좌 연결':'당일 P&L 미연결 '+CANON.total.missing_today.join(','))+' · '+sources;}"
+          new="function updateHero(){if(!CANON)return;const h=document.querySelector('.ctOvPrimary');if(!h)return;const label=h.querySelector('.ctOvLabel'),big=document.getElementById('overviewNavChange'),ret=document.getElementById('overviewDailyReturn'),labelText=`6계좌 오늘 투자손익 (${CANON.total.known_today_count}/${CANON.total.account_count})`,bigText=signed(CANON.total.today_pnl),retText=CANON.total.today_complete?'FULL':'PARTIAL';if(label&&label.textContent!==labelText)label.textContent=labelText;if(big&&big.textContent!==bigText)big.textContent=bigText;if(ret&&ret.textContent!==retText)ret.textContent=retText;let w=document.getElementById('ctHeroScopeWarning');if(!w){w=document.createElement('div');w.id='ctHeroScopeWarning';w.style.cssText='margin-top:5px;font:800 9px/1.35 system-ui;color:#ffb4bf';h.appendChild(w)}const sources=REGISTRY.map(r=>r.id+':'+((CANON.accounts[r.id]||{}).quality||'—')).join(' · '),wt=(CANON.total.today_complete?'당일 P&L 6계좌 연결':'당일 P&L 미연결 '+CANON.total.missing_today.join(','))+' · '+sources;if(w.textContent!==wt)w.textContent=wt;}"
+          reps.append((old,new))
+          reps.append((
+          "function renderAll(){try{if(typeof window.render==='function')window.render()}catch(e){console.warn('render',e)}ensureWatchlistUi();updateCards();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}",
+          "function renderAll(){ensureWatchlistUi();updateCards();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}"
+          ))
+          reps.append((
+          "LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=makeCanonical(live);window.__JJOONI_CANONICAL_SSOT=CANON;mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();",
+          "LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=makeCanonical(live);window.__JJOONI_CANONICAL_SSOT=CANON;mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();try{document.dispatchEvent(new CustomEvent('jjooni:live-applied',{detail:{snapshot_id:live.snapshot_id||null,observed_at:live.observed_at||null}}))}catch(_){};"
+          ))
+          reps.append((
+          "injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden&&CANON){updateCards();updateHero();fixLegacyBadges()}},1500);",
+          "injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});"
+          ))
+          for i,(a,b) in enumerate(reps,1):
+              c=s.count(a)
+              if c!=1:
+                  raise SystemExit(f'PATCH_{i}_MATCH_COUNT={c}')
+              s=s.replace(a,b,1)
+          p.write_text(s,encoding='utf-8')
+          print('PATCHED',len(reps),'replacements')
+          PY
+      - name: Commit patched source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'jjooni-control-tower-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add live-bridge.js
+          git diff --cached --check
+          git commit -m 'Stop periodic full render and DOM churn in live bridge'
+          git push
