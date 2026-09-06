@@ -7,8 +7,11 @@ function load(id,src,onload,onerror){
   const s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=true;
   if(onload)s.onload=onload;if(onerror)s.onerror=onerror;head.appendChild(s);return s;
 }
+function loadBottomGuard(){
+  load('ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5',null,()=>{window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'LOAD_FAILED'}});
+}
 function loadDecisionImpact(){
-  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5',null,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'}});
+  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5.1',loadBottomGuard,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'};loadBottomGuard()});
 }
 function loadStability(){
   load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',loadDecisionImpact,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'};loadDecisionImpact()});
