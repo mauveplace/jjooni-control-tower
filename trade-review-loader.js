@@ -10,8 +10,14 @@ function load(id,src,onload,onerror){
 function loadBottomGuard(){
   load('ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5',null,()=>{window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'LOAD_FAILED'}});
 }
+function loadHumanUi(){
+  load('ctHumanUiV6Script','human-ui-v6.js?v=6',loadBottomGuard,()=>{window.__JJOONI_HUMAN_UI_V6={state:'LOAD_FAILED'};loadBottomGuard()});
+}
+function loadTradeMoney(){
+  load('ctTradeMoneyV6Script','trade-money-v6.js?v=6',loadHumanUi,()=>{window.__JJOONI_TRADE_MONEY_V6={state:'LOAD_FAILED'};loadHumanUi()});
+}
 function loadDecisionImpact(){
-  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2',loadBottomGuard,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'};loadBottomGuard()});
+  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2',loadTradeMoney,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'};loadTradeMoney()});
 }
 function loadStability(){
   load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',loadDecisionImpact,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'};loadDecisionImpact()});
