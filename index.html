@@ -87,7 +87,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
  html.ctTouchTablet .ctBenchHeader,html.ctTouchTablet .ctBenchRow,.ctBenchHeader,.ctBenchRow{font-size:8px!important}
 }
 </style>`;
-const CT_POSTFIX=`<script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
+const CT_POSTFIX=`<script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script><script src="trade-review-loader.js?v=3"><\/script>`;
 async function openTower(pw){
   const msg=$('msg'); msg.className='msg'; msg.textContent='암호화된 Control Tower를 여는 중…';
   try{

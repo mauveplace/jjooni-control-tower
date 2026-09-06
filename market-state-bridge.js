@@ -127,12 +127,4 @@ try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:tr
  (document.head||document.documentElement).appendChild(s);
 })();
 
-(function(){
- if(document.getElementById('ctTradeReviewLoaderScript'))return;
- const s=document.createElement('script');
- s.id='ctTradeReviewLoaderScript';
- s.src='trade-review-loader.js?v=1&_='+Date.now();
- s.async=true;
- s.onerror=function(){console.error('CT trade review loader failed');window.__JJOONI_TRADE_REVIEW_V2={state:'LOADER_FAILED'}};
- (document.head||document.documentElement).appendChild(s);
-})();
+

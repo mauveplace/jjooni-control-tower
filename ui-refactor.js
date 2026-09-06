@@ -1,8 +1,8 @@
 (function(){
 'use strict';
 
-const PRIMARY_TABS=['overview','portfolio','compare','ai','accounts'];
-const SECONDARY_TABS=['tripod','decisions','trades','quality','watchlist','cost'];
+const PRIMARY_TABS=['overview','trades','portfolio','accounts'];
+const SECONDARY_TABS=['compare','ai','tripod','decisions','quality','watchlist','cost'];
 const PAGE_SIZE=30;
 const STATE={tradeParent:null,tradeNodes:[],shown:PAGE_SIZE,tradeControls:null,tradeAnchor:null};
 
@@ -17,9 +17,9 @@ function ensureStyle(){
  st.id='ctUiRefactorStyle';
  st.textContent=`
 @media(max-width:767px){
- .tabs{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important;height:56px!important;padding:4px 6px!important}
+ .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important;height:56px!important;padding:4px 6px!important}
  .tabs>.tab[data-tab]{display:none!important;min-width:0!important;width:auto!important;height:48px!important;font-size:11px!important;line-height:1.15!important;padding:4px 3px!important;white-space:nowrap!important}
- .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="compare"],.tabs>.tab[data-tab="ai"],.tabs>.tab[data-tab="accounts"]{display:flex!important}
+ .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="trades"],.tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="accounts"]{display:flex!important}
  #ctMoreTab{display:flex!important;align-items:center;justify-content:center;min-width:0;width:auto;height:48px;border:0;border-radius:8px;background:transparent;color:#c3d1e2;font:800 11px/1.15 system-ui;cursor:pointer}
  #ctMoreTab.on{background:rgba(255,255,255,.1);color:#fff}
  #ctMoreMenu{position:fixed;left:10px;right:10px;bottom:66px;z-index:100050;background:#071a33;border:1px solid #244363;border-radius:14px;padding:8px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:none;grid-template-columns:1fr 1fr;gap:6px}
@@ -55,7 +55,7 @@ function ensureMobileNav(){
  if(!menu){
   menu=document.createElement('div');menu.id='ctMoreMenu';menu.setAttribute('role','menu');document.body.appendChild(menu);
  }
- const labels={tripod:'TRI-POD',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
+ const labels={compare:'성과분석',ai:'AI BOT',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
  if(!menu.dataset.ready){
   SECONDARY_TABS.forEach(name=>{const b=document.createElement('button');b.type='button';b.dataset.tab=name;b.textContent=labels[name]||name;b.setAttribute('role','menuitem');b.onclick=()=>{activateTab(name);menu.classList.remove('open');more.setAttribute('aria-expanded','false');syncMoreState()};menu.appendChild(b)});
   menu.dataset.ready='1';
@@ -145,6 +145,7 @@ function attachTradePager(group){
  update();window.__JJOONI_TRADE_PAGINATION={state:'ACTIVE',total:STATE.tradeNodes.length,page_size:PAGE_SIZE,selector_hint:group.cls};
 }
 function paginateTrades(){
+ if(qs('#ctTradeReviewV2')){resetTradeState();window.__JJOONI_TRADE_PAGINATION={state:'SUPERSEDED_BY_TRADE_REVIEW_V2'};return;}
  if(!mobile())return;
  const panel=qs('#panel-trades');if(!panel||!visible(panel))return;
  if(STATE.tradeParent&&STATE.tradeParent.isConnected&&STATE.tradeControls&&STATE.tradeControls.isConnected)return;
@@ -152,7 +153,7 @@ function paginateTrades(){
 }
 
 let busy=false;
-function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.3',mobile_nav:'5_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
+function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.4',mobile_nav:'4_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 setInterval(()=>{if(!document.hidden)enforce()},1500);
