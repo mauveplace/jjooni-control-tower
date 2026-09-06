@@ -1,26 +1,20 @@
 (function(){
 'use strict';
+const head=document.head||document.documentElement;
+function load(id,src,onload,onerror){
+  const existing=document.getElementById(id);
+  if(existing){if(onload)existing.addEventListener('load',onload,{once:true});return existing}
+  const s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=true;
+  if(onload)s.onload=onload;if(onerror)s.onerror=onerror;head.appendChild(s);return s;
+}
+function loadStability(){
+  load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',null,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'}});
+}
 function loadReadable(){
-  if(document.getElementById('ctTradeReviewReadableV3Script'))return;
-  const p=document.createElement('script');
-  p.id='ctTradeReviewReadableV3Script';
-  p.src='trade-review-readable-v3.js?v=3&_='+Date.now();
-  p.async=true;
-  p.onerror=function(){console.error('CT trade review readable v3 load failed');window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'LOAD_FAILED'}};
-  (document.head||document.documentElement).appendChild(p);
+  load('ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3',loadStability,()=>{window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'LOAD_FAILED'};loadStability()});
 }
-
-const existing=document.getElementById('ctTradeReviewV2Script');
-if(existing){
-  if(window.__JJOONI_TRADE_REVIEW_V2)loadReadable();
-  else existing.addEventListener('load',loadReadable,{once:true});
-  return;
+function loadTrade(){
+  load('ctTradeReviewV2Script','trade-review-v2.js?v=2',loadReadable,()=>{window.__JJOONI_TRADE_REVIEW_V2={state:'LOAD_FAILED'};loadReadable()});
 }
-const s=document.createElement('script');
-s.id='ctTradeReviewV2Script';
-s.src='trade-review-v2.js?v=2&_='+Date.now();
-s.async=true;
-s.onload=loadReadable;
-s.onerror=function(){console.error('CT trade review v2 load failed');window.__JJOONI_TRADE_REVIEW_V2={state:'LOAD_FAILED'}};
-(document.head||document.documentElement).appendChild(s);
+load('ctDataIntegrityV4Script','data-integrity-v4.js?v=4',loadTrade,()=>{window.__JJOONI_DATA_INTEGRITY_V4={state:'LOAD_FAILED'};loadTrade()});
 })();
