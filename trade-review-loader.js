@@ -7,7 +7,7 @@ function load(id,src,onload,onerror){
   const s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=true;
   if(onload)s.onload=onload;if(onerror)s.onerror=onerror;head.appendChild(s);return s;
 }
-function loadMetricRouter(){load('ctMetricDrillV11Script','metric-drilldown-router-v11.js?v=11.0',null,()=>{window.__JJOONI_METRIC_DRILL_V11={state:'LOAD_FAILED'}})}
+function loadMetricRouter(){load('ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.0',null,()=>{window.__JJOONI_METRIC_DRILL_V12={state:'LOAD_FAILED'};window.__JJOONI_METRIC_DRILL_V11={state:'LOAD_FAILED'}})}
 function loadRecentTradeMetric(){load('ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.1',loadMetricRouter,()=>{window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'LOAD_FAILED'};loadMetricRouter()})}
 function loadTabletAccounts(){load('ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.1',loadRecentTradeMetric,()=>{window.__JJOONI_TABLET_ACCOUNTS_V8={state:'LOAD_FAILED'};loadRecentTradeMetric()})}
 function loadTabletRuntime(){load('ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.0',loadTabletAccounts,()=>{window.__JJOONI_TABLET_RUNTIME_V8={state:'LOAD_FAILED'};loadTabletAccounts()})}
