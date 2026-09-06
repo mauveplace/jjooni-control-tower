@@ -1,10 +1,10 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TRADE_REVIEW_READABLE_V3)return;
-window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'BOOTING',version:'3.0'};
+window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'BOOTING',version:'3.1'};
 
 const state={showAll:false,query:''};
-let applying=false,timer=null;
+let applying=false,rafPending=false;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
 
@@ -76,17 +76,14 @@ function parsePct(text){
   const m=String(text||'').match(/([+-]?\d+(?:\.\d+)?)%/);
   return m?Number(m[1]):null;
 }
-
 function maxSleevePct(card){
   const vals=qsa('.ctSleeveRet',card).map(e=>parsePct(e.textContent)).filter(v=>Number.isFinite(v));
   if(!vals.length)return null;
   return vals.sort((a,b)=>Math.abs(b)-Math.abs(a))[0];
 }
-
 function simplifyCard(card){
   simplifyMeta(card);
-  const score=qs('.ctTickerScore',card);
-  const pct=maxSleevePct(card);
+  const score=qs('.ctTickerScore',card),pct=maxSleevePct(card);
   if(score){
     if(Number.isFinite(pct))score.textContent='최대오차 '+Math.abs(pct).toFixed(1)+'%';
     else if(!String(score.textContent||'').includes('최대오차'))score.textContent='상세에서 손익 확인';
@@ -97,17 +94,14 @@ function simplifyCard(card){
     const parts=t.split('·').map(x=>x.trim()).filter(Boolean);
     if(parts.length>1)t=parts[0].slice(0,1)+' '+parts[parts.length-1];
     v.textContent=t;
-    const good=/✓|잘 팔았|매수 유효|청산 이익/.test(t);
-    const bad=/✕|평단 아래|매도 후 상승|청산 손실/.test(t);
+    const good=/✓|잘 팔았|매수 유효|청산 이익/.test(t),bad=/✕|평단 아래|매도 후 상승|청산 손실/.test(t);
     v.dataset.kind=good?'good':bad?'bad':'wait';
   }
 }
 
 function ensureTools(root){
-  let tools=qs('.ctTrV3Tools',root);
-  if(tools)return tools;
-  const toolbar=qs('.ctTrToolbar',root);
-  if(!toolbar)return null;
+  let tools=qs('.ctTrV3Tools',root);if(tools)return tools;
+  const toolbar=qs('.ctTrToolbar',root);if(!toolbar)return null;
   tools=document.createElement('div');tools.className='ctTrV3Tools';
   const input=document.createElement('input');input.className='ctTrV3Search';input.type='search';input.placeholder='종목 검색';input.value=state.query;input.setAttribute('aria-label','종목 검색');
   input.addEventListener('input',()=>{state.query=input.value||'';state.showAll=false;apply()});
@@ -125,12 +119,7 @@ function limitCards(root){
     card.style.setProperty('display',show?'block':'none','important');
     if(show&&hit)shown++;
   });
-  if(tools){
-    const btn=qs('.ctTrV3More',tools);
-    if(btn){
-      if(q||matched<=12){btn.style.display='none'}else{btn.style.display='block';btn.textContent=state.showAll?'접기':`${matched-12}개 더보기`}
-    }
-  }
+  if(tools){const btn=qs('.ctTrV3More',tools);if(btn){if(q||matched<=12){btn.style.display='none'}else{btn.style.display='block';btn.textContent=state.showAll?'접기':`${matched-12}개 더보기`}}}
 }
 
 function apply(){
@@ -140,16 +129,20 @@ function apply(){
   try{
     style();hideDeveloperNotes();
     const sub=qs('.ctTrSub',root);if(sub)sub.textContent='종목 요약 → 탭하면 계좌별 → 다시 탭하면 체결 상세';
+    const errorSort=qs('[data-sort="error"]',root);if(errorSort)errorSort.textContent='오차율순';
     qsa('.ctTicker',root).forEach(simplifyCard);
     limitCards(root);
-    window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'ACTIVE',version:'3.0',visible_limit:12,query:state.query,show_all:state.showAll};
+    window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'ACTIVE',version:'3.1',visible_limit:12,query:state.query,show_all:state.showAll};
   }finally{applying=false}
 }
 
-function schedule(){clearTimeout(timer);timer=setTimeout(apply,60)}
+function schedule(){
+  if(rafPending)return;rafPending=true;
+  requestAnimationFrame(()=>{rafPending=false;apply()});
+}
 style();
 const obs=new MutationObserver(schedule);obs.observe(document.documentElement,{subtree:true,childList:true});
 window.addEventListener('resize',schedule,{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
-setTimeout(apply,0);setTimeout(apply,900);setTimeout(apply,2400);
+setTimeout(apply,0);setTimeout(apply,500);setTimeout(apply,1400);setInterval(()=>{if(!document.hidden)apply()},700);
 })();
