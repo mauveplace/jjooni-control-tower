@@ -7,8 +7,11 @@ function load(id,src,onload,onerror){
   const s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=true;
   if(onload)s.onload=onload;if(onerror)s.onerror=onerror;head.appendChild(s);return s;
 }
+function loadDecisionImpact(){
+  load('ctDecisionImpactV5Script','decision-impact-v5.js?v=5',null,()=>{window.__JJOONI_DECISION_IMPACT_V5={state:'LOAD_FAILED'}});
+}
 function loadStability(){
-  load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',null,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'}});
+  load('ctMobileStabilityV4Script','mobile-stability-v4.js?v=4',loadDecisionImpact,()=>{window.__JJOONI_MOBILE_STABILITY_V4={state:'LOAD_FAILED'};loadDecisionImpact()});
 }
 function loadReadable(){
   load('ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3',loadStability,()=>{window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'LOAD_FAILED'};loadStability()});
