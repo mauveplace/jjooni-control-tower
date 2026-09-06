@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_ACCOUNT_INTEGRITY_V17?.booted)return;
-const S={booted:true,state:'BOOTING',version:'17.3',ai_trades:0,ai_modal_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,updated_at:null};
+const S={booted:true,state:'BOOTING',version:'17.4',ai_trades:0,ai_modal_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,updated_at:null};
 window.__JJOONI_ACCOUNT_INTEGRITY_V17=S;
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
@@ -26,28 +26,35 @@ function aiName(ticker){
  const k=sym(ticker),a=L().accounts?.AI||{},rows=[...(a.holdings_kr||[]),...(a.holdings_us||[]),...(a.positions||[])];
  const p=rows.find(x=>sym(x?.ticker)===k);return String(p?.name||ticker||'').trim()||k;
 }
+function normalizeAiTrade(t){
+ if(!t||typeof t!=='object')return null;
+ const ticker=String(t.ticker||t.symbol||'').trim();if(!ticker)return null;
+ let market=String(t.market||'').toUpperCase();if(!market){const cur=String(t.currency||'').toUpperCase();market=cur==='USD'?'US':'KR'}
+ const side=String(t.side||'').toUpperCase();
+ return {...t,account:'AI',account_type:'AI',ticker,name:String(t.name||aiName(ticker)||ticker),market,currency:String(t.currency||'').toUpperCase()||(market==='US'?'USD':'KRW'),side:side.startsWith('S')?'SELL':'BUY',qty:n(t.qty??t.quantity??t.filled_qty),price:n(t.price??t.filled_price??t.avg_price),trade_date:String(t.trade_date||t.filled_at_kst||t.filled_at||t.date||''),filled_at_kst:String(t.filled_at_kst||t.filled_at||t.trade_date||t.date||''),source:t.source||'AI_LIVE_LEDGER'};
+}
 function aiTrades(){
  const a=L().accounts?.AI||{};
- if(Array.isArray(a.trades)&&a.trades.length)return a.trades;
+ if(Array.isArray(a.trades)&&a.trades.length)return a.trades.map(normalizeAiTrade).filter(Boolean);
  if(!Array.isArray(a.trades_v18))return [];
  return a.trades_v18.map(r=>{
    if(!Array.isArray(r)||r.length<6)return null;
    const [date,m,ticker,side,qty,price]=r,market=m==='U'?'US':'KR';
-   return {account:'AI',account_type:'AI',trade_date:String(date||''),filled_at_kst:String(date||''),market,currency:market==='US'?'USD':'KRW',ticker:String(ticker||''),name:aiName(ticker),side:side==='S'?'SELL':'BUY',qty:n(qty),price:n(price),source:'AI_PERSISTED_GCS_V18'};
+   return normalizeAiTrade({trade_date:String(date||''),filled_at_kst:String(date||''),market,currency:market==='US'?'USD':'KRW',ticker:String(ticker||''),name:aiName(ticker),side:side==='S'?'SELL':'BUY',qty:n(qty),price:n(price),source:'AI_PERSISTED_GCS_V18'});
  }).filter(Boolean);
 }
 function mirrorAiTrades(){
  const at=aiTrades();
  try{
+   if(typeof D!=='object'||!D)return;
    D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};
    if(at.length){
      const rows=at.map(t=>({...t,account:'AI',account_type:'AI'}));
      D.ai.trades_31d=rows;D.ai.latest.trades=rows;D.ai.trade_count=rows.length;
      D.human=D.human||{};
      const old=Array.isArray(D.human.trades)?D.human.trades:[];
-     const key=t=>[String(t.account||t.account_type||''),String(t.order_no||t.decision_id||''),String(t.filled_at_kst||t.trade_date||''),sym(t.ticker),String(t.side||''),String(t.qty||''),String(t.price||'')].join('|');
-     const m=new Map();[...rows,...old].forEach(t=>{const k=key(t);if(k&&!m.has(k))m.set(k,t)});
-     D.human.trades=[...m.values()].sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,320);
+     const nonAi=old.filter(t=>!['AI','AIBOT','AI_BOT'].includes(String(t.account||t.account_type||'').trim().toUpperCase()));
+     D.human.trades=[...rows,...nonAi].sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,400);
    }
  }catch(_){}
  S.ai_trades=at.length;
@@ -81,17 +88,19 @@ function patchIrpModal(){
 function patchAiModal(){
  const m=document.getElementById('accountDrillModal');if(!m||!String(m.innerText||'').includes('AI BOT'))return;
  const rows=aiTrades();if(!rows.length)return;
- const existing=[...m.querySelectorAll('.trade')];if(!existing.length)return;
- const parent=existing[0].parentElement;if(!parent)return;
- existing.forEach(x=>x.remove());
- parent.querySelector('#ctAiFullLedgerV17')?.remove();
+ // The legacy modal is fed by the human trade ledger and can legitimately be
+ // empty for AI. Remove only its rendered trade rows and render the AI ledger
+ // directly from the live/persisted AI authority instead of depending on it.
+ m.querySelectorAll('.trade').forEach(x=>x.remove());
+ m.querySelector('#ctAiLedgerSectionV174')?.remove();
+ const section=document.createElement('section');section.id='ctAiLedgerSectionV174';section.style.cssText='margin:14px 0 4px;padding:0 2px';
  const note=document.createElement('div');note.id='ctAiFullLedgerV17';note.style.cssText='margin:10px 0 8px;padding:8px 10px;border:1px solid rgba(77,166,255,.32);border-radius:10px;background:rgba(22,74,116,.18);font:800 12px/1.45 system-ui;color:#cfe9ff';
- const kr=rows.filter(x=>x.market==='KR').length,us=rows.filter(x=>x.market==='US').length;note.textContent=`전체 체결원장 ${rows.length}건 · 국내 ${kr}건 · 미국 ${us}건`;
- parent.appendChild(note);
- rows.forEach(t=>{const side=String(t.side||'BUY').toUpperCase(),isSell=side.startsWith('S'),ccy=String(t.currency||t.market==='US'?'USD':'KRW').toUpperCase(),p=n(t.price),q=n(t.qty);const el=document.createElement('div');el.className='trade ctAiLedgerRowV17';el.style.cssText='display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)';el.innerHTML=`<span style="display:inline-flex;min-width:42px;justify-content:center;padding:4px 7px;border-radius:7px;background:${isSell?'rgba(255,88,88,.15)':'rgba(62,205,137,.16)'};color:${isSell?'#ffb1b1':'#a9f3ce'};font:900 10px/1 system-ui">${isSell?'SELL':'BUY'}</span><div style="min-width:0"><div class="name" style="font:800 12px/1.35 system-ui;white-space:normal">${esc(t.name||t.ticker)}</div><div class="sub" style="margin-top:3px;font:600 10px/1.35 system-ui;opacity:.72">${esc(t.trade_date||t.filled_at_kst)} · ${esc(t.ticker)} · ${esc(t.market)}</div></div><div class="right" style="text-align:right"><b style="font:800 11px/1.3 system-ui">${q==null?'—':q.toLocaleString('ko-KR')}주</b><div class="sub" style="margin-top:3px;font:600 10px/1.3 system-ui;opacity:.72">${p==null?'체결가 —':`${ccy} ${p.toLocaleString('ko-KR',{maximumFractionDigits:4})}`}</div></div>`;parent.appendChild(el)});
- S.ai_modal_trades=rows.length;
+ const kr=rows.filter(x=>String(x.market).toUpperCase()==='KR').length,us=rows.filter(x=>String(x.market).toUpperCase()==='US').length;note.textContent=`전체 체결원장 ${rows.length}건 · 국내 ${kr}건 · 미국 ${us}건`;
+ section.appendChild(note);
+ rows.forEach(t=>{const side=String(t.side||'BUY').toUpperCase(),isSell=side.startsWith('S'),ccy=String(t.currency||(t.market==='US'?'USD':'KRW')).toUpperCase(),p=n(t.price),q=n(t.qty);const el=document.createElement('div');el.className='trade ctAiLedgerRowV17';el.style.cssText='display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)';el.innerHTML=`<span style="display:inline-flex;min-width:42px;justify-content:center;padding:4px 7px;border-radius:7px;background:${isSell?'rgba(255,88,88,.15)':'rgba(62,205,137,.16)'};color:${isSell?'#ffb1b1':'#a9f3ce'};font:900 10px/1 system-ui">${isSell?'SELL':'BUY'}</span><div style="min-width:0"><div class="name" style="font:800 12px/1.35 system-ui;white-space:normal">${esc(t.name||t.ticker)}</div><div class="sub" style="margin-top:3px;font:600 10px/1.35 system-ui;opacity:.72">${esc(t.trade_date||t.filled_at_kst)} · ${esc(t.ticker)} · ${esc(t.market)}</div></div><div class="right" style="text-align:right"><b style="font:800 11px/1.3 system-ui">${q==null?'—':q.toLocaleString('ko-KR')}주</b><div class="sub" style="margin-top:3px;font:600 10px/1.3 system-ui;opacity:.72">${p==null?'체결가 —':`${ccy} ${p.toLocaleString('ko-KR',{maximumFractionDigits:4})}`}</div></div>`;section.appendChild(el)});
+ m.appendChild(section);S.ai_modal_trades=rows.length;
 }
 function apply(){mirrorAiTrades();normalizeIrp();failCloseIrpCards();patchIrpModal();patchAiModal();S.state='ACTIVE';S.updated_at=new Date().toISOString()}
-function wrap(){const fn=window.openAccountDrilldown;if(typeof fn!=='function'||fn.__jjooniIntegrityV17)return;const w=function(){apply();const r=fn.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,120);setTimeout(apply,320);return r};w.__jjooniIntegrityV17=true;w.__original=fn;window.openAccountDrilldown=w}
-apply();wrap();setTimeout(()=>{apply();wrap()},500);document.addEventListener('jjooni:live-applied',()=>{apply();wrap()});document.addEventListener('click',e=>{if(e.target?.closest?.('[data-account-drill]'))setTimeout(apply,80)},{capture:true});
+function wrap(){const fn=window.openAccountDrilldown;if(typeof fn!=='function'||fn.__jjooniIntegrityV17)return;const w=function(){apply();const r=fn.apply(this,arguments);[0,80,220,500,1000].forEach(ms=>setTimeout(apply,ms));return r};w.__jjooniIntegrityV17=true;w.__original=fn;window.openAccountDrilldown=w}
+apply();wrap();[250,700,1600,3000].forEach(ms=>setTimeout(()=>{apply();wrap()},ms));document.addEventListener('jjooni:live-applied',()=>{apply();wrap();setTimeout(apply,120);setTimeout(apply,700)});document.addEventListener('click',e=>{if(e.target?.closest?.('[data-account-drill]')){setTimeout(apply,60);setTimeout(apply,260)}},{capture:true});
 })();
