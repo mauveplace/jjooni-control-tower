@@ -7,7 +7,8 @@ function load(id,src,onload,onerror){
   const s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=true;
   if(onload)s.onload=onload;if(onerror)s.onerror=onerror;head.appendChild(s);return s;
 }
-function loadBottomGuard(){load('ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5',null,()=>{window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'LOAD_FAILED'}})}
+function loadTabletRuntime(){load('ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.0',null,()=>{window.__JJOONI_TABLET_RUNTIME_V8={state:'LOAD_FAILED'}})}
+function loadBottomGuard(){load('ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5',loadTabletRuntime,()=>{window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'LOAD_FAILED'};loadTabletRuntime()})}
 function loadHumanUi(){load('ctHumanUiV6Script','human-ui-v6.js?v=6.1',loadBottomGuard,()=>{window.__JJOONI_HUMAN_UI_V6={state:'LOAD_FAILED'};loadBottomGuard()})}
 function loadTradeMoney(){load('ctTradeMoneyV6Script','trade-money-v6.js?v=6.2',loadHumanUi,()=>{window.__JJOONI_TRADE_MONEY_V6={state:'LOAD_FAILED'};loadHumanUi()})}
 function loadRealizedLedger(){load('ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.1',loadTradeMoney,()=>{window.__JJOONI_REALIZED_LEDGER_V7={state:'LOAD_FAILED'};loadTradeMoney()})}
