@@ -298,7 +298,7 @@ function restoreLegacy(panel){
   qsa('[data-ct-trade-review-legacy="1"]',panel).forEach(e=>{e.style.removeProperty('display');delete e.dataset.ctTradeReviewLegacy});
 }
 
-function run(){ensureStyle();ensureNav();syncMoreState();const p=qs('#panel-trades');if(p&&(p.classList.contains('on')||window.innerWidth>767))render()}
+function run(){ensureStyle();ensureNav();syncMoreState();const p=qs('#panel-trades');if(p)render()}
 setTimeout(run,0);setTimeout(run,800);setTimeout(run,2200);
 setInterval(()=>{if(!document.hidden)run()},2000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
