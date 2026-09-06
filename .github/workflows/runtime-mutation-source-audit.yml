@@ -1,0 +1,46 @@
+name: Runtime Mutation Source Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/runtime-mutation-source-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find recurring DOM mutation sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES=(
+            live-bridge.js
+            human-ui-v6.js
+            data-integrity-v4.js
+            trade-review-v2.js
+            trade-review-readable-v3.js
+            mobile-stability-v4.js
+            decision-impact-v5.js
+            realized-ledger-v7.js
+            trade-money-v6.js
+            viewport-bottom-guard-v5.js
+            tablet-runtime-v8.js
+            tablet-accounts-v8.js
+            recent-trade-metric-drilldown-v9.js
+            canonical-valuation-fix-v13.js
+            metric-drilldown-router-v12.js
+            runtime-integrity-v15.js
+            fx-attribution-v16.js
+            market-state-bridge.js
+            ui-refactor.js
+          )
+          for f in "${FILES[@]}"; do
+            [[ -f "$f" ]] || continue
+            echo "===== $f ====="
+            grep -nE 'setInterval|setTimeout|MutationObserver|requestAnimationFrame|innerHTML[[:space:]]*=|textContent[[:space:]]*=' "$f" || true
+          done
