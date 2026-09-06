@@ -221,15 +221,25 @@ function ensureMoreMenu(){
 
 function ensureNav(){
   const mm=ensureMoreMenu(),tabs=qs('.tabs');if(!tabs||!mm)return;
+  if(window.innerWidth<=767){
+    tabs.style.setProperty('display','grid','important');
+    tabs.style.setProperty('grid-template-columns','repeat(5,minmax(0,1fr))','important');
+    tabs.style.setProperty('width','100%','important');
+    tabs.style.setProperty('max-width','100%','important');
+    tabs.style.setProperty('justify-content','stretch','important');
+    tabs.style.setProperty('align-items','stretch','important');
+  }else{
+    for(const k of ['display','grid-template-columns','width','max-width','justify-content','align-items'])tabs.style.removeProperty(k);
+  }
   qsa('.tab[data-tab]').forEach(t=>{
     const id=t.dataset.tab;t.style.removeProperty('display');t.style.removeProperty('order');
     if(window.innerWidth<=767){
       t.style.setProperty('display',CFG.primary.includes(id)?'flex':'none','important');
-      if(CFG.primary.includes(id))t.style.setProperty('order',String(CFG.primary.indexOf(id)+1),'important');
+      if(CFG.primary.includes(id)){t.style.setProperty('order',String(CFG.primary.indexOf(id)+1),'important');t.style.setProperty('width','100%','important');t.style.setProperty('min-width','0','important');t.style.setProperty('justify-self','stretch','important');}
     }
   });
   const {more,menu}=mm;
-  if(window.innerWidth<=767){more.style.setProperty('display','flex','important');more.style.setProperty('order','5','important');more.textContent='더보기'}else{more.style.removeProperty('display');more.style.removeProperty('order')}
+  if(window.innerWidth<=767){more.style.setProperty('display','flex','important');more.style.setProperty('order','5','important');more.style.setProperty('width','100%','important');more.style.setProperty('min-width','0','important');more.style.setProperty('justify-self','stretch','important');more.textContent='더보기'}else{for(const k of ['display','order','width','min-width','justify-self'])more.style.removeProperty(k)}
   const menuIds=qsa('button[data-tab]',menu).map(b=>b.dataset.tab);
   const menuOk=menuIds.length===CFG.secondary.length&&new Set(menuIds).size===CFG.secondary.length&&CFG.secondary.every(id=>menuIds.includes(id));
   if(menu.dataset.tradeReviewMenu!=='v2'||!menuOk){
