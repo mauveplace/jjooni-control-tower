@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_RUNTIME_INTEGRITY_V15)return;
-const STATE={state:'BOOTING',version:'15.0',polling_full_render_skipped:0,dd_guarded:0,codes_scrubbed:0};
+const STATE={state:'BOOTING',version:'15.1',polling_full_render_skipped:0,dd_guarded:0,codes_scrubbed:0};
 window.__JJOONI_RUNTIME_INTEGRITY_V15=STATE;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -11,10 +11,8 @@ function ensureStyle(){if(qs('#ctRuntimeIntegrityV15Style'))return;const s=docum
 #ctSourceHealthBannerV15{margin:0 0 10px;padding:10px 12px;border:1px solid #f7b27a;border-radius:12px;background:#fff7ed;color:#9a3412;font:850 11px/1.45 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px rgba(154,52,18,.06)}
 html[data-ct-data-state="degraded"] .ctOvHero{box-shadow:inset 0 3px #f79009!important}
 .ctDdGuardV15{color:#b45309!important;font-weight:850!important}
-@media(max-width:1199px){
- .tab,.tab[data-tab],.ctAcctStats,.ctAcctStats span,.ctAcctStats b,.ctHumanAccountLineV6,.ctTrustDetailSubV6,.ctTrustFootV6,.ctTrustRowV6,.ctBenchBm small,.ctLossAccount,.ctActionWho,.ctActionState,.ctWlTag,.ctWlTicker{font-size:10px!important}
- .ctActionText,.ctBenchHeader,.ctBenchRow,.ctLossRow{font-size:10px!important}
-}
+.tab,.tab[data-tab],.ctAcctStats,.ctAcctStats span,.ctAcctStats b,.ctHumanAccountLineV6,.ctTrustDetailSubV6,.ctTrustFootV6,.ctTrustRowV6,.ctBenchBm small,.ctLossAccount,.ctActionWho,.ctActionState,.ctWlTag,.ctWlTicker{font-size:10px!important}
+.ctActionText,.ctBenchHeader,.ctBenchRow,.ctLossRow{font-size:10px!important}
 `;(document.head||document.documentElement).appendChild(s)}
 function wrapRenderAllViewports(){const fn=window.render;if(typeof fn!=='function'||fn.__ctIntegrityV15)return;function guarded(){let stack='';try{stack=String(new Error().stack||'')}catch(_){};const polling=/renderAll|applyLive|refresh/i.test(stack);if(polling&&window.__JJOONI_LIVE_READY===true){STATE.polling_full_render_skipped++;STATE.last_skip_at=new Date().toISOString();return undefined}return fn.apply(this,arguments)}guarded.__ctIntegrityV15=true;guarded.__ctOriginal=fn;window.render=guarded}
 function sourceHealthBanner(){const L=window.__JJOONI_LIVE_PAYLOAD||{},pb=((L.source_health||{}).pb_ssot)||{},gate=L.decision_gate||{},pbState=String(pb.state||'').toUpperCase(),gateState=String(gate.status||'').toUpperCase();const degraded=pbState==='STALE'||pbState==='REFERENCE'||gateState==='LIMITED'||gateState==='BLOCKED';let b=qs('#ctSourceHealthBannerV15');if(!degraded){document.documentElement.dataset.ctDataState='live';if(b)b.remove();return}document.documentElement.dataset.ctDataState='degraded';if(!b){b=document.createElement('div');b.id='ctSourceHealthBannerV15';const top=qs('.top'),app=qs('.app')||document.body;if(top&&top.parentNode)top.parentNode.insertBefore(b,top.nextSibling);else app.insertBefore(b,app.firstChild)}const feed=stamp(L.generated_kst||L.observed_at),pbAt=stamp(pb.as_of||L.source_snapshot_kst);b.textContent=`⚠ 데이터 일부 제한 · 현재 시세 Feed ${feed} · PB 기준원장 ${pbAt} (${pbState||'상태 확인 필요'}) · 현재가 조회는 가능하지만 역사성과·DD는 검증 전까지 제한합니다.`;b.title=`Decision gate: ${gateState||'UNKNOWN'}${(gate.reason_codes||[]).length?' · '+gate.reason_codes.join(', '):''}`}
