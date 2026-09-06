@@ -23,11 +23,10 @@ function inferAccount(){
  const m=modal();if(!m)return null;const h=String((m.querySelector('h2')||{}).textContent||'').trim().toUpperCase();
  if(h.includes('AI BOT'))return'AI';if(h==='ISA')return'ISA';if(h.includes('연금저축'))return'PENSION';if(h==='IRP')return'IRP';if(h.includes('TOSS'))return'TOSS';return null;
 }
+// IMPORTANT: these helpers intentionally mirror openAccountDrilldown's own data scope.
+// Do not broaden to Canonical/global quote fallbacks here, or detail totals diverge from the card headline.
 function humanPositions(acct){
- const out=[];
- try{if(typeof D!=='undefined'&&Array.isArray(D.human?.positions))out.push(...D.human.positions.filter(x=>normAcct(x.account||x.account_type)===acct))}catch(_){}
- try{const c=(window.__JJOONI_CANONICAL_SSOT?.accounts||{})[acct]||{};(c.positions||[]).forEach(p=>{if(!out.some(x=>normTicker(x.ticker)===normTicker(p.ticker)))out.push({...p,account:acct})})}catch(_){}
- return out;
+ try{return [...(D.human?.positions||[])].filter(x=>normAcct(x.account||x.account_type)===acct)}catch(_){return []}
 }
 function humanTrades(acct){
  try{return [...(D.human?.trades||[])].filter(t=>normAcct(t.account||t.account_type)===acct).sort((a,b)=>when(b).localeCompare(when(a)))}catch(_){return []}
@@ -40,11 +39,11 @@ function aiPositions(){
 }
 function quotePrice(t,acct,positions){
  const nt=normTicker(t.ticker||t.symbol);
- const p=(positions||[]).find(x=>normTicker(x.ticker||x.symbol)===nt),pp=n(p&&(p.current_price??p.price??p.last_price));if(pp!=null&&pp>0)return pp;
+ const p=(positions||[]).find(x=>normTicker(x.ticker||x.symbol)===nt),pp=n(p&&(p.current_price??p.price));if(pp!=null&&pp>0)return pp;
+ if(acct==='AI')return null;
  try{
-  const q=D.human?.trade_quotes||{},direct=q[t.ticker]||q[nt]||Object.entries(q).find(([k])=>normTicker(k)===nt)?.[1],v=n(direct&&(direct.price??direct.p));if(v!=null&&v>0)return v;
+  const q=D.human?.trade_quotes||{},direct=q[t.ticker]||q[nt]||Object.entries(q).find(([k])=>normTicker(k)===nt)?.[1],v=n(direct&&direct.price);if(v!=null&&v>0)return v;
  }catch(_){}
- try{const q=window.__JJOONI_TRADE_QUOTES?.q||{},direct=q[t.ticker]||q[nt]||Object.entries(q).find(([k])=>normTicker(k)===nt)?.[1],v=n(direct&&(direct.p??direct.price));if(v!=null&&v>0)return v}catch(_){}
  return null;
 }
 function build(acct){
@@ -57,11 +56,15 @@ function tradeRow(t,i){
  const name=t.name||t.ticker||'거래',sd=t._side==='SELL'?'매도':t._side==='BUY'?'매수':'거래',cls=t._perf>0?'유리':t._perf<0?'불리':'보합';
  return [`${i+1}. ${name} · ${sd} · ${shortDate(when(t))}`,`${pct(t._perf)} · ${cls} · ${qty(t).toLocaleString('ko-KR')}주 · ${fmtPx(price(t),t)} → ${fmtPx(t._current,t)}`];
 }
+function headlineSnapshot(){
+ const m=modal(),out={};if(!m)return out;
+ m.querySelectorAll('.v2Kpi').forEach(el=>{const lab=String((el.querySelector('.label')||{}).textContent||'').replace(/\s+/g,' ').trim(),val=String((el.querySelector('.value')||{}).textContent||'').trim();if(lab)out[lab]=val});return out;
+}
 function openDetail(kind,label,value){
  const acct=inferAccount(),d=build(acct);if(!acct||typeof window.openMetricInfo!=='function')return;
  let rows=[];
  if(kind==='evaluable'){
-  rows=[['산정 기준','현재가가 확인되는 거래만 포함'],['평가 거래수',d.scored.length+'건'],...d.scored.map(tradeRow)];
+  rows=[['산정 기준','계좌 카드와 동일한 현재가 확인 거래만 포함'],['평가 거래수',d.scored.length+'건'],...d.scored.map(tradeRow)];
  }else if(kind==='favorable'){
   rows=[['유리한 체결',d.favorable.length+'건'],['불리·보합',d.unfavorable.length+'건'],['판정 기준','매수는 현재가 상승, 매도는 매도 후 가격 하락이 +'],...d.scored.map(tradeRow)];
  }else if(kind==='rate'){
@@ -69,9 +72,10 @@ function openDetail(kind,label,value){
  }else if(kind==='average'){
   rows=[['체결후 성과 합계',pct(d.sum)],['평가 거래수',d.scored.length+'건'],['산식',d.scored.length?`${d.sum.toFixed(4)}% ÷ ${d.scored.length} = ${d.avg.toFixed(4)}%`:'—'],...d.scored.map(tradeRow)];
  }
+ const heads=headlineSnapshot();
  window.openMetricInfo(label,value,rows);
- STATE.last={kind,account:acct,evaluable:d.scored.length,favorable:d.favorable.length,average:d.avg};
- window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'ACTIVE',version:'9.0',bound:STATE.bound,last:STATE.last};
+ STATE.last={kind,account:acct,evaluable:d.scored.length,favorable:d.favorable.length,rate:d.scored.length?d.favorable.length/d.scored.length*100:null,average:d.avg,headline:value,headlines:heads};
+ window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'ACTIVE',version:'9.1',bound:STATE.bound,last:STATE.last};
 }
 function bind(){
  const m=modal();if(!m||!visible(m))return;
@@ -87,7 +91,7 @@ function bind(){
   el.dataset.noAutoDrill='1';delete el.dataset.autoDrill;el.dataset.tradeMetricDetail=def.kind;el.style.cursor='pointer';
   el.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();const value=String((el.querySelector('.value')||{}).textContent||'').trim();openDetail(def.kind,lab,value);return false};count++;
  });
- STATE.bound=count;window.__JJOONI_RECENT_TRADE_DRILL_V9={state:count?'ACTIVE':'WAITING',version:'9.0',bound:count,last:STATE.last};
+ STATE.bound=count;window.__JJOONI_RECENT_TRADE_DRILL_V9={state:count?'ACTIVE':'WAITING',version:'9.1',bound:count,last:STATE.last};
 }
 function wrap(){
  const fn=window.openAccountDrilldown;if(typeof fn!=='function'||fn.__jjooniRecentTradeV9)return;
@@ -97,5 +101,5 @@ wrap();setTimeout(wrap,400);setTimeout(bind,500);
 new MutationObserver(ms=>{if(ms.some(x=>x.type==='childList'))setTimeout(bind,0)}).observe(document.documentElement,{subtree:true,childList:true});
 document.addEventListener('click',e=>{const a=e.target?.closest?.('[data-account-drill]');if(a){STATE.activeAccount=normAcct(a.dataset.accountDrill);setTimeout(bind,40)}},{capture:true});
 setInterval(()=>{if(!document.hidden){wrap();bind()}},1000);
-window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'BOOTING',version:'9.0',bound:0,last:null};
+window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'BOOTING',version:'9.1',bound:0,last:null};
 })();
