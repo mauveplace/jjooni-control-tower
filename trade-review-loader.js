@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.3',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.4',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -28,10 +28,11 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
 ['ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.0','tablet-runtime'],
 ['ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.1','tablet-accounts'],
-['ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.1','recent-trade-drill'],
+['ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.2','recent-trade-drill'],
 ['ctCanonicalValuationV13Script','canonical-valuation-fix-v13.js?v=13.0','valuation'],
 ['ctFxAttributionV16Script','fx-attribution-v16.js?v=16.0','fx-attribution'],
 ['ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.0','metric-router'],
-['ctRuntimeIntegrityV15Script','runtime-integrity-v15.js?v=15.5','runtime-integrity']];for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
+['ctRuntimeIntegrityV15Script','runtime-integrity-v15.js?v=15.5','runtime-integrity'],
+['ctAccountIntegrityV17Script','account-integrity-v17.js?v=17.0','account-integrity']];for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
 boot();
 })();
