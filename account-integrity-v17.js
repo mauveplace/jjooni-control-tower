@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_ACCOUNT_INTEGRITY_V17?.booted)return;
-const S={booted:true,state:'BOOTING',version:'17.0',ai_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,updated_at:null};
+const S={booted:true,state:'BOOTING',version:'17.1',ai_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,updated_at:null};
 window.__JJOONI_ACCOUNT_INTEGRITY_V17=S;
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
@@ -14,9 +14,23 @@ function L(){return window.__JJOONI_LIVE_PAYLOAD||{}}
 function isFund(p){return /^F\d+$/i.test(sym(p?.ticker))||String(p?.record_type||'').toUpperCase()==='FUND'}
 function holdingReturn(p){const a=n(p?.avg_price??p?.avg),c=n(p?.current_price??p?.price);return a>0&&c>0?(c/a-1)*100:null}
 function holdingPnl(p){const a=n(p?.avg_price??p?.avg),c=n(p?.current_price??p?.price),q=Math.abs(z(p?.qty??p?.quantity));return a>0&&c>0&&q>0?(c-a)*q:null}
+function aiName(ticker){
+ const k=sym(ticker),a=L().accounts?.AI||{},rows=[...(a.holdings_kr||[]),...(a.holdings_us||[]),...(a.positions||[])];
+ const p=rows.find(x=>sym(x?.ticker)===k);return String(p?.name||ticker||'').trim()||k;
+}
+function aiTrades(){
+ const a=L().accounts?.AI||{};
+ if(Array.isArray(a.trades)&&a.trades.length)return a.trades;
+ if(!Array.isArray(a.trades_v18))return [];
+ return a.trades_v18.map(r=>{
+   if(!Array.isArray(r)||r.length<6)return null;
+   const [date,m,ticker,side,qty,price]=r,market=m==='U'?'US':'KR';
+   return {account:'AI',account_type:'AI',trade_date:String(date||''),filled_at_kst:String(date||''),market,currency:market==='US'?'USD':'KRW',ticker:String(ticker||''),name:aiName(ticker),side:side==='S'?'SELL':'BUY',qty:n(qty),price:n(price),source:'AI_PERSISTED_GCS_V18'};
+ }).filter(Boolean);
+}
 
 function mirrorAiTrades(){
- const at=Array.isArray(L().accounts?.AI?.trades)?L().accounts.AI.trades:[];
+ const at=aiTrades();
  try{
    D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};
    if(at.length){
@@ -48,10 +62,8 @@ function patchIrpModal(){
  const m=document.getElementById('accountDrillModal');if(!m||String(m.querySelector('h2')?.textContent||'').trim().toUpperCase()!=='IRP')return;
  const a=C().accounts?.IRP;if(!a)return;let totalEval=0,totalCost=0,totalPnl=0;(a.positions||[]).forEach(p=>{const mv=n(p.market_value_krw??p.market_value)??0,pl=holdingPnl(p);totalEval+=mv;if(pl!=null){totalPnl+=pl;totalCost+=mv-pl}});
  let info=m.querySelector('#ctIrpIntegrityV17');if(!info){info=document.createElement('div');info.id='ctIrpIntegrityV17';info.style.cssText='margin:12px 0;padding:11px 13px;border:1px solid #765a1b;border-radius:12px;background:#2d2718;color:#ffe3a3;font:800 12px/1.55 system-ui';const hero=m.querySelector('.accountHeroPrimary');hero?hero.insertAdjacentElement('afterend',info):m.firstElementChild?.prepend(info)}if(info)info.innerHTML=`계좌 누적성과는 <b>원금/이관 이력 대사 중</b>이라 현재 음수 누적수익률을 사용하지 않습니다.<br>현재 보유 기준 평가손익 ${won(totalPnl)} · 현재 보유 원가 ${won(totalCost).replace('+','')} · 계좌 NAV ₩${Math.round(z(a.nav)).toLocaleString('ko-KR')}`;
- // Correct the zero securities fallback: IRP positions include funds and ETFs.
  m.querySelectorAll('.v2Kpi').forEach(k=>{const lab=String(k.querySelector('.label')?.textContent||'').trim();if(lab==='주식 평가액'){const v=k.querySelector('.value');if(v)v.textContent='₩'+Math.round(totalEval).toLocaleString('ko-KR')}});
  m.querySelectorAll('[data-position-drill^="IRP|"]').forEach(row=>{const ticker=String(row.dataset.positionDrill||'').split('|')[1]||'',p=(a.positions||[]).find(x=>sym(x.ticker)===sym(ticker));if(!p)return;const r=holdingReturn(p),pl=holdingPnl(p),leftSubs=row.querySelectorAll(':scope > div:first-child .sub'),rightSub=row.querySelector('.right .sub');if(isFund(p)&&leftSubs.length){const q=Math.abs(z(p.qty??p.quantity));leftSubs[0].innerHTML=`${p.ticker||ticker} · ${q.toLocaleString('ko-KR')}좌 · <span class="v2Muted">펀드 기준가</span>`}if(rightSub&&r!=null){rightSub.innerHTML=`${isFund(p)?'기준가':'누적'} <span class="${cls(r)}">${pct(r)}</span>${pl!=null?` · <span class="${cls(pl)}">${won(pl)}</span>`:''}`}});
- // Historical fund transactions can be amount-based, not comparable NAV units.
  const fundNames=new Set((a.positions||[]).filter(isFund).map(p=>String(p.name||'').trim()));m.querySelectorAll('.trade').forEach(row=>{const nm=String(row.querySelector('.name')?.textContent||'').trim();if(!fundNames.has(nm))return;const b=row.querySelector('.right b'),s=row.querySelector('.right .sub');if(b){b.textContent='산정 제외';b.className='v2Muted'}if(s)s.textContent='펀드 가격단위 불일치'});
 }
 function apply(){mirrorAiTrades();normalizeIrp();failCloseIrpCards();patchIrpModal();S.state='ACTIVE';S.updated_at=new Date().toISOString()}
