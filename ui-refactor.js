@@ -156,7 +156,7 @@ let busy=false;
 function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.4',mobile_nav:'4_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
-setInterval(()=>{if(!document.hidden)enforce()},1500);
+document.addEventListener('jjooni:live-applied',enforce);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
 window.addEventListener('resize',()=>{if(!mobile()){const m=qs('#ctMoreMenu');if(m)m.classList.remove('open');resetTradeState()}enforce()},{passive:true});
 })();

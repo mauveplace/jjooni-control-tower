@@ -67,6 +67,6 @@ function normalize(){
 }
 
 normalize();
-setInterval(()=>{if(!document.hidden)normalize()},750);
+document.addEventListener('jjooni:live-applied',normalize);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)normalize()});
 })();

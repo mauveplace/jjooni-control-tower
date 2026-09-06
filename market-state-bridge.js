@@ -102,9 +102,8 @@ function paint(){
 let busy=false;
 const run=()=>{if(busy)return;busy=true;try{paint()}finally{setTimeout(()=>{busy=false},0)}};
 run();
-setInterval(()=>{if(!document.hidden)run()},15000);
+document.addEventListener('jjooni:live-applied',run);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
-try{new MutationObserver(()=>run()).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(_){}
 })();
 
 (function(){

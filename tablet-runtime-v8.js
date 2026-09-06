@@ -85,5 +85,5 @@ function renderPerformance(){
 }
 
 function apply(){if(!wide())return;ensureStyle();installMetricOverrides();stabilizeHero();renderTrades();renderPerformance();window.__JJOONI_TABLET_RUNTIME_V8={state:'ACTIVE',version:'8.0',wide:true,hero_stable:true,trade_review:true,performance:true,metric_overrides:true,regular_metrics_nonzero:enrichedPositions().filter(p=>n(p.regular_pnl)!=null&&Math.abs(p.regular_pnl)>0.5).length,regular_metrics_missing:enrichedPositions().filter(p=>n(p.regular_pnl)==null).length}}
-ensureStyle();setTimeout(apply,0);setTimeout(apply,700);setInterval(()=>{if(!document.hidden)apply()},750);window.addEventListener('resize',apply);document.addEventListener('jjooni:realized-ledger',apply);try{new MutationObserver(()=>{if(wide())requestAnimationFrame(apply)}).observe(document.documentElement,{childList:true,subtree:true})}catch(_){}
+ensureStyle();setTimeout(apply,0);setTimeout(apply,700);document.addEventListener('jjooni:live-applied',apply);window.addEventListener('resize',apply);document.addEventListener('jjooni:realized-ledger',apply);
 })();

@@ -141,8 +141,8 @@ function schedule(){
   requestAnimationFrame(()=>{rafPending=false;apply()});
 }
 style();
-const obs=new MutationObserver(schedule);obs.observe(document.documentElement,{subtree:true,childList:true});
+document.addEventListener('jjooni:live-applied',schedule);
 window.addEventListener('resize',schedule,{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
-setTimeout(apply,0);setTimeout(apply,500);setTimeout(apply,1400);setInterval(()=>{if(!document.hidden)apply()},700);
+setTimeout(apply,0);setTimeout(apply,500);setTimeout(apply,1400);
 })();

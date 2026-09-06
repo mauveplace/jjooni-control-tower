@@ -22,6 +22,6 @@ function wrap(){
  guardedRender.__ctBottomGuardV5=true;guardedRender.__ctOriginal=fn;window.render=guardedRender;
  window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5={state:'ACTIVE',version:'5.0',bottom_gap_preservation:true,dvh_supported:CSS.supports('height','100dvh')};
 }
-wrap();setTimeout(wrap,500);setTimeout(wrap,1600);setInterval(()=>{if(!document.hidden)wrap()},900);
+wrap();setTimeout(wrap,500);setTimeout(wrap,1600);document.addEventListener('jjooni:live-applied',wrap);
 window.visualViewport?.addEventListener('resize',()=>{const s=window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5||{};s.last_visual_height=Math.round(window.visualViewport.height);s.last_resize_kst=new Date().toISOString();window.__JJOONI_VIEWPORT_BOTTOM_GUARD_V5=s},{passive:true});
 })();

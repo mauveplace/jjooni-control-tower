@@ -166,7 +166,7 @@ function apply(){
  window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.1',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
 }
 let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;apply()},45)}
-const mo=new MutationObserver(()=>schedule());mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+document.addEventListener('jjooni:live-applied',schedule);
 window.addEventListener('resize',schedule,{passive:true});document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
-setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);setInterval(()=>{if(!document.hidden)apply()},1800);
+setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);
 })();

@@ -312,7 +312,7 @@ function restoreLegacy(panel){
 
 function run(){ensureStyle();ensureNav();syncMoreState();const p=qs('#panel-trades');if(p)render()}
 setTimeout(run,0);setTimeout(run,800);setTimeout(run,2200);
-setInterval(()=>{if(!document.hidden)run()},2000);
+document.addEventListener('jjooni:live-applied',run);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 window.addEventListener('resize',run,{passive:true});
 })();

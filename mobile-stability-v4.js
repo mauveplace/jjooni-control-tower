@@ -165,7 +165,7 @@ function apply(){
 
 document.addEventListener('pointerdown',()=>{lastPointerAt=Date.now()},{passive:true,capture:true});
 document.addEventListener('touchstart',()=>{lastPointerAt=Date.now()},{passive:true,capture:true});
-const mo=new MutationObserver(()=>{clearTimeout(mo._t);mo._t=setTimeout(apply,25)});mo.observe(document.documentElement,{subtree:true,childList:true});
+document.addEventListener('jjooni:live-applied',apply);
 window.addEventListener('resize',apply,{passive:true});
-setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);setInterval(()=>{if(!document.hidden)apply()},1200);
+setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);
 })();

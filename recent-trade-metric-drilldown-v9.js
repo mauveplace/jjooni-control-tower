@@ -98,8 +98,8 @@ function wrap(){
  const wrapped=function(acct){STATE.activeAccount=normAcct(acct);const r=fn.apply(this,arguments);setTimeout(bind,0);setTimeout(bind,80);setTimeout(bind,250);return r};wrapped.__jjooniRecentTradeV9=true;wrapped.__original=fn;window.openAccountDrilldown=wrapped;STATE.wrapped=wrapped;
 }
 wrap();setTimeout(wrap,400);setTimeout(bind,500);
-new MutationObserver(ms=>{if(ms.some(x=>x.type==='childList'))setTimeout(bind,0)}).observe(document.documentElement,{subtree:true,childList:true});
+document.addEventListener('jjooni:live-applied',()=>setTimeout(bind,0));
 document.addEventListener('click',e=>{const a=e.target?.closest?.('[data-account-drill]');if(a){STATE.activeAccount=normAcct(a.dataset.accountDrill);setTimeout(bind,40)}},{capture:true});
-setInterval(()=>{if(!document.hidden){wrap();bind()}},1000);
+document.addEventListener('jjooni:live-applied',()=>{wrap();bind()});
 window.__JJOONI_RECENT_TRADE_DRILL_V9={state:'BOOTING',version:'9.1',bound:0,last:null};
 })();

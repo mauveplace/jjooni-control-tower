@@ -56,6 +56,6 @@ function reconcile(){
 }
 
 reconcile();
-setTimeout(reconcile,150);setTimeout(reconcile,700);setInterval(()=>{if(!document.hidden)reconcile()},500);
+setTimeout(reconcile,150);setTimeout(reconcile,700);document.addEventListener('jjooni:live-applied',reconcile);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)reconcile()});
 })();

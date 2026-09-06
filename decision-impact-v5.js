@@ -151,6 +151,6 @@ function apply(){
 }
 function schedule(){if(state.scheduled)return;state.scheduled=true;queueMicrotask(()=>requestAnimationFrame(apply))}
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#ctTradeReviewV2 [data-sort]');if(b){state.amountSort=false;schedule()}},{capture:true});
-const mo=new MutationObserver(schedule);mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
-setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,900);setInterval(()=>{if(!document.hidden)apply()},1200);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
+document.addEventListener('jjooni:live-applied',schedule);
+setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,900);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
 })();
