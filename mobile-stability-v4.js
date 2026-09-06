@@ -1,11 +1,14 @@
 (function(){
 'use strict';
 if(window.__JJOONI_MOBILE_STABILITY_V4)return;
-window.__JJOONI_MOBILE_STABILITY_V4={state:'BOOTING',version:'4.0'};
+window.__JJOONI_MOBILE_STABILITY_V4={state:'BOOTING',version:'4.1'};
 
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
 let lastPointerAt=0,wrapping=false;
+const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
+const won=v=>'₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR');
+const signed=v=>{const x=Number(v)||0;return (x>=0?'+':'-')+won(x)};
 
 function mobile(){return window.matchMedia('(max-width:767px)').matches}
 function activeTab(){return qs('.tab.on[data-tab]')?.dataset?.tab||''}
@@ -23,12 +26,16 @@ function ensureStyle(){
  #ctHeroScopeWarning{display:none!important}
  #ctHeroTrustStripV4{min-height:30px;height:30px;display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden;margin-top:6px}
  #ctHeroTrustStripV4 .ctTrustBadge{margin:0!important;font-size:10px!important;padding:4px 7px!important;background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.14)!important;color:#e7eef8!important}
+ #ctMobileNetSummaryV4{margin:0 0 11px;padding:0 0 11px;border-bottom:1px solid rgba(255,255,255,.12)}
+ #ctMobileNetSummaryV4 .ctNetLabel{font-size:10px;line-height:1;color:#9fb2c9;font-weight:800;letter-spacing:.02em}
+ #ctMobileNetSummaryV4 .ctNetValue{font-size:30px;line-height:1.05;color:#fff;font-weight:950;letter-spacing:-.045em;margin-top:4px;white-space:nowrap}
+ #ctMobileNetSummaryV4 .ctNetMeta{font-size:10px;line-height:1.35;color:#aebfd2;margin-top:5px}
+ .ctOvPrimary .ctOvBig{font-size:26px!important}
+ #ctTodayNetStrip{display:none!important}
  #ctMoreBackdropV4{position:fixed;inset:0;z-index:100040;background:rgba(2,10,22,.56);backdrop-filter:blur(1.5px);display:none}
  #ctMoreBackdropV4.open{display:block}
  #ctMoreMenu{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:calc(70px + env(safe-area-inset-bottom))!important;z-index:100060!important;max-height:min(62dvh,520px)!important;overflow:auto!important;background:#071a33!important;border:1px solid #315273!important;border-radius:18px!important;padding:10px!important;box-shadow:0 22px 70px rgba(0,0,0,.48)!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
  #ctMoreMenu button{min-height:48px!important;font-size:12px!important;text-align:center!important}
- #ctTodayNetStrip{font-size:11px!important;line-height:1.55!important;padding:10px 12px!important}
- #ctTodayNetStrip b:first-of-type{font-size:15px!important;color:#101828!important}
 }
 `;(document.head||document.documentElement).appendChild(st);
 }
@@ -38,6 +45,16 @@ function trustKind(raw){
  if(s.includes('BROKER')||s==='FULL'||s==='LIVE')return 'measured';
  if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING'))return 'modeled';
  return 'reference';
+}
+
+function updateNetSummary(){
+ if(!mobile())return;
+ const C=window.__JJOONI_CANONICAL_SSOT,h=qs('.ctOvPrimary');if(!C||!h)return;
+ let box=qs('#ctMobileNetSummaryV4',h);
+ if(!box){box=document.createElement('div');box.id='ctMobileNetSummaryV4';h.insertBefore(box,h.firstChild)}
+ const nav=n(C.total&&C.total.nav),pnl=n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
+ const html=`<div class="ctNetLabel">총자산${count!=null?' · '+count+'계좌':''}</div><div class="ctNetValue">${nav==null?'—':won(nav)}</div><div class="ctNetMeta">오늘 투자손익 ${pnl==null?'—':signed(pnl)}</div>`;
+ if(box.innerHTML!==html)box.innerHTML=html;
 }
 
 function updateTrustStrip(){
@@ -99,8 +116,8 @@ function stabilizeTradeDefault(){
 }
 
 function apply(){
- ensureStyle();hideRawHeroLog();updateTrustStrip();dockLiveBadge();ensureMoreSheet();wrapRender();stabilizeTradeDefault();
- window.__JJOONI_MOBILE_STABILITY_V4={state:'ACTIVE',version:'4.0',scroll_guard:true,hero_raw_log_hidden:true,trust_strip:true,more_bottom_sheet:true,dynamic_viewport:true};
+ ensureStyle();hideRawHeroLog();updateNetSummary();updateTrustStrip();dockLiveBadge();ensureMoreSheet();wrapRender();stabilizeTradeDefault();
+ window.__JJOONI_MOBILE_STABILITY_V4={state:'ACTIVE',version:'4.1',scroll_guard:true,hero_raw_log_hidden:true,trust_strip:true,total_asset_primary:true,more_bottom_sheet:true,dynamic_viewport:true};
 }
 
 document.addEventListener('pointerdown',()=>{lastPointerAt=Date.now()},{passive:true,capture:true});
