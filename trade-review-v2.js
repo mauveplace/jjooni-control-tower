@@ -67,8 +67,8 @@ function unrealPnlInfo(pos,g){
 
 function collectTrades(){
   const out=[];
-  try{if(window.D&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
-  try{if(window.D&&D.ai&&D.ai.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
+  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
+  try{if(typeof D!=='undefined'&&D.ai&&D.ai.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
   const seen=new Set(),dedup=[];
   out.forEach(t=>{
     const k=[account(t),parseTs(t),sym(t.ticker||t.symbol),side(t),qty(t),tradePx(t)].join('|');
@@ -230,7 +230,9 @@ function ensureNav(){
   });
   const {more,menu}=mm;
   if(window.innerWidth<=767){more.style.setProperty('display','flex','important');more.style.setProperty('order','5','important');more.textContent='더보기'}else{more.style.removeProperty('display');more.style.removeProperty('order')}
-  if(menu.dataset.tradeReviewMenu!=='v2'){
+  const menuIds=qsa('button[data-tab]',menu).map(b=>b.dataset.tab);
+  const menuOk=menuIds.length===CFG.secondary.length&&new Set(menuIds).size===CFG.secondary.length&&CFG.secondary.every(id=>menuIds.includes(id));
+  if(menu.dataset.tradeReviewMenu!=='v2'||!menuOk){
     menu.innerHTML='';
     const labels={compare:'성과분석',ai:'AI BOT',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
     CFG.secondary.forEach(id=>{
