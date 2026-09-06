@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TRADE_MONEY_V6)return;
-window.__JJOONI_TRADE_MONEY_V6={state:'BOOTING',version:'6.0'};
+window.__JJOONI_TRADE_MONEY_V6={state:'BOOTING',version:'6.1'};
 
 const CFG={recentDays:90,pendingDays:7};
 const state={amountSort:true,applying:false,scheduled:false};
@@ -29,133 +29,88 @@ function toKrw(value,curr){
 }
 function firstNum(o,keys){for(const k of keys){const x=n(o&&o[k]);if(x!=null)return {value:x,key:k}}return null}
 function realizedInfo(t){
- let x=firstNum(t,['realized_pnl_krw','pnl_realized_krw','realized_profit_krw','realized_profit_loss_krw']);
- if(x)return {value:x.value,currency:'KRW'};
- x=firstNum(t,['realized_pnl','pnl_realized','realized_profit','realized_profit_loss']);
- return x?{value:x.value,currency:currency(t)}:null;
+ let x=firstNum(t,['realized_pnl_krw','pnl_realized_krw','realized_profit_krw','realized_profit_loss_krw']);if(x)return {value:x.value,currency:'KRW'};
+ x=firstNum(t,['realized_pnl','pnl_realized','realized_profit','realized_profit_loss']);return x?{value:x.value,currency:currency(t)}:null;
 }
 function collectTrades(){
  const out=[];
  try{if(typeof D!=='undefined'&&Array.isArray(D.human?.trades))out.push(...D.human.trades)}catch(_){}
  try{if(typeof D!=='undefined'&&Array.isArray(D.ai?.latest?.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
  const seen=new Set(),dedup=[];
- out.forEach(t=>{const k=[acct(t),parseTs(t),sym(t.ticker||t.symbol),side(t),qty(t),px(t)].join('|');if(k&&!seen.has(k)){seen.add(k);dedup.push(t)}});
- return dedup;
+ out.forEach(t=>{const k=[acct(t),parseTs(t),sym(t.ticker||t.symbol),side(t),qty(t),px(t)].join('|');if(k&&!seen.has(k)){seen.add(k);dedup.push(t)}});return dedup;
 }
 function positions(){
- const out=[];
- try{const C=window.__JJOONI_CANONICAL_SSOT||{};Object.entries(C.accounts||{}).forEach(([a,row])=>(row.positions||[]).forEach(p=>out.push({...p,account:p.account||a,account_type:p.account_type||a})))}catch(_){}
- return out;
+ const out=[];try{const C=window.__JJOONI_CANONICAL_SSOT||{};Object.entries(C.accounts||{}).forEach(([a,row])=>(row.positions||[]).forEach(p=>out.push({...p,account:p.account||a,account_type:p.account_type||a})))}catch(_){}return out;
 }
 function positionPnlKrw(p){
  let x=firstNum(p,['unrealized_pnl_krw','pnl_krw','evaluation_pnl_krw']);if(x)return x.value;
  x=firstNum(p,['unrealized_pnl','pnl','evaluation_pnl']);if(x)return toKrw(x.value,currency(p));
- const q=Math.abs(z(p.qty||p.quantity||p.held_qty)),a=n(p.avg_price||p.avg||p.average_price),c=n(p.current_price||p.price||p.last_price);
- return q>0&&a!=null&&c!=null?toKrw((c-a)*q,currency(p)):null;
+ const q=Math.abs(z(p.qty||p.quantity||p.held_qty)),a=n(p.avg_price||p.avg||p.average_price),c=n(p.current_price||p.price||p.last_price);return q>0&&a!=null&&c!=null?toKrw((c-a)*q,currency(p)):null;
 }
+function ledgerState(){return window.__JJOONI_REALIZED_LEDGER_V7||{state:'WAITING'}}
 function metricMap(){
  const map=new Map();
- const ensure=t=>{const k=sym(t);if(!k)return null;if(!map.has(k))map.set(k,{ticker:k,realizedKrw:0,realizedCount:0,openPnlKrw:0,openPnlKnown:false,missedKrw:0,avoidedKrw:0,pendingKrw:0,pendingCount:0,sellCount:0,amountScore:0});return map.get(k)};
+ const ensure=t=>{const k=sym(t);if(!k)return null;if(!map.has(k))map.set(k,{ticker:k,realizedKrw:0,realizedCount:0,realizedRecentCount:0,realizedComplete:true,realizedSource:'NONE',openPnlKrw:0,openPnlKnown:false,missedKrw:0,avoidedKrw:0,pendingKrw:0,pendingCount:0,sellCount:0,amountScore:0});return map.get(k)};
  positions().forEach(p=>{const m=ensure(p.ticker||p.symbol);if(!m)return;const v=positionPnlKrw(p);if(v!=null){m.openPnlKrw+=v;m.openPnlKnown=true}});
+ const ledger=ledgerState(),useLedger=ledger.state==='ACTIVE';
+ if(useLedger){Object.values(ledger.by_ticker||{}).forEach(r=>{const m=ensure(r.ticker);if(!m)return;m.realizedKrw+=z(r.realized_krw);m.realizedCount+=z(r.covered_sell_count);m.realizedRecentCount+=z(r.recent_sell_count);m.realizedComplete=m.realizedComplete&&r.complete!==false;m.realizedSource='LEDGER'})}
  const cutoff=Date.now()-CFG.recentDays*86400000;
  collectTrades().forEach(t=>{
-   const ts=parseTs(t);if(ts<cutoff)return;
-   const m=ensure(t.ticker||t.symbol);if(!m)return;
+   const ts=parseTs(t);if(ts<cutoff)return;const m=ensure(t.ticker||t.symbol);if(!m)return;
    if(side(t)==='SELL'){
-     const ri=realizedInfo(t);
-     if(ri){const rv=toKrw(ri.value,ri.currency);if(rv!=null){m.realizedKrw+=rv;m.realizedCount++}}
-     const sp=px(t),cp=cur(t),q=qty(t);if(sp==null||cp==null||q<=0)return;
-     const delta=toKrw((cp-sp)*q,currency(t));if(delta==null)return;
-     m.sellCount++;
-     if(daysSince(ts)<CFG.pendingDays){m.pendingKrw+=delta;m.pendingCount++;return}
-     if(delta>0)m.missedKrw+=delta;else if(delta<0)m.avoidedKrw+=Math.abs(delta);
+     if(!useLedger){const ri=realizedInfo(t);if(ri){const rv=toKrw(ri.value,ri.currency);if(rv!=null){m.realizedKrw+=rv;m.realizedCount++;m.realizedRecentCount++;m.realizedSource='DIRECT'}}}
+     const sp=px(t),cp=cur(t),q=qty(t);if(sp==null||cp==null||q<=0)return;const delta=toKrw((cp-sp)*q,currency(t));if(delta==null)return;
+     m.sellCount++;if(daysSince(ts)<CFG.pendingDays){m.pendingKrw+=delta;m.pendingCount++;return}if(delta>0)m.missedKrw+=delta;else if(delta<0)m.avoidedKrw+=Math.abs(delta);
    }
  });
- map.forEach(m=>{m.netSellEffectKrw=m.avoidedKrw-m.missedKrw;m.amountScore=Math.abs(m.realizedKrw)+Math.abs(m.openPnlKnown?m.openPnlKrw:0)+m.missedKrw+m.avoidedKrw+Math.abs(m.pendingKrw)});
- return map;
+ map.forEach(m=>{m.netSellEffectKrw=m.avoidedKrw-m.missedKrw;m.amountScore=Math.abs(m.realizedKrw)+Math.abs(m.openPnlKnown?m.openPnlKrw:0)+m.missedKrw+m.avoidedKrw+Math.abs(m.pendingKrw)});return map;
 }
 function totals(map){
- const t={realized:0,realizedCount:0,open:0,openCount:0,missed:0,avoided:0,pending:0,pendingCount:0};
- map.forEach(m=>{t.realized+=m.realizedKrw;t.realizedCount+=m.realizedCount;if(m.openPnlKnown){t.open+=m.openPnlKrw;t.openCount++}t.missed+=m.missedKrw;t.avoided+=m.avoidedKrw;t.pending+=m.pendingKrw;t.pendingCount+=m.pendingCount});
- t.net=t.avoided-t.missed;return t;
+ const t={realized:0,realizedCount:0,realizedRecentCount:0,open:0,openCount:0,missed:0,avoided:0,pending:0,pendingCount:0};
+ map.forEach(m=>{t.realized+=m.realizedKrw;t.realizedCount+=m.realizedCount;t.realizedRecentCount+=m.realizedRecentCount;if(m.openPnlKnown){t.open+=m.openPnlKrw;t.openCount++}t.missed+=m.missedKrw;t.avoided+=m.avoidedKrw;t.pending+=m.pendingKrw;t.pendingCount+=m.pendingCount});t.net=t.avoided-t.missed;return t;
 }
 function moneyClass(v){return v>0?'gain':v<0?'loss':'neutral'}
 function ensureStyle(){
  if(qs('#ctTradeMoneyV6Style'))return;
  const st=document.createElement('style');st.id='ctTradeMoneyV6Style';st.textContent=`
 @media(max-width:767px){
- #ctOpportunitySummaryV5{display:none!important}
- #ctTradeReviewV2 [data-sort-amount-v5]{display:none!important}
- #ctTradeReviewV2 .ctTickerMoneyV5{display:none!important}
- #ctOpportunitySummaryV6{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 10px}
- .ctImpactKpiV6{border:1px solid #e1e7ee;border-radius:11px;background:#fff;padding:9px 10px;min-width:0}
- .ctImpactKpiV6 span{display:block;font-size:9px;line-height:1.2;color:#7b8798;font-weight:850}.ctImpactKpiV6 b{display:block;margin-top:3px;font-size:14px;line-height:1.1;white-space:nowrap}.ctImpactKpiV6 small{display:block;margin-top:3px;font-size:8px;color:#98a2b3}.ctImpactKpiV6 b.gain{color:#d92d20}.ctImpactKpiV6 b.loss{color:#175cd3}.ctImpactKpiV6 b.neutral{color:#101828}
- .ctTickerMoneyV6{min-width:132px;text-align:right;font-size:9px;line-height:1.22;font-weight:900;color:#475467;white-space:nowrap}
- .ctTickerMoneyV6 .moneyLine{display:block}.ctTickerMoneyV6 .gain{color:#d92d20}.ctTickerMoneyV6 .loss{color:#175cd3}.ctTickerMoneyV6 .neutral{color:#475467}.ctTickerMoneyV6 .pending{color:#667085}
- #ctTradeReviewV2 .ctTickerRight{display:grid!important;grid-template-columns:1fr!important;justify-items:end!important;gap:1px!important;min-width:138px!important}
- #ctTradeReviewV2 .ctTickerScore{font-size:9px!important;color:#667085!important;font-weight:800!important}
- #ctTradeReviewV2 .ctTickerVerdict{font-size:9px!important}
+ #ctOpportunitySummaryV5{display:none!important}#ctTradeReviewV2 [data-sort-amount-v5]{display:none!important}#ctTradeReviewV2 .ctTickerMoneyV5{display:none!important}
+ #ctOpportunitySummaryV6{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 10px}.ctImpactKpiV6{border:1px solid #e1e7ee;border-radius:11px;background:#fff;padding:9px 10px;min-width:0}.ctImpactKpiV6 span{display:block;font-size:9px;line-height:1.2;color:#7b8798;font-weight:850}.ctImpactKpiV6 b{display:block;margin-top:3px;font-size:14px;line-height:1.1;white-space:nowrap}.ctImpactKpiV6 small{display:block;margin-top:3px;font-size:8px;color:#98a2b3}.ctImpactKpiV6 b.gain{color:#d92d20}.ctImpactKpiV6 b.loss{color:#175cd3}.ctImpactKpiV6 b.neutral{color:#101828}
+ .ctTickerMoneyV6{min-width:132px;text-align:right;font-size:9px;line-height:1.22;font-weight:900;color:#475467;white-space:nowrap}.ctTickerMoneyV6 .moneyLine{display:block}.ctTickerMoneyV6 .gain{color:#d92d20}.ctTickerMoneyV6 .loss{color:#175cd3}.ctTickerMoneyV6 .neutral,.ctTickerMoneyV6 .pending{color:#667085}
+ #ctTradeReviewV2 .ctTickerRight{display:grid!important;grid-template-columns:1fr!important;justify-items:end!important;gap:1px!important;min-width:138px!important}#ctTradeReviewV2 .ctTickerScore{font-size:9px!important;color:#667085!important;font-weight:800!important}#ctTradeReviewV2 .ctTickerVerdict{font-size:9px!important}
 }
 `;(document.head||document.documentElement).appendChild(st);
 }
 function ensureSortButton(root){
- const sorts=qs('.ctTrSorts',root);if(!sorts)return;
- let b=qs('[data-sort-amount-v6]',sorts);
- if(!b){b=document.createElement('button');b.type='button';b.className='ctTrChip';b.dataset.sortAmountV6='1';b.textContent='금액순';sorts.prepend(b);b.addEventListener('click',e=>{e.stopPropagation();state.amountSort=true;schedule()})}
- b.classList.toggle('on',state.amountSort);
- if(state.amountSort)qsa('[data-sort]',sorts).forEach(x=>x.classList.remove('on'));
+ const sorts=qs('.ctTrSorts',root);if(!sorts)return;let b=qs('[data-sort-amount-v6]',sorts);if(!b){b=document.createElement('button');b.type='button';b.className='ctTrChip';b.dataset.sortAmountV6='1';b.textContent='금액순';sorts.prepend(b);b.addEventListener('click',e=>{e.stopPropagation();state.amountSort=true;schedule()})}b.classList.toggle('on',state.amountSort);if(state.amountSort)qsa('[data-sort]',sorts).forEach(x=>x.classList.remove('on'));
+}
+function realizedSummary(t){
+ const L=ledgerState();if(L.state==='LOADING'||L.state==='BOOTING'||L.state==='WAITING')return ['실현손익','산정 중','neutral','전체 체결원장 확인 중'];
+ if(L.state==='ERROR')return ['실현손익','산정 실패','neutral','체결원장 조회 실패'];
+ if(L.state==='ACTIVE'){
+   const covered=z(L.covered_sell_count),recent=z(L.recent_sell_count),missing=Math.max(0,recent-covered),sub=missing?`${covered}/${recent}건 복원 · 원가이력 부족 ${missing}건`:`${covered}/${recent}건 복원 · 수수료·세금 반영`;
+   return ['체결기반 실현손익',signedWon(t.realized),moneyClass(t.realized),sub];
+ }
+ return ['확인된 실현손익',signedWon(t.realized),moneyClass(t.realized),`${t.realizedCount}건 확인`];
 }
 function renderSummary(root,map){
  let box=qs('#ctOpportunitySummaryV6',root);if(!box){box=document.createElement('div');box.id='ctOpportunitySummaryV6';const old=qs('#ctOpportunitySummaryV5',root),toolbar=qs('.ctTrToolbar',root);if(old)old.insertAdjacentElement('afterend',box);else if(toolbar)toolbar.insertAdjacentElement('afterend',box);else root.prepend(box)}
- const t=totals(map),items=[
-  ['확인된 실현손익',signedWon(t.realized),moneyClass(t.realized),`${t.realizedCount}개 매도체결 · 최근 ${CFG.recentDays}일`],
-  ['현재 보유 평가손익',signedWon(t.open),moneyClass(t.open),`${t.openCount}개 종목군 · KRW 환산`],
-  ['놓친 돈',t.missed?'-'+wonAbs(t.missed):'₩0',t.missed?'loss':'neutral','매도 후 상승 · 7일 경과'],
-  ['지킨 돈',t.avoided?'+'+wonAbs(t.avoided):'₩0',t.avoided?'gain':'neutral','매도 후 하락 · 7일 경과'],
-  ['순 매도효과',signedWon(t.net),moneyClass(t.net),'지킨 돈 − 놓친 돈'],
-  ['평가 중',t.pending?signedWon(-t.pending):'₩0',t.pending>0?'loss':t.pending<0?'gain':'neutral',`${t.pendingCount}건 · 7일 미경과`]
- ];
- const html=items.map(([label,val,cls,sub])=>`<div class="ctImpactKpiV6"><span>${label}</span><b class="${cls}">${val}</b><small>${sub}</small></div>`).join('');
- if(box.innerHTML!==html)box.innerHTML=html;
+ const t=totals(map),items=[realizedSummary(t),['현재 보유 평가손익',signedWon(t.open),moneyClass(t.open),`${t.openCount}개 종목군 · KRW 환산`],['놓친 돈',t.missed?'-'+wonAbs(t.missed):'₩0',t.missed?'loss':'neutral','매도 후 상승 · 7일 경과'],['지킨 돈',t.avoided?'+'+wonAbs(t.avoided):'₩0',t.avoided?'gain':'neutral','매도 후 하락 · 7일 경과'],['순 매도효과',signedWon(t.net),moneyClass(t.net),'지킨 돈 − 놓친 돈'],['평가 중',t.pending?signedWon(-t.pending):'₩0',t.pending>0?'loss':t.pending<0?'gain':'neutral',`${t.pendingCount}건 · 7일 미경과`]];
+ const html=items.map(([label,val,cls,sub])=>`<div class="ctImpactKpiV6"><span>${label}</span><b class="${cls}">${val}</b><small>${sub}</small></div>`).join('');if(box.innerHTML!==html)box.innerHTML=html;
 }
 function cardHtml(m){
- if(!m)return '<span class="moneyLine neutral">금액 산정 대기</span>';
- const a=[];
- const first=[];
- if(m.realizedCount)first.push(`<span class="${moneyClass(m.realizedKrw)}">실현 ${signedWon(m.realizedKrw)}</span>`);
- if(m.openPnlKnown)first.push(`<span class="${moneyClass(m.openPnlKrw)}">평가 ${signedWon(m.openPnlKrw)}</span>`);
- if(first.length)a.push(`<span class="moneyLine">${first.join(' · ')}</span>`);
- const second=[];
- if(m.missedKrw>0)second.push(`<span class="loss">놓친 돈 -${wonAbs(m.missedKrw)}</span>`);
- if(m.avoidedKrw>0)second.push(`<span class="gain">지킨 돈 +${wonAbs(m.avoidedKrw)}</span>`);
- if(m.pendingCount>0){const text=m.pendingKrw>0?'평가중 놓침 '+('-'+wonAbs(m.pendingKrw)):m.pendingKrw<0?'평가중 방어 '+('+'+wonAbs(m.pendingKrw)):'평가중 ₩0';second.push(`<span class="pending">${text}</span>`)}
- if(second.length)a.push(`<span class="moneyLine">${second.join(' · ')}</span>`);
- return a.join('')||'<span class="moneyLine neutral">금액 산정 대기</span>';
+ if(!m)return '<span class="moneyLine neutral">금액 산정 대기</span>';const a=[],first=[];
+ if(m.realizedCount||m.realizedRecentCount){const tag=m.realizedSource==='LEDGER'?'실현(체결)':'실현';first.push(`<span class="${moneyClass(m.realizedKrw)}">${tag} ${signedWon(m.realizedKrw)}${m.realizedComplete?'':' · 일부복원'}</span>`)}
+ if(m.openPnlKnown)first.push(`<span class="${moneyClass(m.openPnlKrw)}">평가 ${signedWon(m.openPnlKrw)}</span>`);if(first.length)a.push(`<span class="moneyLine">${first.join(' · ')}</span>`);
+ const second=[];if(m.missedKrw>0)second.push(`<span class="loss">놓친 돈 -${wonAbs(m.missedKrw)}</span>`);if(m.avoidedKrw>0)second.push(`<span class="gain">지킨 돈 +${wonAbs(m.avoidedKrw)}</span>`);if(m.pendingCount>0){const text=m.pendingKrw>0?'평가중 놓침 -'+wonAbs(m.pendingKrw):m.pendingKrw<0?'평가중 방어 +'+wonAbs(m.pendingKrw):'평가중 ₩0';second.push(`<span class="pending">${text}</span>`)}if(second.length)a.push(`<span class="moneyLine">${second.join(' · ')}</span>`);return a.join('')||'<span class="moneyLine neutral">금액 산정 대기</span>';
 }
-function annotateCards(root,map){
- qsa('.ctTicker[data-ticker]',root).forEach(card=>{
-   const right=qs('.ctTickerRight',card);if(!right)return;
-   let e=qs('.ctTickerMoneyV6',right);if(!e){e=document.createElement('div');e.className='ctTickerMoneyV6';right.insertBefore(e,right.firstChild)}
-   const html=cardHtml(map.get(sym(card.dataset.ticker)));if(e.innerHTML!==html)e.innerHTML=html;
-   const score=qs('.ctTickerScore',right);if(score&&/최대오차/.test(score.textContent||''))score.textContent=String(score.textContent||'').replace('최대오차','오차율');
- });
-}
-function sortCards(root,map){
- if(!state.amountSort)return;
- const cards=qsa('.ctTicker[data-ticker]',root);if(cards.length<2)return;
- const desired=[...cards].sort((a,b)=>z(map.get(sym(b.dataset.ticker))?.amountScore)-z(map.get(sym(a.dataset.ticker))?.amountScore));
- if(cards.some((x,i)=>x!==desired[i]))desired.forEach(x=>x.parentNode&&x.parentNode.appendChild(x));
-}
+function annotateCards(root,map){qsa('.ctTicker[data-ticker]',root).forEach(card=>{const right=qs('.ctTickerRight',card);if(!right)return;let e=qs('.ctTickerMoneyV6',right);if(!e){e=document.createElement('div');e.className='ctTickerMoneyV6';right.insertBefore(e,right.firstChild)}const html=cardHtml(map.get(sym(card.dataset.ticker)));if(e.innerHTML!==html)e.innerHTML=html;const score=qs('.ctTickerScore',right);if(score&&/최대오차/.test(score.textContent||''))score.textContent=String(score.textContent||'').replace('최대오차','오차율')})}
+function sortCards(root,map){if(!state.amountSort)return;const cards=qsa('.ctTicker[data-ticker]',root);if(cards.length<2)return;const desired=[...cards].sort((a,b)=>z(map.get(sym(b.dataset.ticker))?.amountScore)-z(map.get(sym(a.dataset.ticker))?.amountScore));if(cards.some((x,i)=>x!==desired[i]))desired.forEach(x=>x.parentNode&&x.parentNode.appendChild(x))}
 function apply(){
- if(state.applying||window.innerWidth>767)return;state.applying=true;state.scheduled=false;
- try{
-   ensureStyle();const root=qs('#ctTradeReviewV2');if(!root){window.__JJOONI_TRADE_MONEY_V6={state:'WAITING',version:'6.0'};return}
-   ensureSortButton(root);const map=metricMap();renderSummary(root,map);annotateCards(root,map);sortCards(root,map);
-   const t=totals(map);window.__JJOONI_TRADE_MONEY_V6={state:'ACTIVE',version:'6.0',default_sort:state.amountSort?'amount':'base',realized_pnl_krw:t.realized,realized_trade_count:t.realizedCount,open_pnl_krw:t.open,missed_money_krw:t.missed,avoided_money_krw:t.avoided,net_sell_effect_krw:t.net,pending_count:t.pendingCount,pending_direction_krw:t.pending};
- }finally{state.applying=false}
-}
+ if(state.applying||window.innerWidth>767)return;state.applying=true;state.scheduled=false;try{ensureStyle();const root=qs('#ctTradeReviewV2');if(!root){window.__JJOONI_TRADE_MONEY_V6={state:'WAITING',version:'6.1'};return}ensureSortButton(root);const map=metricMap();renderSummary(root,map);annotateCards(root,map);sortCards(root,map);const t=totals(map),L=ledgerState();window.__JJOONI_TRADE_MONEY_V6={state:'ACTIVE',version:'6.1',default_sort:state.amountSort?'amount':'base',realized_pnl_krw:t.realized,realized_trade_count:t.realizedCount,realized_ledger_state:L.state,realized_covered_sell_count:z(L.covered_sell_count),realized_recent_sell_count:z(L.recent_sell_count),realized_uncovered_sell_count:z(L.uncovered_sell_count),open_pnl_krw:t.open,missed_money_krw:t.missed,avoided_money_krw:t.avoided,net_sell_effect_krw:t.net,pending_count:t.pendingCount,pending_direction_krw:t.pending}}finally{state.applying=false}}
 function schedule(){if(state.scheduled)return;state.scheduled=true;setTimeout(apply,35)}
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#ctTradeReviewV2 [data-sort]');if(b){state.amountSort=false;schedule()}},{capture:true});
+document.addEventListener('jjooni:realized-ledger',schedule);
 const mo=new MutationObserver(m=>{if(m.some(x=>x.type==='childList'))schedule()});mo.observe(document.documentElement,{subtree:true,childList:true});
 setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);setInterval(()=>{if(!document.hidden)apply()},1800);
 })();
