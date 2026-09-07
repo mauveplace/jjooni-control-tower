@@ -7,13 +7,8 @@ const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);ret
 const accountOf=o=>String(o&& (o.account||o.account_type)||'').trim().toUpperCase();
 
 function fxKrwPerUsd(){
-  const vals=[];
-  try{vals.push(window.__JJOONI_LIVE_PAYLOAD?.accounts?.AI?.fx_krw_per_usd)}catch(_){}
-  try{vals.push(window.__JJOONI_LIVE_PAYLOAD?.accounts?.TRIPOD?.fx)}catch(_){}
-  try{vals.push(window.__JJOONI_CANONICAL_SSOT?.accounts?.TRIPOD?.fx)}catch(_){}
-  try{if(typeof D!=='undefined')vals.push(D.ai?.latest?.fx)}catch(_){}
-  const fx=vals.map(n).find(x=>x&&x>500&&x<3000);
-  return fx||null;
+  const live=window.__JJOONI_LIVE_PAYLOAD||{},ref=live.fx_reference||{},fx=n(ref.krw_per_usd);
+  return fx&&fx>500&&fx<3000&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?fx:null;
 }
 
 function normalizeRecord(o,forcedAccount){

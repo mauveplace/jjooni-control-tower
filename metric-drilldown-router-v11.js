@@ -13,7 +13,7 @@ const z=v=>n(v)==null?0:n(v);
 const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
 const C=()=>window.__JJOONI_CANONICAL_SSOT||{};
 const L=()=>window.__JJOONI_LIVE_PAYLOAD||{};
-const fx=()=>n(window.__JJOONI_FX_KRW_PER_USD)||n(L().accounts?.AI?.fx_krw_per_usd)||n(L().accounts?.TRIPOD?.fx)||1350;
+const fx=()=>{const r=L().fx_reference||{},x=n(r.krw_per_usd);return x&&x>500&&x<3000&&String(r.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?x:null};
 const won=v=>'₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR');
 const signed=v=>{const x=Number(v)||0;return (x>=0?'+':'-')+won(x)};
 const pct=(v,d=2)=>n(v)==null?'—':(Number(v)>=0?'+':'')+Number(v).toFixed(d)+'%';
@@ -33,13 +33,13 @@ function accountIdFromModal(){
 function positions(id){return (C().accounts?.[id]?.positions||[]).filter(x=>String(x?.record_type||'POSITION').toUpperCase()==='POSITION')}
 function positionValueKrw(p){
  for(const k of ['market_value_krw','evaluation_amount_krw','eval_amount_krw','valuation_krw','evlu_amt_krw']){const x=n(p?.[k]);if(x!=null)return x}
- for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null)return sideCurrency(p)==='USD'?x*fx():x}
- const qq=Math.abs(z(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)),px=n(p?.current_price??p?.price??p?.last_price);if(qq&&px!=null)return sideCurrency(p)==='USD'?qq*px*fx():qq*px;
+ for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null){const f=fx();return sideCurrency(p)==='USD'?(f?x*f:null):x}}
+ const qq=Math.abs(z(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)),px=n(p?.current_price??p?.price??p?.last_price);if(qq&&px!=null){const f=fx();return sideCurrency(p)==='USD'?(f?qq*px*f:null):qq*px;}
  return null;
 }
 function accountSnapshot(id){
  const a=C().accounts?.[id]||{},ps=positions(id),vals=ps.map(positionValueKrw).filter(x=>x!=null),posValue=vals.length?vals.reduce((s,x)=>s+x,0):null;
- const cashKrw=n(a.cash_krw)||0,cashUsd=n(a.cash_usd)||0,cashTotal=cashKrw+cashUsd*fx();
+ const cashKrw=n(a.cash_krw)||0,cashUsd=n(a.cash_usd)||0,f=fx(),cashTotal=cashUsd?(f?cashKrw+cashUsd*f:null):cashKrw;
  const nav=n(a.nav),pnl=n(a.today_pnl),ret=n(a.today_return),cum=n(a.pnl),cumRet=n(a.return_pct),flow=n(a.net_flow);
  return {id,a,ps,posValue,cashKrw,cashUsd,cashTotal,nav,pnl,ret,cum,cumRet,flow};
 }
@@ -51,7 +51,7 @@ function topContributionRows(id){
 }
 function accountRows(id,label){
  const s=accountSnapshot(id),a=s.a,source=norm(a.quality||a.source||'Canonical SSOT')||'Canonical SSOT';
- if(label==='현재 NAV')return [['Canonical NAV',s.nav==null?'산정 대기':won(s.nav)],['보유자산 평가액',s.posValue==null?'산정 대기':won(s.posValue)],['KRW 예수금',won(s.cashKrw)],['USD 예수금',s.cashUsd?'$'+s.cashUsd.toLocaleString('en-US',{maximumFractionDigits:2}):'$0'],['적용 환율',s.cashUsd?fx().toLocaleString('ko-KR')+'원/USD':'해당 없음'],['데이터 근거',source]];
+ if(label==='현재 NAV')return [['Canonical NAV',s.nav==null?'산정 대기':won(s.nav)],['보유자산 평가액',s.posValue==null?'산정 대기':won(s.posValue)],['KRW 예수금',won(s.cashKrw)],['USD 예수금',s.cashUsd?'$'+s.cashUsd.toLocaleString('en-US',{maximumFractionDigits:2}):'$0'],['적용 환율',s.cashUsd?(fx()?fx().toLocaleString('ko-KR')+'원/USD':'환율 미확인'):'해당 없음'],['데이터 근거',source]];
  if(label==='정규장 투자성과'||label==='정규장 P&L')return [['오늘 투자손익',s.pnl==null?'산정 대기':money(s.pnl)],['오늘 수익률',s.ret==null?'산정 대기':pct(s.ret)],['산정 근거',source],...topContributionRows(id)];
  if(label==='오늘 수익률'||label==='정규장 수익률')return [['오늘 수익률',s.ret==null?'산정 대기':pct(s.ret)],['오늘 투자손익',s.pnl==null?'산정 대기':money(s.pnl)],['현재 NAV',s.nav==null?'산정 대기':won(s.nav)],['산정 근거',source]];
  if(label==='순입출금')return [['오늘 순입출금',s.flow==null?'확인값 없음':money(s.flow)],['현재 NAV',s.nav==null?'산정 대기':won(s.nav)],['분류','투자손익과 별도 Flow로 관리'],['데이터 근거',source]];
@@ -59,7 +59,7 @@ function accountRows(id,label){
    const total=n(C().total?.nav),impact=s.pnl!=null&&total?100*s.pnl/total:null;return [['계좌 오늘손익',s.pnl==null?'산정 대기':money(s.pnl)],['전체 6계좌 NAV',total==null?'산정 대기':won(total)],['산식',impact==null?'산정 대기':`${money(s.pnl)} ÷ ${won(total)} × 100`],['포트폴리오 영향도',impact==null?'산정 대기':(impact>=0?'+':'')+impact.toFixed(3)+'%p']];
  }
  if(label==='주식 평가액')return [['보유자산 평가액',s.posValue==null?'산정 대기':won(s.posValue)],['보유종목 수',s.ps.length+'개'],['계산 기준','Canonical 보유수량 × 현재가 · USD는 KRW 환산'],...s.ps.slice(0,12).map((p,i)=>[`${i+1}. ${p.name||p.ticker||'종목'}`,positionValueKrw(p)==null?'가격 미확인':won(positionValueKrw(p))])];
- if(label==='예수금')return [['KRW 예수금',won(s.cashKrw)],['USD 예수금',s.cashUsd?'$'+s.cashUsd.toLocaleString('en-US',{maximumFractionDigits:2}):'$0'],['USD 원화환산',s.cashUsd?won(s.cashUsd*fx()):'₩0'],['합산 현금',won(s.cashTotal)],['적용 환율',s.cashUsd?fx().toLocaleString('ko-KR')+'원/USD':'해당 없음']];
+ if(label==='예수금')return [['KRW 예수금',won(s.cashKrw)],['USD 예수금',s.cashUsd?'$'+s.cashUsd.toLocaleString('en-US',{maximumFractionDigits:2}):'$0'],['USD 원화환산',s.cashUsd?(fx()?won(s.cashUsd*fx()):'환율 미확인'):'₩0'],['합산 현금',s.cashTotal==null?'산정 대기':won(s.cashTotal)],['적용 환율',s.cashUsd?(fx()?fx().toLocaleString('ko-KR')+'원/USD':'환율 미확인'):'해당 없음']];
  if(label==='보유종목'||label==='KR'||label==='US'){
    const target=label==='KR'?s.ps.filter(p=>sideCurrency(p)!=='USD'):label==='US'?s.ps.filter(p=>sideCurrency(p)==='USD'):s.ps;
    return [['대상',label==='보유종목'?'전체 보유종목':label+' 시장'],['종목 수',target.length+'개'],...target.map((p,i)=>[`${i+1}. ${p.name||p.ticker||'종목'}`,`${qtyText(p.qty??p.quantity)} · ${positionValueKrw(p)==null?'평가액 산정 대기':won(positionValueKrw(p))}`])];
@@ -77,7 +77,7 @@ function correctAccountHeadline(el,id,label){
  if(label==='현재 NAV'&&s.nav!=null)setCardValue(el,won(s.nav));
  if((label==='정규장 투자성과'||label==='정규장 P&L')&&s.pnl!=null)setCardValue(el,money(s.pnl));
  if((label==='오늘 수익률'||label==='정규장 수익률')&&s.ret!=null)setCardValue(el,pct(s.ret));
- if(label==='예수금')setCardValue(el,won(s.cashTotal));
+ if(label==='예수금')setCardValue(el,s.cashTotal==null?'산정 대기':won(s.cashTotal));
  if(label==='순입출금'&&s.flow!=null)setCardValue(el,money(s.flow));
  if(label==='전체 영향도'){
    const total=n(C().total?.nav),imp=s.pnl!=null&&total?100*s.pnl/total:null;if(imp!=null)setCardValue(el,(imp>=0?'+':'')+imp.toFixed(3)+'%p');
