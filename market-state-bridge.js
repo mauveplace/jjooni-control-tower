@@ -55,48 +55,12 @@ function liquidityState(live){
 }
 function nextText(live){return live.next_expected_update_kst?stamp(live.next_expected_update_kst):''}
 function paint(){
-  const b=ensureBadge();
-  const live=window.__JJOONI_LIVE_PAYLOAD||{};
-  const session=live.session||{};
-  const scheduleState=String(live.schedule_contract_state||'').toUpperCase();
-  const basis=basisMs(live),basisLabel=stamp(basisRaw(live)),age=basis==null?null:Math.max(0,Date.now()-basis),next=nextText(live);
-
-  if(age==null){
-    b.textContent='⚠ 기준시각 확인 필요';
-    b.title='generated_kst를 확인할 수 없어 데이터 신선도를 판정할 수 없습니다.';
-    paintStyle(b,'warn');return;
-  }
-  if(age>STALE_AGE_MS){
-    b.textContent=`⚠ 데이터 ${ageText(age)} · 기준 ${basisLabel}`;
-    b.title='generated_kst 기준 24시간을 초과했습니다. 휴장 여부와 관계없이 마지막 검증값으로만 취급합니다.';
-    paintStyle(b,'warn');return;
-  }
-  if(scheduleState==='MISMATCH'){
-    b.textContent=`⚠ 수집 일정 확인 필요 · 기준 ${basisLabel}`;
-    b.title='데이터는 있으나 producer 일정 계약이 불일치합니다.';
-    paintStyle(b,'warn');return;
-  }
-  if(String(session.state||'').toUpperCase()==='CLOSED'){
-    const aged=age>REF_AGE_MS?' · '+ageText(age):'';
-    b.textContent=`● 장 마감${aged} · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
-    b.title='generated_kst 기준 마지막 검증값입니다. 24시간을 넘으면 휴장 중에도 경고로 전환합니다.';
-    paintStyle(b,'closed');return;
-  }
-  const liquidity=liquidityState(live);
-  if(age>REF_AGE_MS){
-    b.textContent=`⚠ 데이터 ${ageText(age)} · 기준 ${basisLabel}`;
-    b.title='시장 진행 중인데 generated_kst 기준 30분을 넘었습니다.';
-    paintStyle(b,'warn');return;
-  }
-  if(liquidity==='THIN'){
-    b.textContent=`● 저유동성 구간 · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
-    b.title='가격 유동성이 낮아 손익 판단은 제한적으로 봐야 합니다.';
-    paintStyle(b,'warn');return;
-  }
-  b.textContent=`● 최신 · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
-  b.title='데이터 신선도는 generated_kst 기준입니다. 브라우저 렌더 시각은 사용하지 않습니다.';
-  paintStyle(b,'good');
-  window.__JJOONI_MARKET_STATE_BRIDGE={state:'ACTIVE',version:'2.1',freshness_authority:'generated_kst',basis_kst:basisRaw(live),data_age_ms:age};
+ const b=ensureBadge(),live=window.__JJOONI_LIVE_PAYLOAD||{},f=window.JjooniMetrics.freshness(live),basis=stamp(basisRaw(live)),next=nextText(live);
+ const text=(live.schedule_contract_state==='MISMATCH'?'수집 일정 확인 필요':f.text)+' · 기준 '+basis+(next?' · 다음 '+next:'');
+ if(b.textContent!==text)b.textContent=text;
+ b.title='최종 데이터 생성 시각과 생산자가 지정한 다음 수집 마감시각 기준';
+ paintStyle(b,live.schedule_contract_state==='MISMATCH'?'warn':f.kind);
+ window.__JJOONI_MARKET_STATE_BRIDGE={state:'ACTIVE',version:'2.3',freshness_authority:'PRODUCER_STALE_AFTER',basis_kst:basisRaw(live),data_age_ms:f.age_ms};
 }
 
 let busy=false;
@@ -106,32 +70,4 @@ document.addEventListener('jjooni:live-applied',run);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 })();
 
-(function(){
- if(document.getElementById('ctLineageGuardScript'))return;
- const s=document.createElement('script');
- s.id='ctLineageGuardScript';
- s.src='lineage-guard.js?v=1&_='+Date.now();
- s.async=true;
- s.onerror=function(){console.error('CT lineage guard load failed')};
- (document.head||document.documentElement).appendChild(s);
-})();
-
-(function(){
- if(document.getElementById('ctUiRefactorScript'))return;
- const s=document.createElement('script');
- s.id='ctUiRefactorScript';
- s.src='ui-refactor.js?v=1&_='+Date.now();
- s.async=true;
- s.onerror=function(){console.error('CT UI refactor load failed');window.__JJOONI_UI_REFACTOR={state:'LOAD_FAILED'}};
- (document.head||document.documentElement).appendChild(s);
-})();
-
-(function(){
- if(document.getElementById('ctMarketContextV20Script'))return;
- const s=document.createElement('script');
- s.id='ctMarketContextV20Script';
- s.src='market-context-v20.js?v=20.0&_='+Date.now();
- s.async=true;
- s.onerror=function(){console.error('CT market context load failed');window.__JJOONI_MARKET_CONTEXT_V20={state:'LOAD_FAILED'}};
- (document.head||document.documentElement).appendChild(s);
-})();
+// UI dependencies are owned exclusively by the verified sequential loader.

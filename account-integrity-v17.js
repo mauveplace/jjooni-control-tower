@@ -32,10 +32,11 @@ function patchAiBrokerAuthority(){
  for(const root of [L(),C()]){
    try{if(root.accounts?.AI){root.accounts.AI.broker=label;root.accounts.AI.broker_name=label;root.accounts.AI.broker_code='KIS'}}catch(_){}
  }
- const candidates=[...document.querySelectorAll('.ctP8Card,.ctA8Card,.accountCard,.card,[data-account-drill],#accountDrillModal')];
+ const candidates=[...document.querySelectorAll('.ctP8Card,.ctA8Card,.accountCard,[data-account-drill],#accountDrillModal')];
  for(const root of candidates){
    const text=String(root.innerText||root.textContent||'');
-   if(!/AI\s*BOT|\bAI\b/i.test(text))continue;
+   const heading=String(root.querySelector('.ctP8Name,.ctA8Name,.accountName,h1,h2,h3')?.textContent||'');
+   if(String(root.dataset.accountDrill||'').toUpperCase()!=='AI'&&!/AI\s*BOT/i.test(heading))continue;
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
    let node;
    while((node=walker.nextNode())){

@@ -11,34 +11,7 @@ const GENERIC=['market_value','evaluation_amount','eval_amount','valuation','evl
 const EXPLICIT=['market_value_krw','evaluation_amount_krw','eval_amount_krw','valuation_krw','evlu_amt_krw'];
 
 function firstNumber(o,keys){for(const k of keys){const x=n(o?.[k]);if(x!=null)return {key:k,value:x}}return null}
-function validFx(v){const x=n(v);return x!=null&&x>500&&x<3000?x:null}
-function fxFor(id,a,p){
- const live=(window.__JJOONI_LIVE_PAYLOAD?.accounts||{})[id]||{};
- for(const v of [p?.fx_krw_per_usd,p?.fx,a?.fx_krw_per_usd,a?.fx,live?.fx_krw_per_usd,live?.fx]){const x=validFx(v);if(x)return {value:x,source:'ACCOUNT_SPECIFIC'}}
- const ref=window.__JJOONI_LIVE_PAYLOAD?.fx_reference||{};
- const x=validFx(ref.krw_per_usd);
- if(x&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING')return {value:x,source:String(ref.source||'FX_REFERENCE')};
- return null;
-}
-function inferKrw(id,p,a){
- const explicit=firstNumber(p,EXPLICIT);if(explicit&&String(p?.market_value_contract||'')!=='CANONICAL_KRW_V13')return {value:explicit.value,mode:'EXPLICIT_KRW',source:explicit.key};
- const raw=firstNumber(p,GENERIC);
- if(currency(p)!=='USD'){
-   if(raw)return {value:raw.value,mode:'KRW_DIRECT',source:raw.key};
-   const q=qty(p),cur=px(p);return q>0&&cur!=null&&cur>0?{value:q*cur,mode:'QTY_X_PRICE_KRW',source:'qty*price'}:null;
- }
- const f=fxFor(id,a,p);if(!f)return {value:null,mode:'FX_MISSING',source:null};
- const q=qty(p),cur=px(p);
- if(!(q>0&&cur!=null&&cur>0))return {value:null,mode:'USD_BASIS_INSUFFICIENT',source:raw?.key||null,fx:f.value,fx_source:f.source};
- const native=q*cur,krw=native*f.value;
- if(raw){
-   const eNative=Math.abs(raw.value-native)/Math.max(1,Math.abs(native));
-   const eKrw=Math.abs(raw.value-krw)/Math.max(1,Math.abs(krw));
-   if(eNative+0.02<eKrw)return {value:raw.value*f.value,mode:'USD_NATIVE_TO_KRW',source:raw.key,fx:f.value,fx_source:f.source,eNative,eKrw};
-   if(eKrw+0.02<eNative)return {value:raw.value,mode:'ALREADY_KRW',source:raw.key,fx:f.value,fx_source:f.source,eNative,eKrw};
- }
- return {value:krw,mode:'QTY_X_PRICE_X_VERIFIED_FX',source:'qty*price*fx',fx:f.value,fx_source:f.source};
-}
+function inferKrw(id,p,a){if(p.market_value_contract==='CANONICAL_KRW_V13'&&currency(p)==='USD'&&window.JjooniMetrics.fx(a,p)==null)return null;const value=window.JjooniMetrics.valueKrw(p,a);return value==null?null:{value,mode:'DECLARED_CURRENCY',source:'CANONICAL_CONTRACT'}}
 
 function reconcile(){
  const C=window.__JJOONI_CANONICAL_SSOT;
@@ -49,7 +22,7 @@ function reconcile(){
  Object.entries(C.accounts).forEach(([id,a])=>{
    let total=0,count=0,stamped=0,missing=0;
    (a?.positions||[]).forEach(p=>{
-     if(String(p?.record_type||'POSITION').toUpperCase()!=='POSITION')return;
+     if(String(p?.record_type||'POSITION').toUpperCase()==='CASH')return;
      positions++;if(currency(p)==='USD')usd++;
      const r=inferKrw(id,p,a);
      if(!r||n(r.value)==null){if(currency(p)==='USD'){missing++;fxMissing++;}if(String(p.market_value_contract||'')==='CANONICAL_KRW_V13'){for(const k of ['market_value_krw','market_value_currency','market_value_contract','market_value_reconcile_mode','market_value_reconcile_source','market_value_fx','market_value_fx_source'])delete p[k];}return;}

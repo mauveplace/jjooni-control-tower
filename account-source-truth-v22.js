@@ -7,7 +7,7 @@ const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);ret
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
 const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
-const ACCOUNT_METRICS=new Set(['정규장 투자성과','순입출금','현재 NAV','오늘 수익률','전체 영향도','주식 평가액','예수금','📈 보유종목 가격효과','💱 보유종목 환율효과','🧩 당일매매·비용 Bridge','정규장 P&L','정규장 수익률','보유종목','KR','US','Best','Worst']);
+const ACCOUNT_METRICS=new Set(['당일 투자성과','당일 손익','정규장 투자성과','순입출금','현재 NAV','오늘 수익률','전체 영향도','주식 평가액','예수금','📈 보유종목 가격효과','💱 보유종목 환율효과','🧩 당일매매·비용 Bridge','정규장 P&L','정규장 수익률','보유종목','KR','US','Best','Worst']);
 
 function patchCanonical(){
  const L=window.__JJOONI_LIVE_PAYLOAD||{};
@@ -24,8 +24,8 @@ function patchCanonical(){
  const kisDirect=aiStatus==='LIVE'&&aiNav!=null&&aiNav>0&&kisIdentity;
  if(kisDirect){
    ai.source='BROKER_DIRECT_KIS_KR+OVERSEAS';
-   ai.quality='BROKER_DIRECT_KIS_API';
-   ai.account_quality='BROKER_DIRECT_KIS_API';
+   ai.quality=String(liveA.status||'UNKNOWN');
+   ai.account_quality=String(liveA.status||'UNKNOWN');
    ai.holdings_quality='BROKER_DIRECT_KIS_API';
    ai.cash_quality='BROKER_DIRECT_KIS_API';
    ai.broker='한국투자증권';
@@ -38,8 +38,8 @@ function patchCanonical(){
  const tossState=String(liveT.status||toss.quality||'').toUpperCase();
  const tossMode=String(liveT.mode||liveT.source||toss.source||'').toUpperCase();
  if(tossState==='BROKER_LIVE_FULL'||tossMode.includes('TOSS')){
-   toss.quality='BROKER_DIRECT_TOSS_API';
-   toss.account_quality='BROKER_DIRECT_TOSS_API';
+   toss.quality=String(liveT.status||'UNKNOWN');
+   toss.account_quality=String(liveT.status||'UNKNOWN');
    toss.holdings_quality='BROKER_DIRECT_TOSS_API';
    toss.cash_quality='BROKER_DIRECT_TOSS_API';
    toss.broker='Toss증권';
@@ -92,18 +92,8 @@ function fx(id,p){
  return null;
 }
 function currency(p){return String(p?.currency||((String(p?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase()}
-function positionValueKrw(id,p){
- for(const k of ['market_value_krw','evaluation_amount_krw','eval_amount_krw','valuation_krw','evlu_amt_krw']){const x=n(p?.[k]);if(x!=null)return x}
- for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null){if(currency(p)!=='USD')return x;const f=fx(id,p);return f?x*f:null}}
- const qty=Math.abs(n(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)||0),px=n(p?.current_price??p?.price??p?.last_price);
- if(!qty||px==null)return null;
- if(currency(p)!=='USD')return qty*px;const f=fx(id,p);return f?qty*px*f:null;
-}
-function stockValue(id){
- const C=window.__JJOONI_CANONICAL_SSOT||{},a=(C.accounts||{})[id]||{};
- const vals=(a.positions||[]).filter(p=>String(p?.record_type||'POSITION').toUpperCase()==='POSITION').map(p=>positionValueKrw(id,p)).filter(v=>v!=null);
- return vals.length?vals.reduce((s,v)=>s+v,0):null;
-}
+function positionValueKrw(p){return window.JjooniMetrics.valueKrw(p,window.__JJOONI_CANONICAL_SSOT?.accounts?.[p.account||p.account_type])}
+function stockValue(id){return window.JjooniMetrics.stock(window.__JJOONI_CANONICAL_SSOT?.accounts?.[id])}
 function won(v){return '₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR')}
 function modalAccountId(){
  const m=q('#accountDrillModal');if(!m)return null;

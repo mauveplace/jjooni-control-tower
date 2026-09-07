@@ -57,33 +57,17 @@ function enforceKis(){
  for(const root of nodes){const text=String(root.innerText||root.textContent||'');if(!/AI\s*BOT|\bAI\b/i.test(text))continue;root.querySelectorAll('.ctAcctSource,.ctTrustDetailSubV6,.ctTrustFootV6,[data-source-label]').forEach(e=>{e.textContent=ev.ok?'한국투자증권 API':label});}
 }
 function safeValue(id,a,p){
- const contract=String(p?.market_value_contract||'');
- const explicit=firstNumber(p,explicitKrwKeys);
- if(explicit&&contract!=='CANONICAL_KRW_V13')return{value:explicit.value,mode:'EXPLICIT_KRW',source:explicit.key};
- const raw=firstNumber(p,genericKeys);
- if(!isUsd(p)){
-  if(raw)return{value:raw.value,mode:'KRW_DIRECT',source:raw.key};
-  const q=qty(p),cur=px(p);return q>0&&cur!=null&&cur>0?{value:q*cur,mode:'QTY_X_PRICE_KRW',source:'qty*price'}:null;
- }
- const f=fxFor(id,a,p);if(!f)return null;
- const q=qty(p),cur=px(p);
- if(q>0&&cur!=null&&cur>0){
-  const native=q*cur,krw=native*f.value;
-  if(raw){
-   const eNative=Math.abs(raw.value-native)/Math.max(1,Math.abs(native));
-   const eKrw=Math.abs(raw.value-krw)/Math.max(1,Math.abs(krw));
-   if(eNative+0.02<eKrw)return{value:raw.value*f.value,mode:'USD_NATIVE_TO_KRW',source:raw.key,fx:f.value,fx_source:f.source};
-   if(eKrw+0.02<eNative)return{value:raw.value,mode:'ALREADY_KRW',source:raw.key,fx:f.value,fx_source:f.source};
-  }
-  return{value:krw,mode:'QTY_X_PRICE_X_VERIFIED_FX',source:'qty*price*fx',fx:f.value,fx_source:f.source};
- }
- return null;
+ let row=p;
+ if(p.market_value_contract==='CANONICAL_KRW_V13'){if(isUsd(p)&&window.JjooniMetrics.fx(a,p)==null)return null;row={...p};for(const k of explicitKrwKeys)delete row[k]}
+ const value=window.JjooniMetrics.valueKrw(row,a);
+ return value==null?null:{value,mode:'DECLARED_CURRENCY',source:'CANONICAL_CONTRACT'};
 }
+
 function reconcileValuations(){
  const c=C();let removed=0,repaired=0;const missing=new Set();
  for(const [id,a] of Object.entries(c.accounts||{})){
   for(const p of a?.positions||[]){
-   if(String(p?.record_type||'POSITION').toUpperCase()!=='POSITION')continue;
+   if(!['POSITION','FUND'].includes(String(p?.record_type||'POSITION').toUpperCase()))continue;
    const wasV13=String(p.market_value_contract||'')==='CANONICAL_KRW_V13';
    const r=safeValue(id,a,p);
    if(!r){
@@ -96,15 +80,12 @@ function reconcileValuations(){
  }
  S.unsafe_valuations_removed=removed;S.valuations_repaired=repaired;S.fx_missing_accounts=[...missing];
 }
-function accountStockValue(id){
- const a=(C().accounts||{})[id]||{};let total=0,count=0,unsafe=false;
- for(const p of a.positions||[]){if(String(p?.record_type||'POSITION').toUpperCase()!=='POSITION')continue;const r=safeValue(id,a,p);if(!r){if(isUsd(p))unsafe=true;continue}total+=r.value;count++;}
- return unsafe?null:(count?total:null);
-}
+function accountStockValue(id){const a=(C().accounts||{})[id]||{},ps=window.JjooniMetrics.positions(a),vals=ps.map(p=>safeValue(id,a,p)?.value??null);return ps.length?window.JjooniMetrics.sum(vals):0}
+
 function patchOpenModal(){
  const m=document.getElementById('accountDrillModal');if(!m)return;
- const title=String(m.innerText||'');let id=null;
- for(const x of ['TOSS','ISA','PENSION','IRP','AI']){if(x==='AI'?/AI\s*BOT|\bAI\b/i.test(title):title.includes(x)){id=x;break}}
+ const title=String(m.querySelector('h1,h2,h3,.modalTitle,.title')?.textContent||'').toUpperCase();let id=null;
+ for(const x of ['TOSS','ISA','PENSION','IRP','AI','TRIPOD']){if(x==='AI'?/AI\s*BOT|\bAI\b/i.test(title):title.includes(x)){id=x;break}}
  if(!id)return;const v=accountStockValue(id);
  m.querySelectorAll('.v2Kpi').forEach(k=>{const lab=String(k.querySelector('.label')?.textContent||'').trim();if(lab!=='주식 평가액')return;const el=k.querySelector('.value');if(!el)return;el.textContent=v==null?'환율/평가 근거 미확인':'₩'+Math.round(v).toLocaleString('ko-KR');if(v==null)el.title='검증된 KRW 평가값 또는 환율 원천이 없어 숫자를 표시하지 않습니다.';});
 }

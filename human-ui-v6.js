@@ -43,20 +43,8 @@ function ageText(ms){
  const h=Math.floor(min/60),m=min%60;return m>=30?`${h+1}시간 경과`:`${h}시간 경과`;
 }
 function nextTime(){const L=live();return L.next_expected_update_kst||''}
-function freshnessState(){
- const L=live(),s=String(L.schedule_contract_state||'').toUpperCase(),session=String((L.session||{}).state||'').toUpperCase(),age=basisAgeMs();
- if(age==null)return {kind:'warn',text:'기준시각 확인 필요',age_ms:null};
- if(age>24*60*60*1000)return {kind:'warn',text:'⚠ 데이터 '+ageText(age),age_ms:age};
- if(s==='MISMATCH')return {kind:'warn',text:'수집 일정 확인 필요',age_ms:age};
- if(age>30*60*1000){
-   if(session==='CLOSED')return {kind:'closed',text:'장 마감 · '+ageText(age),age_ms:age};
-   return {kind:'warn',text:'데이터 '+ageText(age),age_ms:age};
- }
- if(session==='CLOSED')return {kind:'closed',text:'장 마감 기준',age_ms:age};
- const liq=String(((L.price_liquidity_quality||{}).state)||'').toUpperCase();
- if(liq==='THIN')return {kind:'warn',text:'저유동성 구간',age_ms:age};
- return {kind:'good',text:'최신 기준',age_ms:age};
-}
+function freshnessState(){const L=live(),f=window.JjooniMetrics.freshness(L);if(L.schedule_contract_state==='MISMATCH')return {...f,kind:'warn',text:'수집 일정 확인 필요'};return f;}
+
 function accountCard(id){
  const label=LABEL[id].toLowerCase();return qsa('.ctAcct').find(c=>String(qs('.ctAcctName',c)?.textContent||'').toLowerCase().includes(label))||null;
 }

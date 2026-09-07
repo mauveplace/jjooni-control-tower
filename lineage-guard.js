@@ -14,16 +14,7 @@ function ids(){
 }
 
 function validFx(v){const x=n(v);return x!=null&&x>500&&x<3000?x:null}
-function fxFor(id,c,p){
- if(String((p||{}).currency||'KRW').toUpperCase()!=='USD')return 1;
- const L=live()||{},a=(L.accounts||{})[id]||{};
- for(const v of [p&&p.fx_krw_per_usd,p&&p.fx,c&&c.fx_krw_per_usd,c&&c.fx,a.fx_krw_per_usd,a.fx]){
-  const x=validFx(v);if(x!=null)return x;
- }
- const ref=L.fx_reference||{},x=validFx(ref.krw_per_usd);
- if(x!=null&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING')return x;
- return null;
-}
+function fxFor(id,c,p){return window.JjooniMetrics.currency(p)==='USD'?window.JjooniMetrics.fx(c,p):1}
 function priceAsOf(p){return String((p||{}).price_as_of||(p||{}).live_price_timestamp||'').trim()||null}
 function tossDiag(){
  const C=canon()||{},L=live()||{};
@@ -31,8 +22,9 @@ function tossDiag(){
 }
 
 function repairLegacyMirrors(){
- const C=canon(),IDS=ids();
+ const C=canon(),IDS=['TOSS','ISA','PENSION','IRP'];
  if(!C||typeof D==='undefined')return;
+ const H=window.JjooniMetrics.aggregate(C.accounts,IDS);
  D.human=D.human||{};
  D.human.current_account_navs=D.human.current_account_navs||{};
  D.human.current_account_details=D.human.current_account_details||{};
@@ -49,19 +41,19 @@ function repairLegacyMirrors(){
    cash_usd:n(c.cash_usd)
   };
  }
- if(n((C.total||{}).nav)!=null)D.human.total_asset=Number(C.total.nav);
- if(n((C.total||{}).principal)!=null)D.human.principal=Number(C.total.principal);
- if(n((C.total||{}).pnl)!=null)D.human.total_pnl=Number(C.total.pnl);
- if(n((C.total||{}).return_pct)!=null)D.human.return_pct=Number(C.total.return_pct);
+ D.human.total_asset=H.nav;
+ D.human.principal=H.principal;
+ D.human.total_pnl=H.cum;
+ D.human.return_pct=H.return_pct;
 
  D.human.latest_performance={
   ...(D.human.latest_performance||{}),
-  total_asset:n((C.total||{}).nav),
-  principal:n((C.total||{}).principal),
-  total_pnl:n((C.total||{}).pnl),
-  return_pct:n((C.total||{}).return_pct),
-  market_pnl:n((C.total||{}).today_pnl),
-  net_cash_flow:n((C.total||{}).net_flow),
+  total_asset:H.nav,
+  principal:H.principal,
+  total_pnl:H.cum,
+  return_pct:H.return_pct,
+  market_pnl:H.day,
+  net_cash_flow:H.flow,
   data_state:'CANONICAL_REGISTRY_LINEAGE_GUARD',
   sync_kst:C.observed_at
  };
@@ -146,7 +138,7 @@ function installFunctions(){
   for(const id of IDS){
    const c=(C2.accounts||{})[id]||{};let priced=0,total=0;
    for(const p of (c.positions||[])){
-    if(String(p.record_type||'POSITION').toUpperCase()!=='POSITION')continue;
+    if(['CASH','WATCHLIST'].includes(String(p.record_type||'POSITION').toUpperCase()))continue;
     total++;
     const cur=n(p.current_price!=null?p.current_price:p.price),prev=n(p.prev_close),qty=n(p.qty),asof=priceAsOf(p),liq=String(p.price_liquidity||'NORMAL').toUpperCase();
     if(id==='TOSS'){
@@ -166,7 +158,7 @@ function installFunctions(){
 
     const isUsd=String(p.currency||'KRW').toUpperCase()==='USD',fx=fxFor(id,c,p);
     const ok=cur!=null&&cur>0&&prev!=null&&prev>0&&qty!=null&&qty>0&&asof!=null&&(!isUsd||fx!=null);
-    const pnl=ok?qty*(cur-prev)*(isUsd?fx:1):null;
+    const pnl=window.JjooniMetrics.positionDay(p,c);
     if(ok&&liq!=='THIN')priced++;
     positions.push({
      account:id,ticker:p.ticker,name:p.name,qty,

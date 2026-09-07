@@ -5,6 +5,8 @@ const SHEET_ID='1t8TNfIHxSIc_uoSxAgmSbkqCz00923nF1u-b6jlCgYE';
 const TAB='GITHUB_CT_LIVE';
 const REFRESH_MS=60000;
 const MAX_AGE=20*60*1000;
+const M=window.JjooniMetrics;
+if(!M)throw new Error('CANONICAL_METRICS_MISSING');
 const REGISTRY=[
  {id:'TOSS',label:'Toss',type:'HUMAN',broker:'Toss증권'},
  {id:'ISA',label:'ISA',type:'HUMAN',broker:'KB증권'},
@@ -21,10 +23,10 @@ const b64=s=>Uint8Array.from(atob(String(s||'')),c=>c.charCodeAt(0));
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
-const won=v=>'₩'+Math.round(Math.abs(z(v))).toLocaleString('ko-KR');
-const signed=v=>(z(v)>=0?'+':'-')+won(v);
+const won=v=>n(v)==null?'—':'₩'+Math.round(Math.abs(z(v))).toLocaleString('ko-KR');
+const signed=v=>n(v)==null?'—':(z(v)>=0?'+':'-')+won(v);
 const pct=v=>n(v)==null?'—':(z(v)>=0?'+':'')+z(v).toFixed(2)+'%';
-const usd=v=>'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const usd=v=>n(v)==null?'—':'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const clone=x=>JSON.parse(JSON.stringify(x));
 let LAST_LIVE=null;
 let CANON=null;
@@ -94,37 +96,39 @@ function injectResponsiveCss(){
 
 function staticRows(){try{return ORIGINAL.latestAccountRows?ORIGINAL.latestAccountRows()||{}:{}}catch(_){return {}}}
 function staticHumanRow(id){return staticRows()[id]||{}}
-function staticPrincipal(id){const r=staticHumanRow(id);if(n(r.principal)!=null)return z(r.principal);try{const p=((D.human||{}).performance||[]).filter(x=>String(x.account||'').toUpperCase()===id).at(-1);return z(p&&p.principal)}catch(_){return 0}}
+function staticPrincipal(id){const r=staticHumanRow(id);if(n(r.principal)!=null)return z(r.principal);try{const p=((D.human||{}).performance||[]).filter(x=>String(x.account||'').toUpperCase()===id).at(-1);return n(p&&p.principal)}catch(_){return null}}
 function staticNetFlow(id){const r=staticHumanRow(id);if(n(r.net_cash_flow)!=null)return z(r.net_cash_flow);try{const p=((D.human||{}).performance||[]).filter(x=>String(x.account||'').toUpperCase()===id).at(-1);return n(p&&p.net_cash_flow)}catch(_){return null}}
 function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filter(x=>String(x.account||x.account_type||'').toUpperCase()===id)}catch(_){return []}}
 
 function makeCanonical(live){
  const A=live.accounts||{},out={};
- const toss=A.TOSS||{},tossFlow=staticNetFlow('TOSS');
- out.TOSS={id:'TOSS',type:'HUMAN',nav:n(toss.nav),principal:n(toss.principal)||staticPrincipal('TOSS'),pnl:n(toss.total_pnl),return_pct:n(toss.total_return_pct),today_pnl:n(toss.today_pnl),today_return:n(toss.today_return),net_flow:tossFlow,cash_krw:n(toss.cash_krw),cash_usd:n(toss.cash_usd),positions:(Array.isArray(toss.positions)&&toss.positions.length?toss.positions:humanStaticPositions('TOSS')),source:String(toss.mode||toss.status||'TOSS_REFERENCE'),quality:String(toss.status||'REFERENCE_STALE')};
- ['ISA','PENSION','IRP'].forEach(id=>{const a=A[id]||{},ps=Array.isArray(a.positions)?a.positions:humanStaticPositions(id),pr=staticPrincipal(id),nav=n(a.nav),flow=staticNetFlow(id);out[id]={id,type:'HUMAN',nav,principal:pr,pnl:nav!=null&&pr>0?nav-pr:null,return_pct:nav!=null&&pr>0?(nav/pr-1)*100:null,today_pnl:n(a.today_pnl),today_return:n(a.today_return),net_flow:flow,cash_krw:n(a.cash_krw??a.cash),cash_usd:null,positions:ps,source:String(a.mode||''),quality:String(a.status||'PARTIAL_MODELED'),quote_coverage_pct:n(a.quote_coverage_pct)};});
- const ai=A.AI||{},aiPs=[...(ai.holdings_kr||[]).map(x=>({...x,account:'AI',account_type:'AI',current_price:z(x.current_price||x.price),avg_price:z(x.avg),market_value:z(x.value),prev_close:n(x.prev_close),record_type:'POSITION',currency:'KRW',market:'KR'})),...(ai.holdings_us||[]).map(x=>({...x,account:'AI',account_type:'AI',current_price:z(x.current_price||x.price),avg_price:z(x.avg),market_value:z(x.value_krw||z(x.value)*z(ai.fx_krw_per_usd)),prev_close:n(x.prev_close),record_type:'POSITION',currency:x.currency||'USD',market:'US'}))],aip=z(((D.ai||{}).inception_nav)),ain=n(ai.nav);
- out.AI={id:'AI',type:'AI',nav:ain,principal:aip||null,pnl:ain!=null&&aip>0?ain-aip:null,return_pct:ain!=null&&aip>0?(ain/aip-1)*100:null,today_pnl:n(ai.today_pnl),today_return:n(ai.today_return),net_flow:0,cash_krw:n(ai.cash_krw),cash_usd:n(ai.cash_usd),positions:aiPs,source:String(ai.mode||'KIS_BROKER_DIRECT'),quality:String(ai.today_pnl_quality||ai.status||'MISSING'),account_quality:String(ai.status||'MISSING')};
- const tp=A.TRIPOD||{},tpn=n(tp.nav),tpQty=z(tp.qty),tpAvg=z(tp.avg_price),tpFx=z(tp.fx),tpPr=tpQty>0&&tpAvg>0&&tpFx>0?tpQty*tpAvg*tpFx:null;
- out.TRIPOD={id:'TRIPOD',type:'TRIPOD',nav:tpn,principal:tpPr,pnl:tpn!=null&&tpPr!=null?tpn-tpPr:null,return_pct:n(tp.current_price)!=null&&tpAvg>0?(z(tp.current_price)/tpAvg-1)*100:null,today_pnl:n(tp.today_change),today_return:n(tp.today_return),net_flow:0,cash_krw:null,cash_usd:null,positions:Array.isArray(tp.positions)?tp.positions:[],source:String(tp.mode||''),quality:String(tp.status||'MISSING'),current_price:n(tp.current_price),prev_close:n(tp.prev_close),fx:n(tp.fx),signal:tp.signal||live.tripod_signal||{}};
- const rows=REGISTRY.map(r=>out[r.id]).filter(Boolean),finite=(x,k)=>n(x&&x[k])!=null,sum=k=>rows.reduce((s,x)=>s+(finite(x,k)?z(x[k]):0),0),known=rows.filter(x=>finite(x,'today_pnl')),knownFlow=rows.filter(x=>finite(x,'net_flow')),nav=sum('nav'),principal=sum('principal'),todayPnl=known.reduce((s,x)=>s+z(x.today_pnl),0),flow=knownFlow.reduce((s,x)=>s+z(x.net_flow),0);
- rows.forEach(x=>{x.nav_change=n(x.today_pnl)!=null&&n(x.net_flow)!=null?z(x.today_pnl)+z(x.net_flow):n(x.today_pnl)});
- return {observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total:{nav,principal,pnl:principal>0?nav-principal:null,return_pct:principal>0?(nav/principal-1)*100:null,today_change:todayPnl+flow,today_pnl:todayPnl,net_flow:flow,today_complete:known.length===rows.length,flow_complete:knownFlow.length===rows.length,known_today_count:known.length,known_flow_count:knownFlow.length,account_count:rows.length,missing_today:rows.filter(x=>!finite(x,'today_pnl')).map(x=>x.id),missing_flow:rows.filter(x=>!finite(x,'net_flow')).map(x=>x.id),position_count:rows.reduce((s,x)=>s+(x.positions||[]).length,0)}};
+ for(const r of REGISTRY){
+  const a=A[r.id]||{},id=r.id,nav=n(a.nav),principal=n(a.principal);
+  let ps=Array.isArray(a.positions)?a.positions:[];
+  if(id==='AI')ps=[...(a.holdings_kr||[]),...(a.holdings_us||[])].map(p=>({...p,avg_price:n(p.avg_price??p.avg),current_price:n(p.current_price??p.price),market_value_krw:M.valueKrw(p,a),record_type:p.record_type||'POSITION'}));
+  ps=ps.map(p=>({...p,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}));
+  const day=n(a.today_pnl??(id==='TRIPOD'?a.today_change:null)),flow=n(a.net_flow??a.net_cash_flow);
+  out[id]={...a,id,type:r.type,nav,principal,pnl:id==='IRP'?null:n(a.total_pnl)??(nav!=null&&principal!=null?nav-principal:null),return_pct:id==='IRP'?null:n(a.total_return_pct)??(nav!=null&&principal>0?100*(nav/principal-1):null),today_pnl:day,today_return:n(a.today_return),net_flow:flow,cash_krw:n(a.cash_krw??(['ISA','PENSION','IRP'].includes(id)?a.cash:null)),cash_usd:n(a.cash_usd),positions:ps,source:String(a.mode||a.source||''),quality:String(a.status||'MISSING'),account_quality:String(a.status||'MISSING'),today_pnl_quality:a.today_pnl_quality||(['ISA','PENSION','IRP','TRIPOD'].includes(id)?'MODELED':'BROKER_MEASURED'),signal:a.signal||live.tripod_signal||{}};
+  out[id].cash_total_krw=M.cash(out[id]);
+  out[id].nav_change=day!=null&&flow!=null?day+flow:null;
+ }
+ const t=M.aggregate(out),rows=REGISTRY.map(r=>out[r.id]);
+ return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total:{nav:t.nav,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
  D.human=D.human||{};D.human.positions=Array.isArray(D.human.positions)?D.human.positions:[];const a=live.accounts||{};
  ['TOSS','ISA','PENSION','IRP'].forEach(id=>{const x=a[id]||{};if(!Array.isArray(x.positions))return;
-  D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id||rt!=='POSITION'});
-  (x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:z(p.current_price),market_value:z(p.market_value),avg_price:z(p.avg_price),price_source:p.price_source||'KIS_MARKET_QUOTE',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
+  D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id});
+  (x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
  });
- const ai=a.AI||{};D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};Object.assign(D.ai.latest,{nav:z(ai.nav),kr_nav:z(ai.kr_nav),us_nav:z(ai.us_nav_krw),us_nav_krw:z(ai.us_nav_krw),cash:z(ai.cash),cash_krw:z(ai.cash_krw),cash_usd:z(ai.cash_usd),cash_usd_krw:z(ai.cash_usd_krw),fx:z(ai.fx_krw_per_usd),holdings_kr:ai.holdings_kr||[],holdings_us:ai.holdings_us||[],today_pnl:n(ai.today_pnl),today_return:n(ai.today_return),observed_at:live.observed_at});
- const tp=a.TRIPOD||{};D.human.tripod_positions=tp.positions||[];D.human.tripod_market={ticker:'TQQQ',current_price:z(tp.current_price),prev_close:z(tp.prev_close),fx:z(tp.fx),previous_fx:z(tp.previous_fx||tp.fx),currency:'USD',quote_timestamp:live.observed_at,current_price_source:'PUBLIC_MARKET_MODEL'};D.human.tripod_signal=tp.signal||live.tripod_signal||{};
+ const ai=a.AI||{};D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};Object.assign(D.ai.latest,{nav:n(ai.nav),kr_nav:z(ai.kr_nav),us_nav:z(ai.us_nav_krw),us_nav_krw:z(ai.us_nav_krw),cash:n(ai.cash),cash_krw:n(ai.cash_krw),cash_usd:n(ai.cash_usd),cash_usd_krw:z(ai.cash_usd_krw),fx:z(ai.fx_krw_per_usd),holdings_kr:ai.holdings_kr||[],holdings_us:ai.holdings_us||[],today_pnl:n(ai.today_pnl),today_return:n(ai.today_return),observed_at:live.observed_at});
+ const tp=a.TRIPOD||{};D.human.tripod_positions=tp.positions||[];D.human.tripod_market={ticker:'TQQQ',current_price:z(tp.current_price),prev_close:z(tp.prev_close),fx:z(tp.fx),previous_fx:n(tp.previous_fx),currency:'USD',quote_timestamp:live.observed_at,current_price_source:'PUBLIC_MARKET_MODEL'};D.human.tripod_signal=tp.signal||live.tripod_signal||{};
 }
 
 function mergeTrades(live){
  D.human=D.human||{};const old=Array.isArray(D.human.trades)?D.human.trades:[],fresh=Array.isArray(live.recent_trades)?live.recent_trades:[],key=t=>[String(t.account||''),String(t.trade_date||t.filled_at_kst||''),sym(t.ticker),String(t.side||''),String(t.qty||''),String(t.price||'')].join('|'),m=new Map();[...fresh,...old].forEach(t=>{const k=key(t);if(k&&!m.has(k))m.set(k,t)});D.human.trades=[...m.values()].sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,240);
- D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(at.length)D.ai.latest.trades=at;
+ D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(Array.isArray(((live.accounts||{}).AI||{}).trades))D.ai.latest.trades=at;
 }
 
 function syncTradeCurrentPrices(){
@@ -138,28 +142,26 @@ function syncTradeCurrentPrices(){
  window.__JJOONI_TRADE_QUOTES=TRADE_QUOTES;
 }
 function syncLegacyMirrors(){
- if(!CANON||typeof D==='undefined')return;D.human=D.human||{};const humanIds=['TOSS','ISA','PENSION','IRP'],hs=humanIds.map(id=>CANON.accounts[id]).filter(Boolean);
+ if(!CANON||typeof D==='undefined')return;
+ D.human=D.human||{};
+ const ids=['TOSS','ISA','PENSION','IRP'],h=M.aggregate(CANON.accounts,ids),day=M.dayKey(CANON.observed_at);
  D.human.current_account_navs=D.human.current_account_navs||{};D.human.current_account_details=D.human.current_account_details||{};
- hs.forEach(c=>{if(n(c.nav)!=null)D.human.current_account_navs[c.id]=z(c.nav);D.human.current_account_details[c.id]={...(D.human.current_account_details[c.id]||{}),cash_residual:z(c.cash_krw),cash_krw:z(c.cash_krw),cash_usd:n(c.cash_usd),canonical_quality:c.quality,canonical_source:c.source,display_nav_source:c.source,modeled_current_nav:n(c.nav)};});
- D.human.total_asset=hs.reduce((s,x)=>s+z(x.nav),0);D.human.principal=hs.reduce((s,x)=>s+(n(x.principal)!=null?z(x.principal):0),0);D.human.total_pnl=D.human.total_asset-D.human.principal;D.human.return_pct=D.human.principal>0?(D.human.total_asset/D.human.principal-1)*100:null;
- const hp=hs.filter(x=>n(x.today_pnl)!=null).reduce((s,x)=>s+z(x.today_pnl),0),hf=hs.filter(x=>n(x.net_flow)!=null).reduce((s,x)=>s+z(x.net_flow),0);D.human.latest_performance={...(D.human.latest_performance||{}),total_asset:D.human.total_asset,principal:D.human.principal,total_pnl:D.human.total_pnl,return_pct:D.human.return_pct,market_pnl:hp,net_cash_flow:hf,daily_return:D.human.total_asset-hp-hf>0?hp/(D.human.total_asset-hp-hf):null,data_state:'CANONICAL_V5',sync_kst:CANON.observed_at};
- const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date()),arr=Array.isArray(D.human.performance)?D.human.performance:[];humanIds.forEach(id=>{const c=CANON.accounts[id];if(!c||n(c.nav)==null)return;let r=arr.find(x=>String(x.date||'')===today&&String(x.account||'').toUpperCase()===id);if(!r){r={date:today,account:id,series_id:'ACTUAL'};arr.push(r)}r.total_asset=z(c.nav);if(n(c.principal)!=null)r.principal=z(c.principal);if(n(c.today_pnl)!=null){r.market_pnl=z(c.today_pnl);r.daily_return=n(c.today_return)!=null?z(c.today_return)/100:null;r.flow_adj_return=r.daily_return;r.flow_adj_daily_return=r.daily_return;}if(n(c.net_flow)!=null)r.net_cash_flow=z(c.net_flow);r.data_state=c.quality;r.sync_kst=CANON.observed_at; });
- const normDate=v=>{const raw=String(v||'').trim();if(/^\d{8}$/.test(raw))return raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);return raw.slice(0,10).replaceAll('/','-')};
- arr.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
- const totalNav=hs.reduce((sum,x)=>sum+z(x.nav),0),totalPrincipal=hs.reduce((sum,x)=>sum+(n(x.principal)!=null?z(x.principal):0),0),knownToday=hs.filter(x=>n(x.today_pnl)!=null),knownFlow=hs.filter(x=>n(x.net_flow)!=null),totalToday=knownToday.reduce((sum,x)=>sum+z(x.today_pnl),0),totalFlow=knownFlow.reduce((sum,x)=>sum+z(x.net_flow),0),prevTotal=totalNav-totalToday-totalFlow;
- let totalRow=arr.find(x=>String(x.date||'')===today&&String(x.account||'').toUpperCase()==='TOTAL'&&String(x.series_id||'ACTUAL').toUpperCase()==='ACTUAL');
- if(!totalRow){totalRow={date:today,account:'TOTAL',series_id:'ACTUAL'};arr.push(totalRow)}
- Object.assign(totalRow,{total_asset:totalNav,principal:totalPrincipal,market_pnl:knownToday.length?totalToday:null,net_cash_flow:knownFlow.length?totalFlow:null,daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,data_state:'CANONICAL_V5',sync_kst:CANON.observed_at});
- D.human.performance=arr;
- D.ai=D.ai||{};D.ai.rows=Array.isArray(D.ai.rows)?D.ai.rows:[];D.ai.rows.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
- const aiNow=(CANON.accounts||{}).AI||{};
- if(n(aiNow.nav)!=null){let aiRow=D.ai.rows.find(x=>normDate(x.date)===today);if(!aiRow){aiRow={date:today};D.ai.rows.push(aiRow)}Object.assign(aiRow,{date:today,nav:z(aiNow.nav),today_pnl:n(aiNow.today_pnl),today_return:n(aiNow.today_return),source:aiNow.source||'CANONICAL_V5',sync_kst:CANON.observed_at})}
+ ids.forEach(id=>{const a=CANON.accounts[id];D.human.current_account_navs[id]=a.nav;D.human.current_account_details[id]={...(D.human.current_account_details[id]||{}),current_nav:a.nav,modeled_current_nav:a.nav,cash_krw:a.cash_krw,cash_usd:a.cash_usd,cash_total_krw:M.cash(a),canonical_source:a.source,canonical_quality:a.quality}});
+ Object.assign(D.human,{total_asset:h.nav,principal:h.principal,total_pnl:h.cum,return_pct:h.return_pct});
+ const rows=Array.isArray(D.human.performance)?D.human.performance:[];
+ rows.forEach(x=>{x.date=M.dayKey(x.date)});
+ function upsert(id,fields){if(!day)return;let r=rows.find(x=>x.date===day&&String(x.account||'').toUpperCase()===id&&String(x.series_id||'ACTUAL').toUpperCase()==='ACTUAL');if(!r){r={date:day,account:id,series_id:'ACTUAL'};rows.push(r)}Object.assign(r,fields,{sync_kst:CANON.observed_at,snapshot_id:CANON.snapshot_id,data_state:'CANONICAL_CURRENT_OBSERVATION'})}
+ ids.forEach(id=>{const a=CANON.accounts[id];upsert(id,{total_asset:a.nav,principal:a.principal,total_pnl:a.pnl,market_pnl:a.today_pnl,net_cash_flow:a.net_flow,daily_return:n(a.today_return)==null?null:a.today_return/100,flow_adj_return:n(a.today_return)==null?null:a.today_return/100,flow_adj_daily_return:n(a.today_return)==null?null:a.today_return/100})});
+ const total={total_asset:h.nav,principal:h.principal,total_pnl:h.cum,return_pct:h.return_pct,market_pnl:h.day,net_cash_flow:h.flow,daily_return:h.day_return==null?null:h.day_return/100,flow_adj_return:h.day_return==null?null:h.day_return/100,flow_adj_daily_return:h.day_return==null?null:h.day_return/100};upsert('TOTAL',total);
+ D.human.latest_performance={...total,date:day,account:'TOTAL',sync_kst:CANON.observed_at};D.human.performance=rows;
+ D.ai=D.ai||{};D.ai.rows=Array.isArray(D.ai.rows)?D.ai.rows:[];D.ai.rows.forEach(x=>{x.date=M.dayKey(x.date)});
+ if(day){let r=D.ai.rows.find(x=>x.date===day);if(!r){r={date:day};D.ai.rows.push(r)}const a=CANON.accounts.AI;Object.assign(r,{nav:a.nav,today_pnl:a.today_pnl,today_return:a.today_return,sync_kst:CANON.observed_at,snapshot_id:CANON.snapshot_id})}
 }
 
 function installCanonicalFunctions(){
  window.latestAccountRows=function(){const base=ORIGINAL.latestAccountRows?ORIGINAL.latestAccountRows()||{}:{};if(!CANON)return base;const out={...base};['TOSS','ISA','PENSION','IRP'].forEach(id=>{const c=CANON.accounts[id]||{};out[id]={...(base[id]||{}),account:id,total_asset:n(c.nav),principal:n(c.principal),market_pnl:n(c.today_pnl),net_cash_flow:n(c.net_flow),daily_return:n(c.today_return)!=null?z(c.today_return)/100:null,flow_adj_return:n(c.today_return)!=null?z(c.today_return)/100:null,data_state:c.quality,sync_kst:CANON.observed_at};});return out;};
  window.buildTodayAccounting=function(){const accts={},ids=['TOSS','ISA','PENSION','IRP'];let current=0,pnl=0,flow=0;ids.forEach(id=>{const c=CANON.accounts[id]||{},p=n(c.today_pnl),f=n(c.net_flow),chg=p!=null&&f!=null?p+f:p;const prev=n(c.nav)!=null&&chg!=null?z(c.nav)-chg:null;accts[id]={account:id,current_nav:n(c.nav),actual_nav:n(c.nav),previous_nav:prev,nav_change:chg,actual_nav_change:chg,live_nav_change:chg,net_cash_flow:f,live_pnl:p,investment_pnl:p,daily_return:n(c.today_return),data_state:c.quality,sync_kst:CANON.observed_at};current+=z(c.nav);if(p!=null)pnl+=p;if(f!=null)flow+=f});return {accounts:accts,current_nav:current,actual_nav:current,nav_change:pnl+flow,actual_nav_change:pnl+flow,live_nav_change:pnl+flow,net_cash_flow:flow,live_pnl:pnl,investment_pnl:pnl,previous_nav:current-pnl-flow,daily_return:current-pnl-flow>0?pnl/(current-pnl-flow):null,explained_gap:0,live_reconciliation_gap:0};};
- window.buildUnifiedAccountSnapshot=function(){const c=clone(CANON);Object.values(c.accounts).forEach(x=>{x.today_change=x.today_pnl;x.session_change=x.today_pnl;x.extended_change=0;x.session_return=x.today_return;x.session_quality=x.quality;x.position_count=(x.positions||[]).length;x.cash=z(x.cash_krw)+(z(x.cash_usd)*(x.id==='AI'?z(((LAST_LIVE.accounts||{}).AI||{}).fx_krw_per_usd):0));});c.total.session_change=c.total.today_pnl;c.total.extended_change=0;c.total.session_return=null;c.total.unique_ticker_count=new Set(Object.values(c.accounts).flatMap(x=>(x.positions||[]).map(p=>sym(p.ticker)).filter(Boolean))).size;return c;};
+ window.buildUnifiedAccountSnapshot=function(){const c=clone(CANON);Object.values(c.accounts).forEach(x=>{x.today_change=x.today_pnl;x.session_change=x.today_pnl;x.extended_change=0;x.session_return=x.today_return;x.session_quality=x.quality;x.position_count=(x.positions||[]).length;x.cash=M.cash(x);});c.total.session_change=c.total.today_pnl;c.total.extended_change=0;c.total.session_return=null;c.total.unique_ticker_count=new Set(Object.values(c.accounts).flatMap(x=>(x.positions||[]).map(p=>sym(p.ticker)).filter(Boolean))).size;return c;};
  window.buildUnifiedPortfolioPositions=function(){if(!CANON)return [];return REGISTRY.flatMap(r=>((CANON.accounts[r.id]||{}).positions||[]).map(p=>({...p,account:r.id,account_type:r.id,current_price:z(p.current_price||p.price),market_value:z(p.market_value||p.value_krw||p.value),data_state:p.data_state||((CANON.accounts[r.id]||{}).quality),price_source:p.price_source||((CANON.accounts[r.id]||{}).source)})));};
  window.buildRegularSessionMetrics=function(){const accounts={},positions=[];REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{};let priced=0,total=0;(c.positions||[]).forEach(p=>{if(String(p.record_type||'POSITION').toUpperCase()!=='POSITION')return;total++;const cur=z(p.current_price||p.price),prev=z(p.prev_close),qty=z(p.qty),fx=String(p.currency||'KRW').toUpperCase()==='USD'?(z(p.fx)||z(c.fx)||z(((LAST_LIVE.accounts||{}).AI||{}).fx_krw_per_usd)||1):1,ok=cur>0&&prev>0&&qty>0;if(ok)priced++;positions.push({account:r.id,ticker:p.ticker,name:p.name,qty,baseline_price:prev,regular_mark:cur,regular_pnl:ok?qty*(cur-prev)*fx:0,extended_pnl:0,session_pnl:ok?qty*(cur-prev)*fx:0,quality:ok?'FULL':'REFERENCE',quote_timestamp:p.live_price_timestamp||CANON.observed_at,quote_source:p.price_source||c.source,base_fx:fx})});let q=['MODELED_LIVE','MODEL_LIVE','USER_VERIFIED_CURRENT','LIVE'].includes(c.quality)?'FULL':c.quality;accounts[r.id]={regular_pnl:n(c.today_pnl),extended_pnl:0,session_pnl:n(c.today_pnl),quality:q,priced,positions:total,session_label:c.source};});return {accounts,positions,context:{source:'CANONICAL_V5',observed_at:CANON.observed_at}};};
  if(ORIGINAL.openTradePerformanceDetail&&!window.__ctTradeDetailWrapped){window.openTradePerformanceDetail=function(t,acct,currentPrice,perf,rankLabel){let cp=n(currentPrice);if((cp==null||cp<=0)&&CANON){const id=String(acct||t&&t.account||'').toUpperCase(),p=((CANON.accounts[id]||{}).positions||[]).find(x=>sym(x.ticker)===sym(t&&t.ticker));cp=n(p&&p.current_price)||n(p&&p.price)||cp;}return ORIGINAL.openTradePerformanceDetail(t,acct,cp,perf,rankLabel)};window.__ctTradeDetailWrapped=true;}
@@ -192,13 +194,15 @@ function renderAll(){ensureWatchlistUi();updateCards();updateHero();fixLegacyBad
 
 function applyLive(live){
  if(!live||!['JJOONI_CT_LIVE_V3','JJOONI_CT_LIVE_V4','JJOONI_CT_LIVE_V5'].includes(String(live.schema||'')))throw new Error('LIVE_SCHEMA_MISMATCH');if(typeof D==='undefined')throw new Error('CONTROL_TOWER_DATA_MISSING');
- LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=makeCanonical(live);window.__JJOONI_CANONICAL_SSOT=CANON;mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();try{document.dispatchEvent(new CustomEvent('jjooni:live-applied',{detail:{snapshot_id:live.snapshot_id||null,observed_at:live.observed_at||null}}))}catch(_){};
+ const incoming=M.parseMs(live.generated_kst||live.observed_at),previous=M.parseMs(LAST_LIVE?.generated_kst||LAST_LIVE?.observed_at);if(incoming==null||incoming>Date.now()+120000)throw new Error('INVALID_SNAPSHOT_TIME');if(previous!=null&&incoming<previous)throw new Error('SNAPSHOT_ROLLBACK_REJECTED');
+ const candidate=makeCanonical(live);if(candidate.total.nav==null)throw Error('INCOMPLETE_NAV_SNAPSHOT');LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=candidate;window.__JJOONI_CANONICAL_SSOT=CANON;mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();try{document.dispatchEvent(new CustomEvent('jjooni:live-applied',{detail:{snapshot_id:live.snapshot_id||null,observed_at:live.observed_at||null}}))}catch(_){};
  const ts=Date.parse(String(live.observed_at||'')),age=Number.isFinite(ts)?Date.now()-ts:Infinity,t=String(live.observed_at||'').replace('T',' ').slice(5,16),miss=CANON.total.missing_today.join(',')||'none';
- if(age>MAX_AGE)setBadge('SSOT STALE · '+t,'warn','Feed age exceeded 20 minutes. Missing daily P&L: '+miss);
+ if(M.freshness(live).state==='STALE')setBadge('SSOT STALE · '+t,'warn','Producer next-update deadline exceeded. Missing daily P&L: '+miss);
  else setBadge('SSOT '+CANON.total.known_today_count+'/'+CANON.total.account_count+' · '+t,CANON.total.today_complete?'good':'warn','Canonical feed drives overview, performance, account drilldowns, trade review, TRI-POD and watchlist. Missing daily P&L: '+miss);
 }
 
-async function refresh(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};try{window.__JJOONI_COST_SIDECAR=kv.COST_JSON?JSON.parse(kv.COST_JSON):null}catch(_){window.__JJOONI_COST_SIDECAR=null};const live=await decryptEnvelope(JSON.parse(kv.ENCRYPTED_PAYLOAD||'{}'),pw);applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
+let refreshBusy=false;
+async function refresh(){if(refreshBusy)return;refreshBusy=true;try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};try{window.__JJOONI_COST_SIDECAR=kv.COST_JSON?JSON.parse(kv.COST_JSON):null}catch(_){window.__JJOONI_COST_SIDECAR=null};let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}finally{refreshBusy=false}}
 
 injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
