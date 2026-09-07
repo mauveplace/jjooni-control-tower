@@ -26,7 +26,6 @@ jobs:
               if s.count(old)!=1: raise SystemExit(f'NON_UNIQUE_PATTERN:{path}:{s.count(old)}')
               p.write_text(s.replace(old,new),encoding='utf-8')
 
-          # data-integrity: shared FX must be explicit, never borrowed from AI/TRIPOD.
           rep('data-integrity-v4.js', '''function fxKrwPerUsd(){
             const vals=[];
             try{vals.push(window.__JJOONI_LIVE_PAYLOAD?.accounts?.AI?.fx_krw_per_usd)}catch(_){}
@@ -40,19 +39,17 @@ jobs:
             return fx&&fx>500&&fx<3000&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?fx:null;
           }''')
 
-          # metric drilldown: no 1350 or cross-account FX fallback.
           rep('metric-drilldown-router-v11.js', "const fx=()=>n(window.__JJOONI_FX_KRW_PER_USD)||n(L().accounts?.AI?.fx_krw_per_usd)||n(L().accounts?.TRIPOD?.fx)||1350;", "const fx=()=>{const r=L().fx_reference||{},x=n(r.krw_per_usd);return x&&x>500&&x<3000&&String(r.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?x:null};")
           rep('metric-drilldown-router-v11.js', "for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null)return sideCurrency(p)==='USD'?x*fx():x}\n const qq=Math.abs(z(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)),px=n(p?.current_price??p?.price??p?.last_price);if(qq&&px!=null)return sideCurrency(p)==='USD'?qq*px*fx():qq*px;", "for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null){const f=fx();return sideCurrency(p)==='USD'?(f?x*f:null):x}}\n const qq=Math.abs(z(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)),px=n(p?.current_price??p?.price??p?.last_price);if(qq&&px!=null){const f=fx();return sideCurrency(p)==='USD'?(f?qq*px*f:null):qq*px;}")
           rep('metric-drilldown-router-v11.js', "const cashKrw=n(a.cash_krw)||0,cashUsd=n(a.cash_usd)||0,cashTotal=cashKrw+cashUsd*fx();", "const cashKrw=n(a.cash_krw)||0,cashUsd=n(a.cash_usd)||0,f=fx(),cashTotal=cashUsd?(f?cashKrw+cashUsd*f:null):cashKrw;")
-          rep('metric-drilldown-router-v11.js', "['적용 환율',s.cashUsd?fx().toLocaleString('ko-KR')+'원/USD':'해당 없음']", "['적용 환율',s.cashUsd?(fx()?fx().toLocaleString('ko-KR')+'원/USD':'환율 미확인'):'해당 없음']")
+          # Replace the larger cash-detail block first; then the single remaining NAV FX row.
           rep('metric-drilldown-router-v11.js', "['USD 원화환산',s.cashUsd?won(s.cashUsd*fx()):'₩0'],['합산 현금',won(s.cashTotal)],['적용 환율',s.cashUsd?fx().toLocaleString('ko-KR')+'원/USD':'해당 없음']", "['USD 원화환산',s.cashUsd?(fx()?won(s.cashUsd*fx()):'환율 미확인'):'₩0'],['합산 현금',s.cashTotal==null?'산정 대기':won(s.cashTotal)],['적용 환율',s.cashUsd?(fx()?fx().toLocaleString('ko-KR')+'원/USD':'환율 미확인'):'해당 없음']")
+          rep('metric-drilldown-router-v11.js', "['적용 환율',s.cashUsd?fx().toLocaleString('ko-KR')+'원/USD':'해당 없음']", "['적용 환율',s.cashUsd?(fx()?fx().toLocaleString('ko-KR')+'원/USD':'환율 미확인'):'해당 없음']")
           rep('metric-drilldown-router-v11.js', "if(label==='예수금')setCardValue(el,won(s.cashTotal));", "if(label==='예수금')setCardValue(el,s.cashTotal==null?'산정 대기':won(s.cashTotal));")
 
-          # loader: add final completeness layer after authority guard.
           rep('trade-review-loader.js', "version:'14.11'", "version:'14.12'")
           rep('trade-review-loader.js', "['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.1','source-authority-guard']];", "['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.1','source-authority-guard'],\n['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.0','position-completeness']];")
 
-          # static assertions
           checks={
             'data-integrity-v4.js':['accounts?.AI?.fx_krw_per_usd','accounts?.TRIPOD?.fx','D.ai?.latest?.fx'],
             'metric-drilldown-router-v11.js':['||1350','accounts?.AI?.fx_krw_per_usd','accounts?.TRIPOD?.fx'],
