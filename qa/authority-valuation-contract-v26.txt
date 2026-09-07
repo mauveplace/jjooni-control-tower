@@ -1,0 +1,6 @@
+AUTHORITY_VALUATION_V26
+- Broker account authority uses holdings_quality/cash_quality before raw freshness/status quality.
+- Raw LIVE/BROKER_LIVE_FULL status is preserved; it is not overloaded as broker identity.
+- Active metric router must not use 1350 or another account's FX as a fallback.
+- JjooniMetrics.positions includes FUND rows for valuation/drilldown completeness.
+- A modeled IRP reconciliation residual of <= 1.01 KRW is retained in canonical arithmetic but not presented as real cash/예수금.
