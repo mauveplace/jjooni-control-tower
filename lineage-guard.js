@@ -14,12 +14,14 @@ function ids(){
 }
 
 function validFx(v){const x=n(v);return x!=null&&x>500&&x<3000?x:null}
-function fxFor(c,p){
+function fxFor(id,c,p){
  if(String((p||{}).currency||'KRW').toUpperCase()!=='USD')return 1;
- const L=live()||{},A=L.accounts||{};
- for(const v of [p&&p.fx,c&&c.fx,(A.TOSS||{}).fx_krw_per_usd,(A.AI||{}).fx_krw_per_usd,(A.TRIPOD||{}).fx]){
+ const L=live()||{},a=(L.accounts||{})[id]||{};
+ for(const v of [p&&p.fx_krw_per_usd,p&&p.fx,c&&c.fx_krw_per_usd,c&&c.fx,a.fx_krw_per_usd,a.fx]){
   const x=validFx(v);if(x!=null)return x;
  }
+ const ref=L.fx_reference||{},x=validFx(ref.krw_per_usd);
+ if(x!=null&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING')return x;
  return null;
 }
 function priceAsOf(p){return String((p||{}).price_as_of||(p||{}).live_price_timestamp||'').trim()||null}
@@ -148,7 +150,7 @@ function installFunctions(){
     total++;
     const cur=n(p.current_price!=null?p.current_price:p.price),prev=n(p.prev_close),qty=n(p.qty),asof=priceAsOf(p),liq=String(p.price_liquidity||'NORMAL').toUpperCase();
     if(id==='TOSS'){
-     const dp=n(p.daily_pnl),dr=n(p.daily_return),fx=fxFor(c,p);
+     const dp=n(p.daily_pnl),dr=n(p.daily_return),fx=fxFor(id,c,p);
      const ok=dp!=null&&asof!=null;
      if(ok&&liq!=='THIN')priced++;
      positions.push({
@@ -162,7 +164,7 @@ function installFunctions(){
      continue;
     }
 
-    const isUsd=String(p.currency||'KRW').toUpperCase()==='USD',fx=fxFor(c,p);
+    const isUsd=String(p.currency||'KRW').toUpperCase()==='USD',fx=fxFor(id,c,p);
     const ok=cur!=null&&cur>0&&prev!=null&&prev>0&&qty!=null&&qty>0&&asof!=null&&(!isUsd||fx!=null);
     const pnl=ok?qty*(cur-prev)*(isUsd?fx:1):null;
     if(ok&&liq!=='THIN')priced++;

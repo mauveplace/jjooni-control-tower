@@ -2,7 +2,7 @@
 'use strict';
 if(window.__JJOONI_SOURCE_AUTHORITY_V24?.booted)return;
 
-const S={booted:true,state:'BOOTING',version:'24.0',kis_verified:false,kis_reason:'UNVERIFIED',unsafe_valuations_removed:0,valuations_repaired:0,fx_missing_accounts:[],updated_at:null};
+const S={booted:true,state:'BOOTING',version:'24.1',kis_verified:false,kis_reason:'UNVERIFIED',unsafe_valuations_removed:0,valuations_repaired:0,fx_missing_accounts:[],updated_at:null};
 window.__JJOONI_SOURCE_AUTHORITY_V24=S;
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
@@ -35,8 +35,9 @@ function kisEvidence(){
  const position=String(a.position_authority||'').toUpperCase();
  const provider=String(a.provider||'').toUpperCase();
  const strong=balance.includes('KIS_OPEN_API_BROKER_BALANCE')||position.includes('KIS_OPEN_API_BROKER_BALANCE')||a.broker_direct===true||provider.includes('KOREA INVESTMENT');
- const base=status==='LIVE'&&mode.includes('KIS')&&nav!=null&&nav>0;
- if(base&&(strong||(!balance&&!position&&!provider)))return{ok:true,reason:strong?'LIVE_KIS_BACKEND_AUTHORITY':'LIVE_KIS_MODE_NAV'};
+ const identity=mode.includes('KIS')||String(a.broker_code||'').toUpperCase()==='KIS'||String(a.source||'').toUpperCase().includes('KIS')||strong;
+ const base=status==='LIVE'&&identity&&nav!=null&&nav>0;
+ if(base)return{ok:true,reason:strong?'LIVE_KIS_BACKEND_AUTHORITY':'LIVE_KIS_IDENTITY_NAV'};
  return{ok:false,reason:`status=${status||'MISSING'} mode=${mode||'MISSING'} nav=${nav==null?'MISSING':nav}`};
 }
 function enforceKis(){
@@ -46,11 +47,13 @@ function enforceKis(){
   const a=root?.accounts?.AI;if(!a)continue;
   a.broker='한국투자증권';a.broker_name='한국투자증권';a.broker_code='KIS';
   a.source_verified=!!ev.ok;
-  if(ev.ok){a.source='KIS_OPEN_API';a.account_quality='BROKER_DIRECT_KIS_API';a.holdings_quality='BROKER_DIRECT_KIS_API';a.cash_quality='BROKER_DIRECT_KIS_API';}
-  else{a.account_quality='SOURCE_UNVERIFIED';a.holdings_quality='SOURCE_UNVERIFIED';a.cash_quality='SOURCE_UNVERIFIED';if(String(a.source||'').toUpperCase()==='KIS_OPEN_API')a.source='KIS_SOURCE_UNVERIFIED';}
+  if(ev.ok){a.quality='BROKER_DIRECT_KIS_API';a.account_quality='BROKER_DIRECT_KIS_API';a.holdings_quality='BROKER_DIRECT_KIS_API';a.cash_quality='BROKER_DIRECT_KIS_API';if(!String(a.source||'').toUpperCase().includes('KIS'))a.source='BROKER_DIRECT_KIS_KR+OVERSEAS';}
+  else{a.quality='SOURCE_UNVERIFIED';a.account_quality='SOURCE_UNVERIFIED';a.holdings_quality='SOURCE_UNVERIFIED';a.cash_quality='SOURCE_UNVERIFIED';if(/KIS|BROKER_DIRECT_KIS/.test(String(a.source||'').toUpperCase()))a.source='KIS_SOURCE_UNVERIFIED';}
  }
  window.__JJOONI_BROKER_OVERRIDE={...(window.__JJOONI_BROKER_OVERRIDE||{}),AI:label};
  const nodes=[...document.querySelectorAll('.ctP8Card,.ctA8Card,.accountCard,.card,[data-account-drill],#accountDrillModal')];
+ const trustRows=[...document.querySelectorAll('.ctTrustRowV6')];for(const row of trustRows){if(String(row.querySelector('b')?.textContent||'').trim()==='AI BOT'){const x=row.querySelector('.ctTrustSourceV6');if(x)x.textContent=ev.ok?'한국투자증권 API':label}}
+ for(const card of document.querySelectorAll('#ctDesktopAccountsV8 .ctA8Card')){if(String(card.querySelector('.ctA8Name')?.textContent||'').trim()==='AI BOT'){const x=card.querySelector('.ctA8Source');if(x){const basis=String(x.textContent||'').split('· 기준').slice(1).join('· 기준').trim();x.textContent=(ev.ok?'한국투자증권 API':label)+(basis?' · 기준 '+basis:'')}}}
  for(const root of nodes){const text=String(root.innerText||root.textContent||'');if(!/AI\s*BOT|\bAI\b/i.test(text))continue;root.querySelectorAll('.ctAcctSource,.ctTrustDetailSubV6,.ctTrustFootV6,[data-source-label]').forEach(e=>{e.textContent=ev.ok?'한국투자증권 API':label});}
 }
 function safeValue(id,a,p){
@@ -108,5 +111,5 @@ function patchOpenModal(){
 function apply(){enforceKis();reconcileValuations();patchOpenModal();S.state='ACTIVE';S.updated_at=new Date().toISOString();document.dispatchEvent(new CustomEvent('jjooni:source-authority-v24-applied',{detail:{kis_verified:S.kis_verified,fx_missing_accounts:S.fx_missing_accounts}}));}
 let queued=false;function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})}
 function wrapModal(){const fn=window.openAccountDrilldown;if(typeof fn!=='function'||fn.__jjooniSourceAuthorityV24)return;const w=function(){const r=fn.apply(this,arguments);[0,80,220,500,1000].forEach(ms=>setTimeout(schedule,ms));return r};w.__jjooniSourceAuthorityV24=true;w.__jjooniSourceAuthorityOriginal=fn;window.openAccountDrilldown=w;}
-apply();wrapModal();[100,400,1200,3000].forEach(ms=>setTimeout(()=>{wrapModal();schedule()},ms));document.addEventListener('jjooni:live-applied',schedule);document.addEventListener('jjooni:source-truth-applied',schedule);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
+apply();wrapModal();[100,400,1200,3000].forEach(ms=>setTimeout(()=>{wrapModal();schedule()},ms));document.addEventListener('jjooni:live-applied',schedule);document.addEventListener('jjooni:source-truth-applied',schedule);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});window.addEventListener('resize',schedule,{passive:true});setInterval(()=>{if(!document.hidden)schedule()},1000);
 })();

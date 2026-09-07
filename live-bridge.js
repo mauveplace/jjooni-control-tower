@@ -10,7 +10,7 @@ const REGISTRY=[
  {id:'ISA',label:'ISA',type:'HUMAN',broker:'KB증권'},
  {id:'PENSION',label:'연금저축',type:'HUMAN',broker:'KB증권'},
  {id:'IRP',label:'IRP',type:'HUMAN',broker:'KB증권'},
- {id:'AI',label:'AI BOT',type:'AI',broker:'KB증권'},
+ {id:'AI',label:'AI BOT',type:'AI',broker:'한국투자증권'},
  {id:'TRIPOD',label:'TRI-POD',type:'TRIPOD',broker:'카카오증권'}
 ];
 const ORIGINAL={

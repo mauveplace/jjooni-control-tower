@@ -18,7 +18,10 @@ function patchCanonical(){
  const aiMode=String(liveA.mode||ai.source||'').toUpperCase();
  const aiBrokerCode=String(liveA.broker_code||ai.broker_code||'').toUpperCase();
  const aiProvider=String(liveA.provider||liveA.source||ai.provider||ai.source||'').toUpperCase();
- const kisDirect=aiMode.includes('KIS')||aiBrokerCode==='KIS'||aiProvider.includes('KIS_OPEN_API')||aiProvider.includes('KOREA INVESTMENT');
+ const aiStatus=String(liveA.status||'').toUpperCase();
+ const aiNav=n(liveA.nav??ai.nav);
+ const kisIdentity=aiMode.includes('KIS')||aiBrokerCode==='KIS'||aiProvider.includes('KIS_OPEN_API')||aiProvider.includes('KOREA INVESTMENT')||liveA.broker_direct===true||String(liveA.position_authority||'').toUpperCase().includes('KIS_OPEN_API_BROKER_BALANCE');
+ const kisDirect=aiStatus==='LIVE'&&aiNav!=null&&aiNav>0&&kisIdentity;
  if(kisDirect){
    ai.source='BROKER_DIRECT_KIS_KR+OVERSEAS';
    ai.quality='BROKER_DIRECT_KIS_API';
@@ -49,7 +52,7 @@ function patchCanonical(){
  return kisDirect;
 }
 
-function patchUi(){
+function patchUi(kisDirect){
  const C=window.__JJOONI_CANONICAL_SSOT||{};
  const ai=(C.accounts||{}).AI||{};
  const measured=qa('#ctHeroTrustStripV6 button.measured')[0];
@@ -62,7 +65,7 @@ function patchUi(){
    const name=String(q('b',row)?.textContent||'').trim();
    const src=q('.ctTrustSourceV6',row);
    if(!src)return;
-   if(name==='AI BOT')src.textContent='한국투자증권 API';
+   if(name==='AI BOT')src.textContent=kisDirect?'한국투자증권 API':'한국투자증권 · API 원천 미확인';
    else if(name==='Toss')src.textContent='Toss API';
  });
  const aiLine=q('#ctHumanAIV6');
@@ -75,27 +78,30 @@ function patchUi(){
    const name=norm(q('.ctA8Name',card)?.textContent);
    const src=q('.ctA8Source',card);if(!src)return;
    const basis=(src.textContent||'').split('· 기준').slice(1).join('· 기준').trim();
-   if(name==='AI BOT')src.textContent='한국투자증권 API'+(basis?' · 기준 '+basis:'');
+   if(name==='AI BOT')src.textContent=(kisDirect?'한국투자증권 API':'한국투자증권 · API 원천 미확인')+(basis?' · 기준 '+basis:'');
    if(name==='Toss')src.textContent='Toss API'+(basis?' · 기준 '+basis:'');
  });
 }
 
-function fx(){
- const L=window.__JJOONI_LIVE_PAYLOAD||{};
- for(const v of [window.__JJOONI_FX_KRW_PER_USD,(L.accounts||{}).AI?.fx_krw_per_usd,(L.accounts||{}).TRIPOD?.fx]){const x=n(v);if(x&&x>500&&x<3000)return x}
- return 1350;
+function fx(id,p){
+ const L=window.__JJOONI_LIVE_PAYLOAD||{},C=window.__JJOONI_CANONICAL_SSOT||{};
+ const a=(C.accounts||{})[id]||{},live=(L.accounts||{})[id]||{};
+ for(const v of [p?.fx_krw_per_usd,p?.fx,a.fx_krw_per_usd,a.fx,live.fx_krw_per_usd,live.fx]){const x=n(v);if(x&&x>500&&x<3000)return x}
+ const ref=L.fx_reference||{},x=n(ref.krw_per_usd);
+ if(x&&x>500&&x<3000&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING')return x;
+ return null;
 }
 function currency(p){return String(p?.currency||((String(p?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase()}
-function positionValueKrw(p){
+function positionValueKrw(id,p){
  for(const k of ['market_value_krw','evaluation_amount_krw','eval_amount_krw','valuation_krw','evlu_amt_krw']){const x=n(p?.[k]);if(x!=null)return x}
- for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null)return currency(p)==='USD'?x*fx():x}
+ for(const k of ['market_value','evaluation_amount','eval_amount','valuation','evlu_amt','evaluation_value']){const x=n(p?.[k]);if(x!=null){if(currency(p)!=='USD')return x;const f=fx(id,p);return f?x*f:null}}
  const qty=Math.abs(n(p?.qty??p?.quantity??p?.held_qty??p?.balance_qty)||0),px=n(p?.current_price??p?.price??p?.last_price);
  if(!qty||px==null)return null;
- return currency(p)==='USD'?qty*px*fx():qty*px;
+ if(currency(p)!=='USD')return qty*px;const f=fx(id,p);return f?qty*px*f:null;
 }
 function stockValue(id){
  const C=window.__JJOONI_CANONICAL_SSOT||{},a=(C.accounts||{})[id]||{};
- const vals=(a.positions||[]).filter(p=>String(p?.record_type||'POSITION').toUpperCase()==='POSITION').map(positionValueKrw).filter(v=>v!=null);
+ const vals=(a.positions||[]).filter(p=>String(p?.record_type||'POSITION').toUpperCase()==='POSITION').map(p=>positionValueKrw(id,p)).filter(v=>v!=null);
  return vals.length?vals.reduce((s,v)=>s+v,0):null;
 }
 function won(v){return '₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR')}
@@ -149,7 +155,7 @@ function patchMetricRuntime(){
 
 function apply(){
  const direct=patchCanonical();
- patchUi();
+ patchUi(direct);
  const metric=patchMetricRuntime();
  const C=window.__JJOONI_CANONICAL_SSOT||{},ai=(C.accounts||{}).AI||{},toss=(C.accounts||{}).TOSS||{};
  window.__JJOONI_ACCOUNT_SOURCE_V22={

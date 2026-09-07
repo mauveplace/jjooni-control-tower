@@ -15,7 +15,7 @@ const usd=v=>'$'+Math.abs(Number(v)||0).toLocaleString('en-US',{minimumFractionD
 function mobile(){return window.matchMedia('(max-width:767px)').matches}
 function trustKind(raw){
  const s=String(raw||'').toUpperCase();
- if(s.includes('BROKER')||s.includes('ACTUAL')||s==='FULL'||s==='LIVE')return 'measured';
+ if(s.includes('BROKER_DIRECT')||s.includes('BROKER_LIVE')||s.includes('BROKER_API')||s.includes('ACTUAL_BROKER'))return 'measured';
  if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING')||s.includes('PROXY')||s.includes('PARTIAL'))return 'modeled';
  return 'reference';
 }

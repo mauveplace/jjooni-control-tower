@@ -14,7 +14,7 @@ const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
 const wide=()=>window.innerWidth>=768;
 const C=()=>window.__JJOONI_CANONICAL_SSOT||{};
 const L=()=>window.__JJOONI_LIVE_PAYLOAD||{};
-const fxNow=()=>n(window.__JJOONI_FX_KRW_PER_USD)||n((((L().accounts||{}).AI)||{}).fx_krw_per_usd)||1;
+const fxNow=()=>{const ref=L().fx_reference||{},x=n(ref.krw_per_usd);return x&&x>500&&x<3000&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?x:null};
 const won=v=>'₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR');
 const signed=v=>{const x=Number(v)||0;return (x>=0?'+':'-')+won(x)};
 const pct=v=>n(v)==null?'—':(Number(v)>=0?'+':'')+Number(v).toFixed(2)+'%';
@@ -24,9 +24,9 @@ const qty=t=>Math.abs(z(t&&(t.qty??t.quantity??t.held_qty??t.filled_qty)));
 const price=t=>n(t&&(t.price??t.filled_price??t.avg_price));
 const ts=t=>{const r=String(t&&(t.filled_at_kst||t.trade_date||t.date)||'').trim();if(!r)return 0;const x=Date.parse(r.length<=10?r+'T00:00:00+09:00':r);return Number.isFinite(x)?x:0};
 const currency=o=>String(o&&o.currency||((String(o&&o.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase();
-function toKrw(v,c,fx){const x=n(v);if(x==null)return null;return String(c||'KRW').toUpperCase()==='USD'?x*(n(fx)||fxNow()):x}
+function toKrw(v,c,fx){const x=n(v);if(x==null)return null;if(String(c||'KRW').toUpperCase()!=='USD')return x;const f=n(fx)||fxNow();return f&&f>500&&f<3000?x*f:null}
 function cls(v){return Number(v)>0?'gain':Number(v)<0?'loss':'neutral'}
-function trustKind(raw){const s=String(raw||'').toUpperCase();if(s.includes('BROKER')||s.includes('ACTUAL')||s==='FULL'||s==='LIVE')return 'measured';if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING')||s.includes('PARTIAL'))return 'modeled';return 'reference'}
+function trustKind(raw){const s=String(raw||'').toUpperCase();if(s.includes('BROKER_DIRECT')||s.includes('BROKER_LIVE')||s.includes('BROKER_API')||s.includes('ACTUAL_BROKER'))return 'measured';if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING')||s.includes('PARTIAL'))return 'modeled';return 'reference'}
 function trustLabel(k){return k==='measured'?'증권사 확인':k==='modeled'?'계산값':'참고값'}
 
 function ensureStyle(){

@@ -30,7 +30,7 @@ function patchAiBrokerAuthority(){
  const label=aiBrokerLabel();
  window.__JJOONI_BROKER_OVERRIDE={...(window.__JJOONI_BROKER_OVERRIDE||{}),AI:label};
  for(const root of [L(),C()]){
-   try{if(root.accounts?.AI){root.accounts.AI.broker=label;root.accounts.AI.broker_name=label;root.accounts.AI.broker_code='KIS';root.accounts.AI.source=root.accounts.AI.source||'KIS_OPEN_API'}}catch(_){}
+   try{if(root.accounts?.AI){root.accounts.AI.broker=label;root.accounts.AI.broker_name=label;root.accounts.AI.broker_code='KIS'}}catch(_){}
  }
  const candidates=[...document.querySelectorAll('.ctP8Card,.ctA8Card,.accountCard,.card,[data-account-drill],#accountDrillModal')];
  for(const root of candidates){
