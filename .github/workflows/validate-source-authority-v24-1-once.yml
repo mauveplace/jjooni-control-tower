@@ -1,0 +1,31 @@
+name: Validate Source Authority V24.1 Once
+on:
+  push:
+    branches: [fix/source-authority-v24-1-cache-fx-20260907]
+    paths: ['.github/workflows/validate-source-authority-v24-1-once.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/source-authority-v24-1-cache-fx-20260907
+      - name: Syntax and static contract
+        run: |
+          set -euo pipefail
+          for f in account-integrity-v17.js account-source-truth-v22.js human-ui-v6.js lineage-guard.js live-bridge.js source-authority-guard-v24.js tablet-accounts-v8.js tablet-runtime-v8.js trade-review-loader.js; do
+            node --check "$f"
+          done
+          grep -q 'trade-review-loader.js?v=14.11' index.html
+          grep -q "source-authority-guard-v24.js?v=24.1" trade-review-loader.js
+          grep -q "version:'24.1'" source-authority-guard-v24.js
+          grep -q "aiStatus==='LIVE'" account-source-truth-v22.js
+          grep -q "ACCOUNT_SPECIFIC_OR_EXPLICIT_FX_REFERENCE_ONLY" canonical-valuation-fix-v13.js
+          grep -q "cashText=cashFxMissing?'환율 미확인'" tablet-accounts-v8.js
+          ! grep -q 'return 1350' account-source-truth-v22.js canonical-valuation-fix-v13.js
+          ! grep -q "broker:'KB증권'" live-bridge.js
+          ! grep -q "source=root.accounts.AI.source||'KIS_OPEN_API'" account-integrity-v17.js
+          echo 'SOURCE_AUTHORITY_V24_1_STATIC=PASS'
