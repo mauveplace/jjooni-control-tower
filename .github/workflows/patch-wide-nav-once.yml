@@ -1,0 +1,44 @@
+name: Patch Wide Nav Once
+on:
+  push:
+    branches: [fix/readability-cost-trades-20260908]
+    paths: ['.github/workflows/patch-wide-nav-once.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/readability-cost-trades-20260908
+      - name: Remove mobile more menu from wide layouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('ui-refactor.js'); s=p.read_text(encoding='utf-8')
+          old="@media(max-width:767px){"
+          new="@media(min-width:768px){#ctMoreTab,#ctMoreMenu{display:none!important}}\n@media(max-width:767px){"
+          if s.count(old)!=1: raise SystemExit('MEDIA_PATTERN')
+          s=s.replace(old,new,1)
+          old="function ensureMobileNav(){\n const tabs=qs('.tabs');if(!tabs)return;"
+          new="function ensureMobileNav(){\n if(!mobile()){const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.style.display='none';if(menu){menu.classList.remove('open');menu.style.display='none'};return}\n const tabs=qs('.tabs');if(!tabs)return;"
+          if s.count(old)!=1: raise SystemExit('NAV_PATTERN')
+          s=s.replace(old,new,1)
+          s=s.replace("window.__JJOONI_UI_REFACTOR={version:'1.4'","window.__JJOONI_UI_REFACTOR={version:'1.5'",1)
+          p.write_text(s,encoding='utf-8')
+          q=Path('trade-review-loader.js'); t=q.read_text(encoding='utf-8')
+          if 'ui-refactor.js?v=1.1' not in t: raise SystemExit('LOADER_UI_PATTERN')
+          t=t.replace('ui-refactor.js?v=1.1','ui-refactor.js?v=1.5',1)
+          q.write_text(t,encoding='utf-8')
+          PY
+          node --check ui-refactor.js
+          node --check trade-review-loader.js
+          git config user.name 'jjooni-automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add ui-refactor.js trade-review-loader.js
+          git commit -m 'fix: hide mobile more menu on tablet and desktop'
+          git push origin HEAD:fix/readability-cost-trades-20260908
