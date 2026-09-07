@@ -19,44 +19,26 @@ jobs:
 
       - name: Patch live bridge
         shell: bash
+        env:
+          POSITION_PATCH_B64: ZnVuY3Rpb24gbWVyZ2VQb3NpdGlvbnMobGl2ZSl7CiBELmh1bWFuPUQuaHVtYW58fHt9O0QuaHVtYW4ucG9zaXRpb25zPUFycmF5LmlzQXJyYXkoRC5odW1hbi5wb3NpdGlvbnMpP0QuaHVtYW4ucG9zaXRpb25zOltdO2NvbnN0IGE9bGl2ZS5hY2NvdW50c3x8e307CiBbJ1RPU1MnLCdJU0EnLCdQRU5TSU9OJywnSVJQJ10uZm9yRWFjaChpZD0+e2NvbnN0IHg9YVtpZF18fHt9O2lmKCFBcnJheS5pc0FycmF5KHgucG9zaXRpb25zKSlyZXR1cm47CiAgRC5odW1hbi5wb3NpdGlvbnM9RC5odW1hbi5wb3NpdGlvbnMuZmlsdGVyKHE9Pntjb25zdCBhY2N0PVN0cmluZyhxLmFjY291bnR8fHEuYWNjb3VudF90eXBlfHwnJykudG9VcHBlckNhc2UoKSxydD1TdHJpbmcocS5yZWNvcmRfdHlwZXx8J1BPU0lUSU9OJykudG9VcHBlckNhc2UoKTtyZXR1cm4gYWNjdCE9PWlkfHxydCE9PSdQT1NJVElPTid9KTsKICAoeC5wb3NpdGlvbnN8fFtdKS5mb3JFYWNoKHA9Pntjb25zdCBtPXsuLi5wLGFjY291bnQ6aWQsYWNjb3VudF90eXBlOmlkLHJlY29yZF90eXBlOlN0cmluZyhwLnJlY29yZF90eXBlfHwnUE9TSVRJT04nKS50b1VwcGVyQ2FzZSgpLGN1cnJlbnRfcHJpY2U6eihwLmN1cnJlbnRfcHJpY2UpLG1hcmtldF92YWx1ZTp6KHAubWFya2V0X3ZhbHVlKSxhdmdfcHJpY2U6eihwLmF2Z19wcmljZSkscHJpY2Vfc291cmNlOnAucHJpY2Vfc291cmNlfHwnS0lTX01BUktFVF9RVU9URScsZGF0YV9zdGF0ZTpwLmRhdGFfc3RhdGV8fCdDVVJSRU5UJ307RC5odW1hbi5wb3NpdGlvbnMucHVzaChtKX0pOwogfSk7Cg==
+          PERFORMANCE_PATCH_B64: I H0pOwogY29uc3Qgbm9ybURhdGU9dj0+e2NvbnN0IHJhdz1TdHJpbmcodnx8JycpLnRyaW0oKTtpZigvXlxkezh9JC8udGVzdChyYXcpKXJldHVybiByYXcuc2xpY2UoMCw0KSsnLScrcmF3LnNsaWNlKDQsNikrJy0nK3Jhdy5zbGljZSg2LDgpO3JldHVybiByYXcuc2xpY2UoMCwxMCkucmVwbGFjZUFsbCgnLycsJy0nKX07CiBhcnIuZm9yRWFjaCh4PT57aWYoeCYmeC5kYXRlKXguZGF0ZT1ub3JtRGF0ZSh4LmRhdGUpfSk7CiBjb25zdCB0b3RhbE5hdj1ocy5yZWR1Y2UoKHN1bSx4KT0+c3VtK3ooeC5uYXYpLDApLHRvdGFsUHJpbmNpcGFsPWhzLnJlZHVjZSgoc3VtLHgpPT5zdW0rKG4oeC5wcmluY2lwYWwpIT1udWxsP3ooeC5wcmluY2lwYWwpOjApLDApLGtub3duVG9kYXk9aHMuZmlsdGVyKHg9Pm4oeC50b2RheV9wbmwpIT1udWxsKSxrbm93bkZsb3c9aHMuZmlsdGVyKHg9Pm4oeC5uZXRfZmxvdykhPW51bGwpLHRvdGFsVG9kYXk9a25vd25Ub2RheS5yZWR1Y2UoKHN1bSx4KT0+c3VtK3ooeC50b2RheV9wbmwpLDApLHRvdGFsRmxvdz1rbm93bkZsb3cucmVkdWNlKChzdW0seCk9PnN1bSt6KHgubmV0X2Zsb3cpLDApLHByZXZUb3RhbD10b3RhbE5hdi10b3RhbFRvZGF5LXRvdGFsRmxvdzsKIGxldCB0b3RhbFJvdz1hcnIuZmluZCh4PT5TdHJpbmcoeC5kYXRlfHwnJyk9PT10b2RheSYmU3RyaW5nKHguYWNjb3VudHx8JycpLnRvVXBwZXJDYXNlKCk9PT0nVE9UQUwnJiZTdHJpbmcoeC5zZXJpZXNfaWR8fCdBQ1RVQUwnKS50b1VwcGVyQ2FzZSgpPT09J0FDVFVBTCcpOwogaWYoIXRvdGFsUm93KXt0b3RhbFJvdz17ZGF0ZTp0b2RheSxhY2NvdW50OidUT1RBTCcsc2VyaWVzX2lkOidBQ1RVQUwnfTthcnIucHVzaCh0b3RhbFJvdyl9CiBPYmplY3QuYXNzaWduKHRvdGFsUm93LHt0b3RhbF9hc3NldDp0b3RhbE5hdixwcmluY2lwYWw6dG90YWxQcmluY2lwYWwsbWFya2V0X3BubDprbm93blRvZGF5Lmxlbmd0aD90b3RhbFRvZGF5Om51bGwsbmV0X2Nhc2hfZmxvdzprbm93bkZsb3cubGVuZ3RoP3RvdGFsRmxvdzpudWxsLGRhaWx5X3JldHVybjprbm93blRvZGF5Lmxlbmd0aCYmcHJldlRvdGFsPjA/dG90YWxUb2RheS9wcmV2VG90YWw6bnVsbCxmbG93X2Fkal9yZXR1cm46a25vd25Ub2RheS5sZW5ndGgmJnByZXZUb3RhbD4wP3RvdGFsVG9kYXkvcHJldlRvdGFsOm51bGwsZmxvd19hZGpfZGFpbHlfcmV0dXJuOmtub3duVG9kYXkubGVuZ3RoJiZwcmV2VG90YWw+MD90b3RhbFRvZGF5L3ByZXZUb3RhbDpudWxsLGRhdGFfc3RhdGU6J0NBTk9OSUNBTF9WNScsc3luY19rc3Q6Q0FOT04ub2JzZXJ2ZWRfYXR9KTsKIEQuaHVtYW4ucGVyZm9ybWFuY2U9YXJyOwogRC5haT1ELmFpfHx7fTtELmFpLnJvd3M9QXJyYXkuaXNBcnJheShELmFpLnJvd3MpP0QuYWkucm93czpbXTtELmFpLnJvd3MuZm9yRWFjaCh4PT57aWYoeCYmeC5kYXRlKXguZGF0ZT1ub3JtRGF0ZSh4LmRhdGUpfSk7CiBjb25zdCBhaU5vdz0oQ0FOT04uYWNjb3VudHN8fHt9KS5BSXx8e307CiBpZihuKGFpTm93Lm5hdikhPW51bGwpe2xldCBhaVJvdz1ELmFpLnJvd3MuZmluZCh4PT5ub3JtRGF0ZSh4LmRhdGUpPT09dG9kYXkpO2lmKCFhaVJvdyl7YWlSb3c9e2RhdGU6dG9kYXl9O0QuYWkucm93cy5wdXNoKGFpUm93KX1PYmplY3QuYXNzaWduKGFpUm93LHtkYXRlOnRvZGF5LG5hdjp6KGFpTm93Lm5hdiksdG9kYXlfcG5sOm4oYWlOb3cudG9kYXlfcG5sKSx0b2RheV9yZXR1cm46bihhaU5vdy50b2RheV9yZXR1cm4pLHNvdXJjZTphaU5vdy5zb3VyY2V8fCdDQU5PTklDQUxfVjUnLHN5bmNfa3N0OkNBTk9OLm9ic2VydmVkX2F0fSl9Cn0=
         run: |
           python - <<'PY'
+          import base64, os
           from pathlib import Path
 
           p = Path('live-bridge.js')
           s = p.read_text(encoding='utf-8')
 
-          # 1) Position arrays from the live broker payload are authoritative.
-          #    Replace the old upsert-only merge so fully sold names disappear.
           start = s.index('function mergePositions(live){')
           mid = s.index(' const ai=a.AI||{};', start)
-          replacement = r'''function mergePositions(live){
- D.human=D.human||{};D.human.positions=Array.isArray(D.human.positions)?D.human.positions:[];const a=live.accounts||{};
- ['TOSS','ISA','PENSION','IRP'].forEach(id=>{const x=a[id]||{};if(!Array.isArray(x.positions))return;
-  D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id||rt!=='POSITION'});
-  (x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:z(p.current_price),market_value:z(p.market_value),avg_price:z(p.avg_price),price_source:p.price_source||'KIS_MARKET_QUOTE',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
- });
-'''
+          replacement = base64.b64decode(os.environ['POSITION_PATCH_B64']).decode('utf-8')
           s = s[:start] + replacement + s[mid:]
 
-          # 2) Live bridge previously updated only per-account rows for today.
-          #    Add TOTAL + AI current rows and normalize date keys so Human-vs-AI
-          #    has a common NAV time axis instead of showing '공통 NAV 시계열 부족'.
           marker = '});D.human.performance=arr;\n}'
           if marker not in s:
               raise SystemExit('PERFORMANCE_MARKER_NOT_FOUND')
-          perf = r''' });
- const normDate=v=>{const raw=String(v||'').trim();if(/^\d{8}$/.test(raw))return raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);return raw.slice(0,10).replaceAll('/','-')};
- arr.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
- const totalNav=hs.reduce((sum,x)=>sum+z(x.nav),0),totalPrincipal=hs.reduce((sum,x)=>sum+(n(x.principal)!=null?z(x.principal):0),0),knownToday=hs.filter(x=>n(x.today_pnl)!=null),knownFlow=hs.filter(x=>n(x.net_flow)!=null),totalToday=knownToday.reduce((sum,x)=>sum+z(x.today_pnl),0),totalFlow=knownFlow.reduce((sum,x)=>sum+z(x.net_flow),0),prevTotal=totalNav-totalToday-totalFlow;
- let totalRow=arr.find(x=>String(x.date||'')===today&&String(x.account||'').toUpperCase()==='TOTAL'&&String(x.series_id||'ACTUAL').toUpperCase()==='ACTUAL');
- if(!totalRow){totalRow={date:today,account:'TOTAL',series_id:'ACTUAL'};arr.push(totalRow)}
- Object.assign(totalRow,{total_asset:totalNav,principal:totalPrincipal,market_pnl:knownToday.length?totalToday:null,net_cash_flow:knownFlow.length?totalFlow:null,daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,data_state:'CANONICAL_V5',sync_kst:CANON.observed_at});
- D.human.performance=arr;
- D.ai=D.ai||{};D.ai.rows=Array.isArray(D.ai.rows)?D.ai.rows:[];D.ai.rows.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
- const aiNow=(CANON.accounts||{}).AI||{};
- if(n(aiNow.nav)!=null){let aiRow=D.ai.rows.find(x=>normDate(x.date)===today);if(!aiRow){aiRow={date:today};D.ai.rows.push(aiRow)}Object.assign(aiRow,{date:today,nav:z(aiNow.nav),today_pnl:n(aiNow.today_pnl),today_return:n(aiNow.today_return),source:aiNow.source||'CANONICAL_V5',sync_kst:CANON.observed_at})}
-}'''
+          perf = base64.b64decode(os.environ['PERFORMANCE_PATCH_B64'].replace(' ', '')).decode('utf-8')
           s = s.replace(marker, perf, 1)
 
           p.write_text(s, encoding='utf-8')
