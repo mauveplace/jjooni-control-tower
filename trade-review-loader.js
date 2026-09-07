@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.14',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.15',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -40,14 +40,14 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
-['ctHumanUiV6Script','human-ui-v6.js?v=6.1','human-ui'],
+['ctHumanUiV6Script','human-ui-v6.js?v=6.2','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
 ['ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.0','tablet-runtime'],
-['ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.1','tablet-accounts'],
+['ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.2','tablet-accounts'],
 ['ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.2','recent-trade-drill'],
 ['ctCanonicalValuationV13Script','canonical-valuation-fix-v13.js?v=13.1','valuation'],
 ['ctFxAttributionV16Script','fx-attribution-v16.js?v=16.0','fx-attribution'],
-['ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.0','metric-router'],
+['ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.1','metric-router'],
 ['ctDailyPerformanceAliasV23Script','daily-performance-alias-v23.js?v=23.0','daily-performance-alias'],
 ['ctRuntimeIntegrityV15Script','runtime-integrity-v15.js?v=15.6','runtime-integrity'],
 ['ctAccountIntegrityV17Script','account-integrity-v17.js?v=17.5','account-integrity'],

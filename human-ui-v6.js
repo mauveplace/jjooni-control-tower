@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_HUMAN_UI_V6)return;
-window.__JJOONI_HUMAN_UI_V6={state:'BOOTING',version:'6.1'};
+window.__JJOONI_HUMAN_UI_V6={state:'BOOTING',version:'6.2'};
 
 const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',AI:'AI BOT',TRIPOD:'TRI-POD'};
@@ -19,6 +19,7 @@ function trustKind(raw){
  if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING')||s.includes('PROXY')||s.includes('PARTIAL'))return 'modeled';
  return 'reference';
 }
+function authority(c){return c?.holdings_quality||c?.cash_quality||c?.account_authority||c?.quality||c?.source||''}
 function trustLabel(kind){return kind==='measured'?'증권사 확인':kind==='modeled'?'계산값':'참고값'}
 function live(){return window.__JJOONI_LIVE_PAYLOAD||{}}
 function canon(){return window.__JJOONI_CANONICAL_SSOT||{}}
@@ -50,7 +51,7 @@ function accountCard(id){
 }
 function todayPnl(c){for(const k of ['today_pnl','investment_pnl','market_pnl','session_change']){const x=n(c&&c[k]);if(x!=null)return x}return null}
 function humanAccountLine(id,c){
- const kind=trustKind(c.quality||c.source||''),source=trustLabel(kind),basis=stamp(basisTime()),day=todayPnl(c),fresh=freshnessState();
+ const kind=trustKind(authority(c)),source=trustLabel(kind),basis=stamp(basisTime()),day=todayPnl(c),fresh=freshnessState();
  const bits=[];
  if(id==='TOSS'){
    if(n(c.cash_krw)!=null)bits.push(`예수금 ${won(c.cash_krw)}`);
@@ -105,7 +106,7 @@ function updateAccountCards(){
 }
 function trustRows(){
  const C=canon(),rows=[];
- IDS.forEach(id=>{const c=(C.accounts||{})[id]||{},kind=trustKind(c.quality||c.source||''),p=todayPnl(c);rows.push({id,label:LABEL[id],kind,pnl:p})});
+ IDS.forEach(id=>{const c=(C.accounts||{})[id]||{},kind=trustKind(authority(c)),p=todayPnl(c);rows.push({id,label:LABEL[id],kind,pnl:p})});
  return rows;
 }
 function updateTrust(){
@@ -151,7 +152,7 @@ function scrubKnownCodes(){
 function apply(){
  ensureStyle();updateAccountCards();updateTrust();updateProducerBadge();updateHeroCompletion();scrubKnownCodes();
  const rows=trustRows(),counts={measured:0,modeled:0,reference:0};rows.forEach(r=>counts[r.kind]++);const age=basisAgeMs();
- window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.1',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
+ window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.2',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
 }
 let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;apply()},45)}
 document.addEventListener('jjooni:live-applied',schedule);
