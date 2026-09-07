@@ -96,7 +96,7 @@ function paint(){
   b.textContent=`● 최신 · 기준 ${basisLabel}${next?' · 다음 '+next:''}`;
   b.title='데이터 신선도는 generated_kst 기준입니다. 브라우저 렌더 시각은 사용하지 않습니다.';
   paintStyle(b,'good');
-  window.__JJOONI_MARKET_STATE_BRIDGE={state:'ACTIVE',version:'2.0',freshness_authority:'generated_kst',basis_kst:basisRaw(live),data_age_ms:age};
+  window.__JJOONI_MARKET_STATE_BRIDGE={state:'ACTIVE',version:'2.1',freshness_authority:'generated_kst',basis_kst:basisRaw(live),data_age_ms:age};
 }
 
 let busy=false;
@@ -123,5 +123,15 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
  s.src='ui-refactor.js?v=1&_='+Date.now();
  s.async=true;
  s.onerror=function(){console.error('CT UI refactor load failed');window.__JJOONI_UI_REFACTOR={state:'LOAD_FAILED'}};
+ (document.head||document.documentElement).appendChild(s);
+})();
+
+(function(){
+ if(document.getElementById('ctMarketContextV20Script'))return;
+ const s=document.createElement('script');
+ s.id='ctMarketContextV20Script';
+ s.src='market-context-v20.js?v=20.0&_='+Date.now();
+ s.async=true;
+ s.onerror=function(){console.error('CT market context load failed');window.__JJOONI_MARKET_CONTEXT_V20={state:'LOAD_FAILED'}};
  (document.head||document.documentElement).appendChild(s);
 })();
