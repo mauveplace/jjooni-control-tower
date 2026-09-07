@@ -172,7 +172,7 @@ function installFunctions(){
    }
    accounts[id]={
     regular_pnl:n(c.today_pnl),extended_pnl:0,session_pnl:n(c.today_pnl),
-    quality:c.quality,priced,positions:total,session_label:c.source
+    quality:c.quality,authority:c.holdings_quality||c.cash_quality||c.account_quality||c.quality||c.source,priced,positions:total,session_label:c.source
    };
   }
   return {accounts,positions,context:{source:'CANONICAL_LINEAGE_GUARD_V2',observed_at:C2.observed_at,account_count:IDS.length}};
