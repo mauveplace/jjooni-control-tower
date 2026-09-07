@@ -16,6 +16,7 @@ function ensureStyle(){
  const st=document.createElement('style');
  st.id='ctUiRefactorStyle';
  st.textContent=`
+@media(min-width:768px){#ctMoreTab,#ctMoreMenu{display:none!important}}
 @media(max-width:767px){
  .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important;height:56px!important;padding:4px 6px!important}
  .tabs>.tab[data-tab]{display:none!important;min-width:0!important;width:auto!important;height:48px!important;font-size:11px!important;line-height:1.15!important;padding:4px 3px!important;white-space:nowrap!important}
@@ -46,6 +47,7 @@ function activateTab(name){
 }
 
 function ensureMobileNav(){
+ if(!mobile()){const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.style.display='none';if(menu){menu.classList.remove('open');menu.style.display='none'};return}
  const tabs=qs('.tabs');if(!tabs)return;
  let more=qs('#ctMoreTab');
  if(!more){
@@ -153,7 +155,7 @@ function paginateTrades(){
 }
 
 let busy=false;
-function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.4',mobile_nav:'4_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
+function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.5',mobile_nav:'4_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 document.addEventListener('jjooni:live-applied',enforce);

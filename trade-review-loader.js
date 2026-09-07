@@ -31,7 +31,7 @@ function canonicalizeNavigation(){const tabs=document.querySelector('.tabs');if(
 function lockNavigation(){canonicalizeNavigation();const tabs=document.querySelector('.tabs');if(!tabs||tabs.dataset.ctNavObservedV14)return;tabs.dataset.ctNavObservedV14='1';let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;canonicalizeNavigation()})}).observe(tabs,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});window.addEventListener('resize',canonicalizeNavigation,{passive:true})}
 async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot='waiting-ssot';try{bootText('Canonical SSOT 연결을 기다리는 중입니다.');await waitFor(()=>window.__JJOONI_LIVE_READY===true&&window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD,30000,'SSOT_READY');BOOT.state='LOADING_REQUIRED_UI';document.documentElement.dataset.ctBoot='loading-ui';const modules=[
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
-['ctUiRefactorV14Script','ui-refactor.js?v=1.1','ui-refactor'],
+['ctUiRefactorV14Script','ui-refactor.js?v=1.5','ui-refactor'],
 ['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2','trade-review'],
 ['ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3','trade-readable'],
