@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_ACCOUNT_INTEGRITY_V17?.booted)return;
-const S={booted:true,state:'BOOTING',version:'17.4',ai_trades:0,ai_modal_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,updated_at:null};
+const S={booted:true,state:'BOOTING',version:'17.5',ai_trades:0,ai_modal_trades:0,irp_funds:0,irp_lifetime_fail_closed:false,kis_broker_label:false,updated_at:null};
 window.__JJOONI_ACCOUNT_INTEGRITY_V17=S;
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
@@ -22,6 +22,28 @@ function holdingReturn(p){
   return a>0&&c>0?(c/a-1)*100:null;
 }
 function holdingPnl(p){const a=n(p?.avg_price??p?.avg),c=n(p?.current_price??p?.price),q=Math.abs(z(p?.qty??p?.quantity));return a>0&&c>0&&q>0?(c-a)*q:null}
+function aiBrokerLabel(){
+ const a=L().accounts?.AI||C().accounts?.AI||{};
+ return String(a.broker_name||a.broker||'한국투자증권 (KIS)').trim()||'한국투자증권 (KIS)';
+}
+function patchAiBrokerAuthority(){
+ const label=aiBrokerLabel();
+ window.__JJOONI_BROKER_OVERRIDE={...(window.__JJOONI_BROKER_OVERRIDE||{}),AI:label};
+ for(const root of [L(),C()]){
+   try{if(root.accounts?.AI){root.accounts.AI.broker=label;root.accounts.AI.broker_name=label;root.accounts.AI.broker_code='KIS';root.accounts.AI.source=root.accounts.AI.source||'KIS_OPEN_API'}}catch(_){}
+ }
+ const candidates=[...document.querySelectorAll('.ctP8Card,.ctA8Card,.accountCard,.card,[data-account-drill],#accountDrillModal')];
+ for(const root of candidates){
+   const text=String(root.innerText||root.textContent||'');
+   if(!/AI\s*BOT|\bAI\b/i.test(text))continue;
+   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+   let node;
+   while((node=walker.nextNode())){
+     if(String(node.nodeValue||'').includes('KB증권'))node.nodeValue=String(node.nodeValue).replaceAll('KB증권',label);
+   }
+ }
+ S.kis_broker_label=true;
+}
 function aiName(ticker){
  const k=sym(ticker),a=L().accounts?.AI||{},rows=[...(a.holdings_kr||[]),...(a.holdings_us||[]),...(a.positions||[])];
  const p=rows.find(x=>sym(x?.ticker)===k);return String(p?.name||ticker||'').trim()||k;
@@ -100,7 +122,7 @@ function patchAiModal(){
  rows.forEach(t=>{const side=String(t.side||'BUY').toUpperCase(),isSell=side.startsWith('S'),ccy=String(t.currency||(t.market==='US'?'USD':'KRW')).toUpperCase(),p=n(t.price),q=n(t.qty);const el=document.createElement('div');el.className='trade ctAiLedgerRowV17';el.style.cssText='display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)';el.innerHTML=`<span style="display:inline-flex;min-width:42px;justify-content:center;padding:4px 7px;border-radius:7px;background:${isSell?'rgba(255,88,88,.15)':'rgba(62,205,137,.16)'};color:${isSell?'#ffb1b1':'#a9f3ce'};font:900 10px/1 system-ui">${isSell?'SELL':'BUY'}</span><div style="min-width:0"><div class="name" style="font:800 12px/1.35 system-ui;white-space:normal">${esc(t.name||t.ticker)}</div><div class="sub" style="margin-top:3px;font:600 10px/1.35 system-ui;opacity:.72">${esc(t.trade_date||t.filled_at_kst)} · ${esc(t.ticker)} · ${esc(t.market)}</div></div><div class="right" style="text-align:right"><b style="font:800 11px/1.3 system-ui">${q==null?'—':q.toLocaleString('ko-KR')}주</b><div class="sub" style="margin-top:3px;font:600 10px/1.3 system-ui;opacity:.72">${p==null?'체결가 —':`${ccy} ${p.toLocaleString('ko-KR',{maximumFractionDigits:4})}`}</div></div>`;section.appendChild(el)});
  m.appendChild(section);S.ai_modal_trades=rows.length;
 }
-function apply(){mirrorAiTrades();normalizeIrp();failCloseIrpCards();patchIrpModal();patchAiModal();S.state='ACTIVE';S.updated_at=new Date().toISOString()}
+function apply(){patchAiBrokerAuthority();mirrorAiTrades();normalizeIrp();failCloseIrpCards();patchIrpModal();patchAiModal();patchAiBrokerAuthority();S.state='ACTIVE';S.updated_at=new Date().toISOString()}
 function wrap(){const fn=window.openAccountDrilldown;if(typeof fn!=='function'||fn.__jjooniIntegrityV17)return;const w=function(){apply();const r=fn.apply(this,arguments);[0,80,220,500,1000].forEach(ms=>setTimeout(apply,ms));return r};w.__jjooniIntegrityV17=true;w.__original=fn;window.openAccountDrilldown=w}
 apply();wrap();[250,700,1600,3000].forEach(ms=>setTimeout(()=>{apply();wrap()},ms));document.addEventListener('jjooni:live-applied',()=>{apply();wrap();setTimeout(apply,120);setTimeout(apply,700)});document.addEventListener('click',e=>{if(e.target?.closest?.('[data-account-drill]')){setTimeout(apply,60);setTimeout(apply,260)}},{capture:true});
 })();
