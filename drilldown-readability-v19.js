@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_DRILLDOWN_READABILITY_V19)return;
-const STATE={state:'ACTIVE',version:'19.0',patched:0,last_at:null};
+const STATE={state:'ACTIVE',version:'19.1',patched:0,last_at:null};
 window.__JJOONI_DRILLDOWN_READABILITY_V19=STATE;
 
 function ensureStyle(){
@@ -9,7 +9,7 @@ function ensureStyle(){
  const s=document.createElement('style');
  s.id='ctDrilldownReadabilityV19Style';
  s.textContent=`
-/* V19: tablet/desktop drilldowns are decision surfaces, not micro-copy. */
+/* V19.1: tablet/desktop drilldowns are decision surfaces, not micro-copy. */
 #accountDrillModal,
 #positionDrillModal,
 #posDrillModal,
@@ -79,19 +79,22 @@ function ensureStyle(){
 }
 
 const REPLACEMENTS=[
+ ['CURRENT SESSION P&L · LIVE','당일 손익 · LIVE'],
+ ['Session Engine 정규장 기준 손익 원인','당일 손익 구성'],
  ['종목별 정규장 가격효과','종목별 당일 가격효과'],
  ['종목 기준 정규장 손익','종목 기준 당일 손익'],
  ['정규장 투자성과','당일 투자성과'],
  ['정규장 기준 P&L','당일 손익'],
  ['정규장 P&L','당일 손익'],
  ['정규장 현재가','현재가'],
+ ['직전 정규장 종가 대비 최신 정규장 시세','직전 기준가 대비 최신 가격'],
  ['직전 정규장 종가','직전 기준가'],
  ['정규장 손익','당일 손익'],
  ['정규장 등락률','당일 등락률'],
  ['정규장 상승','당일 상승'],
  ['정규장 하락','당일 하락'],
  ['정규장 시세 확인중','당일 시세 확인중'],
- ['직전 정규장 종가 대비 최신 정규장 시세','직전 기준가 대비 최신 가격'],
+ ['정규장 —','당일 —'],
  ['Session Engine 기준','당일 기준']
 ];
 
@@ -135,13 +138,16 @@ function patch(){
  for(const root of roots()){markDynamicRoot(root);count+=replaceText(root)}
  STATE.patched+=count;STATE.last_at=new Date().toISOString();
 }
+function burst(){[30,100,240,520,900,1300,1900].forEach(ms=>setTimeout(patch,ms))}
 
 ensureStyle();
 patch();
-// Event-driven only: no polling loop / no global MutationObserver.
+// Event-driven only: no polling loop / no global MutationObserver. A short
+// finite burst follows an open action because legacy account modules finish
+// their own async render in several waves up to ~1s after the click.
 document.addEventListener('click',e=>{
  const hit=e.target&&e.target.closest&&e.target.closest('[data-position-drill],[data-account-drill],.trade,.v2Kpi');
- if(hit){setTimeout(patch,40);setTimeout(patch,180)}
+ if(hit)burst();
 },{capture:true});
-document.addEventListener('jjooni:live-applied',()=>setTimeout(patch,60));
+document.addEventListener('jjooni:live-applied',()=>{setTimeout(patch,60);setTimeout(patch,700)});
 })();
