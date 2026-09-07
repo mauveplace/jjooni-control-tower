@@ -1,0 +1,84 @@
+name: hotfix-performance-position-reconcile-20260907
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hotfix-performance-position-reconcile-20260907.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch live bridge
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('live-bridge.js')
+          s = p.read_text(encoding='utf-8')
+
+          # 1) Position arrays from the live broker payload are authoritative.
+          #    Replace the old upsert-only merge so fully sold names disappear.
+          start = s.index('function mergePositions(live){')
+          mid = s.index(' const ai=a.AI||{};', start)
+          replacement = r'''function mergePositions(live){
+ D.human=D.human||{};D.human.positions=Array.isArray(D.human.positions)?D.human.positions:[];const a=live.accounts||{};
+ ['TOSS','ISA','PENSION','IRP'].forEach(id=>{const x=a[id]||{};if(!Array.isArray(x.positions))return;
+  D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id||rt!=='POSITION'});
+  (x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:z(p.current_price),market_value:z(p.market_value),avg_price:z(p.avg_price),price_source:p.price_source||'KIS_MARKET_QUOTE',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
+ });
+'''
+          s = s[:start] + replacement + s[mid:]
+
+          # 2) Live bridge previously updated only per-account rows for today.
+          #    Add TOTAL + AI current rows and normalize date keys so Human-vs-AI
+          #    has a common NAV time axis instead of showing '공통 NAV 시계열 부족'.
+          marker = '});D.human.performance=arr;\n}'
+          if marker not in s:
+              raise SystemExit('PERFORMANCE_MARKER_NOT_FOUND')
+          perf = r''' });
+ const normDate=v=>{const raw=String(v||'').trim();if(/^\d{8}$/.test(raw))return raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);return raw.slice(0,10).replaceAll('/','-')};
+ arr.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
+ const totalNav=hs.reduce((sum,x)=>sum+z(x.nav),0),totalPrincipal=hs.reduce((sum,x)=>sum+(n(x.principal)!=null?z(x.principal):0),0),knownToday=hs.filter(x=>n(x.today_pnl)!=null),knownFlow=hs.filter(x=>n(x.net_flow)!=null),totalToday=knownToday.reduce((sum,x)=>sum+z(x.today_pnl),0),totalFlow=knownFlow.reduce((sum,x)=>sum+z(x.net_flow),0),prevTotal=totalNav-totalToday-totalFlow;
+ let totalRow=arr.find(x=>String(x.date||'')===today&&String(x.account||'').toUpperCase()==='TOTAL'&&String(x.series_id||'ACTUAL').toUpperCase()==='ACTUAL');
+ if(!totalRow){totalRow={date:today,account:'TOTAL',series_id:'ACTUAL'};arr.push(totalRow)}
+ Object.assign(totalRow,{total_asset:totalNav,principal:totalPrincipal,market_pnl:knownToday.length?totalToday:null,net_cash_flow:knownFlow.length?totalFlow:null,daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,flow_adj_daily_return:knownToday.length&&prevTotal>0?totalToday/prevTotal:null,data_state:'CANONICAL_V5',sync_kst:CANON.observed_at});
+ D.human.performance=arr;
+ D.ai=D.ai||{};D.ai.rows=Array.isArray(D.ai.rows)?D.ai.rows:[];D.ai.rows.forEach(x=>{if(x&&x.date)x.date=normDate(x.date)});
+ const aiNow=(CANON.accounts||{}).AI||{};
+ if(n(aiNow.nav)!=null){let aiRow=D.ai.rows.find(x=>normDate(x.date)===today);if(!aiRow){aiRow={date:today};D.ai.rows.push(aiRow)}Object.assign(aiRow,{date:today,nav:z(aiNow.nav),today_pnl:n(aiNow.today_pnl),today_return:n(aiNow.today_return),source:aiNow.source||'CANONICAL_V5',sync_kst:CANON.observed_at})}
+}'''
+          s = s.replace(marker, perf, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Syntax and contract checks
+        shell: bash
+        run: |
+          node --check live-bridge.js
+          grep -q "account:'TOTAL'" live-bridge.js
+          grep -q "acct!==id||rt!=='POSITION'" live-bridge.js
+          git diff --check
+
+      - name: Commit hotfix
+        shell: bash
+        run: |
+          if git diff --quiet -- live-bridge.js; then
+            echo 'NO_CHANGE=true'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add live-bridge.js
+          git commit -m 'fix: reconcile sold positions and live performance rows'
+          git push
