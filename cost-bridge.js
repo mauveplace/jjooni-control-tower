@@ -6,7 +6,8 @@ const TAB_NAME='cost';
 let LAST_KEY='';
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
-const money=v=>n(v)==null?'—':'$'+n(v).toFixed(n(v)<10?2:1);
+const moneyUsd=v=>n(v)==null?'—':'$'+n(v).toFixed(Math.abs(n(v))<10?2:1);
+const moneyNative=(v,c)=>{const x=n(v),cc=String(c||'').toUpperCase();if(x==null)return '—';if(cc==='USD')return moneyUsd(x);if(cc==='KRW')return '₩'+Math.round(x).toLocaleString('ko-KR');return x.toLocaleString('en-US',{maximumFractionDigits:2})+(cc?' '+cc:'')};
 const integer=v=>n(v)==null?'—':Math.round(n(v)).toLocaleString('en-US');
 const pct=v=>n(v)==null?'—':n(v).toFixed(1)+'%';
 const duration=s=>{if(n(s)==null)return '—';const sec=Math.max(0,n(s));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);return h+'h '+m+'m'};
@@ -65,6 +66,8 @@ function render(force){
  }
  const rt=c.runtime||{},ai=c.ai||{},bill=c.billing||{},fc=c.forecast||{};
  const estimate=(n(rt.estimated_usd_today)||0)+(n(ai.estimated_usd_today)||0);
+ const billingSafe=String(c.schema||'')==='AUTOBOT_COST_V2'&&bill.currency_verified===true&&!!String(bill.currency||'').trim();
+ const billMoney=v=>billingSafe?moneyNative(v,bill.currency):'검증 대기';
  const alerts=Array.isArray(c.alerts)?c.alerts:[];
  const budgetPct=n(fc.budget_pct),bar=Math.max(0,Math.min(100,budgetPct||0));
  const generated=String(c.generated_kst||'—').replace('T',' ').slice(0,16);
@@ -72,16 +75,16 @@ function render(force){
  p.innerHTML=`
    <div class="ctCostHead"><div><h2>AUTOBOT COST</h2><div class="ctCostSub">Near-real-time estimate + lagged Google Billing actual · ${generated}</div></div><span class="ctCostStatus ${statusClass(status)}">${status}</span></div>
    <div class="ctCostHero">
-     <div class="ctCostKpi"><div class="ctCostLabel">오늘 예상</div><div class="ctCostValue">${money(estimate)}</div><div class="ctCostMini">Worker + OpenAI</div></div>
-     <div class="ctCostKpi"><div class="ctCostLabel">Google 실제</div><div class="ctCostValue">${money(bill.actual_today_usd)}</div><div class="ctCostMini">Billing lag ${ageText(bill.lag_minutes)}</div></div>
-     <div class="ctCostKpi"><div class="ctCostLabel">월 누적</div><div class="ctCostValue">${money(bill.month_to_date_usd)}</div><div class="ctCostMini">BigQuery actual</div></div>
-     <div class="ctCostKpi"><div class="ctCostLabel">월말 예상</div><div class="ctCostValue">${money(fc.month_end_usd)}</div><div class="ctCostMini">Budget ${money(fc.budget_usd)} · ${pct(fc.budget_pct)}</div><div class="ctCostBar"><i style="width:${bar}%"></i></div></div>
+     <div class="ctCostKpi"><div class="ctCostLabel">오늘 예상</div><div class="ctCostValue">${moneyUsd(estimate)}</div><div class="ctCostMini">Worker + OpenAI</div></div>
+     <div class="ctCostKpi"><div class="ctCostLabel">Google 실제</div><div class="ctCostValue">${billMoney(bill.actual_today??bill.actual_today_usd)}</div><div class="ctCostMini">Billing lag ${ageText(bill.lag_minutes)}</div></div>
+     <div class="ctCostKpi"><div class="ctCostLabel">월 누적</div><div class="ctCostValue">${billMoney(bill.month_to_date??bill.month_to_date_usd)}</div><div class="ctCostMini">${billingSafe?'BigQuery actual':'통화 원천 미검증 · 숫자 차단'}</div></div>
+     <div class="ctCostKpi"><div class="ctCostLabel">월말 예상</div><div class="ctCostValue">${billingSafe?moneyNative(fc.month_end,bill.currency):'검증 대기'}</div><div class="ctCostMini">${billingSafe&&fc.budget_comparable===true?'Budget '+moneyUsd(fc.budget_usd)+' · '+pct(fc.budget_pct):'예산 비교 차단 · 통화 검증 필요'}</div>${billingSafe&&fc.budget_comparable===true?`<div class="ctCostBar"><i style="width:${bar}%"></i></div>`:''}</div>
    </div>
    <div class="ctCostGrid">
-     <div class="ctCostCard"><h3>Worker Runtime</h3>${row('Platform',String(rt.platform||'—').replaceAll('_',' '))}${row('Worker',rt.worker_pool||'—')}${row('Instances',integer(rt.instances))}${row('오늘 billable',duration(rt.billable_seconds_today))}${row('오늘 예상비용',money(rt.estimated_usd_today))}${row('Telemetry',rt.telemetry||'—')}</div>
-     <div class="ctCostCard"><h3>AI Usage</h3>${row('Luna calls',integer(ai.luna_calls_today))}${row('Terra calls',integer(ai.terra_calls_today))}${row('Sol calls',integer(ai.sol_calls_today))}${row('Input tokens',integer(ai.input_tokens))}${row('Cached input',integer(ai.cached_input_tokens))}${row('Output tokens',integer(ai.output_tokens))}${row('오늘 AI 비용',money(ai.estimated_usd_today))}</div>
-     <div class="ctCostCard"><h3>Google Billing</h3>${row('Source',bill.source||'—')}${row('오늘 실제비용',money(bill.actual_today_usd))}${row('월 누적비용',money(bill.month_to_date_usd))}${row('Billing lag',ageText(bill.lag_minutes))}${row('Currency',bill.currency||'USD')}</div>
-     <div class="ctCostCard"><h3>Cost Guard</h3>${alerts.length?alerts.map(x=>`<div class="ctCostAlert">${String(x)}</div>`).join(''):`<div class="ctCostOk">비용 이상징후 없음</div>`}<div class="ctCostFoot">COST는 기존 Sheet 응답의 COST_JSON sidecar를 우선 사용합니다. 별도 Google/BigQuery browser polling은 없습니다.</div></div>
+     <div class="ctCostCard"><h3>Worker Runtime</h3>${row('Platform',String(rt.platform||'—').replaceAll('_',' '))}${row('Worker',rt.worker_pool||'—')}${row('Instances',integer(rt.instances))}${row('오늘 billable',duration(rt.billable_seconds_today))}${row('오늘 예상비용',moneyUsd(rt.estimated_usd_today))}${row('Telemetry',rt.telemetry||'—')}</div>
+     <div class="ctCostCard"><h3>AI Usage</h3>${row('Luna calls',integer(ai.luna_calls_today))}${row('Terra calls',integer(ai.terra_calls_today))}${row('Sol calls',integer(ai.sol_calls_today))}${row('Input tokens',integer(ai.input_tokens))}${row('Cached input',integer(ai.cached_input_tokens))}${row('Output tokens',integer(ai.output_tokens))}${row('오늘 AI 비용',moneyUsd(ai.estimated_usd_today))}</div>
+     <div class="ctCostCard"><h3>Google Billing</h3>${row('Source',bill.source||'—')}${row('오늘 실제비용',billMoney(bill.actual_today??bill.actual_today_usd))}${row('월 누적비용',billMoney(bill.month_to_date??bill.month_to_date_usd))}${row('Billing lag',ageText(bill.lag_minutes))}${row('Currency',billingSafe?bill.currency:'UNVERIFIED')}</div>
+     <div class="ctCostCard"><h3>Cost Guard</h3>${!billingSafe?`<div class="ctCostAlert">Google Billing 통화/원천이 검증되지 않아 실제·월누적·월말예상 숫자를 차단했습니다.</div>`:alerts.length?alerts.map(x=>`<div class="ctCostAlert">${String(x)}</div>`).join(''):`<div class="ctCostOk">비용 이상징후 없음</div>`}<div class="ctCostFoot">COST는 기존 Sheet 응답의 COST_JSON sidecar를 우선 사용합니다. 별도 Google/BigQuery browser polling은 없습니다.</div></div>
    </div>`;
 }
 
