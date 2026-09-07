@@ -1,0 +1,39 @@
+name: Patch Position V25.1 Cache Once
+on:
+  push:
+    branches: [fix/position-completeness-v25-1-cache-20260907]
+    paths: ['.github/workflows/patch-position-v25-1-cache-once.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/position-completeness-v25-1-cache-20260907
+          fetch-depth: 0
+      - name: Patch bootstrap cache versions
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          def rep(path,old,new):
+            p=Path(path);s=p.read_text(encoding='utf-8')
+            if s.count(old)!=1: raise SystemExit(f'PATTERN_COUNT:{path}:{old}:{s.count(old)}')
+            p.write_text(s.replace(old,new),encoding='utf-8')
+          rep('trade-review-loader.js',"version:'14.12'","version:'14.13'")
+          rep('trade-review-loader.js',"position-completeness-v25.js?v=25.0","position-completeness-v25.js?v=25.1")
+          rep('index.html',"trade-review-loader.js?v=14.11","trade-review-loader.js?v=14.13")
+          s=Path('trade-review-loader.js').read_text(encoding='utf-8')
+          assert "version:'14.13'" in s and 'position-completeness-v25.js?v=25.1' in s
+          assert 'trade-review-loader.js?v=14.13' in Path('index.html').read_text(encoding='utf-8')
+          PY
+          node --check position-completeness-v25.js
+          node --check trade-review-loader.js
+          git config user.name 'jjooni-automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html trade-review-loader.js position-completeness-v25.js
+          git commit -m 'fix: cache-bust strict position completeness v25.1'
+          git push origin HEAD:fix/position-completeness-v25-1-cache-20260907
