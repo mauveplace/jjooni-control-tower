@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.17',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.18',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -15,6 +15,7 @@ function runtimeReady(label){
  if(label==='market-context')return ['ACTIVE','WAITING'].includes(window.__JJOONI_MARKET_CONTEXT_V20?.state);
  if(label==='source-authority-guard')return window.__JJOONI_SOURCE_AUTHORITY_V24?.state==='ACTIVE';
  if(label==='position-completeness')return window.__JJOONI_POSITION_COMPLETENESS_V25?.state==='ACTIVE'&&String(window.__JJOONI_POSITION_COMPLETENESS_V25.version).startsWith('25.1');
+ if(label==='trade-outcomes')return window.__JJOONI_TRADE_OUTCOMES_V26?.state==='ACTIVE';
  return null;
 }
 function loadRequired(id,src,label){return new Promise((resolve,reject)=>{
@@ -39,6 +40,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2','decision-impact'],
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
+['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.0','trade-outcomes'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.2','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
@@ -56,6 +58,6 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctMarketContextV20Script','market-context-v20.js?v=20.0','market-context'],
 ['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.0','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.1','source-authority-guard'],
-['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.1','position-completeness']];for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
+['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.1','position-completeness']];for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true||runtimeReady('trade-outcomes')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
 boot();
 })();
