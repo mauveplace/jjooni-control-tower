@@ -4,12 +4,18 @@ on:
     branches: [main]
     paths:
       - 'position-completeness-v25.js'
+      - 'daily-performance-alias-v23.js'
+      - 'daily-pnl-attribution-v27.js'
       - 'tests/mobile-drilldown-contract.test.cjs'
+      - 'tests/daily-pnl-attribution.test.cjs'
       - '.github/workflows/mobile-drilldown-contract.yml'
   pull_request:
     paths:
       - 'position-completeness-v25.js'
+      - 'daily-performance-alias-v23.js'
+      - 'daily-pnl-attribution-v27.js'
       - 'tests/mobile-drilldown-contract.test.cjs'
+      - 'tests/daily-pnl-attribution.test.cjs'
       - '.github/workflows/mobile-drilldown-contract.yml'
 permissions:
   contents: read
@@ -22,4 +28,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/mobile-drilldown-contract.test.cjs
+      - run: node --test tests/mobile-drilldown-contract.test.cjs tests/daily-pnl-attribution.test.cjs

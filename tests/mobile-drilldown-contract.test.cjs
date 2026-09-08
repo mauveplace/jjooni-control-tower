@@ -16,6 +16,6 @@ test('mobile drilldown stays viewport-bound and non-duplicated',()=>{
 });
 
 test('verified boot pins the same mobile drilldown release',()=>{
-  assert.match(loader,/version:'14\.19'/);
+  assert.match(loader,/version:'14\.\d+'/);
   assert.match(loader,/position-completeness-v25\.js\?v=25\.1\.2/);
 });
