@@ -51,3 +51,17 @@ s.onload=()=>{st.state=window.__JJOONI_DAILY_PNL_ATTR_V27?.state||'LOADED';st.lo
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('DAILY_PNL_ATTR_V27_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
 })();
+
+(function(){
+'use strict';
+if(window.__JJOONI_TRADE_OPPORTUNITY_V28||document.getElementById('ctTradeOpportunityV28Script'))return;
+const st={state:'LOADING',version:'28.0',started_at:new Date().toISOString()};
+window.__JJOONI_TRADE_OPPORTUNITY_LOADER_V28=st;
+const s=document.createElement('script');
+s.id='ctTradeOpportunityV28Script';
+s.src='trade-opportunity-v28.js?v=28.0&_='+Date.now();
+s.async=false;
+s.onload=()=>{st.state=window.__JJOONI_TRADE_OPPORTUNITY_V28?.state||'LOADED';st.loaded_at=new Date().toISOString()};
+s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('TRADE_OPPORTUNITY_V28_LOAD_FAILED')};
+(document.head||document.documentElement).appendChild(s);
+})();
