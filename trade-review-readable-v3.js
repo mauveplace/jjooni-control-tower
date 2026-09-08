@@ -1,12 +1,34 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TRADE_REVIEW_READABLE_V3)return;
-window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'BOOTING',version:'3.1'};
+window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'BOOTING',version:'3.2'};
 
-const state={showAll:false,query:''};
+const state={showAll:false,query:'',defaultsApplied:false};
 let applying=false,rafPending=false;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
+const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
+
+function parseTs(t){
+  const raw=String(t?.filled_at_kst||t?.trade_date||t?.date||'').trim();
+  if(!raw)return 0;
+  const ms=Date.parse(raw.length<=10?raw+'T00:00:00+09:00':raw);
+  return Number.isFinite(ms)?ms:0;
+}
+function allTrades(){
+  const out=[];
+  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
+  try{if(typeof D!=='undefined'&&D.ai&&D.ai.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades)}catch(_){}
+  return out;
+}
+function latestTradeLabel(card){
+  const ticker=sym(card?.dataset?.ticker);if(!ticker)return null;
+  let ms=0;
+  allTrades().forEach(t=>{if(sym(t.ticker||t.symbol)===ticker)ms=Math.max(ms,parseTs(t))});
+  if(!ms)return null;
+  const d=new Date(ms);if(!Number.isFinite(d.getTime()))return null;
+  return '최근 '+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+}
 
 function style(){
   if(qs('#ctTradeReadableV3Style'))return;
@@ -22,6 +44,8 @@ function style(){
   #ctTradeReviewV2 .ctTrToolbar{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;margin:0 0 10px!important}
   #ctTradeReviewV2 .ctTrFilters,#ctTradeReviewV2 .ctTrSorts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
   #ctTradeReviewV2 .ctTrChip{width:100%!important;min-height:36px!important;padding:0 6px!important;font-size:11px!important;border-radius:10px!important;white-space:nowrap!important}
+  #ctTradeReviewV2 [data-sort="error"]{display:none!important}
+  #ctTradeReviewV2 .ctTrSorts{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #ctTradeReviewV2 .ctTrV3Tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin:0 0 10px}
   #ctTradeReviewV2 .ctTrV3Search{width:100%;height:38px;border:1px solid #d7e0e9;border-radius:11px;background:#fff;padding:0 12px;font:700 12px/1 system-ui;color:#172033;outline:none;box-sizing:border-box}
   #ctTradeReviewV2 .ctTrV3Search:focus{border-color:#7996bd;box-shadow:0 0 0 3px rgba(30,84,145,.08)}
@@ -68,33 +92,28 @@ function simplifyMeta(card){
   const meta=qs('.ctTickerMeta',card);if(!meta)return;
   const raw=(meta.textContent||'').trim();
   const s=(raw.match(/(\d+)개 전략/)||[])[1];
+  const buys=(raw.match(/매수\s*(\d+)회/)||[])[1];
+  const sells=(raw.match(/매도\s*(\d+)회/)||[])[1];
   const status=raw.includes('청산 완료')?'청산 완료':'진행 중';
-  meta.textContent=(s?`${s}계좌 · `:'')+status+' · 탭하면 계좌별 상세';
+  const bits=[];if(s)bits.push(`${s}계좌`);if(buys)bits.push(`매수 ${buys}`);if(sells)bits.push(`매도 ${sells}`);bits.push(status);
+  meta.textContent=bits.join(' · ');
 }
 
-function parsePct(text){
-  const m=String(text||'').match(/([+-]?\d+(?:\.\d+)?)%/);
-  return m?Number(m[1]):null;
-}
-function maxSleevePct(card){
-  const vals=qsa('.ctSleeveRet',card).map(e=>parsePct(e.textContent)).filter(v=>Number.isFinite(v));
-  if(!vals.length)return null;
-  return vals.sort((a,b)=>Math.abs(b)-Math.abs(a))[0];
-}
 function simplifyCard(card){
   simplifyMeta(card);
-  const score=qs('.ctTickerScore',card),pct=maxSleevePct(card);
+  const score=qs('.ctTickerScore',card);
   if(score){
-    if(Number.isFinite(pct))score.textContent='최대오차 '+Math.abs(pct).toFixed(1)+'%';
-    else if(!String(score.textContent||'').includes('최대오차'))score.textContent='상세에서 손익 확인';
+    const raw=String(score.textContent||'').trim();
+    if(!raw||raw.includes('최대오차')||raw.includes('상세에서 손익'))score.textContent=latestTradeLabel(card)||'최근 거래';
   }
   const v=qs('.ctTickerVerdict',card);
   if(v){
     let t=(v.textContent||'').trim();
     const parts=t.split('·').map(x=>x.trim()).filter(Boolean);
     if(parts.length>1)t=parts[0].slice(0,1)+' '+parts[parts.length-1];
+    t=t.replace(/매수 유효/g,'보유 중').replace(/평단 아래/g,'보유 중 · 평단↓');
     v.textContent=t;
-    const good=/✓|잘 팔았|매수 유효|청산 이익/.test(t),bad=/✕|평단 아래|매도 후 상승|청산 손실/.test(t);
+    const good=/✓|잘 팔았|청산 이익/.test(t),bad=/✕|매도 후 상승|청산 손실/.test(t);
     v.dataset.kind=good?'good':bad?'bad':'wait';
   }
 }
@@ -122,17 +141,29 @@ function limitCards(root){
   if(tools){const btn=qs('.ctTrV3More',tools);if(btn){if(q||matched<=12){btn.style.display='none'}else{btn.style.display='block';btn.textContent=state.showAll?'접기':`${matched-12}개 더보기`}}}
 }
 
+function applyDefaultView(root){
+  if(state.defaultsApplied)return true;
+  const all=qs('[data-filter="all"]',root),recent=qs('[data-sort="recent"]',root);
+  if(all&&!all.classList.contains('on')){all.click();setTimeout(schedule,0);return false}
+  if(recent&&!recent.classList.contains('on')){recent.click();setTimeout(schedule,0);return false}
+  state.defaultsApplied=true;
+  return true;
+}
+
 function apply(){
   if(applying||window.innerWidth>767)return;
   const root=qs('#ctTradeReviewV2');if(!root)return;
   applying=true;
   try{
     style();hideDeveloperNotes();
-    const sub=qs('.ctTrSub',root);if(sub)sub.textContent='종목 요약 → 탭하면 계좌별 → 다시 탭하면 체결 상세';
-    const errorSort=qs('[data-sort="error"]',root);if(errorSort)errorSort.textContent='오차율순';
+    if(!applyDefaultView(root))return;
+    const sub=qs('.ctTrSub',root);if(sub)sub.textContent='최근 거래부터 · 종목 → 계좌/전략 → 체결 상세';
+    const errorSort=qs('[data-sort="error"]',root);if(errorSort){errorSort.style.setProperty('display','none','important');errorSort.setAttribute('aria-hidden','true')}
+    const missedSort=qs('[data-sort="missed"]',root);if(missedSort)missedSort.textContent='기회손익순';
+    const recentSort=qs('[data-sort="recent"]',root);if(recentSort)recentSort.textContent='최근순';
     qsa('.ctTicker',root).forEach(simplifyCard);
     limitCards(root);
-    window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'ACTIVE',version:'3.1',visible_limit:12,query:state.query,show_all:state.showAll};
+    window.__JJOONI_TRADE_REVIEW_READABLE_V3={state:'ACTIVE',version:'3.2',default_filter:'all',default_sort:'recent',error_metric_visible:false,visible_limit:12,query:state.query,show_all:state.showAll};
   }finally{applying=false}
 }
 
