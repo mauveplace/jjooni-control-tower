@@ -1,0 +1,25 @@
+name: Mobile drilldown regression contract
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'position-completeness-v25.js'
+      - 'tests/mobile-drilldown-contract.test.cjs'
+      - '.github/workflows/mobile-drilldown-contract.yml'
+  pull_request:
+    paths:
+      - 'position-completeness-v25.js'
+      - 'tests/mobile-drilldown-contract.test.cjs'
+      - '.github/workflows/mobile-drilldown-contract.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/mobile-drilldown-contract.test.cjs
