@@ -110,6 +110,6 @@ document.addEventListener('click',e=>{const t=e.target.closest?.('.tab[data-tab]
 document.addEventListener('jjooni:live-applied',()=>setTimeout(sync,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
 window.addEventListener('resize',()=>setTimeout(sync,0),{passive:true});
-try{new MutationObserver(()=>{if(!q('.tab[data-tab="consultant"]')||!q('button[data-tab="consultant"]','#ctMoreMenu'))setTimeout(sync,0)}).observe(document.documentElement,{subtree:true,childList:true});}catch(_){}
+try{new MutationObserver(()=>{if(!q('.tab[data-tab="consultant"]')||!q('#ctMoreMenu button[data-tab="consultant"]'))setTimeout(sync,0)}).observe(document.documentElement,{subtree:true,childList:true});}catch(_){}
 setTimeout(sync,0);setTimeout(sync,500);setTimeout(sync,1500);setTimeout(sync,3000);
 })();
