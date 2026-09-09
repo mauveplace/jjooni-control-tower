@@ -65,12 +65,21 @@ function ensureStyle(){
  `;(document.head||document.documentElement).appendChild(st);
 }
 
+function restorePanels(){
+ const panel=q('#panel-consultant');
+ qa('[data-ct-consultant-hidden="1"]').forEach(p=>{p.style.removeProperty('display');delete p.dataset.ctConsultantHidden});
+ if(panel){panel.classList.remove('on');panel.style.removeProperty('display')}
+ const tab=q('.tab[data-tab="consultant"]');if(tab)tab.classList.remove('on');
+ const more=q('#ctMoreTab');if(more)more.classList.remove('on');
+}
+
 function activate(){
  const tab=q('.tab[data-tab="consultant"]'),panel=q('#panel-consultant');if(!tab||!panel)return;
  qa('.tab[data-tab]').forEach(t=>t.classList.toggle('on',t===tab));
- qa('[id^="panel-"]').forEach(p=>{const on=p===panel;p.classList.toggle('on',on);if(on)p.style.setProperty('display','block','important');else p.style.setProperty('display','none','important')});
+ qa('[id^="panel-"]').forEach(p=>{const on=p===panel;p.classList.toggle('on',on);if(on){p.style.setProperty('display','block','important');p.removeAttribute('data-ct-consultant-hidden')}else{p.dataset.ctConsultantHidden='1';p.style.setProperty('display','none','important')}});
  try{sessionStorage.setItem('jjooni_ct_active_tab_v1','consultant')}catch(_){}
  const more=q('#ctMoreMenu');if(more)qa('button[data-tab]',more).forEach(b=>b.classList.toggle('active',b.dataset.tab==='consultant'));
+ const moreTab=q('#ctMoreTab');if(moreTab)moreTab.classList.add('on');
  render();
 }
 function ensureShell(){
@@ -106,7 +115,7 @@ function render(){
 }
 function sync(){ensureStyle();if(!ensureShell())return;ensureMore();render()}
 
-document.addEventListener('click',e=>{const t=e.target.closest?.('.tab[data-tab]');if(t&&t.dataset.tab!=='consultant'){const p=q('#panel-consultant'),ct=q('.tab[data-tab="consultant"]');if(p){p.classList.remove('on');p.style.removeProperty('display')}if(ct)ct.classList.remove('on')}});
+document.addEventListener('click',e=>{const t=e.target.closest?.('.tab[data-tab]');if(t&&t.dataset.tab!=='consultant'){restorePanels();setTimeout(restorePanels,0)}});
 document.addEventListener('jjooni:live-applied',()=>setTimeout(sync,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
 window.addEventListener('resize',()=>setTimeout(sync,0),{passive:true});
