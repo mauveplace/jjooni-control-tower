@@ -3,6 +3,7 @@
 
 const SHEET_ID='1t8TNfIHxSIc_uoSxAgmSbkqCz00923nF1u-b6jlCgYE';
 const TAB='GITHUB_CT_LIVE';
+const DEFAULT_FAST_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';
 const COOLDOWN_MS=45000;
 const REQUEST_TIMEOUT_MS=12000;
 let lastKick=0,busy=false,fastUrl='';
@@ -31,8 +32,13 @@ async function proof(password,bucket){
 
 async function resolveUrl(){
  if(fastUrl)return fastUrl;
- const kv=await loadGviz();
- fastUrl=String(kv.FAST_REFRESH_URL||'').replace(/\/$/,'');
+ try{
+  const kv=await loadGviz();
+  const discovered=String(kv.FAST_REFRESH_URL||'').replace(/\/$/,'');
+  fastUrl=/^https:\/\//.test(discovered)?discovered:DEFAULT_FAST_URL;
+ }catch(_){
+  fastUrl=DEFAULT_FAST_URL;
+ }
  return fastUrl;
 }
 
@@ -61,7 +67,7 @@ async function kick(reason){
  }finally{busy=false}
 }
 
-window.__JJOONI_CT_FAST={version:'1.0',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND'};
+window.__JJOONI_CT_FAST={version:'1.1',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND'};
 document.addEventListener('jjooni:live-applied',()=>kick('live-applied'));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick('visible')});
 setTimeout(()=>kick('startup'),1200);
