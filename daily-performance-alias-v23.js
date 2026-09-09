@@ -65,3 +65,17 @@ s.onload=()=>{st.state=window.__JJOONI_TRADE_OPPORTUNITY_V28?.state||'LOADED';st
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('TRADE_OPPORTUNITY_V28_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
 })();
+
+(function(){
+'use strict';
+if(window.__JJOONI_CONSULTANT_MARKET_V29||document.getElementById('ctConsultantMarketV29Script'))return;
+const st={state:'LOADING',version:'29.0',started_at:new Date().toISOString()};
+window.__JJOONI_CONSULTANT_MARKET_LOADER_V29=st;
+const s=document.createElement('script');
+s.id='ctConsultantMarketV29Script';
+s.src='consultant-market-v29.js?v=29.0&_='+Date.now();
+s.async=false;
+s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_MARKET_V29?.state||'LOADED';st.loaded_at=new Date().toISOString()};
+s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_MARKET_V29_LOAD_FAILED')};
+(document.head||document.documentElement).appendChild(s);
+})();
