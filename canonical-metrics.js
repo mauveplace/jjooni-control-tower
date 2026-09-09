@@ -1,6 +1,7 @@
 (function(root){
 'use strict';
-// Shared display contract. No requests, writes, timers or trading decisions.
+// Shared display contract. No trading decisions; browser may load the separate
+// read-only FAST refresh client after the pure metrics API is installed.
 const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
 const number=v=>{if(v==null||typeof v==='boolean'||typeof v==='object'||String(v).trim()==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const first=(o,keys)=>{for(const k of keys){const x=number(o?.[k]);if(x!=null)return x}return null};
@@ -52,3 +53,15 @@ function audit(c){const rows={};for(const id of IDS){const a=c.accounts?.[id]||{
 const api={IDS,number,first,sum,positions,currency,fx,valueKrw,cash,stock,previous,aggregate,dayKey,parseMs,freshness,positionDay,audit};
 root.JjooniMetrics=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window==='object'?window:globalThis);
+
+(function(){
+'use strict';
+if(typeof window!=='object'||typeof document!=='object')return;
+if(window.__JJOONI_CT_FAST_BOOTSTRAPPED)return;
+window.__JJOONI_CT_FAST_BOOTSTRAPPED=true;
+const s=document.createElement('script');
+s.src='fast-refresh-v32.js?v=1&_='+Date.now();
+s.async=true;
+s.onerror=()=>console.warn('CT FAST client load failed');
+(document.head||document.documentElement).appendChild(s);
+})();
