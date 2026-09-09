@@ -99,25 +99,45 @@ function ensureUI(){
   }
 }
 
+function isLive(x){return x?.quote_live===true}
+function referencePrice(x){return n(x?.reference_price??x?.current_price)}
+function currentPrice(x){return isLive(x)?n(x?.current_price):null}
 function priceText(x){
-  const v=n(x.current_price);if(v==null)return '현재가 —';
-  if(String(x.market)==='KR')return '₩'+Math.round(v).toLocaleString('ko-KR');
-  return '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const live=currentPrice(x);
+  const ref=referencePrice(x);
+  const value=live!=null?live:ref;
+  const label=live!=null?'현재':'기준';
+  if(value==null)return '현재가 —';
+  if(String(x.market)==='KR')return `${label} ₩`+Math.round(value).toLocaleString('ko-KR');
+  return `${label} $`+value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function sourceText(x){
+  if(isLive(x))return x.quote_source||'LIVE';
+  const raw=String(x.reference_source||x.quote_source||'PB_ROTATION_RADAR').replace(/_REFERENCE$/,'');
+  return `기준값 · ${raw}`;
 }
 function sortLabel(){return {day_return_pct:'1D',ret_5d_pct:'5D',ret_10d_pct:'10D',ret_20d_pct:'20D'}[SORT]||'1D'}
-function selectedValue(x){return n(x[SORT])}
+function selectedValue(x){
+  if(SORT==='day_return_pct')return isLive(x)?n(x.day_return_pct):null;
+  return n(x[SORT]);
+}
+function metricValue(x,key){
+  if(key==='1D')return isLive(x)?n(x.day_return_pct):null;
+  return n(x[{ '5D':'ret_5d_pct','10D':'ret_10d_pct','20D':'ret_20d_pct' }[key]]);
+}
 function rowHtml(x,i){
   const v=selectedValue(x);
   const tags=[];
   if(x.is_held)tags.push(`<span class="ctWatchTag held">보유${x.account?' · '+x.account:''}</span>`);
   if(x.theme&&x.theme!=='ETC')tags.push(`<span class="ctWatchTag">${x.theme}</span>`);
+  if(!isLive(x))tags.push(`<span class="ctWatchTag">현재시세 미확인</span>`);
   const cats=(x.categories||[]).slice(0,2);cats.forEach(c=>tags.push(`<span class="ctWatchTag">${String(c).replaceAll('_',' ')}</span>`));
-  const metrics=[['1D',x.day_return_pct],['5D',x.ret_5d_pct],['10D',x.ret_10d_pct],['20D',x.ret_20d_pct]];
+  const metrics=['1D','5D','10D','20D'];
   return `<div class="ctWatchRow">
     <div class="ctWatchRank">${i+1}</div>
-    <div><div class="ctWatchName">${x.name||x.ticker}</div><div class="ctWatchTicker">${x.ticker||''} · ${x.quote_source||'RADAR'}</div><div class="ctWatchTags">${tags.join('')}</div></div>
+    <div><div class="ctWatchName">${x.name||x.ticker}</div><div class="ctWatchTicker">${x.ticker||''} · ${sourceText(x)}</div><div class="ctWatchTags">${tags.join('')}</div></div>
     <div class="ctWatchRight"><div class="ctWatchPrice">${priceText(x)}</div><div class="ctWatchSelected ${tone(v)}">${pct(v)}</div></div>
-    <div class="ctWatchMiniGrid">${metrics.map(([k,val])=>`<div class="ctWatchMini ${tone(val)}"><b>${k}</b>${pct(val)}</div>`).join('')}</div>
+    <div class="ctWatchMiniGrid">${metrics.map(k=>{const val=metricValue(x,k);return `<div class="ctWatchMini ${tone(val)}"><b>${k}</b>${pct(val)}</div>`}).join('')}</div>
   </div>`;
 }
 
@@ -126,21 +146,25 @@ function render(){
   const p=document.getElementById('panel-watchlist');if(!p)return;
   const w=(LIVE||{}).watchlist||{};
   const list=Array.isArray(MARKET==='KR'?w.kr:w.us)?[...(MARKET==='KR'?w.kr:w.us)]:[];
-  list.sort((a,b)=>z(b[SORT])-z(a[SORT]));
+  if(SORT==='day_return_pct'){
+    list.sort((a,b)=>Number(isLive(b))-Number(isLive(a))||z(selectedValue(b))-z(selectedValue(a)));
+  }else{
+    list.sort((a,b)=>z(b[SORT])-z(a[SORT]));
+  }
   const sync=String(w.sync_kst||'—').replace('T',' ').slice(0,16);
   const observed=String((LIVE||{}).observed_at||'—').replace('T',' ').slice(5,16);
-  const liveCount=list.filter(x=>x.quote_live).length;
+  const liveCount=list.filter(isLive).length;
   const sortButtons=[['day_return_pct','1D'],['ret_5d_pct','5D'],['ret_10d_pct','10D'],['ret_20d_pct','20D']];
   p.innerHTML=`
-    <div class="ctWatchHead"><div><h2>워치리스트 시황</h2><div class="ctWatchSub">한국장/미국장 분리 · 선택 기간 수익률 내림차순 · 1D는 가능한 종목 현재 시세 재평가</div></div><div class="ctWatchSub">RADAR ${sync} · FEED ${observed}</div></div>
+    <div class="ctWatchHead"><div><h2>워치리스트 시황</h2><div class="ctWatchSub">한국장/미국장 분리 · 1D 현재값은 quote_live=true 종목만 표시 · RADAR 값은 기준값으로만 표기</div></div><div class="ctWatchSub">RADAR ${sync} · FEED ${observed}</div></div>
     <div class="ctWatchControls">
       <button class="ctWatchCtl ${MARKET==='KR'?'on':''}" data-watch-market="KR">한국장 ${Number(w.kr_count||0)}개</button>
       <button class="ctWatchCtl ${MARKET==='US'?'on':''}" data-watch-market="US">미국장 ${Number(w.us_count||0)}개</button>
       ${sortButtons.map(([k,l])=>`<button class="ctWatchCtl ${SORT===k?'on':''}" data-watch-sort="${k}">${l} 수익률순</button>`).join('')}
     </div>
     <div class="ctWatchCard">
-      <div class="ctWatchMeta"><span>${MARKET==='KR'?'한국장':'미국장'} · ${sortLabel()} 기준 DESC</span><span>현재시세 ${liveCount}/${list.length}</span></div>
-      <div class="ctWatchRows">${list.length?list.map(rowHtml).join(''):`<div class="ctWatchEmpty">워치리스트 데이터가 아직 새 Feed에 반영되지 않았습니다.<br>다음 10분 Feed 갱신 후 자동 표시됩니다.</div>`}</div>
+      <div class="ctWatchMeta"><span>${MARKET==='KR'?'한국장':'미국장'} · ${sortLabel()} 기준 DESC</span><span>검증 현재시세 ${liveCount}/${list.length}</span></div>
+      <div class="ctWatchRows">${list.length?list.map(rowHtml).join(''):`<div class="ctWatchEmpty">워치리스트 데이터가 아직 새 Feed에 반영되지 않았습니다.<br>다음 Feed 갱신 후 자동 표시됩니다.</div>`}</div>
     </div>`;
   p.querySelectorAll('[data-watch-market]').forEach(b=>b.onclick=()=>{MARKET=b.dataset.watchMarket;render()});
   p.querySelectorAll('[data-watch-sort]').forEach(b=>b.onclick=()=>{SORT=b.dataset.watchSort;render()});
