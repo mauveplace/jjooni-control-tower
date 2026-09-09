@@ -47,12 +47,12 @@ async function kick(reason){
   const timer=setTimeout(()=>ctrl.abort(),REQUEST_TIMEOUT_MS);
   badge('FAST 최신화 중…','warn','Control Tower 핵심 숫자만 저지연으로 갱신 중입니다. PB/DEEP 분석은 별도입니다.');
   let r;
-  try{r=await fetch(url+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':sig,'X-CT-Requester':'browser'}})}finally{clearTimeout(timer)}
+  try{r=await fetch(url+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':sig}})}finally{clearTimeout(timer)}
   if(!r.ok)throw new Error('FAST_HTTP_'+r.status);
   const receipt=await r.json().catch(()=>({}));
   window.__JJOONI_CT_FAST_RECEIPT=receipt;
   if(receipt&&receipt.duration_ms!=null)badge('FAST '+(Number(receipt.duration_ms)/1000).toFixed(1)+'초','good','핵심 계좌/시세 FAST 갱신 완료. PB/DEEP 참고자료는 별도 주기로 갱신됩니다.');
-  // live-bridge already owns decryption/rendering.  Ask its existing visibility
+  // live-bridge already owns decryption/rendering. Ask its existing visibility
   // listener to re-read the newly published encrypted display envelope now.
   setTimeout(()=>document.dispatchEvent(new Event('visibilitychange')),180);
  }catch(e){
