@@ -1,0 +1,55 @@
+name: Patch consultant tab restore once
+on:
+  push:
+    branches: [feat/consultant-market-page-20260909]
+    paths:
+      - '.github/workflows/patch-consultant-tab-restore-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/consultant-market-page-20260909
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Make consultant tab exit restore core panels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('consultant-market-v29.js')
+          s=p.read_text()
+          anchor='function activate(){\n'
+          restore='''function restorePanels(){\n const panel=q('#panel-consultant');\n qa('[data-ct-consultant-hidden="1"]').forEach(p=>{p.style.removeProperty('display');delete p.dataset.ctConsultantHidden});\n if(panel){panel.classList.remove('on');panel.style.removeProperty('display')}\n const tab=q('.tab[data-tab="consultant"]');if(tab)tab.classList.remove('on');\n const more=q('#ctMoreTab');if(more)more.classList.remove('on');\n}\n\n'''
+          if restore.strip() not in s:
+              if anchor not in s: raise SystemExit('ACTIVATE_ANCHOR_NOT_FOUND')
+              s=s.replace(anchor,restore+anchor,1)
+          old='qa(\'[id^="panel-"]\').forEach(p=>{const on=p===panel;p.classList.toggle(\'on\',on);if(on)p.style.setProperty(\'display\',\'block\',\'important\');else p.style.setProperty(\'display\',\'none\',\'important\')});'
+          new='qa(\'[id^="panel-"]\').forEach(p=>{const on=p===panel;p.classList.toggle(\'on\',on);if(on){p.style.setProperty(\'display\',\'block\',\'important\');p.removeAttribute(\'data-ct-consultant-hidden\')}else{p.dataset.ctConsultantHidden=\'1\';p.style.setProperty(\'display\',\'none\',\'important\')}});'
+          if old not in s: raise SystemExit('PANEL_SWITCH_NOT_FOUND')
+          s=s.replace(old,new,1)
+          old2=" const more=q('#ctMoreMenu');if(more)qa('button[data-tab]',more).forEach(b=>b.classList.toggle('active',b.dataset.tab==='consultant'));\n render();"
+          new2=" const more=q('#ctMoreMenu');if(more)qa('button[data-tab]',more).forEach(b=>b.classList.toggle('active',b.dataset.tab==='consultant'));\n const moreTab=q('#ctMoreTab');if(moreTab)moreTab.classList.add('on');\n render();"
+          if old2 not in s: raise SystemExit('MORE_STATE_ANCHOR_NOT_FOUND')
+          s=s.replace(old2,new2,1)
+          old3="document.addEventListener('click',e=>{const t=e.target.closest?.('.tab[data-tab]');if(t&&t.dataset.tab!=='consultant'){const p=q('#panel-consultant'),ct=q('.tab[data-tab=\"consultant\"]');if(p){p.classList.remove('on');p.style.removeProperty('display')}if(ct)ct.classList.remove('on')}});"
+          new3="document.addEventListener('click',e=>{const t=e.target.closest?.('.tab[data-tab]');if(t&&t.dataset.tab!=='consultant'){restorePanels();setTimeout(restorePanels,0)}});"
+          if old3 not in s: raise SystemExit('EXIT_HANDLER_NOT_FOUND')
+          s=s.replace(old3,new3,1)
+          p.write_text(s)
+          PY
+          node --check consultant-market-v29.js
+          grep -q 'data-ct-consultant-hidden' consultant-market-v29.js
+          grep -q 'restorePanels' consultant-market-v29.js
+      - name: Commit patch and remove one-shot workflow
+        run: |
+          git config user.name 'mauveplace'
+          git config user.email 'mauveplace@gmail.com'
+          git rm .github/workflows/patch-consultant-tab-restore-once.yml
+          git add consultant-market-v29.js
+          git commit -m 'fix: restore core panels when leaving consultant view'
+          git push origin HEAD:feat/consultant-market-page-20260909
