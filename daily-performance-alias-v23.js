@@ -79,3 +79,17 @@ s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_MARKET_V29?.state||'LOADED';st
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_MARKET_V29_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
 })();
+
+(function(){
+'use strict';
+if(window.__JJOONI_CONSULTANT_TAB_HOTFIX_V30||document.getElementById('ctConsultantTabHotfixV30Script'))return;
+const st={state:'LOADING',version:'30.0',started_at:new Date().toISOString()};
+window.__JJOONI_CONSULTANT_TAB_HOTFIX_LOADER_V30=st;
+const s=document.createElement('script');
+s.id='ctConsultantTabHotfixV30Script';
+s.src='consultant-tab-hotfix-v30.js?v=30.0&_='+Date.now();
+s.async=false;
+s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_TAB_HOTFIX_V30?.state||'LOADED';st.loaded_at=new Date().toISOString()};
+s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_TAB_HOTFIX_V30_LOAD_FAILED')};
+(document.head||document.documentElement).appendChild(s);
+})();
