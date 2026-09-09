@@ -69,11 +69,11 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 (function(){
 'use strict';
 if(window.__JJOONI_CONSULTANT_MARKET_V29||document.getElementById('ctConsultantMarketV29Script'))return;
-const st={state:'LOADING',version:'29.0',started_at:new Date().toISOString()};
+const st={state:'LOADING',version:'29.1',started_at:new Date().toISOString()};
 window.__JJOONI_CONSULTANT_MARKET_LOADER_V29=st;
 const s=document.createElement('script');
 s.id='ctConsultantMarketV29Script';
-s.src='consultant-market-v29.js?v=29.0&_='+Date.now();
+s.src='consultant-market-v29.js?v=29.1&_='+Date.now();
 s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_MARKET_V29?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_MARKET_V29_LOAD_FAILED')};
