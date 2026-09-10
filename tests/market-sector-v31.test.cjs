@@ -4,9 +4,16 @@ const fs=require('node:fs');
 const {execFileSync}=require('node:child_process');
 
 const src=fs.readFileSync('consultant-tab-hotfix-v31.js','utf8');
+const metrics=fs.readFileSync('canonical-metrics.js','utf8');
 
 test('market-sector hotfix is valid JavaScript',()=>{
   execFileSync(process.execPath,['--check','consultant-tab-hotfix-v31.js'],{stdio:'pipe'});
+  execFileSync(process.execPath,['--check','canonical-metrics.js'],{stdio:'pipe'});
+});
+
+test('VIX authority guard is always bootstrapped from canonical metrics',()=>{
+  assert.match(metrics,/__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED/);
+  assert.match(metrics,/consultant-tab-hotfix-v31\.js\?v=31\.5/);
 });
 
 test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
