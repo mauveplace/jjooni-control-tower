@@ -1,0 +1,33 @@
+name: One-shot CT GViz live transport probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ct-gviz-live-probe-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Probe exact browser GViz transport without printing values
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://docs.google.com/spreadsheets/d/1t8TNfIHxSIc_uoSxAgmSbkqCz00923nF1u-b6jlCgYE/gviz/tq?sheet=GITHUB_CT_LIVE&tqx=responseHandler:__ct_probe'
+          CODE="$(curl -L -sS --max-time 20 -o /tmp/gviz.out -w '%{http_code}' "$URL" || true)"
+          BYTES="$(wc -c </tmp/gviz.out 2>/dev/null || echo 0)"
+          AUTH=0; grep -qiE 'accounts.google.com|ServiceLogin|request access|Sign in' /tmp/gviz.out && AUTH=1 || true
+          CALLBACK=0; grep -q '__ct_probe' /tmp/gviz.out && CALLBACK=1 || true
+          SCHEMA=0; grep -q 'JJOONI_CT_LIVE_ENCRYPTED_' /tmp/gviz.out && SCHEMA=1 || true
+          CHUNKS=0; grep -q 'ENVELOPE_CHUNK_COUNT' /tmp/gviz.out && CHUNKS=1 || true
+          echo "GVIZ_HTTP=$CODE BYTES=$BYTES AUTH_PAGE=$AUTH CALLBACK=$CALLBACK SCHEMA_KEY=$SCHEMA CHUNK_KEY=$CHUNKS"
+          test "$CODE" = 200
+          test "$AUTH" = 0
+          test "$CALLBACK" = 1
+          test "$SCHEMA" = 1
+          test "$CHUNKS" = 1
