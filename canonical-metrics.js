@@ -57,6 +57,20 @@ root.JjooniMetrics=api;if(typeof module==='object'&&module.exports)module.export
 (function(){
 'use strict';
 if(typeof window!=='object'||typeof document!=='object')return;
+
+// SSOT-first verified boot coordinator. This runs before the legacy eager
+// trade-review-loader tag and temporarily marks that loader as already active,
+// so the old loader returns immediately instead of starting its 30s timeout.
+if(!window.__JJOONI_BOOT_COORDINATOR_BOOTSTRAPPED){
+ window.__JJOONI_BOOT_COORDINATOR_BOOTSTRAPPED=true;
+ if(!window.__JJOONI_UI_BOOT_V14)window.__JJOONI_UI_BOOT_V14={state:'ACTIVE',version:'V33_DEFERRED_BOOT_HOLD'};
+ const c=document.createElement('script');
+ c.src='boot-coordinator-v33.js?v=33.0&_='+Date.now();
+ c.async=false;
+ c.onerror=()=>{console.warn('CT boot coordinator load failed');window.__JJOONI_UI_BOOT_V14=null};
+ (document.head||document.documentElement).appendChild(c);
+}
+
 if(window.__JJOONI_CT_FAST_BOOTSTRAPPED)return;
 window.__JJOONI_CT_FAST_BOOTSTRAPPED=true;
 const s=document.createElement('script');
