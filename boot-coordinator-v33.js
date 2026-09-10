@@ -3,7 +3,7 @@
 if(typeof window!=='object'||typeof document!=='object')return;
 if(window.__JJOONI_BOOT_COORDINATOR_V33)return;
 
-const S={version:'33.1',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0};
+const S={version:'33.2',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0,last_diag:null};
 window.__JJOONI_BOOT_COORDINATOR_V33=S;
 
 function factsReady(){return !!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD)}
@@ -12,6 +12,15 @@ function lineageReady(){
  return !!(g&&String(g.version||'').length);
 }
 function verifiedReady(){return factsReady()&&lineageReady()}
+function scriptLoaded(name){return [...document.scripts].some(s=>String(s.src||'').includes(name))}
+function bridgeDiag(){
+ const b=document.getElementById('ctEncryptedLiveBadge');
+ const title=String((b&&b.title)||'').trim();
+ const text=String((b&&b.textContent)||'').trim();
+ if(title){S.last_diag=title;return title}
+ if(text&&/WAIT|BLOCKED|실패|대기/i.test(text)){S.last_diag=text;return text}
+ return S.last_diag;
+}
 function ensureShield(){
  let s=document.getElementById('ctUiBootShieldV14');
  if(!s){
@@ -22,7 +31,12 @@ function ensureShield(){
  }
  return s;
 }
-function paint(text){const s=ensureShield(),t=s.querySelector('#ctUiBootTitleV14'),x=s.querySelector('#ctUiBootTextV14'),b=s.querySelector('#ctUiBootReloadV14');if(t)t.textContent='실시간 데이터 연결 중';if(x)x.textContent=text;if(b)b.style.display='none'}
+function paint(text,failed){
+ const s=ensureShield(),t=s.querySelector('#ctUiBootTitleV14'),x=s.querySelector('#ctUiBootTextV14'),b=s.querySelector('#ctUiBootReloadV14');
+ if(t)t.textContent=failed?'SSOT 연결 진단':'실시간 데이터 연결 중';
+ if(x)x.textContent=text;
+ if(b){b.style.display=failed?'inline-block':'none';b.onclick=()=>location.reload()}
+}
 function nudge(){
  S.pulses++;
  try{document.dispatchEvent(new Event('visibilitychange'))}catch(_){}
@@ -39,10 +53,10 @@ function startVerifiedUi(){
  window.__JJOONI_UI_BOOT_V14=null;
  const s=document.createElement('script');
  s.id='ctVerifiedUiLoaderV33';
- s.src='trade-review-loader.js?v=14.20-v33.1&_='+Date.now();
+ s.src='trade-review-loader.js?v=14.20-v33.2&_='+Date.now();
  s.async=false;
  s.onload=()=>{S.state='UI_LOADER_STARTED';S.ui_loader_at=new Date().toISOString()};
- s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.');setTimeout(startVerifiedUi,1500)};
+ s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.',true);setTimeout(startVerifiedUi,1500)};
  (document.head||document.documentElement).appendChild(s);
 }
 
@@ -50,7 +64,7 @@ function startVerifiedUi(){
 // trade-review-loader tag, so the old loader sees ACTIVE and returns. We only
 // clear this hold after verified live SSOT exists.
 if(!window.__JJOONI_UI_BOOT_V14)window.__JJOONI_UI_BOOT_V14={state:'ACTIVE',version:'V33_DEFERRED_BOOT_HOLD'};
-paint('저장된 검증 SSOT를 먼저 연결합니다. 최신 FAST 갱신은 화면 진입 후 이어집니다.');
+paint('저장된 검증 SSOT를 먼저 연결합니다. 최신 FAST 갱신은 화면 진입 후 이어집니다.',false);
 
 let lastPaint=0;
 const timer=setInterval(()=>{
@@ -58,11 +72,20 @@ const timer=setInterval(()=>{
   clearInterval(timer);startVerifiedUi();return;
  }
  const now=Date.now();
- if(now-lastPaint>4000){
+ if(now-lastPaint>2000){
   lastPaint=now;
   const sec=Math.max(0,Math.round((now-Date.parse(S.started_at))/1000));
-  const phase=!factsReady()?'SSOT 읽기/복호화':!lineageReady()?'LINEAGE GUARD 확인':'UI 준비';
-  paint(phase+' · '+sec+'초');
+  if(!factsReady()){
+   const lg=scriptLoaded('lineage-guard.js'),lb=scriptLoaded('live-bridge.js'),diag=bridgeDiag();
+   window.__JJOONI_BOOT_DIAG={sec,lineage_script:lg,live_bridge_script:lb,bridge_error:diag||null,at:new Date().toISOString()};
+   if(diag){paint('SSOT 읽기/복호화 실패 · '+String(diag).slice(0,150),true)}
+   else if(sec>=6&&!lg){paint('LINEAGE GUARD 스크립트가 시작되지 않았습니다. · '+sec+'초',true)}
+   else if(sec>=8&&lg&&!lb){paint('LIVE BRIDGE 스크립트가 시작되지 않았습니다. · '+sec+'초',true)}
+   else paint('SSOT 읽기/복호화 · '+sec+'초 · bridge='+(lb?'ON':'WAIT')+' · lineage='+(lg?'ON':'WAIT'),false);
+  }else if(!lineageReady()){
+   window.__JJOONI_BOOT_DIAG={sec,lineage_script:scriptLoaded('lineage-guard.js'),live_bridge_script:scriptLoaded('live-bridge.js'),bridge_error:bridgeDiag()||null,at:new Date().toISOString()};
+   paint('SSOT는 도착했지만 LINEAGE GUARD 확인 대기 · '+sec+'초',sec>=8);
+  }else paint('UI 준비 · '+sec+'초',false);
  }
  nudge();
 },900);
