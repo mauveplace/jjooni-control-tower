@@ -5,19 +5,30 @@ const {execFileSync}=require('node:child_process');
 
 const src=fs.readFileSync('consultant-tab-hotfix-v31.js','utf8');
 const daily=fs.readFileSync('tripod-daily-freshness-v35.js','utf8');
+const sidecar=fs.readFileSync('public-market-sidecar-v36.js','utf8');
 const metrics=fs.readFileSync('canonical-metrics.js','utf8');
 
-test('market-sector and TRI-POD guard scripts are valid JavaScript',()=>{
-  execFileSync(process.execPath,['--check','consultant-tab-hotfix-v31.js'],{stdio:'pipe'});
-  execFileSync(process.execPath,['--check','tripod-daily-freshness-v35.js'],{stdio:'pipe'});
-  execFileSync(process.execPath,['--check','canonical-metrics.js'],{stdio:'pipe'});
+test('market-sector, sidecar and TRI-POD guard scripts are valid JavaScript',()=>{
+  for(const file of ['consultant-tab-hotfix-v31.js','tripod-daily-freshness-v35.js','public-market-sidecar-v36.js','canonical-metrics.js']){
+    execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
+  }
 });
 
-test('VIX authority and daily freshness guards are always bootstrapped',()=>{
+test('public market, VIX authority and daily freshness guards are always bootstrapped',()=>{
+  assert.match(metrics,/__JJOONI_PUBLIC_MARKET_SIDECAR_BOOTSTRAPPED/);
+  assert.match(metrics,/public-market-sidecar-v36\.js\?v=36\.0/);
   assert.match(metrics,/__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED/);
-  assert.match(metrics,/consultant-tab-hotfix-v31\.js\?v=31\.5/);
+  assert.match(metrics,/consultant-tab-hotfix-v31\.js\?v=31\.6/);
   assert.match(metrics,/__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED/);
-  assert.match(metrics,/tripod-daily-freshness-v35\.js\?v=35\.0/);
+  assert.match(metrics,/tripod-daily-freshness-v35\.js\?v=35\.1/);
+});
+
+test('public sidecar is read-only market-only data with freshness validation',()=>{
+  assert.match(sidecar,/JJOONI_PUBLIC_MARKET_DAILY_V1/);
+  assert.match(sidecar,/d\.read_only!==true/);
+  assert.match(sidecar,/d\.contains_account_data!==false/);
+  assert.match(sidecar,/age>=0&&age<=4/);
+  assert.match(sidecar,/jjooni:public-market-loaded/);
 });
 
 test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
@@ -26,33 +37,31 @@ test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
   assert.match(src,/key==='WTI'\|\|key==='BRENT'/);
 });
 
+test('public daily values fill blanks but valid LIVE values keep priority',()=>{
+  assert.match(src,/__JJOONI_PUBLIC_MARKET_DAILY/);
+  assert.match(src,/const safeFallback=mergeRecord\(ci\[key\],pi\[key\]\)/);
+  assert.match(src,/items\[key\]=mergeRecord\(safeFallback,li\[key\]\)/);
+  assert.match(src,/YAHOO_PUBLIC_DAILY/);
+});
+
 test('TRI-POD distinguishes current VIX from 10-day strategy average',()=>{
-  assert.match(src,/VIX 현물\/최근값/);
-  assert.match(src,/VIX 10일 평균 · 전략 입력/);
-  assert.match(src,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN/);
-  assert.match(src,/YAHOO_RULE_ENGINE_FAST_V31/);
-});
-
-test('legacy TRI-POD VIX10 is blocked until FAST V31 authority arrives',()=>{
-  assert.match(src,/function signalIsAuthoritative\(sig\)/);
-  assert.match(src,/String\(sig\.source\|\|'\'\)==='YAHOO_RULE_ENGINE_FAST_V31'/);
-  assert.match(src,/STALE SIGNAL BLOCKED/);
-  assert.match(src,/rewriteLegacyTripodVix\(panel,'갱신 대기'\)/);
-});
-
-test('partial LIVE market payload cannot blank valid canonical values',()=>{
-  assert.match(src,/function mergeRecord\(c,l\)/);
-  assert.match(src,/if\(hasValue\(L\)\)return \{\.\.\.C,\.\.\.L\}/);
-  assert.match(src,/if\(hasValue\(C\)\)return \{\.\.\.L,\.\.\.C\}/);
+  assert.match(daily,/VIX 최근 완료 일봉/);
+  assert.match(daily,/VIX 10일 평균 · 전략 입력/);
+  assert.match(daily,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN/);
 });
 
 test('stale historical TRI-POD card is quarantined instead of presented as today',()=>{
   assert.match(daily,/data-ct-tripod-daily-quarantine/);
   assert.match(daily,/STALE BLOCKED/);
   assert.match(daily,/구형 정적 판단화면은 안전을 위해 숨겼습니다/);
-  assert.match(daily,/YAHOO_RULE_ENGINE_FAST_V31/);
-  assert.match(daily,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN/);
   assert.match(daily,/age>4/);
+});
+
+test('daily TRI-POD trusts only verified FAST or isolated public daily authority',()=>{
+  assert.match(daily,/PUBLIC_MARKET_DAILY_V1/);
+  assert.match(daily,/YAHOO_RULE_ENGINE_FAST_V31/);
+  assert.match(daily,/NDX_VIX_SAME_COMPLETED_SESSION/);
+  assert.match(daily,/jjooni:public-market-loaded/);
 });
 
 test('verified daily TRI-POD surface contains complete decision inputs',()=>{
@@ -63,4 +72,5 @@ test('verified daily TRI-POD surface contains complete decision inputs',()=>{
   assert.match(daily,/NASDAQ-100 \/ MA250/);
   assert.match(daily,/VIX 10일 평균 · 전략 입력/);
   assert.match(daily,/52주 고점 대비 낙폭/);
+  assert.match(daily,/PUBLIC DAILY/);
 });
