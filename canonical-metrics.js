@@ -71,23 +71,33 @@ if(!window.__JJOONI_BOOT_COORDINATOR_BOOTSTRAPPED){
  (document.head||document.documentElement).appendChild(c);
 }
 
+// Stability boundary: public-market sidecar contains no account/order data and
+// therefore can refresh market/TRI-POD daily facts independently of private KIS.
+if(!window.__JJOONI_PUBLIC_MARKET_SIDECAR_BOOTSTRAPPED){
+ window.__JJOONI_PUBLIC_MARKET_SIDECAR_BOOTSTRAPPED=true;
+ const p=document.createElement('script');
+ p.src='public-market-sidecar-v36.js?v=36.0&_='+Date.now();
+ p.async=false;
+ p.onerror=()=>console.warn('CT public market sidecar load failed');
+ (document.head||document.documentElement).appendChild(p);
+}
+
 // Read-only market/VIX presentation guard.
 if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
  window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED=true;
  const v=document.createElement('script');
- v.src='consultant-tab-hotfix-v31.js?v=31.5&_='+Date.now();
- v.async=true;
- v.onerror=()=>console.warn('CT TRI-POD VIX authority guard load failed');
+ v.src='consultant-tab-hotfix-v31.js?v=31.6&_='+Date.now();
+ v.async=false;
+ v.onerror=()=>console.warn('CT market/VIX presentation guard load failed');
  (document.head||document.documentElement).appendChild(v);
 }
 
-// Stability-first TRI-POD daily surface.  The decrypted legacy card is a historical
-// snapshot and is quarantined until one internally consistent FAST V31 daily signal
-// proves its date + NDX + MA250 + VIX10 + drawdown + target in the same payload.
+// Stability-first TRI-POD daily surface. The decrypted legacy card is historical
+// and remains quarantined unless a complete verified daily signal is available.
 if(!window.__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED){
  window.__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED=true;
  const d=document.createElement('script');
- d.src='tripod-daily-freshness-v35.js?v=35.0&_='+Date.now();
+ d.src='tripod-daily-freshness-v35.js?v=35.1&_='+Date.now();
  d.async=false;
  d.onerror=()=>console.warn('CT TRI-POD daily freshness guard load failed');
  (document.head||document.documentElement).appendChild(d);
