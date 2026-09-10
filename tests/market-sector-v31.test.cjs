@@ -1,8 +1,13 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const {execFileSync}=require('node:child_process');
 
 const src=fs.readFileSync('consultant-tab-hotfix-v31.js','utf8');
+
+test('market-sector hotfix is valid JavaScript',()=>{
+  execFileSync(process.execPath,['--check','consultant-tab-hotfix-v31.js'],{stdio:'pipe'});
+});
 
 test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
   assert.match(src,/\['NASDAQCOMP','NASDAQ 종합'\]/);
