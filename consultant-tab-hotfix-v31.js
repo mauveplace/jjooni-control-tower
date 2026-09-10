@@ -1,12 +1,12 @@
 (function(){
 'use strict';
 if(window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31)return;
-const S={state:'ACTIVE',version:'31.2-market-merge',activations:0,market_augments:0,market_repairs:0};
+const S={state:'ACTIVE',version:'31.3-brent-nasdaq',activations:0,market_augments:0,market_repairs:0};
 window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const BASE_MARKET=[
   ['KOSPI','KOSPI'],
   ['KOSDAQ','KOSDAQ'],
@@ -20,8 +20,9 @@ const BASE_MARKET=[
 ];
 const MARKET_EXTRA=[
   ['DOW30','다우 30'],
-  ['NASDAQCOMP','나스닥 종합'],
+  ['NASDAQCOMP','NASDAQ 종합'],
   ['RUSSELL2000','Russell 2000'],
+  ['BRENT','브렌트유'],
   ['FEAR_GREED','공포탐욕지수']
 ];
 function hasValue(r){return n(r?.value)!=null}
@@ -68,7 +69,7 @@ function val(v){const x=n(v);return x==null?'—':x.toLocaleString('en-US',{maxi
 function marketVal(r,key){
   const x=n(r?.value);if(x==null)return'—';
   if(key==='USDKRW')return '₩'+x.toLocaleString('ko-KR',{maximumFractionDigits:2});
-  if(key==='WTI'||String(r?.unit||'').toUpperCase()==='USD/BBL')return '$'+x.toLocaleString('en-US',{maximumFractionDigits:2});
+  if(key==='WTI'||key==='BRENT'||String(r?.unit||'').toUpperCase()==='USD/BBL')return '$'+x.toLocaleString('en-US',{maximumFractionDigits:2});
   if(key==='US10Y'||r?.unit==='%')return x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:3})+'%';
   return val(x);
 }
@@ -119,7 +120,7 @@ function augmentMarketCards(){
     updateCard(card,items[key]||{},key,label);touched++;
   }
   const sub=q('.ctCmSub',panel);
-  if(sub&&items.DOW30)sub.textContent='송팀장 Consultant View · 주요 지수 + 시장심리 + 마스터시트 섹터 Watchlist';
+  if(sub&&items.DOW30)sub.textContent='송팀장 Consultant View · 주요 지수 + 유가 + 시장심리 + 마스터시트 섹터 Watchlist';
   if(touched){S.market_augments+=touched;S.last_market_augment=new Date().toISOString()}
   S.market_merge=market._ct_merge;
   return true;
@@ -151,16 +152,10 @@ function intercept(e){
   queueMicrotask(activate);
   setTimeout(activate,0);
 }
-// Window is the first DOM node in the capture path. This intentionally runs before
-// the dashboard's legacy document-level capture handlers, which otherwise consume
-// consultant-tab clicks before V30 can observe them.
 window.addEventListener('click',intercept,true);
 window.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&isConsultantTarget(e))intercept(e);
 },true);
-// V29 re-renders the consultant panel whenever a fresh live payload arrives. Reconcile
-// both the original cards and the V30 breadth cards after every render. LIVE is allowed
-// to override CANONICAL only for records that contain an actual numeric value.
 try{
   let pending=false;
   new MutationObserver(()=>{
