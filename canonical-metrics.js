@@ -71,6 +71,19 @@ if(!window.__JJOONI_BOOT_COORDINATOR_BOOTSTRAPPED){
  (document.head||document.documentElement).appendChild(c);
 }
 
+// Stability guard: this is read-only UI protection. It does not calculate orders,
+// change strategy state, or mutate SSOT. Its only job is to prevent a stale legacy
+// TRI-POD VIX value from being presented as current and to show spot VIX separately
+// from the strategy's verified 10-session average when FAST V31 authority is present.
+if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
+ window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED=true;
+ const v=document.createElement('script');
+ v.src='consultant-tab-hotfix-v31.js?v=31.5&_='+Date.now();
+ v.async=true;
+ v.onerror=()=>console.warn('CT TRI-POD VIX authority guard load failed');
+ (document.head||document.documentElement).appendChild(v);
+}
+
 if(window.__JJOONI_CT_FAST_BOOTSTRAPPED)return;
 window.__JJOONI_CT_FAST_BOOTSTRAPPED=true;
 const s=document.createElement('script');
