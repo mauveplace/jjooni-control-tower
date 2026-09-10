@@ -1,0 +1,92 @@
+name: Public Market + TRI-POD Daily Sidecar
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/public-market-daily.yml
+      - tools/build_public_market_daily.py
+  schedule:
+    # 07:10 KST Tue-Sat: after each completed US Mon-Fri regular session.
+    - cron: '10 22 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-market-daily
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Static syntax check
+        run: python -m py_compile tools/build_public_market_daily.py
+
+      - name: Build public read-only market snapshot with bounded retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in 1 2 3; do
+            echo "PUBLIC_MARKET_ATTEMPT=$attempt"
+            if python tools/build_public_market_daily.py; then
+              ok=1
+              break
+            fi
+            sleep 20
+          done
+          test "$ok" = 1
+
+      - name: Acceptance — fresh aligned TRI-POD and core market values
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import date
+          d=json.load(open('public-market-daily.json'))
+          assert d.get('schema')=='JJOONI_PUBLIC_MARKET_DAILY_V1', d.get('schema')
+          assert d.get('read_only') is True
+          assert d.get('contains_account_data') is False
+          market=(d.get('market_context') or {}).get('items') or {}
+          sig=d.get('tripod_signal') or {}
+          for key in ('NASDAQ100','SP500','WTI','US10Y','VIX','DXY','DOW30','NASDAQCOMP','RUSSELL2000','BRENT'):
+              v=(market.get(key) or {}).get('value')
+              assert isinstance(v,(int,float)) and v>0, (key,v)
+          assert sig.get('ok') is True, sig
+          assert sig.get('source')=='PUBLIC_MARKET_DAILY_V1', sig
+          assert sig.get('vix_basis')=='LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN', sig
+          assert sig.get('data_alignment')=='NDX_VIX_SAME_COMPLETED_SESSION', sig
+          assert int(sig.get('vix_window_count') or 0)==10, sig
+          age=(date.today()-date.fromisoformat(sig['date'])).days
+          assert 0<=age<=4, (sig.get('date'),age)
+          print('PUBLIC_MARKET_DAILY_ACCEPTANCE=PASS')
+          print('date=',sig['date'],'vix=',sig['vix_latest_close'],'vix10=',sig['vix10'])
+          print('regime=',sig['regime'],'target=',sig['target'],'action=',sig['action'])
+          PY
+
+      - name: Commit only the public market snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public-market-daily.json
+          if git diff --cached --quiet; then
+            echo PUBLIC_MARKET_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data: refresh public market and TRI-POD daily signal'
+          git push
