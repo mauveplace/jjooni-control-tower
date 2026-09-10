@@ -10,6 +10,7 @@ const BRIDGE_RECOVERY_WINDOW_MS=28000;
 const BRIDGE_RECOVERY_PULSE_MS=900;
 let lastKick=0,busy=false,fastUrl='';
 let recoveryTimer=null,recoveryStarted=0,recoveryPulses=0;
+let verifiedBootRecoveryInFlight=false;
 
 function badge(text,state,title){
  const e=document.getElementById('ctEncryptedLiveBadge');if(!e)return;
@@ -22,6 +23,43 @@ function liveReadyFacts(){
  return !!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD);
 }
 
+function recoverVerifiedBoot(){
+ const boot=window.__JJOONI_UI_BOOT_V14;
+ if(!boot||boot.state!=='BLOCKED'||String(boot.failed||'')!=='SSOT_READY_TIMEOUT')return false;
+ if(verifiedBootRecoveryInFlight)return true;
+ verifiedBootRecoveryInFlight=true;
+ window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'RELOADING_VERIFIED_BOOT',reason:'SSOT_READY_TIMEOUT',at:new Date().toISOString()};
+ const shield=document.getElementById('ctUiBootShieldV14');
+ if(shield){
+  const title=shield.querySelector('#ctUiBootTitleV14'),text=shield.querySelector('#ctUiBootTextV14'),btn=shield.querySelector('#ctUiBootReloadV14');
+  if(title)title.textContent='검증된 화면 재구성 중';
+  if(text)text.textContent='SSOT 연결이 복구되어 필수 UI 모듈을 다시 검증합니다.';
+  if(btn)btn.style.display='none';
+ }
+ try{
+  window.__JJOONI_UI_BOOT_V14=null;
+  const s=document.createElement('script');
+  s.dataset.ctVerifiedBootRecovery='1';
+  s.src='trade-review-loader.js?v=14.20-recovery&_='+Date.now();
+  s.async=false;
+  s.onload=()=>{
+   verifiedBootRecoveryInFlight=false;
+   window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RELOADED',at:new Date().toISOString()};
+  };
+  s.onerror=()=>{
+   verifiedBootRecoveryInFlight=false;
+   window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RELOAD_FAILED',at:new Date().toISOString()};
+   badge('UI BOOT 재시도 실패','warn','trade-review-loader.js 재로딩 실패');
+  };
+  (document.head||document.documentElement).appendChild(s);
+  return true;
+ }catch(e){
+  verifiedBootRecoveryInFlight=false;
+  window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RECOVERY_ERROR',error:String(e&&e.message||e),at:new Date().toISOString()};
+  return false;
+ }
+}
+
 function releaseLateReady(){
  if(!liveReadyFacts()||window.__LINEAGE_GUARD_ACTIVE!==true)return false;
  // lineage-guard uses this exact canonical+live predicate. If its 25s timer
@@ -29,6 +67,10 @@ function releaseLateReady(){
  // recover without forcing the user into a reload loop.
  window.__JJOONI_LIVE_READY=true;
  const shield=document.getElementById('ctSsotSafetyShield');if(shield)shield.remove();
+ // trade-review-loader has its own fail-closed shield. A prior SSOT timeout is
+ // recoverable once the same verified canonical+live predicate becomes true.
+ // Re-run the verified module loader instead of merely hiding its shield.
+ recoverVerifiedBoot();
  return true;
 }
 
@@ -121,7 +163,7 @@ async function kick(reason){
  }finally{busy=false}
 }
 
-window.__JJOONI_CT_FAST={version:'1.2',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND',bridge_recovery:'BOUNDED_28S_READ_ONLY'};
+window.__JJOONI_CT_FAST={version:'1.3',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'SSOT_TIMEOUT_RELOAD'};
 document.addEventListener('jjooni:live-applied',()=>{releaseLateReady();kick('live-applied')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick('visible')});
 // Start read-side recovery before/alongside the first FAST call. This closes the
