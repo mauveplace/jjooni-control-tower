@@ -13,8 +13,15 @@ test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
 test('TRI-POD distinguishes current VIX from 10-day strategy average',()=>{
   assert.match(src,/VIX 현물\/최근값/);
   assert.match(src,/VIX 10일 평균 · 전략 입력/);
-  assert.match(src,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN|vix10/);
-  assert.match(src,/YAHOO_RULE_ENGINE_FAST_V31|sig\.source/);
+  assert.match(src,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN/);
+  assert.match(src,/YAHOO_RULE_ENGINE_FAST_V31/);
+});
+
+test('legacy TRI-POD VIX10 is blocked until FAST V31 authority arrives',()=>{
+  assert.match(src,/function signalIsAuthoritative\(sig\)/);
+  assert.match(src,/String\(sig\.source\|\|'\'\)==='YAHOO_RULE_ENGINE_FAST_V31'/);
+  assert.match(src,/STALE SIGNAL BLOCKED/);
+  assert.match(src,/rewriteLegacyTripodVix\(panel,'갱신 대기'\)/);
 });
 
 test('partial LIVE market payload cannot blank valid canonical values',()=>{
