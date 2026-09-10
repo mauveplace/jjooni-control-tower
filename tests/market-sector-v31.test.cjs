@@ -4,16 +4,20 @@ const fs=require('node:fs');
 const {execFileSync}=require('node:child_process');
 
 const src=fs.readFileSync('consultant-tab-hotfix-v31.js','utf8');
+const daily=fs.readFileSync('tripod-daily-freshness-v35.js','utf8');
 const metrics=fs.readFileSync('canonical-metrics.js','utf8');
 
-test('market-sector hotfix is valid JavaScript',()=>{
+test('market-sector and TRI-POD guard scripts are valid JavaScript',()=>{
   execFileSync(process.execPath,['--check','consultant-tab-hotfix-v31.js'],{stdio:'pipe'});
+  execFileSync(process.execPath,['--check','tripod-daily-freshness-v35.js'],{stdio:'pipe'});
   execFileSync(process.execPath,['--check','canonical-metrics.js'],{stdio:'pipe'});
 });
 
-test('VIX authority guard is always bootstrapped from canonical metrics',()=>{
+test('VIX authority and daily freshness guards are always bootstrapped',()=>{
   assert.match(metrics,/__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED/);
   assert.match(metrics,/consultant-tab-hotfix-v31\.js\?v=31\.5/);
+  assert.match(metrics,/__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED/);
+  assert.match(metrics,/tripod-daily-freshness-v35\.js\?v=35\.0/);
 });
 
 test('market-sector board includes Nasdaq Composite and Brent crude',()=>{
@@ -40,4 +44,23 @@ test('partial LIVE market payload cannot blank valid canonical values',()=>{
   assert.match(src,/function mergeRecord\(c,l\)/);
   assert.match(src,/if\(hasValue\(L\)\)return \{\.\.\.C,\.\.\.L\}/);
   assert.match(src,/if\(hasValue\(C\)\)return \{\.\.\.L,\.\.\.C\}/);
+});
+
+test('stale historical TRI-POD card is quarantined instead of presented as today',()=>{
+  assert.match(daily,/data-ct-tripod-daily-quarantine/);
+  assert.match(daily,/STALE BLOCKED/);
+  assert.match(daily,/구형 정적 판단화면은 안전을 위해 숨겼습니다/);
+  assert.match(daily,/YAHOO_RULE_ENGINE_FAST_V31/);
+  assert.match(daily,/LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN/);
+  assert.match(daily,/age>4/);
+});
+
+test('verified daily TRI-POD surface contains complete decision inputs',()=>{
+  assert.match(daily,/VERIFIED DAILY/);
+  assert.match(daily,/CURRENT REGIME/);
+  assert.match(daily,/TARGET EXPOSURE/);
+  assert.match(daily,/TODAY ACTION/);
+  assert.match(daily,/NASDAQ-100 \/ MA250/);
+  assert.match(daily,/VIX 10일 평균 · 전략 입력/);
+  assert.match(daily,/52주 고점 대비 낙폭/);
 });
