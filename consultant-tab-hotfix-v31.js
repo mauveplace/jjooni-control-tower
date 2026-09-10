@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31)return;
-const S={state:'ACTIVE',version:'31.3-brent-nasdaq',activations:0,market_augments:0,market_repairs:0};
+const S={state:'ACTIVE',version:'31.4-brent-nasdaq-tripod-vix',activations:0,market_augments:0,market_repairs:0,tripod_repairs:0};
 window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -76,11 +76,7 @@ function marketVal(r,key){
 function sentiment(r){
   const score=n(r?.value),prev=n(r?.prev_close),rating=String(r?.rating||'').toUpperCase();
   const ko={'EXTREME FEAR':'극도 공포','FEAR':'공포','NEUTRAL':'중립','GREED':'탐욕','EXTREME GREED':'극도 탐욕'}[rating]||rating||'—';
-  return {
-    value:score==null?'—':Math.round(score)+'/100',
-    move:(prev==null?ko:`${ko} · 전일 ${Math.round(prev)}`),
-    klass:'flat'
-  };
+  return {value:score==null?'—':Math.round(score)+'/100',move:(prev==null?ko:`${ko} · 전일 ${Math.round(prev)}`),klass:'flat'};
 }
 function updateCard(card,r,key,label){
   if(!card)return false;
@@ -88,9 +84,7 @@ function updateCard(card,r,key,label){
   if(name&&label)name.textContent=label;
   if(src)src.textContent=sourceLabel(r?.source);
   let value=marketVal(r,key),move=pct(r?.change_pct),klass=cls(r?.change_pct);
-  if(key==='FEAR_GREED'){
-    const s=sentiment(r);value=s.value;move=s.move;klass=s.klass;
-  }
+  if(key==='FEAR_GREED'){const s=sentiment(r);value=s.value;move=s.move;klass=s.klass}
   if(valueEl)valueEl.textContent=value;
   if(moveEl){moveEl.textContent=move;moveEl.classList.remove('up','down','flat');moveEl.classList.add(klass)}
   return hasValue(r);
@@ -100,18 +94,12 @@ function repairBaseMarketCards(grid,items){
   const byLabel=new Map();
   for(const card of cards){const label=q('.ctCmMacroName',card)?.textContent?.trim();if(label)byLabel.set(label,card)}
   let repaired=0;
-  for(const [key,label] of BASE_MARKET){
-    const r=items[key]||{};
-    if(!hasValue(r))continue;
-    const card=byLabel.get(label);
-    if(card&&updateCard(card,r,key,label))repaired++;
-  }
+  for(const [key,label] of BASE_MARKET){const r=items[key]||{};if(!hasValue(r))continue;const card=byLabel.get(label);if(card&&updateCard(card,r,key,label))repaired++}
   if(repaired){S.market_repairs+=repaired;S.last_market_repair=new Date().toISOString()}
 }
 function augmentMarketCards(){
   const panel=q('#panel-consultant'),grid=q('.ctCmMacro',panel||document);if(!panel||!grid)return false;
-  const market=mergedMarket();
-  const items=market.items||{};
+  const market=mergedMarket(),items=market.items||{};
   repairBaseMarketCards(grid,items);
   let touched=0;
   for(const [key,label] of MARKET_EXTRA){
@@ -119,50 +107,71 @@ function augmentMarketCards(){
     if(!card){card=document.createElement('div');card.className='ctCmMacroCard';card.dataset.ctMarketV30=key;card.innerHTML='<div class="ctCmMacroTop"><span class="ctCmMacroName"></span><span class="ctCmSrc"></span></div><div class="ctCmMacroValue">—</div><div class="ctCmMacroMove flat">—</div>';grid.appendChild(card)}
     updateCard(card,items[key]||{},key,label);touched++;
   }
-  const sub=q('.ctCmSub',panel);
-  if(sub&&items.DOW30)sub.textContent='송팀장 Consultant View · 주요 지수 + 유가 + 시장심리 + 마스터시트 섹터 Watchlist';
+  const sub=q('.ctCmSub',panel);if(sub&&items.DOW30)sub.textContent='송팀장 Consultant View · 주요 지수 + 유가 + 시장심리 + 마스터시트 섹터 Watchlist';
   if(touched){S.market_augments+=touched;S.last_market_augment=new Date().toISOString()}
   S.market_merge=market._ct_merge;
   return true;
 }
+function tripodSignal(){
+  const P=window.__JJOONI_LIVE_PAYLOAD||{},tp=(P.accounts||{}).TRIPOD||{};
+  return tp.signal||P.tripod_signal||{};
+}
+function repairLegacyTripodVix(panel,vix10){
+  if(vix10==null)return 0;
+  let repaired=0;
+  const leaves=qa('*',panel).filter(e=>e.childElementCount===0&&!e.closest('#ctTripodVixAuthorityV34'));
+  for(const label of leaves){
+    const t=String(label.textContent||'').trim();
+    if(!/^VIX(?:\s*10(?:일|D|DAY)?(?:\s*(?:평균|AVG))?)?$/i.test(t))continue;
+    if(t!=='VIX 10일 평균')label.textContent='VIX 10일 평균';
+    let root=label.parentElement;
+    for(let depth=0;root&&depth<3;depth++,root=root.parentElement){
+      const nums=qa('*',root).filter(e=>e!==label&&e.childElementCount===0&&!e.closest('#ctTripodVixAuthorityV34')&&/^[-+]?\d+(?:\.\d+)?$/.test(String(e.textContent||'').trim()));
+      if(nums.length===1){const txt=vix10.toFixed(2);if(nums[0].textContent!==txt)nums[0].textContent=txt;repaired++;break}
+    }
+  }
+  return repaired;
+}
+function repairTripodSignal(){
+  const panel=q('#panel-tripod');if(!panel)return false;
+  const sig=tripodSignal(),vix10=n(sig.vix10);if(!sig||sig.ok!==true||vix10==null)return false;
+  const market=mergedMarket(),vix=(market.items||{}).VIX||{},spot=n(vix.value)??n(sig.vix_latest_close),ndx=n(sig.ndx),ma250=n(sig.ma250),dd=n(sig.drawdown_52w_pct);
+  let box=q('#ctTripodVixAuthorityV34',panel);
+  if(!box){box=document.createElement('section');box.id='ctTripodVixAuthorityV34';box.style.cssText='margin:8px 0 12px;padding:12px 13px;border:1px solid #d7e6fb;border-radius:14px;background:#f8fbff;color:#172033;font-family:system-ui,-apple-system,sans-serif';panel.insertBefore(box,panel.firstChild)}
+  const signature=[vix10,spot,ndx,ma250,dd,sig.regime,sig.target,sig.date,sig.source].join('|');
+  if(box.dataset.signature!==signature){
+    box.dataset.signature=signature;
+    box.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b style="font-size:13px">TRI-POD 신호 기준값</b><span style="font-size:9px;color:#667085">'+esc(sig.date||'')+' · '+esc(sig.source||'')+'</span></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px">'+
+      '<div style="padding:8px;border:1px solid #e4edf7;border-radius:10px;background:#fff"><span style="font-size:9px;color:#667085">VIX 현물/최근값</span><b style="display:block;margin-top:3px;font-size:16px">'+(spot==null?'—':spot.toFixed(2))+'</b></div>'+
+      '<div style="padding:8px;border:1px solid #e4edf7;border-radius:10px;background:#fff"><span style="font-size:9px;color:#667085">VIX 10일 평균 · 전략 입력</span><b style="display:block;margin-top:3px;font-size:16px">'+vix10.toFixed(2)+'</b></div>'+
+      '<div style="padding:8px;border:1px solid #e4edf7;border-radius:10px;background:#fff"><span style="font-size:9px;color:#667085">NASDAQ-100 / MA250</span><b style="display:block;margin-top:3px;font-size:12px">'+(ndx==null?'—':val(ndx))+' / '+(ma250==null?'—':val(ma250))+'</b></div>'+
+      '<div style="padding:8px;border:1px solid #e4edf7;border-radius:10px;background:#fff"><span style="font-size:9px;color:#667085">레짐 / 52주 낙폭</span><b style="display:block;margin-top:3px;font-size:12px">'+esc(sig.regime||'—')+' / '+(dd==null?'—':dd.toFixed(2)+'%')+'</b></div></div>'+
+      '<div style="margin-top:8px;font-size:10px;color:#475467"><b>목표:</b> '+esc(sig.target||'—')+' · TRI-POD의 VIX 기준은 현물값이 아니라 최근 10거래일 종가의 산술평균입니다.</div>';
+  }
+  const repaired=repairLegacyTripodVix(panel,vix10);
+  if(repaired){S.tripod_repairs+=repaired;S.last_tripod_repair=new Date().toISOString()}
+  S.tripod_vix={spot:spot,vix10:vix10,source:sig.source||null,date:sig.date||null};
+  return true;
+}
 function activate(){
-  const tab=q('.tab[data-tab="consultant"]'),panel=q('#panel-consultant');
-  if(!panel)return false;
+  const tab=q('.tab[data-tab="consultant"]'),panel=q('#panel-consultant');if(!panel)return false;
   qa('.tab[data-tab]').forEach(t=>t.classList.toggle('on',t===tab));
-  qa('[id^="panel-"]').forEach(p=>{
-    const on=p===panel;
-    p.classList.toggle('on',on);
-    if(on){p.style.setProperty('display','block','important');p.removeAttribute('data-ct-consultant-hidden')}
-    else{p.dataset.ctConsultantHidden='1';p.style.setProperty('display','none','important')}
-  });
-  const menu=q('#ctMoreMenu');
-  if(menu){qa('button[data-tab]',menu).forEach(b=>b.classList.toggle('active',b.dataset.tab==='consultant'));menu.classList.remove('open')}
+  qa('[id^="panel-"]').forEach(p=>{const on=p===panel;p.classList.toggle('on',on);if(on){p.style.setProperty('display','block','important');p.removeAttribute('data-ct-consultant-hidden')}else{p.dataset.ctConsultantHidden='1';p.style.setProperty('display','none','important')}});
+  const menu=q('#ctMoreMenu');if(menu){qa('button[data-tab]',menu).forEach(b=>b.classList.toggle('active',b.dataset.tab==='consultant'));menu.classList.remove('open')}
   const more=q('#ctMoreTab');if(more){more.classList.add('on');more.setAttribute('aria-expanded','false')}
   try{sessionStorage.setItem('jjooni_ct_active_tab_v1','consultant')}catch(_){}
   S.activations++;S.last_activation=new Date().toISOString();
-  augmentMarketCards();setTimeout(augmentMarketCards,0);setTimeout(augmentMarketCards,250);
+  augmentMarketCards();repairTripodSignal();setTimeout(()=>{augmentMarketCards();repairTripodSignal()},250);
   return true;
 }
-function intercept(e){
-  if(!isConsultantTarget(e))return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  e.stopPropagation();
-  activate();
-  queueMicrotask(activate);
-  setTimeout(activate,0);
-}
+function intercept(e){if(!isConsultantTarget(e))return;e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();activate();queueMicrotask(activate);setTimeout(activate,0)}
 window.addEventListener('click',intercept,true);
-window.addEventListener('keydown',e=>{
-  if((e.key==='Enter'||e.key===' ')&&isConsultantTarget(e))intercept(e);
-},true);
+window.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&isConsultantTarget(e))intercept(e)},true);
 try{
   let pending=false;
-  new MutationObserver(()=>{
-    if(pending)return;pending=true;
-    requestAnimationFrame(()=>{pending=false;augmentMarketCards()});
-  }).observe(document.documentElement,{subtree:true,childList:true});
+  new MutationObserver(()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;augmentMarketCards();repairTripodSignal()})}).observe(document.documentElement,{subtree:true,childList:true});
 }catch(_){ }
-document.addEventListener('jjooni:live-applied',()=>setTimeout(augmentMarketCards,0));
-setTimeout(augmentMarketCards,500);
+document.addEventListener('jjooni:live-applied',()=>setTimeout(()=>{augmentMarketCards();repairTripodSignal()},0));
+setTimeout(()=>{augmentMarketCards();repairTripodSignal()},500);
 })();
