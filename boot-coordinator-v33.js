@@ -3,11 +3,15 @@
 if(typeof window!=='object'||typeof document!=='object')return;
 if(window.__JJOONI_BOOT_COORDINATOR_V33)return;
 
-const S={version:'33.0',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0};
+const S={version:'33.1',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0};
 window.__JJOONI_BOOT_COORDINATOR_V33=S;
 
 function factsReady(){return !!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD)}
-function verifiedReady(){return factsReady()&&window.__LINEAGE_GUARD_ACTIVE===true}
+function lineageReady(){
+ const g=window.__JJOONI_LINEAGE_GUARD;
+ return !!(g&&String(g.version||'').length);
+}
+function verifiedReady(){return factsReady()&&lineageReady()}
 function ensureShield(){
  let s=document.getElementById('ctUiBootShieldV14');
  if(!s){
@@ -22,10 +26,12 @@ function paint(text){const s=ensureShield(),t=s.querySelector('#ctUiBootTitleV14
 function nudge(){
  S.pulses++;
  try{document.dispatchEvent(new Event('visibilitychange'))}catch(_){}
- try{window.__JJOONI_CT_FAST?.kick?.()}catch(_){}
+ // Existing verified SSOT should open first. FAST refresh is a post-open freshness
+ // improvement, not a prerequisite for rendering the dashboard.
+ if(S.pulses>8){try{window.__JJOONI_CT_FAST?.kick?.()}catch(_){}}
 }
 function startVerifiedUi(){
- if(S.state==='UI_LOADING'||S.state==='ACTIVE')return;
+ if(S.state==='UI_LOADING'||S.state==='ACTIVE'||S.state==='UI_LOADER_STARTED')return;
  S.state='UI_LOADING';S.live_ready_at=new Date().toISOString();
  window.__JJOONI_LIVE_READY=true;
  const ss=document.getElementById('ctSsotSafetyShield');if(ss)ss.remove();
@@ -33,7 +39,7 @@ function startVerifiedUi(){
  window.__JJOONI_UI_BOOT_V14=null;
  const s=document.createElement('script');
  s.id='ctVerifiedUiLoaderV33';
- s.src='trade-review-loader.js?v=14.20-v33&_='+Date.now();
+ s.src='trade-review-loader.js?v=14.20-v33.1&_='+Date.now();
  s.async=false;
  s.onload=()=>{S.state='UI_LOADER_STARTED';S.ui_loader_at=new Date().toISOString()};
  s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.');setTimeout(startVerifiedUi,1500)};
@@ -44,7 +50,7 @@ function startVerifiedUi(){
 // trade-review-loader tag, so the old loader sees ACTIVE and returns. We only
 // clear this hold after verified live SSOT exists.
 if(!window.__JJOONI_UI_BOOT_V14)window.__JJOONI_UI_BOOT_V14={state:'ACTIVE',version:'V33_DEFERRED_BOOT_HOLD'};
-paint('SSOT 연결을 먼저 완료한 뒤 화면 모듈을 검증합니다.');
+paint('저장된 검증 SSOT를 먼저 연결합니다. 최신 FAST 갱신은 화면 진입 후 이어집니다.');
 
 let lastPaint=0;
 const timer=setInterval(()=>{
@@ -55,7 +61,8 @@ const timer=setInterval(()=>{
  if(now-lastPaint>4000){
   lastPaint=now;
   const sec=Math.max(0,Math.round((now-Date.parse(S.started_at))/1000));
-  paint('SSOT 연결 확인 중 · '+sec+'초 · 연결이 늦어져도 화면을 영구 차단하지 않습니다.');
+  const phase=!factsReady()?'SSOT 읽기/복호화':!lineageReady()?'LINEAGE GUARD 확인':'UI 준비';
+  paint(phase+' · '+sec+'초');
  }
  nudge();
 },900);
