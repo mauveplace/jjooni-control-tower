@@ -22,6 +22,10 @@ function badge(text,state,title){
 function liveReadyFacts(){
  return !!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD);
 }
+function lineageReady(){
+ const g=window.__JJOONI_LINEAGE_GUARD;
+ return !!(g&&String(g.version||'').length);
+}
 
 function recoverVerifiedBoot(){
  const boot=window.__JJOONI_UI_BOOT_V14;
@@ -61,15 +65,9 @@ function recoverVerifiedBoot(){
 }
 
 function releaseLateReady(){
- if(!liveReadyFacts()||window.__LINEAGE_GUARD_ACTIVE!==true)return false;
- // lineage-guard uses this exact canonical+live predicate. If its 25s timer
- // already displayed the fail-closed shield, allow a late successful read to
- // recover without forcing the user into a reload loop.
+ if(!liveReadyFacts()||!lineageReady())return false;
  window.__JJOONI_LIVE_READY=true;
  const shield=document.getElementById('ctSsotSafetyShield');if(shield)shield.remove();
- // trade-review-loader has its own fail-closed shield. A prior SSOT timeout is
- // recoverable once the same verified canonical+live predicate becomes true.
- // Re-run the verified module loader instead of merely hiding its shield.
  recoverVerifiedBoot();
  return true;
 }
@@ -80,9 +78,6 @@ function nudgeBridge(reason){
  window.__JJOONI_CT_FAST_BRIDGE_RECOVERY={
   state:'NUDGE',reason:String(reason||''),pulses:recoveryPulses,at:new Date().toISOString()
  };
- // live-bridge owns decryption and canonicalization. Its refresh function is
- // intentionally private; visibilitychange is its public re-read hook. Multiple
- // pulses are safe because live-bridge itself has refreshBusy single-flight.
  document.dispatchEvent(new Event('visibilitychange'));
 }
 
@@ -150,11 +145,6 @@ async function kick(reason){
   const receipt=await r.json().catch(()=>({}));
   window.__JJOONI_CT_FAST_RECEIPT=receipt;
   if(receipt&&receipt.duration_ms!=null)badge('FAST '+(Number(receipt.duration_ms)/1000).toFixed(1)+'초','good','핵심 계좌/시세 FAST 갱신 완료. PB/DEEP 참고자료는 별도 주기로 갱신됩니다.');
-  // FAST publishes the encrypted sheet while live-bridge may already be in its
-  // initial GViz read. One visibility event can be lost while refreshBusy=true,
-  // which caused VERIFIED BOOT to time out even though the new snapshot existed.
-  // Keep nudging only the read side for a bounded 28s window; FAST itself remains
-  // protected by the 45s cooldown, so this does not create extra Cloud Run work.
   setTimeout(()=>startBridgeRecovery('fast-published'),180);
  }catch(e){
   console.warn('CT FAST refresh',e);
@@ -163,11 +153,9 @@ async function kick(reason){
  }finally{busy=false}
 }
 
-window.__JJOONI_CT_FAST={version:'1.3',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'SSOT_TIMEOUT_RELOAD'};
+window.__JJOONI_CT_FAST={version:'1.4',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'LINEAGE_OBJECT_CONTRACT'};
 document.addEventListener('jjooni:live-applied',()=>{releaseLateReady();kick('live-applied')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick('visible')});
-// Start read-side recovery before/alongside the first FAST call. This closes the
-// startup race without re-enabling any Control Tower scheduler.
 setTimeout(()=>startBridgeRecovery('startup'),350);
 setTimeout(()=>kick('startup'),1200);
 })();
