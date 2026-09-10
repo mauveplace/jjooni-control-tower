@@ -1,0 +1,36 @@
+name: One-shot CT boot cache key bump
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-ct-boot-cache-bump.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump static boot cache keys
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = s
+          s = s.replace('canonical-metrics.js?v=1', 'canonical-metrics.js?v=33.0')
+          s = s.replace('trade-review-loader.js?v=14.18', 'trade-review-loader.js?v=14.20')
+          if s == old:
+              raise SystemExit('expected cache-key strings not found')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit cache key bump
+        run: |
+          git config user.name 'jjooni-automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: force fresh SSOT-first boot assets'
+          git push
