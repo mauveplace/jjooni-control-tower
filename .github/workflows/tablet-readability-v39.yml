@@ -1,0 +1,89 @@
+name: Tablet Readability Floor V39
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/tablet-readability-v39.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tablet-readability-v39
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Raise tablet text floor only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tablet-stability-v37.js')
+          t=p.read_text()
+          reps=[
+            ("version:'37.1'","version:'37.2'"),
+            (".tabs:after{left:22px!important;top:76px!important;font-size:11px!important}",".tabs:after{left:22px!important;top:76px!important;font-size:14px!important}"),
+            ("padding:13px 12px!important;font-size:15px!important;line-height:1.25!important","padding:13px 12px!important;font-size:17px!important;line-height:1.25!important"),
+            ("min-height:44px;font-size:14px!important;touch-action:manipulation","min-height:44px;font-size:16px!important;touch-action:manipulation"),
+            ("small{font-size:14px!important;line-height:1.45!important}","small{font-size:16px!important;line-height:1.45!important}"),
+            (".ctD8Kpi small){font-size:14px!important;line-height:1.45!important}",".ctD8Kpi small){font-size:16px!important;line-height:1.45!important}"),
+            (".ctD8Name){font-size:17px!important;line-height:1.35!important}",".ctD8Name){font-size:19px!important;line-height:1.35!important}"),
+            (".ctD8Btn){font-size:14px!important;min-height:42px!important;padding:9px 12px!important}",".ctD8Btn){font-size:16px!important;min-height:44px!important;padding:9px 12px!important}"),
+            (".ctTrChip{border:1px solid #d8e1ea!important;background:#fff!important;color:#475467!important;border-radius:999px!important;padding:10px 14px!important;font-size:15px!important", ".ctTrChip{border:1px solid #d8e1ea!important;background:#fff!important;color:#475467!important;border-radius:999px!important;padding:10px 14px!important;font-size:16px!important"),
+            (".ctTickerMeta{display:block!important;font-size:14px!important", ".ctTickerMeta{display:block!important;font-size:16px!important"),
+            (".ctTickerVerdict{font-size:14px!important", ".ctTickerVerdict{font-size:16px!important"),
+            (".ctSleeveMeta{font-size:14px!important", ".ctSleeveMeta{font-size:16px!important"),
+            (".ctSleeveVerdict{font-size:14px!important", ".ctSleeveVerdict{font-size:16px!important"),
+            (".ctTrMetric{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;padding:8px 0!important;font-size:15px!important", ".ctTrMetric{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;padding:8px 0!important;font-size:16px!important"),
+            (".ctTrEventMain{display:grid!important;grid-template-columns:58px 48px minmax(0,1fr) auto!important;gap:8px!important;font-size:15px!important", ".ctTrEventMain{display:grid!important;grid-template-columns:58px 48px minmax(0,1fr) auto!important;gap:8px!important;font-size:16px!important"),
+            (".ctTrEventMeta{font-size:14px!important", ".ctTrEventMeta{font-size:16px!important"),
+            (".tab[data-tab]{font-size:14px!important}", ".tab[data-tab]{font-size:16px!important}")
+          ]
+          for old,new in reps:
+              c=t.count(old)
+              if c!=1:
+                  raise SystemExit(f'READABILITY_PATCH_REFUSE count={c} token={old[:80]}')
+              t=t.replace(old,new,1)
+          p.write_text(t)
+          print('TABLET_READABILITY_FLOOR=PASS')
+          PY
+
+      - name: Stability acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tablet-stability-v37.js
+          node --test tests/*.test.cjs
+          node - <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const s=fs.readFileSync('tablet-stability-v37.js','utf8');
+          assert.match(s,/version:'37\.2'/);
+          assert.match(s,/button.*font-size:16px!important/);
+          assert.match(s,/small\{font-size:16px!important/);
+          assert.match(s,/\.tab.*font-size:17px!important/);
+          assert.match(s,/\.ctTickerName\{font-size:20px!important/);
+          assert.match(s,/\.ctTrTitle\{font-size:30px!important/);
+          assert.match(s,/min-height:44px/);
+          console.log('TABLET_READABILITY_V39=PASS');
+          NODE
+
+      - name: Commit typography-only patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tablet-stability-v37.js
+          git diff --cached --check
+          git commit -m 'fix: raise tablet readability floor to 16px'
+          git push
