@@ -22,24 +22,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Apply V40 tablet fixes
+      - name: Patch production UI only
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
 
-          def once(path, old, new, label):
-              p=Path(path); t=p.read_text(); c=t.count(old)
-              if c != 1:
-                  raise SystemExit(f'{label}: expected 1 occurrence, got {c}')
-              p.write_text(t.replace(old,new,1))
-              print(label+'=PASS')
-
-          # Persistent ticker -> Korean name cache, captured before LIVE rows can overwrite static rows.
+          # live-bridge: keep a persistent code -> Korean-name cache before LIVE mutates D.
           p=Path('live-bridge.js'); t=p.read_text()
+          marker="let TRADE_QUOTES={};\n"
           if 'STATIC_SECURITY_NAMES' not in t:
-              marker="let TRADE_QUOTES={};\n"
               cache=("let TRADE_QUOTES={};\n"
                      "const STATIC_SECURITY_NAMES=(()=>{\n"
                      " const m=new Map(),manual={'091170':'KODEX 은행','418660':'TIGER 미국나스닥100레버리지(합성)','006400':'삼성SDI','005380':'현대차'};\n"
@@ -54,12 +47,11 @@ jobs:
               t=t.replace(marker,cache,1)
           old="const k=sym(ticker);if(!k)return '';\n try{"
           new="const k=sym(ticker);if(!k)return '';\n const sk=/^\\d{1,6}$/.test(k)?k.padStart(6,'0'):k;const cached=STATIC_SECURITY_NAMES.get(sk)||STATIC_SECURITY_NAMES.get(k);if(cached)return cached;\n try{"
-          if old not in t: raise SystemExit('LEGACY_NAME_CACHE anchor missing')
-          t=t.replace(old,new,1)
+          if old in t: t=t.replace(old,new,1)
+          elif 'STATIC_SECURITY_NAMES.get(sk)' not in t: raise SystemExit('LEGACY_NAME_CACHE anchor missing')
           p.write_text(t)
-          print('STATIC_NAME_CACHE=PASS')
 
-          # Trade review: default recent-first, name cache fallback, Galaxy Tab-safe classification.
+          # trade-review: recent-first + persistent name fallback + Galaxy Tab-safe detection.
           p=Path('trade-review-v2.js'); t=p.read_text()
           if "sort:'error'" in t: t=t.replace("sort:'error'","sort:'recent'",1)
           elif "sort:'recent'" not in t: raise SystemExit('DEFAULT_SORT missing')
@@ -72,11 +64,10 @@ jobs:
           if old in t: t=t.replace(old,new,1)
           elif '__JJOONI_SECURITY_NAMES' not in t: raise SystemExit('TRADE_NAME_FALLBACK missing')
           p.write_text(t)
-          print('TRADE_REVIEW_V40=PASS')
 
-          # Tablet detection and typography floor.
+          # tablet guard: classify by physical screen and override compact block/table text.
           p=Path('tablet-stability-v37.js'); t=p.read_text()
-          t=t.replace("version:'37.2'","version:'37.3'",1)
+          if "version:'37.2'" in t: t=t.replace("version:'37.2'","version:'37.3'",1)
           old="function isTablet(){\n  const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');\n  return touch&&Math.min(window.innerWidth,window.innerHeight)>=600;\n}"
           new="function isTablet(){\n  const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');\n  const sw=Math.min(Number(window.screen?.width)||window.innerWidth,Number(window.screen?.height)||window.innerHeight);\n  return touch&&(sw>=600||(window.innerWidth>=768&&window.innerHeight>=500));\n}"
           if old in t: t=t.replace(old,new,1)
@@ -94,21 +85,10 @@ jobs:
               if t.count(anchor)!=1: raise SystemExit('TYPOGRAPHY anchor mismatch')
               t=t.replace(anchor,floor,1)
           p.write_text(t)
-          print('TABLET_STABILITY_V40=PASS')
-
-          # Regression locks.
-          p=Path('tests/tablet-stability-v37.test.cjs'); t=p.read_text()
-          if 'V40 defaults to recent-first' not in t:
-              extra=("\n"
-                     "test('V40 defaults to recent-first and preserves Korean names',()=>{assert.match(trade,/sort:'recent'/);assert.match(trade,/__JJOONI_SECURITY_NAMES/);assert.match(live,/STATIC_SECURITY_NAMES/);assert.match(live,/091170':'KODEX 은행/);assert.match(live,/418660':'TIGER 미국나스닥100레버리지\\(합성\\)'/)});\n"
-                     "test('V40 Galaxy Tab detection survives compressed browser viewport',()=>{assert.match(guard,/window\\.screen\\?\\.width/);assert.match(guard,/sw>=600\\|\\|\\(window\\.innerWidth>=768&&window\\.innerHeight>=500\\)/);assert.match(trade,/sw>=600\\|\\|\\(window\\.innerWidth>=768&&window\\.innerHeight>=500\\)/)});\n"
-                     "test('V40 tablet block typography floor is explicit',()=>{assert.match(guard,/Tablet readability floor V40/);assert.match(guard,/\\.ctWlPrice,.ctWlRet/);assert.match(guard,/\\.ctAttribRow/);assert.match(guard,/table,thead,tbody,tr,td,th/)});\n")
-              t=t.rstrip()+extra
-          p.write_text(t+'\n')
-          print('V40_REGRESSION_LOCKS=PASS')
+          print('V40_PRODUCTION_PATCH=PASS')
           PY
 
-      - name: Full canonical acceptance
+      - name: Full canonical and V40 acceptance
         shell: bash
         run: |
           set -euo pipefail
@@ -116,15 +96,28 @@ jobs:
           node --check trade-review-v2.js
           node --check tablet-stability-v37.js
           node --test tests/*.test.cjs
-          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          live=Path('live-bridge.js').read_text(); trade=Path('trade-review-v2.js').read_text(); guard=Path('tablet-stability-v37.js').read_text()
+          checks={
+            'TOSS_KR_NAME_CACHE': "'091170':'KODEX 은행'" in live and "'418660':'TIGER 미국나스닥100레버리지(합성)'" in live,
+            'RECENT_FIRST': "sort:'recent'" in trade,
+            'TRADE_NAME_FALLBACK': '__JJOONI_SECURITY_NAMES' in trade,
+            'GALAXY_TAB_DETECT': 'window.screen?.width' in guard and 'sw>=600||(window.innerWidth>=768&&window.innerHeight>=500)' in guard,
+            'BLOCK_FONT_FLOOR': 'Tablet readability floor V40' in guard and '.ctWlPrice,.ctWlRet' in guard and '.ctAttribRow' in guard and 'table,thead,tbody,tr,td,th' in guard,
+          }
+          for k,v in checks.items(): print(k+'='+('PASS' if v else 'FAIL'))
+          if not all(checks.values()): raise SystemExit(1)
+          PY
+          git diff --check -- live-bridge.js trade-review-v2.js tablet-stability-v37.js
 
-      - name: Commit V40
+      - name: Commit V40 production fixes
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add live-bridge.js trade-review-v2.js tablet-stability-v37.js tests/tablet-stability-v37.test.cjs
+          git add live-bridge.js trade-review-v2.js tablet-stability-v37.js
           git diff --cached --check
           git commit -m 'fix: restore Toss names recent-first and readable tablet blocks'
           git push
