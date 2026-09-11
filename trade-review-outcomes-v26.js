@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.0',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.1',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -35,8 +35,10 @@ function cls(v){return v===null?'na':v>0?'pos':v<0?'neg':'zero'}
 
 function collectTrades(){
  const out=[];
- try{if(window.D?.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
- try{if(window.D?.ai?.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
+ let d=null;
+ try{d=(typeof D!=='undefined'&&D)?D:window.D}catch(_){d=window.D||null}
+ try{if(d?.human&&Array.isArray(d.human.trades))out.push(...d.human.trades)}catch(_){}
+ try{if(d?.ai?.latest&&Array.isArray(d.ai.latest.trades))out.push(...d.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
  const seen=new Set(),dedup=[];
  out.forEach((t,i)=>{
   const oid=String(t?.order_id||t?.order_no||'').trim();
