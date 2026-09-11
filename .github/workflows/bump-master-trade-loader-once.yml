@@ -24,21 +24,23 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-
           p=Path('trade-review-outcomes-v26.js')
           s=p.read_text(encoding='utf-8')
           marker="const ticker=t=>sym(t?.ticker||t?.symbol);\n"
-          overrides="""const VERIFIED_SECURITY_NAMES={
- 'IBBQ':'Invesco Nasdaq Biotechnology ETF',
- 'XLV':'State Street Health Care Select Sector SPDR ETF',
- 'KO':'The Coca-Cola Company',
- '066570':'LG전자',
- 'SPCX':'The SPAC and New Issue ETF',
- '491010':'TIGER 글로벌AI전력인프라액티브'
-};
-"""
+          overrides="\n".join([
+              "const VERIFIED_SECURITY_NAMES={",
+              " 'IBBQ':'Invesco Nasdaq Biotechnology ETF',",
+              " 'XLV':'State Street Health Care Select Sector SPDR ETF',",
+              " 'KO':'The Coca-Cola Company',",
+              " '066570':'LG전자',",
+              " 'SPCX':'The SPAC and New Issue ETF',",
+              " '491010':'TIGER 글로벌AI전력인프라액티브'",
+              "};",
+              "",
+          ])
           if 'const VERIFIED_SECURITY_NAMES=' not in s:
-              if marker not in s: raise SystemExit('TICKER_MARKER_MISSING')
+              if marker not in s:
+                  raise SystemExit('TICKER_MARKER_MISSING')
               s=s.replace(marker,marker+overrides,1)
           old=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n if(raw&&sym(raw)!==tk)return raw;"
           new=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n const verified=String(VERIFIED_SECURITY_NAMES[tk]||'').trim();\n if(verified)return verified;\n if(raw&&sym(raw)!==tk)return raw;"
@@ -48,13 +50,11 @@ jobs:
               raise SystemExit('NAME_RESOLVER_TARGET_MISSING')
           s=s.replace("version:'26.2'","version:'26.3'",1)
           p.write_text(s,encoding='utf-8')
-
           q=Path('trade-review-loader.js')
           t=q.read_text(encoding='utf-8')
           t=t.replace("version:'14.21'","version:'14.22'",1)
           t=t.replace('trade-review-outcomes-v26.js?v=26.2','trade-review-outcomes-v26.js?v=26.3',1)
           q.write_text(t,encoding='utf-8')
-
           r=Path('index.html')
           u=r.read_text(encoding='utf-8')
           u=u.replace('trade-review-loader.js?v=14.21','trade-review-loader.js?v=14.22')
