@@ -16,6 +16,7 @@ const state={
 
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
+const touchTablet=()=>{const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');return touch&&Math.min(window.innerWidth,window.innerHeight)>=600};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
@@ -284,7 +285,7 @@ function sleeveHtml(g){
 
 function render(){
   const panel=qs('#panel-trades');if(!panel)return;
-  if(window.innerWidth>767){restoreLegacy(panel);return}
+  if(window.innerWidth>767&&!touchTablet()){restoreLegacy(panel);return}
   let root=qs('#ctTradeReviewV2',panel);
   if(!root){root=document.createElement('div');root.id='ctTradeReviewV2';panel.prepend(root)}
   qsa(':scope > *',panel).forEach(e=>{if(e!==root){e.dataset.ctTradeReviewLegacy='1';e.style.setProperty('display','none','important')}});
