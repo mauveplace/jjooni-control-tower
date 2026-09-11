@@ -228,7 +228,32 @@ function applyLive(live){
 let refreshBusy=false;
 async function refresh(){if(refreshBusy)return;refreshBusy=true;try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};try{window.__JJOONI_COST_SIDECAR=kv.COST_JSON?JSON.parse(kv.COST_JSON):null}catch(_){window.__JJOONI_COST_SIDECAR=null};let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}finally{refreshBusy=false}}
 
-injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+const FAST_REFRESH_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';
+const FAST_REFRESH_MIN_GAP_MS=45000;
+let FAST_REFRESH_BUSY=false,FAST_REFRESH_LAST=0;
+window.__JJOONI_FAST_ACCESS_REFRESH_V1={version:'1.0',state:'READY',last_trigger:null,last_result:null};
+async function fastProof(password,bucket){
+ const enc=new TextEncoder(),key=await crypto.subtle.importKey('raw',enc.encode(password),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+ const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode('ct-fast:'+bucket)));
+ return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function triggerFastAccessRefresh(reason){
+ const now=Date.now();if(FAST_REFRESH_BUSY||now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS)return;
+ const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;
+ FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);
+ try{
+  const bucket=Math.floor(Date.now()/1000/30),proof=await fastProof(pw,bucket);
+  const res=await fetch(FAST_REFRESH_URL+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':proof,'X-CT-Force':'false'}});
+  if(!res.ok)throw new Error('FAST_HTTP_'+res.status);
+  const out=await res.json();if(!['PASS','PARTIAL','SKIP_RECENT'].includes(String(out.status||'')))throw new Error('FAST_STATUS_'+String(out.status||'UNKNOWN'));
+  window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};
+  setTimeout(refresh,400);setTimeout(refresh,1800);setTimeout(refresh,4200);
+ }catch(e){window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFERENCE';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:'REFERENCE',error:String(e&&e.message||e)};console.warn('CT FAST access refresh',e)}
+ finally{clearTimeout(timer);FAST_REFRESH_BUSY=false}
+}
+
+injectResponsiveCss();ensureWatchlistUi();refresh();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});
 })();
 
 /* CT_UI_STATE_WATCHLIST_V1 */
