@@ -1,4 +1,4 @@
-name: Patch Trade Outcome Security Names Once
+name: Patch Verified Trade Security Names Once
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reuse canonical security-name resolver in trade outcomes
+      - name: Correct verified security identities and bump UI modules
         shell: bash
         run: |
           set -euo pipefail
@@ -27,56 +27,46 @@ jobs:
 
           p=Path('trade-review-outcomes-v26.js')
           s=p.read_text(encoding='utf-8')
-          old="const name=t=>String(t?.name||t?.stock_name||t?.ticker||t?.symbol||'UNKNOWN').trim();"
-          new="\n".join([
-              "const name=t=>{",
-              " const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();",
-              " if(raw&&sym(raw)!==tk)return raw;",
-              " try{",
-              "  const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(tk)?tk.padStart(6,'0'):tk;",
-              "  const mapped=String(names[k]||names[tk]||'').trim();",
-              "  if(mapped&&sym(mapped)!==tk)return mapped;",
-              " }catch(_){}",
-              " const candidate=o=>{",
-              "  if(!o)return '';",
-              "  const ot=sym(o.ticker||o.symbol||o.code||o.stock_code||o.pdno||'');",
-              "  if(ot!==tk)return '';",
-              "  const v=String(o.name||o.stock_name||o.security_name||o.display_name||o.product_name||o.prdt_name||o.hts_kor_isnm||'').trim();",
-              "  return v&&sym(v)!==tk?v:'';",
-              " };",
-              " try{",
-              "  const C=window.__JJOONI_CANONICAL_SSOT||{};",
-              "  for(const a of Object.values(C.accounts||{}))for(const x of (a?.positions||[])){const v=candidate(x);if(v)return v}",
-              " }catch(_){}",
-              " try{",
-              "  const d=(typeof D!=='undefined'&&D)?D:window.D;",
-              "  const w=d?.human?.watchlist||{};",
-              "  for(const x of [...(w.kr||[]),...(w.us||[])]){const v=candidate(x);if(v)return v}",
-              "  for(const x of (d?.human?.trades||[])){const v=candidate(x);if(v)return v}",
-              " }catch(_){}",
-              " return tk||raw||'UNKNOWN';",
-              "};",
-          ])
-          if old not in s and "const name=t=>{" not in s:
-              raise SystemExit('TRADE_OUTCOME_NAME_TARGET_MISSING')
+          marker="const ticker=t=>sym(t?.ticker||t?.symbol);\n"
+          overrides="""const VERIFIED_SECURITY_NAMES={
+ 'IBBQ':'Invesco Nasdaq Biotechnology ETF',
+ 'XLV':'State Street Health Care Select Sector SPDR ETF',
+ 'KO':'The Coca-Cola Company',
+ '066570':'LG전자',
+ 'SPCX':'The SPAC and New Issue ETF',
+ '491010':'TIGER 글로벌AI전력인프라액티브'
+};
+"""
+          if 'const VERIFIED_SECURITY_NAMES=' not in s:
+              if marker not in s: raise SystemExit('TICKER_MARKER_MISSING')
+              s=s.replace(marker,marker+overrides,1)
+          old=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n if(raw&&sym(raw)!==tk)return raw;"
+          new=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n const verified=String(VERIFIED_SECURITY_NAMES[tk]||'').trim();\n if(verified)return verified;\n if(raw&&sym(raw)!==tk)return raw;"
           if old in s:
               s=s.replace(old,new,1)
-          s=s.replace("version:'26.1'","version:'26.2'",1)
+          elif 'const verified=String(VERIFIED_SECURITY_NAMES[tk]' not in s:
+              raise SystemExit('NAME_RESOLVER_TARGET_MISSING')
+          s=s.replace("version:'26.2'","version:'26.3'",1)
           p.write_text(s,encoding='utf-8')
 
           q=Path('trade-review-loader.js')
           t=q.read_text(encoding='utf-8')
-          t=t.replace('trade-review-outcomes-v26.js?v=26.0','trade-review-outcomes-v26.js?v=26.2',1)
-          t=t.replace('trade-review-outcomes-v26.js?v=26.1','trade-review-outcomes-v26.js?v=26.2',1)
+          t=t.replace("version:'14.21'","version:'14.22'",1)
+          t=t.replace('trade-review-outcomes-v26.js?v=26.2','trade-review-outcomes-v26.js?v=26.3',1)
           q.write_text(t,encoding='utf-8')
-          print('CT_TRADE_OUTCOME_SECURITY_NAMES_PATCH=PASS')
+
+          r=Path('index.html')
+          u=r.read_text(encoding='utf-8')
+          u=u.replace('trade-review-loader.js?v=14.21','trade-review-loader.js?v=14.22')
+          r.write_text(u,encoding='utf-8')
+          print('CT_VERIFIED_SECURITY_IDENTITY_PATCH=PASS')
           PY
-          if git diff --quiet -- trade-review-outcomes-v26.js trade-review-loader.js; then
-            echo 'CT_TRADE_OUTCOME_SECURITY_NAMES_PATCH=NO_CHANGE'
+          if git diff --quiet -- trade-review-outcomes-v26.js trade-review-loader.js index.html; then
+            echo 'CT_VERIFIED_SECURITY_IDENTITY_PATCH=NO_CHANGE'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add trade-review-outcomes-v26.js trade-review-loader.js
-          git commit -m 'fix(ct-ui): resolve security names in trade outcomes v26.2'
+          git add trade-review-outcomes-v26.js trade-review-loader.js index.html
+          git commit -m 'fix(ct-ui): verified security names v26.3'
           git push origin HEAD:main
