@@ -1,4 +1,4 @@
-name: Patch Access FAST Refresh Once
+name: Patch Actual Freshness Classification Once
 
 on:
   push:
@@ -18,62 +18,104 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Add non-blocking FAST refresh on page access
+      - name: Make actual live timestamp authoritative for freshness UI
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('live-bridge.js')
+
+          p=Path('human-ui-v6.js')
           s=p.read_text(encoding='utf-8')
-          old="injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});"
-          block="\n".join([
-            "const FAST_REFRESH_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';",
-            "const FAST_REFRESH_MIN_GAP_MS=45000;",
-            "let FAST_REFRESH_BUSY=false,FAST_REFRESH_LAST=0;",
-            "window.__JJOONI_FAST_ACCESS_REFRESH_V1={version:'1.0',state:'READY',last_trigger:null,last_result:null};",
-            "async function fastProof(password,bucket){",
-            " const enc=new TextEncoder(),key=await crypto.subtle.importKey('raw',enc.encode(password),{name:'HMAC',hash:'SHA-256'},false,['sign']);",
-            " const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode('ct-fast:'+bucket)));",
-            " return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('');",
+          s=s.replace("version:'6.2'","version:'6.3'",1)
+
+          old="function nextTime(){const L=live();return L.next_expected_update_kst||''}\nfunction freshnessState(){const L=live(),f=window.JjooniMetrics.freshness(L);if(L.schedule_contract_state==='MISMATCH')return {...f,kind:'warn',text:'수집 일정 확인 필요'};return f;}"
+          new="\n".join([
+            "function nextTime(){const L=live();return L.next_expected_update_kst||''}",
+            "const ACTUAL_FRESH_MS=20*60*1000;",
+            "function actualObservedTime(){const L=live();return L.observed_at||L.generated_kst||L.source_snapshot_kst||canon().observed_at||''}",
+            "function actualObservedAgeMs(){const ms=parseKstMs(actualObservedTime());return ms==null?null:Math.max(0,Date.now()-ms)}",
+            "function accessRefreshState(){return String(window.__JJOONI_FAST_ACCESS_REFRESH_V1?.state||'')}",
+            "function freshnessState(){",
+            " const L=live(),f=window.JjooniMetrics.freshness(L),age=actualObservedAgeMs(),access=accessRefreshState();",
+            " if(age!=null&&age<=ACTUAL_FRESH_MS)return {...f,kind:'good',text:'최신',actual_age_ms:age,authority:'ACTUAL_OBSERVED_AT'};",
+            " if(access==='REFRESHING')return {...f,kind:'refreshing',text:'최신 시세 반영 중',actual_age_ms:age,authority:'ACCESS_REFRESH'};",
+            " if(L.schedule_contract_state==='MISMATCH')return {...f,kind:'warn',text:'수집 일정 확인 필요',actual_age_ms:age,authority:'SCHEDULE_DIAGNOSTIC'};",
+            " return {...f,actual_age_ms:age,authority:'METRICS_FALLBACK'};",
             "}",
-            "async function triggerFastAccessRefresh(reason){",
-            " const now=Date.now();if(FAST_REFRESH_BUSY||now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS)return;",
-            " const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;",
-            " FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};",
-            " const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);",
-            " try{",
-            "  const bucket=Math.floor(Date.now()/1000/30),proof=await fastProof(pw,bucket);",
-            "  const res=await fetch(FAST_REFRESH_URL+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':proof,'X-CT-Force':'false'}});",
-            "  if(!res.ok)throw new Error('FAST_HTTP_'+res.status);",
-            "  const out=await res.json();if(!['PASS','PARTIAL','SKIP_RECENT'].includes(String(out.status||'')))throw new Error('FAST_STATUS_'+String(out.status||'UNKNOWN'));",
-            "  window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};",
-            "  setTimeout(refresh,400);setTimeout(refresh,1800);setTimeout(refresh,4200);",
-            " }catch(e){window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFERENCE';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:'REFERENCE',error:String(e&&e.message||e)};console.warn('CT FAST access refresh',e)}",
-            " finally{clearTimeout(timer);FAST_REFRESH_BUSY=false}",
-            "}",
-            "",
-            "injectResponsiveCss();ensureWatchlistUi();refresh();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});",
           ])
-          if 'window.__JJOONI_FAST_ACCESS_REFRESH_V1=' not in s:
-              if old not in s:
-                  raise SystemExit('LIVE_BRIDGE_BOOT_TARGET_MISSING')
-              s=s.replace(old,block,1)
+          if old not in s:
+              raise SystemExit('FRESHNESS_STATE_TARGET_MISSING')
+          s=s.replace(old,new,1)
+
+          old2="function humanProducerText(){\n const basis=stamp(basisTime()),next=nextTime()?stamp(nextTime()):'',st=freshnessState();\n if(st.kind==='warn')return `${st.text} · 기준 ${basis}`;\n if(st.kind==='closed')return `● ${st.text} · 기준 ${basis}${next?' · 다음 '+next:''}`;\n return `● 최신 · 기준 ${basis}${next?' · 다음 '+next:''}`;\n}"
+          new2="\n".join([
+            "function humanProducerText(){",
+            " const basis=stamp(actualObservedTime()||basisTime()),next=nextTime()?stamp(nextTime()):'',st=freshnessState();",
+            " if(st.kind==='refreshing')return `↻ 최신 시세 반영 중 · 기준 ${basis}`;",
+            " if(st.kind==='warn')return `${st.text} · 기준 ${basis}`;",
+            " if(st.kind==='closed')return `● ${st.text} · 기준 ${basis}${next?' · 다음 '+next:''}`;",
+            " return `● 최신 · 기준 ${basis}${next?' · 다음 '+next:''}`;",
+            "}",
+            "function updateGlobalFreshnessBar(){",
+            " const bar=qs('#globalFreshnessBar');if(!bar)return;",
+            " const st=freshnessState(),basis=stamp(actualObservedTime()||basisTime()),label=qs('.gf-label',bar),base=qs('.gf-base',bar),alert=qs('.gf-alert',bar);",
+            " bar.dataset.ctFreshnessAuthority=String(st.authority||'');bar.dataset.ctActualAgeMs=st.actual_age_ms==null?'':String(Math.round(st.actual_age_ms));",
+            " if(st.kind==='good'){",
+            "  bar.classList.remove('gf-stale','gf-refreshing');bar.classList.add('gf-fresh');",
+            "  if(label)label.textContent='최신';if(base)base.textContent='기준 '+basis;if(alert)alert.classList.remove('gf-alert-show');",
+            "  bar.style.setProperty('display','none','important');",
+            "  return;",
+            " }",
+            " bar.style.removeProperty('display');",
+            " if(st.kind==='refreshing'){
+              bar.classList.remove('gf-stale','gf-fresh');bar.classList.add('gf-refreshing');
+              if(label)label.textContent='최신 시세 반영 중';if(base)base.textContent='기준 '+basis;
+              if(alert){alert.textContent='마지막 검증값을 표시하면서 최신 시세를 반영 중입니다.';alert.classList.add('gf-alert-show')}
+              bar.style.borderColor='#93c5fd';bar.style.background='#eff6ff';bar.style.color='#1d4ed8';
+              return;
+            }",
+            " bar.classList.remove('gf-fresh','gf-refreshing');bar.classList.add('gf-stale');",
+            " if(label)label.textContent=st.text||'수집 지연';if(base)base.textContent='기준 '+basis;",
+            " if(alert){alert.textContent='⚠ 현재 시세 업데이트 지연 · 마지막 수집 '+basis.replace(' ','/')+' · 새 값 수집을 확인 중입니다.';alert.classList.add('gf-alert-show')}",
+            " bar.style.removeProperty('border-color');bar.style.removeProperty('background');bar.style.removeProperty('color');",
+            "}",
+          ])
+          if old2 not in s:
+              raise SystemExit('PRODUCER_TEXT_TARGET_MISSING')
+          s=s.replace(old2,new2,1)
+
+          old3="ensureStyle();updateAccountCards();updateTrust();updateProducerBadge();updateHeroCompletion();scrubKnownCodes();"
+          new3="ensureStyle();updateAccountCards();updateTrust();updateProducerBadge();updateGlobalFreshnessBar();updateHeroCompletion();scrubKnownCodes();"
+          if old3 not in s:
+              raise SystemExit('APPLY_TARGET_MISSING')
+          s=s.replace(old3,new3,1)
+          s=s.replace("state:'ACTIVE',version:'6.2'","state:'ACTIVE',version:'6.3'",1)
           p.write_text(s,encoding='utf-8')
-          q=Path('index.html')
+
+          q=Path('trade-review-loader.js')
           t=q.read_text(encoding='utf-8')
-          t=t.replace("live-bridge.js?v=3&_='","live-bridge.js?v=4&_='")
+          t=t.replace("version:'14.22'","version:'14.23'",1)
+          t=t.replace("human-ui-v6.js?v=6.2","human-ui-v6.js?v=6.3",1)
           q.write_text(t,encoding='utf-8')
-          print('CT_ACCESS_FAST_REFRESH_PATCH=PASS')
+
+          r=Path('index.html')
+          u=r.read_text(encoding='utf-8')
+          u=u.replace('trade-review-loader.js?v=14.22','trade-review-loader.js?v=14.23')
+          r.write_text(u,encoding='utf-8')
+          print('CT_ACTUAL_FRESHNESS_UI_PATCH=PASS')
           PY
-          if git diff --quiet -- live-bridge.js index.html; then
-            echo 'CT_ACCESS_FAST_REFRESH_PATCH=NO_CHANGE'
+          node --check human-ui-v6.js
+          node --check trade-review-loader.js
+          grep -q "ACTUAL_OBSERVED_AT" human-ui-v6.js
+          grep -q "updateGlobalFreshnessBar" human-ui-v6.js
+          grep -q "human-ui-v6.js?v=6.3" trade-review-loader.js
+          if git diff --quiet -- human-ui-v6.js trade-review-loader.js index.html; then
+            echo 'CT_ACTUAL_FRESHNESS_UI_PATCH=NO_CHANGE'
             exit 0
           fi
-          grep -q '__JJOONI_FAST_ACCESS_REFRESH_V1' live-bridge.js
-          grep -q "triggerFastAccessRefresh('open')" live-bridge.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add live-bridge.js index.html
-          git commit -m 'fix(ct-ui): refresh FAST data asynchronously on access'
+          git add human-ui-v6.js trade-review-loader.js index.html
+          git commit -m 'fix(ct-ui): classify freshness from actual observed time'
           git push origin HEAD:main
