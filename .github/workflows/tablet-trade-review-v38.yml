@@ -42,9 +42,6 @@ jobs:
               "if(window.innerWidth>767){restoreLegacy(panel);return}",
               "if(window.innerWidth>767&&!touchTablet()){restoreLegacy(panel);return}",
               'TRADE_REVIEW_TABLET_RENDER')
-
-          path='trade-review-loader.js'
-          rep(path,"tablet-stability-v37.js?v=37.0","tablet-stability-v37.js?v=37.1",'TABLET_GUARD_VERSION')
           PY
 
       - name: Full stability acceptance
@@ -63,13 +60,15 @@ jobs:
           const st=fs.readFileSync('tablet-stability-v37.js','utf8');
           const lb=fs.readFileSync('live-bridge.js','utf8');
           const mr=fs.readFileSync('metric-drilldown-router-v12.js','utf8');
-          assert.match(tr,/function|const touchTablet=/);
+          const loader=fs.readFileSync('trade-review-loader.js','utf8');
+          assert.match(tr,/const touchTablet=/);
           assert.match(tr,/window\.innerWidth>767&&!touchTablet\(\)/);
           assert.match(st,/\.ctTicker\.open \.ctTickerBody\{display:block!important\}/);
           assert.match(st,/\.ctSleeve\.open \.ctSleeveDetail\{display:block!important\}/);
           assert.match(st,/font-size:20px!important/);
           assert.match(lb,/function legacyName\(id,ticker\)/);
           assert.match(mr,/OPEN_METRIC_INFO_MISSING/);
+          assert.match(loader,/tablet-stability-v37\.js\?v=37\.0/);
           console.log('TABLET_V38_ACCEPTANCE=PASS');
           NODE
 
@@ -79,7 +78,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add trade-review-v2.js trade-review-loader.js
+          git add trade-review-v2.js
           git diff --cached --check
           git commit -m 'fix: restore interactive trade review on touch tablets'
           git push
