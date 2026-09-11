@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.21',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.22',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -42,7 +42,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2','decision-impact'],
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
-['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.2','trade-outcomes'],
+['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.3','trade-outcomes'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.2','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],

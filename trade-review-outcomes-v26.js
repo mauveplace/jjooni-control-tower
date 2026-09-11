@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.2',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.3',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -14,8 +14,18 @@ const px=t=>n(t?.price??t?.filled_price??t?.avg_price);
 const ccy=t=>String(t?.currency||((String(t?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase();
 const ts=t=>String(t?.filled_at_kst||t?.filled_at||t?.trade_date||t?.date||'');
 const ticker=t=>sym(t?.ticker||t?.symbol);
+const VERIFIED_SECURITY_NAMES={
+ 'IBBQ':'Invesco Nasdaq Biotechnology ETF',
+ 'XLV':'State Street Health Care Select Sector SPDR ETF',
+ 'KO':'The Coca-Cola Company',
+ '066570':'LG전자',
+ 'SPCX':'The SPAC and New Issue ETF',
+ '491010':'TIGER 글로벌AI전력인프라액티브'
+};
 const name=t=>{
  const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();
+ const verified=String(VERIFIED_SECURITY_NAMES[tk]||'').trim();
+ if(verified)return verified;
  if(raw&&sym(raw)!==tk)return raw;
  try{
   const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\d{1,6}$/.test(tk)?tk.padStart(6,'0'):tk;
