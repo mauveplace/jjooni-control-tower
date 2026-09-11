@@ -138,13 +138,26 @@ async function kick(reason){
   const url=await resolveUrl();if(!/^https:\/\//.test(url))return;
   const bucket=Math.floor(Date.now()/1000/30),sig=await proof(pw,bucket),ctrl=new AbortController();
   const timer=setTimeout(()=>ctrl.abort(),REQUEST_TIMEOUT_MS);
-  badge('FAST 최신화 중…','warn','Control Tower 핵심 숫자만 저지연으로 갱신 중입니다. PB/DEEP 분석은 별도입니다.');
+  badge('마스터 변경 확인 · 최신화 중…','warn','Master Sheet 변경 여부를 먼저 확인하고, 변경분은 FAST 경로로 즉시 반영합니다. PB/DEEP 정합성 처리는 별도입니다.');
   let r;
   try{r=await fetch(url+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':sig}})}finally{clearTimeout(timer)}
   if(!r.ok)throw new Error('FAST_HTTP_'+r.status);
   const receipt=await r.json().catch(()=>({}));
   window.__JJOONI_CT_FAST_RECEIPT=receipt;
-  if(receipt&&receipt.duration_ms!=null)badge('FAST '+(Number(receipt.duration_ms)/1000).toFixed(1)+'초','good','핵심 계좌/시세 FAST 갱신 완료. PB/DEEP 참고자료는 별도 주기로 갱신됩니다.');
+  const master=(receipt&&receipt.master_refresh)||{};
+  const ms=String(master.status||'');
+  const elapsed=receipt&&receipt.duration_ms!=null?(Number(receipt.duration_ms)/1000).toFixed(1)+'초':'';
+  if(ms==='MASTER_AHEAD'){
+   badge('MASTER 최신값 반영 · DEEP 후처리 중','good','Master Sheet 변경분은 FAST 화면에 먼저 반영했습니다. PB/SSOT/DEEP 정합성 반영은 별도 경로로 진행됩니다. '+elapsed);
+  }else if(ms==='BASELINE_DIRECT_READ'){
+   badge('MASTER 직접조회 반영 · '+elapsed,'good','Master Sheet를 직접 읽어 최신 구조를 FAST 화면에 반영했습니다. PB/DEEP 완료를 기다리지 않습니다.');
+  }else if(ms==='MATCH'){
+   badge('MASTER 확인 완료 · FAST '+elapsed,'good','Master Sheet와 직전 FAST 기준이 일치합니다. 핵심 계좌/시세 최신화 완료.');
+  }else if(ms==='UNAVAILABLE'){
+   badge('MASTER 확인 실패 · 기존 검증값','warn','Master 직접조회 실패로 마지막 검증값을 유지합니다. '+String(master.error||'').slice(0,100));
+  }else if(receipt&&receipt.duration_ms!=null){
+   badge('FAST '+elapsed,'good','핵심 계좌/시세 FAST 갱신 완료. PB/DEEP 참고자료는 별도 주기로 갱신됩니다.');
+  }
   setTimeout(()=>startBridgeRecovery('fast-published'),180);
  }catch(e){
   console.warn('CT FAST refresh',e);
@@ -153,7 +166,7 @@ async function kick(reason){
  }finally{busy=false}
 }
 
-window.__JJOONI_CT_FAST={version:'1.4',kick:()=>kick('manual'),mode:'DIRECT_HMAC_ON_DEMAND',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'LINEAGE_OBJECT_CONTRACT'};
+window.__JJOONI_CT_FAST={version:'1.5',kick:()=>kick('manual'),mode:'MASTER_DIRECT_FAST_READ',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'LINEAGE_OBJECT_CONTRACT'};
 document.addEventListener('jjooni:live-applied',()=>{releaseLateReady();kick('live-applied')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick('visible')});
 setTimeout(()=>startBridgeRecovery('startup'),350);
