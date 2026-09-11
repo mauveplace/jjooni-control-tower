@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_RUNTIME_V8)return;
-window.__JJOONI_TABLET_RUNTIME_V8={state:'BOOTING',version:'8.3'};
+window.__JJOONI_TABLET_RUNTIME_V8={state:'BOOTING',version:'8.4'};
 
 const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',AI:'AI BOT',TRIPOD:'TRI-POD'};
@@ -11,7 +11,7 @@ const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_)
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
-const wide=()=>window.innerWidth>=768;
+const wide=()=>window.innerWidth>=1200&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 const C=()=>window.__JJOONI_CANONICAL_SSOT||{};
 const L=()=>window.__JJOONI_LIVE_PAYLOAD||{};
 const fxNow=()=>{const r=L().fx_reference||{};const x=n(r.krw_per_usd);return x&&x>500&&x<3000?x:null};
@@ -32,7 +32,7 @@ function trustLabel(k){return k==='measured'?'증권사 확인':k==='modeled'?'�
 function ensureStyle(){
  if(qs('#ctTabletRuntimeV8Style'))return;
  const s=document.createElement('style');s.id='ctTabletRuntimeV8Style';s.textContent=`
-@media(min-width:768px){
+@media(min-width:1200px) and (hover:hover) and (pointer:fine){
  #ctHeroScopeWarning{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
  #overviewDailyReturn{display:none!important}
  #ctDesktopTrustV8{height:20px;min-height:20px;margin-top:5px;display:flex;align-items:center;gap:9px;font:800 9px/1 system-ui;color:#c9d6e6;white-space:nowrap;overflow:hidden}
@@ -84,6 +84,6 @@ function renderPerformance(){
  if(!wide())return;const panel=qs('#panel-performance');if(!panel)return;const c=C();if(!c.accounts)return;let root=qs('#ctDesktopPerformanceV8',panel);if(!root){root=document.createElement('div');root.id='ctDesktopPerformanceV8';panel.prepend(root)}const cards=IDS.map(id=>{const a=(c.accounts||{})[id]||{},kind=trustKind(a.quality||a.source),cash=window.JjooniMetrics.cash(a);return `<div class="ctP8Card"><div class="ctP8Name">${LABEL[id]}</div><div class="ctP8Nav">${n(a.nav)!=null?won(a.nav):'—'}</div><div class="ctP8Rows"><div class="ctP8Line"><span>오늘 투자손익</span><b class="${cls(a.today_pnl)}">${n(a.today_pnl)!=null?signed(a.today_pnl):'산정 대기'}</b></div><div class="ctP8Line"><span>오늘 수익률</span><b>${pct(a.today_return)}</b></div><div class="ctP8Line"><span>누적손익</span><b class="${cls(a.pnl)}">${n(a.pnl)!=null?signed(a.pnl):'산정 대기'}</b></div><div class="ctP8Line"><span>누적수익률</span><b>${pct(a.return_pct)}</b></div><div class="ctP8Line"><span>예수금/현금</span><b>${cash!=null?won(cash):'—'}</b></div><div class="ctP8Line"><span>보유종목</span><b>${(a.positions||[]).length}개</b></div></div><div class="ctP8Source">${trustLabel(kind)} · 기준 ${String(c.observed_at||'').replace('T',' ').slice(5,16)}</div></div>`}).join('');const html=`<div class="ctP8Head"><div><div class="ctP8Title">계좌별 성과</div><div class="ctP8Sub">6계좌 동일 Canonical SSOT 기준 · 0원 fallback 금지</div></div><div class="ctP8Total">총자산 ${won(c.total&&c.total.nav)} · 오늘 ${signed(c.total&&c.total.today_pnl)}</div></div><div class="ctP8Grid">${cards}</div>`;if(root.innerHTML!==html)root.innerHTML=html;
 }
 
-function apply(){if(!wide())return;ensureStyle();installMetricOverrides();stabilizeHero();renderTrades();renderPerformance();window.__JJOONI_TABLET_RUNTIME_V8={state:'ACTIVE',version:'8.0',wide:true,hero_stable:true,trade_review:true,performance:true,metric_overrides:true,regular_metrics_nonzero:enrichedPositions().filter(p=>n(p.regular_pnl)!=null&&Math.abs(p.regular_pnl)>0.5).length,regular_metrics_missing:enrichedPositions().filter(p=>n(p.regular_pnl)==null).length}}
+function apply(){if(!wide())return;ensureStyle();installMetricOverrides();stabilizeHero();renderTrades();renderPerformance();window.__JJOONI_TABLET_RUNTIME_V8={state:'ACTIVE',version:'8.4',wide:true,hero_stable:true,trade_review:true,performance:true,metric_overrides:true,regular_metrics_nonzero:enrichedPositions().filter(p=>n(p.regular_pnl)!=null&&Math.abs(p.regular_pnl)>0.5).length,regular_metrics_missing:enrichedPositions().filter(p=>n(p.regular_pnl)==null).length}}
 ensureStyle();setTimeout(apply,0);setTimeout(apply,700);document.addEventListener('jjooni:live-applied',apply);window.addEventListener('resize',apply);document.addEventListener('jjooni:realized-ledger',apply);
 })();

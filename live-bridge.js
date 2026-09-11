@@ -99,6 +99,20 @@ function staticHumanRow(id){return staticRows()[id]||{}}
 function staticPrincipal(id){const r=staticHumanRow(id);if(n(r.principal)!=null)return z(r.principal);try{const p=((D.human||{}).performance||[]).filter(x=>String(x.account||'').toUpperCase()===id).at(-1);return n(p&&p.principal)}catch(_){return null}}
 function staticNetFlow(id){const r=staticHumanRow(id);if(n(r.net_cash_flow)!=null)return z(r.net_cash_flow);try{const p=((D.human||{}).performance||[]).filter(x=>String(x.account||'').toUpperCase()===id).at(-1);return n(p&&p.net_cash_flow)}catch(_){return null}}
 function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filter(x=>String(x.account||x.account_type||'').toUpperCase()===id)}catch(_){return []}}
+function legacyName(id,ticker){
+ const k=sym(ticker);if(!k)return '';
+ try{
+  const hp=[...((D.human||{}).positions||[]),...((D.human||{}).trades||[])];
+  const ap=[...(((D.ai||{}).latest||{}).holdings_kr||[]),...(((D.ai||{}).latest||{}).holdings_us||[]),...(((D.ai||{}).latest||{}).trades||[])];
+  const pools=id==='AI'?[...ap,...hp]:[...hp,...ap];
+  for(const x of pools){
+   if(sym(x.ticker||x.symbol)!==k)continue;
+   const nm=String(x.name||x.stock_name||x.security_name||x.prdt_name||'').trim();
+   if(nm&&sym(nm)!==k)return nm;
+  }
+ }catch(_){}
+ return '';
+}
 
 function makeCanonical(live){
  const A=live.accounts||{},out={};
@@ -106,7 +120,7 @@ function makeCanonical(live){
   const a=A[r.id]||{},id=r.id,nav=n(a.nav),principal=n(a.principal);
   let ps=Array.isArray(a.positions)?a.positions:[];
   if(id==='AI')ps=[...(a.holdings_kr||[]),...(a.holdings_us||[])].map(p=>({...p,avg_price:n(p.avg_price??p.avg),current_price:n(p.current_price??p.price),market_value_krw:M.valueKrw(p,a),record_type:p.record_type||'POSITION'}));
-  ps=ps.map(p=>({...p,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}));
+  ps=ps.map(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();return {...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}});
   const day=n(a.today_pnl??(id==='TRIPOD'?a.today_change:null)),flow=n(a.net_flow??a.net_cash_flow);
   out[id]={...a,id,type:r.type,nav,principal,pnl:id==='IRP'?null:n(a.total_pnl)??(nav!=null&&principal!=null?nav-principal:null),return_pct:id==='IRP'?null:n(a.total_return_pct)??(nav!=null&&principal>0?100*(nav/principal-1):null),today_pnl:day,today_return:n(a.today_return),net_flow:flow,cash_krw:n(a.cash_krw??(['ISA','PENSION','IRP'].includes(id)?a.cash:null)),cash_usd:n(a.cash_usd),positions:ps,source:String(a.mode||a.source||''),quality:String(a.status||'MISSING'),account_quality:String(a.status||'MISSING'),today_pnl_quality:a.today_pnl_quality||(['ISA','PENSION','IRP','TRIPOD'].includes(id)?'MODELED':'BROKER_MEASURED'),signal:a.signal||live.tripod_signal||{}};
   out[id].cash_total_krw=M.cash(out[id]);
@@ -120,15 +134,15 @@ function mergePositions(live){
  D.human=D.human||{};D.human.positions=Array.isArray(D.human.positions)?D.human.positions:[];const a=live.accounts||{};
  ['TOSS','ISA','PENSION','IRP'].forEach(id=>{const x=a[id]||{};if(!Array.isArray(x.positions))return;
   D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id});
-  (x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
+  (x.positions||[]).forEach(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();const m={...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
  });
  const ai=a.AI||{};D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};Object.assign(D.ai.latest,{nav:n(ai.nav),kr_nav:z(ai.kr_nav),us_nav:z(ai.us_nav_krw),us_nav_krw:z(ai.us_nav_krw),cash:n(ai.cash),cash_krw:n(ai.cash_krw),cash_usd:n(ai.cash_usd),cash_usd_krw:z(ai.cash_usd_krw),fx:z(ai.fx_krw_per_usd),holdings_kr:ai.holdings_kr||[],holdings_us:ai.holdings_us||[],today_pnl:n(ai.today_pnl),today_return:n(ai.today_return),observed_at:live.observed_at});
  const tp=a.TRIPOD||{};D.human.tripod_positions=tp.positions||[];D.human.tripod_market={ticker:'TQQQ',current_price:z(tp.current_price),prev_close:z(tp.prev_close),fx:z(tp.fx),previous_fx:n(tp.previous_fx),currency:'USD',quote_timestamp:live.observed_at,current_price_source:'PUBLIC_MARKET_MODEL'};D.human.tripod_signal=tp.signal||live.tripod_signal||{};
 }
 
 function mergeTrades(live){
- D.human=D.human||{};const old=Array.isArray(D.human.trades)?D.human.trades:[],fresh=Array.isArray(live.recent_trades)?live.recent_trades:[],key=t=>[String(t.account||''),String(t.trade_date||t.filled_at_kst||''),sym(t.ticker),String(t.side||''),String(t.qty||''),String(t.price||'')].join('|'),m=new Map();[...fresh,...old].forEach(t=>{const k=key(t);if(k&&!m.has(k))m.set(k,t)});D.human.trades=[...m.values()].sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,240);
- D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(Array.isArray(((live.accounts||{}).AI||{}).trades))D.ai.latest.trades=at;
+ D.human=D.human||{};const old=Array.isArray(D.human.trades)?D.human.trades:[],fresh=Array.isArray(live.recent_trades)?live.recent_trades:[],key=t=>[String(t.account||t.account_type||''),String(t.trade_date||t.filled_at_kst||''),sym(t.ticker||t.symbol),String(t.side||''),String(t.qty??t.quantity??''),String(t.price??t.filled_price??'')].join('|'),m=new Map();[...fresh,...old].forEach(t=>{const k=key(t);if(!k)return;if(!m.has(k)){m.set(k,{...t});return}const cur=m.get(k),have=String(cur.name||cur.stock_name||'').trim(),incoming=String(t.name||t.stock_name||'').trim();if(!have&&incoming){if(t.name)cur.name=t.name;if(t.stock_name)cur.stock_name=t.stock_name}});D.human.trades=[...m.values()].map(t=>{const nm=String(t.name||t.stock_name||legacyName(String(t.account||t.account_type||'').toUpperCase(),t.ticker||t.symbol)||'').trim();return nm?{...t,name:t.name||nm,stock_name:t.stock_name||nm}:t}).sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,240);
+ D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(Array.isArray(((live.accounts||{}).AI||{}).trades))D.ai.latest.trades=at.map(t=>{const nm=String(t.name||t.stock_name||legacyName('AI',t.ticker||t.symbol)||'').trim();return nm?{...t,name:t.name||nm,stock_name:t.stock_name||nm}:{...t}});
 }
 
 function syncTradeCurrentPrices(){
