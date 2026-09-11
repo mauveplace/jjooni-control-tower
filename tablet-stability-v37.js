@@ -1,13 +1,14 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.2',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.3',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
 function isTablet(){
   const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');
-  return touch&&Math.min(window.innerWidth,window.innerHeight)>=600;
+  const sw=Math.min(Number(window.screen?.width)||window.innerWidth,Number(window.screen?.height)||window.innerHeight);
+  return touch&&(sw>=600||(window.innerWidth>=768&&window.innerHeight>=500));
 }
 function ensureStyle(){
  if(q('#ctTabletStabilityV37Style'))return;
@@ -21,6 +22,13 @@ html.ctStableTabletV37 .app{margin-left:210px!important;width:calc(100% - 210px)
 html.ctStableTabletV37 .tabPanel{font-size:17px!important;line-height:1.55!important}
 html.ctStableTabletV37 button,html.ctStableTabletV37 [role="button"]{min-height:44px;font-size:16px!important;touch-action:manipulation}
 html.ctStableTabletV37 small{font-size:16px!important;line-height:1.45!important}
+/* Tablet readability floor V40: compact 8-11px block rules must not win on a touch tablet. */
+html.ctStableTabletV37 :is(.card,.ctOvHeroCell,.ctAcct,.ctWlCard,.ctWlRow,.ctTicker,.ctSleeve,.v2Kpi,.v2Account,.ctD8Kpi,.ctA8Card,.ctP8Card){font-size:18px!important;line-height:1.45!important}
+html.ctStableTabletV37 :is(.ctOvLabel,.ctOvMini,.ctAcctName,.ctAcctNav,.ctAcctStats,.ctAcctStats span,.ctAcctStats b,.ctAttribRow,.ctBenchHeader,.ctBenchRow,.ctBenchRow b,.ctBenchBm small,.ctLossRow,.ctLossAccount,.ctActionWho,.ctActionState,.ctActionText,.ctWlMeta,.ctWlTicker,.ctWlTag){font-size:16px!important;line-height:1.45!important}
+html.ctStableTabletV37 :is(.ctWlRow,.ctWlPrice,.ctWlRet,.ctWlRank){font-size:17px!important;line-height:1.4!important}
+html.ctStableTabletV37 :is(.ctOvGrid h3,.ctOvMetaRow h2,.ctWlTitle){font-size:22px!important;line-height:1.3!important}
+html.ctStableTabletV37 :is(table,thead,tbody,tr,td,th,.v2Table){font-size:16px!important;line-height:1.45!important}
+html.ctStableTabletV37 :is(.card,.ctOvGrid,.ctWlCard,.v2Kpi,.v2Account) :is(p,li,label,small){font-size:16px!important;line-height:1.5!important}
 html.ctStableTabletV37 :is(.ctWlSub,.ctWlMeta,.ctWlTicker,.ctWlTag,.ctCmSrc,.ctCmMacroMove,.ctTrSub,.ctTickerMeta,.ctSleeveMeta,.ctTrEventMeta,.ctTrEventEval,.ctA8Sub,.ctA8Line,.ctA8Source,.ctP8Sub,.ctP8Line,.ctP8Source,.ctTpLabel,.ctTpNote,.ctD8Sub,.ctD8Meta,.ctD8Now,.ctD8Kpi span,.ctD8Kpi small){font-size:16px!important;line-height:1.45!important}
 html.ctStableTabletV37 :is(.ctWlName,.ctCmMacroName,.ctTickerName,.ctSleeveName,.ctA8Name,.ctP8Name,.ctD8Name){font-size:19px!important;line-height:1.35!important}
 html.ctStableTabletV37 :is(.ctCmMacroValue,.ctA8Nav,.ctP8Nav,.ctD8Kpi b){font-size:24px!important;line-height:1.2!important}

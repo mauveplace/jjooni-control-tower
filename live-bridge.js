@@ -31,6 +31,15 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 let LAST_LIVE=null;
 let CANON=null;
 let TRADE_QUOTES={};
+const STATIC_SECURITY_NAMES=(()=>{
+ const m=new Map(),manual={'091170':'KODEX 은행','418660':'TIGER 미국나스닥100레버리지(합성)','006400':'삼성SDI','005380':'현대차'};
+ Object.entries(manual).forEach(([k,v])=>m.set(k,v));
+ const seen=new WeakSet(),key=v=>{const s=sym(v);return /^\d{1,6}$/.test(s)?s.padStart(6,'0'):s};
+ const walk=(v,d=0)=>{if(!v||typeof v!=='object'||d>9||seen.has(v))return;seen.add(v);if(!Array.isArray(v)){const raw=v.ticker??v.symbol??v.code??v.stock_code??v.pdno??v.product_code??v.isu_cd;const nm=String(v.name??v.stock_name??v.security_name??v.prdt_name??v.product_name??v.isu_nm??v.kor_name??'').trim();const k=key(raw);if(k&&nm&&key(nm)!==k&&!m.has(k))m.set(k,nm)}const xs=Array.isArray(v)?v:Object.values(v);for(const x of xs)walk(x,d+1)};
+ try{if(typeof D!=='undefined')walk(D)}catch(_){}
+ return m;
+})();
+window.__JJOONI_SECURITY_NAMES=Object.fromEntries(STATIC_SECURITY_NAMES);
 
 async function decryptEnvelope(env,password){
  const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
@@ -101,6 +110,7 @@ function staticNetFlow(id){const r=staticHumanRow(id);if(n(r.net_cash_flow)!=nul
 function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filter(x=>String(x.account||x.account_type||'').toUpperCase()===id)}catch(_){return []}}
 function legacyName(id,ticker){
  const k=sym(ticker);if(!k)return '';
+ const sk=/^\d{1,6}$/.test(k)?k.padStart(6,'0'):k;const cached=STATIC_SECURITY_NAMES.get(sk)||STATIC_SECURITY_NAMES.get(k);if(cached)return cached;
  try{
   const hp=[...((D.human||{}).positions||[]),...((D.human||{}).trades||[])];
   const ap=[...(((D.ai||{}).latest||{}).holdings_kr||[]),...(((D.ai||{}).latest||{}).holdings_us||[]),...(((D.ai||{}).latest||{}).trades||[])];
