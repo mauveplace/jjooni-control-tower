@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.3',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.4',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -86,6 +86,32 @@ html.ctStableTabletV37 #accountDrillModal :is(td,th,li,p,small){font-size:16px!i
 }
 `;(document.head||document.documentElement).appendChild(st);
 }
+const CONTENT_FONT_FLOOR_PX=16;
+let fontFloorTimer=0;
+function enforceContentFontFloor(){
+ if(!isTablet())return 0;
+ const root=q('.app')||document.body;if(!root)return 0;
+ let changed=0;
+ const nodes=[root,...qa('*',root)];
+ for(const el of nodes){
+  if(!el||!el.style)continue;
+  const tag=String(el.tagName||'').toUpperCase();
+  if(['SCRIPT','STYLE','NOSCRIPT','LINK','META'].includes(tag))continue;
+  const txt=String(el.textContent||'').trim();if(!txt)continue;
+  let cs;try{cs=getComputedStyle(el)}catch(_){continue}
+  if(!cs||cs.display==='none'||cs.visibility==='hidden')continue;
+  const fs=parseFloat(cs.fontSize||'0');
+  if(Number.isFinite(fs)&&fs>0&&fs<CONTENT_FONT_FLOOR_PX){
+   el.style.setProperty('font-size',CONTENT_FONT_FLOOR_PX+'px','important');
+   const lh=parseFloat(cs.lineHeight||'0');
+   if(Number.isFinite(lh)&&lh>0&&lh<CONTENT_FONT_FLOOR_PX*1.3)el.style.setProperty('line-height','1.4','important');
+   changed++;
+  }
+ }
+ S.font_floor_px=CONTENT_FONT_FLOOR_PX;S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();
+ return changed;
+}
+function scheduleContentFontFloor(delay=30){clearTimeout(fontFloorTimer);fontFloorTimer=setTimeout(enforceContentFontFloor,delay)}
 function forceTab(name){
  if(!isTablet()||!name)return false;
  const tab=q('.tab[data-tab="'+CSS.escape(name)+'"]');
@@ -106,6 +132,7 @@ function apply(){
  html.classList.toggle('ctStableTabletV37',on);
  if(!on){S.state='INACTIVE_NON_TABLET';return}
  ensureStyle();
+ enforceContentFontFloor();scheduleContentFontFloor(120);
  const active=q('.tab.on[data-tab]');
  if(active&&document.getElementById('panel-'+active.dataset.tab))forceTab(active.dataset.tab);
  S.state='ACTIVE';S.applies++;S.last_apply=new Date().toISOString();
@@ -119,7 +146,12 @@ document.addEventListener('click',e=>{
  if(!isTablet())return;const t=e.target?.closest?.('.tab[data-tab],#ctMoreMenu button[data-tab]');if(!t)return;
  if(Date.now()-lastPointer<500)return;setTimeout(()=>forceTab(t.dataset.tab),0);
 },true);
-document.addEventListener('jjooni:live-applied',()=>setTimeout(apply,0));
+document.addEventListener('jjooni:live-applied',()=>{setTimeout(apply,0);scheduleContentFontFloor(180)});
+try{
+ const mo=new MutationObserver(ms=>{if(!isTablet())return;if(ms.some(m=>m.addedNodes&&m.addedNodes.length))scheduleContentFontFloor(80)});
+ mo.observe(document.documentElement,{subtree:true,childList:true});
+ S.ctTabletFontFloorObserverV41=true;
+}catch(_){}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(apply,0)});
 window.addEventListener('resize',()=>setTimeout(apply,50),{passive:true});
 setTimeout(apply,0);setTimeout(apply,700);setTimeout(apply,1800);
