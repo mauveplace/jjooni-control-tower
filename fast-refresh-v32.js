@@ -138,35 +138,38 @@ async function kick(reason){
   const url=await resolveUrl();if(!/^https:\/\//.test(url))return;
   const bucket=Math.floor(Date.now()/1000/30),sig=await proof(pw,bucket),ctrl=new AbortController();
   const timer=setTimeout(()=>ctrl.abort(),REQUEST_TIMEOUT_MS);
-  badge('마스터 변경 확인 · 최신화 중…','warn','Master Sheet 변경 여부를 먼저 확인하고, 변경분은 FAST 경로로 즉시 반영합니다. PB/DEEP 정합성 처리는 별도입니다.');
+  badge('마스터 변경 확인 · 최신화 중…','warn','Master Sheet 변경 여부와 ISA·연금·IRP 구조를 우선 확인합니다. PB/DEEP·전체 시장 갱신은 이 조회의 선행조건이 아닙니다.');
   let r;
-  try{r=await fetch(url+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':sig}})}finally{clearTimeout(timer)}
-  if(!r.ok)throw new Error('FAST_HTTP_'+r.status);
+  try{r=await fetch(url+'/master-sync',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':sig}})}finally{clearTimeout(timer)}
+  if(!r.ok)throw new Error('MASTER_FAST_HTTP_'+r.status);
   const receipt=await r.json().catch(()=>({}));
   window.__JJOONI_CT_FAST_RECEIPT=receipt;
+  window.__JJOONI_CT_MASTER_RECEIPT=receipt;
   const master=(receipt&&receipt.master_refresh)||{};
   const ms=String(master.status||'');
   const elapsed=receipt&&receipt.duration_ms!=null?(Number(receipt.duration_ms)/1000).toFixed(1)+'초':'';
   if(ms==='MASTER_AHEAD'){
-   badge('MASTER 최신값 반영 · DEEP 후처리 중','good','Master Sheet 변경분은 FAST 화면에 먼저 반영했습니다. PB/SSOT/DEEP 정합성 반영은 별도 경로로 진행됩니다. '+elapsed);
+   badge('MASTER 최신값 반영 · DEEP 후처리 중','good','Master Sheet 변경분을 화면에 먼저 반영했습니다. PB/SSOT/DEEP 정합성 반영은 별도 경로입니다. '+elapsed);
   }else if(ms==='BASELINE_DIRECT_READ'){
-   badge('MASTER 직접조회 반영 · '+elapsed,'good','Master Sheet를 직접 읽어 최신 구조를 FAST 화면에 반영했습니다. PB/DEEP 완료를 기다리지 않습니다.');
+   badge('MASTER 직접조회 반영 · '+elapsed,'good','Master Sheet를 직접 읽어 ISA·연금·IRP 최신 구조를 반영했습니다. PB/DEEP 완료를 기다리지 않습니다.');
   }else if(ms==='MATCH'){
-   badge('MASTER 확인 완료 · FAST '+elapsed,'good','Master Sheet와 직전 FAST 기준이 일치합니다. 핵심 계좌/시세 최신화 완료.');
+   badge('MASTER 변경 없음 · '+elapsed,'good','Master Sheet가 직전 직접조회 기준과 일치합니다.');
   }else if(ms==='UNAVAILABLE'){
    badge('MASTER 확인 실패 · 기존 검증값','warn','Master 직접조회 실패로 마지막 검증값을 유지합니다. '+String(master.error||'').slice(0,100));
+  }else if(receipt&&receipt.status==='SKIP_RECENT'){
+   badge('MASTER 최근 확인값 사용','good','최근 Master 확인 결과를 재사용합니다.');
   }else if(receipt&&receipt.duration_ms!=null){
-   badge('FAST '+elapsed,'good','핵심 계좌/시세 FAST 갱신 완료. PB/DEEP 참고자료는 별도 주기로 갱신됩니다.');
+   badge('MASTER 확인 완료 · '+elapsed,'good','Master 직접조회 경로 완료.');
   }
-  setTimeout(()=>startBridgeRecovery('fast-published'),180);
+  setTimeout(()=>startBridgeRecovery('master-published'),180);
  }catch(e){
-  console.warn('CT FAST refresh',e);
-  badge('FAST 대기 · 기존값 표시','warn','FAST 갱신 실패 시 마지막 검증값을 유지합니다: '+String(e&&e.message||e).slice(0,100));
-  startBridgeRecovery('fast-failed-use-last-verified');
+  console.warn('CT MASTER sync',e);
+  badge('MASTER 확인 대기 · 기존값 표시','warn','Master 직접조회 실패 시 마지막 검증값을 유지합니다: '+String(e&&e.message||e).slice(0,100));
+  startBridgeRecovery('master-failed-use-last-verified');
  }finally{busy=false}
 }
 
-window.__JJOONI_CT_FAST={version:'1.5',kick:()=>kick('manual'),mode:'MASTER_DIRECT_FAST_READ',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'LINEAGE_OBJECT_CONTRACT'};
+window.__JJOONI_CT_FAST={version:'1.6',kick:()=>kick('manual'),mode:'MASTER_SYNC_FIRST',bridge_recovery:'BOUNDED_28S_READ_ONLY',verified_boot_recovery:'LINEAGE_OBJECT_CONTRACT'};
 document.addEventListener('jjooni:live-applied',()=>{releaseLateReady();kick('live-applied')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick('visible')});
 setTimeout(()=>startBridgeRecovery('startup'),350);
