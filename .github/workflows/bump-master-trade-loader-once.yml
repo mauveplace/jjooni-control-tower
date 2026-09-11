@@ -1,4 +1,4 @@
-name: Patch Verified Trade Security Names Once
+name: Patch Access FAST Refresh Once
 
 on:
   push:
@@ -18,55 +18,62 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Correct verified security identities and bump UI modules
+      - name: Add non-blocking FAST refresh on page access
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('trade-review-outcomes-v26.js')
+          p=Path('live-bridge.js')
           s=p.read_text(encoding='utf-8')
-          marker="const ticker=t=>sym(t?.ticker||t?.symbol);\n"
-          overrides="\n".join([
-              "const VERIFIED_SECURITY_NAMES={",
-              " 'IBBQ':'Invesco Nasdaq Biotechnology ETF',",
-              " 'XLV':'State Street Health Care Select Sector SPDR ETF',",
-              " 'KO':'The Coca-Cola Company',",
-              " '066570':'LG전자',",
-              " 'SPCX':'The SPAC and New Issue ETF',",
-              " '491010':'TIGER 글로벌AI전력인프라액티브'",
-              "};",
-              "",
+          old="injectResponsiveCss();ensureWatchlistUi();refresh();setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});"
+          block="\n".join([
+            "const FAST_REFRESH_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';",
+            "const FAST_REFRESH_MIN_GAP_MS=45000;",
+            "let FAST_REFRESH_BUSY=false,FAST_REFRESH_LAST=0;",
+            "window.__JJOONI_FAST_ACCESS_REFRESH_V1={version:'1.0',state:'READY',last_trigger:null,last_result:null};",
+            "async function fastProof(password,bucket){",
+            " const enc=new TextEncoder(),key=await crypto.subtle.importKey('raw',enc.encode(password),{name:'HMAC',hash:'SHA-256'},false,['sign']);",
+            " const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode('ct-fast:'+bucket)));",
+            " return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('');",
+            "}",
+            "async function triggerFastAccessRefresh(reason){",
+            " const now=Date.now();if(FAST_REFRESH_BUSY||now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS)return;",
+            " const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;",
+            " FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};",
+            " const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);",
+            " try{",
+            "  const bucket=Math.floor(Date.now()/1000/30),proof=await fastProof(pw,bucket);",
+            "  const res=await fetch(FAST_REFRESH_URL+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':proof,'X-CT-Force':'false'}});",
+            "  if(!res.ok)throw new Error('FAST_HTTP_'+res.status);",
+            "  const out=await res.json();if(!['PASS','PARTIAL','SKIP_RECENT'].includes(String(out.status||'')))throw new Error('FAST_STATUS_'+String(out.status||'UNKNOWN'));",
+            "  window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};",
+            "  setTimeout(refresh,400);setTimeout(refresh,1800);setTimeout(refresh,4200);",
+            " }catch(e){window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFERENCE';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:'REFERENCE',error:String(e&&e.message||e)};console.warn('CT FAST access refresh',e)}",
+            " finally{clearTimeout(timer);FAST_REFRESH_BUSY=false}",
+            "}",
+            "",
+            "injectResponsiveCss();ensureWatchlistUi();refresh();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});",
           ])
-          if 'const VERIFIED_SECURITY_NAMES=' not in s:
-              if marker not in s:
-                  raise SystemExit('TICKER_MARKER_MISSING')
-              s=s.replace(marker,marker+overrides,1)
-          old=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n if(raw&&sym(raw)!==tk)return raw;"
-          new=" const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();\n const verified=String(VERIFIED_SECURITY_NAMES[tk]||'').trim();\n if(verified)return verified;\n if(raw&&sym(raw)!==tk)return raw;"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif 'const verified=String(VERIFIED_SECURITY_NAMES[tk]' not in s:
-              raise SystemExit('NAME_RESOLVER_TARGET_MISSING')
-          s=s.replace("version:'26.2'","version:'26.3'",1)
+          if 'window.__JJOONI_FAST_ACCESS_REFRESH_V1=' not in s:
+              if old not in s:
+                  raise SystemExit('LIVE_BRIDGE_BOOT_TARGET_MISSING')
+              s=s.replace(old,block,1)
           p.write_text(s,encoding='utf-8')
-          q=Path('trade-review-loader.js')
+          q=Path('index.html')
           t=q.read_text(encoding='utf-8')
-          t=t.replace("version:'14.21'","version:'14.22'",1)
-          t=t.replace('trade-review-outcomes-v26.js?v=26.2','trade-review-outcomes-v26.js?v=26.3',1)
+          t=t.replace("live-bridge.js?v=3&_='","live-bridge.js?v=4&_='")
           q.write_text(t,encoding='utf-8')
-          r=Path('index.html')
-          u=r.read_text(encoding='utf-8')
-          u=u.replace('trade-review-loader.js?v=14.21','trade-review-loader.js?v=14.22')
-          r.write_text(u,encoding='utf-8')
-          print('CT_VERIFIED_SECURITY_IDENTITY_PATCH=PASS')
+          print('CT_ACCESS_FAST_REFRESH_PATCH=PASS')
           PY
-          if git diff --quiet -- trade-review-outcomes-v26.js trade-review-loader.js index.html; then
-            echo 'CT_VERIFIED_SECURITY_IDENTITY_PATCH=NO_CHANGE'
+          if git diff --quiet -- live-bridge.js index.html; then
+            echo 'CT_ACCESS_FAST_REFRESH_PATCH=NO_CHANGE'
             exit 0
           fi
+          grep -q '__JJOONI_FAST_ACCESS_REFRESH_V1' live-bridge.js
+          grep -q "triggerFastAccessRefresh('open')" live-bridge.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add trade-review-outcomes-v26.js trade-review-loader.js index.html
-          git commit -m 'fix(ct-ui): verified security names v26.3'
+          git add live-bridge.js index.html
+          git commit -m 'fix(ct-ui): refresh FAST data asynchronously on access'
           git push origin HEAD:main
