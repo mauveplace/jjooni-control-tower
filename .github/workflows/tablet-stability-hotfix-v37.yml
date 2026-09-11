@@ -1,4 +1,4 @@
-name: Tablet Stability Hotfix V37
+name: Tablet Stability Hotfix V40
 
 on:
   push:
@@ -10,130 +10,121 @@ permissions:
   contents: write
 
 concurrency:
-  group: tablet-stability-hotfix-v37
+  group: tablet-stability-hotfix-v40
   cancel-in-progress: true
 
 jobs:
   patch:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Apply minimal stability patches
+      - name: Apply V40 tablet fixes
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
 
-          def rep(path, old, new, label):
-              p=Path(path); t=p.read_text()
-              c=t.count(old)
-              if c!=1:
+          def once(path, old, new, label):
+              p=Path(path); t=p.read_text(); c=t.count(old)
+              if c != 1:
                   raise SystemExit(f'{label}: expected 1 occurrence, got {c}')
               p.write_text(t.replace(old,new,1))
               print(label+'=PASS')
 
-          # 1) Preserve Korean display names when fresh live rows only contain tickers.
-          path='live-bridge.js'
-          old="""function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filter(x=>String(x.account||x.account_type||'').toUpperCase()===id)}catch(_){return []}}\n\nfunction makeCanonical(live){"""
-          new="""function humanStaticPositions(id){try{return ((D.human||{}).positions||[]).filter(x=>String(x.account||x.account_type||'').toUpperCase()===id)}catch(_){return []}}\nfunction legacyName(id,ticker){\n const k=sym(ticker);if(!k)return '';\n try{\n  const hp=[...((D.human||{}).positions||[]),...((D.human||{}).trades||[])];\n  const ap=[...(((D.ai||{}).latest||{}).holdings_kr||[]),...(((D.ai||{}).latest||{}).holdings_us||[]),...(((D.ai||{}).latest||{}).trades||[])];\n  const pools=id==='AI'?[...ap,...hp]:[...hp,...ap];\n  for(const x of pools){\n   if(sym(x.ticker||x.symbol)!==k)continue;\n   const nm=String(x.name||x.stock_name||x.security_name||x.prdt_name||'').trim();\n   if(nm&&sym(nm)!==k)return nm;\n  }\n }catch(_){}\n return '';\n}\n\nfunction makeCanonical(live){"""
-          rep(path,old,new,'LIVE_NAME_RESOLVER')
-          rep(path,
-              "ps=ps.map(p=>({...p,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}));",
-              "ps=ps.map(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();return {...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}});",
-              'CANONICAL_POSITION_NAMES')
-          rep(path,
-              "(x.positions||[]).forEach(p=>{const m={...p,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});",
-              "(x.positions||[]).forEach(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();const m={...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});",
-              'LEGACY_POSITION_NAMES')
-          rep(path,
-              "D.human=D.human||{};const old=Array.isArray(D.human.trades)?D.human.trades:[],fresh=Array.isArray(live.recent_trades)?live.recent_trades:[],key=t=>[String(t.account||''),String(t.trade_date||t.filled_at_kst||''),sym(t.ticker),String(t.side||''),String(t.qty||''),String(t.price||'')].join('|'),m=new Map();[...fresh,...old].forEach(t=>{const k=key(t);if(k&&!m.has(k))m.set(k,t)});D.human.trades=[...m.values()].sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,240);\n D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(Array.isArray(((live.accounts||{}).AI||{}).trades))D.ai.latest.trades=at;",
-              "D.human=D.human||{};const old=Array.isArray(D.human.trades)?D.human.trades:[],fresh=Array.isArray(live.recent_trades)?live.recent_trades:[],key=t=>[String(t.account||t.account_type||''),String(t.trade_date||t.filled_at_kst||''),sym(t.ticker||t.symbol),String(t.side||''),String(t.qty??t.quantity??''),String(t.price??t.filled_price??'')].join('|'),m=new Map();[...fresh,...old].forEach(t=>{const k=key(t);if(!k)return;if(!m.has(k)){m.set(k,{...t});return}const cur=m.get(k),have=String(cur.name||cur.stock_name||'').trim(),incoming=String(t.name||t.stock_name||'').trim();if(!have&&incoming){if(t.name)cur.name=t.name;if(t.stock_name)cur.stock_name=t.stock_name}});D.human.trades=[...m.values()].map(t=>{const nm=String(t.name||t.stock_name||legacyName(String(t.account||t.account_type||'').toUpperCase(),t.ticker||t.symbol)||'').trim();return nm?{...t,name:t.name||nm,stock_name:t.stock_name||nm}:t}).sort((a,b)=>String(b.filled_at_kst||b.trade_date||'').localeCompare(String(a.filled_at_kst||a.trade_date||''))).slice(0,240);\n D.ai=D.ai||{};D.ai.latest=D.ai.latest||{};const at=((live.accounts||{}).AI||{}).trades||[];if(Array.isArray(((live.accounts||{}).AI||{}).trades))D.ai.latest.trades=at.map(t=>{const nm=String(t.name||t.stock_name||legacyName('AI',t.ticker||t.symbol)||'').trim();return nm?{...t,name:t.name||nm,stock_name:t.stock_name||nm}:{...t}});",
-              'TRADE_NAME_MERGE')
+          # Persistent ticker -> Korean name cache, captured before LIVE rows can overwrite static rows.
+          p=Path('live-bridge.js'); t=p.read_text()
+          if 'STATIC_SECURITY_NAMES' not in t:
+              marker="let TRADE_QUOTES={};\n"
+              cache=("let TRADE_QUOTES={};\n"
+                     "const STATIC_SECURITY_NAMES=(()=>{\n"
+                     " const m=new Map(),manual={'091170':'KODEX 은행','418660':'TIGER 미국나스닥100레버리지(합성)','006400':'삼성SDI','005380':'현대차'};\n"
+                     " Object.entries(manual).forEach(([k,v])=>m.set(k,v));\n"
+                     " const seen=new WeakSet(),key=v=>{const s=sym(v);return /^\\d{1,6}$/.test(s)?s.padStart(6,'0'):s};\n"
+                     " const walk=(v,d=0)=>{if(!v||typeof v!=='object'||d>9||seen.has(v))return;seen.add(v);if(!Array.isArray(v)){const raw=v.ticker??v.symbol??v.code??v.stock_code??v.pdno??v.product_code??v.isu_cd;const nm=String(v.name??v.stock_name??v.security_name??v.prdt_name??v.product_name??v.isu_nm??v.kor_name??'').trim();const k=key(raw);if(k&&nm&&key(nm)!==k&&!m.has(k))m.set(k,nm)}const xs=Array.isArray(v)?v:Object.values(v);for(const x of xs)walk(x,d+1)};\n"
+                     " try{if(typeof D!=='undefined')walk(D)}catch(_){}\n"
+                     " return m;\n"
+                     "})();\n"
+                     "window.__JJOONI_SECURITY_NAMES=Object.fromEntries(STATIC_SECURITY_NAMES);\n")
+              if t.count(marker)!=1: raise SystemExit('STATIC_NAME_CACHE marker mismatch')
+              t=t.replace(marker,cache,1)
+          old="const k=sym(ticker);if(!k)return '';\n try{"
+          new="const k=sym(ticker);if(!k)return '';\n const sk=/^\\d{1,6}$/.test(k)?k.padStart(6,'0'):k;const cached=STATIC_SECURITY_NAMES.get(sk)||STATIC_SECURITY_NAMES.get(k);if(cached)return cached;\n try{"
+          if old not in t: raise SystemExit('LEGACY_NAME_CACHE anchor missing')
+          t=t.replace(old,new,1)
+          p.write_text(t)
+          print('STATIC_NAME_CACHE=PASS')
 
-          # 2) A metric router must never swallow a tap when its modal host is unavailable.
-          path='metric-drilldown-router-v12.js'
-          old="""const el=e.target?.closest?.('[data-metric-drill-v11],[data-metric-disabled-v11]');if(!el)return;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();if(el.dataset.metricDisabledV11)return false;if(typeof window.openMetricInfo!=='function')return false;"""
-          new="""const el=e.target?.closest?.('[data-metric-drill-v11],[data-metric-disabled-v11]');if(!el)return;if(el.dataset.metricDisabledV11){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();return false}if(typeof window.openMetricInfo!=='function'){S.last={scope:'fallback',reason:'OPEN_METRIC_INFO_MISSING'};publish();return}e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();"""
-          rep(path,old,new,'DRILLDOWN_FAIL_OPEN')
+          # Trade review: default recent-first, name cache fallback, Galaxy Tab-safe classification.
+          p=Path('trade-review-v2.js'); t=p.read_text()
+          if "sort:'error'" in t: t=t.replace("sort:'error'","sort:'recent'",1)
+          elif "sort:'recent'" not in t: raise SystemExit('DEFAULT_SORT missing')
+          old="const touchTablet=()=>{const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');return touch&&Math.min(window.innerWidth,window.innerHeight)>=600};"
+          new="const touchTablet=()=>{const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');const sw=Math.min(Number(window.screen?.width)||window.innerWidth,Number(window.screen?.height)||window.innerHeight);return touch&&(sw>=600||(window.innerWidth>=768&&window.innerHeight>=500))};"
+          if old in t: t=t.replace(old,new,1)
+          elif 'const sw=Math.min(Number(window.screen?.width)' not in t: raise SystemExit('TRADE_TABLET_DETECT missing')
+          old="function labelTicker(t){return String(t.name||t.stock_name||t.ticker||t.symbol||'UNKNOWN').trim()}"
+          new="function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}"
+          if old in t: t=t.replace(old,new,1)
+          elif '__JJOONI_SECURITY_NAMES' not in t: raise SystemExit('TRADE_NAME_FALLBACK missing')
+          p.write_text(t)
+          print('TRADE_REVIEW_V40=PASS')
 
-          # 3) Desktop replacement views must not take over touch tablets.
-          path='tablet-runtime-v8.js'
-          rep(path,"window.__JJOONI_TABLET_RUNTIME_V8={state:'BOOTING',version:'8.3'};","window.__JJOONI_TABLET_RUNTIME_V8={state:'BOOTING',version:'8.4'};",'TABLET_RUNTIME_VERSION')
-          rep(path,"const wide=()=>window.innerWidth>=768;","const wide=()=>window.innerWidth>=1200&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;",'TABLET_RUNTIME_DESKTOP_ONLY')
-          rep(path,"@media(min-width:768px){","@media(min-width:1200px) and (hover:hover) and (pointer:fine){",'TABLET_RUNTIME_CSS_DESKTOP_ONLY')
-          t=Path(path).read_text().replace("version:'8.0',wide:true","version:'8.4',wide:true")
-          Path(path).write_text(t)
+          # Tablet detection and typography floor.
+          p=Path('tablet-stability-v37.js'); t=p.read_text()
+          t=t.replace("version:'37.2'","version:'37.3'",1)
+          old="function isTablet(){\n  const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');\n  return touch&&Math.min(window.innerWidth,window.innerHeight)>=600;\n}"
+          new="function isTablet(){\n  const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');\n  const sw=Math.min(Number(window.screen?.width)||window.innerWidth,Number(window.screen?.height)||window.innerHeight);\n  return touch&&(sw>=600||(window.innerWidth>=768&&window.innerHeight>=500));\n}"
+          if old in t: t=t.replace(old,new,1)
+          elif 'const sw=Math.min(Number(window.screen?.width)' not in t: raise SystemExit('STABILITY_TABLET_DETECT missing')
+          if 'Tablet readability floor V40' not in t:
+              anchor='html.ctStableTabletV37 small{font-size:16px!important;line-height:1.45!important}\n'
+              floor=(anchor+
+                     "/* Tablet readability floor V40: compact 8-11px block rules must not win on a touch tablet. */\n"
+                     "html.ctStableTabletV37 :is(.card,.ctOvHeroCell,.ctAcct,.ctWlCard,.ctWlRow,.ctTicker,.ctSleeve,.v2Kpi,.v2Account,.ctD8Kpi,.ctA8Card,.ctP8Card){font-size:18px!important;line-height:1.45!important}\n"
+                     "html.ctStableTabletV37 :is(.ctOvLabel,.ctOvMini,.ctAcctName,.ctAcctNav,.ctAcctStats,.ctAcctStats span,.ctAcctStats b,.ctAttribRow,.ctBenchHeader,.ctBenchRow,.ctBenchRow b,.ctBenchBm small,.ctLossRow,.ctLossAccount,.ctActionWho,.ctActionState,.ctActionText,.ctWlMeta,.ctWlTicker,.ctWlTag){font-size:16px!important;line-height:1.45!important}\n"
+                     "html.ctStableTabletV37 :is(.ctWlRow,.ctWlPrice,.ctWlRet,.ctWlRank){font-size:17px!important;line-height:1.4!important}\n"
+                     "html.ctStableTabletV37 :is(.ctOvGrid h3,.ctOvMetaRow h2,.ctWlTitle){font-size:22px!important;line-height:1.3!important}\n"
+                     "html.ctStableTabletV37 :is(table,thead,tbody,tr,td,th,.v2Table){font-size:16px!important;line-height:1.45!important}\n"
+                     "html.ctStableTabletV37 :is(.card,.ctOvGrid,.ctWlCard,.v2Kpi,.v2Account) :is(p,li,label,small){font-size:16px!important;line-height:1.5!important}\n")
+              if t.count(anchor)!=1: raise SystemExit('TYPOGRAPHY anchor mismatch')
+              t=t.replace(anchor,floor,1)
+          p.write_text(t)
+          print('TABLET_STABILITY_V40=PASS')
 
-          path='tablet-accounts-v8.js'
-          rep(path,"window.__JJOONI_TABLET_ACCOUNTS_V8={state:'BOOTING',version:'8.2'};","window.__JJOONI_TABLET_ACCOUNTS_V8={state:'BOOTING',version:'8.3'};",'TABLET_ACCOUNTS_VERSION')
-          rep(path,"const wide=()=>innerWidth>=768;","const wide=()=>innerWidth>=1200&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;",'TABLET_ACCOUNTS_DESKTOP_ONLY')
-          rep(path,"@media(min-width:768px){","@media(min-width:1200px) and (hover:hover) and (pointer:fine){",'TABLET_ACCOUNTS_CSS_DESKTOP_ONLY')
-          t=Path(path).read_text().replace("state:'ACTIVE',version:'8.2',card_count","state:'ACTIVE',version:'8.3',card_count")
-          Path(path).write_text(t)
-
-          # 4) Load the tablet stability guard after all canonical detail modules.
-          path='trade-review-loader.js'
-          old="""['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness']];for(const [id,src,label] of modules)"""
-          new="""['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness'],['ctTabletStabilityV37Script','tablet-stability-v37.js?v=37.0','tablet-stability']];for(const [id,src,label] of modules)"""
-          rep(path,old,new,'TABLET_STABILITY_LOADER')
+          # Regression locks.
+          p=Path('tests/tablet-stability-v37.test.cjs'); t=p.read_text()
+          if 'V40 defaults to recent-first' not in t:
+              extra=("\n"
+                     "test('V40 defaults to recent-first and preserves Korean names',()=>{assert.match(trade,/sort:'recent'/);assert.match(trade,/__JJOONI_SECURITY_NAMES/);assert.match(live,/STATIC_SECURITY_NAMES/);assert.match(live,/091170':'KODEX 은행/);assert.match(live,/418660':'TIGER 미국나스닥100레버리지\\(합성\\)'/)});\n"
+                     "test('V40 Galaxy Tab detection survives compressed browser viewport',()=>{assert.match(guard,/window\\.screen\\?\\.width/);assert.match(guard,/sw>=600\\|\\|\\(window\\.innerWidth>=768&&window\\.innerHeight>=500\\)/);assert.match(trade,/sw>=600\\|\\|\\(window\\.innerWidth>=768&&window\\.innerHeight>=500\\)/)});\n"
+                     "test('V40 tablet block typography floor is explicit',()=>{assert.match(guard,/Tablet readability floor V40/);assert.match(guard,/\\.ctWlPrice,.ctWlRet/);assert.match(guard,/\\.ctAttribRow/);assert.match(guard,/table,thead,tbody,tr,td,th/)});\n")
+              t=t.rstrip()+extra
+          p.write_text(t+'\n')
+          print('V40_REGRESSION_LOCKS=PASS')
           PY
 
-      - name: Add regression contract
+      - name: Full canonical acceptance
         shell: bash
         run: |
-          cat > tests/tablet-stability-v37.test.cjs <<'EOF'
-          const test=require('node:test');
-          const assert=require('node:assert/strict');
-          const fs=require('node:fs');
-          const {execFileSync}=require('node:child_process');
-          const live=fs.readFileSync('live-bridge.js','utf8');
-          const tablet=fs.readFileSync('tablet-runtime-v8.js','utf8');
-          const accounts=fs.readFileSync('tablet-accounts-v8.js','utf8');
-          const drill=fs.readFileSync('metric-drilldown-router-v12.js','utf8');
-          const loader=fs.readFileSync('trade-review-loader.js','utf8');
-          const guard=fs.readFileSync('tablet-stability-v37.js','utf8');
-          test('tablet stability scripts parse',()=>{
-            for(const f of ['live-bridge.js','tablet-runtime-v8.js','tablet-accounts-v8.js','metric-drilldown-router-v12.js','trade-review-loader.js','tablet-stability-v37.js'])execFileSync(process.execPath,['--check',f]);
-          });
-          test('fresh ticker-only rows preserve legacy Korean names',()=>{
-            assert.match(live,/function legacyName\(id,ticker\)/);
-            assert.match(live,/name:t\.name\|\|nm/);
-            assert.match(live,/stock_name:t\.stock_name\|\|nm/);
-            assert.match(live,/sym\(t\.ticker\|\|t\.symbol\)/);
-          });
-          test('metric drilldown fails open when modal host is unavailable',()=>{
-            const host=drill.indexOf("typeof window.openMetricInfo!=='function'");
-            const stop=drill.indexOf('e.preventDefault()',host);
-            assert.ok(host>0);
-            assert.ok(stop>host,'active drilldown preventDefault must occur after openMetricInfo availability check');
-            assert.match(drill,/OPEN_METRIC_INFO_MISSING/);
-          });
-          test('desktop replacement panels cannot take over touch tablet',()=>{
-            assert.match(tablet,/innerWidth>=1200&&window\.matchMedia\('\(hover:hover\) and \(pointer:fine\)'\)\.matches/);
-            assert.match(accounts,/innerWidth>=1200&&window\.matchMedia\('\(hover:hover\) and \(pointer:fine\)'\)\.matches/);
-          });
-          test('tablet readability and navigation guard is loaded',()=>{
-            assert.match(loader,/tablet-stability-v37\.js\?v=37\.0/);
-            assert.match(guard,/ctStableTabletV37/);
-            assert.match(guard,/font-size:19px!important/);
-            assert.match(guard,/function forceTab\(name\)/);
-            assert.match(guard,/ctConsultantHidden/);
-          });
-          EOF
-          node --test tests/tablet-stability-v37.test.cjs
+          set -euo pipefail
+          node --check live-bridge.js
+          node --check trade-review-v2.js
+          node --check tablet-stability-v37.js
+          node --test tests/*.test.cjs
+          git diff --check
 
-      - name: Commit stability patch
+      - name: Commit V40
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add live-bridge.js metric-drilldown-router-v12.js tablet-runtime-v8.js tablet-accounts-v8.js trade-review-loader.js tests/tablet-stability-v37.test.cjs
+          git add live-bridge.js trade-review-v2.js tablet-stability-v37.js tests/tablet-stability-v37.test.cjs
           git diff --cached --check
-          git commit -m 'fix: stabilize tablet navigation names trade review and readability'
+          git commit -m 'fix: restore Toss names recent-first and readable tablet blocks'
           git push
