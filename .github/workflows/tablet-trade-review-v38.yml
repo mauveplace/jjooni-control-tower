@@ -1,0 +1,85 @@
+name: Tablet Trade Review Restore V38
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/tablet-trade-review-v38.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tablet-trade-review-v38
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch trade review tablet boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          def rep(path,old,new,label):
+              p=Path(path); t=p.read_text(); c=t.count(old)
+              if c!=1: raise SystemExit(f'{label}: expected 1 occurrence, got {c}')
+              p.write_text(t.replace(old,new,1)); print(label+'=PASS')
+
+          path='trade-review-v2.js'
+          rep(path,
+              "const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};\nconst n=v=>",
+              "const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};\nconst touchTablet=()=>{const touch=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches||document.documentElement.classList.contains('ctTouchTablet');return touch&&Math.min(window.innerWidth,window.innerHeight)>=600};\nconst n=v=>",
+              'TRADE_REVIEW_TABLET_DETECT')
+          rep(path,
+              "if(window.innerWidth>767){restoreLegacy(panel);return}",
+              "if(window.innerWidth>767&&!touchTablet()){restoreLegacy(panel);return}",
+              'TRADE_REVIEW_TABLET_RENDER')
+
+          path='trade-review-loader.js'
+          rep(path,"tablet-stability-v37.js?v=37.0","tablet-stability-v37.js?v=37.1",'TABLET_GUARD_VERSION')
+          PY
+
+      - name: Full stability acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check trade-review-v2.js
+          node --check tablet-stability-v37.js
+          node --check trade-review-loader.js
+          node --check live-bridge.js
+          node --check metric-drilldown-router-v12.js
+          node --test tests/*.test.cjs
+          node - <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const tr=fs.readFileSync('trade-review-v2.js','utf8');
+          const st=fs.readFileSync('tablet-stability-v37.js','utf8');
+          const lb=fs.readFileSync('live-bridge.js','utf8');
+          const mr=fs.readFileSync('metric-drilldown-router-v12.js','utf8');
+          assert.match(tr,/function|const touchTablet=/);
+          assert.match(tr,/window\.innerWidth>767&&!touchTablet\(\)/);
+          assert.match(st,/\.ctTicker\.open \.ctTickerBody\{display:block!important\}/);
+          assert.match(st,/\.ctSleeve\.open \.ctSleeveDetail\{display:block!important\}/);
+          assert.match(st,/font-size:20px!important/);
+          assert.match(lb,/function legacyName\(id,ticker\)/);
+          assert.match(mr,/OPEN_METRIC_INFO_MISSING/);
+          console.log('TABLET_V38_ACCEPTANCE=PASS');
+          NODE
+
+      - name: Commit minimal tablet trade-review restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trade-review-v2.js trade-review-loader.js
+          git diff --cached --check
+          git commit -m 'fix: restore interactive trade review on touch tablets'
+          git push
