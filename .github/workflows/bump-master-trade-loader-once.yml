@@ -28,33 +28,35 @@ jobs:
           p=Path('trade-review-outcomes-v26.js')
           s=p.read_text(encoding='utf-8')
           old="const name=t=>String(t?.name||t?.stock_name||t?.ticker||t?.symbol||'UNKNOWN').trim();"
-          new="""const name=t=>{
- const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();
- if(raw&&sym(raw)!==tk)return raw;
- try{
-  const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(tk)?tk.padStart(6,'0'):tk;
-  const mapped=String(names[k]||names[tk]||'').trim();
-  if(mapped&&sym(mapped)!==tk)return mapped;
- }catch(_){}
- const candidate=o=>{
-  if(!o)return '';
-  const ot=sym(o.ticker||o.symbol||o.code||o.stock_code||o.pdno||'');
-  if(ot!==tk)return '';
-  const v=String(o.name||o.stock_name||o.security_name||o.display_name||o.product_name||o.prdt_name||o.hts_kor_isnm||'').trim();
-  return v&&sym(v)!==tk?v:'';
- };
- try{
-  const C=window.__JJOONI_CANONICAL_SSOT||{};
-  for(const a of Object.values(C.accounts||{}))for(const x of (a?.positions||[])){const v=candidate(x);if(v)return v}
- }catch(_){}
- try{
-  const d=(typeof D!=='undefined'&&D)?D:window.D;
-  const w=d?.human?.watchlist||{};
-  for(const x of [...(w.kr||[]),...(w.us||[])]){const v=candidate(x);if(v)return v}
-  for(const x of (d?.human?.trades||[])){const v=candidate(x);if(v)return v}
- }catch(_){}
- return tk||raw||'UNKNOWN';
-};"""
+          new="\n".join([
+              "const name=t=>{",
+              " const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();",
+              " if(raw&&sym(raw)!==tk)return raw;",
+              " try{",
+              "  const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(tk)?tk.padStart(6,'0'):tk;",
+              "  const mapped=String(names[k]||names[tk]||'').trim();",
+              "  if(mapped&&sym(mapped)!==tk)return mapped;",
+              " }catch(_){}",
+              " const candidate=o=>{",
+              "  if(!o)return '';",
+              "  const ot=sym(o.ticker||o.symbol||o.code||o.stock_code||o.pdno||'');",
+              "  if(ot!==tk)return '';",
+              "  const v=String(o.name||o.stock_name||o.security_name||o.display_name||o.product_name||o.prdt_name||o.hts_kor_isnm||'').trim();",
+              "  return v&&sym(v)!==tk?v:'';",
+              " };",
+              " try{",
+              "  const C=window.__JJOONI_CANONICAL_SSOT||{};",
+              "  for(const a of Object.values(C.accounts||{}))for(const x of (a?.positions||[])){const v=candidate(x);if(v)return v}",
+              " }catch(_){}",
+              " try{",
+              "  const d=(typeof D!=='undefined'&&D)?D:window.D;",
+              "  const w=d?.human?.watchlist||{};",
+              "  for(const x of [...(w.kr||[]),...(w.us||[])]){const v=candidate(x);if(v)return v}",
+              "  for(const x of (d?.human?.trades||[])){const v=candidate(x);if(v)return v}",
+              " }catch(_){}",
+              " return tk||raw||'UNKNOWN';",
+              "};",
+          ])
           if old not in s and "const name=t=>{" not in s:
               raise SystemExit('TRADE_OUTCOME_NAME_TARGET_MISSING')
           if old in s:
