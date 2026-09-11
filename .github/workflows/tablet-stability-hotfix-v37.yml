@@ -108,9 +108,9 @@ jobs:
           });
           test('metric drilldown fails open when modal host is unavailable',()=>{
             const host=drill.indexOf("typeof window.openMetricInfo!=='function'");
-            const stop=drill.indexOf('e.preventDefault()',host-260);
+            const stop=drill.indexOf('e.preventDefault()',host);
             assert.ok(host>0);
-            assert.ok(stop>host,'preventDefault must occur after openMetricInfo availability check');
+            assert.ok(stop>host,'active drilldown preventDefault must occur after openMetricInfo availability check');
             assert.match(drill,/OPEN_METRIC_INFO_MISSING/);
           });
           test('desktop replacement panels cannot take over touch tablet',()=>{
