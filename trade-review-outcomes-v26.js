@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.1',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.2',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -14,7 +14,33 @@ const px=t=>n(t?.price??t?.filled_price??t?.avg_price);
 const ccy=t=>String(t?.currency||((String(t?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase();
 const ts=t=>String(t?.filled_at_kst||t?.filled_at||t?.trade_date||t?.date||'');
 const ticker=t=>sym(t?.ticker||t?.symbol);
-const name=t=>String(t?.name||t?.stock_name||t?.ticker||t?.symbol||'UNKNOWN').trim();
+const name=t=>{
+ const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();
+ if(raw&&sym(raw)!==tk)return raw;
+ try{
+  const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\d{1,6}$/.test(tk)?tk.padStart(6,'0'):tk;
+  const mapped=String(names[k]||names[tk]||'').trim();
+  if(mapped&&sym(mapped)!==tk)return mapped;
+ }catch(_){}
+ const candidate=o=>{
+  if(!o)return '';
+  const ot=sym(o.ticker||o.symbol||o.code||o.stock_code||o.pdno||'');
+  if(ot!==tk)return '';
+  const v=String(o.name||o.stock_name||o.security_name||o.display_name||o.product_name||o.prdt_name||o.hts_kor_isnm||'').trim();
+  return v&&sym(v)!==tk?v:'';
+ };
+ try{
+  const C=window.__JJOONI_CANONICAL_SSOT||{};
+  for(const a of Object.values(C.accounts||{}))for(const x of (a?.positions||[])){const v=candidate(x);if(v)return v}
+ }catch(_){}
+ try{
+  const d=(typeof D!=='undefined'&&D)?D:window.D;
+  const w=d?.human?.watchlist||{};
+  for(const x of [...(w.kr||[]),...(w.us||[])]){const v=candidate(x);if(v)return v}
+  for(const x of (d?.human?.trades||[])){const v=candidate(x);if(v)return v}
+ }catch(_){}
+ return tk||raw||'UNKNOWN';
+};
 
 function firstNum(o,keys){for(const k of keys){const x=n(o&&o[k]);if(x!==null)return {value:x,key:k}}return null}
 function fee(t){return firstNum(t,['commission','fee','commission_krw','fee_krw'])?.value??0}
