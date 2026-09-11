@@ -1,0 +1,47 @@
+name: Bump Master Trade Loader Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/bump-master-trade-loader-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Force browser to load v14.21 verified UI loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='trade-review-loader.js?v=14.20'
+          new='trade-review-loader.js?v=14.21'
+          if new in s:
+              print('CT_LOADER_CACHE_BUST=ALREADY_PRESENT')
+          else:
+              if old not in s:
+                  raise SystemExit('CT_LOADER_CACHE_BUST_TARGET_MISSING')
+              s=s.replace(old,new)
+              p.write_text(s,encoding='utf-8')
+              print('CT_LOADER_CACHE_BUST=PASS')
+          PY
+          if git diff --quiet -- index.html; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix(ct-ui): bump verified loader to 14.21'
+          git push origin HEAD:main
