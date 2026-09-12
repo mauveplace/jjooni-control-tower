@@ -1,0 +1,88 @@
+name: Market Observatory Responsive E2E
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/index.html
+      - market-observatory/observatory-v2.js
+      - .github/workflows/market-observatory-responsive-e2e.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-observatory-responsive-e2e
+  cancel-in-progress: true
+
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Serve Observatory
+        run: |
+          python3 -m http.server 8123 >/tmp/obs-http.log 2>&1 &
+          echo $! >/tmp/obs-http.pid
+          sleep 2
+      - name: Phone and tablet layout + history E2E
+        run: |
+          node <<'JS'
+          const { chromium } = require('playwright');
+          const assert = (v,m)=>{if(!v)throw new Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const cases=[
+              {name:'phone',width:390,height:844},
+              {name:'tablet',width:800,height:1280},
+            ];
+            for(const tc of cases){
+              const page=await browser.newPage({viewport:{width:tc.width,height:tc.height}});
+              const errors=[];
+              page.on('pageerror',e=>errors.push(String(e)));
+              await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
+              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4-responsive-history',{timeout:30000});
+              await page.waitForTimeout(5000);
+              const base=await page.evaluate(()=>({
+                innerWidth:window.innerWidth,
+                scrollWidth:document.documentElement.scrollWidth,
+                bodyScroll:document.body.scrollWidth,
+                version:window.__JJOONI_OBSERVATORY_UI?.version,
+                coverage:document.querySelector('[data-coverage="marketChart"]')?.textContent||'',
+                cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width}})
+              }));
+              assert(base.scrollWidth<=base.innerWidth+3,`${tc.name} html horizontal overflow ${base.scrollWidth}>${base.innerWidth}`);
+              assert(base.bodyScroll<=base.innerWidth+3,`${tc.name} body horizontal overflow ${base.bodyScroll}>${base.innerWidth}`);
+              assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport ${JSON.stringify(base.cards)}`);
+              assert(base.coverage,`${tc.name} market history coverage missing`);
+              const y=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
+              assert(y&&y<=2016,`${tc.name} long history not hydrated: ${base.coverage}`);
+
+              await page.click('button[data-tab="calendar"]');
+              await page.waitForTimeout(300);
+              const cal=await page.evaluate(()=>({
+                innerWidth:window.innerWidth,
+                scrollWidth:document.documentElement.scrollWidth,
+                rows:[...document.querySelectorAll('#calendar .event')].slice(0,8).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width}}),
+                metricRows:[...document.querySelectorAll('#calendar .obsMetricRow')].slice(0,8).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width}})
+              }));
+              assert(cal.scrollWidth<=cal.innerWidth+3,`${tc.name} calendar horizontal overflow ${cal.scrollWidth}>${cal.innerWidth}`);
+              assert(cal.rows.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} event outside viewport ${JSON.stringify(cal.rows)}`);
+              assert(cal.metricRows.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} metric row outside viewport ${JSON.stringify(cal.metricRows)}`);
+              assert(errors.length===0,`${tc.name} page errors: ${errors.join(' | ')}`);
+              console.log(`OBS_RESPONSIVE_E2E=PASS ${tc.name} coverage=${base.coverage}`);
+              await page.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
