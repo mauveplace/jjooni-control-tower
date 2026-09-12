@@ -1,0 +1,44 @@
+name: Market Observatory History Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/data/history-30y.json
+      - tools/backfill_market_history_30y.py
+      - .github/workflows/market-observatory-history-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit history coverage
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from datetime import date
+          p='market-observatory/data/history-30y.json'
+          h=json.load(open(p))
+          s=h.get('series') or {}
+          print('schema=',h.get('schema'),'generated=',h.get('generated_kst'))
+          rows=[]
+          for k,xs in sorted(s.items()):
+              dates=[str(x.get('date')) for x in (xs or []) if x.get('date')]
+              rows.append((k,dates[0] if dates else None,dates[-1] if dates else None,len(dates)))
+          for r in rows: print('HISTORY_COVERAGE',*r)
+          core=['NASDAQ100','SP500','VIX','DXY','USDKRW','USDJPY','WTI','BRENT','GOLD','COPPER','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y','KR10Y']
+          bad=[]
+          for k in core:
+              dates=[str(x.get('date')) for x in (s.get(k) or []) if x.get('date')]
+              if not dates or dates[0]>'2016-12-31':bad.append((k,dates[0] if dates else None,len(dates)))
+          if bad:
+              raise SystemExit('CORE_HISTORY_LT_10Y '+repr(bad))
+          print('MARKET_HISTORY_CORE_10Y=PASS')
+          PY
