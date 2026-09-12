@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-13T08:03:13+09:00",
+  "generated_kst": "2026-09-13T08:10:32+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -1126,7 +1126,8 @@
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "FairEconomy/ForexFactory"
+      "market_data_source": "FairEconomy/ForexFactory",
+      "ff_match_score": 57
     },
     {
       "datetime_kst": "2026-09-11T21:30+09:00",
@@ -1141,7 +1142,8 @@
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "FairEconomy/ForexFactory"
+      "market_data_source": "FairEconomy/ForexFactory",
+      "ff_match_score": 54
     },
     {
       "datetime_kst": "2026-09-15T06:00+09:00",
@@ -1945,7 +1947,7 @@
     }
   },
   "enrichment_contract": "OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL",
-  "enrichment_note": "Official agencies remain schedule authority. Consensus/actual are populated only from matched market-data observations; missing values remain null.",
+  "enrichment_note": "Official agencies remain schedule authority. ForexFactory/FairEconomy is a near-term consensus/actual fallback. Captured observations persist after weekly feeds roll forward; missing values are never invented.",
   "enrichment_sources": [
     "Trading Economics unavailable/guest-limited",
     "FairEconomy/ForexFactory weekly public feed"
@@ -1953,5 +1955,9 @@
   "enrichment_matched": {
     "trading_economics": 0,
     "faireconomy": 2
+  },
+  "enrichment_updates": {
+    "actual": 0,
+    "forecast": 0
   }
 }
