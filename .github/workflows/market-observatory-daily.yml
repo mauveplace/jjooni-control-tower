@@ -1,0 +1,75 @@
+name: Market Observatory Daily + Calendar
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_market_observatory.py
+      - market-observatory/index.html
+      - .github/workflows/market-observatory-daily.yml
+  schedule:
+    # 07:25 KST daily: completed US session + latest official bond/calendar data.
+    - cron: '25 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-daily
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build read-only market observatory data
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_market_observatory.py
+          python tools/build_market_observatory.py
+      - name: Acceptance contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          o=json.load(open('market-observatory/data/observatory.json'))
+          c=json.load(open('market-observatory/data/economic-calendar.json'))
+          assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
+          assert o['read_only'] is True and o['contains_account_data'] is False
+          assert isinstance(o.get('series'),dict) and len(o['series'])>=10
+          for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY']:
+              assert len(o['series'].get(k) or [])>20,(k,len(o['series'].get(k) or []))
+          assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
+          assert c['timezone']=='Asia/Seoul'
+          assert any(e.get('country')=='US' for e in c['events'])
+          assert any(e.get('country')=='KR' for e in c['events'])
+          assert any('FOMC' in e.get('title','') for e in c['events'])
+          assert any('소비자물가' in e.get('title','') for e in c['events'])
+          print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
+          print('series=',len(o['series']),'calendar=',len(c['events']))
+          PY
+      - name: Publish only observatory data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json
+          if git diff --cached --quiet; then
+            echo MARKET_OBSERVATORY_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): refresh market history and macro calendar'
+          git push
