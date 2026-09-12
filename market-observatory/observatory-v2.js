@@ -2,64 +2,26 @@
 'use strict';
 const RAW={};
 const RANGE_ORDER=['1M','3M','6M','1Y','3Y','5Y','10Y','20Y','30Y','ALL'];
-const RANGE_DAYS={1:30};
 const DAYS={'1M':31,'3M':92,'6M':184,'1Y':366,'3Y':1096,'5Y':1827,'10Y':3653,'20Y':7306,'30Y':10958,'ALL':999999};
 const active={};
-const originalChart=window.chart;
-function cutoffFor(labels,range){
- if(range==='ALL'||!labels?.length)return null;
- const last=String(labels[labels.length-1]);
- const d=new Date(last+'T00:00:00Z');
- if(Number.isNaN(d.getTime()))return null;
- d.setUTCDate(d.getUTCDate()-DAYS[range]);
- return d.toISOString().slice(0,10);
-}
-function filtered(labels,sets,range){
- const cut=cutoffFor(labels,range);if(!cut)return {labels,sets};
- let i=labels.findIndex(x=>String(x)>=cut);if(i<0)i=0;
- return {labels:labels.slice(i),sets:sets.map(s=>({...s,data:(s.data||[]).slice(i)}))};
-}
-function ensureToolbar(id){
- const canvas=document.getElementById(id);if(!canvas||canvas.dataset.rangeReady)return;
- canvas.dataset.rangeReady='1';
- const wrap=canvas.parentElement;const bar=document.createElement('div');bar.className='range obsRange';bar.dataset.for=id;
- for(const r of RANGE_ORDER){const b=document.createElement('button');b.textContent=r;b.dataset.range=r;b.classList.toggle('on',(active[id]||'5Y')===r);b.onclick=()=>{active[id]=r;bar.querySelectorAll('button[data-range]').forEach(x=>x.classList.toggle('on',x===b));redraw(id)};bar.appendChild(b)}
- const reset=document.createElement('button');reset.textContent='줌 초기화';reset.onclick=()=>{try{charts[id]?.resetZoom()}catch(_){};};bar.appendChild(reset);
- const note=document.createElement('span');note.className='meta';note.style.alignSelf='center';note.textContent='휠/핀치 확대 · 드래그 이동';bar.appendChild(note);
- wrap.insertBefore(bar,canvas);
-}
-function draw(id,labels,sets){
- if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(!c)return;
- const range=active[id]||'5Y';const f=filtered(labels,sets,range);
- charts[id]=new Chart(c,{type:'line',data:{labels:f.labels,datasets:f.sets.map(x=>({label:x.label,data:x.data,borderWidth:2,pointRadius:0,tension:.12,spanGaps:true}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x',modifierKey:null},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}},scales:{x:{ticks:{maxTicksLimit:8,maxRotation:0}},y:{ticks:{maxTicksLimit:6}}}}});
- ensureToolbar(id);
-}
+function cutoffFor(labels,range){if(range==='ALL'||!labels?.length)return null;const last=String(labels[labels.length-1]);const d=new Date(last+'T00:00:00Z');if(Number.isNaN(d.getTime()))return null;d.setUTCDate(d.getUTCDate()-DAYS[range]);return d.toISOString().slice(0,10)}
+function filtered(labels,sets,range){const cut=cutoffFor(labels,range);if(!cut)return{labels,sets};let i=labels.findIndex(x=>String(x)>=cut);if(i<0)i=0;return{labels:labels.slice(i),sets:sets.map(s=>({...s,data:(s.data||[]).slice(i)}))}}
+function ensureToolbar(id){const canvas=document.getElementById(id);if(!canvas||canvas.dataset.rangeReady)return;canvas.dataset.rangeReady='1';const wrap=canvas.parentElement,bar=document.createElement('div');bar.className='range obsRange';bar.dataset.for=id;for(const r of RANGE_ORDER){const b=document.createElement('button');b.textContent=r;b.dataset.range=r;b.classList.toggle('on',(active[id]||'5Y')===r);b.onclick=()=>{active[id]=r;bar.querySelectorAll('button[data-range]').forEach(x=>x.classList.toggle('on',x===b));redraw(id)};bar.appendChild(b)}const reset=document.createElement('button');reset.textContent='줌 초기화';reset.onclick=()=>{try{charts[id]?.resetZoom()}catch(_){}};bar.appendChild(reset);const note=document.createElement('span');note.className='meta';note.style.alignSelf='center';note.textContent='휠/핀치 확대 · 드래그 이동';bar.appendChild(note);wrap.insertBefore(bar,canvas)}
+function draw(id,labels,sets){if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(!c)return;const f=filtered(labels,sets,active[id]||'5Y');charts[id]=new Chart(c,{type:'line',data:{labels:f.labels,datasets:f.sets.map(x=>({label:x.label,data:x.data,borderWidth:2,pointRadius:0,tension:.12,spanGaps:true}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}},scales:{x:{ticks:{maxTicksLimit:8,maxRotation:0}},y:{ticks:{maxTicksLimit:6}}}}});ensureToolbar(id)}
 function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
 window.chart=function(id,labels,sets){RAW[id]={labels:[...(labels||[])],sets:(sets||[]).map(s=>({...s,data:[...(s.data||[])]}))};draw(id,labels,sets)};
-
 function val(v){return v==null||v===''?'—':String(v)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-window.renderCalendar=function(){
- if(!window.CAL&&typeof CAL==='undefined')return;
- const C=typeof CAL!=='undefined'?CAL:window.CAL;
- const month=typeof calMonth!=='undefined'?calMonth:new Date().toISOString().slice(0,7);
- const title=document.querySelector('#calendarMonth');if(title)title.textContent=month;
- const xs=(C.events||[]).filter(e=>String(e.datetime_kst||e.date||'').startsWith(month));
- const box=document.querySelector('#events');if(!box)return;
- box.innerHTML=xs.length?xs.map(e=>{
-   const dt=(e.datetime_kst||e.date||'').slice(5,16).replace('T',' ');
-   const status=e.actual!=null?'<span style="color:#087443;font-weight:900">발표완료</span>':'<span style="color:#718096">예정</span>';
-   const metrics=`<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(val(e.actual))}</b></span><span>${status}</span></div>`;
-   return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''}</div>${metrics}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`
- }).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>';
-};
-
-const style=document.createElement('style');style.textContent=`
-.obsRange{align-items:center;margin:8px 0 2px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.obsRange button{white-space:nowrap}.obsEventMetrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:10px}.obsEventMetrics span{background:#f6f8fb;border:1px solid #e7ecf2;padding:4px 6px;border-radius:7px}.obsEventMetrics b{margin-left:3px}.event{align-items:start}
-`;document.head.appendChild(style);
-
-window.addEventListener('load',()=>{
- document.querySelectorAll('canvas').forEach(c=>ensureToolbar(c.id));
- try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){}
-});
+window.renderCalendar=function(){if(typeof CAL==='undefined')return;const month=typeof calMonth!=='undefined'?calMonth:new Date().toISOString().slice(0,7);const title=document.querySelector('#calendarMonth');if(title)title.textContent=month;const xs=(CAL.events||[]).filter(e=>String(e.datetime_kst||e.date||'').startsWith(month));const box=document.querySelector('#events');if(!box)return;box.innerHTML=xs.length?xs.map(e=>{const dt=(e.datetime_kst||e.date||'').slice(5,16).replace('T',' '),status=e.actual!=null?'<span style="color:#087443;font-weight:900">발표완료</span>':'<span style="color:#718096">예정</span>',metrics=`<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(val(e.actual))}</b></span><span>${status}</span></div>`;return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''}</div>${metrics}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`}).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>'};
+function mergeSeries(base,recent){const m=new Map();for(const x of(base||[]))if(x?.date)m.set(x.date,x);for(const x of(recent||[]))if(x?.date)m.set(x.date,x);return[...m.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
+async function hydrateHistory(){
+ try{
+  const h=await fetch('./data/history-30y.json',{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(new Error('history '+r.status)));
+  if(typeof DATA==='undefined'||!DATA)return;
+  const merged={};const hs=h.series||{},rs=DATA.series||{};for(const k of new Set([...Object.keys(hs),...Object.keys(rs)]))merged[k]=mergeSeries(hs[k],rs[k]);DATA.series=merged;DATA.history_loaded=true;DATA.history_base_generated_kst=h.generated_kst||null;
+  if(typeof render==='function')render();
+ }catch(e){console.warn('30Y history cache unavailable',e)}
+}
+const style=document.createElement('style');style.textContent=`.obsRange{align-items:center;margin:8px 0 2px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.obsRange button{white-space:nowrap}.obsEventMetrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:10px}.obsEventMetrics span{background:#f6f8fb;border:1px solid #e7ecf2;padding:4px 6px;border-radius:7px}.obsEventMetrics b{margin-left:3px}.event{align-items:start}`;document.head.appendChild(style);
+window.addEventListener('load',()=>{document.querySelectorAll('canvas').forEach(c=>ensureToolbar(c.id));try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){};setTimeout(hydrateHistory,150)});
 })();
