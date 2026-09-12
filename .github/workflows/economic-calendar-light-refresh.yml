@@ -1,0 +1,57 @@
+name: Economic Calendar Light Refresh
+
+on:
+  schedule:
+    # KST 07:05 / 13:05 / 19:05 / 22:05 / 00:35 / 03:35
+    - cron: '5 22,4,10,13 * * *'
+    - cron: '35 15,18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: economic-calendar-light-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh consensus and actual only
+        env:
+          TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/enrich_economic_calendar.py
+          python tools/enrich_economic_calendar.py
+          python - <<'PY'
+          import json
+          c=json.load(open('market-observatory/data/economic-calendar.json'))
+          assert c.get('enrichment_contract')=='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL'
+          assert all(all(k in e for k in ['previous','consensus','actual']) for e in c.get('events',[]))
+          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('enrichment_updates'))
+          PY
+      - name: Publish calendar only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/economic-calendar.json
+          if git diff --cached --quiet; then
+            echo ECON_CAL_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): refresh macro consensus and actual'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
