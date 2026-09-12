@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-13T08:22:37+09:00",
+  "generated_kst": "2026-09-13T08:24:41+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2442,7 +2442,6 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": "FairEconomy/ForexFactory",
-      "ff_match_score": 57,
       "market_metrics": [
         {
           "key": "ppi_mom",
@@ -2482,7 +2481,8 @@
           "consensus": null,
           "actual": null
         }
-      ]
+      ],
+      "ff_match_score": 57
     },
     {
       "datetime_kst": "2026-09-11T21:30+09:00",
@@ -2498,7 +2498,6 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": "FairEconomy/ForexFactory",
-      "ff_match_score": 54,
       "market_metrics": [
         {
           "key": "cpi_yoy",
@@ -2544,7 +2543,8 @@
           "consensus": "0.2%",
           "actual": null
         }
-      ]
+      ],
+      "ff_match_score": 54
     },
     {
       "datetime_kst": "2026-09-15T06:00+09:00",
@@ -3992,6 +3992,6 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 6
+    "forecast": 8
   }
 }
