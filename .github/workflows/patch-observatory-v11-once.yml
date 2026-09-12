@@ -1,0 +1,88 @@
+name: Patch Observatory V1.1 Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/patch-observatory-v11-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch observatory builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/build_market_observatory.py')
+          s=p.read_text(encoding='utf-8')
+          old="""def ecos_series(item,start,end,key):
+    url=f'https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/1000/817Y002/D/{start}/{end}/{item}'
+    obj=get_json(url); rows=((obj.get('StatisticSearch') or {}).get('row') or [])
+    out=[]
+    for r in rows:
+        try:v=float(r['DATA_VALUE'])
+        except:continue
+        t=str(r.get('TIME') or '');
+        if len(t)==8:t=f'{t[:4]}-{t[4:6]}-{t[6:8]}'
+        out.append({'date':t,'value':v})
+    return sorted(out,key=lambda x:x['date'])
+"""
+          new="""def ecos_series(item,start,end,key):
+    # ECOS public sample key is limited to 10 rows per request. Page it so the
+    # Observatory still gets a useful history without requiring a secret.
+    page_size=10 if str(key).lower()=='sample' else 1000
+    rows=[]; pos=1; total=None
+    while True:
+        last=pos+page_size-1
+        url=f'https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/{pos}/{last}/817Y002/D/{start}/{end}/{item}'
+        obj=get_json(url); block=(obj.get('StatisticSearch') or {})
+        batch=block.get('row') or []
+        if total is None:
+            try:total=int(block.get('list_total_count') or 0)
+            except:total=0
+        rows.extend(batch)
+        if not batch or pos+page_size>total or pos>=1000:break
+        pos+=page_size
+    out=[]
+    for r in rows:
+        try:v=float(r['DATA_VALUE'])
+        except:continue
+        t=str(r.get('TIME') or '')
+        if len(t)==8:t=f'{t[:4]}-{t[4:6]}-{t[6:8]}'
+        out.append({'date':t,'value':v})
+    ded={x['date']:x for x in out}
+    return [ded[k] for k in sorted(ded)]
+"""
+          if old not in s: raise SystemExit('ECOS_TARGET_MISSING')
+          s=s.replace(old,new,1)
+          old2="""    for md in ['01-28','03-18','04-29','06-17','07-29','09-16','10-28','12-09']:
+        d='2026-'+md+'T15:00+09:00';add_event(events,d,'FOMC 정책결정','US','중앙은행',3,'Federal Reserve')
+"""
+          new2="""    # FOMC statement is normally released at 2:00 p.m. U.S. Eastern on
+    # the second meeting day. Convert through America/New_York so DST is correct.
+    for md in ['01-28','03-18','04-29','06-17','07-29','09-16','10-28','12-09']:
+        local=datetime.strptime('2026-'+md+' 14:00','%Y-%m-%d %H:%M').replace(tzinfo=ET)
+        d=local.astimezone(KST).isoformat(timespec='minutes')
+        add_event(events,d,'FOMC 정책결정','US','중앙은행',3,'Federal Reserve')
+"""
+          if old2 not in s: raise SystemExit('FOMC_TARGET_MISSING')
+          s=s.replace(old2,new2,1)
+          p.write_text(s,encoding='utf-8')
+          print('OBSERVATORY_V11_PATCH=PASS')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/build_market_observatory.py
+          git commit -m 'fix(observatory): ECOS paging and FOMC timezone'
+          git push origin HEAD:main
