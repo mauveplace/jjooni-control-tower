@@ -41,8 +41,8 @@ jobs:
           python - <<'PY'
           import json
           c=json.load(open('market-observatory/data/economic-calendar.json'))
-          assert c.get('enrichment_contract')=='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL'
-          assert all(all(k in e for k in ['previous','consensus','actual']) for e in c.get('events',[]))
+          assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
+          assert all(all(k in e for k in ['previous','consensus','actual','market_metrics']) for e in c.get('events',[]))
           print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('enrichment_updates'))
           PY
       - name: Publish calendar only
