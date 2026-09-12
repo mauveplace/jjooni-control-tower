@@ -1,6 +1,11 @@
 name: Economic Calendar Light Refresh
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - tools/enrich_economic_calendar.py
+      - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
     # KST 07:05 / 13:05 / 19:05 / 22:05 / 00:35 / 03:35
     - cron: '5 22,4,10,13 * * *'
