@@ -1,0 +1,89 @@
+name: Market Observatory Public Responsive E2E
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/index.html
+      - market-observatory/observatory-v2.js
+      - .github/workflows/market-observatory-public-e2e.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-observatory-public-responsive-e2e
+  cancel-in-progress: true
+
+jobs:
+  public-responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Wait for Pages and verify phone + tablet
+        env:
+          URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
+        run: |
+          node <<'JS'
+          const { chromium } = require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const cases=[{name:'phone',width:390,height:844},{name:'tablet',width:800,height:1280}];
+            for(const tc of cases){
+              let passed=false,last='';
+              for(let attempt=1;attempt<=12&&!passed;attempt++){
+                const page=await browser.newPage({viewport:{width:tc.width,height:tc.height}});
+                const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+                try{
+                  await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
+                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4.1-responsive-history',{timeout:12000});
+                  await page.waitForTimeout(5000);
+                  const base=await page.evaluate(()=>({
+                    innerWidth:innerWidth,
+                    htmlWidth:document.documentElement.scrollWidth,
+                    bodyWidth:document.body.scrollWidth,
+                    version:window.__JJOONI_OBSERVATORY_UI?.version,
+                    coverage:document.querySelector('[data-coverage="marketChart"]')?.textContent||'',
+                    cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
+                  }));
+                  assert(base.htmlWidth<=base.innerWidth+3,`${tc.name} html overflow ${base.htmlWidth}>${base.innerWidth}`);
+                  assert(base.bodyWidth<=base.innerWidth+3,`${tc.name} body overflow ${base.bodyWidth}>${base.innerWidth}`);
+                  assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport`);
+                  assert(base.coverage,`${tc.name} coverage missing`);
+                  const year=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
+                  assert(year&&year<=2016,`${tc.name} long history missing ${base.coverage}`);
+                  await page.click('button[data-tab="calendar"]');
+                  await page.waitForTimeout(500);
+                  const cal=await page.evaluate(()=>({
+                    innerWidth,
+                    htmlWidth:document.documentElement.scrollWidth,
+                    events:[...document.querySelectorAll('#calendar .event')].slice(0,10).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}}),
+                    metrics:[...document.querySelectorAll('#calendar .obsMetricRow')].slice(0,10).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
+                  }));
+                  assert(cal.htmlWidth<=cal.innerWidth+3,`${tc.name} calendar overflow ${cal.htmlWidth}>${cal.innerWidth}`);
+                  assert(cal.events.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} event outside viewport`);
+                  assert(cal.metrics.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} metrics outside viewport`);
+                  assert(errors.length===0,`${tc.name} page errors ${errors.join(' | ')}`);
+                  console.log(`OBS_PUBLIC_E2E=PASS ${tc.name} version=${base.version} coverage=${base.coverage}`);
+                  passed=true;
+                }catch(e){last=String(e);console.log(`OBS_PUBLIC_E2E_RETRY ${tc.name} attempt=${attempt} ${last}`);}
+                await page.close();
+                if(!passed)await sleep(15000);
+              }
+              assert(passed,`${tc.name} public Pages verification failed: ${last}`);
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
