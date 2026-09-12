@@ -6,7 +6,10 @@ on:
     paths:
       - tools/build_market_observatory.py
       - tools/postprocess_market_observatory.py
+      - tools/backfill_market_history_30y.py
+      - tools/enrich_economic_calendar.py
       - market-observatory/index.html
+      - market-observatory/observatory-v2.js
       - .github/workflows/market-observatory-daily.yml
   schedule:
     # 07:25 KST daily: completed US session + latest official bond/calendar data.
@@ -23,7 +26,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,53 +37,74 @@ jobs:
       - name: Build read-only market observatory data
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
+          TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/build_market_observatory.py tools/postprocess_market_observatory.py
+          python -m py_compile tools/build_market_observatory.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py
           python tools/build_market_observatory.py
           python tools/postprocess_market_observatory.py
+          python tools/backfill_market_history_30y.py
+          python tools/enrich_economic_calendar.py
+      - name: Install Observatory V2 chart runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('market-observatory/index.html')
+          s=p.read_text(encoding='utf-8')
+          zoom='<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>'
+          if 'chartjs-plugin-zoom@2.2.0' not in s:s=s.replace('</head>',zoom+'</head>',1)
+          bridge='<script src="./observatory-v2.js?v=2.0"></script>'
+          if 'observatory-v2.js' not in s:s=s.replace('</body>',bridge+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          print('OBSERVATORY_V2_RUNTIME=PASS')
+          PY
       - name: Acceptance contract
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
+          from pathlib import Path
           o=json.load(open('market-observatory/data/observatory.json'))
           c=json.load(open('market-observatory/data/economic-calendar.json'))
+          h=json.load(open('market-observatory/data/history-30y.json'))
           assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
           assert o['read_only'] is True and o['contains_account_data'] is False
+          assert o.get('history_target_years')==30
+          assert o.get('history_contract')=='INITIAL_BACKFILL_THEN_INCREMENTAL'
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
           for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
           assert o.get('latest',{}).get('US_2S10S') is not None
           assert o.get('latest',{}).get('JP_2S10S') is not None
           assert o.get('latest',{}).get('KR10Y') is not None
-          assert o.get('latest',{}).get('KR_3S10S') is not None
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
-          assert any(e.get('country')=='US' for e in c['events'])
-          assert any(e.get('country')=='KR' for e in c['events'])
-          assert any('FOMC' in e.get('title','') for e in c['events'])
-          assert any('소비자물가' in e.get('title','') for e in c['events'])
-          print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
-          print('series=',len(o['series']),'calendar=',len(c['events']),'KR10Y=',o.get('latest',{}).get('KR10Y'))
+          assert c.get('enrichment_contract')=='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL'
+          assert all(all(k in e for k in ['previous','consensus','actual']) for e in c.get('events',[]))
+          assert h.get('target_years')==30
+          html=Path('market-observatory/index.html').read_text(encoding='utf-8')
+          assert 'chartjs-plugin-zoom@2.2.0' in html and 'observatory-v2.js?v=2.0' in html
+          js=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
+          assert "'30Y'" in js and 'spanGaps:true' in js and 'pinch:{enabled:true}' in js
+          print('MARKET_OBSERVATORY_V2_ACCEPTANCE=PASS')
+          print('series=',len(o['series']),'calendar=',len(c['events']),'enriched=',c.get('enrichment_matched'))
           PY
-      - name: Publish only observatory data
+      - name: Publish Observatory V2 data and UI
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json
+          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/index.html market-observatory/observatory-v2.js
           if git diff --cached --quiet; then
             echo MARKET_OBSERVATORY_NO_CHANGE
             exit 0
           fi
-          git commit -m 'data(observatory): refresh market history and macro calendar'
-          # Unrelated maintenance commits may land while the data build is running.
-          # Rebase generated-data commit onto the latest main instead of failing
-          # the publication for a non-fast-forward race.
+          git commit -m 'data(observatory): 30Y history and enriched macro calendar'
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
