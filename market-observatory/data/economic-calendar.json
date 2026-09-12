@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-13T00:12:31+09:00",
+  "generated_kst": "2026-09-13T00:21:45+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -1121,12 +1121,12 @@
       "importance": 2,
       "source": "BLS",
       "reference_period": "",
-      "previous": null,
-      "consensus": null,
+      "previous": "0.2%",
+      "consensus": "0.3%",
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null
+      "market_data_source": "FairEconomy/ForexFactory"
     },
     {
       "datetime_kst": "2026-09-11T21:30+09:00",
@@ -1136,12 +1136,12 @@
       "importance": 3,
       "source": "BLS",
       "reference_period": "",
-      "previous": null,
-      "consensus": null,
+      "previous": "2.5%",
+      "consensus": "2.4%",
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null
+      "market_data_source": "FairEconomy/ForexFactory"
     },
     {
       "datetime_kst": "2026-09-15T06:00+09:00",
@@ -1945,7 +1945,13 @@
     }
   },
   "enrichment_contract": "OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL",
-  "enrichment_note": "Consensus/actual are populated only when a market-data source returns a matched observation; missing values remain null.",
-  "enrichment_source": "UNAVAILABLE_OR_GUEST_LIMITED",
-  "enrichment_matched": 0
+  "enrichment_note": "Official agencies remain schedule authority. Consensus/actual are populated only from matched market-data observations; missing values remain null.",
+  "enrichment_sources": [
+    "Trading Economics unavailable/guest-limited",
+    "FairEconomy/ForexFactory weekly public feed"
+  ],
+  "enrichment_matched": {
+    "trading_economics": 0,
+    "faireconomy": 2
+  }
 }
