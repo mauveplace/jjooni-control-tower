@@ -74,7 +74,7 @@ jobs:
           assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
           assert o['read_only'] is True and o['contains_account_data'] is False
           assert o.get('history_target_years')==30
-          assert o.get('history_contract')=='INITIAL_BACKFILL_THEN_INCREMENTAL'
+          assert o.get('history_contract')=='IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT'
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
           for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
@@ -85,13 +85,14 @@ jobs:
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
           assert c.get('enrichment_contract')=='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL'
           assert all(all(k in e for k in ['previous','consensus','actual']) for e in c.get('events',[]))
-          assert h.get('target_years')==30
+          assert h.get('schema')=='JJOONI_MARKET_HISTORY_30Y_V1' and h.get('target_years')==30
+          assert h.get('history_contract') in ('INITIAL_BACKFILL_THEN_INCREMENTAL','IMMUTABLE_BASE')
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
           assert 'chartjs-plugin-zoom@2.2.0' in html and 'observatory-v2.js?v=2.0' in html
           js=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
-          assert "'30Y'" in js and 'spanGaps:true' in js and 'pinch:{enabled:true}' in js
+          assert "'30Y'" in js and 'spanGaps:true' in js and 'pinch:{enabled:true}' in js and "history-30y.json" in js
           print('MARKET_OBSERVATORY_V2_ACCEPTANCE=PASS')
-          print('series=',len(o['series']),'calendar=',len(c['events']),'enriched=',c.get('enrichment_matched'))
+          print('series=',len(o['series']),'calendar=',len(c['events']),'enriched=',c.get('enrichment_matched'),'history_base=',h.get('generated_kst'))
           PY
       - name: Publish Observatory V2 data and UI
         shell: bash
@@ -104,7 +105,7 @@ jobs:
             echo MARKET_OBSERVATORY_NO_CHANGE
             exit 0
           fi
-          git commit -m 'data(observatory): 30Y history and enriched macro calendar'
+          git commit -m 'data(observatory): recent refresh over immutable 30Y base'
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
