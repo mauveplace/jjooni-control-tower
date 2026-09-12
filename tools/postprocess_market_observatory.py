@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import json, os, urllib.request
+import json, os, re, urllib.request
 from datetime import datetime, timedelta
+from html.parser import HTMLParser
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -9,12 +10,17 @@ ROOT=Path(__file__).resolve().parents[1]
 OBS=ROOT/'market-observatory'/'data'/'observatory.json'
 CAL=ROOT/'market-observatory'/'data'/'economic-calendar.json'
 KST=ZoneInfo('Asia/Seoul'); ET=ZoneInfo('America/New_York')
-UA='Mozilla/5.0 JJOONI-Market-Observatory-Post/1.0'
+UA='Mozilla/5.0 JJOONI-Market-Observatory-Post/1.1'
 KR={'KR3Y':'010200000','KR5Y':'010200001','KR10Y':'010210000','KR20Y':'010220000','KR30Y':'010230000'}
+
 
 def get_json(url):
     req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'application/json'})
     with urllib.request.urlopen(req,timeout=20) as r:return json.load(r)
+
+def get_text(url):
+    req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'text/html,application/xhtml+xml'})
+    with urllib.request.urlopen(req,timeout=25) as r:return r.read().decode('utf-8','ignore')
 
 def ecos_page(item,start,end,pos,last,key):
     url=f'https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/{pos}/{last}/817Y002/D/{start}/{end}/{item}'
@@ -61,6 +67,101 @@ def patch_rates(o):
     if latest.get('KR10Y') is not None and us is not None:latest['KR_US_10Y']=round(latest['KR10Y']-us,8)
     o.setdefault('quality',{})['kr_rates']={'state':'PASS' if latest.get('KR10Y') is not None else 'UNAVAILABLE','source':'BOK_ECOS','window':'1Y_BACKFILL_THEN_45D_INCREMENT','errors':errors}
 
+
+class _TableParser(HTMLParser):
+    def __init__(self):
+        super().__init__(); self.rows=[]; self.row=None; self.cell=None
+    def handle_starttag(self,tag,attrs):
+        if tag=='tr': self.row=[]
+        elif tag in ('td','th') and self.row is not None: self.cell=[]
+    def handle_data(self,data):
+        if self.cell is not None:self.cell.append(data)
+    def handle_endtag(self,tag):
+        if tag in ('td','th') and self.cell is not None and self.row is not None:
+            self.row.append(re.sub(r'\s+',' ',' '.join(self.cell)).strip()); self.cell=None
+        elif tag=='tr' and self.row is not None:
+            if any(self.row):self.rows.append(self.row)
+            self.row=None;self.cell=None
+
+DATE_RE=re.compile(r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+([A-Za-z]+)\s+(\d{1,2})\s+(20\d{2})',re.I)
+
+def _te_rows(slug,code):
+    txt=get_text(f'https://tradingeconomics.com/{slug}/calendar')
+    p=_TableParser();p.feed(txt);out=[];current=None
+    for cells in p.rows:
+        joined=' '.join(cells);m=DATE_RE.search(joined)
+        if m:
+            try:current=datetime.strptime(f'{m.group(2)} {m.group(3)} {m.group(4)}','%B %d %Y').date().isoformat()
+            except:current=None
+            if len(cells)<=2:continue
+        if not current:continue
+        idx=next((i for i,x in enumerate(cells) if x.strip().upper()==code),None)
+        if idx is None:continue
+        tail=[x.strip() for x in cells[idx+1:]]
+        if not tail:continue
+        event=tail[0]
+        # Calendar table contract: Event | Actual | Previous | Consensus | Forecast.
+        vals=(tail[1:]+['','','',''])[:4]
+        out.append({'date':current,'event':event,'actual':vals[0],'previous':vals[1],'consensus':vals[2],'forecast':vals[3]})
+    return out
+
+def _norm(s):return re.sub(r'[^a-z0-9가-힣]+',' ',str(s).lower()).strip()
+
+def _date_near(a,b):
+    try:return abs((datetime.fromisoformat(a).date()-datetime.fromisoformat(b).date()).days)<=1
+    except:return False
+
+METRIC_RULES=[
+    (('consumer price index','소비자물가동향'),['Inflation Rate YoY','Core Inflation Rate YoY']),
+    (('producer price index','생산자물가지수'),['PPI YoY','Core PPI YoY']),
+    (('employment situation',),['Non Farm Payrolls','Unemployment Rate']),
+    (('job openings','jolts'),['Job Openings']),
+    (('personal income and outlays',),['Core PCE Price Index YoY','PCE Price Index YoY','Personal Spending MoM']),
+    (('gdp','실질 gdp'),['GDP Growth Rate QoQ','GDP Growth Rate YoY']),
+    (('산업활동동향',),['Industrial Production YoY','Industrial Production MoM']),
+    (('고용동향',),['Unemployment Rate','Employment Change']),
+    (('fomc','통화정책방향 결정회의'),['Interest Rate Decision','Fed Interest Rate Decision']),
+]
+
+def _preferred_metrics(title):
+    n=_norm(title)
+    for needles,metrics in METRIC_RULES:
+        if any(_norm(x) in n for x in needles):return metrics
+    return []
+
+def _find_metric(rows,date,name):
+    nn=_norm(name);best=None
+    for r in rows:
+        if not _date_near(date,r['date']):continue
+        ev=_norm(r['event'])
+        score=0
+        if nn==ev:score=100
+        elif nn in ev or ev in nn:score=80
+        else:
+            a=set(nn.split());b=set(ev.split());score=len(a&b)*10
+        if score and (best is None or score>best[0]):best=(score,r)
+    return best[1] if best else None
+
+def enrich_market_expectations(c):
+    rows={};errors={}
+    for country,slug,code in [('US','united-states','US'),('KR','south-korea','KR')]:
+        try:rows[country]=_te_rows(slug,code)
+        except Exception as exc:rows[country]=[];errors[country]=type(exc).__name__
+    enriched=0
+    for e in c.get('events') or []:
+        country=e.get('country');date=str(e.get('datetime_kst') or '')[:10]
+        metrics=[]
+        for wanted in _preferred_metrics(e.get('title','')):
+            r=_find_metric(rows.get(country,[]),date,wanted)
+            if not r:continue
+            metrics.append({'label':r['event'],'actual':r['actual'] or None,'previous':r['previous'] or None,'consensus':r['consensus'] or None,'forecast':r['forecast'] or None,'source':'Trading Economics'})
+        if metrics:
+            e['market_metrics']=metrics[:3]
+            first=metrics[0];e['actual']=first.get('actual');e['consensus']=first.get('consensus');e['previous']=first.get('previous')
+            e['expectations_source']='Trading Economics';enriched+=1
+    c.setdefault('quality',{})['market_expectations']={'state':'PASS' if enriched else ('DEGRADED' if errors else 'NO_MATCH'),'source':'Trading Economics public calendar','enriched_events':enriched,'errors':errors,'contract':'official schedule + market consensus overlay'}
+    if 'Trading Economics' not in c.setdefault('sources',[]):c['sources'].append('Trading Economics')
+
 def patch_calendar(c):
     events=c.get('events') or []
     # Correct FOMC statement timestamps: 2 p.m. ET on second meeting day -> KST with DST.
@@ -70,17 +171,18 @@ def patch_calendar(c):
         if e.get('source')=='Federal Reserve' and 'FOMC' in e.get('title',''):
             raw=str(e.get('datetime_kst') or '')[:10]
             if raw in bydate:e['datetime_kst']=bydate[raw]
-    # Keep calendar compact: current year through end of next year.
     y=datetime.now(KST).year; lo=f'{y}-01-01';hi=f'{y+1}-12-31'
     events=[e for e in events if lo<=str(e.get('datetime_kst') or '')[:10]<=hi]
     events.sort(key=lambda e:e.get('datetime_kst') or '')
     c['events']=events;c['generated_kst']=datetime.now(KST).isoformat(timespec='seconds');c['time_contract']='ALL_TIMES_KST';c['importance_contract']='3=market_moving,2=major,1=reference'
+    enrich_market_expectations(c)
 
 def main():
     o=json.loads(OBS.read_text(encoding='utf-8'));c=json.loads(CAL.read_text(encoding='utf-8'))
     patch_rates(o);patch_calendar(c)
     o['generated_kst']=datetime.now(KST).isoformat(timespec='seconds')
     OBS.write_text(json.dumps(o,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');CAL.write_text(json.dumps(c,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    q=(c.get('quality') or {}).get('market_expectations') or {}
     print('MARKET_OBSERVATORY_POSTPROCESS=PASS')
-    print('KR10Y=',o.get('latest',{}).get('KR10Y'),'KR3S10S=',o.get('latest',{}).get('KR_3S10S'),'calendar=',len(c.get('events') or []))
+    print('KR10Y=',o.get('latest',{}).get('KR10Y'),'KR3S10S=',o.get('latest',{}).get('KR_3S10S'),'calendar=',len(c.get('events') or []),'expectations=',q.get('enriched_events',0))
 if __name__=='__main__':main()
