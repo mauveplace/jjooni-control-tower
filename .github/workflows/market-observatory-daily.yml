@@ -32,7 +32,7 @@ jobs:
           python-version: '3.12'
       - name: Build read-only market observatory data
         env:
-          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY }}
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
         shell: bash
         run: |
           set -euo pipefail
