@@ -51,7 +51,7 @@ jobs:
               const errors=[];
               page.on('pageerror',e=>errors.push(String(e)));
               await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
-              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4-responsive-history',{timeout:30000});
+              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4.1-responsive-history',{timeout:30000});
               await page.waitForTimeout(5000);
               const base=await page.evaluate(()=>({
                 innerWidth:window.innerWidth,
