@@ -1,0 +1,49 @@
+name: Inject Observatory Calendar Editor Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/inject-calendar-editor-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inject editor script and bump observatory loader
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('market-observatory/index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./calendar-editor-v1.js?v=1.0"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>',tag+'</body></html>')
+          s=s.replace('./observatory-v2.js?v=2.0','./observatory-v2.js?v=2.4.1')
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add market-observatory/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "feat(observatory): load inline calendar editor"
+            git pull --rebase origin main
+            git push origin main
+          fi
+      - name: Remove one-shot workflow
+        run: |
+          rm -f .github/workflows/inject-calendar-editor-once.yml
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: remove calendar editor one-shot"
+            git pull --rebase origin main
+            git push origin main
+          fi
