@@ -8,17 +8,17 @@ from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1]
 CAL=ROOT/'market-observatory'/'data'/'economic-calendar.json'
 KST=ZoneInfo('Asia/Seoul')
-UA='Mozilla/5.0 JJOONI-Market-Observatory-Calendar/2.1'
+UA='Mozilla/5.0 JJOONI-Market-Observatory-Calendar/2.2'
 
 PREF={
- 'Consumer Price Index':['cpi y/y','inflation rate yoy','cpi yoy'],
- 'Employment Situation':['non-farm employment change','non farm payrolls','unemployment rate'],
- 'Producer Price Index':['ppi m/m','producer prices change','ppi yoy'],
+ 'Consumer Price Index':['cpi y/y','cpi m/m','core cpi y/y','inflation rate yoy','cpi yoy'],
+ 'Employment Situation':['non-farm employment change','non farm payrolls','unemployment rate','average hourly earnings'],
+ 'Producer Price Index':['ppi m/m','core ppi m/m','producer prices change','ppi yoy'],
  'Job Openings and Labor Turnover':['jolts job openings','job openings'],
  'Employment Cost Index':['employment cost index'],
  'Productivity and Costs':['nonfarm productivity','unit labour costs','unit labor costs'],
  'Personal Income and Outlays':['core pce price index m/m','core pce price index mom','pce price index yoy','personal spending'],
- 'GDP':['gdp growth rate qoq','gdp growth rate'],
+ 'GDP':['advance gdp q/q','prelim gdp q/q','final gdp q/q','gdp growth rate qoq','gdp growth rate'],
  'FOMC':['federal funds rate','fed interest rate decision'],
  '통화정책방향':['interest rate decision'],
  '소비자물가':['inflation rate yoy','cpi'],
@@ -42,6 +42,8 @@ def te_rows():
 
 def ff_rows():
     out=[]
+    # Forex Factory exposes weekly JSON exports through FairEconomy CDN.
+    # Current + next week are enough for forward consensus; historical matched values are persisted below.
     for name in ['thisweek','nextweek']:
         try:
             xs=req_json(f'https://nfs.faireconomy.media/ff_calendar_{name}.json')
@@ -58,7 +60,7 @@ def prefs_for(title):
 def event_date(e):return str(e.get('datetime_kst') or '')[:10]
 def clean(v):
     if v is None:return None
-    s=str(v).strip();return None if s in ('','None','null','nan','N/A') else s
+    s=str(v).strip();return None if s in ('','None','null','nan','N/A','-') else s
 
 def score_te(event,row):
     ec='united states' if event.get('country')=='US' else 'south korea';rc=norm(row.get('Country'))
@@ -70,9 +72,10 @@ def score_te(event,row):
     elif delta<=1:s+=10
     else:return -999
     rtxt=norm((row.get('Event') or '')+' '+(row.get('Category') or ''))
-    for i,p in enumerate(prefs_for(event.get('title'))):
+    prefs=prefs_for(event.get('title'))
+    for i,p in enumerate(prefs):
         if norm(p) in rtxt:s+=18-i*3
-    return s
+    return s if prefs else -999
 
 def score_ff(event,row):
     if event.get('country')!='US' or str(row.get('country') or '').upper()!='USD':return -999
@@ -82,40 +85,57 @@ def score_ff(event,row):
     try:delta=abs((datetime.fromisoformat(ed).date()-datetime.fromisoformat(rd).date()).days)
     except:return -999
     if delta>1:return -999
+    prefs=prefs_for(event.get('title'))
+    if not prefs:return -999
     s=20 if delta==0 else 10;rtxt=norm(row.get('title'))
-    for i,p in enumerate(prefs_for(event.get('title'))):
-        if norm(p) in rtxt:s+=20-i*3
-    return s
+    hits=0
+    for i,p in enumerate(prefs):
+        if norm(p) in rtxt:s+=20-i*3;hits+=1
+    return s if hits else -999
 
-def best_match(event,rows,scorer,threshold=20):
+def best_match(event,rows,scorer,threshold=30):
     best=None;bs=-999
     for r in rows:
         sc=scorer(event,r)
         if sc>bs:best,bs=r,sc
-    return best if best is not None and bs>=threshold else None
+    return (best,bs) if best is not None and bs>=threshold else (None,bs)
+
+def set_if_present(e,key,val):
+    v=clean(val)
+    if v is not None:e[key]=v
 
 def main():
-    c=json.loads(CAL.read_text(encoding='utf-8'));te=te_rows();ff=ff_rows();matched_te=matched_ff=0
+    c=json.loads(CAL.read_text(encoding='utf-8'));te=te_rows();ff=ff_rows();matched_te=matched_ff=0;actual_updates=forecast_updates=0
     for e in c.get('events') or []:
-        e['previous']=None;e['consensus']=None;e['actual']=None;e['te_forecast']=None;e['surprise']=None;e['market_data_source']=None
-        r=best_match(e,te,score_te)
+        # Preserve previously captured market observations. Weekly feeds roll forward, so deleting
+        # old values here would erase historical actual/consensus data once an event leaves the feed.
+        for k in ['previous','consensus','actual','te_forecast','surprise','market_data_source']:
+            e.setdefault(k,None)
+
+        r,score=best_match(e,te,score_te)
         if r:
-            e['previous']=clean(r.get('Previous'));e['consensus']=clean(r.get('Forecast'));e['actual']=clean(r.get('Actual'));e['te_forecast']=clean(r.get('TEForecast'));e['market_data_source']='Trading Economics';matched_te+=1
-        # Public ForexFactory/FairEconomy feed is used as a forecast/previous fallback for near-term U.S. events.
-        f=best_match(e,ff,score_ff)
+            before_a=e.get('actual');before_c=e.get('consensus')
+            set_if_present(e,'previous',r.get('Previous'));set_if_present(e,'consensus',r.get('Forecast'));set_if_present(e,'actual',r.get('Actual'));set_if_present(e,'te_forecast',r.get('TEForecast'))
+            e['market_data_source']='Trading Economics';e['market_match_score']=score;matched_te+=1
+            actual_updates+=int(before_a!=e.get('actual') and e.get('actual') is not None);forecast_updates+=int(before_c!=e.get('consensus') and e.get('consensus') is not None)
+
+        f,score=best_match(e,ff,score_ff)
         if f:
-            if e['previous'] is None:e['previous']=clean(f.get('previous'))
-            if e['consensus'] is None:e['consensus']=clean(f.get('forecast'))
-            if e['actual'] is None:e['actual']=clean(f.get('actual'))
-            if e['market_data_source'] is None:e['market_data_source']='FairEconomy/ForexFactory'
-            elif 'FairEconomy' not in e['market_data_source']:e['market_data_source']+=' + FairEconomy'
-            matched_ff+=1
-        if e['actual'] is not None and e['consensus'] is not None:e['surprise']='actual_vs_consensus'
+            before_a=e.get('actual');before_c=e.get('consensus')
+            set_if_present(e,'previous',f.get('previous'));set_if_present(e,'consensus',f.get('forecast'));set_if_present(e,'actual',f.get('actual'))
+            if e.get('market_data_source') is None:e['market_data_source']='FairEconomy/ForexFactory'
+            elif 'FairEconomy' not in e['market_data_source']:e['market_data_source']+=' + FairEconomy/ForexFactory'
+            e['ff_match_score']=score;matched_ff+=1
+            actual_updates+=int(before_a!=e.get('actual') and e.get('actual') is not None);forecast_updates+=int(before_c!=e.get('consensus') and e.get('consensus') is not None)
+
+        if e.get('actual') is not None and e.get('consensus') is not None:e['surprise']='actual_vs_consensus'
+
     c['enrichment_contract']='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL'
-    c['enrichment_note']='Official agencies remain schedule authority. Consensus/actual are populated only from matched market-data observations; missing values remain null.'
+    c['enrichment_note']='Official agencies remain schedule authority. ForexFactory/FairEconomy is a near-term consensus/actual fallback. Captured observations persist after weekly feeds roll forward; missing values are never invented.'
     c['enrichment_sources']=['Trading Economics API' if te else 'Trading Economics unavailable/guest-limited','FairEconomy/ForexFactory weekly public feed' if ff else 'FairEconomy unavailable']
     c['enrichment_matched']={'trading_economics':matched_te,'faireconomy':matched_ff}
+    c['enrichment_updates']={'actual':actual_updates,'forecast':forecast_updates}
     c['generated_kst']=datetime.now(KST).isoformat(timespec='seconds')
     CAL.write_text(json.dumps(c,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    print('ECON_CAL_ENRICH=PASS te_rows=',len(te),'ff_rows=',len(ff),'te_matched=',matched_te,'ff_matched=',matched_ff)
+    print('ECON_CAL_ENRICH=PASS te_rows=',len(te),'ff_rows=',len(ff),'te_matched=',matched_te,'ff_matched=',matched_ff,'actual_updates=',actual_updates,'forecast_updates=',forecast_updates)
 if __name__=='__main__':main()
