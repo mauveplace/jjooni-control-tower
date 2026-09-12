@@ -6,6 +6,8 @@ on:
     paths:
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-public-e2e.yml
   workflow_dispatch:
 
@@ -30,7 +32,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.55.0
           npx playwright install --with-deps chromium >/dev/null
-      - name: Wait for Pages and verify phone + tablet
+      - name: Wait for Pages and verify phone + tablet + calendar editor
         env:
           URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
         run: |
@@ -49,12 +51,14 @@ jobs:
                 try{
                   await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
                   await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4.1-responsive-history',{timeout:12000});
-                  await page.waitForTimeout(5000);
+                  await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.0',{timeout:12000});
+                  await page.waitForTimeout(4500);
                   const base=await page.evaluate(()=>({
                     innerWidth:innerWidth,
                     htmlWidth:document.documentElement.scrollWidth,
                     bodyWidth:document.body.scrollWidth,
                     version:window.__JJOONI_OBSERVATORY_UI?.version,
+                    editor:window.__JJOONI_CALENDAR_EDITOR?.version,
                     coverage:document.querySelector('[data-coverage="marketChart"]')?.textContent||'',
                     cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
                   }));
@@ -65,18 +69,34 @@ jobs:
                   const year=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
                   assert(year&&year<=2016,`${tc.name} long history missing ${base.coverage}`);
                   await page.click('button[data-tab="calendar"]');
-                  await page.waitForTimeout(500);
+                  await page.waitForTimeout(800);
                   const cal=await page.evaluate(()=>({
                     innerWidth,
                     htmlWidth:document.documentElement.scrollWidth,
+                    text:document.querySelector('#events')?.innerText||'',
+                    editButtons:document.querySelectorAll('#events .obsCalEditBtn').length,
+                    seeded:[...document.querySelectorAll('#events .obsCalEditBtn.seeded')].length,
                     events:[...document.querySelectorAll('#calendar .event')].slice(0,10).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}}),
                     metrics:[...document.querySelectorAll('#calendar .obsMetricRow')].slice(0,10).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
                   }));
                   assert(cal.htmlWidth<=cal.innerWidth+3,`${tc.name} calendar overflow ${cal.htmlWidth}>${cal.innerWidth}`);
                   assert(cal.events.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} event outside viewport`);
                   assert(cal.metrics.every(r=>r.left>=-2&&r.right<=cal.innerWidth+2),`${tc.name} metrics outside viewport`);
+                  assert(cal.editButtons>0,`${tc.name} edit buttons missing`);
+                  assert(cal.seeded>=3,`${tc.name} seeded override badges missing: ${cal.seeded}`);
+                  for(const needle of ['JOLTS Job Openings','7.18M','7.33M','7.27M','Nonfarm Payrolls','162K']) assert(cal.text.includes(needle),`${tc.name} seeded value missing: ${needle}`);
+                  const seededBtn=page.locator('#events .obsCalEditBtn.seeded').first();
+                  await seededBtn.click();
+                  await page.waitForSelector('#obsCalEditor.on',{timeout:5000});
+                  const modal=await page.evaluate(()=>({
+                    on:document.querySelector('#obsCalEditor')?.classList.contains('on'),
+                    inputs:document.querySelectorAll('#obsCalEditor input[data-field]').length,
+                    save:[...document.querySelectorAll('#obsCalEditor button')].some(b=>b.textContent.trim()==='저장'),
+                    reset:[...document.querySelectorAll('#obsCalEditor button')].some(b=>b.textContent.includes('자동값 복원'))
+                  }));
+                  assert(modal.on&&modal.inputs>=3&&modal.save&&modal.reset,`${tc.name} editor modal invalid ${JSON.stringify(modal)}`);
                   assert(errors.length===0,`${tc.name} page errors ${errors.join(' | ')}`);
-                  console.log(`OBS_PUBLIC_E2E=PASS ${tc.name} version=${base.version} coverage=${base.coverage}`);
+                  console.log(`OBS_PUBLIC_E2E=PASS ${tc.name} version=${base.version} editor=${base.editor} seeded=${cal.seeded} coverage=${base.coverage}`);
                   passed=true;
                 }catch(e){last=String(e);console.log(`OBS_PUBLIC_E2E_RETRY ${tc.name} attempt=${attempt} ${last}`);}
                 await page.close();
