@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -55,6 +55,8 @@ jobs:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
           assert o.get('latest',{}).get('US_2S10S') is not None
           assert o.get('latest',{}).get('JP_2S10S') is not None
+          assert o.get('latest',{}).get('KR10Y') is not None
+          assert o.get('latest',{}).get('KR_3S10S') is not None
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
           assert any(e.get('country')=='US' for e in c['events'])
@@ -76,4 +78,9 @@ jobs:
             exit 0
           fi
           git commit -m 'data(observatory): refresh market history and macro calendar'
-          git push
+          # Unrelated maintenance commits may land while the data build is running.
+          # Rebase generated-data commit onto the latest main instead of failing
+          # the publication for a non-fast-forward race.
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
