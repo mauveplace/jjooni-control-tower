@@ -4,23 +4,8 @@ const RAW={};
 const RANGE_ORDER=['1M','3M','6M','1Y','3Y','5Y','10Y','20Y','30Y','ALL'];
 const DAYS={'1M':31,'3M':92,'6M':184,'1Y':366,'3Y':1096,'5Y':1827,'10Y':3653,'20Y':7306,'30Y':10958,'ALL':999999};
 const active={};let fullChart=null;
-
-// V2.4 contract: the base page previously truncated every merged series to the
-// latest 260 observations (~1 year). Override that global helper so the range
-// controls receive the complete hydrated history. Filtering now happens only
-// at chart render time.
-function fullCommon(keys){
- const map=new Map();
- if(typeof DATA==='undefined'||!DATA?.series)return[];
- for(const k of keys)for(const p of(DATA.series[k]||[])){
-   if(!p?.date)continue;
-   if(!map.has(p.date))map.set(p.date,{date:p.date});
-   map.get(p.date)[k]=p.value;
- }
- return [...map.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-}
+function fullCommon(keys){const map=new Map();if(typeof DATA==='undefined'||!DATA?.series)return[];for(const k of keys)for(const p of(DATA.series[k]||[])){if(!p?.date)continue;if(!map.has(p.date))map.set(p.date,{date:p.date});map.get(p.date)[k]=p.value}return[...map.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
 try{globalThis.common=fullCommon}catch(_){}
-
 function cutoffFor(labels,range){if(range==='ALL'||!labels?.length)return null;const last=String(labels[labels.length-1]);const d=new Date(last+'T00:00:00Z');if(Number.isNaN(d.getTime()))return null;d.setUTCDate(d.getUTCDate()-DAYS[range]);return d.toISOString().slice(0,10)}
 function filtered(labels,sets,range){const cut=cutoffFor(labels,range);if(!cut)return{labels,sets};let i=labels.findIndex(x=>String(x)>=cut);if(i<0)i=0;return{labels:labels.slice(i),sets:sets.map(s=>({...s,data:(s.data||[]).slice(i)}))}}
 function chartConfig(labels,sets){return{type:'line',data:{labels,datasets:sets.map(x=>({label:x.label,data:x.data,borderWidth:2,pointRadius:0,tension:.12,spanGaps:true}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:false,plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}},zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}},scales:{x:{ticks:{maxTicksLimit:8,maxRotation:0,font:{size:9}}},y:{ticks:{maxTicksLimit:6,font:{size:9}}}}}}}
@@ -28,20 +13,14 @@ function ensureFullscreen(){let o=document.getElementById('obsFullChart');if(o)r
 function openFullscreen(id){const r=RAW[id];if(!r)return;const o=ensureFullscreen(),range=active[id]||'5Y',f=filtered(r.labels,r.sets,range);o.classList.add('on');document.body.classList.add('obsNoScroll');const title=document.querySelector(`#${id}`)?.closest('.card')?.querySelector('h3')?.textContent||id;o.querySelector('#obsFullTitle').textContent=title+' · '+range;if(fullChart)fullChart.destroy();fullChart=new Chart(o.querySelector('#obsFullCanvas'),chartConfig(f.labels,f.sets))}
 function closeFullscreen(){const o=document.getElementById('obsFullChart');if(o)o.classList.remove('on');document.body.classList.remove('obsNoScroll');if(fullChart){fullChart.destroy();fullChart=null}}
 function coverageText(id){const r=RAW[id];if(!r?.labels?.length)return'';const first=r.labels[0],last=r.labels[r.labels.length-1];return `${first} → ${last} · ${r.labels.length.toLocaleString()}pt`}
-function ensureToolbar(id){const canvas=document.getElementById(id);if(!canvas||canvas.dataset.rangeReady)return;canvas.dataset.rangeReady='1';const wrap=canvas.parentElement,bar=document.createElement('div');bar.className='range obsRange';bar.dataset.for=id;for(const r of RANGE_ORDER){const b=document.createElement('button');b.textContent=r;b.dataset.range=r;b.classList.toggle('on',(active[id]||'5Y')===r);b.onclick=()=>{active[id]=r;bar.querySelectorAll('button[data-range]').forEach(x=>x.classList.toggle('on',x===b));redraw(id)};bar.appendChild(b)}const reset=document.createElement('button');reset.textContent='줌 초기화';reset.onclick=()=>{try{charts[id]?.resetZoom()}catch(_){}};bar.appendChild(reset);const full=document.createElement('button');full.textContent='⛶ 크게 보기';full.className='obsFullBtn';full.onclick=()=>openFullscreen(id);bar.appendChild(full);const note=document.createElement('span');note.className='meta obsGesture';note.textContent='휠/핀치 확대 · 드래그 이동';bar.appendChild(note);const cov=document.createElement('span');cov.className='obsCoverage';cov.dataset.coverage=id;cov.textContent=coverageText(id);bar.insertAdjacentElement('afterend',cov);wrap.insertBefore(bar,canvas)}
+function ensureToolbar(id){const canvas=document.getElementById(id);if(!canvas||canvas.dataset.rangeReady)return;canvas.dataset.rangeReady='1';const wrap=canvas.parentElement,bar=document.createElement('div');bar.className='range obsRange';bar.dataset.for=id;for(const r of RANGE_ORDER){const b=document.createElement('button');b.textContent=r;b.dataset.range=r;b.classList.toggle('on',(active[id]||'5Y')===r);b.onclick=()=>{active[id]=r;bar.querySelectorAll('button[data-range]').forEach(x=>x.classList.toggle('on',x===b));redraw(id)};bar.appendChild(b)}const reset=document.createElement('button');reset.textContent='줌 초기화';reset.onclick=()=>{try{charts[id]?.resetZoom()}catch(_){}};bar.appendChild(reset);const full=document.createElement('button');full.textContent='⛶ 크게 보기';full.className='obsFullBtn';full.onclick=()=>openFullscreen(id);bar.appendChild(full);const note=document.createElement('span');note.className='meta obsGesture';note.textContent='휠/핀치 확대 · 드래그 이동';bar.appendChild(note);const cov=document.createElement('span');cov.className='obsCoverage';cov.dataset.coverage=id;cov.textContent=coverageText(id);wrap.insertBefore(bar,canvas);wrap.insertBefore(cov,canvas)}
 function refreshCoverage(id){const el=document.querySelector(`[data-coverage="${id}"]`);if(el)el.textContent=coverageText(id)}
 function draw(id,labels,sets){if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(!c)return;const f=filtered(labels,sets,active[id]||'5Y');charts[id]=new Chart(c,chartConfig(f.labels,f.sets));ensureToolbar(id);refreshCoverage(id)}
 function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
 window.chart=function(id,labels,sets){RAW[id]={labels:[...(labels||[])],sets:(sets||[]).map(s=>({...s,data:[...(s.data||[])]}))};draw(id,labels,sets)};
 function val(v){return v==null||v===''?'—':String(v)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]))}
-function eventMetricsHtml(e){
- const ms=(e.market_metrics||[]).filter(m=>m&&m.label);
- if(ms.length){
-   return `<div class="obsMetricTable">${ms.map(m=>`<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">이전 <b>${esc(val(m.previous))}</b></div><div class="forecast">예측 <b>${esc(val(m.consensus))}</b></div><div class="actual">실제 <b>${esc(val(m.actual))}</b></div></div>`).join('')}</div>`;
- }
- return `<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(val(e.actual))}</b></span></div>`;
-}
+function eventMetricsHtml(e){const ms=(e.market_metrics||[]).filter(m=>m&&m.label);if(ms.length){return `<div class="obsMetricTable">${ms.map(m=>`<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">이전 <b>${esc(val(m.previous))}</b></div><div class="forecast">예측 <b>${esc(val(m.consensus))}</b></div><div class="actual">실제 <b>${esc(val(m.actual))}</b></div></div>`).join('')}</div>`}return `<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(val(e.actual))}</b></span></div>`}
 window.renderCalendar=function(){if(typeof CAL==='undefined')return;const month=typeof calMonth!=='undefined'?calMonth:new Date().toISOString().slice(0,7);const title=document.querySelector('#calendarMonth');if(title)title.textContent=month;const xs=(CAL.events||[]).filter(e=>String(e.datetime_kst||e.date||'').startsWith(month));const box=document.querySelector('#events');if(!box)return;box.innerHTML=xs.length?xs.map(e=>{const dt=(e.datetime_kst||e.date||'').slice(5,16).replace('T',' '),hasActual=(e.market_metrics||[]).some(m=>m?.actual!=null)||e.actual!=null,status=hasActual?'<span class="obsDone">발표완료</span>':'<span class="obsPending">예정</span>';return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div class="obsEventMain"><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''} · ${status}</div>${eventMetricsHtml(e)}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`}).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>'};
 function mergeSeries(base,recent){const m=new Map();for(const x of(base||[]))if(x?.date)m.set(x.date,x);for(const x of(recent||[]))if(x?.date)m.set(x.date,x);return[...m.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
 async function hydrateHistory(){try{const h=await fetch('./data/history-30y.json',{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(new Error('history '+r.status)));if(typeof DATA==='undefined'||!DATA)return;const merged={},hs=h.series||{},rs=DATA.series||{};for(const k of new Set([...Object.keys(hs),...Object.keys(rs)]))merged[k]=mergeSeries(hs[k],rs[k]);DATA.series=merged;DATA.history_loaded=true;DATA.history_base_generated_kst=h.generated_kst||null;try{globalThis.common=fullCommon}catch(_){};if(typeof render==='function')render();Object.keys(RAW).forEach(refreshCoverage)}catch(e){console.warn('30Y history cache unavailable',e)}}
@@ -57,5 +36,5 @@ html,body{max-width:100%;overflow-x:hidden}.wrap,.panel,.grid,.card,.chart,.even
 `;document.head.appendChild(style);
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeFullscreen()});
 window.addEventListener('load',()=>{try{globalThis.common=fullCommon}catch(_){};document.querySelectorAll('canvas').forEach(c=>ensureToolbar(c.id));try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){};setTimeout(hydrateHistory,150)});
-window.__JJOONI_OBSERVATORY_UI={version:'2.4-responsive-history',responsive:true,history_common:'FULL_NO_260_SLICE',ranges:RANGE_ORDER};
+window.__JJOONI_OBSERVATORY_UI={version:'2.4.1-responsive-history',responsive:true,history_common:'FULL_NO_260_SLICE',ranges:RANGE_ORDER};
 })();
