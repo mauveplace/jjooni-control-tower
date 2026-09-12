@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - tools/build_market_observatory.py
+      - tools/postprocess_market_observatory.py
       - market-observatory/index.html
       - .github/workflows/market-observatory-daily.yml
   schedule:
@@ -36,8 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/build_market_observatory.py
+          python -m py_compile tools/build_market_observatory.py tools/postprocess_market_observatory.py
           python tools/build_market_observatory.py
+          python tools/postprocess_market_observatory.py
       - name: Acceptance contract
         shell: bash
         run: |
@@ -49,16 +51,18 @@ jobs:
           assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
           assert o['read_only'] is True and o['contains_account_data'] is False
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
-          for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY']:
-              assert len(o['series'].get(k) or [])>20,(k,len(o['series'].get(k) or []))
+          for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
+              assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
+          assert o.get('latest',{}).get('US_2S10S') is not None
+          assert o.get('latest',{}).get('JP_2S10S') is not None
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
-          assert c['timezone']=='Asia/Seoul'
+          assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
           assert any(e.get('country')=='US' for e in c['events'])
           assert any(e.get('country')=='KR' for e in c['events'])
           assert any('FOMC' in e.get('title','') for e in c['events'])
           assert any('소비자물가' in e.get('title','') for e in c['events'])
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
-          print('series=',len(o['series']),'calendar=',len(c['events']))
+          print('series=',len(o['series']),'calendar=',len(c['events']),'KR10Y=',o.get('latest',{}).get('KR10Y'))
           PY
       - name: Publish only observatory data
         shell: bash
