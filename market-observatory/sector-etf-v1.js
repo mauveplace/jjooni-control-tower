@@ -1,10 +1,9 @@
 (()=>{
 'use strict';
 if(window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1)return;
-const STATE={version:'1.0',status:'BOOTING',loaded:false,loading:false,error:null,rendered_at:null};
+const STATE={version:'1.1',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
-const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const pct=v=>{const x=n(v);return x==null?'—':(x>=0?'+':'')+x.toFixed(2)+'%'};
@@ -54,7 +53,6 @@ function ensureShell(){
  return true;
 }
 
-function flattenGroups(d){return (d?.groups||[]).flatMap(g=>Array.isArray(g.rows)?g.rows:[])}
 function classicRows(){return (DATA?.groups||[]).find(g=>g.key==='classic')?.rows||[]}
 function leaderText(xs){return xs?.length?xs.map(x=>`${x.ticker} ${pct(x.value)}`).join(' · '):'—'}
 
@@ -69,20 +67,22 @@ function classicTable(rows){
 }
 
 function drawRsChart(rows){
- const canvas=q('#sectorRsChart');if(!canvas||typeof Chart==='undefined')return;
+ const canvas=q('#sectorRsChart');if(!canvas||typeof Chart==='undefined')return true;
  const sorted=rows.filter(r=>n(r.rs_spy_1m_pct)!=null).slice().sort((a,b)=>a.rs_spy_1m_pct-b.rs_spy_1m_pct);
  if(rsChart)try{rsChart.destroy()}catch(_){}
  rsChart=new Chart(canvas,{type:'bar',data:{labels:sorted.map(r=>r.ticker),datasets:[{label:'1M RS vs SPY (%p)',data:sorted.map(r=>r.rs_spy_1m_pct)}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9}},grid:{color:'#eef2f6'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});
+ return true;
 }
 
 function render(){
  const panel=q('#sectors');if(!panel||!DATA)return;
- const s=DATA.summary||{},rows=classicRows(),leaders=s.leaders_1m_rs_spy||[],laggards=s.laggards_1m_rs_spy||[],q=DATA.quality||{};
- const warning=n(q.fetch_error_count)>0;
+ const s=DATA.summary||{},rows=classicRows(),leaders=s.leaders_1m_rs_spy||[],laggards=s.laggards_1m_rs_spy||[],quality=DATA.quality||{};
+ const warning=n(quality.fetch_error_count)>0;
  panel.innerHTML=`<div class="obsSectorHead"><div><div class="obsSectorTitle">송팀장 Sector Observatory</div><div class="meta">S&P 500 11개 섹터 + 반도체·소프트웨어·바이오·은행·방산·인프라·로봇 ETF · 완료 일봉 기준</div></div><div class="obsSectorBadge">${esc(DATA.universe_version||'SECTOR UNIVERSE')}</div></div>
  <div class="obsSectorKpis"><div class="obsSectorKpi"><span>기준일</span><b>${esc(DATA.as_of_date||'—')}</b></div><div class="obsSectorKpi"><span>MA20 상회 · 11개 섹터</span><b>${esc(s.classic_above_ma20??'—')} / ${esc(s.classic_count??11)}</b></div><div class="obsSectorKpi"><span>1M RS 강세</span><b>${esc(leaders[0]?.ticker||'—')} ${pct(leaders[0]?.value)}</b></div><div class="obsSectorKpi"><span>1M RS 약세</span><b>${esc(laggards[0]?.ticker||'—')} ${pct(laggards[0]?.value)}</b></div><div class="obsSectorKpi"><span>성장-방어 1M 스프레드</span><b class="${cls(s.growth_defense_spread_1m_pct)}">${pct(s.growth_defense_spread_1m_pct)}</b></div></div>
- <div class="obsSectorGrid"><div><section class="obsSectorCard"><h3>S&P 500 섹터 상대강도</h3><div class="meta">1개월 성과에서 SPY 1개월 성과를 차감한 상대강도(%p) · 높은 순으로 표 정렬</div>${classicTable(rows)}</section><section class="obsSectorCard" style="margin-top:12px"><h3>테마·업종 ETF</h3><div class="meta">송팀장 기존 섹터 Watchlist를 Observatory용 시장관측 Universe로 확장</div>${themeHtml()}</section></div><div><section class="obsSectorCard"><h3>1M RS Ranking</h3><div class="meta">SPY 대비 상대강도 · 회전 방향을 빠르게 확인</div><div class="obsSectorChart"><canvas id="sectorRsChart"></canvas></div></section><section class="obsSectorCard" style="margin-top:12px"><h3>리더 / 래거드</h3><div class="obsSectorLeader"><span><span class="obsSectorRank">L</span>강세 TOP3</span><b class="up">${esc(leaderText(leaders))}</b></div><div class="obsSectorLeader"><span><span class="obsSectorRank">W</span>약세 TOP3</span><b class="down">${esc(leaderText(laggards))}</b></div><div class="obsSectorQuality ${warning?'warn':''}">${warning?'일부 Yahoo 일봉 수집 실패가 있어 직전 검증값으로 대체된 ETF가 있습니다.':'전체 섹터 ETF가 최신 완료 일봉으로 수집되었습니다.'}<br>가격 확인 ${esc(s.priced_count??0)}/${esc(s.total_count??0)} · fetch error ${esc(q.fetch_error_count??0)} · source: ${esc(DATA.source_contract||'Yahoo public daily')}</div></section></div></div>`;
- drawRsChart(rows);STATE.status='ACTIVE';STATE.loaded=true;STATE.rendered_at=new Date().toISOString();
+ <div class="obsSectorGrid"><div><section class="obsSectorCard"><h3>S&P 500 섹터 상대강도</h3><div class="meta">1개월 성과에서 SPY 1개월 성과를 차감한 상대강도(%p) · 높은 순으로 표 정렬</div>${classicTable(rows)}</section><section class="obsSectorCard" style="margin-top:12px"><h3>테마·업종 ETF</h3><div class="meta">송팀장 기존 섹터 Watchlist를 Observatory용 시장관측 Universe로 확장</div>${themeHtml()}</section></div><div><section class="obsSectorCard"><h3>1M RS Ranking</h3><div class="meta">SPY 대비 상대강도 · 회전 방향을 빠르게 확인</div><div class="obsSectorChart"><canvas id="sectorRsChart"></canvas></div></section><section class="obsSectorCard" style="margin-top:12px"><h3>리더 / 래거드</h3><div class="obsSectorLeader"><span><span class="obsSectorRank">L</span>강세 TOP3</span><b class="up">${esc(leaderText(leaders))}</b></div><div class="obsSectorLeader"><span><span class="obsSectorRank">W</span>약세 TOP3</span><b class="down">${esc(leaderText(laggards))}</b></div><div class="obsSectorQuality ${warning?'warn':''}">${warning?'일부 Yahoo 일봉 수집 실패가 있어 직전 검증값으로 대체된 ETF가 있습니다.':'전체 섹터 ETF가 최신 완료 일봉으로 수집되었습니다.'}<br>가격 확인 ${esc(s.priced_count??0)}/${esc(s.total_count??0)} · fetch error ${esc(quality.fetch_error_count??0)} · source: ${esc(DATA.source_contract||'Yahoo public daily')}</div></section></div></div>`;
+ try{drawRsChart(rows)}catch(e){STATE.chart_error=String(e);STATE.status='ACTIVE_DEGRADED';console.warn('sector RS chart render failed',e);const host=q('#sectorRsChart')?.parentElement;if(host)host.innerHTML='<div class="obsSectorLoading" style="padding:22px 8px">RS 차트만 표시하지 못했습니다. 표·ETF 데이터는 정상입니다.</div>'}
+ if(STATE.status!=='ACTIVE_DEGRADED')STATE.status='ACTIVE';STATE.loaded=true;STATE.error=null;STATE.rendered_at=new Date().toISOString();
 }
 
 async function load(){
@@ -94,7 +94,7 @@ async function load(){
    const r=await fetch('./data/sector-etf.json',{cache:'no-cache'});if(!r.ok)throw new Error('sector-etf '+r.status);
    const d=await r.json();if(d?.schema!=='JJOONI_OBSERVATORY_SECTOR_ETF_V1')throw new Error('sector-etf schema mismatch');
    DATA=d;render();return d;
- }catch(e){STATE.status='ERROR';STATE.error=String(e);const panel=q('#sectors');if(panel)panel.innerHTML='<div class="obsSectorLoading">섹터 ETF 데이터를 불러오지 못했습니다. 다음 Observatory 갱신 후 다시 확인해 주세요.</div>';console.error(e);return null}
+ }catch(e){STATE.status='ERROR';STATE.error=String(e);const panel=q('#sectors');if(panel)panel.innerHTML='<div class="obsSectorLoading">섹터 ETF 원천 데이터를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.</div>';console.error(e);return null}
  finally{STATE.loading=false}
 }
 
