@@ -1,0 +1,98 @@
+name: Market Observatory Verified Calendar
+
+on:
+  workflow_run:
+    workflows: ["Market Observatory Daily + Calendar"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - tools/calendar_market_events.py
+      - market-observatory/data/calendar-manual-overrides.json
+      - .github/workflows/market-observatory-calendar-verified.yml
+  schedule:
+    - cron: '40 22 * * *'
+    - cron: '25 7 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-calendar-verified
+  cancel-in-progress: true
+
+jobs:
+  verify-calendar:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Seed and merge verified key events
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp market-observatory/data/economic-calendar.json /tmp/economic-calendar-prev.json
+          python -m py_compile tools/calendar_market_events.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py
+          python tools/calendar_market_events.py seed
+          python tools/enrich_economic_calendar.py
+          python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
+          python tools/calendar_market_events.py refresh
+          python tools/archive_calendar_actuals.py
+      - name: Acceptance contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          c=json.load(open('market-observatory/data/economic-calendar.json'))
+          events=c.get('events',[])
+          def find(date,title):
+              return next((e for e in events if str(e.get('datetime_kst','')).startswith(date) and title in str(e.get('title',''))),None)
+          assert c.get('key_event_contract')=='VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1'
+          assert c.get('verified_override_contract')=='SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1'
+          fomc=find('2026-09-17','FOMC 정책결정')
+          assert fomc and fomc['datetime_kst']=='2026-09-17T03:00+09:00',fomc
+          assert not find('2026-09-16','FOMC 정책결정')
+          fw=next((m for m in fomc.get('market_metrics',[]) if m.get('key')=='fedwatch_hike_25bp'),None)
+          assert fw and fw.get('actual')=='86.5%',fw
+          mich=find('2026-09-11','University of Michigan Consumer Sentiment')
+          assert mich,mich
+          mm={m.get('key'):m for m in mich.get('market_metrics',[])}
+          assert mm.get('umich_sentiment',{}).get('actual')=='47.8',mm
+          assert mm.get('umich_inflation_1y',{}).get('actual')=='4.6%',mm
+          assert mm.get('umich_inflation_1y',{}).get('consensus')=='4.2%',mm
+          assert mm.get('umich_inflation_5y',{}).get('actual')=='3.4%',mm
+          boe=find('2026-09-17','Bank of England 금리 결정')
+          claims=find('2026-09-17','U.S. Initial Jobless Claims')
+          boj=find('2026-09-18','BOJ 금융정책결정회의 결과')
+          micron=find('2026-10-01','Micron FY2026 Q4')
+          assert boe and boe['datetime_kst']=='2026-09-17T20:00+09:00',boe
+          assert claims and claims['datetime_kst']=='2026-09-17T21:30+09:00',claims
+          assert boj and boj.get('time_status')=='TBD',boj
+          assert micron and micron['datetime_kst']=='2026-10-01T05:30+09:00',micron
+          assert not find('2026-09-23','Micron')
+          print('VERIFIED_CALENDAR_ACCEPTANCE=PASS')
+          print('FOMC=',fomc['datetime_kst'],'MICH=',mm['umich_sentiment']['actual'],'FEDWATCH=',fw['actual'],'BOE=',boe['datetime_kst'],'CLAIMS=',claims['datetime_kst'],'MICRON=',micron['datetime_kst'])
+          PY
+      - name: Publish verified calendar
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
+          if git diff --cached --quiet; then
+            echo VERIFIED_CALENDAR_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): merge verified calendar actuals and key events'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
