@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'market-observatory' / 'data' / 'sector-etf.json'
 KST = ZoneInfo('Asia/Seoul')
 ET = ZoneInfo('America/New_York')
-UA = 'Mozilla/5.0 JJOONI-Market-Observatory-Sector/1.0'
+UA = 'Mozilla/5.0 JJOONI-Market-Observatory-Sector/1.1'
 YAHOO = 'https://query1.finance.yahoo.com/v8/finance/chart/'
 
 BENCHMARKS = {
@@ -63,6 +63,8 @@ GROUPS = [
     ]),
 ]
 
+HORIZONS = (1, 5, 10, 20, 50, 100)
+
 
 def request_json(url: str, timeout: int = 20):
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/json'})
@@ -102,8 +104,8 @@ def yahoo_series(symbol: str, range_: str = '1y'):
                 out.append({'date': d, 'value': round(v, 8)})
             dedup = {x['date']: x for x in out}
             rows = [dedup[k] for k in sorted(dedup)]
-            if len(rows) < 20:
-                raise RuntimeError(f'insufficient points: {len(rows)}')
+            if len(rows) < 101:
+                raise RuntimeError(f'insufficient points for 100d horizon: {len(rows)}')
             return rows
         except Exception as exc:
             last_error = exc
@@ -157,12 +159,8 @@ def metrics(points):
     ma20 = avg(values[-20:]) if len(values) >= 20 else None
     ma60 = avg(values[-60:]) if len(values) >= 60 else None
     high20 = max(values[-20:]) if len(values) >= 20 else None
-    return {
+    out = {
         'price': rounded(price, 4),
-        'ret_1d_pct': rounded(pct_from_points(points, 1)),
-        'ret_5d_pct': rounded(pct_from_points(points, 5)),
-        'ret_1m_pct': rounded(pct_from_points(points, 21)),
-        'ret_3m_pct': rounded(pct_from_points(points, 63)),
         'ytd_pct': rounded(ytd_return(points)),
         'ma20': rounded(ma20, 4),
         'ma60': rounded(ma60, 4),
@@ -173,6 +171,18 @@ def metrics(points):
         'above_ma60': bool(ma60 is not None and price >= ma60),
         'observed_date': points[-1]['date'],
     }
+    for d in HORIZONS:
+        out[f'ret_{d}d_pct'] = rounded(pct_from_points(points, d))
+    # Legacy fields retained for existing consumers/QA.
+    out['ret_1m_pct'] = rounded(pct_from_points(points, 21))
+    out['ret_3m_pct'] = rounded(pct_from_points(points, 63))
+    return out
+
+
+def relative(row, bench, key):
+    a = row.get(key)
+    b = bench.get(key)
+    return rounded(a - b) if a is not None and b is not None else None
 
 
 def build():
@@ -214,10 +224,14 @@ def build():
                     'group': label,
                     'group_key': key,
                     'source': 'Yahoo public daily',
-                    'rs_spy_5d_pct': rounded((m.get('ret_5d_pct') or 0) - (spy.get('ret_5d_pct') or 0)) if m.get('ret_5d_pct') is not None and spy.get('ret_5d_pct') is not None else None,
-                    'rs_spy_1m_pct': rounded((m.get('ret_1m_pct') or 0) - (spy.get('ret_1m_pct') or 0)) if m.get('ret_1m_pct') is not None and spy.get('ret_1m_pct') is not None else None,
-                    'rs_qqq_1m_pct': rounded((m.get('ret_1m_pct') or 0) - (qqq.get('ret_1m_pct') or 0)) if m.get('ret_1m_pct') is not None and qqq.get('ret_1m_pct') is not None else None,
                 })
+                for d in HORIZONS:
+                    key_name = f'ret_{d}d_pct'
+                    m[f'rs_spy_{d}d_pct'] = relative(m, spy, key_name)
+                    m[f'rs_qqq_{d}d_pct'] = relative(m, qqq, key_name)
+                # Legacy fields retained for existing consumers/QA.
+                m['rs_spy_1m_pct'] = relative(m, spy, 'ret_1m_pct')
+                m['rs_qqq_1m_pct'] = relative(m, qqq, 'ret_1m_pct')
             else:
                 m = {'ticker': ticker, 'name': name, 'group': label, 'group_key': key, 'source': 'UNAVAILABLE'}
             rows.append(m)
@@ -225,14 +239,22 @@ def build():
         group_payload.append({'key': key, 'label': label, 'rows': rows})
 
     classic = next((g['rows'] for g in group_payload if g['key'] == 'classic'), [])
-    ranked = sorted([r for r in classic if r.get('rs_spy_1m_pct') is not None], key=lambda r: r['rs_spy_1m_pct'], reverse=True)
+    ranked_20d = sorted([r for r in classic if r.get('rs_spy_20d_pct') is not None], key=lambda r: r['rs_spy_20d_pct'], reverse=True)
+    ranked_1m = sorted([r for r in classic if r.get('rs_spy_1m_pct') is not None], key=lambda r: r['rs_spy_1m_pct'], reverse=True)
     priced = [r for r in all_rows if r.get('price') is not None]
     above_ma20 = [r for r in classic if r.get('above_ma20') is True]
-    growth = [r.get('ret_1m_pct') for r in classic if r.get('ticker') in {'XLK', 'XLC', 'XLY'}]
-    defensive = [r.get('ret_1m_pct') for r in classic if r.get('ticker') in {'XLV', 'XLP', 'XLU'}]
-    growth_defense_spread = None
-    if avg(growth) is not None and avg(defensive) is not None:
-        growth_defense_spread = avg(growth) - avg(defensive)
+
+    growth_20d = [r.get('ret_20d_pct') for r in classic if r.get('ticker') in {'XLK', 'XLC', 'XLY'}]
+    defensive_20d = [r.get('ret_20d_pct') for r in classic if r.get('ticker') in {'XLV', 'XLP', 'XLU'}]
+    growth_defense_spread_20d = None
+    if avg(growth_20d) is not None and avg(defensive_20d) is not None:
+        growth_defense_spread_20d = avg(growth_20d) - avg(defensive_20d)
+
+    growth_1m = [r.get('ret_1m_pct') for r in classic if r.get('ticker') in {'XLK', 'XLC', 'XLY'}]
+    defensive_1m = [r.get('ret_1m_pct') for r in classic if r.get('ticker') in {'XLV', 'XLP', 'XLU'}]
+    growth_defense_spread_1m = None
+    if avg(growth_1m) is not None and avg(defensive_1m) is not None:
+        growth_defense_spread_1m = avg(growth_1m) - avg(defensive_1m)
 
     latest_dates = [r.get('observed_date') for r in priced if r.get('observed_date')]
     as_of_date = max(latest_dates) if latest_dates else None
@@ -245,6 +267,7 @@ def build():
         'contains_account_data': False,
         'universe_version': 'SONG_SECTOR_UNIVERSE_V1',
         'source_contract': 'YAHOO_PUBLIC_COMPLETED_DAILY_REFERENCE',
+        'horizons_sessions': list(HORIZONS),
         'benchmarks': {
             ticker: {'ticker': ticker, 'name': name, **(bm_metrics.get(ticker) or {}), 'source': 'Yahoo public daily'}
             for ticker, name in BENCHMARKS.items()
@@ -254,9 +277,12 @@ def build():
             'priced_count': len(priced),
             'total_count': len(all_rows),
             'classic_above_ma20': len(above_ma20),
-            'leaders_1m_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_1m_pct']} for r in ranked[:3]],
-            'laggards_1m_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_1m_pct']} for r in ranked[-3:][::-1]],
-            'growth_defense_spread_1m_pct': rounded(growth_defense_spread),
+            'leaders_20d_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_20d_pct']} for r in ranked_20d[:3]],
+            'laggards_20d_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_20d_pct']} for r in ranked_20d[-3:][::-1]],
+            'growth_defense_spread_20d_pct': rounded(growth_defense_spread_20d),
+            'leaders_1m_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_1m_pct']} for r in ranked_1m[:3]],
+            'laggards_1m_rs_spy': [{'ticker': r['ticker'], 'value': r['rs_spy_1m_pct']} for r in ranked_1m[-3:][::-1]],
+            'growth_defense_spread_1m_pct': rounded(growth_defense_spread_1m),
         },
         'groups': group_payload,
         'series': {ticker: (points[-130:] if points else []) for ticker, points in series.items()},
@@ -277,6 +303,7 @@ def main():
     print('OBSERVATORY_SECTOR_ETF_BUILD=PASS')
     print('generated_kst=' + out['generated_kst'])
     print('as_of_date=' + str(out.get('as_of_date')))
+    print('horizons=' + ','.join(str(x) for x in out.get('horizons_sessions', [])))
     print('classic=' + str(out['quality']['classic_priced_count']) + '/11')
     print('priced=' + str(out['summary']['priced_count']) + '/' + str(out['summary']['total_count']))
     print('fetch_errors=' + str(out['quality']['fetch_error_count']))
