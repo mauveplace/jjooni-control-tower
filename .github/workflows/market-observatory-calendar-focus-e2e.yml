@@ -1,0 +1,91 @@
+name: Market Observatory Calendar Focus E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/data/calendar-manual-overrides.json
+      - .github/workflows/market-observatory-calendar-focus-e2e.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-observatory-calendar-focus-e2e
+  cancel-in-progress: true
+
+jobs:
+  public-calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Verify public actuals and next-seven-day-first order
+        env:
+          URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
+        run: |
+          node <<'JS'
+          const { chromium } = require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const val=(metrics,key)=>String((metrics.find(m=>m.key===key)||{}).actual??'');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            let passed=false,last='';
+            for(let attempt=1;attempt<=12&&!passed;attempt++){
+              const page=await browser.newPage({viewport:{width:390,height:844}});
+              const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+              try{
+                await page.goto(process.env.URL+`?calendar_focus_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
+                await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.mode==='SERVER_SEED_PLUS_LOCAL_OVERRIDE_NEXT7_FIRST',{timeout:15000});
+                await page.click('button[data-tab="calendar"]');
+                await page.waitForTimeout(1200);
+                await page.waitForFunction(()=>document.querySelector('#obsCalFocusStatus')?.textContent.includes('향후 7일 우선'),{timeout:8000});
+                const x=await page.evaluate(()=>{
+                  const events=(typeof CAL!=='undefined'&&CAL?.events)||[];
+                  const ppi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-10')&&String(e.title||'').includes('Producer Price Index'));
+                  const cpi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-11')&&String(e.title||'').includes('Consumer Price Index'));
+                  const first=document.querySelector('#events .event');
+                  return {
+                    mode:window.__JJOONI_CALENDAR_EDITOR?.mode,
+                    status:document.querySelector('#obsCalFocusStatus')?.textContent||'',
+                    firstDate:first?.querySelector('.date')?.textContent?.trim()||'',
+                    firstTitle:first?.querySelector('.event-title')?.textContent?.trim()||'',
+                    ppi:ppi?.market_metrics||[],
+                    cpi:cpi?.market_metrics||[],
+                    htmlWidth:document.documentElement.scrollWidth,
+                    innerWidth:window.innerWidth
+                  };
+                });
+                assert(x.htmlWidth<=x.innerWidth+3,`mobile overflow ${x.htmlWidth}>${x.innerWidth}`);
+                assert(x.status.includes('09/13')&&x.status.includes('09/20'),`wrong KST 7d banner: ${x.status}`);
+                assert(/^09-(1[3-9]|20)/.test(x.firstDate),`first event not within next 7d: ${x.firstDate} ${x.firstTitle}`);
+                assert(val(x.ppi,'ppi_mom')==='0.4%',`PPI MoM actual ${val(x.ppi,'ppi_mom')}`);
+                assert(val(x.ppi,'ppi_yoy')==='5.4%',`PPI YoY actual ${val(x.ppi,'ppi_yoy')}`);
+                assert(val(x.ppi,'core_ppi_mom')==='0.2%',`Core PPI MoM actual ${val(x.ppi,'core_ppi_mom')}`);
+                assert(val(x.ppi,'core_ppi_yoy')==='4.6%',`Core PPI YoY actual ${val(x.ppi,'core_ppi_yoy')}`);
+                assert(val(x.cpi,'cpi_yoy')==='3.4%',`CPI YoY actual ${val(x.cpi,'cpi_yoy')}`);
+                assert(val(x.cpi,'cpi_mom')==='0.4%',`CPI MoM actual ${val(x.cpi,'cpi_mom')}`);
+                assert(val(x.cpi,'core_cpi_yoy')==='2.4%',`Core CPI YoY actual ${val(x.cpi,'core_cpi_yoy')}`);
+                assert(val(x.cpi,'core_cpi_mom')==='0.3%',`Core CPI MoM actual ${val(x.cpi,'core_cpi_mom')}`);
+                assert(errors.length===0,`page errors: ${errors.join(' | ')}`);
+                console.log(`CALENDAR_FOCUS_E2E=PASS first="${x.firstDate} ${x.firstTitle}" banner="${x.status}" PPI=${val(x.ppi,'ppi_mom')}/${val(x.ppi,'ppi_yoy')}/${val(x.ppi,'core_ppi_mom')}/${val(x.ppi,'core_ppi_yoy')} CPI=${val(x.cpi,'cpi_yoy')}/${val(x.cpi,'cpi_mom')}/${val(x.cpi,'core_cpi_yoy')}/${val(x.cpi,'core_cpi_mom')}`);
+                passed=true;
+              }catch(e){last=String(e);console.log(`CALENDAR_FOCUS_E2E_RETRY attempt=${attempt} ${last}`)}
+              await page.close();
+              if(!passed)await sleep(15000);
+            }
+            await browser.close();
+            assert(passed,`public calendar focus verification failed: ${last}`);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
