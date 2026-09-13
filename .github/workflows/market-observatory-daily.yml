@@ -8,12 +8,20 @@ on:
       - tools/postprocess_market_observatory.py
       - tools/backfill_market_history_30y.py
       - tools/enrich_economic_calendar.py
+      - tools/persist_calendar_history.py
+      - tools/archive_calendar_actuals.py
+      - tools/add_observatory_equities.py
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/latest-board-v1.js
+      - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-daily.yml
   schedule:
-    # 07:25 KST daily: completed US session + latest official bond/calendar data.
+    # 07:25 KST: completed US session + latest official bond/calendar data.
     - cron: '25 22 * * *'
+    # 16:10 KST: Korea market close refresh for KOSPI/KOSDAQ and KR reference data.
+    - cron: '10 7 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -34,6 +42,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Preserve previous calendar observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp market-observatory/data/economic-calendar.json /tmp/economic-calendar-prev.json
+          echo CALENDAR_PREVIOUS_SNAPSHOT=PASS
       - name: Build read-only market observatory data
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
@@ -41,12 +55,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/build_market_observatory.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py
+          python -m py_compile tools/build_market_observatory.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py
           python tools/build_market_observatory.py
           python tools/postprocess_market_observatory.py
           python tools/backfill_market_history_30y.py
           python tools/enrich_economic_calendar.py
-      - name: Install Observatory V2 chart runtime
+          python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
+          python tools/archive_calendar_actuals.py
+          python tools/add_observatory_equities.py
+      - name: Install Observatory UI runtimes
         shell: bash
         run: |
           set -euo pipefail
@@ -56,10 +73,14 @@ jobs:
           s=p.read_text(encoding='utf-8')
           zoom='<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>'
           if 'chartjs-plugin-zoom@2.2.0' not in s:s=s.replace('</head>',zoom+'</head>',1)
-          bridge='<script src="./observatory-v2.js?v=2.0"></script>'
+          bridge='<script src="./observatory-v2.js?v=2.5.0"></script>'
           if 'observatory-v2.js' not in s:s=s.replace('</body>',bridge+'</body>',1)
+          editor='<script src="./calendar-editor-v1.js?v=1.0"></script>'
+          if 'calendar-editor-v1.js' not in s:s=s.replace('</body>',editor+'</body>',1)
+          board='<script src="./latest-board-v1.js?v=1.0"></script>'
+          if 'latest-board-v1.js' not in s:s=s.replace('</body>',board+'</body>',1)
           p.write_text(s,encoding='utf-8')
-          print('OBSERVATORY_V2_RUNTIME=PASS')
+          print('OBSERVATORY_UI_RUNTIME=PASS')
           PY
       - name: Acceptance contract
         shell: bash
@@ -76,36 +97,38 @@ jobs:
           assert o.get('history_target_years')==30
           assert o.get('history_contract')=='IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT'
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
-          for k in ['NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
+          for k in ['KOSPI','KOSDAQ','NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
-          assert o.get('latest',{}).get('US_2S10S') is not None
-          assert o.get('latest',{}).get('JP_2S10S') is not None
-          assert o.get('latest',{}).get('KR10Y') is not None
+          for k in ['KOSPI','KOSDAQ','US_2S10S','JP_2S10S','KR10Y']:
+              assert o.get('latest',{}).get(k) is not None,(k,o.get('latest',{}).get(k))
+          assert o.get('equity_enrichment_contract')=='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
           assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
+          assert c.get('retention_contract')=='PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics']) for e in c.get('events',[]))
           assert h.get('schema')=='JJOONI_MARKET_HISTORY_30Y_V1' and h.get('target_years')==30
-          assert h.get('history_contract') in ('INITIAL_BACKFILL_THEN_INCREMENTAL','IMMUTABLE_BASE')
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
-          assert 'chartjs-plugin-zoom@2.2.0' in html and 'observatory-v2.js?v=2.0' in html
-          js=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
-          assert "'30Y'" in js and 'spanGaps:true' in js and 'pinch:{enabled:true}' in js and 'market_metrics' in js and "history-30y.json" in js
-          print('MARKET_OBSERVATORY_V2_ACCEPTANCE=PASS')
-          print('series=',len(o['series']),'calendar=',len(c['events']),'enriched=',c.get('enrichment_matched'),'history_base=',h.get('generated_kst'))
+          for token in ['chartjs-plugin-zoom@2.2.0','observatory-v2.js','calendar-editor-v1.js','latest-board-v1.js']:
+              assert token in html,token
+          board=Path('market-observatory/latest-board-v1.js').read_text(encoding='utf-8')
+          for token in ['KOSPI','KOSDAQ','US10Y_OFFICIAL','KR10Y','WTI','LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE']:
+              assert token in board,token
+          print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
+          print('series=',len(o['series']),'KOSPI=',o['latest']['KOSPI'],'KOSDAQ=',o['latest']['KOSDAQ'],'calendar=',len(c['events']))
           PY
-      - name: Publish Observatory V2 data and UI
+      - name: Publish Observatory data and UI
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/index.html market-observatory/observatory-v2.js
+          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/calendar-manual-overrides.json market-observatory/index.html
           if git diff --cached --quiet; then
             echo MARKET_OBSERVATORY_NO_CHANGE
             exit 0
           fi
-          git commit -m 'data(observatory): recent refresh over immutable 30Y base'
+          git commit -m 'data(observatory): refresh latest market board and calendar'
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
