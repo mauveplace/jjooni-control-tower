@@ -10,7 +10,18 @@ OBS=ROOT/'market-observatory'/'data'/'observatory.json'
 KST=ZoneInfo('Asia/Seoul');ET=ZoneInfo('America/New_York')
 YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
 UA='Mozilla/5.0 JJOONI-Market-Observatory/1.0'
-SYMBOLS={'KOSPI':'^KS11','KOSDAQ':'^KQ11'}
+
+# Supplemental completed-session daily references used by the top numeric board.
+# These stay separate from account/order data and are safe to refresh at the
+# normal Observatory cadence.
+SYMBOLS={
+    'KOSPI':'^KS11',
+    'KOSDAQ':'^KQ11',
+    'RUSSELL2000':'^RUT',
+    'DOW':'^DJI',
+    'NASDAQCOMPOSITE':'^IXIC',
+    'SILVER':'SI=F',
+}
 
 def get_json(url):
     req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'application/json'})
@@ -44,9 +55,18 @@ def main():
         sm[key]=xs
         latest[key]=xs[-1]['value'] if xs else None
     src['KR_EQUITY']='Yahoo public daily (^KS11/^KQ11)'
+    src['GLOBAL_EQUITY_SUPPLEMENT']='Yahoo public daily (^RUT/^DJI/^IXIC)'
+    src['SILVER']='Yahoo public daily (SI=F)'
     data['equity_enrichment_contract']='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
+    data['market_supplement_contract']='GLOBAL_INDEX_AND_SILVER_DAILY_REFERENCE_V1'
     data['equity_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
     OBS.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    print('OBSERVATORY_KR_EQUITIES=PASS KOSPI=',latest.get('KOSPI'),'KOSDAQ=',latest.get('KOSDAQ'))
+    print('OBSERVATORY_MARKET_SUPPLEMENT=PASS',
+          'KOSPI=',latest.get('KOSPI'),
+          'KOSDAQ=',latest.get('KOSDAQ'),
+          'RUT=',latest.get('RUSSELL2000'),
+          'DOW=',latest.get('DOW'),
+          'IXIC=',latest.get('NASDAQCOMPOSITE'),
+          'SILVER=',latest.get('SILVER'))
 
 if __name__=='__main__':main()
