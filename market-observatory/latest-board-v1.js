@@ -3,17 +3,24 @@
 const ITEMS=[
   {k:'KOSPI',label:'KOSPI',kind:'pct',digits:2,group:'한국'},
   {k:'KOSDAQ',label:'KOSDAQ',kind:'pct',digits:2,group:'한국'},
-  {k:'NASDAQ100',label:'NASDAQ 100',kind:'pct',digits:0,group:'미국'},
+  {k:'RUSSELL2000',label:'Russell 2000',kind:'pct',digits:0,group:'미국'},
+  {k:'DOW',label:'Dow',kind:'pct',digits:0,group:'미국'},
   {k:'SP500',label:'S&P 500',kind:'pct',digits:0,group:'미국'},
+  {k:'NASDAQCOMPOSITE',label:'NASDAQ 종합',kind:'pct',digits:0,group:'미국'},
+  {k:'NASDAQ100',label:'NASDAQ 100',kind:'pct',digits:0,group:'미국'},
   {k:'VIX',label:'VIX',kind:'pct',digits:2,group:'위험'},
   {k:'USDKRW',label:'USD/KRW',kind:'pct',digits:2,group:'환율'},
   {k:'DXY',label:'DXY',kind:'pct',digits:2,group:'환율'},
-  {k:'US10Y_OFFICIAL',fallback:'US10Y',label:'미국 10Y',kind:'bp',digits:2,suffix:'%',group:'금리'},
+  {k:'US2Y',label:'미국 2Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
+  {k:'US10Y_OFFICIAL',fallback:'US10Y',label:'미국 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
+  {k:'US30Y_OFFICIAL',fallback:'US30Y',label:'미국 30Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'KR10Y',label:'한국 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'JP10Y',label:'일본 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'WTI',label:'WTI',kind:'pct',digits:2,prefix:'$',group:'유가'},
   {k:'BRENT',label:'Brent',kind:'pct',digits:2,prefix:'$',group:'유가'},
-  {k:'GOLD',label:'Gold',kind:'pct',digits:1,prefix:'$',group:'원자재'}
+  {k:'GOLD',label:'Gold',kind:'pct',digits:1,prefix:'$',group:'원자재'},
+  {k:'SILVER',label:'Silver',kind:'pct',digits:2,prefix:'$',group:'원자재'},
+  {k:'COPPER',label:'Copper',kind:'pct',digits:3,prefix:'$',group:'원자재'}
 ];
 const fmt=(v,d)=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d});
 function seriesOf(item){if(typeof DATA==='undefined'||!DATA?.series)return[];const a=DATA.series[item.k]||[];if(a.length)return a;return item.fallback?(DATA.series[item.fallback]||[]):[]}
@@ -29,5 +36,5 @@ const st=document.createElement('style');st.textContent=`
 @media(max-width:760px){.latestBoardWrap{padding:0 10px;margin-top:9px}.latestBoardHead{align-items:flex-start}.latestBoardHead>div{display:block}.latestBoardHead>div span{display:block;margin-top:2px}.latestBoardGrid{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestBoardGrid::-webkit-scrollbar{display:none}.latestTile{padding:8px 9px;scroll-snap-align:start}.latestTile strong{font-size:17px}.latestTileFoot{font-size:8px}}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;hook();if(renderBoard()||tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'1.0',contract:'LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE'};
+window.__JJOONI_LATEST_BOARD={version:'1.1',contract:'LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE'};
 })();
