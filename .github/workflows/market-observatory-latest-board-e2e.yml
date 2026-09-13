@@ -42,29 +42,31 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             let passed=false,last='';
-            for(let attempt=1;attempt<=16&&!passed;attempt++){
+            for(let attempt=1;attempt<=20&&!passed;attempt++){
               const page=await browser.newPage({viewport:{width:390,height:844}});
               const errors=[];page.on('pageerror',e=>errors.push(String(e)));
               try{
                 await page.goto(process.env.URL+`?latest_board_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                await page.waitForFunction(()=>window.__JJOONI_LATEST_BOARD?.version==='1.0',{timeout:12000});
-                await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile').length>=10,{timeout:12000});
+                await page.waitForFunction(()=>window.__JJOONI_LATEST_BOARD?.version==='1.1',{timeout:12000});
+                await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile').length>=20,{timeout:12000});
                 const x=await page.evaluate(()=>({
                   title:document.querySelector('#latestMarketBoard .latestBoardHead b')?.textContent||'',
                   labels:[...document.querySelectorAll('#latestBoardGrid .latestTileTop b')].map(e=>e.textContent.trim()),
                   values:[...document.querySelectorAll('#latestBoardGrid .latestTile strong')].map(e=>e.textContent.trim()),
                   dates:[...document.querySelectorAll('#latestBoardGrid .latestTile time')].map(e=>e.textContent.trim()),
                   width:document.documentElement.scrollWidth,inner:window.innerWidth,
-                  contract:window.__JJOONI_LATEST_BOARD?.contract||''
+                  contract:window.__JJOONI_LATEST_BOARD?.contract||'',
+                  version:window.__JJOONI_LATEST_BOARD?.version||''
                 }));
-                for(const k of ['KOSPI','KOSDAQ','미국 10Y','한국 10Y','WTI','Brent']){
+                for(const k of ['KOSPI','KOSDAQ','Russell 2000','Dow','S&P 500','NASDAQ 종합','NASDAQ 100','VIX','USD/KRW','미국 2Y','미국 10Y','미국 30Y','한국 10Y','일본 10Y','WTI','Brent','Gold','Silver','Copper']){
                   const i=x.labels.indexOf(k);assert(i>=0,`missing ${k}`);assert(x.values[i]&&x.values[i]!=='—',`${k} blank`);assert(/^2026-\d{2}-\d{2}$/.test(x.dates[i]),`${k} date ${x.dates[i]}`);
                 }
                 assert(x.title==='최신 시장 수치',`title ${x.title}`);
                 assert(x.contract==='LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE',`contract ${x.contract}`);
+                assert(x.version==='1.1',`version ${x.version}`);
                 assert(x.width<=x.inner+3,`mobile overflow ${x.width}>${x.inner}`);
                 assert(errors.length===0,`page errors ${errors.join(' | ')}`);
-                console.log('LATEST_BOARD_E2E=PASS labels='+x.labels.length+' KOSPI='+x.values[x.labels.indexOf('KOSPI')]+' KR10Y='+x.values[x.labels.indexOf('한국 10Y')]+' WTI='+x.values[x.labels.indexOf('WTI')]);
+                console.log('LATEST_BOARD_E2E=PASS labels='+x.labels.length+' RUT='+x.values[x.labels.indexOf('Russell 2000')]+' US2Y='+x.values[x.labels.indexOf('미국 2Y')]+' SILVER='+x.values[x.labels.indexOf('Silver')]);
                 passed=true;
               }catch(e){last=String(e);console.log(`LATEST_BOARD_E2E_RETRY attempt=${attempt} ${last}`)}
               await page.close();
