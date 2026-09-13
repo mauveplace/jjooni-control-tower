@@ -1,0 +1,61 @@
+name: Market Observatory Sector ETF QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/sector-etf-v1.js
+      - market-observatory/data/sector-etf.json
+      - tools/build_observatory_sector_etf.py
+      - .github/workflows/market-observatory-sector-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-observatory-sector-qa
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check market-observatory/sector-etf-v1.js
+          python -m py_compile tools/build_observatory_sector_etf.py
+          echo SECTOR_ETF_SYNTAX=PASS
+      - name: Data and UI contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('market-observatory/data/sector-etf.json',encoding='utf-8'))
+          assert d['schema']=='JJOONI_OBSERVATORY_SECTOR_ETF_V1'
+          assert d['read_only'] is True and d['contains_account_data'] is False
+          assert d['universe_version']=='SONG_SECTOR_UNIVERSE_V1'
+          classic=next(g['rows'] for g in d['groups'] if g['key']=='classic')
+          expected=['XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE']
+          assert [r['ticker'] for r in classic]==expected
+          assert d['quality']['classic_priced_count']==11
+          assert d['summary']['priced_count']==d['summary']['total_count']
+          assert d['quality']['fetch_error_count']==0
+          for r in classic:
+              for k in ['price','ret_1d_pct','ret_5d_pct','ret_1m_pct','ret_3m_pct','ytd_pct','rs_spy_1m_pct','vs_ma20_pct','vs_ma60_pct','high20_gap_pct']:
+                  assert r.get(k) is not None,(r['ticker'],k)
+          js=Path('market-observatory/sector-etf-v1.js').read_text(encoding='utf-8')
+          for token in ['data-tab="sectors"','sector-etf.json','송팀장 Sector Observatory','RS vs SPY 1M','READY_LAZY']:
+              assert token in js,token
+          print('SECTOR_ETF_CONTRACT=PASS')
+          print('as_of_date=',d['as_of_date'],'classic=',len(classic),'priced=',d['summary']['priced_count'],'errors=',d['quality']['fetch_error_count'])
+          PY
