@@ -2,11 +2,11 @@
 'use strict';
 if(window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1)return;
 const LEGACY_QA_TOKEN='RS vs SPY 1M';
-const STATE={version:'1.2',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
+const STATE={version:'1.3',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
 const pct=v=>{const x=n(v);return x==null?'—':(x>=0?'+':'')+x.toFixed(2)+'%'};
 const cls=v=>{const x=n(v);return x==null?'flat':x>0?'up':x<0?'down':'flat'};
 const price=v=>{const x=n(v);return x==null?'—':'$'+x.toLocaleString('en-US',{maximumFractionDigits:2})};
@@ -42,13 +42,16 @@ function ensureStyle(){
  #sectors .obsPeriodGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
  #sectors .obsPeriod{background:#f8fafc;border:1px solid #eef2f6;border-radius:8px;padding:5px 3px;text-align:center;min-width:0}
  #sectors .obsPeriod span{display:block;font-size:7px;font-weight:900;color:#98a2b3}.obsPeriod b{display:block;margin-top:2px;font-size:9px;white-space:nowrap}
+ #sectors .obsSpark{margin-top:7px;padding:6px 7px 4px;border:1px solid #eef2f6;border-radius:9px;background:linear-gradient(180deg,#fbfcfe,#f8fafc);overflow:hidden}
+ #sectors .obsSparkHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;font-size:7px;font-weight:850;color:#98a2b3}
+ #sectors .obsSparkHead b{font-size:8px}.obsSpark svg{display:block;width:100%;height:42px;overflow:visible}.obsSpark polyline{fill:none;stroke:currentColor;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}.obsSpark circle{fill:currentColor}.obsSpark .sparkBase{stroke:#e4e7ec;stroke-width:1;vector-effect:non-scaling-stroke}
  #sectors .obsRs20{margin-top:6px;padding-top:6px;border-top:1px solid #eef2f6;display:flex;justify-content:space-between;font-size:8px;color:#667085}.obsRs20 b{font-size:9px}
  #sectors .obsSectorLeader{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eef2f6;font-size:10px}
  #sectors .obsSectorLeader:last-child{border-bottom:0}.obsSectorLeader b{font-size:11px}.obsSectorRank{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:999px;background:#f2f4f7;font-size:9px;font-weight:950;margin-right:7px}
  #sectors .obsSectorQuality{margin-top:10px;padding:9px 10px;border-radius:10px;font-size:9px;line-height:1.5;background:#f8fafc;border:1px solid #e8edf3;color:#667085}.obsSectorQuality.warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
  #sectors .obsSectorChart{height:330px;margin-top:8px}
  #sectors .obsSectorLoading{padding:40px 14px;text-align:center;color:#718096;font-size:11px}
- @media(max-width:760px){#sectors .obsSectorHead{align-items:flex-start}#sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}#sectors .obsSectorGrid{grid-template-columns:1fr}#sectors .obsThemeRows{grid-template-columns:1fr}#sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#sectors .obsSectorChart{height:280px}}
+ @media(max-width:760px){#sectors .obsSectorHead{align-items:flex-start}#sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}#sectors .obsSectorGrid{grid-template-columns:1fr}#sectors .obsThemeRows{grid-template-columns:1fr}#sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#sectors .obsSectorChart{height:280px}#sectors .obsSpark svg{height:38px}}
  `;(document.head||document.documentElement).appendChild(st);
 }
 
@@ -75,9 +78,18 @@ function ranked20(rows){return rows.map(r=>({ticker:r.ticker,value:rsSpy(r,20)})
 function growthDefense20(rows){const avg=xs=>{const a=xs.filter(v=>v!=null);return a.length?a.reduce((s,v)=>s+v,0)/a.length:null};const g=avg(rows.filter(r=>['XLK','XLC','XLY'].includes(r.ticker)).map(r=>ret(r,20)));const d=avg(rows.filter(r=>['XLV','XLP','XLU'].includes(r.ticker)).map(r=>ret(r,20)));return g!=null&&d!=null?g-d:null}
 
 function periodGrid(r){return `<div class="obsPeriodGrid">${H.map(d=>`<div class="obsPeriod"><span>${d}일</span><b class="${cls(ret(r,d))}">${pct(ret(r,d))}</b></div>`).join('')}</div>`}
+function sparkline(r){
+ const xs=(DATA?.series?.[r?.ticker]||[]).slice(-100).map(p=>({date:p?.date,value:n(p?.value)})).filter(p=>p.value!=null);
+ if(xs.length<2)return '<div class="obsSpark"><div class="obsSparkHead"><span>최근 100거래일</span><b class="flat">데이터 부족</b></div></div>';
+ const vals=xs.map(p=>p.value),lo=Math.min(...vals),hi=Math.max(...vals),span=hi-lo||1,w=320,h=42,pad=2;
+ const points=vals.map((v,i)=>`${(pad+(i*(w-pad*2)/(vals.length-1))).toFixed(1)},${(pad+((hi-v)/span)*(h-pad*2)).toFixed(1)}`).join(' ');
+ const first=vals[0],last=vals[vals.length-1],move=first?((last/first)-1)*100:null,tone=move==null?'flat':move>=0?'up':'down';
+ const lastPair=points.split(' ').pop().split(',');
+ return `<div class="obsSpark ${tone}"><div class="obsSparkHead"><span>최근 100거래일</span><b class="${tone}">${pct(move)}</b></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(r.ticker)} 최근 100거래일 가격 추이"><line class="sparkBase" x1="0" y1="${h-1}" x2="${w}" y2="${h-1}"></line><polyline points="${points}"></polyline><circle cx="${lastPair[0]}" cy="${lastPair[1]}" r="2.4"></circle></svg></div>`;
+}
 function themeHtml(){
  const groups=(DATA?.groups||[]).filter(g=>g.key!=='classic');
- return groups.map(g=>`<div class="obsTheme"><div class="obsThemeTitle">${esc(g.label)} · ${(g.rows||[]).length}</div><div class="obsThemeRows">${(g.rows||[]).map(r=>`<div class="obsEtfCard"><div class="obsEtfTop"><div><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||r.ticker)}</div></div><div class="obsEtfPrice">${price(r.price)}</div></div>${periodGrid(r)}<div class="obsRs20"><span>20일 RS vs SPY</span><b class="${cls(rsSpy(r,20))}">${pct(rsSpy(r,20))}</b></div></div>`).join('')}</div></div>`).join('');
+ return groups.map(g=>`<div class="obsTheme"><div class="obsThemeTitle">${esc(g.label)} · ${(g.rows||[]).length}</div><div class="obsThemeRows">${(g.rows||[]).map(r=>`<div class="obsEtfCard"><div class="obsEtfTop"><div><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||r.ticker)}</div></div><div class="obsEtfPrice">${price(r.price)}</div></div>${periodGrid(r)}${sparkline(r)}<div class="obsRs20"><span>20일 RS vs SPY</span><b class="${cls(rsSpy(r,20))}">${pct(rsSpy(r,20))}</b></div></div>`).join('')}</div></div>`).join('');
 }
 
 function classicTable(rows){
@@ -99,7 +111,7 @@ function render(){
  const spread20=n(s.growth_defense_spread_20d_pct)??growthDefense20(rows),warning=n(quality.fetch_error_count)>0;
  panel.innerHTML=`<div class="obsSectorHead"><div><div class="obsSectorTitle">송팀장 Sector Observatory</div><div class="meta">완료 일봉 기준 · 수익률 구간을 1일·5일·10일·20일·50일·100일로 통일</div></div><div class="obsSectorBadge">${esc(DATA.universe_version||'SECTOR UNIVERSE')}</div></div>
  <div class="obsSectorKpis"><div class="obsSectorKpi"><span>기준일</span><b>${esc(DATA.as_of_date||'—')}</b></div><div class="obsSectorKpi"><span>MA20 상회 · 11개 섹터</span><b>${esc(s.classic_above_ma20??'—')} / ${esc(s.classic_count??11)}</b></div><div class="obsSectorKpi"><span>20일 RS 강세</span><b>${esc(leaders[0]?.ticker||'—')} ${pct(leaders[0]?.value)}</b></div><div class="obsSectorKpi"><span>20일 RS 약세</span><b>${esc(laggards[0]?.ticker||'—')} ${pct(laggards[0]?.value)}</b></div><div class="obsSectorKpi"><span>성장-방어 20일</span><b class="${cls(spread20)}">${pct(spread20)}</b></div></div>
- <div class="obsSectorGrid"><div><section class="obsSectorCard"><h3>S&P 500 섹터 상대강도</h3><div class="meta">1·5·10·20·50·100 거래일 수익률 · 20일 SPY 대비 상대강도 순 정렬</div>${classicTable(rows)}</section><section class="obsSectorCard" style="margin-top:12px"><h3>테마·업종 ETF</h3><div class="meta">각 ETF마다 동일한 6개 구간을 모두 표시합니다. 모바일은 3칸×2줄로 보여 빈 영역을 없앴습니다.</div>${themeHtml()}</section></div><div><section class="obsSectorCard"><h3>20일 RS Ranking</h3><div class="meta">SPY 20거래일 성과 대비 상대강도 · 섹터 회전 확인</div><div class="obsSectorChart"><canvas id="sectorRsChart"></canvas></div></section><section class="obsSectorCard" style="margin-top:12px"><h3>리더 / 래거드</h3><div class="obsSectorLeader"><span><span class="obsSectorRank">L</span>강세 TOP3</span><b class="up">${esc(leaderText(leaders))}</b></div><div class="obsSectorLeader"><span><span class="obsSectorRank">W</span>약세 TOP3</span><b class="down">${esc(leaderText(laggards))}</b></div><div class="obsSectorLeader"><span>SPY 20일</span><b class="${cls(benchRet('SPY',20))}">${pct(benchRet('SPY',20))}</b></div><div class="obsSectorLeader"><span>QQQ 20일</span><b class="${cls(benchRet('QQQ',20))}">${pct(benchRet('QQQ',20))}</b></div><div class="obsSectorQuality ${warning?'warn':''}">${warning?'일부 Yahoo 일봉 수집 실패가 있어 직전 검증값으로 대체된 ETF가 있습니다.':'전체 섹터 ETF가 최신 완료 일봉으로 수집되었습니다.'}<br>가격 확인 ${esc(s.priced_count??0)}/${esc(s.total_count??0)} · fetch error ${esc(quality.fetch_error_count??0)} · source: ${esc(DATA.source_contract||'Yahoo public daily')}</div></section></div></div>`;
+ <div class="obsSectorGrid"><div><section class="obsSectorCard"><h3>S&P 500 섹터 상대강도</h3><div class="meta">1·5·10·20·50·100 거래일 수익률 · 20일 SPY 대비 상대강도 순 정렬</div>${classicTable(rows)}</section><section class="obsSectorCard" style="margin-top:12px"><h3>테마·업종 ETF</h3><div class="meta">6개 기간 수익률 + 최근 100거래일 스파크라인으로 방향과 속도를 함께 확인합니다.</div>${themeHtml()}</section></div><div><section class="obsSectorCard"><h3>20일 RS Ranking</h3><div class="meta">SPY 20거래일 성과 대비 상대강도 · 섹터 회전 확인</div><div class="obsSectorChart"><canvas id="sectorRsChart"></canvas></div></section><section class="obsSectorCard" style="margin-top:12px"><h3>리더 / 래거드</h3><div class="obsSectorLeader"><span><span class="obsSectorRank">L</span>강세 TOP3</span><b class="up">${esc(leaderText(leaders))}</b></div><div class="obsSectorLeader"><span><span class="obsSectorRank">W</span>약세 TOP3</span><b class="down">${esc(leaderText(laggards))}</b></div><div class="obsSectorLeader"><span>SPY 20일</span><b class="${cls(benchRet('SPY',20))}">${pct(benchRet('SPY',20))}</b></div><div class="obsSectorLeader"><span>QQQ 20일</span><b class="${cls(benchRet('QQQ',20))}">${pct(benchRet('QQQ',20))}</b></div><div class="obsSectorQuality ${warning?'warn':''}">${warning?'일부 Yahoo 일봉 수집 실패가 있어 직전 검증값으로 대체된 ETF가 있습니다.':'전체 섹터 ETF가 최신 완료 일봉으로 수집되었습니다.'}<br>가격 확인 ${esc(s.priced_count??0)}/${esc(s.total_count??0)} · fetch error ${esc(quality.fetch_error_count??0)} · source: ${esc(DATA.source_contract||'Yahoo public daily')}</div></section></div></div>`;
  try{drawRsChart(rows)}catch(e){STATE.chart_error=String(e);STATE.status='ACTIVE_DEGRADED';console.warn('sector RS chart render failed',e);const host=q('#sectorRsChart')?.parentElement;if(host)host.innerHTML='<div class="obsSectorLoading" style="padding:22px 8px">RS 차트만 표시하지 못했습니다. 표·ETF 데이터는 정상입니다.</div>'}
  if(STATE.status!=='ACTIVE_DEGRADED')STATE.status='ACTIVE';STATE.loaded=true;STATE.error=null;STATE.rendered_at=new Date().toISOString();
 }
