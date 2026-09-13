@@ -7,6 +7,7 @@ on:
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
       - market-observatory/calendar-editor-v1.js
+      - market-observatory/data/history-lite.json
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-public-e2e.yml
   workflow_dispatch:
@@ -32,7 +33,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.55.0
           npx playwright install --with-deps chromium >/dev/null
-      - name: Wait for Pages and verify phone + tablet + calendar editor
+      - name: Wait for Pages and verify ranges + x-axis + calendar editor
         env:
           URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
         run: |
@@ -40,36 +41,65 @@ jobs:
           const { chromium } = require('playwright');
           const assert=(v,m)=>{if(!v)throw new Error(m)};
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const yearFrom=s=>Number((String(s||'').match(/(\d{4})/)||[])[1]);
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const cases=[{name:'phone',width:390,height:844},{name:'tablet',width:800,height:1280}];
             for(const tc of cases){
               let passed=false,last='';
-              for(let attempt=1;attempt<=12&&!passed;attempt++){
+              for(let attempt=1;attempt<=10&&!passed;attempt++){
                 const page=await browser.newPage({viewport:{width:tc.width,height:tc.height}});
                 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
                 try{
                   await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4.1-responsive-history',{timeout:12000});
+                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.5.0-long-history-axis',{timeout:20000});
                   await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.0',{timeout:12000});
-                  await page.waitForTimeout(4500);
+                  await page.waitForFunction(()=>window.DATA?.history_loaded===true,{timeout:20000});
+                  await page.waitForTimeout(1200);
+
                   const base=await page.evaluate(()=>({
-                    innerWidth:innerWidth,
+                    innerWidth,
                     htmlWidth:document.documentElement.scrollWidth,
                     bodyWidth:document.body.scrollWidth,
                     version:window.__JJOONI_OBSERVATORY_UI?.version,
                     editor:window.__JJOONI_CALENDAR_EDITOR?.version,
-                    coverage:document.querySelector('[data-coverage="marketChart"]')?.textContent||'',
+                    historyLoaded:window.DATA?.history_loaded===true,
                     cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
                   }));
                   assert(base.htmlWidth<=base.innerWidth+3,`${tc.name} html overflow ${base.htmlWidth}>${base.innerWidth}`);
                   assert(base.bodyWidth<=base.innerWidth+3,`${tc.name} body overflow ${base.bodyWidth}>${base.innerWidth}`);
                   assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport`);
-                  assert(base.coverage,`${tc.name} coverage missing`);
-                  const year=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
-                  assert(year&&year<=2016,`${tc.name} long history missing ${base.coverage}`);
+                  assert(base.historyLoaded,`${tc.name} history cache not loaded`);
+
+                  async function checkRange(range,minStart,maxStart){
+                    const sel=`.obsRange[data-for="marketChart"] button[data-range="${range}"]`;
+                    await page.click(sel);
+                    await page.waitForTimeout(350);
+                    const x=await page.evaluate(()=>{
+                      const cov=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';
+                      const ch=window.charts?.marketChart || (window.Chart?.getChart ? window.Chart.getChart(document.getElementById('marketChart')) : null);
+                      return {
+                        coverage:cov,
+                        labels:(ch?.data?.labels||[]).length,
+                        xDisplay:ch?.options?.scales?.x?.ticks?.display!==false,
+                        tickLabels:(ch?.scales?.x?.ticks||[]).map(t=>String(t.label??'')).filter(Boolean)
+                      };
+                    });
+                    const start=yearFrom(x.coverage);
+                    assert(x.coverage.startsWith(range+' 표시 '),`${tc.name} ${range} coverage stale: ${x.coverage}`);
+                    assert(start>=minStart&&start<=maxStart,`${tc.name} ${range} wrong start ${start}: ${x.coverage}`);
+                    assert(x.labels>2,`${tc.name} ${range} too few chart labels: ${x.labels}`);
+                    assert(x.xDisplay,`${tc.name} ${range} x axis hidden`);
+                    assert(x.tickLabels.length>=2,`${tc.name} ${range} x tick labels missing: ${JSON.stringify(x.tickLabels)}`);
+                    return x;
+                  }
+
+                  const y1=await checkRange('1Y',2025,2026);
+                  const y10=await checkRange('10Y',2015,2017);
+                  const y30=await checkRange('30Y',1996,1998);
+
                   await page.click('button[data-tab="calendar"]');
-                  await page.waitForTimeout(800);
+                  await page.waitForTimeout(700);
                   const cal=await page.evaluate(()=>({
                     innerWidth,
                     htmlWidth:document.documentElement.scrollWidth,
@@ -96,11 +126,11 @@ jobs:
                   }));
                   assert(modal.on&&modal.inputs>=3&&modal.save&&modal.reset,`${tc.name} editor modal invalid ${JSON.stringify(modal)}`);
                   assert(errors.length===0,`${tc.name} page errors ${errors.join(' | ')}`);
-                  console.log(`OBS_PUBLIC_E2E=PASS ${tc.name} version=${base.version} editor=${base.editor} seeded=${cal.seeded} coverage=${base.coverage}`);
+                  console.log(`OBS_PUBLIC_E2E=PASS ${tc.name} version=${base.version} 1Y="${y1.coverage}" 10Y="${y10.coverage}" 30Y="${y30.coverage}" ticks30=${y30.tickLabels.join(',')}`);
                   passed=true;
                 }catch(e){last=String(e);console.log(`OBS_PUBLIC_E2E_RETRY ${tc.name} attempt=${attempt} ${last}`);}
                 await page.close();
-                if(!passed)await sleep(15000);
+                if(!passed)await sleep(12000);
               }
               assert(passed,`${tc.name} public Pages verification failed: ${last}`);
             }
