@@ -9,11 +9,9 @@ ROOT=Path(__file__).resolve().parents[1]
 OBS=ROOT/'market-observatory'/'data'/'observatory.json'
 KST=ZoneInfo('Asia/Seoul');ET=ZoneInfo('America/New_York')
 YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
+FEAR_GREED='https://fearandgreedgraph.com/api/fear-greed'
 UA='Mozilla/5.0 JJOONI-Market-Observatory/1.0'
 
-# Supplemental completed-session daily references used by the top numeric board.
-# These stay separate from account/order data and are safe to refresh at the
-# normal Observatory cadence.
 SYMBOLS={
     'KOSPI':'^KS11',
     'KOSDAQ':'^KQ11',
@@ -44,6 +42,20 @@ def series(symbol):
     ded={x['date']:x for x in out}
     return [ded[k] for k in sorted(ded)]
 
+def fear_greed_series():
+    obj=get_json(FEAR_GREED)
+    dates=obj.get('dates') or []
+    values=obj.get('values') or []
+    out=[]
+    for d,v in zip(dates,values):
+        try:v=float(v)
+        except:continue
+        if not math.isfinite(v):continue
+        d=str(d)[:10]
+        if len(d)==10:out.append({'date':d,'value':round(v,4)})
+    ded={x['date']:x for x in out}
+    return [ded[k] for k in sorted(ded)]
+
 def main():
     data=json.loads(OBS.read_text(encoding='utf-8'))
     sm=data.setdefault('series',{});latest=data.setdefault('latest',{});src=data.setdefault('sources',{})
@@ -54,11 +66,17 @@ def main():
             print(f'{key}_FETCH_WARN={e}');xs=prev.get(key,[])
         sm[key]=xs
         latest[key]=xs[-1]['value'] if xs else None
+    try:fg=fear_greed_series()
+    except Exception as e:
+        print(f'FEAR_GREED_FETCH_WARN={e}');fg=prev.get('FEAR_GREED',[])
+    sm['FEAR_GREED']=fg
+    latest['FEAR_GREED']=fg[-1]['value'] if fg else None
     src['KR_EQUITY']='Yahoo public daily (^KS11/^KQ11)'
     src['GLOBAL_EQUITY_SUPPLEMENT']='Yahoo public daily (^RUT/^DJI/^IXIC)'
     src['SILVER']='Yahoo public daily (SI=F)'
+    src['FEAR_GREED']='FearAndGreedGraph public JSON (CNN-derived sentiment reference)'
     data['equity_enrichment_contract']='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
-    data['market_supplement_contract']='GLOBAL_INDEX_AND_SILVER_DAILY_REFERENCE_V1'
+    data['market_supplement_contract']='GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2'
     data['equity_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
     OBS.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('OBSERVATORY_MARKET_SUPPLEMENT=PASS',
@@ -67,6 +85,7 @@ def main():
           'RUT=',latest.get('RUSSELL2000'),
           'DOW=',latest.get('DOW'),
           'IXIC=',latest.get('NASDAQCOMPOSITE'),
-          'SILVER=',latest.get('SILVER'))
+          'SILVER=',latest.get('SILVER'),
+          'FEAR_GREED=',latest.get('FEAR_GREED'))
 
 if __name__=='__main__':main()
