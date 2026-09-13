@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-13T14:57:31+09:00",
+  "generated_kst": "2026-09-13T17:00:21+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
     {
@@ -45,7 +45,10 @@
           "actual": "1.2%",
           "source": "Forex Factory/Fair Economy historical calendar"
         }
-      ]
+      ],
+      "previous": "1.4%",
+      "consensus": "1.4%",
+      "actual": "1.4%"
     },
     {
       "match": {
@@ -79,7 +82,10 @@
           "actual": "0.3%",
           "source": "Forex Factory/Fair Economy historical calendar"
         }
-      ]
+      ],
+      "previous": "21K",
+      "consensus": "55K",
+      "actual": "162K"
     },
     {
       "match": {
@@ -139,7 +145,7 @@
         "country": "US",
         "title_contains": "Producer Price Index"
       },
-      "source": "BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
+      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
       "market_metrics": [
         {
           "key": "ppi_mom",
@@ -173,7 +179,10 @@
           "actual": "4.6%",
           "source": "BLS / market calendar cross-check"
         }
-      ]
+      ],
+      "previous": "0.1%",
+      "consensus": "0.4%",
+      "actual": "0.4%"
     },
     {
       "match": {
@@ -181,7 +190,7 @@
         "country": "US",
         "title_contains": "Consumer Price Index"
       },
-      "source": "BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
+      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
       "market_metrics": [
         {
           "key": "cpi_yoy",
@@ -215,7 +224,10 @@
           "actual": "0.3%",
           "source": "BLS / Reuters"
         }
-      ]
+      ],
+      "previous": "3.4%",
+      "consensus": "3.4%",
+      "actual": "3.4%"
     },
     {
       "match": {
@@ -270,6 +282,118 @@
           "metric_type": "market_probability_snapshot"
         }
       ]
+    },
+    {
+      "match": {
+        "date": "2026-09-01",
+        "country": "US",
+        "title_contains": "Job Openings and Labor Turnover Survey"
+      },
+      "source": "Forex Factory/Fair Economy historical calendar",
+      "market_metrics": [
+        {
+          "key": "jolts",
+          "label": "JOLTS Job Openings",
+          "previous": "7.18M",
+          "consensus": "7.33M",
+          "actual": "7.27M",
+          "source": "Forex Factory/Fair Economy historical calendar"
+        }
+      ],
+      "previous": "7.18M",
+      "consensus": "7.33M",
+      "actual": "7.27M"
+    },
+    {
+      "match": {
+        "date": "2026-09-02",
+        "country": "KR",
+        "title_contains": "2026년 8월 소비자물가동향"
+      },
+      "source": "Korea official release + market consensus cross-check",
+      "market_metrics": [
+        {
+          "key": "kr_cpi_yoy",
+          "label": "CPI YoY",
+          "previous": "2.8%",
+          "consensus": "3.2%",
+          "actual": "3.1%",
+          "source": "KOSTAT / market consensus cross-check"
+        },
+        {
+          "key": "kr_cpi_mom",
+          "label": "CPI MoM",
+          "consensus": "0.3%",
+          "actual": "0.2%",
+          "source": "KOSTAT / Reuters consensus"
+        }
+      ],
+      "previous": "2.8%",
+      "consensus": "3.2%",
+      "actual": "3.1%"
+    },
+    {
+      "match": {
+        "date": "2026-09-09",
+        "country": "KR",
+        "title_contains": "2026년 8월 고용동향"
+      },
+      "source": "KOSTAT official release + market calendar cross-check",
+      "market_metrics": [
+        {
+          "key": "kr_unemployment_sa",
+          "label": "계절조정 실업률",
+          "previous": "2.8%",
+          "consensus": "3.1%",
+          "actual": "2.7%",
+          "source": "KOSTAT / market calendar cross-check"
+        },
+        {
+          "key": "kr_employment_yoy",
+          "label": "취업자 증감 YoY",
+          "actual": "+184K",
+          "source": "KOSTAT official release"
+        }
+      ],
+      "previous": "2.8%",
+      "consensus": "3.1%",
+      "actual": "2.7%"
+    },
+    {
+      "match": {
+        "date": "2026-09-11",
+        "country": "US",
+        "title_contains": "University of Michigan Consumer Sentiment (Preliminary)"
+      },
+      "source": "University of Michigan official + Reuters/Investing consensus cross-check",
+      "market_metrics": [
+        {
+          "key": "umich_sentiment",
+          "label": "UoM Consumer Sentiment",
+          "previous": "51.7",
+          "consensus": "51.0",
+          "actual": "47.8",
+          "source": "University of Michigan / Reuters"
+        },
+        {
+          "key": "umich_inflation_1y",
+          "label": "UoM 1Y Inflation Expectations",
+          "previous": "4.0%",
+          "consensus": "4.2%",
+          "actual": "4.6%",
+          "source": "University of Michigan / Investing"
+        },
+        {
+          "key": "umich_inflation_5y",
+          "label": "UoM Long-run Inflation Expectations",
+          "previous": "3.3%",
+          "actual": "3.4%",
+          "source": "University of Michigan"
+        }
+      ],
+      "previous": "51.7",
+      "consensus": "51.0",
+      "actual": "47.8"
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
