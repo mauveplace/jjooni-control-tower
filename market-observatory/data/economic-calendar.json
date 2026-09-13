@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-13T08:32:50+09:00",
+  "generated_kst": "2026-09-13T13:45:46+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2447,12 +2447,12 @@
           "key": "ppi_mom",
           "label": "PPI MoM",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "PPI m/m",
-          "datetime_source": "2026-09-10T08:30:00-04:00",
-          "impact": "High",
           "previous": "0.0%",
           "consensus": "0.4%",
-          "actual": null
+          "actual": null,
+          "event_title": "PPI m/m",
+          "datetime_source": "2026-09-10T08:30:00-04:00",
+          "impact": "High"
         },
         {
           "key": "ppi_yoy",
@@ -2466,12 +2466,12 @@
           "key": "core_ppi_mom",
           "label": "Core PPI MoM",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "Core PPI m/m",
-          "datetime_source": "2026-09-10T08:30:00-04:00",
-          "impact": "High",
           "previous": "0.2%",
           "consensus": "0.3%",
-          "actual": null
+          "actual": null,
+          "event_title": "Core PPI m/m",
+          "datetime_source": "2026-09-10T08:30:00-04:00",
+          "impact": "High"
         },
         {
           "key": "core_ppi_yoy",
@@ -2481,8 +2481,7 @@
           "consensus": null,
           "actual": null
         }
-      ],
-      "ff_match_score": 57
+      ]
     },
     {
       "datetime_kst": "2026-09-11T21:30+09:00",
@@ -2503,48 +2502,47 @@
           "key": "cpi_yoy",
           "label": "CPI YoY",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "CPI y/y",
-          "datetime_source": "2026-09-11T08:30:00-04:00",
-          "impact": "High",
           "previous": "3.4%",
           "consensus": "3.4%",
-          "actual": null
+          "actual": null,
+          "event_title": "CPI y/y",
+          "datetime_source": "2026-09-11T08:30:00-04:00",
+          "impact": "High"
         },
         {
           "key": "cpi_mom",
           "label": "CPI MoM",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "CPI m/m",
-          "datetime_source": "2026-09-11T08:30:00-04:00",
-          "impact": "High",
           "previous": "0.1%",
           "consensus": "0.4%",
-          "actual": null
+          "actual": null,
+          "event_title": "CPI m/m",
+          "datetime_source": "2026-09-11T08:30:00-04:00",
+          "impact": "High"
         },
         {
           "key": "core_cpi_yoy",
           "label": "Core CPI YoY",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "Core CPI y/y",
-          "datetime_source": "2026-09-11T08:30:00-04:00",
-          "impact": "High",
           "previous": "2.5%",
           "consensus": "2.4%",
-          "actual": null
+          "actual": null,
+          "event_title": "Core CPI y/y",
+          "datetime_source": "2026-09-11T08:30:00-04:00",
+          "impact": "High"
         },
         {
           "key": "core_cpi_mom",
           "label": "Core CPI MoM",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "Core CPI m/m",
-          "datetime_source": "2026-09-11T08:30:00-04:00",
-          "impact": "High",
           "previous": "0.2%",
           "consensus": "0.2%",
-          "actual": null
+          "actual": null,
+          "event_title": "Core CPI m/m",
+          "datetime_source": "2026-09-11T08:30:00-04:00",
+          "impact": "High"
         }
-      ],
-      "ff_match_score": 54
+      ]
     },
     {
       "datetime_kst": "2026-09-15T06:00+09:00",
@@ -2586,22 +2584,26 @@
       "importance": 3,
       "source": "Federal Reserve",
       "reference_period": "",
-      "previous": null,
+      "previous": "3.75%",
       "consensus": null,
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
+      "market_data_source": "FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "key": "fed_rate",
           "label": "Federal Funds Rate",
           "source": "FairEconomy/ForexFactory",
-          "previous": null,
+          "event_title": "Federal Funds Rate",
+          "datetime_source": "2026-09-16T14:00:00-04:00",
+          "impact": "High",
+          "previous": "3.75%",
           "consensus": null,
           "actual": null
         }
-      ]
+      ],
+      "ff_match_score": 40
     },
     {
       "datetime_kst": "2026-09-18T06:00+09:00",
@@ -3987,11 +3989,18 @@
   ],
   "enrichment_matched": {
     "trading_economics": 0,
-    "faireconomy_events": 2,
-    "faireconomy_metrics": 6
+    "faireconomy_events": 1,
+    "faireconomy_metrics": 1
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 8
-  }
+    "forecast": 0
+  },
+  "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
+  "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
+  "retention_preserved": {
+    "event_fields": 6,
+    "metric_fields_or_rows": 30
+  },
+  "retention_kst": "2026-09-13T13:45:46+09:00"
 }
