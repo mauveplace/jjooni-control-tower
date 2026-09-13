@@ -6,7 +6,7 @@ const STATE={version:'1.3',status:'BOOTING',loaded:false,loading:false,error:nul
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const pct=v=>{const x=n(v);return x==null?'—':(x>=0?'+':'')+x.toFixed(2)+'%'};
 const cls=v=>{const x=n(v);return x==null?'flat':x>0?'up':x<0?'down':'flat'};
 const price=v=>{const x=n(v);return x==null?'—':'$'+x.toLocaleString('en-US',{maximumFractionDigits:2})};
