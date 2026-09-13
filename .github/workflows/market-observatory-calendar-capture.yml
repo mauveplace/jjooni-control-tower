@@ -1,0 +1,35 @@
+name: Market Observatory Calendar Actual Capture
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '45 12 * * *'
+    - cron: '45 13 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Capture released economic values
+        run: |
+          python tools/enrich_economic_calendar.py
+          python tools/archive_calendar_actuals.py
+      - name: Publish
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'data(observatory): archive released economic actuals'
+          git pull --rebase origin main
+          git push origin HEAD:main
