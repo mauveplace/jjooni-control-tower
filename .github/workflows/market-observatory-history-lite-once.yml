@@ -1,4 +1,4 @@
-name: Market Observatory History Lite Once
+name: Market Observatory UI Cache Bust Once
 
 on:
   push:
@@ -10,59 +10,35 @@ permissions:
   contents: write
 
 jobs:
-  build-lite:
+  patch-index:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Build monthly long-history cache
+      - name: Bump Observatory UI asset version
         run: |
           python - <<'PY'
-          import json
           from pathlib import Path
-          src=Path('market-observatory/data/history-30y.json')
-          dst=Path('market-observatory/data/history-lite.json')
-          h=json.loads(src.read_text(encoding='utf-8'))
-          out={}
-          for key, rows in (h.get('series') or {}).items():
-              monthly={}
-              first=None
-              last=None
-              for row in rows or []:
-                  d=str(row.get('date') or '')
-                  if len(d)<7:
-                      continue
-                  if first is None:
-                      first=row
-                  last=row
-                  monthly[d[:7]]=row
-              vals=list(monthly.values())
-              if first and (not vals or first.get('date')!=vals[0].get('date')):
-                  vals.insert(0, first)
-              if last and (not vals or last.get('date')!=vals[-1].get('date')):
-                  vals.append(last)
-              out[key]=vals
-          lite={
-              'schema':'JJOONI_MARKET_HISTORY_LITE_V1',
-              'generated_from':h.get('generated_kst'),
-              'target_years':h.get('target_years',30),
-              'sampling':'MONTH_END_PLUS_BOUNDARIES',
-              'series':out
-          }
-          dst.write_text(json.dumps(lite,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
-          print('HISTORY_LITE=PASS', dst.stat().st_size, 'bytes', 'series', len(out))
+          p=Path('market-observatory/index.html')
+          s=p.read_text(encoding='utf-8')
+          old='observatory-v2.js?v=2.4.1'
+          new='observatory-v2.js?v=2.5.0'
+          if old not in s and new not in s:
+              raise SystemExit('asset marker not found')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          print('OBS_UI_CACHE_BUST=PASS',new)
           PY
-      - name: Commit cache
+      - name: Commit index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/history-lite.json
+          git add market-observatory/index.html
           if git diff --cached --quiet; then
             echo 'No changes'
             exit 0
           fi
-          git commit -m 'data(observatory): add lightweight 30y history cache'
+          git commit -m 'fix(observatory): serve long-history axis UI v2.5.0'
           git pull --rebase origin main
           git push origin HEAD:main
