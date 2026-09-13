@@ -44,18 +44,22 @@ jobs:
           assert d['schema']=='JJOONI_OBSERVATORY_SECTOR_ETF_V1'
           assert d['read_only'] is True and d['contains_account_data'] is False
           assert d['universe_version']=='SONG_SECTOR_UNIVERSE_V1'
+          assert d.get('horizons_sessions')==[1,5,10,20,50,100],d.get('horizons_sessions')
           classic=next(g['rows'] for g in d['groups'] if g['key']=='classic')
           expected=['XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE']
           assert [r['ticker'] for r in classic]==expected
           assert d['quality']['classic_priced_count']==11
           assert d['summary']['priced_count']==d['summary']['total_count']
           assert d['quality']['fetch_error_count']==0
+          required=['price','ytd_pct','vs_ma20_pct','vs_ma60_pct','high20_gap_pct']+[f'ret_{x}d_pct' for x in [1,5,10,20,50,100]]+[f'rs_spy_{x}d_pct' for x in [1,5,10,20,50,100]]
           for r in classic:
-              for k in ['price','ret_1d_pct','ret_5d_pct','ret_1m_pct','ret_3m_pct','ytd_pct','rs_spy_1m_pct','vs_ma20_pct','vs_ma60_pct','high20_gap_pct']:
+              for k in required:
                   assert r.get(k) is not None,(r['ticker'],k)
           js=Path('market-observatory/sector-etf-v1.js').read_text(encoding='utf-8')
-          for token in ['data-tab="sectors"','sector-etf.json','송팀장 Sector Observatory','RS vs SPY 1M','READY_LAZY']:
+          for token in ['data-tab="sectors"','sector-etf.json','송팀장 Sector Observatory','const H=[1,5,10,20,50,100]','20일 RS','READY_LAZY',"version:'1.2'"]:
               assert token in js,token
+          html=Path('market-observatory/index.html').read_text(encoding='utf-8')
+          assert './sector-etf-v1.js?v=1.2' in html
           print('SECTOR_ETF_CONTRACT=PASS')
-          print('as_of_date=',d['as_of_date'],'classic=',len(classic),'priced=',d['summary']['priced_count'],'errors=',d['quality']['fetch_error_count'])
+          print('horizons=',d['horizons_sessions'],'as_of_date=',d['as_of_date'],'classic=',len(classic),'priced=',d['summary']['priced_count'],'errors=',d['quality']['fetch_error_count'])
           PY
