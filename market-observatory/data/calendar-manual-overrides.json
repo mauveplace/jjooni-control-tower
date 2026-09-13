@@ -216,6 +216,60 @@
           "source": "BLS / Reuters"
         }
       ]
+    },
+    {
+      "match": {
+        "date": "2026-09-11",
+        "country": "US",
+        "title_contains": "University of Michigan Consumer Sentiment"
+      },
+      "source": "University of Michigan official + Reuters/Investing consensus cross-check",
+      "market_metrics": [
+        {
+          "key": "umich_sentiment",
+          "label": "UoM Consumer Sentiment",
+          "previous": "51.7",
+          "consensus": "51.0",
+          "actual": "47.8",
+          "source": "University of Michigan / Reuters"
+        },
+        {
+          "key": "umich_inflation_1y",
+          "label": "UoM 1Y Inflation Expectations",
+          "previous": "4.0%",
+          "consensus": "4.2%",
+          "actual": "4.6%",
+          "source": "University of Michigan / Investing"
+        },
+        {
+          "key": "umich_inflation_5y",
+          "label": "UoM Long-run Inflation Expectations",
+          "previous": "3.3%",
+          "consensus": null,
+          "actual": "3.4%",
+          "source": "University of Michigan"
+        }
+      ]
+    },
+    {
+      "match": {
+        "date": "2026-09-17",
+        "country": "US",
+        "title_contains": "FOMC 정책결정"
+      },
+      "source": "CME Group market snapshot after Aug CPI release",
+      "market_metrics": [
+        {
+          "key": "fedwatch_hike_25bp",
+          "label": "CME FedWatch 25bp 인상확률 (9/11 snapshot)",
+          "previous": null,
+          "consensus": null,
+          "actual": "86.5%",
+          "source": "CME Group",
+          "observed_date": "2026-09-11",
+          "metric_type": "market_probability_snapshot"
+        }
+      ]
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
