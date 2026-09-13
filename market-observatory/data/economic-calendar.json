@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-14T06:05:36+09:00",
+  "generated_kst": "2026-09-14T06:24:33+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2312,8 +2312,7 @@
           "consensus": "7.33M",
           "actual": "7.27M"
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-02T08:00+09:00",
@@ -2346,8 +2345,7 @@
           "actual": "0.2%",
           "source": "KOSTAT / Reuters consensus"
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-03T21:30+09:00",
@@ -2380,8 +2378,7 @@
           "consensus": "1.3%",
           "actual": "1.2%"
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-04T21:30+09:00",
@@ -2430,8 +2427,7 @@
           "consensus": null,
           "actual": null
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-09T08:00+09:00",
@@ -2464,8 +2460,7 @@
           "actual": "+184K",
           "source": "KOSTAT official release"
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-10T21:30+09:00",
@@ -2520,8 +2515,7 @@
           "consensus": null,
           "actual": "4.6%"
         }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-11T21:30+09:00",
@@ -2582,50 +2576,7 @@
           "datetime_source": "2026-09-11T08:30:00-04:00",
           "impact": "High"
         }
-      ],
-      "_verified_override": true
-    },
-    {
-      "datetime_kst": "2026-09-11T23:00+09:00",
-      "title": "University of Michigan Consumer Sentiment (Preliminary)",
-      "country": "US",
-      "category": "심리/기대인플레",
-      "importance": 3,
-      "source": "University of Michigan",
-      "reference_period": "2026-09 preliminary",
-      "previous": "51.7",
-      "consensus": "51.0",
-      "actual": "47.8",
-      "te_forecast": null,
-      "surprise": "actual_vs_consensus",
-      "market_data_source": "University of Michigan official + Reuters/Investing consensus cross-check",
-      "market_metrics": [
-        {
-          "key": "umich_sentiment",
-          "label": "UoM Consumer Sentiment",
-          "previous": "51.7",
-          "consensus": "51.0",
-          "actual": "47.8",
-          "source": "University of Michigan / Reuters"
-        },
-        {
-          "key": "umich_inflation_1y",
-          "label": "UoM 1Y Inflation Expectations",
-          "previous": "4.0%",
-          "consensus": "4.2%",
-          "actual": "4.6%",
-          "source": "University of Michigan / Investing"
-        },
-        {
-          "key": "umich_inflation_5y",
-          "label": "UoM Long-run Inflation Expectations",
-          "previous": "3.3%",
-          "consensus": null,
-          "actual": "3.4%",
-          "source": "University of Michigan"
-        }
-      ],
-      "_verified_override": true
+      ]
     },
     {
       "datetime_kst": "2026-09-15T06:00+09:00",
@@ -2672,7 +2623,7 @@
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "FairEconomy/ForexFactory + CME Group market snapshot after Aug CPI release",
+      "market_data_source": "FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -2686,52 +2637,7 @@
           "actual": null
         }
       ],
-      "ff_match_score": 40,
-      "_verified_override": true
-    },
-    {
-      "datetime_kst": "2026-09-17T20:00+09:00",
-      "title": "Bank of England 금리 결정",
-      "country": "GB",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "Bank of England",
-      "reference_period": "September 2026 MPC",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": []
-    },
-    {
-      "datetime_kst": "2026-09-17T21:30+09:00",
-      "title": "U.S. Initial Jobless Claims",
-      "country": "US",
-      "category": "고용",
-      "importance": 2,
-      "source": "U.S. Department of Labor",
-      "reference_period": "weekly",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [
-        {
-          "key": "initial_claims",
-          "label": "Initial Jobless Claims",
-          "previous": "206K",
-          "consensus": "209K",
-          "actual": null,
-          "source": "FairEconomy/ForexFactory",
-          "event_title": "Unemployment Claims",
-          "datetime_source": "2026-09-17T08:30:00-04:00",
-          "impact": "Medium"
-        }
-      ]
+      "ff_match_score": 40
     },
     {
       "datetime_kst": "2026-09-18T06:00+09:00",
@@ -2750,23 +2656,6 @@
       "market_metrics": []
     },
     {
-      "datetime_kst": "2026-09-18T12:00+09:00",
-      "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
-      "country": "JP",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "Bank of Japan",
-      "reference_period": "Sep 17-18, 2026 meeting",
-      "time_status": "TBD",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": []
-    },
-    {
       "datetime_kst": "2026-09-23T06:00+09:00",
       "title": "2026년 9월 소비자동향조사 결과",
       "country": "KR",
@@ -2774,22 +2663,6 @@
       "importance": 1,
       "source": "BOK",
       "reference_period": "",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": []
-    },
-    {
-      "datetime_kst": "2026-09-25T23:00+09:00",
-      "title": "University of Michigan Consumer Sentiment (Final)",
-      "country": "US",
-      "category": "심리/기대인플레",
-      "importance": 2,
-      "source": "University of Michigan",
-      "reference_period": "2026-09 final",
       "previous": null,
       "consensus": null,
       "actual": null,
@@ -2928,22 +2801,6 @@
           "actual": null
         }
       ]
-    },
-    {
-      "datetime_kst": "2026-10-01T05:30+09:00",
-      "title": "Micron FY2026 Q4 실적 컨퍼런스콜 (미 현지 9/30)",
-      "country": "US",
-      "category": "기업실적",
-      "importance": 2,
-      "source": "Micron Investor Relations",
-      "reference_period": "FY2026 Q4",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": []
     },
     {
       "datetime_kst": "2026-10-02T08:00+09:00",
@@ -4171,22 +4028,13 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 0
+    "forecast": 2
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
-    "event_fields": 0,
-    "metric_fields_or_rows": 0
+    "event_fields": 35,
+    "metric_fields_or_rows": 62
   },
-  "retention_kst": "2026-09-13T17:00:21+09:00",
-  "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-13T17:00:21+09:00",
-  "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
-  "market_event_refresh": {
-    "faireconomy_rows": 97,
-    "dynamic_metric_matches": 1,
-    "verified_overrides_applied": 9,
-    "refreshed_kst": "2026-09-13T17:00:21+09:00"
-  }
+  "retention_kst": "2026-09-14T06:24:33+09:00"
 }
