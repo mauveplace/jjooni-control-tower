@@ -1,0 +1,76 @@
+name: Market Observatory Latest Board E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/index.html
+      - market-observatory/latest-board-v1.js
+      - market-observatory/data/observatory.json
+      - .github/workflows/market-observatory-latest-board-e2e.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-observatory-latest-board-e2e
+  cancel-in-progress: true
+
+jobs:
+  public-latest-board:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Verify public latest numeric board
+        env:
+          URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
+        run: |
+          node <<'JS'
+          const { chromium } = require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            let passed=false,last='';
+            for(let attempt=1;attempt<=16&&!passed;attempt++){
+              const page=await browser.newPage({viewport:{width:390,height:844}});
+              const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+              try{
+                await page.goto(process.env.URL+`?latest_board_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
+                await page.waitForFunction(()=>window.__JJOONI_LATEST_BOARD?.version==='1.0',{timeout:12000});
+                await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile').length>=10,{timeout:12000});
+                const x=await page.evaluate(()=>({
+                  title:document.querySelector('#latestMarketBoard .latestBoardHead b')?.textContent||'',
+                  labels:[...document.querySelectorAll('#latestBoardGrid .latestTileTop b')].map(e=>e.textContent.trim()),
+                  values:[...document.querySelectorAll('#latestBoardGrid .latestTile strong')].map(e=>e.textContent.trim()),
+                  dates:[...document.querySelectorAll('#latestBoardGrid .latestTile time')].map(e=>e.textContent.trim()),
+                  width:document.documentElement.scrollWidth,inner:window.innerWidth,
+                  contract:window.__JJOONI_LATEST_BOARD?.contract||''
+                }));
+                for(const k of ['KOSPI','KOSDAQ','미국 10Y','한국 10Y','WTI','Brent']){
+                  const i=x.labels.indexOf(k);assert(i>=0,`missing ${k}`);assert(x.values[i]&&x.values[i]!=='—',`${k} blank`);assert(/^2026-\d{2}-\d{2}$/.test(x.dates[i]),`${k} date ${x.dates[i]}`);
+                }
+                assert(x.title==='최신 시장 수치',`title ${x.title}`);
+                assert(x.contract==='LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE',`contract ${x.contract}`);
+                assert(x.width<=x.inner+3,`mobile overflow ${x.width}>${x.inner}`);
+                assert(errors.length===0,`page errors ${errors.join(' | ')}`);
+                console.log('LATEST_BOARD_E2E=PASS labels='+x.labels.length+' KOSPI='+x.values[x.labels.indexOf('KOSPI')]+' KR10Y='+x.values[x.labels.indexOf('한국 10Y')]+' WTI='+x.values[x.labels.indexOf('WTI')]);
+                passed=true;
+              }catch(e){last=String(e);console.log(`LATEST_BOARD_E2E_RETRY attempt=${attempt} ${last}`)}
+              await page.close();
+              if(!passed)await sleep(15000);
+            }
+            await browser.close();
+            assert(passed,`public latest board verification failed: ${last}`);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
