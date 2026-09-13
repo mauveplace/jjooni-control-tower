@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-13T08:50:00+09:00",
+  "generated_kst": "2026-09-13T13:22:00+09:00",
   "note": "Verified seed values for gaps not retained by the rolling weekly market calendar feed. These are display/data overrides only; official release schedules remain authoritative.",
   "overrides": [
     {
@@ -41,6 +41,26 @@
       "market_metrics": [
         {"key": "kr_unemployment_sa", "label": "계절조정 실업률", "previous": "2.8%", "consensus": "3.1%", "actual": "2.7%", "source": "KOSTAT / market calendar cross-check"},
         {"key": "kr_employment_yoy", "label": "취업자 증감 YoY", "previous": null, "consensus": null, "actual": "+184K", "source": "KOSTAT official release"}
+      ]
+    },
+    {
+      "match": {"date": "2026-09-10", "country": "US", "title_contains": "Producer Price Index"},
+      "source": "BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
+      "market_metrics": [
+        {"key": "ppi_mom", "label": "PPI MoM", "previous": "0.1%", "consensus": "0.4%", "actual": "0.4%", "source": "BLS / Forex Factory"},
+        {"key": "ppi_yoy", "label": "PPI YoY", "previous": "4.8%", "consensus": "5.4%", "actual": "5.4%", "source": "BLS / Reuters"},
+        {"key": "core_ppi_mom", "label": "Core PPI MoM", "previous": "0.3%", "consensus": "0.3%", "actual": "0.2%", "source": "BLS / Forex Factory"},
+        {"key": "core_ppi_yoy", "label": "Core PPI YoY", "previous": null, "consensus": null, "actual": "4.6%", "source": "BLS / market calendar cross-check"}
+      ]
+    },
+    {
+      "match": {"date": "2026-09-11", "country": "US", "title_contains": "Consumer Price Index"},
+      "source": "BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
+      "market_metrics": [
+        {"key": "cpi_yoy", "label": "CPI YoY", "previous": "3.4%", "consensus": "3.4%", "actual": "3.4%", "source": "BLS / Reuters"},
+        {"key": "cpi_mom", "label": "CPI MoM", "previous": "0.1%", "consensus": "0.4%", "actual": "0.4%", "source": "BLS / Reuters"},
+        {"key": "core_cpi_yoy", "label": "Core CPI YoY", "previous": "2.5%", "consensus": "2.4%", "actual": "2.4%", "source": "BLS / Reuters"},
+        {"key": "core_cpi_mom", "label": "Core CPI MoM", "previous": "0.2%", "consensus": "0.2%", "actual": "0.3%", "source": "BLS / Reuters"}
       ]
     }
   ]
