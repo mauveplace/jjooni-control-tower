@@ -1,0 +1,65 @@
+name: Fix Sector ETF Render Shadow Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-sector-etf-render-shadow-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch sector render and cache version
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('market-observatory/sector-etf-v1.js')
+          s=p.read_text(encoding='utf-8')
+          old="const s=DATA.summary||{},rows=classicRows(),leaders=s.leaders_1m_rs_spy||[],laggards=s.laggards_1m_rs_spy||[],q=DATA.quality||{};\n const warning=n(q.fetch_error_count)>0;"
+          new="const s=DATA.summary||{},rows=classicRows(),leaders=s.leaders_1m_rs_spy||[],laggards=s.laggards_1m_rs_spy||[],quality=DATA.quality||{};\n const warning=n(quality.fetch_error_count)>0;"
+          if old not in s:
+              raise SystemExit('SECTOR_RENDER_SHADOW_PATTERN_NOT_FOUND')
+          s=s.replace(old,new,1)
+          s=s.replace("fetch error ${esc(q.fetch_error_count??0)}", "fetch error ${esc(quality.fetch_error_count??0)}", 1)
+          s=s.replace("const STATE={version:'1.0'", "const STATE={version:'1.1'", 1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('market-observatory/index.html')
+          h=p.read_text(encoding='utf-8')
+          h=h.replace('./sector-etf-v1.js?v=1.0','./sector-etf-v1.js?v=1.1')
+          p.write_text(h,encoding='utf-8')
+
+          p=Path('.github/workflows/market-observatory-sector-qa.yml')
+          q=p.read_text(encoding='utf-8')
+          needle="          for token in ['data-tab=\"sectors\"','sector-etf.json','송팀장 Sector Observatory','RS vs SPY 1M','READY_LAZY']:\n              assert token in js,token\n"
+          replacement=needle+"          assert 'q=DATA.quality' not in js,'selector helper q must not be shadowed by quality payload'\n          assert 'quality=DATA.quality' in js,'quality payload alias missing'\n          assert \"version:'1.1'\" in js,'sector runtime cache version not bumped'\n"
+          if needle not in q:
+              raise SystemExit('SECTOR_QA_PATTERN_NOT_FOUND')
+          q=q.replace(needle,replacement,1)
+          p.write_text(q,encoding='utf-8')
+          print('SECTOR_RENDER_SHADOW_PATCH=PASS')
+          PY
+          node --check market-observatory/sector-etf-v1.js
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/sector-etf-v1.js market-observatory/index.html .github/workflows/market-observatory-sector-qa.yml
+          git commit -m 'fix(observatory): prevent sector quality selector shadow'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
