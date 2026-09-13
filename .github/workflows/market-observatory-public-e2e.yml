@@ -54,7 +54,7 @@ jobs:
                   await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
                   await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.5.0-long-history-axis',{timeout:20000});
                   await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.0',{timeout:12000});
-                  await page.waitForFunction(()=>window.DATA?.history_loaded===true,{timeout:20000});
+                  await page.waitForFunction(()=>typeof DATA!=='undefined'&&DATA?.history_loaded===true,{timeout:20000});
                   await page.waitForTimeout(1200);
 
                   const base=await page.evaluate(()=>({
@@ -63,7 +63,7 @@ jobs:
                     bodyWidth:document.body.scrollWidth,
                     version:window.__JJOONI_OBSERVATORY_UI?.version,
                     editor:window.__JJOONI_CALENDAR_EDITOR?.version,
-                    historyLoaded:window.DATA?.history_loaded===true,
+                    historyLoaded:typeof DATA!=='undefined'&&DATA?.history_loaded===true,
                     cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right}})
                   }));
                   assert(base.htmlWidth<=base.innerWidth+3,`${tc.name} html overflow ${base.htmlWidth}>${base.innerWidth}`);
@@ -77,7 +77,7 @@ jobs:
                     await page.waitForTimeout(350);
                     const x=await page.evaluate(()=>{
                       const cov=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';
-                      const ch=window.charts?.marketChart || (window.Chart?.getChart ? window.Chart.getChart(document.getElementById('marketChart')) : null);
+                      const ch=window.Chart?.getChart ? window.Chart.getChart(document.getElementById('marketChart')) : null;
                       return {
                         coverage:cov,
                         labels:(ch?.data?.labels||[]).length,
