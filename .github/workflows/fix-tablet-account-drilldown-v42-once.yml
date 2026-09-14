@@ -1,0 +1,87 @@
+name: Fix Tablet Account Drilldown V42 Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-tablet-account-drilldown-v42-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fix-tablet-account-drilldown-v42-once
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch tablet drilldown layout and font floor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('tablet-stability-v37.js')
+          t=p.read_text()
+
+          old="const S={state:'BOOTING',version:'37.4',tab_repairs:0,applies:0};"
+          new="const S={state:'BOOTING',version:'37.5',tab_repairs:0,applies:0};"
+          if t.count(old)!=1:
+              raise SystemExit('VERSION_PATCH_REFUSE')
+          t=t.replace(old,new,1)
+
+          anchor='html.ctStableTabletV37 #accountDrillModal :is(td,th,li,p,small){font-size:16px!important;line-height:1.5!important}'
+          extra='''html.ctStableTabletV37 #accountDrillModal #ctAccountPositionCompletenessV25{display:none!important}\nhtml.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!important}\n'''
+          if t.count(anchor)!=1:
+              raise SystemExit('MODAL_STYLE_ANCHOR_REFUSE')
+          t=t.replace(anchor,anchor+'\n'+extra,1)
+
+          old_root=""" const root=q('.app')||document.body;if(!root)return 0;\n let changed=0;\n const nodes=[root,...qa('*',root)];"""
+          new_root=""" const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);\n if(!roots.length)roots.push(document.body);\n let changed=0;\n const seen=new Set(),nodes=[];\n for(const root of roots){for(const el of [root,...qa('*',root)]){if(!seen.has(el)){seen.add(el);nodes.push(el)}}}\n S.font_floor_roots=roots.map(r=>r.id||r.className||r.tagName);"""
+          if t.count(old_root)!=1:
+              raise SystemExit('FONT_ROOT_PATCH_REFUSE')
+          t=t.replace(old_root,new_root,1)
+          p.write_text(t)
+
+          tp=Path('tests/tablet-stability-v37.test.cjs')
+          tt=tp.read_text()
+          marker="""test('tablet readability and navigation guard is loaded',()=>{"""
+          if marker not in tt:
+              raise SystemExit('TEST_ANCHOR_REFUSE')
+          add="""\ntest('tablet account drilldown stays single-surface and readable',()=>{\n  assert.match(guard,/#accountDrillModal #ctAccountPositionCompletenessV25\\{display:none!important\\}/);\n  assert.match(guard,/#accountDrillModal\\{grid-template-columns:minmax\\(0,1fr\\)!important\\}/);\n  assert.match(guard,/q\\('#accountDrillModal'\\),q\\('#metricInfoModal'\\)/);\n  assert.match(guard,/font_floor_roots/);\n});\n\n"""
+          if "tablet account drilldown stays single-surface and readable" not in tt:
+              tt=tt.replace(marker,add+marker,1)
+          tp.write_text(tt)
+          print('TABLET_ACCOUNT_DRILLDOWN_V42_PATCH=PASS')
+          PY
+
+      - name: Verify syntax and regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tablet-stability-v37.js
+          node --test tests/*.test.cjs
+          grep -F "version:'37.5'" tablet-stability-v37.js
+          grep -F '#accountDrillModal #ctAccountPositionCompletenessV25{display:none!important}' tablet-stability-v37.js
+          grep -F "q('#accountDrillModal'),q('#metricInfoModal')" tablet-stability-v37.js
+          echo TABLET_ACCOUNT_DRILLDOWN_V42=PASS
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tablet-stability-v37.js tests/tablet-stability-v37.test.cjs
+          git diff --cached --check
+          git commit -m 'fix(control-tower): simplify tablet account drilldown'
+          git push
