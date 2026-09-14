@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_DRILLDOWN_READABILITY_V19)return;
-const STATE={state:'ACTIVE',version:'19.2',patched:0,last_at:null};
+const STATE={state:'ACTIVE',version:'19.3',patched:0,last_at:null};
 window.__JJOONI_DRILLDOWN_READABILITY_V19=STATE;
 
 function ensureStyle(){
@@ -11,19 +11,21 @@ function ensureStyle(){
  s.textContent=`
 /* V19.2: tablet/desktop drilldowns are decision surfaces, not micro-copy. */
 #accountDrillModal,#positionDrillModal,#posDrillModal,.ctPositionDrillModal,[data-ct-position-modal],[role="dialog"]{font-family:system-ui,-apple-system,'Noto Sans KR',sans-serif!important}
-#accountDrillModal .v2Kpi,#positionDrillModal .v2Kpi,#posDrillModal .v2Kpi,.ctPositionDrillModal .v2Kpi,[data-ct-position-modal] .v2Kpi{min-height:88px!important;padding:14px 15px!important}
-#accountDrillModal .v2Kpi .label,#positionDrillModal .v2Kpi .label,#posDrillModal .v2Kpi .label,.ctPositionDrillModal .v2Kpi .label,[data-ct-position-modal] .v2Kpi .label{font-size:13px!important;line-height:1.35!important;font-weight:800!important;letter-spacing:-.01em!important}
-#accountDrillModal .v2Kpi .value,#positionDrillModal .v2Kpi .value,#posDrillModal .v2Kpi .value,.ctPositionDrillModal .v2Kpi .value,[data-ct-position-modal] .v2Kpi .value{font-size:21px!important;line-height:1.2!important;font-weight:900!important;margin-top:7px!important}
-#accountDrillModal .name,#positionDrillModal .name,#posDrillModal .name,.ctPositionDrillModal .name,[data-ct-position-modal] .name{font-size:14px!important;line-height:1.4!important;font-weight:850!important}
-#accountDrillModal .sub,#positionDrillModal .sub,#posDrillModal .sub,.ctPositionDrillModal .sub,[data-ct-position-modal] .sub{font-size:11.5px!important;line-height:1.45!important}
-#accountDrillModal .trade,#positionDrillModal .trade,#posDrillModal .trade,.ctPositionDrillModal .trade,[data-ct-position-modal] .trade{min-height:58px!important;padding:11px 12px!important;gap:12px!important}
-#accountDrillModal .trade .right b,#positionDrillModal .trade .right b,#posDrillModal .trade .right b,.ctPositionDrillModal .trade .right b,[data-ct-position-modal] .trade .right b{font-size:13px!important;line-height:1.35!important}
+#accountDrillModal .v2Kpi,#positionDrillModal .v2Kpi,#posDrillModal .v2Kpi,.ctPositionDrillModal .v2Kpi,[data-ct-position-modal] .v2Kpi{min-height:112px!important;padding:18px 20px!important}
+#accountDrillModal .v2Kpi .label,#positionDrillModal .v2Kpi .label,#posDrillModal .v2Kpi .label,.ctPositionDrillModal .v2Kpi .label,[data-ct-position-modal] .v2Kpi .label{font-size:16pt!important;line-height:1.4!important;font-weight:800!important;letter-spacing:-.01em!important}
+#accountDrillModal .v2Kpi .value,#positionDrillModal .v2Kpi .value,#posDrillModal .v2Kpi .value,.ctPositionDrillModal .v2Kpi .value,[data-ct-position-modal] .v2Kpi .value{font-size:22pt!important;line-height:1.2!important;font-weight:900!important;margin-top:9px!important}
+#accountDrillModal .name,#positionDrillModal .name,#posDrillModal .name,.ctPositionDrillModal .name,[data-ct-position-modal] .name{font-size:18pt!important;line-height:1.4!important;font-weight:850!important}
+#accountDrillModal .sub,#positionDrillModal .sub,#posDrillModal .sub,.ctPositionDrillModal .sub,[data-ct-position-modal] .sub{font-size:14pt!important;line-height:1.5!important}
+#accountDrillModal .trade,#positionDrillModal .trade,#posDrillModal .trade,.ctPositionDrillModal .trade,[data-ct-position-modal] .trade{min-height:76px!important;padding:14px 16px!important;gap:14px!important}
+#accountDrillModal .trade .right b,#positionDrillModal .trade .right b,#posDrillModal .trade .right b,.ctPositionDrillModal .trade .right b,[data-ct-position-modal] .trade .right b{font-size:17pt!important;line-height:1.4!important}
 #accountDrillModal h1,#accountDrillModal h2,#accountDrillModal h3,#positionDrillModal h1,#positionDrillModal h2,#positionDrillModal h3,#posDrillModal h1,#posDrillModal h2,#posDrillModal h3,.ctPositionDrillModal h1,.ctPositionDrillModal h2,.ctPositionDrillModal h3{letter-spacing:-.02em!important}
-#accountDrillModal h2,#accountDrillModal h3,#positionDrillModal h2,#positionDrillModal h3,#posDrillModal h2,#posDrillModal h3,.ctPositionDrillModal h2,.ctPositionDrillModal h3{font-size:17px!important;line-height:1.35!important}
+#accountDrillModal h2,#accountDrillModal h3,#positionDrillModal h2,#positionDrillModal h3,#posDrillModal h2,#posDrillModal h3,.ctPositionDrillModal h2,.ctPositionDrillModal h3{font-size:20pt!important;line-height:1.35!important}
 @media(min-width:768px){
- #accountDrillModal,[id*="position"][id*="Modal"],[id*="Position"][id*="Modal"]{font-size:13px!important}
- #accountDrillModal button,[id*="position"][id*="Modal"] button,[id*="Position"][id*="Modal"] button{font-size:12px!important;min-height:34px!important}
- #accountDrillModal [style*="font:800 12px"],#accountDrillModal [style*="font:600 10px"],#accountDrillModal [style*="font:800 11px"]{font-size:12px!important;line-height:1.45!important}
+ #accountDrillModal :is(p,span,li,td,th,small,label){font-size:16pt!important;line-height:1.5!important}
+ #accountDrillModal .trade .right{font-size:16pt!important;line-height:1.45!important}
+ #accountDrillModal,[id*="position"][id*="Modal"],[id*="Position"][id*="Modal"]{font-size:18pt!important;line-height:1.5!important}
+ #accountDrillModal button,[id*="position"][id*="Modal"] button,[id*="Position"][id*="Modal"] button{font-size:14pt!important;min-height:44px!important;padding:8px 12px!important}
+ #accountDrillModal [style*="font:800 12px"],#accountDrillModal [style*="font:600 10px"],#accountDrillModal [style*="font:800 11px"]{font-size:16pt!important;line-height:1.5!important}
 }
 `;
  (document.head||document.documentElement).appendChild(s);

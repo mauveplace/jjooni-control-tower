@@ -51,7 +51,7 @@ test('tablet account drilldown stays single-surface and readable',()=>{
 });
 
 test('tablet readability and navigation guard is loaded',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.7/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.8/);
   assert.match(guard,/ctStableTabletV37/);
   assert.match(guard,/font-size:20px!important/);
   assert.match(guard,/font-size:16px!important/);
@@ -69,4 +69,17 @@ test('tablet overview account cards use one 18pt typography authority',()=>{
   assert.match(guard,/font-size:20pt!important/);
   assert.match(guard,/font-size:22pt!important/);
   assert.doesNotMatch(loader,/account-card-readability-v44/);
+});
+
+
+test('tablet detail modal and account charts are not phone-sized',()=>{
+  const read=fs.readFileSync('drilldown-readability-v19.js','utf8');
+  assert.match(loader,/drilldown-readability-v19\.js\?v=19\.3/);
+  assert.match(read,/font-size:18pt!important/);
+  assert.match(read,/font-size:16pt!important/);
+  assert.match(read,/font-size:22pt!important/);
+  assert.doesNotMatch(read,/font-size:11\.5px!important/);
+  assert.match(guard,/min-height:150px!important/);
+  assert.match(guard,/height:150px!important/);
+  assert.match(guard,/font-size:14pt!important/);
 });

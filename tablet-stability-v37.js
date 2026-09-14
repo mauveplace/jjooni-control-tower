@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.7',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.8',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -54,6 +54,18 @@ html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg text,
 html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg text{font-size:18pt!important}
 html.ctStableTabletV37 #overviewAccounts .ctHumanAccountLineV6,
 html.ctStableTabletV37 .ctOvAccounts .ctHumanAccountLineV6{font-size:18pt!important;line-height:1.45!important;margin-top:10px!important;padding-top:10px!important}
+
+/* Account chart geometry: tablet charts must be larger than phone sparklines. */
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark{display:block!important;min-height:150px!important;height:150px!important;margin-top:14px!important;overflow:visible!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg{width:100%!important;height:150px!important;min-height:150px!important;overflow:visible!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark canvas,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark canvas{width:100%!important;height:150px!important;min-height:150px!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg text,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg text{font-size:14pt!important;font-weight:800!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg path,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg path{stroke-width:2.5!important}
 
 /* Touch tablets use the full interactive trade-review renderer, not the compact
    desktop replacement. Keep all tap targets and P&L text readable. */
