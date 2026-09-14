@@ -34,11 +34,11 @@ const ITEMS=[
 const BY_KEY=Object.fromEntries(ITEMS.map(x=>[x.k,x]));
 const INDEX_KEYS=['KOSPI','KOSDAQ','SP500','NASDAQCOMPOSITE','NASDAQ100','DOW','RUSSELL2000'];
 const OVERVIEW_GROUPS=[
-  {key:'indices',label:'주요 지수',sub:'한국·미국 대표 주가지수',keys:INDEX_KEYS},
+  {key:'indices',label:'주요 지수',sub:'완료 세션 종가 · 미국지수 소수점 2자리',keys:INDEX_KEYS},
   {key:'risk',label:'위험·심리',sub:'변동성과 투자심리',keys:['VIX','FEAR_GREED']},
-  {key:'rates',label:'금리·스프레드',sub:'미국·한국·일본 금리와 장단기 스프레드',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
-  {key:'fx',label:'환율',sub:'원화·엔화·달러 인덱스',keys:['USDKRW','USDJPY','JPYKRW','DXY']},
-  {key:'commodity',label:'원자재',sub:'에너지·귀금속·산업금속',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']}
+  {key:'rates',label:'금리·스프레드',sub:'미국 UST · 한국 ECOS · 일본 MOF 공식 일별 기준',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
+  {key:'fx',label:'환율',sub:'Yahoo daily close · 제공사 cutoff에 따라 시점차 가능',keys:['USDKRW','USDJPY','JPYKRW','DXY']},
+  {key:'commodity',label:'원자재',sub:'Yahoo 연속선물 daily close · 거래소 settlement/월물과 다를 수 있음',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']}
 ];
 const COMPARES={
   D1:{label:'전일',mode:'prev'},
@@ -50,10 +50,10 @@ const COMPARES={
 let compareKey='D1';
 const TAB_CONFIG={
   overview:{title:'시장 한눈에 보기',sub:'지표를 성격별로 묶어 필요한 영역만 빠르게 확인',groups:OVERVIEW_GROUPS},
-  indices:{title:'주요 지수',sub:'KOSPI·KOSDAQ·미국 대표 지수를 한 화면에서 비교',keys:INDEX_KEYS},
-  rates:{title:'금리 주요 지표',sub:'미국·한국·일본 국채와 핵심 장단기 스프레드',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
-  fx:{title:'환율 주요 지표',sub:'원화·엔화·달러 인덱스만 표시',keys:['USDKRW','USDJPY','JPYKRW','DXY']},
-  energy:{title:'원자재 주요 지표',sub:'에너지·귀금속·산업금속만 표시',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']},
+  indices:{title:'주요 지수',sub:'완료 세션 종가 · 미국 주요 지수는 소수점 둘째 자리까지 표시',keys:INDEX_KEYS},
+  rates:{title:'금리 주요 지표',sub:'미국=US Treasury · 한국=BOK ECOS · 일본=MOF 공식 일별 기준',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
+  fx:{title:'환율 주요 지표',sub:'Yahoo daily close · 다른 제공사의 마감 cutoff와 소폭 차이 가능',keys:['USDKRW','USDJPY','JPYKRW','DXY']},
+  energy:{title:'원자재 주요 지표',sub:'Yahoo 연속선물 daily close · 거래소 settlement/특정 월물과 직접 동일값 아님',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']},
   sectors:{title:'섹터·ETF 주요 지표',sub:'송팀장 Sector Observatory의 상대강도·breadth·rotation 요약',special:'sector'},
   tripod:{title:'TRI-POD 주요 입력',sub:'NASDAQ-100 레짐·VIX10·Drawdown·현재 목표노출',special:'tripod'},
   calendar:{title:'경제일정 주요 지표',sub:'오늘·향후 7일·다음 중요 이벤트 중심',special:'calendar'}
@@ -121,5 +121,5 @@ const st=document.createElement('style');st.textContent=`
 @media(max-width:760px){.latestBoardWrap{padding:0 10px;margin-top:9px}.latestBoardHead{align-items:flex-start;flex-direction:column;gap:7px}.latestBoardTitleBox{display:block}.latestBoardTitleBox span{display:block;margin-top:2px}.latestBoardTools{width:100%;align-items:flex-start;flex-direction:column-reverse;gap:5px}.latestCompare{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none}.latestCompare::-webkit-scrollbar{display:none}.latestCompare button{flex:0 0 auto;min-height:28px}.latestBoardGrid:not(.grouped){grid-template-columns:none!important;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestBoardGrid:not(.grouped)::-webkit-scrollbar{display:none}.latestGroup{padding:8px;margin-bottom:8px}.latestGroupHead{align-items:flex-start}.latestGroupHead>div{display:block}.latestGroupHead span{display:block;margin-top:2px}.latestGroupGrid{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestGroupGrid::-webkit-scrollbar{display:none}.latestTile{padding:8px 9px;scroll-snap-align:start}.latestTile strong{font-size:17px}.latestTileFoot{font-size:8px}.obsIndexGrid .card:last-child{grid-column:auto}}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'2.1',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_AND_PERIOD_COMPARISON',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'2.2',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
