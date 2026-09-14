@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.4',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.5',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -77,6 +77,9 @@ html.ctStableTabletV37 #ctTradeReviewV2 .ctTrEmpty{background:#fff!important;bor
 html.ctStableTabletV37 #accountDrillModal :is(.label,.v2Label,[class*="Label"]){font-size:16px!important;line-height:1.4!important}
 html.ctStableTabletV37 #accountDrillModal :is(.value,.v2Value,[class*="Value"]){font-size:21px!important;line-height:1.3!important}
 html.ctStableTabletV37 #accountDrillModal :is(td,th,li,p,small){font-size:16px!important;line-height:1.5!important}
+html.ctStableTabletV37 #accountDrillModal #ctAccountPositionCompletenessV25{display:none!important}
+html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!important}
+
 @media (orientation:portrait){
  html.ctStableTabletV37 .tabs{width:188px!important}
  html.ctStableTabletV37 .app{margin-left:188px!important;width:calc(100% - 188px)!important;padding-left:18px!important;padding-right:18px!important}
@@ -90,9 +93,12 @@ const CONTENT_FONT_FLOOR_PX=16;
 let fontFloorTimer=0;
 function enforceContentFontFloor(){
  if(!isTablet())return 0;
- const root=q('.app')||document.body;if(!root)return 0;
+ const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);
+ if(!roots.length)roots.push(document.body);
  let changed=0;
- const nodes=[root,...qa('*',root)];
+ const seen=new Set(),nodes=[];
+ for(const root of roots){for(const el of [root,...qa('*',root)]){if(!seen.has(el)){seen.add(el);nodes.push(el)}}}
+ S.font_floor_roots=roots.map(r=>r.id||r.className||r.tagName);
  for(const el of nodes){
   if(!el||!el.style)continue;
   const tag=String(el.tagName||'').toUpperCase();

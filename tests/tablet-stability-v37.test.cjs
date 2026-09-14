@@ -42,6 +42,14 @@ test('touch tablet keeps interactive trade review instead of reverting to legacy
   assert.match(trade,/실현\+평가/);
 });
 
+
+test('tablet account drilldown stays single-surface and readable',()=>{
+  assert.match(guard,/#accountDrillModal #ctAccountPositionCompletenessV25\{display:none!important\}/);
+  assert.match(guard,/#accountDrillModal\{grid-template-columns:minmax\(0,1fr\)!important\}/);
+  assert.match(guard,/q\('#accountDrillModal'\),q\('#metricInfoModal'\)/);
+  assert.match(guard,/font_floor_roots/);
+});
+
 test('tablet readability and navigation guard is loaded',()=>{
   assert.match(loader,/tablet-stability-v37\.js\?v=37\.0/);
   assert.match(guard,/ctStableTabletV37/);
