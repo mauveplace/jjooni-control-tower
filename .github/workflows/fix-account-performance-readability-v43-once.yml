@@ -1,0 +1,136 @@
+name: Fix Account Performance Readability V43 Once
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-account-performance-readability-v43-once.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fix-account-performance-readability-v43-once
+  cancel-in-progress: true
+
+jobs:
+  patch-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch readable account and performance typography
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          # 1) Make the font-floor work for 1100-1800px account/performance panels
+          # even when the browser reports a fine pointer / desktop-like input mode.
+          p=Path('tablet-stability-v37.js')
+          t=p.read_text()
+          if "version:'37.5'" in t:
+              t=t.replace("version:'37.5'","version:'37.6'",1)
+          elif "version:'37.6'" not in t:
+              raise SystemExit('V43_REFUSE stability version')
+
+          old="""const CONTENT_FONT_FLOOR_PX=16;\nlet fontFloorTimer=0;\nfunction enforceContentFontFloor(){\n if(!isTablet())return 0;\n const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);\n if(!roots.length)roots.push(document.body);\n let changed=0;\n"""
+          new="""const CONTENT_FONT_FLOOR_PX=16;\nconst DESKTOP_PANEL_FONT_FLOOR_PX=15;\nlet fontFloorTimer=0;\nfunction enforceContentFontFloor(){\n const tablet=isTablet();\n const desktopPanelMode=!tablet&&window.innerWidth>=1100&&window.innerWidth<=1800;\n if(!tablet&&!desktopPanelMode)return 0;\n const roots=(tablet\n   ?[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')]\n   :[q('#panel-accounts'),q('#panel-performance')]).filter(Boolean);\n if(!roots.length)return 0;\n const fontFloorPx=tablet?CONTENT_FONT_FLOOR_PX:DESKTOP_PANEL_FONT_FLOOR_PX;\n let changed=0;\n"""
+          if old in t:
+              t=t.replace(old,new,1)
+          elif 'DESKTOP_PANEL_FONT_FLOOR_PX=15' not in t:
+              raise SystemExit('V43_REFUSE floor block')
+          t=t.replace("if(Number.isFinite(fs)&&fs>0&&fs<CONTENT_FONT_FLOOR_PX){\n   el.style.setProperty('font-size',CONTENT_FONT_FLOOR_PX+'px','important');\n   const lh=parseFloat(cs.lineHeight||'0');\n   if(Number.isFinite(lh)&&lh>0&&lh<CONTENT_FONT_FLOOR_PX*1.3)el.style.setProperty('line-height','1.4','important');",
+                      "if(Number.isFinite(fs)&&fs>0&&fs<fontFloorPx){\n   el.style.setProperty('font-size',fontFloorPx+'px','important');\n   const lh=parseFloat(cs.lineHeight||'0');\n   if(Number.isFinite(lh)&&lh>0&&lh<fontFloorPx*1.3)el.style.setProperty('line-height','1.4','important');",1)
+          t=t.replace("S.font_floor_px=CONTENT_FONT_FLOOR_PX;S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();",
+                      "S.font_floor_px=fontFloorPx;S.font_floor_mode=tablet?'TABLET':'DESKTOP_ACCOUNT_PERFORMANCE';S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();",1)
+          p.write_text(t)
+
+          # 2) Raise the explicit wide-screen performance renderer typography.
+          p=Path('tablet-runtime-v8.js')
+          t=p.read_text()
+          if "version:'8.4'" in t:
+              t=t.replace("version:'8.4'","version:'8.5'",2)
+          elif "version:'8.5'" not in t:
+              raise SystemExit('V43_REFUSE runtime version')
+          reps={
+            '.ctP8Sub{font-size:10px':'.ctP8Sub{font-size:14px',
+            '.ctP8Total{font-size:12px':'.ctP8Total{font-size:15px',
+            '.ctP8Name{font-size:12px':'.ctP8Name{font-size:16px',
+            '.ctP8Nav{font-size:18px':'.ctP8Nav{font-size:22px',
+            'padding:4px 0;font-size:9px;color:#667085}.ctP8Line b':'padding:6px 0;font-size:15px;color:#667085}.ctP8Line b',
+            '.ctP8Source{margin-top:7px;font-size:8px':'.ctP8Source{margin-top:8px;font-size:13px',
+          }
+          for a,b in reps.items():
+              if a in t:t=t.replace(a,b,1)
+              elif b not in t:raise SystemExit('V43_REFUSE runtime token '+a)
+          p.write_text(t)
+
+          # 3) Same floor for the explicit wide-screen account renderer.
+          p=Path('tablet-accounts-v8.js')
+          t=p.read_text()
+          if "version:'8.3'" in t:
+              t=t.replace("version:'8.3'","version:'8.4'",2)
+          elif "version:'8.4'" not in t:
+              raise SystemExit('V43_REFUSE accounts version')
+          reps={
+            '.ctA8Sub{font-size:10px':'.ctA8Sub{font-size:14px',
+            '.ctA8Total{text-align:right;font-size:11px':'.ctA8Total{text-align:right;font-size:15px',
+            '.ctA8Name{font-size:12px':'.ctA8Name{font-size:16px',
+            '.ctA8Nav{font-size:18px':'.ctA8Nav{font-size:22px',
+            'padding:4px 0;font-size:9px;color:#667085}.ctA8Line b':'padding:6px 0;font-size:15px;color:#667085}.ctA8Line b',
+            '.ctA8Source{margin-top:7px;font-size:8px':'.ctA8Source{margin-top:8px;font-size:13px',
+          }
+          for a,b in reps.items():
+              if a in t:t=t.replace(a,b,1)
+              elif b not in t:raise SystemExit('V43_REFUSE accounts token '+a)
+          p.write_text(t)
+
+          # 4) Bump boot module URLs so the deployed page advertises the new layer explicitly.
+          p=Path('trade-review-loader.js')
+          t=p.read_text()
+          t=t.replace("version:'14.23'","version:'14.24'",1)
+          t=t.replace("tablet-runtime-v8.js?v=8.3","tablet-runtime-v8.js?v=8.5",1)
+          t=t.replace("tablet-accounts-v8.js?v=8.2","tablet-accounts-v8.js?v=8.4",1)
+          t=t.replace("tablet-stability-v37.js?v=37.0","tablet-stability-v37.js?v=37.6",1)
+          p.write_text(t)
+
+          # 5) Lock the regression contract to the readability fix.
+          p=Path('tests/tablet-stability-v37.test.cjs')
+          t=p.read_text()
+          t=t.replace("assert.match(loader,/tablet-stability-v37\\.js\\?v=37\\.0/);",
+                      "assert.match(loader,/tablet-stability-v37\\.js\\?v=37\\.6/);",1)
+          if "desktop account/performance text floor" not in t:
+              t += """\n\ntest('desktop account/performance text floor covers 1100-1800px views',()=>{\n  assert.match(guard,/DESKTOP_PANEL_FONT_FLOOR_PX=15/);\n  assert.match(guard,/window\\.innerWidth>=1100&&window\\.innerWidth<=1800/);\n  assert.match(guard,/q\\('#panel-accounts'\\),q\\('#panel-performance'\\)/);\n  assert.match(tablet,/\\.ctP8Line\\{[^}]*font-size:15px/);\n  assert.match(tablet,/\\.ctP8Name\\{font-size:16px/);\n  assert.match(accounts,/\\.ctA8Line\\{[^}]*font-size:15px/);\n  assert.match(accounts,/\\.ctA8Name\\{font-size:16px/);\n  assert.match(loader,/tablet-runtime-v8\\.js\\?v=8\\.5/);\n  assert.match(loader,/tablet-accounts-v8\\.js\\?v=8\\.4/);\n});\n"""
+          p.write_text(t)
+          print('ACCOUNT_PERFORMANCE_READABILITY_V43_PATCH=PASS')
+          PY
+
+      - name: Regression acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tablet-stability-v37.js
+          node --check tablet-runtime-v8.js
+          node --check tablet-accounts-v8.js
+          node --check trade-review-loader.js
+          node --test tests/*.test.cjs
+          grep -q "DESKTOP_PANEL_FONT_FLOOR_PX=15" tablet-stability-v37.js
+          grep -q "ctP8Line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:15px" tablet-runtime-v8.js
+          grep -q "ctA8Line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:15px" tablet-accounts-v8.js
+          echo 'ACCOUNT_PERFORMANCE_READABILITY_V43=PASS'
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tablet-stability-v37.js tablet-runtime-v8.js tablet-accounts-v8.js trade-review-loader.js tests/tablet-stability-v37.test.cjs
+          git diff --cached --check
+          git commit -m 'fix: enlarge account performance typography'
+          git push
