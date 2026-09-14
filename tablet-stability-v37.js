@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.6',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.7',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -33,6 +33,27 @@ html.ctStableTabletV37 :is(.ctWlSub,.ctWlMeta,.ctWlTicker,.ctWlTag,.ctCmSrc,.ctC
 html.ctStableTabletV37 :is(.ctWlName,.ctCmMacroName,.ctTickerName,.ctSleeveName,.ctA8Name,.ctP8Name,.ctD8Name){font-size:19px!important;line-height:1.35!important}
 html.ctStableTabletV37 :is(.ctCmMacroValue,.ctA8Nav,.ctP8Nav,.ctD8Kpi b){font-size:24px!important;line-height:1.2!important}
 html.ctStableTabletV37 :is(.ctWlBtn,.ctTrChip,.ctD8Btn){font-size:16px!important;min-height:44px!important;padding:9px 12px!important}
+
+/* Account-card typography authority: 18pt means 24 CSS px.
+   Keep this in tablet-stability only; do not add another readability sidecar. */
+html.ctStableTabletV37 #overviewAccounts.ctOvAccounts,
+html.ctStableTabletV37 .ctOvAccounts{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcct,
+html.ctStableTabletV37 .ctOvAccounts .ctAcct{padding:20px!important;min-height:260px!important;font-size:18pt!important;line-height:1.45!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcct *,
+html.ctStableTabletV37 .ctOvAccounts .ctAcct *{font-size:18pt!important;line-height:1.45!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctName,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctName{font-size:20pt!important;font-weight:900!important;line-height:1.3!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctNav,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctNav{font-size:22pt!important;font-weight:900!important;line-height:1.2!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcct :is(.gain,.loss),
+html.ctStableTabletV37 .ctOvAccounts .ctAcct :is(.gain,.loss){font-size:20pt!important;font-weight:900!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctIcon,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctIcon{width:34px!important;height:34px!important;font-size:14pt!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg text,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg text{font-size:18pt!important}
+html.ctStableTabletV37 #overviewAccounts .ctHumanAccountLineV6,
+html.ctStableTabletV37 .ctOvAccounts .ctHumanAccountLineV6{font-size:18pt!important;line-height:1.45!important;margin-top:10px!important;padding-top:10px!important}
 
 /* Touch tablets use the full interactive trade-review renderer, not the compact
    desktop replacement. Keep all tap targets and P&L text readable. */
@@ -90,17 +111,11 @@ html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!im
 `;(document.head||document.documentElement).appendChild(st);
 }
 const CONTENT_FONT_FLOOR_PX=16;
-const DESKTOP_PANEL_FONT_FLOOR_PX=15;
 let fontFloorTimer=0;
 function enforceContentFontFloor(){
- const tablet=isTablet();
- const desktopPanelMode=!tablet&&window.innerWidth>=1100&&window.innerWidth<=1800;
- if(!tablet&&!desktopPanelMode)return 0;
- const roots=(tablet
-   ?[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')]
-   :[q('#panel-accounts'),q('#panel-performance')]).filter(Boolean);
- if(!roots.length)return 0;
- const fontFloorPx=tablet?CONTENT_FONT_FLOOR_PX:DESKTOP_PANEL_FONT_FLOOR_PX;
+ if(!isTablet())return 0;
+ const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);
+ if(!roots.length)roots.push(document.body);
  let changed=0;
  const seen=new Set(),nodes=[];
  for(const root of roots){for(const el of [root,...qa('*',root)]){if(!seen.has(el)){seen.add(el);nodes.push(el)}}}
@@ -113,14 +128,14 @@ function enforceContentFontFloor(){
   let cs;try{cs=getComputedStyle(el)}catch(_){continue}
   if(!cs||cs.display==='none'||cs.visibility==='hidden')continue;
   const fs=parseFloat(cs.fontSize||'0');
-  if(Number.isFinite(fs)&&fs>0&&fs<fontFloorPx){
-   el.style.setProperty('font-size',fontFloorPx+'px','important');
+  if(Number.isFinite(fs)&&fs>0&&fs<CONTENT_FONT_FLOOR_PX){
+   el.style.setProperty('font-size',CONTENT_FONT_FLOOR_PX+'px','important');
    const lh=parseFloat(cs.lineHeight||'0');
-   if(Number.isFinite(lh)&&lh>0&&lh<fontFloorPx*1.3)el.style.setProperty('line-height','1.4','important');
+   if(Number.isFinite(lh)&&lh>0&&lh<CONTENT_FONT_FLOOR_PX*1.3)el.style.setProperty('line-height','1.4','important');
    changed++;
   }
  }
- S.font_floor_px=fontFloorPx;S.font_floor_mode=tablet?'TABLET':'DESKTOP_ACCOUNT_PERFORMANCE';S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();
+ S.font_floor_px=CONTENT_FONT_FLOOR_PX;S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();
  return changed;
 }
 function scheduleContentFontFloor(delay=30){clearTimeout(fontFloorTimer);fontFloorTimer=setTimeout(enforceContentFontFloor,delay)}

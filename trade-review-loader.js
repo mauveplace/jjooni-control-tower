@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.25',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.26',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -57,8 +57,8 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.2','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
-['ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.5','tablet-runtime'],
-['ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.4','tablet-accounts'],
+['ctTabletRuntimeV8Script','tablet-runtime-v8.js?v=8.3','tablet-runtime'],
+['ctTabletAccountsV8Script','tablet-accounts-v8.js?v=8.2','tablet-accounts'],
 ['ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.2','recent-trade-drill'],
 ['ctCanonicalValuationV13Script','canonical-valuation-fix-v13.js?v=13.1','valuation'],
 ['ctFxAttributionV16Script','fx-attribution-v16.js?v=16.0','fx-attribution'],
@@ -71,6 +71,6 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctMarketContextV20Script','market-context-v20.js?v=20.0','market-context'],
 ['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.0','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.1','source-authority-guard'],
-['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness'],['ctTabletStabilityV37Script','tablet-stability-v37.js?v=37.6','tablet-stability'],['ctAccountCardReadabilityV44Script','account-card-readability-v44.js?v=44.0','account-card-readability']];preloadModules(modules);for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true||runtimeReady('trade-outcomes')!==true||runtimeReady('master-trade-bridge')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
+['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness'],['ctTabletStabilityV37Script','tablet-stability-v37.js?v=37.7','tablet-stability']];preloadModules(modules);for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true||runtimeReady('trade-outcomes')!==true||runtimeReady('master-trade-bridge')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
 boot();
 })();
