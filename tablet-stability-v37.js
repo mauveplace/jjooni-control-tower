@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.8',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.9',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -107,9 +107,9 @@ html.ctStableTabletV37 #ctTradeReviewV2 .ctTrEventEval,html.ctStableTabletV37 #c
 html.ctStableTabletV37 #ctTradeReviewV2 .ctTrEmpty{background:#fff!important;border:1px dashed #d0d5dd!important;border-radius:14px!important;padding:22px!important;text-align:center!important;color:#667085!important;font-size:16px!important}
 
 /* Account/performance drilldowns retain the original interactive DOM. */
-html.ctStableTabletV37 #accountDrillModal :is(.label,.v2Label,[class*="Label"]){font-size:16px!important;line-height:1.4!important}
-html.ctStableTabletV37 #accountDrillModal :is(.value,.v2Value,[class*="Value"]){font-size:21px!important;line-height:1.3!important}
-html.ctStableTabletV37 #accountDrillModal :is(td,th,li,p,small){font-size:16px!important;line-height:1.5!important}
+html.ctStableTabletV37 #accountDrillModal :is(.label,.v2Label,[class*="Label"]){font-size:16pt!important;line-height:1.4!important}
+html.ctStableTabletV37 #accountDrillModal :is(.value,.v2Value,[class*="Value"]){font-size:22pt!important;line-height:1.3!important}
+html.ctStableTabletV37 #accountDrillModal :is(td,th,li,p,small){font-size:16pt!important;line-height:1.5!important}
 html.ctStableTabletV37 #accountDrillModal #ctAccountPositionCompletenessV25{display:none!important}
 html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!important}
 

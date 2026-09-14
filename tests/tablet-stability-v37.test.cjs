@@ -51,7 +51,7 @@ test('tablet account drilldown stays single-surface and readable',()=>{
 });
 
 test('tablet readability and navigation guard is loaded',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.8/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.9/);
   assert.match(guard,/ctStableTabletV37/);
   assert.match(guard,/font-size:20px!important/);
   assert.match(guard,/font-size:16px!important/);
@@ -82,4 +82,12 @@ test('tablet detail modal and account charts are not phone-sized',()=>{
   assert.match(guard,/min-height:150px!important/);
   assert.match(guard,/height:150px!important/);
   assert.match(guard,/font-size:14pt!important/);
+});
+
+
+test('last-loaded tablet authority preserves pt-sized modal text',()=>{
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.9/);
+  assert.match(guard,/#accountDrillModal :is\(\.label,\.v2Label,\[class\*=\"Label\"\]\)\{font-size:16pt!important/);
+  assert.match(guard,/#accountDrillModal :is\(\.value,\.v2Value,\[class\*=\"Value\"\]\)\{font-size:22pt!important/);
+  assert.match(guard,/#accountDrillModal :is\(td,th,li,p,small\)\{font-size:16pt!important/);
 });
