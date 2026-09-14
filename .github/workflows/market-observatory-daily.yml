@@ -22,6 +22,8 @@ on:
   schedule:
     # 07:25 KST: completed US session + latest official bond/calendar data.
     - cron: '25 22 * * *'
+    # 08:05 KST: retry/safety refresh in case GitHub scheduled execution is delayed or skipped.
+    - cron: '5 23 * * *'
     # 16:10 KST: Korea market close refresh for KOSPI/KOSDAQ and KR reference data.
     - cron: '10 7 * * 1-5'
   workflow_dispatch:
@@ -31,7 +33,7 @@ permissions:
 
 concurrency:
   group: market-observatory-daily
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
