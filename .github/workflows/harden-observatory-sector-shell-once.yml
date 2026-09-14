@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Make sector entrypoint static and strengthen QA
+      - name: Make sector entrypoint static
         shell: bash
         run: |
           set -euo pipefail
@@ -49,24 +49,6 @@ jobs:
               h = h.replace(anchor, static_panel + anchor, 1)
 
           index.write_text(h, encoding='utf-8')
-
-          qa = Path('.github/workflows/market-observatory-sector-qa.yml')
-          q = qa.read_text(encoding='utf-8')
-          path_anchor = '      - market-observatory/sector-etf-v1.js\n'
-          index_path = '      - market-observatory/index.html\n'
-          if index_path not in q:
-              if path_anchor not in q:
-                  raise SystemExit('SECTOR_QA_PATH_ANCHOR_NOT_FOUND')
-              q = q.replace(path_anchor, path_anchor + index_path, 1)
-
-          qa_anchor = "          html=Path('market-observatory/index.html').read_text(encoding='utf-8')\n          assert './sector-etf-v1.js?v=1.3' in html\n"
-          qa_replacement = qa_anchor + "          assert '<button data-tab=\"sectors\">섹터·ETF</button>' in html,'static sector tab missing'\n          assert '<section class=\"panel\" id=\"sectors\">' in html,'static sector panel missing'\n          assert html.find('data-tab=\"sectors\"') < html.find('data-tab=\"tripod\"'),'sector tab order broken'\n          assert html.find('id=\"sectors\"') < html.find('id=\"tripod\"'),'sector panel order broken'\n"
-          if 'static sector tab missing' not in q:
-              if qa_anchor not in q:
-                  raise SystemExit('SECTOR_QA_ASSERT_ANCHOR_NOT_FOUND')
-              q = q.replace(qa_anchor, qa_replacement, 1)
-          qa.write_text(q, encoding='utf-8')
-
           print('SECTOR_STATIC_SHELL_PATCH=PASS')
           PY
           node --check market-observatory/sector-etf-v1.js
@@ -80,7 +62,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/index.html .github/workflows/market-observatory-sector-qa.yml
+          git add market-observatory/index.html
           if git diff --cached --quiet; then
             echo 'No patch needed.'
             exit 0
