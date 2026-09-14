@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.22',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14'};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.23',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -19,6 +19,17 @@ function runtimeReady(label){
  if(label==='trade-outcomes')return window.__JJOONI_TRADE_OUTCOMES_V26?.state==='ACTIVE';
  return null;
 }
+function bootUrl(src){return src+(src.includes('?')?'&':'?')+'_ctboot='+encodeURIComponent(BOOT.preload_token)}
+function preloadModules(modules){
+ for(const [id,src,label] of modules){
+  if(runtimeReady(label)===true||document.getElementById(id))continue;
+  const key='ctPreload_'+id;
+  if(document.getElementById(key))continue;
+  const l=document.createElement('link');l.id=key;l.rel='preload';l.as='script';l.href=bootUrl(src);l.dataset.ctBootPreload='1';head.appendChild(l);
+ }
+ BOOT.preloaded=modules.length;
+ BOOT.preload_started_at=new Date().toISOString();
+}
 function loadRequired(id,src,label){return new Promise((resolve,reject)=>{
  let s=document.getElementById(id),settled=false;
  const finish=(err)=>{if(settled)return;settled=true;clearTimeout(timer);if(err){BOOT.failed_module={id,src,label};reject(err);return}if(s)s.dataset.ctBootLoaded='1';if(!BOOT.loaded.includes(label))BOOT.loaded.push(label);resolve(true)};
@@ -26,7 +37,7 @@ function loadRequired(id,src,label){return new Promise((resolve,reject)=>{
  const timer=setTimeout(()=>finish(new Error(label+'_LOAD_TIMEOUT')),15000);
  if(runtimeReady(label)===true||s?.dataset.ctBootLoaded==='1')return done();
  if(s){s.addEventListener('load',done,{once:true});s.addEventListener('error',()=>finish(new Error(label+'_LOAD_FAILED')),{once:true});return}
- s=document.createElement('script');s.id=id;s.src=src+(src.includes('?')?'&':'?')+'_='+Date.now();s.async=false;s.onload=done;s.onerror=()=>finish(new Error(label+'_LOAD_FAILED'));head.appendChild(s);
+ s=document.createElement('script');s.id=id;s.src=bootUrl(src);s.async=false;s.onload=done;s.onerror=()=>finish(new Error(label+'_LOAD_FAILED'));head.appendChild(s);
 })}
 
 function canonicalizeNavigation(){const tabs=document.querySelector('.tabs');if(!tabs)return false;const seen=new Set();Array.from(tabs.querySelectorAll('.tab[data-tab]')).forEach(t=>{const key=String(t.dataset.tab||'').toLowerCase();if(LABELS[key])t.textContent=LABELS[key];const canonicalKey=key==='performance'&&tabs.querySelector('.tab[data-tab="accounts"]')?'accounts':key;if(seen.has(canonicalKey)){t.style.display='none';t.dataset.ctNavDuplicate='1';return}seen.add(canonicalKey);t.removeAttribute('data-ct-nav-duplicate');if(innerWidth>=768)t.style.removeProperty('display')});const more=document.getElementById('ctMoreTab');if(more&&innerWidth>=768)more.style.display='none';tabs.dataset.ctCanonicalNavOwner='TRADE_REVIEW_LOADER_V14';document.documentElement.dataset.ctNavOwner='v14';BOOT.nav_signature=Array.from(tabs.querySelectorAll('.tab[data-tab]')).filter(e=>getComputedStyle(e).display!=='none').map(e=>String(e.dataset.tab)+':'+String(e.textContent||'').trim()).join('|');return true}
@@ -60,6 +71,6 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctMarketContextV20Script','market-context-v20.js?v=20.0','market-context'],
 ['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.0','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.1','source-authority-guard'],
-['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness'],['ctTabletStabilityV37Script','tablet-stability-v37.js?v=37.0','tablet-stability']];for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true||runtimeReady('trade-outcomes')!==true||runtimeReady('master-trade-bridge')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
+['ctPositionCompletenessV25Script','position-completeness-v25.js?v=25.1.2','position-completeness'],['ctTabletStabilityV37Script','tablet-stability-v37.js?v=37.0','tablet-stability']];preloadModules(modules);for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}if(runtimeReady('source-authority-guard')!==true||runtimeReady('position-completeness')!==true||runtimeReady('trade-outcomes')!==true||runtimeReady('master-trade-bridge')!==true)throw Error('REQUIRED_DETAIL_RUNTIME_MISSING');lockNavigation();if(!canonicalizeNavigation())throw new Error('CANONICAL_NAV_NOT_FOUND');BOOT.state='ACTIVE';BOOT.completed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='ready';const shield=document.getElementById('ctUiBootShieldV14');if(shield)shield.remove();const ssotShield=document.getElementById('ctSsotSafetyShield');if(ssotShield&&window.__JJOONI_LIVE_READY===true)ssotShield.remove();console.info('CT UI BOOT ACTIVE',BOOT)}catch(e){fail(e&&e.message||e)}}
 boot();
 })();
