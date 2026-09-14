@@ -1,0 +1,119 @@
+name: Fix Tablet Detail Readability Once
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-tablet-detail-readability-once.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch tablet detail modal and account chart readability
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          # 1) Drilldown readability is the authority for account/position modals.
+          p=Path('drilldown-readability-v19.js')
+          t=p.read_text()
+          t=t.replace("version:'19.2'","version:'19.3'",1)
+          repl={
+            'min-height:88px!important;padding:14px 15px!important':'min-height:112px!important;padding:18px 20px!important',
+            'font-size:13px!important;line-height:1.35!important;font-weight:800!important':'font-size:16pt!important;line-height:1.4!important;font-weight:800!important',
+            'font-size:21px!important;line-height:1.2!important;font-weight:900!important;margin-top:7px!important':'font-size:22pt!important;line-height:1.2!important;font-weight:900!important;margin-top:9px!important',
+            'font-size:14px!important;line-height:1.4!important;font-weight:850!important':'font-size:18pt!important;line-height:1.4!important;font-weight:850!important',
+            'font-size:11.5px!important;line-height:1.45!important':'font-size:14pt!important;line-height:1.5!important',
+            'min-height:58px!important;padding:11px 12px!important;gap:12px!important':'min-height:76px!important;padding:14px 16px!important;gap:14px!important',
+            'font-size:13px!important;line-height:1.35!important':'font-size:17pt!important;line-height:1.4!important',
+            'font-size:17px!important;line-height:1.35!important':'font-size:20pt!important;line-height:1.35!important',
+            '#accountDrillModal,[id*="position"][id*="Modal"],[id*="Position"][id*="Modal"]{font-size:13px!important}':'#accountDrillModal,[id*="position"][id*="Modal"],[id*="Position"][id*="Modal"]{font-size:18pt!important;line-height:1.5!important}',
+            '#accountDrillModal button,[id*="position"][id*="Modal"] button,[id*="Position"][id*="Modal"] button{font-size:12px!important;min-height:34px!important}':'#accountDrillModal button,[id*="position"][id*="Modal"] button,[id*="Position"][id*="Modal"] button{font-size:14pt!important;min-height:44px!important;padding:8px 12px!important}',
+            '#accountDrillModal [style*="font:800 12px"],#accountDrillModal [style*="font:600 10px"],#accountDrillModal [style*="font:800 11px"]{font-size:12px!important;line-height:1.45!important}':'#accountDrillModal [style*="font:800 12px"],#accountDrillModal [style*="font:600 10px"],#accountDrillModal [style*="font:800 11px"]{font-size:16pt!important;line-height:1.5!important}'
+          }
+          for a,b in repl.items():
+              if a not in t:
+                  raise SystemExit('DRILLDOWN_TOKEN_MISSING: '+a)
+              t=t.replace(a,b,1)
+          # Broad leaf-text floor for tablet account detail. More specific KPI/name/value rules above still win.
+          needle='@media(min-width:768px){\n'
+          extra='@media(min-width:768px){\n #accountDrillModal :is(p,span,li,td,th,small,label){font-size:16pt!important;line-height:1.5!important}\n #accountDrillModal .trade .right{font-size:16pt!important;line-height:1.45!important}\n'
+          if needle not in t: raise SystemExit('DRILLDOWN_MEDIA_MISSING')
+          t=t.replace(needle,extra,1)
+          p.write_text(t)
+
+          # 2) Tablet stability owns overview account-card chart geometry.
+          p=Path('tablet-stability-v37.js')
+          t=p.read_text()
+          t=t.replace("version:'37.7'","version:'37.8'",1)
+          anchor="""html.ctStableTabletV37 #overviewAccounts .ctHumanAccountLineV6,
+html.ctStableTabletV37 .ctOvAccounts .ctHumanAccountLineV6{font-size:18pt!important;line-height:1.45!important;margin-top:10px!important;padding-top:10px!important}
+
+"""
+          block=anchor+"""/* Account chart geometry: tablet charts must be larger than phone sparklines. */
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark{display:block!important;min-height:150px!important;height:150px!important;margin-top:14px!important;overflow:visible!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg{width:100%!important;height:150px!important;min-height:150px!important;overflow:visible!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark canvas,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark canvas{width:100%!important;height:150px!important;min-height:150px!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg text,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg text{font-size:14pt!important;font-weight:800!important}
+html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg path,
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg path{stroke-width:2.5!important}
+
+"""
+          if anchor not in t: raise SystemExit('SPARK_ANCHOR_MISSING')
+          t=t.replace(anchor,block,1)
+          p.write_text(t)
+
+          # 3) Cache-bust only the two existing authority modules.
+          p=Path('trade-review-loader.js')
+          t=p.read_text()
+          t=t.replace("version:'14.26'","version:'14.27'",1)
+          t=t.replace("drilldown-readability-v19.js?v=19.0","drilldown-readability-v19.js?v=19.3",1)
+          t=t.replace("tablet-stability-v37.js?v=37.7","tablet-stability-v37.js?v=37.8",1)
+          p.write_text(t)
+
+          # 4) Regression contract.
+          p=Path('tests/tablet-stability-v37.test.cjs')
+          t=p.read_text()
+          t=t.replace(r'tablet-stability-v37\.js\?v=37\.7',r'tablet-stability-v37\.js\?v=37\.8',1)
+          t += """\n\ntest('tablet detail modal and account charts are not phone-sized',()=>{\n  const read=fs.readFileSync('drilldown-readability-v19.js','utf8');\n  assert.match(loader,/drilldown-readability-v19\\.js\\?v=19\\.3/);\n  assert.match(read,/font-size:18pt!important/);\n  assert.match(read,/font-size:16pt!important/);\n  assert.match(read,/font-size:22pt!important/);\n  assert.doesNotMatch(read,/font-size:11\\.5px!important/);\n  assert.match(guard,/min-height:150px!important/);\n  assert.match(guard,/height:150px!important/);\n  assert.match(guard,/font-size:14pt!important/);\n});\n"""
+          p.write_text(t)
+          PY
+
+      - name: Regression acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check drilldown-readability-v19.js
+          node --check tablet-stability-v37.js
+          node --check trade-review-loader.js
+          node --test tests/*.test.cjs
+          grep -q 'font-size:18pt!important' drilldown-readability-v19.js
+          grep -q 'min-height:150px!important' tablet-stability-v37.js
+          grep -q 'drilldown-readability-v19.js?v=19.3' trade-review-loader.js
+          echo TABLET_DETAIL_READABILITY=PASS
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add drilldown-readability-v19.js tablet-stability-v37.js trade-review-loader.js tests/tablet-stability-v37.test.cjs
+          git diff --cached --check
+          git commit -m 'fix(ui): enlarge tablet detail modal and account charts'
+          git push
