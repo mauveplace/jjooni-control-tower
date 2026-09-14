@@ -38,3 +38,15 @@ test('UI loader still requires detail-authority runtimes before showing the dash
   assert.match(loader,/__JJOONI_CT_FAST\?\.version==='1\.7'/);
   assert.match(loader,/REQUIRED_DETAIL_RUNTIME_MISSING/);
 });
+
+test('UI module optimization preloads downloads but preserves sequential execution',()=>{
+  const loader=read('trade-review-loader.js');
+  assert.match(loader,/function bootUrl\(src\)/);
+  assert.match(loader,/function preloadModules\(modules\)/);
+  assert.match(loader,/l\.rel='preload';l\.as='script';l\.href=bootUrl\(src\)/);
+  const preload=loader.indexOf('preloadModules(modules);');
+  const sequential=loader.indexOf("for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}");
+  assert.ok(preload>=0,'module preloading must be enabled');
+  assert.ok(sequential>preload,'required modules must still execute sequentially after preload starts');
+  assert.match(loader,/s\.src=bootUrl\(src\)/);
+});
