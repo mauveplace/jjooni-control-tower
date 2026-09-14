@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - market-observatory/sector-etf-v1.js
+      - market-observatory/index.html
       - market-observatory/data/sector-etf.json
       - tools/build_observatory_sector_etf.py
       - .github/workflows/market-observatory-sector-qa.yml
@@ -64,6 +65,10 @@ jobs:
               assert token in js,token
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
           assert './sector-etf-v1.js?v=1.3' in html
+          assert '<button data-tab="sectors">섹터·ETF</button>' in html,'static sector tab missing'
+          assert '<section class="panel" id="sectors">' in html,'static sector panel missing'
+          assert html.find('data-tab="sectors"') < html.find('data-tab="tripod"'),'sector tab order broken'
+          assert html.find('id="sectors"') < html.find('id="tripod"'),'sector panel order broken'
           print('SECTOR_ETF_CONTRACT=PASS')
           print('horizons=',d['horizons_sessions'],'sparkline_series_min=',min(len(d['series'][r['ticker']]) for r in theme_rows),'as_of_date=',d['as_of_date'],'classic=',len(classic),'priced=',d['summary']['priced_count'],'errors=',d['quality']['fetch_error_count'])
           PY
