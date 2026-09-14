@@ -118,6 +118,9 @@ jobs:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
           for k in ['KOSPI','KOSDAQ','US_2S10S','JP_2S10S','KR10Y']:
               assert o.get('latest',{}).get(k) is not None,(k,o.get('latest',{}).get(k))
+          us_dates={k:str((o['series'].get(k) or [{}])[-1].get('date',''))[:10] for k in ['NASDAQ100','SP500','VIX']}
+          assert all(us_dates.values()),us_dates
+          assert len(set(us_dates.values()))==1,us_dates
           assert o.get('equity_enrichment_contract')=='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
@@ -142,9 +145,10 @@ jobs:
           for token in ['송팀장 Sector Observatory','RS vs SPY 1M','sector-etf.json','READY_LAZY']:
               assert token in sector,token
           board=Path('market-observatory/latest-board-v1.js').read_text(encoding='utf-8')
-          for token in ['KOSPI','KOSDAQ','US10Y_OFFICIAL','KR10Y','WTI','LATEST_NUMERIC_TOP_BOARD_WITH_SOURCE_DATE']:
+          for token in ['KOSPI','KOSDAQ','US10Y_OFFICIAL','KR10Y','WTI','latestBoardGenerated','refDate']:
               assert token in board,token
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
+          print('us_source_dates=',us_dates)
           print('series=',len(o['series']),'KOSPI=',o['latest']['KOSPI'],'KOSDAQ=',o['latest']['KOSDAQ'],'calendar=',len(c['events']),'sector_classic=',len(classic),'sector_priced=',s['summary']['priced_count'])
           PY
       - name: Publish Observatory data and UI
