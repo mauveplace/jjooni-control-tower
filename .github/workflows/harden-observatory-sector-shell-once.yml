@@ -1,0 +1,91 @@
+name: Harden Observatory Sector Shell Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/harden-observatory-sector-shell-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Make sector entrypoint static and strengthen QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          index = Path('market-observatory/index.html')
+          h = index.read_text(encoding='utf-8')
+
+          old_sub = 'Macro · Rates · FX · Energy · TRI-POD · Event Calendar'
+          new_sub = 'Macro · Rates · FX · Energy · Sector ETF · TRI-POD · Event Calendar'
+          if old_sub in h:
+              h = h.replace(old_sub, new_sub, 1)
+
+          static_tab = '<button data-tab="sectors">섹터·ETF</button>'
+          if static_tab not in h:
+              anchor = '<button data-tab="energy">원자재</button><button data-tab="tripod">TRI-POD</button>'
+              replacement = '<button data-tab="energy">원자재</button>' + static_tab + '<button data-tab="tripod">TRI-POD</button>'
+              if anchor not in h:
+                  raise SystemExit('SECTOR_STATIC_TAB_ANCHOR_NOT_FOUND')
+              h = h.replace(anchor, replacement, 1)
+
+          static_panel = '<section class="panel" id="sectors"><div class="card"><h3>송팀장 Sector Observatory</h3><div class="meta obsSectorLoading">섹터·ETF 완료 일봉을 불러오는 중입니다…</div></div></section>\n'
+          if 'id="sectors"' not in h:
+              anchor = '<section class="panel" id="tripod">'
+              if anchor not in h:
+                  raise SystemExit('SECTOR_STATIC_PANEL_ANCHOR_NOT_FOUND')
+              h = h.replace(anchor, static_panel + anchor, 1)
+
+          index.write_text(h, encoding='utf-8')
+
+          qa = Path('.github/workflows/market-observatory-sector-qa.yml')
+          q = qa.read_text(encoding='utf-8')
+          path_anchor = '      - market-observatory/sector-etf-v1.js\n'
+          index_path = '      - market-observatory/index.html\n'
+          if index_path not in q:
+              if path_anchor not in q:
+                  raise SystemExit('SECTOR_QA_PATH_ANCHOR_NOT_FOUND')
+              q = q.replace(path_anchor, path_anchor + index_path, 1)
+
+          qa_anchor = "          html=Path('market-observatory/index.html').read_text(encoding='utf-8')\n          assert './sector-etf-v1.js?v=1.3' in html\n"
+          qa_replacement = qa_anchor + "          assert '<button data-tab=\"sectors\">섹터·ETF</button>' in html,'static sector tab missing'\n          assert '<section class=\"panel\" id=\"sectors\">' in html,'static sector panel missing'\n          assert html.find('data-tab=\"sectors\"') < html.find('data-tab=\"tripod\"'),'sector tab order broken'\n          assert html.find('id=\"sectors\"') < html.find('id=\"tripod\"'),'sector panel order broken'\n"
+          if 'static sector tab missing' not in q:
+              if qa_anchor not in q:
+                  raise SystemExit('SECTOR_QA_ASSERT_ANCHOR_NOT_FOUND')
+              q = q.replace(qa_anchor, qa_replacement, 1)
+          qa.write_text(q, encoding='utf-8')
+
+          print('SECTOR_STATIC_SHELL_PATCH=PASS')
+          PY
+          node --check market-observatory/sector-etf-v1.js
+          python -m py_compile tools/build_observatory_sector_etf.py
+          git diff --check
+          grep -F '<button data-tab="sectors">섹터·ETF</button>' market-observatory/index.html
+          grep -F '<section class="panel" id="sectors">' market-observatory/index.html
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/index.html .github/workflows/market-observatory-sector-qa.yml
+          if git diff --cached --quiet; then
+            echo 'No patch needed.'
+            exit 0
+          fi
+          git commit -m 'fix(observatory): make sector ETF entrypoint resilient'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
