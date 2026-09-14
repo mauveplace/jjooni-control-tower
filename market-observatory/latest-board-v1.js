@@ -3,11 +3,11 @@
 const ITEMS=[
   {k:'KOSPI',label:'KOSPI',kind:'pct',digits:2,group:'한국'},
   {k:'KOSDAQ',label:'KOSDAQ',kind:'pct',digits:2,group:'한국'},
-  {k:'RUSSELL2000',label:'Russell 2000',kind:'pct',digits:0,group:'미국'},
-  {k:'DOW',label:'Dow',kind:'pct',digits:0,group:'미국'},
-  {k:'SP500',label:'S&P 500',kind:'pct',digits:0,group:'미국'},
-  {k:'NASDAQCOMPOSITE',label:'NASDAQ 종합',kind:'pct',digits:0,group:'미국'},
-  {k:'NASDAQ100',label:'NASDAQ 100',kind:'pct',digits:0,group:'미국'},
+  {k:'RUSSELL2000',label:'Russell 2000',kind:'pct',digits:2,group:'미국'},
+  {k:'DOW',label:'Dow',kind:'pct',digits:2,group:'미국'},
+  {k:'SP500',label:'S&P 500',kind:'pct',digits:2,group:'미국'},
+  {k:'NASDAQCOMPOSITE',label:'NASDAQ 종합',kind:'pct',digits:2,group:'미국'},
+  {k:'NASDAQ100',label:'NASDAQ 100',kind:'pct',digits:2,group:'미국'},
   {k:'VIX',label:'VIX',kind:'pct',digits:2,group:'위험'},
   {k:'FEAR_GREED',label:'Fear & Greed',kind:'pts',digits:0,suffix:'/100',group:'심리'},
   {k:'USDKRW',label:'USD/KRW',kind:'pct',digits:2,group:'환율'},
@@ -98,7 +98,7 @@ function renderSector(){const d=SECTOR_DATA;if(!d){setHeader(TAB_CONFIG.sectors.
 function renderTripod(){const t=(typeof DATA!=='undefined'&&DATA?.tripod_latest)||{},ndx=stat(BY_KEY.NASDAQ100),vix=stat(BY_KEY.VIX),ma=num(t.ma250),v10=num(t.vix10),dd=num(t.drawdown_52w_pct);const rows=[
  customTile('REGIME','현재 상태',t.regime||'—','NASDAQ100 vs MA250'),
  customTile('TARGET','목표 노출',t.target||'—','송팀장 Tri-Pod'),
- customTile('INDEX','NASDAQ 100',ndx?fmt(ndx.value,0):'—',ndx?changeText(BY_KEY.NASDAQ100,ndx.change):'전일 대비 —',cls(ndx?.change),ndx?.date||''),
+ customTile('INDEX','NASDAQ 100',ndx?fmt(ndx.value,2):'—',ndx?changeText(BY_KEY.NASDAQ100,ndx.change):'전일 대비 —',cls(ndx?.change),ndx?.date||''),
  customTile('TREND','MA250',ma==null?'—':fmt(ma,0),'레짐 기준선','flat',t.date||''),
  customTile('RISK','VIX / VIX10',`${vix?fmt(vix.value,2):'—'} / ${v10==null?'—':fmt(v10,2)}`,'현재 / 10일 평균',cls(vix?.change),vix?.date||''),
  customTile('DRAWDOWN','52주 고점대비',dd==null?'—':`${dd.toFixed(2)}%`,'낙폭',dd<-9?'down':'flat',t.date||'')
@@ -121,5 +121,5 @@ const st=document.createElement('style');st.textContent=`
 @media(max-width:760px){.latestBoardWrap{padding:0 10px;margin-top:9px}.latestBoardHead{align-items:flex-start;flex-direction:column;gap:7px}.latestBoardTitleBox{display:block}.latestBoardTitleBox span{display:block;margin-top:2px}.latestBoardTools{width:100%;align-items:flex-start;flex-direction:column-reverse;gap:5px}.latestCompare{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none}.latestCompare::-webkit-scrollbar{display:none}.latestCompare button{flex:0 0 auto;min-height:28px}.latestBoardGrid:not(.grouped){grid-template-columns:none!important;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestBoardGrid:not(.grouped)::-webkit-scrollbar{display:none}.latestGroup{padding:8px;margin-bottom:8px}.latestGroupHead{align-items:flex-start}.latestGroupHead>div{display:block}.latestGroupHead span{display:block;margin-top:2px}.latestGroupGrid{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestGroupGrid::-webkit-scrollbar{display:none}.latestTile{padding:8px 9px;scroll-snap-align:start}.latestTile strong{font-size:17px}.latestTileFoot{font-size:8px}.obsIndexGrid .card:last-child{grid-column:auto}}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'2.0',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_AND_PERIOD_COMPARISON',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'2.1',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_AND_PERIOD_COMPARISON',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
