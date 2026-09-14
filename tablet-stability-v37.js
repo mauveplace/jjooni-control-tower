@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TABLET_STABILITY_V37)return;
-const S={state:'BOOTING',version:'37.5',tab_repairs:0,applies:0};
+const S={state:'BOOTING',version:'37.6',tab_repairs:0,applies:0};
 window.__JJOONI_TABLET_STABILITY_V37=S;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return[]}};
@@ -90,11 +90,17 @@ html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!im
 `;(document.head||document.documentElement).appendChild(st);
 }
 const CONTENT_FONT_FLOOR_PX=16;
+const DESKTOP_PANEL_FONT_FLOOR_PX=15;
 let fontFloorTimer=0;
 function enforceContentFontFloor(){
- if(!isTablet())return 0;
- const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);
- if(!roots.length)roots.push(document.body);
+ const tablet=isTablet();
+ const desktopPanelMode=!tablet&&window.innerWidth>=1100&&window.innerWidth<=1800;
+ if(!tablet&&!desktopPanelMode)return 0;
+ const roots=(tablet
+   ?[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')]
+   :[q('#panel-accounts'),q('#panel-performance')]).filter(Boolean);
+ if(!roots.length)return 0;
+ const fontFloorPx=tablet?CONTENT_FONT_FLOOR_PX:DESKTOP_PANEL_FONT_FLOOR_PX;
  let changed=0;
  const seen=new Set(),nodes=[];
  for(const root of roots){for(const el of [root,...qa('*',root)]){if(!seen.has(el)){seen.add(el);nodes.push(el)}}}
@@ -107,14 +113,14 @@ function enforceContentFontFloor(){
   let cs;try{cs=getComputedStyle(el)}catch(_){continue}
   if(!cs||cs.display==='none'||cs.visibility==='hidden')continue;
   const fs=parseFloat(cs.fontSize||'0');
-  if(Number.isFinite(fs)&&fs>0&&fs<CONTENT_FONT_FLOOR_PX){
-   el.style.setProperty('font-size',CONTENT_FONT_FLOOR_PX+'px','important');
+  if(Number.isFinite(fs)&&fs>0&&fs<fontFloorPx){
+   el.style.setProperty('font-size',fontFloorPx+'px','important');
    const lh=parseFloat(cs.lineHeight||'0');
-   if(Number.isFinite(lh)&&lh>0&&lh<CONTENT_FONT_FLOOR_PX*1.3)el.style.setProperty('line-height','1.4','important');
+   if(Number.isFinite(lh)&&lh>0&&lh<fontFloorPx*1.3)el.style.setProperty('line-height','1.4','important');
    changed++;
   }
  }
- S.font_floor_px=CONTENT_FONT_FLOOR_PX;S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();
+ S.font_floor_px=fontFloorPx;S.font_floor_mode=tablet?'TABLET':'DESKTOP_ACCOUNT_PERFORMANCE';S.font_floor_adjusted=changed;S.font_floor_at=new Date().toISOString();
  return changed;
 }
 function scheduleContentFontFloor(delay=30){clearTimeout(fontFloorTimer);fontFloorTimer=setTimeout(enforceContentFontFloor,delay)}

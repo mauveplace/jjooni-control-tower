@@ -51,7 +51,7 @@ test('tablet account drilldown stays single-surface and readable',()=>{
 });
 
 test('tablet readability and navigation guard is loaded',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.0/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.6/);
   assert.match(guard,/ctStableTabletV37/);
   assert.match(guard,/font-size:20px!important/);
   assert.match(guard,/font-size:16px!important/);
@@ -60,4 +60,16 @@ test('tablet readability and navigation guard is loaded',()=>{
   assert.match(guard,/ctConsultantHidden/);
   assert.match(guard,/\.ctTicker\.open \.ctTickerBody\{display:block!important\}/);
   assert.match(guard,/\.ctSleeve\.open \.ctSleeveDetail\{display:block!important\}/);
+});
+
+test('desktop account/performance text floor covers 1100-1800px views',()=>{
+  assert.match(guard,/DESKTOP_PANEL_FONT_FLOOR_PX=15/);
+  assert.match(guard,/window\.innerWidth>=1100&&window\.innerWidth<=1800/);
+  assert.match(guard,/q\('#panel-accounts'\),q\('#panel-performance'\)/);
+  assert.match(tablet,/\.ctP8Line\{[^}]*font-size:15px/);
+  assert.match(tablet,/\.ctP8Name\{font-size:16px/);
+  assert.match(accounts,/\.ctA8Line\{[^}]*font-size:15px/);
+  assert.match(accounts,/\.ctA8Name\{font-size:16px/);
+  assert.match(loader,/tablet-runtime-v8\.js\?v=8\.5/);
+  assert.match(loader,/tablet-accounts-v8\.js\?v=8\.4/);
 });
