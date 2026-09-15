@@ -1,6 +1,13 @@
 name: Market Observatory Responsive E2E
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - market-observatory/index.html
+      - market-observatory/observatory-v2.js
+      - market-observatory/sector-etf-v1.js
+      - .github/workflows/market-observatory-responsive-e2e.yml
   push:
     branches: [main]
     paths:
@@ -44,7 +51,9 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const cases=[
+              {name:'phone-small',width:360,height:800},
               {name:'phone',width:390,height:844},
+              {name:'phone-wide',width:430,height:932},
               {name:'tablet',width:800,height:1280},
             ];
             for(const tc of cases){
@@ -76,7 +85,7 @@ jobs:
                 innerWidth:window.innerWidth,
                 scrollWidth:document.documentElement.scrollWidth,
                 bodyScroll:document.body.scrollWidth,
-                panel:rect(document.querySelector('#sectors')),
+                panel:(()=>{const x=document.querySelector('#sectors');if(!x)return null;const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})(),
                 cards:[...document.querySelectorAll('#sectors .obsSectorCard')].map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
                 sparks:[...document.querySelectorAll('#sectors .obsSpark')].slice(0,12).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
                 chart:(()=>{const x=document.querySelector('#sectors .obsSectorChart');if(!x)return null;const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})(),
@@ -89,7 +98,7 @@ jobs:
               assert(inside(sector.cards),`${tc.name} sector card overflow ${JSON.stringify(sector.cards)}`);
               assert(inside(sector.sparks),`${tc.name} sector spark overflow ${JSON.stringify(sector.sparks)}`);
               assert(sector.chart&&inside([sector.chart]),`${tc.name} sector chart overflow ${JSON.stringify(sector.chart)}`);
-              if(tc.name==='phone')assert(inside(sector.mobileRows),`${tc.name} sector metric row overflow ${JSON.stringify(sector.mobileRows)}`);
+              if(tc.width<=430)assert(inside(sector.mobileRows),`${tc.name} sector metric row overflow ${JSON.stringify(sector.mobileRows)}`);
 
               await page.click('button[data-tab="calendar"]');
               await page.waitForTimeout(300);
