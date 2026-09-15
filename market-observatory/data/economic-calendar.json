@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-15T20:58:28+09:00",
+  "generated_kst": "2026-09-15T21:07:55+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -296,7 +296,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-01-29T22:30+09:00",
@@ -903,7 +912,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-03-24T21:30+09:00",
@@ -1255,7 +1273,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-04-30T21:30+09:00",
@@ -1821,7 +1848,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-06-24T23:00+09:00",
@@ -2116,7 +2152,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-07-31T21:30+09:00",
@@ -2851,23 +2896,15 @@
           "previous": "3.75%",
           "consensus": "4.00%",
           "actual": null,
-          "source": "FairEconomy/ForexFactory"
-        },
-        {
-          "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (2026-09-14 기준)",
-          "previous": "86.8%",
-          "consensus": "92.8%",
-          "actual": null,
-          "source": "CME Fed Funds futures settlement-derived",
-          "observed_date": "2026-09-14",
-          "previous_observed_date": "2026-09-11",
-          "metric_type": "market_probability_snapshot",
-          "value_role": "market_forecast"
+          "source": "FairEconomy/ForexFactory",
+          "event_title": "Federal Funds Rate",
+          "datetime_source": "2026-09-16T14:00:00-04:00",
+          "impact": "High"
         }
       ],
       "_verified_override": true,
-      "fedwatch_as_of": "2026-09-14"
+      "fedwatch_as_of": "2026-09-14",
+      "ff_match_score": 40
     },
     {
       "datetime_kst": "2026-09-17T20:00+09:00",
@@ -3433,7 +3470,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-10-29T21:30+09:00",
@@ -4120,7 +4166,16 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": []
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "source": "FairEconomy/ForexFactory",
+          "previous": null,
+          "consensus": null,
+          "actual": null
+        }
+      ]
     },
     {
       "datetime_kst": "2026-12-10T22:30+09:00",
@@ -4400,16 +4455,16 @@
   "enrichment_note": "Official agencies remain schedule authority. U.S. releases are decomposed into granular market_metrics from FairEconomy/ForexFactory. Captured observations persist after weekly feeds roll forward; missing values are never invented.",
   "enrichment_sources": [
     "Trading Economics unavailable/guest-limited",
-    "FairEconomy unavailable"
+    "FairEconomy/ForexFactory weekly public feed"
   ],
   "enrichment_matched": {
     "trading_economics": 0,
-    "faireconomy_events": 0,
-    "faireconomy_metrics": 0
+    "faireconomy_events": 3,
+    "faireconomy_metrics": 4
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 0
+    "forecast": 1
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
