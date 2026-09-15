@@ -63,7 +63,8 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet 'curl_cffi>=0.7,<1'
-          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py
+          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py
+          python tests/test_market_observatory_completed_session.py
           python tools/build_market_observatory.py
           python tools/postprocess_market_observatory.py
           python tools/backfill_market_history_30y.py
@@ -132,6 +133,8 @@ jobs:
           us_dates={k:str((o['series'].get(k) or [{}])[-1].get('date',''))[:10] for k in ['NASDAQ100','SP500','VIX']}
           assert all(us_dates.values()),us_dates
           assert len(set(us_dates.values()))==1,us_dates
+          assert o.get('us_market_session_contract')=='COMMON_LAST_COMPLETED_US_SESSION_V1'
+          assert o.get('us_completed_session_date')==next(iter(set(us_dates.values())))
           assert o.get('equity_enrichment_contract')=='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
           assert c['schema']=='JJOONI_ECONOMIC_CALENDAR_V1'
           assert c['timezone']=='Asia/Seoul' and c.get('time_contract')=='ALL_TIMES_KST'
