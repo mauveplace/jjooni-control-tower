@@ -76,7 +76,7 @@ jobs:
               assert(base.bodyScroll<=base.innerWidth+3,`${tc.name} body horizontal overflow ${base.bodyScroll}>${base.innerWidth}`);
               assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport ${JSON.stringify(base.cards)}`);
               assert(base.coverage,`${tc.name} market history coverage missing`);
-              const y=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
+              const y=Number((base.coverage.match(/표시\s+(\d{4})/)||[])[1]);
               assert(y&&y<=2016,`${tc.name} long history not hydrated: ${base.coverage}`);
 
               await page.click('button[data-tab="sectors"]');
