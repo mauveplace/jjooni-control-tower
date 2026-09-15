@@ -28,6 +28,13 @@ def metric_key(m):
     return str(m.get('key') or m.get('label') or '').strip()
 
 
+def metric_fields(m):
+    fields=['previous','consensus','actual','event_title','datetime_source','impact','source']
+    if m.get('metric_type')=='market_probability_snapshot':
+        fields.remove('actual')
+    return fields
+
+
 def main():
     if len(sys.argv)<2:
         print('CALENDAR_RETENTION=SKIP no previous snapshot')
@@ -57,11 +64,12 @@ def main():
             if not mk:continue
             seen.add(mk);op=pm.get(mk)
             if not op:continue
-            for field in ['previous','consensus','actual','event_title','datetime_source','impact','source']:
+            for field in metric_fields(m):
                 if clean(m.get(field)) is None and clean(op.get(field)) is not None:
                     m[field]=op.get(field);kept_metrics+=1
         for mk,op in pm.items():
-            if mk not in seen and any(clean(op.get(f)) is not None for f in ['previous','consensus','actual']):
+            retained_value_fields=['previous','consensus'] if op.get('metric_type')=='market_probability_snapshot' else ['previous','consensus','actual']
+            if mk not in seen and any(clean(op.get(f)) is not None for f in retained_value_fields):
                 cms.append(dict(op));kept_metrics+=1
         e['market_metrics']=cms
 

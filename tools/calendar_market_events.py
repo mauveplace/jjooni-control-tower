@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import urllib.request
 from datetime import datetime
@@ -11,7 +12,9 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 OVR = ROOT / 'market-observatory' / 'data' / 'calendar-manual-overrides.json'
+FEDWATCH = ROOT / 'market-observatory' / 'data' / 'fed-watch.json'
 KST = ZoneInfo('Asia/Seoul')
+ET = ZoneInfo('America/New_York')
 UA = 'Mozilla/5.0 JJOONI-Market-Observatory-KeyEvents/1.0'
 
 FOMC_2026_KST = [
@@ -128,6 +131,9 @@ def seed():
     )]
 
     for e in events:
+        # Some BEA page headings were parsed as "N ews GDP ...". Repair both
+        # newly generated and already committed rows during every refresh.
+        e['title'] = re.sub(r'^N\s*ews\s*', '', str(e.get('title') or ''), flags=re.I)
         ensure_fields(e)
     events.sort(key=lambda x: str(x.get('datetime_kst') or ''))
     c['key_event_contract'] = 'VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1'
@@ -186,6 +192,94 @@ def merge_metric(event, metric):
     rows.append(metric)
 
 
+def merge_sources(*values):
+    out = []
+    for value in values:
+        for part in str(value or '').split(' + '):
+            part = part.strip()
+            if part and part not in out:
+                out.append(part)
+    # Drop a generic source token when a more descriptive token already
+    # contains it (for example "한국은행" beside the full release title).
+    out = [part for part in out if not any(part != other and part in other for other in out)]
+    return ' + '.join(out) or None
+
+
+def probability_pct(value):
+    try:
+        return f'{float(value) * 100:.1f}%'
+    except (TypeError, ValueError):
+        return None
+
+
+def apply_fedwatch_metric(calendar, fedwatch=None):
+    """Attach market-implied probability as a forecast, never as an actual."""
+    if fedwatch is None:
+        try:
+            fedwatch = json.loads(FEDWATCH.read_text(encoding='utf-8'))
+        except Exception:
+            return False
+    meeting_date = clean(fedwatch.get('meeting_date'))
+    if not meeting_date:
+        return False
+    try:
+        release_kst = datetime.fromisoformat(meeting_date + 'T14:00:00').replace(tzinfo=ET).astimezone(KST)
+    except ValueError:
+        return False
+    target = next((e for e in calendar.get('events') or [] if
+                   e.get('country') == 'US' and e.get('title') == 'FOMC 정책결정' and
+                   event_date(e) == release_kst.date().isoformat()), None)
+    if target is None:
+        return False
+    current = fedwatch.get('hike_25bp_probability')
+    as_of = clean(fedwatch.get('market_data_as_of'))
+    history = [x for x in (fedwatch.get('history') or []) if
+               clean(x.get('trade_date')) and (not as_of or x.get('trade_date') <= as_of) and
+               x.get('hike_25bp_probability') is not None]
+    history.sort(key=lambda x: x.get('trade_date'))
+    previous = history[-2].get('hike_25bp_probability') if len(history) >= 2 else None
+    metric = {
+        'key': 'fedwatch_hike_25bp',
+        'label': f'CME FedWatch 25bp 인상확률 ({as_of or "최신"} 기준)',
+        'previous': probability_pct(previous),
+        'consensus': probability_pct(current),
+        'actual': None,
+        'source': 'CME Fed Funds futures settlement-derived',
+        'observed_date': as_of,
+        'previous_observed_date': history[-2].get('trade_date') if len(history) >= 2 else None,
+        'metric_type': 'market_probability_snapshot',
+        'value_role': 'market_forecast',
+    }
+    rows = [m for m in (target.get('market_metrics') or []) if
+            (m.get('key') or m.get('label')) != 'fedwatch_hike_25bp']
+    rows.append(metric)
+    target['market_metrics'] = rows
+    target['market_data_source'] = merge_sources(
+        target.get('market_data_source'), 'CME Fed Funds futures settlement-derived')
+    target['fedwatch_as_of'] = as_of
+    return True
+
+
+def sync_representative_values(event):
+    primary = next((m for m in event.get('market_metrics') or [] if
+                    m.get('metric_type') != 'market_probability_snapshot' and
+                    any(clean(m.get(k)) is not None for k in ['previous','consensus','actual'])), None)
+    if not primary:
+        return False
+    changed = False
+    for key in ['previous','consensus','actual']:
+        value = clean(primary.get(key))
+        if value is not None and clean(event.get(key)) != value:
+            event[key] = primary[key]
+            changed = True
+    source = clean(primary.get('source'))
+    merged_source = merge_sources(event.get('market_data_source'), source)
+    if merged_source != clean(event.get('market_data_source')):
+        event['market_data_source'] = merged_source
+        changed = True
+    return changed
+
+
 def add_ff_metric(event, row, key, label, source='FairEconomy/ForexFactory'):
     if not row:
         return False
@@ -240,7 +334,9 @@ def apply_overrides(c):
             elif not existing:
                 target['market_data_source'] = src
         # Compact clients get the first populated metric as representative.
-        primary = next((x for x in target.get('market_metrics') or [] if any(clean(x.get(k)) is not None for k in ['previous','consensus','actual'])), None)
+        primary = next((x for x in target.get('market_metrics') or [] if
+                        x.get('metric_type') != 'market_probability_snapshot' and
+                        any(clean(x.get(k)) is not None for k in ['previous','consensus','actual'])), None)
         if primary:
             for k in ['previous', 'consensus', 'actual']:
                 if clean(primary.get(k)) is not None:
@@ -265,12 +361,16 @@ def refresh():
             dynamic += int(add_ff_metric(e, ff_match(rows, day, 'USD', ['unemployment claims']), 'initial_claims', 'Initial Jobless Claims'))
 
     applied = apply_overrides(c)
+    fedwatch_applied = apply_fedwatch_metric(c)
+    representative_synced = sum(int(sync_representative_values(e)) for e in c.get('events') or [])
     c.setdefault('events', []).sort(key=lambda x: str(x.get('datetime_kst') or ''))
     c['verified_override_contract'] = 'SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1'
     c['market_event_refresh'] = {
         'faireconomy_rows': len(rows),
         'dynamic_metric_matches': dynamic,
         'verified_overrides_applied': applied,
+        'fedwatch_forecast_applied': fedwatch_applied,
+        'representative_values_synced': representative_synced,
         'refreshed_kst': datetime.now(KST).isoformat(timespec='seconds'),
     }
     CAL.write_text(json.dumps(c, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
