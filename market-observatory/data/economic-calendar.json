@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-15T21:45:26+09:00",
+  "generated_kst": "2026-09-15T23:54:27+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2750,7 +2750,7 @@
       "consensus": "51.0",
       "actual": "47.8",
       "te_forecast": null,
-      "surprise": null,
+      "surprise": "actual_vs_consensus",
       "market_data_source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters",
       "market_metrics": [
         {
@@ -2900,18 +2900,6 @@
           "previous": "3.75%",
           "consensus": "4.00%",
           "actual": null
-        },
-        {
-          "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (2026-09-14 기준)",
-          "previous": "86.8%",
-          "consensus": "92.8%",
-          "actual": null,
-          "source": "CME Fed Funds futures settlement-derived",
-          "observed_date": "2026-09-14",
-          "previous_observed_date": "2026-09-11",
-          "metric_type": "market_probability_snapshot",
-          "value_role": "market_forecast"
         }
       ],
       "ff_match_score": 40,
@@ -4476,7 +4464,7 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 5
+    "forecast": 1
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
