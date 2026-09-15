@@ -110,6 +110,16 @@ jobs:
             exit 0
           fi
           git commit -m 'data(observatory): merge verified calendar actuals and key events'
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            git fetch origin main
+            # During rebase, "theirs" is this freshly verified calendar commit.
+            # Keep it for generated-file conflicts while preserving unrelated
+            # commits that another calendar workflow may have just published.
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "VERIFIED_CALENDAR_PUSH_RETRY=$attempt"
+          done
+          echo 'VERIFIED_CALENDAR_PUSH_FAILED_AFTER_RETRIES' >&2
+          exit 1
