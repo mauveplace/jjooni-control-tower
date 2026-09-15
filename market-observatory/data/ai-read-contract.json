@@ -1,0 +1,47 @@
+{
+  "schema": "JJOONI_MARKET_OBSERVATORY_AI_READ_CONTRACT_V1",
+  "purpose": "Mandatory market inputs for Roy and other PB/strategy agents before producing an investment strategy.",
+  "required_reads": [
+    {
+      "path": "./fed-watch.json",
+      "role": "FOMC policy probability",
+      "required": true,
+      "usable_rule": "freshness == LIVE && usage_contract.strategy_usable == true",
+      "fallback": "If stale/unavailable, verify current CME FedWatch on the web before using any policy probability."
+    },
+    {
+      "path": "./observatory.json",
+      "role": "rates, FX, energy, volatility, indices, TRI-POD",
+      "required": true
+    },
+    {
+      "path": "./economic-calendar.json",
+      "role": "FOMC/CPI/employment and other event schedule",
+      "required": true
+    },
+    {
+      "path": "./sector-etf.json",
+      "role": "sector rotation and ETF relative strength",
+      "required": true
+    }
+  ],
+  "fed_watch_policy": {
+    "primary_source": "CME Group",
+    "preferred_product": "CME FedWatch API when licensed; otherwise CME 30-Day Fed Funds settlement-derived probability using CME methodology",
+    "must_report": [
+      "meeting_date",
+      "current_target",
+      "hold_probability",
+      "hike_25bp_probability",
+      "hike_any_probability",
+      "cut_any_probability",
+      "change_1d_pctpt",
+      "change_1w_pctpt",
+      "market_data_as_of",
+      "freshness"
+    ],
+    "stale_behavior": "Never quote a stale probability as a current fact. Refresh/verify first.",
+    "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale."
+  },
+  "agent_instruction": "Before strategy generation, read all required sources. Distinguish observed market facts from interpretation. Do not infer a FedWatch probability from Treasury yields alone when fed-watch.json is unavailable."
+}
