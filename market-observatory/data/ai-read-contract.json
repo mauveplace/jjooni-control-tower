@@ -27,7 +27,13 @@
   ],
   "fed_watch_policy": {
     "primary_source": "CME Group",
-    "preferred_product": "CME FedWatch API when licensed; otherwise CME 30-Day Fed Funds settlement-derived probability using CME methodology",
+    "source_priority": [
+      "CME official FedWatch Intraday API",
+      "CME official FedWatch EOD API",
+      "CME 30-Day Fed Funds settlement-derived probability",
+      "web verification of CME FedWatch when the stored sensor is stale or time-sensitive"
+    ],
+    "preferred_product": "Use the official CME FedWatch API when credentials are configured. The settlement-derived sensor is a safe fallback/reference, not a substitute for fresh intraday FedWatch after market-moving events.",
     "must_report": [
       "meeting_date",
       "current_target",
@@ -40,8 +46,11 @@
       "market_data_as_of",
       "freshness"
     ],
-    "stale_behavior": "Never quote a stale probability as a current fact. Refresh/verify first.",
-    "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale."
+    "source_mode_behavior": "If source_mode is present, report it. If absent, treat the file as settlement-derived fallback based on source/calculation_contract and do not imply official API provenance.",
+    "stale_behavior": "Never quote a stale probability as a current fact. Refresh or web-verify CME FedWatch first.",
+    "time_sensitive_behavior": "If an FOMC decision is within 48 hours, or a high-impact CPI/PPI/NFP/FOMC-related event has occurred since market_data_as_of, do not present settlement-derived probabilities as current. Require the official CME API or a fresh CME web verification.",
+    "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale.",
+    "attribution_rule": "Clearly distinguish 'CME FedWatch official API' from 'CME FedWatch-compatible settlement-derived probability'."
   },
-  "agent_instruction": "Before strategy generation, read all required sources. Distinguish observed market facts from interpretation. Do not infer a FedWatch probability from Treasury yields alone when fed-watch.json is unavailable."
+  "agent_instruction": "Before strategy generation, read all required sources. Distinguish observed market facts from interpretation. Do not infer a FedWatch probability from Treasury yields alone when fed-watch.json is unavailable. If FedWatch is stale or time-sensitive, verify CME before using a probability in an action recommendation."
 }
