@@ -90,6 +90,7 @@ jobs:
                 cards:[...document.querySelectorAll('#sectors .obsSectorCard')].map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
                 sparks:[...document.querySelectorAll('#sectors .obsSpark')].slice(0,12).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
                 chart:(()=>{const x=document.querySelector('#sectors .obsSectorChart');if(!x)return null;const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})(),
+                classicSparks:document.querySelectorAll('#sectors .obsClassicSparkCell .obsSpark').length,
                 mobileRows:[...document.querySelectorAll('#sectors tbody tr')].slice(0,4).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})
               }));
               const inside=xs=>xs.every(r=>r.left>=-2&&r.right<=sector.innerWidth+2&&r.scrollWidth<=Math.ceil(r.width)+2);
@@ -99,6 +100,7 @@ jobs:
               assert(inside(sector.cards),`${tc.name} sector card overflow ${JSON.stringify(sector.cards)}`);
               assert(inside(sector.sparks),`${tc.name} sector spark overflow ${JSON.stringify(sector.sparks)}`);
               assert(sector.chart&&inside([sector.chart]),`${tc.name} sector chart overflow ${JSON.stringify(sector.chart)}`);
+              assert(sector.classicSparks===11,`${tc.name} classic sector sparklines ${sector.classicSparks}/11`);
               if(tc.width<=430)assert(inside(sector.mobileRows),`${tc.name} sector metric row overflow ${JSON.stringify(sector.mobileRows)}`);
 
               await page.click('button[data-tab="calendar"]');
