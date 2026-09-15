@@ -2,7 +2,7 @@
 'use strict';
 if(window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1)return;
 const LEGACY_QA_TOKEN='RS vs SPY 1M';
-const STATE={version:'1.4',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
+const STATE={version:'1.5',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
@@ -34,6 +34,8 @@ function ensureStyle(){
  #sectors th{position:sticky;top:0;background:#f8fafc;color:#667085;font-size:9px;z-index:1}
  #sectors th:first-child,#sectors td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1}
  #sectors th:first-child{background:#f8fafc;z-index:2}
+ #sectors .obsClassicSparkCell{width:170px;min-width:150px;padding:5px 7px}
+ #sectors .obsClassicSparkCell .obsSpark{min-width:130px;margin-top:0}
  #sectors .ticker{font-size:11px;font-weight:950;color:#101828}.name{font-size:8px;color:#8b97a6;margin-top:2px}
  #sectors .up{color:#d92d20}.down{color:#175cd3}.flat{color:#667085}
  #sectors .obsTheme{margin-top:13px}.obsTheme:first-child{margin-top:0}.obsThemeTitle{font-size:10px;font-weight:950;color:#526071;margin-bottom:7px}
@@ -69,6 +71,9 @@ function ensureStyle(){
   #sectors tbody td::before{content:attr(data-label);display:block;margin-bottom:2px;color:#98a2b3;font-size:7px;font-weight:850}
   #sectors tbody td:first-child{position:static;grid-column:1/-1;padding:8px 9px;text-align:left;background:#fff;border-bottom:1px solid #eef2f6;overflow:visible}
   #sectors tbody td:first-child::before{display:none}
+  #sectors tbody .obsClassicSparkCell{grid-column:1/-1;width:auto;min-width:0;padding:5px 7px 8px;overflow:hidden}
+  #sectors tbody .obsClassicSparkCell::before{display:none}
+  #sectors tbody .obsClassicSparkCell .obsSpark{width:100%;min-width:0;margin-top:0}
   #sectors .obsThemeRows{grid-template-columns:minmax(0,1fr)}
   #sectors .obsEtfCard{width:100%;max-width:100%;overflow:hidden}
   #sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -127,7 +132,7 @@ function themeHtml(){
 
 function classicTable(rows){
  const sorted=rows.slice().sort((a,b)=>(rsSpy(b,20)??-999)-(rsSpy(a,20)??-999));
- return `<div class="obsSectorTableWrap"><table><thead><tr><th>ETF / 섹터</th><th>가격</th>${H.map(d=>`<th>${d}일</th>`).join('')}<th>RS20 vs SPY</th></tr></thead><tbody>${sorted.map(r=>`<tr><td><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||'')}</div></td><td data-label="가격">${price(r.price)}</td>${H.map(d=>`<td data-label="${d}일" class="${cls(ret(r,d))}">${pct(ret(r,d))}</td>`).join('')}<td data-label="RS20" class="${cls(rsSpy(r,20))}"><b>${pct(rsSpy(r,20))}</b></td></tr>`).join('')}</tbody></table></div>`;
+ return `<div class="obsSectorTableWrap"><table><thead><tr><th>ETF / 섹터</th><th>가격</th>${H.map(d=>`<th>${d}일</th>`).join('')}<th>RS20 vs SPY</th><th>100일 추이</th></tr></thead><tbody>${sorted.map(r=>`<tr><td><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||'')}</div></td><td data-label="가격">${price(r.price)}</td>${H.map(d=>`<td data-label="${d}일" class="${cls(ret(r,d))}">${pct(ret(r,d))}</td>`).join('')}<td data-label="RS20" class="${cls(rsSpy(r,20))}"><b>${pct(rsSpy(r,20))}</b></td><td class="obsClassicSparkCell">${sparkline(r)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function drawRsChart(rows){
