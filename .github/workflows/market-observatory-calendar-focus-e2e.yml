@@ -58,11 +58,20 @@ jobs:
                   const fomc=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-17')&&String(e.title||'').includes('FOMC 정책결정'));
                   const fomcCard=[...document.querySelectorAll('#events .event')].find(el=>el.querySelector('.event-title')?.textContent.includes('FOMC 정책결정'));
                   const first=document.querySelector('#events .event');
+                  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+                  const windowStart=`${parts.year}-${parts.month}-${parts.day}`;
+                  const windowEnd=new Date(Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day)+7)).toISOString().slice(0,10);
+                  const firstDate=first?.querySelector('.date')?.textContent?.trim()||'';
+                  const firstTitle=first?.querySelector('.event-title')?.textContent?.trim()||'';
+                  const firstEvent=events.find(e=>String(e.datetime_kst||e.date||'').slice(5,10)===firstDate.slice(0,5)&&String(e.title||'')===firstTitle);
                   return {
                     mode:window.__JJOONI_CALENDAR_EDITOR?.mode,
                     status:document.querySelector('#obsCalFocusStatus')?.textContent||'',
-                    firstDate:first?.querySelector('.date')?.textContent?.trim()||'',
-                    firstTitle:first?.querySelector('.event-title')?.textContent?.trim()||'',
+                    firstDate,
+                    firstTitle,
+                    firstFullDate:String(firstEvent?.datetime_kst||firstEvent?.date||'').slice(0,10),
+                    windowStart,
+                    windowEnd,
                     ppi:ppi?.market_metrics||[],
                     cpi:cpi?.market_metrics||[],
                     fomc:fomc||null,
@@ -72,8 +81,8 @@ jobs:
                   };
                 });
                 assert(x.htmlWidth<=x.innerWidth+3,`mobile overflow ${x.htmlWidth}>${x.innerWidth}`);
-                assert(x.status.includes('09/13')&&x.status.includes('09/20'),`wrong KST 7d banner: ${x.status}`);
-                assert(/^09-(1[3-9]|20)/.test(x.firstDate),`first event not within next 7d: ${x.firstDate} ${x.firstTitle}`);
+                assert(x.status.includes(x.windowStart.slice(5).replace('-','/'))&&x.status.includes(x.windowEnd.slice(5).replace('-','/')),`wrong KST 7d banner: ${x.status}`);
+                assert(x.firstFullDate>=x.windowStart&&x.firstFullDate<=x.windowEnd,`first event not within next 7d: ${x.firstFullDate} ${x.firstTitle}`);
                 assert(val(x.ppi,'ppi_mom')==='0.4%',`PPI MoM actual ${val(x.ppi,'ppi_mom')}`);
                 assert(val(x.ppi,'ppi_yoy')==='5.4%',`PPI YoY actual ${val(x.ppi,'ppi_yoy')}`);
                 assert(val(x.ppi,'core_ppi_mom')==='0.2%',`Core PPI MoM actual ${val(x.ppi,'core_ppi_mom')}`);
