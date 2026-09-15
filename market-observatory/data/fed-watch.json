@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-15T13:18:01+09:00",
+  "generated_kst": "2026-09-15T20:38:06+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -8,10 +8,10 @@
   "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_METHODOLOGY_NEAREST_NODE_V1",
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-09-16",
-  "market_data_as_of": "2026-09-11",
+  "market_data_as_of": "2026-09-14",
   "expected_market_data_date": "2026-09-14",
-  "observed_at": "2026-09-15T13:18:01+09:00",
-  "freshness": "STALE",
+  "observed_at": "2026-09-15T20:38:06+09:00",
+  "freshness": "LIVE",
   "current_target": "3.50-3.75",
   "current_target_lower": 3.5,
   "current_target_upper": 3.75,
@@ -22,31 +22,23 @@
       "action": "HOLD",
       "move_bp": 0,
       "target": "3.50-3.75",
-      "probability": 0.132143
+      "probability": 0.071875
     },
     {
       "action": "HIKE_25BP",
       "move_bp": 25,
       "target": "3.75-4.00",
-      "probability": 0.867857
+      "probability": 0.928125
     }
   ],
-  "hold_probability": 0.132143,
-  "hike_any_probability": 0.867857,
-  "hike_25bp_probability": 0.867857,
+  "hold_probability": 0.071875,
+  "hike_any_probability": 0.928125,
+  "hike_25bp_probability": 0.928125,
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
-  "change_1d_pctpt": 12.99,
-  "change_1w_pctpt": 25.98,
+  "change_1d_pctpt": 6.03,
+  "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-04",
-      "hold_probability": 0.391964,
-      "hike_any_probability": 0.608036,
-      "hike_25bp_probability": 0.608036,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-08",
       "hold_probability": 0.391964,
@@ -78,20 +70,28 @@
       "hike_25bp_probability": 0.867857,
       "cut_any_probability": 0,
       "cut_25bp_probability": 0
+    },
+    {
+      "trade_date": "2026-09-14",
+      "hold_probability": 0.071875,
+      "hike_any_probability": 0.928125,
+      "hike_25bp_probability": 0.928125,
+      "cut_any_probability": 0,
+      "cut_25bp_probability": 0
     }
   ],
   "calculation": {
-    "start_effr_implied": 3.63125,
-    "end_effr_implied": 3.848214,
-    "meeting_month_avg_effr": 3.7325,
-    "expected_change_bp": 21.696,
+    "start_effr_implied": 3.631719,
+    "end_effr_implied": 3.86375,
+    "meeting_month_avg_effr": 3.74,
+    "expected_change_bp": 23.203,
     "anchor_month": "2026-11",
     "days_before_including_meeting": 16,
     "days_after": 14
   },
   "quality": {
-    "state": "DEGRADED",
-    "cme_trade_date_gap_days": 3,
+    "state": "PASS",
+    "cme_trade_date_gap_days": 0,
     "fred_target_dates": {
       "lower": "2026-09-14",
       "upper": "2026-09-14",
@@ -105,7 +105,7 @@
     "fred": "https://fred.stlouisfed.org/graph/fredgraph.csv"
   },
   "usage_contract": {
-    "strategy_usable": false,
+    "strategy_usable": true,
     "stale_rule": "If freshness != LIVE, do not use probability as a strategy fact; refresh CME source or web-verify CME FedWatch.",
     "attribution": "CME FedWatch-compatible probability derived from CME 30-Day Fed Funds settlements; not the paid CME FedWatch API payload."
   }

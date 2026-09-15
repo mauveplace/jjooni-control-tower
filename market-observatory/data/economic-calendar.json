@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-15T18:21:38+09:00",
+  "generated_kst": "2026-09-15T20:37:55+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -4028,13 +4028,13 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 0
+    "forecast": 2
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
     "event_fields": 35,
-    "metric_fields_or_rows": 63
+    "metric_fields_or_rows": 62
   },
-  "retention_kst": "2026-09-15T13:17:54+09:00"
+  "retention_kst": "2026-09-15T20:37:55+09:00"
 }
