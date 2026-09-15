@@ -44,9 +44,9 @@
       "change_1d_pctpt",
       "change_1w_pctpt",
       "market_data_as_of",
-      "freshness",
-      "source_mode"
+      "freshness"
     ],
+    "source_mode_behavior": "If source_mode is present, report it. If absent, treat the file as settlement-derived fallback based on source/calculation_contract and do not imply official API provenance.",
     "stale_behavior": "Never quote a stale probability as a current fact. Refresh or web-verify CME FedWatch first.",
     "time_sensitive_behavior": "If an FOMC decision is within 48 hours, or a high-impact CPI/PPI/NFP/FOMC-related event has occurred since market_data_as_of, do not present settlement-derived probabilities as current. Require the official CME API or a fresh CME web verification.",
     "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale.",
