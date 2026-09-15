@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-15T13:17:54+09:00",
+  "generated_kst": "2026-09-15T18:21:38+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2635,16 +2635,6 @@
           "previous": "3.75%",
           "consensus": "4.00%",
           "actual": null
-        },
-        {
-          "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (9/11 snapshot)",
-          "previous": null,
-          "consensus": null,
-          "actual": "86.5%",
-          "source": "CME Group",
-          "observed_date": "2026-09-11",
-          "metric_type": "market_probability_snapshot"
         }
       ],
       "ff_match_score": 40
@@ -4038,7 +4028,7 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 2
+    "forecast": 0
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
