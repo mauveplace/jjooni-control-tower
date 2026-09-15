@@ -19,6 +19,8 @@ SYMBOLS={
  'US3M':'^IRX','US5Y':'^FVX','US10Y':'^TNX','US30Y':'^TYX'
 }
 KR_ECOS={'KR3Y':'010200000','KR5Y':'010200001','KR10Y':'010210000','KR20Y':'010220000','KR30Y':'010230000'}
+US_COMPLETED_SESSION_KEYS=('NASDAQ100','SP500','VIX')
+US_REGULAR_CLOSE_GRACE=(16,15)
 
 
 def req(url,timeout=20,accept='*/*'):
@@ -49,6 +51,37 @@ def yahoo_series(symbol,range_='3y'):
         d=datetime.fromtimestamp(int(t),ET).date().isoformat()
         out.append({'date':d,'value':round(v,8)})
     ded={x['date']:x for x in out}; return [ded[k] for k in sorted(ded)]
+
+def completed_us_session_cutoff(now_et=None):
+    """Return the latest date that may contain a completed US regular session.
+
+    Yahoo can expose a provisional same-day daily bar before the cash session has
+    closed (VIX commonly arrives before the index bars).  A small grace period
+    after 16:00 ET keeps provisional values out of EOD/TRI-POD calculations.
+    """
+    now_et=(now_et or datetime.now(ET)).astimezone(ET)
+    cutoff=now_et.date()
+    if (now_et.hour,now_et.minute)<US_REGULAR_CLOSE_GRACE:
+        cutoff-=timedelta(days=1)
+    return cutoff.isoformat()
+
+def completed_us_bars(rows,now_et=None):
+    cutoff=completed_us_session_cutoff(now_et)
+    return [x for x in (rows or []) if str(x.get('date') or '')[:10]<=cutoff]
+
+def align_completed_us_market_series(series):
+    """Align NDX, S&P 500 and VIX to one common completed trading date."""
+    date_sets=[]
+    for key in US_COMPLETED_SESSION_KEYS:
+        rows=series.get(key) or []
+        if not rows:return None
+        date_sets.append({str(x.get('date') or '')[:10] for x in rows if x.get('date')})
+    common=set.intersection(*date_sets)
+    if not common:return None
+    aligned=max(common)
+    for key in US_COMPLETED_SESSION_KEYS:
+        series[key]=[x for x in series[key] if str(x.get('date') or '')[:10]<=aligned]
+    return aligned
 
 def load_prev():
     try:return json.loads(OBS.read_text(encoding='utf-8'))
@@ -122,7 +155,9 @@ def ecos_series(item,start,end,key):
 def series_map():
     prev=(load_prev().get('series') or {}); out={}
     for k,s in SYMBOLS.items():
-        try:out[k]=yahoo_series(s,'3y')
+        try:
+            rows=yahoo_series(s,'3y')
+            out[k]=completed_us_bars(rows) if k in US_COMPLETED_SESSION_KEYS else rows
         except Exception:out[k]=prev.get(k,[])
     key=os.getenv('BOK_ECOS_API_KEY','sample'); end=datetime.now(KST).strftime('%Y%m%d'); start=(datetime.now(KST)-timedelta(days=1100)).strftime('%Y%m%d')
     for k,item in KR_ECOS.items():
@@ -134,6 +169,7 @@ def series_map():
         out[name]=[{'date':d,'value':round(ma[d]-mb[d],8)} for d in sorted(set(ma)&set(mb))]
     # Yahoo does not expose a stable 2Y yield symbol; US2Y is injected from Treasury below.
     derive('KR10Y','KR3Y','KR_3S10S')
+    align_completed_us_market_series(out)
     return out
 
 def add_official_yields(series):
@@ -254,7 +290,9 @@ def main():
     try:public=json.loads((ROOT/'public-market-daily.json').read_text(encoding='utf-8'))
     except:pass
     sig=public.get('tripod_signal') or (th[-1] if th else {})
-    out={'schema':'JJOONI_MARKET_OBSERVATORY_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'read_only':True,'contains_account_data':False,'latest':latest,'series':series,'curves':{'US_CURVE':curve_payload(us,['3 Mo','2 Yr','5 Yr','10 Yr','30 Yr']),'JP_CURVE':curve_payload(jp,['2Y','5Y','10Y','20Y','30Y'])},'tripod_latest':sig,'tripod_history':th[-800:],'signal_log':log[-100:],'sources':{'US_TREASURY':'US Treasury','JP_JGB':'Japan MOF','KR_RATES':'BOK ECOS','MARKETS':'Yahoo public daily','TRIPOD':'derived completed-session daily'}}
+    us_session_dates={k:(series.get(k) or [{}])[-1].get('date') for k in US_COMPLETED_SESSION_KEYS}
+    us_completed_session_date=next(iter(set(us_session_dates.values()))) if len(set(us_session_dates.values()))==1 else None
+    out={'schema':'JJOONI_MARKET_OBSERVATORY_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'read_only':True,'contains_account_data':False,'us_market_session_contract':'COMMON_LAST_COMPLETED_US_SESSION_V1','us_completed_session_date':us_completed_session_date,'latest':latest,'series':series,'curves':{'US_CURVE':curve_payload(us,['3 Mo','2 Yr','5 Yr','10 Yr','30 Yr']),'JP_CURVE':curve_payload(jp,['2Y','5Y','10Y','20Y','30Y'])},'tripod_latest':sig,'tripod_history':th[-800:],'signal_log':log[-100:],'sources':{'US_TREASURY':'US Treasury','JP_JGB':'Japan MOF','KR_RATES':'BOK ECOS','MARKETS':'Yahoo public daily','TRIPOD':'derived completed-session daily'}}
     OBS.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     CAL.write_text(json.dumps(calendar_build(),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('MARKET_OBSERVATORY_BUILD=PASS');print('generated_kst='+out['generated_kst']);print('series='+str(len(series)));print('calendar_events='+str(len(json.loads(CAL.read_text())['events'])))
