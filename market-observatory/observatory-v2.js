@@ -200,5 +200,5 @@ window.addEventListener('load',()=>{
   try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){}
   setTimeout(()=>hydrateHistory(false),80);
 });
-window.__JJOONI_OBSERVATORY_UI={version:'2.5.0-long-history-axis',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,x_axis_dates:true};
+window.__JJOONI_OBSERVATORY_UI={version:'2.6.0-calendar-semantics',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,x_axis_dates:true};
 })();

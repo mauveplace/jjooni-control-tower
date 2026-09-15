@@ -52,8 +52,8 @@ jobs:
                 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
                 try{
                   await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.5.0-long-history-axis',{timeout:20000});
-                  await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.0',{timeout:12000});
+                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.6.0-calendar-semantics',{timeout:20000});
+                  await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.1',{timeout:12000});
                   await page.waitForFunction(()=>typeof DATA!=='undefined'&&DATA?.history_loaded===true,{timeout:20000});
                   await page.waitForTimeout(1200);
 
