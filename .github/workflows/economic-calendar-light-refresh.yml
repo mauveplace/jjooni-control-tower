@@ -57,6 +57,10 @@ jobs:
             exit 0
           fi
           git commit -m 'data(observatory): refresh macro consensus and actual'
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            echo "ECON_CAL_PUSH_RETRY=$attempt"
+          done
+          exit 1
