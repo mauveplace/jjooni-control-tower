@@ -6,6 +6,7 @@ on:
     paths:
       - tools/build_market_observatory.py
       - tools/build_observatory_sector_etf.py
+      - tools/build_fed_watch.py
       - tools/postprocess_market_observatory.py
       - tools/backfill_market_history_30y.py
       - tools/enrich_economic_calendar.py
@@ -17,6 +18,8 @@ on:
       - market-observatory/calendar-editor-v1.js
       - market-observatory/latest-board-v1.js
       - market-observatory/sector-etf-v1.js
+      - market-observatory/fed-watch-v1.js
+      - market-observatory/data/ai-read-contract.json
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-daily.yml
   schedule:
@@ -59,7 +62,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py
+          python -m pip install --quiet 'curl_cffi>=0.7,<1'
+          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py
           python tools/build_market_observatory.py
           python tools/postprocess_market_observatory.py
           python tools/backfill_market_history_30y.py
@@ -68,6 +72,7 @@ jobs:
           python tools/archive_calendar_actuals.py
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
+          python tools/build_fed_watch.py
       - name: Install Observatory UI runtimes and optimize bootstrap
         shell: bash
         run: |
@@ -86,6 +91,9 @@ jobs:
           if 'latest-board-v1.js' not in s:s=s.replace('</body>',board+'</body>',1)
           sector='<script src="./sector-etf-v1.js?v=1.0"></script>'
           if 'sector-etf-v1.js' not in s:s=s.replace('</body>',sector+'</body>',1)
+          fedwatch='<script src="./fed-watch-v1.js?v=1.0"></script>'
+          if 'fed-watch-v1.js' not in s:s=s.replace('</body>',fedwatch+'</body>',1)
+          s=s.replace('Macro · Rates · FX · Energy · Sector ETF · TRI-POD · Event Calendar','Macro · Rates · FedWatch · FX · Energy · Sector ETF · TRI-POD · Event Calendar')
 
           old="Promise.all([fetch('./data/observatory.json?'+Date.now(),{cache:'no-store'}).then(r=>r.json()),fetch('./data/economic-calendar.json?'+Date.now(),{cache:'no-store'}).then(r=>r.json())]).then(([d,c])=>{DATA=d;CAL=c;render();renderCalendar()}).catch(e=>{console.error(e);$('#pulse').innerHTML='<span class=\"chip\">데이터 로딩 대기</span>'});"
           new="const loadObsJson=u=>fetch(u,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);return r.json()});let CAL_PROMISE=null;function loadCalendar(){if(CAL)return Promise.resolve(CAL);if(CAL_PROMISE)return CAL_PROMISE;CAL_PROMISE=loadObsJson('./data/economic-calendar.json').then(c=>{CAL=c;renderCalendar();return c}).finally(()=>{CAL_PROMISE=null});return CAL_PROMISE}loadObsJson('./data/observatory.json').then(d=>{DATA=d;render()}).catch(e=>{console.error(e);$('#pulse').innerHTML='<span class=\"chip\">데이터 로딩 대기</span>'});$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b?.dataset.tab==='calendar')loadCalendar().catch(err=>console.error('calendar lazy load',err))});"
@@ -97,6 +105,7 @@ jobs:
           print('OBSERVATORY_UI_RUNTIME=PASS')
           print('OBSERVATORY_BOOTSTRAP_CACHE_REVALIDATION=PASS')
           print('OBSERVATORY_CALENDAR_LAZY_LOAD=PASS')
+          print('OBSERVATORY_FEDWATCH_RUNTIME=PASS')
           PY
       - name: Acceptance contract
         shell: bash
@@ -109,6 +118,8 @@ jobs:
           c=json.load(open('market-observatory/data/economic-calendar.json'))
           h=json.load(open('market-observatory/data/history-30y.json'))
           s=json.load(open('market-observatory/data/sector-etf.json'))
+          f=json.load(open('market-observatory/data/fed-watch.json'))
+          a=json.load(open('market-observatory/data/ai-read-contract.json'))
           assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
           assert o['read_only'] is True and o['contains_account_data'] is False
           assert o.get('history_target_years')==30
@@ -136,8 +147,18 @@ jobs:
           assert s.get('quality',{}).get('classic_priced_count',0)>=9
           for ticker in ['XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE','SMH','IGV','XBI','KRE']:
               assert ticker in s.get('series',{}),ticker
+          assert f.get('schema')=='JJOONI_FED_WATCH_V1'
+          assert f.get('read_only') is True and f.get('contains_account_data') is False
+          assert f.get('meeting_date') and f.get('market_data_as_of')
+          assert f.get('freshness') in ['LIVE','STALE']
+          assert 0 <= float(f.get('hold_probability',0)) <= 1
+          assert 0 <= float(f.get('hike_any_probability',0)) <= 1
+          assert 0 <= float(f.get('cut_any_probability',0)) <= 1
+          assert abs(sum(float(x.get('probability',0)) for x in f.get('outcomes',[]))-1.0) < 0.01
+          assert a.get('schema')=='JJOONI_MARKET_OBSERVATORY_AI_READ_CONTRACT_V1'
+          assert any(x.get('path')=='./fed-watch.json' and x.get('required') for x in a.get('required_reads',[]))
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
-          for token in ['chartjs-plugin-zoom@2.2.0','observatory-v2.js','calendar-editor-v1.js','latest-board-v1.js','sector-etf-v1.js']:
+          for token in ['chartjs-plugin-zoom@2.2.0','observatory-v2.js','calendar-editor-v1.js','latest-board-v1.js','sector-etf-v1.js','fed-watch-v1.js']:
               assert token in html,token
           assert "fetch('./data/observatory.json?'+Date.now(),{cache:'no-store'})" not in html
           assert "loadCalendar()" in html and "economic-calendar.json" in html
@@ -147,8 +168,12 @@ jobs:
           board=Path('market-observatory/latest-board-v1.js').read_text(encoding='utf-8')
           for token in ['KOSPI','KOSDAQ','US10Y_OFFICIAL','KR10Y','WTI','latestBoardGenerated','refDate']:
               assert token in board,token
+          fedjs=Path('market-observatory/fed-watch-v1.js').read_text(encoding='utf-8')
+          for token in ['FOMC Market Pricing · FedWatch','fed-watch.json','hike_25bp_probability','change_1w_pctpt']:
+              assert token in fedjs,token
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
+          print('fedwatch=',f['meeting_date'],f['market_data_as_of'],f['hike_any_probability'],f['freshness'])
           print('series=',len(o['series']),'KOSPI=',o['latest']['KOSPI'],'KOSDAQ=',o['latest']['KOSDAQ'],'calendar=',len(c['events']),'sector_classic=',len(classic),'sector_priced=',s['summary']['priced_count'])
           PY
       - name: Publish Observatory data and UI
@@ -157,12 +182,12 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/calendar-manual-overrides.json market-observatory/index.html
+          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/index.html
           if git diff --cached --quiet; then
             echo MARKET_OBSERVATORY_NO_CHANGE
             exit 0
           fi
-          git commit -m 'data(observatory): refresh latest market board calendar and sectors'
+          git commit -m 'data(observatory): refresh latest market board calendar sectors and FedWatch'
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
