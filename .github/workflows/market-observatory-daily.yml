@@ -63,17 +63,21 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet 'curl_cffi>=0.7,<1'
-          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py
+          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/calendar_market_events.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
           python tests/test_market_observatory_completed_session.py
+          python tests/test_calendar_market_semantics.py
           python tools/build_market_observatory.py
+          python tools/calendar_market_events.py seed
           python tools/postprocess_market_observatory.py
           python tools/backfill_market_history_30y.py
           python tools/enrich_economic_calendar.py
           python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
+          python tools/build_fed_watch.py
+          python tools/calendar_market_events.py refresh
           python tools/archive_calendar_actuals.py
+          python tests/test_calendar_data_quality.py
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
-          python tools/build_fed_watch.py
       - name: Install Observatory UI runtimes and optimize bootstrap
         shell: bash
         run: |
@@ -158,6 +162,16 @@ jobs:
           assert 0 <= float(f.get('hike_any_probability',0)) <= 1
           assert 0 <= float(f.get('cut_any_probability',0)) <= 1
           assert abs(sum(float(x.get('probability',0)) for x in f.get('outcomes',[]))-1.0) < 0.01
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          fomc_date=datetime.fromisoformat(f['meeting_date']+'T14:00:00').replace(tzinfo=ZoneInfo('America/New_York')).astimezone(ZoneInfo('Asia/Seoul')).date().isoformat()
+          fomc=next(e for e in c.get('events',[]) if e.get('country')=='US' and e.get('title')=='FOMC 정책결정' and str(e.get('datetime_kst','')).startswith(fomc_date))
+          metrics={m.get('key'):m for m in fomc.get('market_metrics',[])}
+          rate=metrics.get('fed_rate') or {}
+          fw=metrics.get('fedwatch_hike_25bp') or {}
+          assert rate.get('previous') and rate.get('consensus') and rate.get('actual') is None,rate
+          assert fw.get('previous') and fw.get('consensus') and fw.get('actual') is None,fw
+          assert fw.get('metric_type')=='market_probability_snapshot' and fw.get('value_role')=='market_forecast',fw
           assert a.get('schema')=='JJOONI_MARKET_OBSERVATORY_AI_READ_CONTRACT_V1'
           assert any(x.get('path')=='./fed-watch.json' and x.get('required') for x in a.get('required_reads',[]))
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
