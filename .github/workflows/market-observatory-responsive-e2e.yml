@@ -62,7 +62,8 @@ jobs:
               page.on('pageerror',e=>errors.push(String(e)));
               await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
               await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.responsive===true,{timeout:30000});
-              await page.waitForTimeout(5000);
+              await page.click('.obsRange[data-for="marketChart"] button[data-range="30Y"]');
+              await page.waitForFunction(()=>{const s=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';return s.startsWith('30Y 표시')&&!s.includes('로딩중')},{timeout:30000});
               const base=await page.evaluate(()=>({
                 innerWidth:window.innerWidth,
                 scrollWidth:document.documentElement.scrollWidth,
