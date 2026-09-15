@@ -20,6 +20,8 @@ PREF={
  'Personal Income and Outlays':['core pce price index m/m','core pce price index mom','pce price index y/y','personal income','personal spending'],
  'GDP':['advance gdp q/q','prelim gdp q/q','final gdp q/q','gdp growth rate qoq','gdp growth rate'],
  'FOMC':['federal funds rate','fed interest rate decision'],
+ 'Import and Export Price Indexes':['import prices m/m','export prices m/m'],
+ 'Bank of England 금리 결정':['official bank rate','mpc official bank rate votes'],
  '통화정책방향':['interest rate decision'],
  '소비자물가':['inflation rate yoy','cpi'],
  '고용동향':['unemployment rate'],
@@ -70,6 +72,14 @@ DETAIL_GROUPS={
  ],
  'FOMC':[
    {'key':'fed_rate','label':'Federal Funds Rate','aliases':['federal funds rate']},
+ ],
+ 'Import and Export Price Indexes':[
+   {'key':'us_import_price_mom','label':'U.S. Import Prices MoM','aliases':['import prices m/m','import prices mom']},
+   {'key':'us_export_price_mom','label':'U.S. Export Prices MoM','aliases':['export prices m/m','export prices mom']},
+ ],
+ 'Bank of England 금리 결정':[
+   {'key':'boe_bank_rate','label':'Bank of England Bank Rate','aliases':['official bank rate'],'forbid':['votes']},
+   {'key':'boe_vote_split','label':'MPC 금리투표 (인상-인하-동결)','aliases':['mpc official bank rate votes']},
  ],
 }
 
@@ -131,7 +141,8 @@ def score_te(event,row):
     return s if prefs else -999
 
 def score_ff(event,row):
-    if event.get('country')!='US' or str(row.get('country') or '').upper()!='USD':return -999
+    currency={'US':'USD','GB':'GBP'}.get(event.get('country'))
+    if not currency or str(row.get('country') or '').upper()!=currency:return -999
     delta=date_delta(event_date(event),row_kst_date(row))
     if delta>1:return -999
     prefs=prefs_for(event.get('title'))
@@ -153,11 +164,12 @@ def set_if_present(e,key,val):
     if v is not None:e[key]=v
 
 def metric_match(event,spec,rows):
-    if event.get('country')!='US':return None
+    currency={'US':'USD','GB':'GBP'}.get(event.get('country'))
+    if not currency:return None
     best=None;best_score=-999
     ed=event_date(event)
     for row in rows:
-        if str(row.get('country') or '').upper()!='USD':continue
+        if str(row.get('country') or '').upper()!=currency:continue
         delta=date_delta(ed,row_kst_date(row))
         if delta>1:continue
         title=norm(row.get('title'))

@@ -55,6 +55,8 @@ jobs:
                   const events=(typeof CAL!=='undefined'&&CAL?.events)||[];
                   const ppi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-10')&&String(e.title||'').includes('Producer Price Index'));
                   const cpi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-11')&&String(e.title||'').includes('Consumer Price Index'));
+                  const fomc=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-17')&&String(e.title||'').includes('FOMC 정책결정'));
+                  const fomcCard=[...document.querySelectorAll('#events .event')].find(el=>el.querySelector('.event-title')?.textContent.includes('FOMC 정책결정'));
                   const first=document.querySelector('#events .event');
                   return {
                     mode:window.__JJOONI_CALENDAR_EDITOR?.mode,
@@ -63,6 +65,8 @@ jobs:
                     firstTitle:first?.querySelector('.event-title')?.textContent?.trim()||'',
                     ppi:ppi?.market_metrics||[],
                     cpi:cpi?.market_metrics||[],
+                    fomc:fomc||null,
+                    fomcText:fomcCard?.innerText||'',
                     htmlWidth:document.documentElement.scrollWidth,
                     innerWidth:window.innerWidth
                   };
@@ -78,6 +82,12 @@ jobs:
                 assert(val(x.cpi,'cpi_mom')==='0.4%',`CPI MoM actual ${val(x.cpi,'cpi_mom')}`);
                 assert(val(x.cpi,'core_cpi_yoy')==='2.4%',`Core CPI YoY actual ${val(x.cpi,'core_cpi_yoy')}`);
                 assert(val(x.cpi,'core_cpi_mom')==='0.3%',`Core CPI MoM actual ${val(x.cpi,'core_cpi_mom')}`);
+                const fw=(x.fomc?.market_metrics||[]).find(m=>m.key==='fedwatch_hike_25bp')||{};
+                const rate=(x.fomc?.market_metrics||[]).find(m=>m.key==='fed_rate')||{};
+                assert(rate.previous==='3.75%'&&rate.consensus==='4.00%'&&rate.actual==null,`FOMC rate semantics ${JSON.stringify(rate)}`);
+                assert(fw.previous==='86.8%'&&fw.consensus==='92.8%'&&fw.actual==null&&fw.value_role==='market_forecast',`FedWatch semantics ${JSON.stringify(fw)}`);
+                assert(x.fomcText.includes('예정')&&!x.fomcText.includes('발표완료'),`FOMC status ${x.fomcText}`);
+                assert(x.fomcText.includes('1거래일 전')&&x.fomcText.includes('현재 시장예측'),`FedWatch labels ${x.fomcText}`);
                 assert(errors.length===0,`page errors: ${errors.join(' | ')}`);
                 console.log(`CALENDAR_FOCUS_E2E=PASS first="${x.firstDate} ${x.firstTitle}" banner="${x.status}" PPI=${val(x.ppi,'ppi_mom')}/${val(x.ppi,'ppi_yoy')}/${val(x.ppi,'core_ppi_mom')}/${val(x.ppi,'core_ppi_yoy')} CPI=${val(x.cpi,'cpi_yoy')}/${val(x.cpi,'cpi_mom')}/${val(x.cpi,'core_cpi_yoy')}/${val(x.cpi,'core_cpi_mom')}`);
                 passed=true;

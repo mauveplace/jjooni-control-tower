@@ -1,15 +1,68 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-15T20:37:55+09:00",
+  "generated_kst": "2026-09-15T21:01:46+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
+    {
+      "match": {
+        "date": "2026-09-15",
+        "country": "KR",
+        "title_contains": "수출입물가지수 및 무역지수"
+      },
+      "source": "한국은행 2026년 8월 수출입물가지수 및 무역지수(잠정)",
+      "market_metrics": [
+        {
+          "key": "kr_export_price_mom",
+          "label": "수출물가지수 MoM",
+          "previous": "+0.9%",
+          "consensus": null,
+          "actual": "-3.7%",
+          "source": "한국은행"
+        },
+        {
+          "key": "kr_import_price_mom",
+          "label": "수입물가지수 MoM",
+          "previous": "-1.0%",
+          "consensus": null,
+          "actual": "-2.4%",
+          "source": "한국은행"
+        },
+        {
+          "key": "kr_export_price_yoy",
+          "label": "수출물가지수 YoY",
+          "previous": "+48.9%",
+          "consensus": null,
+          "actual": "+42.4%",
+          "source": "한국은행"
+        },
+        {
+          "key": "kr_import_price_yoy",
+          "label": "수입물가지수 YoY",
+          "previous": "+18.8%",
+          "consensus": null,
+          "actual": "+15.6%",
+          "source": "한국은행"
+        },
+        {
+          "key": "kr_net_terms_trade_yoy",
+          "label": "순상품교역조건지수 YoY",
+          "previous": null,
+          "consensus": null,
+          "actual": "+27.1%",
+          "source": "한국은행"
+        }
+      ],
+      "previous": "+0.9%",
+      "consensus": null,
+      "actual": "-3.7%"
+    },
     {
       "match": {
         "date": "2026-09-01",
         "country": "US",
         "title_contains": "Job Openings and Labor Turnover"
       },
-      "source": "Forex Factory/Fair Economy historical calendar",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "key": "jolts",
@@ -17,9 +70,12 @@
           "previous": "7.18M",
           "consensus": "7.33M",
           "actual": "7.27M",
-          "source": "Forex Factory/Fair Economy historical calendar"
+          "source": "FairEconomy/ForexFactory"
         }
-      ]
+      ],
+      "previous": "7.18M",
+      "consensus": "7.33M",
+      "actual": "7.27M"
     },
     {
       "match": {
@@ -27,7 +83,7 @@
         "country": "US",
         "title_contains": "Productivity and Costs"
       },
-      "source": "Forex Factory/Fair Economy historical calendar",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "key": "productivity",
@@ -56,7 +112,7 @@
         "country": "US",
         "title_contains": "Employment Situation"
       },
-      "source": "Forex Factory/Fair Economy historical calendar",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "key": "nfp",
@@ -93,7 +149,7 @@
         "country": "KR",
         "title_contains": "소비자물가"
       },
-      "source": "Korea official release + market consensus cross-check",
+      "source": "Korea official release + KOSTAT / market consensus cross-check",
       "market_metrics": [
         {
           "key": "kr_cpi_yoy",
@@ -111,7 +167,10 @@
           "actual": "0.2%",
           "source": "KOSTAT / Reuters consensus"
         }
-      ]
+      ],
+      "previous": "2.8%",
+      "consensus": "3.2%",
+      "actual": "3.1%"
     },
     {
       "match": {
@@ -119,7 +178,7 @@
         "country": "KR",
         "title_contains": "고용동향"
       },
-      "source": "KOSTAT official release + market calendar cross-check",
+      "source": "KOSTAT official release + KOSTAT / market calendar cross-check",
       "market_metrics": [
         {
           "key": "kr_unemployment_sa",
@@ -137,7 +196,10 @@
           "actual": "+184K",
           "source": "KOSTAT official release"
         }
-      ]
+      ],
+      "previous": "2.8%",
+      "consensus": "3.1%",
+      "actual": "2.7%"
     },
     {
       "match": {
@@ -235,7 +297,7 @@
         "country": "US",
         "title_contains": "University of Michigan Consumer Sentiment"
       },
-      "source": "University of Michigan official + Reuters/Investing consensus cross-check",
+      "source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters",
       "market_metrics": [
         {
           "key": "umich_sentiment",
@@ -261,27 +323,10 @@
           "actual": "3.4%",
           "source": "University of Michigan"
         }
-      ]
-    },
-    {
-      "match": {
-        "date": "2026-09-17",
-        "country": "US",
-        "title_contains": "FOMC 정책결정"
-      },
-      "source": "CME Group market snapshot after Aug CPI release",
-      "market_metrics": [
-        {
-          "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (9/11 snapshot)",
-          "previous": null,
-          "consensus": null,
-          "actual": "86.5%",
-          "source": "CME Group",
-          "observed_date": "2026-09-11",
-          "metric_type": "market_probability_snapshot"
-        }
-      ]
+      ],
+      "previous": "51.7",
+      "consensus": "51.0",
+      "actual": "47.8"
     },
     {
       "match": {
@@ -394,6 +439,57 @@
       "previous": "51.7",
       "consensus": "51.0",
       "actual": "47.8"
+    },
+    {
+      "match": {
+        "date": "2026-09-17",
+        "country": "US",
+        "title_contains": "FOMC 정책결정"
+      },
+      "source": "FairEconomy/ForexFactory",
+      "market_metrics": [
+        {
+          "key": "fed_rate",
+          "label": "Federal Funds Rate",
+          "previous": "3.75%",
+          "consensus": "4.00%",
+          "actual": null,
+          "source": "FairEconomy/ForexFactory"
+        }
+      ],
+      "previous": "3.75%",
+      "consensus": "4.00%",
+      "actual": null
+    },
+    {
+      "match": {
+        "date": "2026-09-17",
+        "country": "GB",
+        "title_contains": "Bank of England 금리 결정"
+      },
+      "source": "FairEconomy/ForexFactory",
+      "market_metrics": [
+        {
+          "key": "boe_bank_rate",
+          "label": "Bank of England Bank Rate",
+          "previous": "3.75%",
+          "consensus": "3.75%",
+          "actual": null,
+          "source": "FairEconomy/ForexFactory",
+          "event_title": "Official Bank Rate"
+        },
+        {
+          "key": "boe_vote_split",
+          "label": "MPC 금리투표 (인상-인하-동결)",
+          "previous": "3-0-6",
+          "consensus": "3-0-6",
+          "actual": null,
+          "source": "FairEconomy/ForexFactory"
+        }
+      ],
+      "previous": "3.75%",
+      "consensus": "3.75%",
+      "actual": null
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"

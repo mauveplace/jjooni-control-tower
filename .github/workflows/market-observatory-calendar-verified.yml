@@ -8,6 +8,14 @@ on:
     branches: [main]
     paths:
       - tools/calendar_market_events.py
+      - tools/enrich_economic_calendar.py
+      - tools/persist_calendar_history.py
+      - tools/archive_calendar_actuals.py
+      - tools/build_market_observatory.py
+      - tests/test_calendar_market_semantics.py
+      - tests/test_calendar_data_quality.py
+      - market-observatory/observatory-v2.js
+      - market-observatory/calendar-editor-v1.js
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-calendar-verified.yml
   schedule:
@@ -39,12 +47,14 @@ jobs:
         run: |
           set -euo pipefail
           cp market-observatory/data/economic-calendar.json /tmp/economic-calendar-prev.json
-          python -m py_compile tools/calendar_market_events.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py
+          python -m py_compile tools/calendar_market_events.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
+          python tests/test_calendar_market_semantics.py
           python tools/calendar_market_events.py seed
           python tools/enrich_economic_calendar.py
           python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
           python tools/calendar_market_events.py refresh
           python tools/archive_calendar_actuals.py
+          python tests/test_calendar_data_quality.py
       - name: Acceptance contract
         shell: bash
         run: |
@@ -60,8 +70,15 @@ jobs:
           fomc=find('2026-09-17','FOMC 정책결정')
           assert fomc and fomc['datetime_kst']=='2026-09-17T03:00+09:00',fomc
           assert not find('2026-09-16','FOMC 정책결정')
-          fw=next((m for m in fomc.get('market_metrics',[]) if m.get('key')=='fedwatch_hike_25bp'),None)
-          assert fw and fw.get('actual')=='86.5%',fw
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          fwd=json.load(open('market-observatory/data/fed-watch.json'))
+          fw_kst=datetime.fromisoformat(fwd['meeting_date']+'T14:00:00').replace(tzinfo=ZoneInfo('America/New_York')).astimezone(ZoneInfo('Asia/Seoul')).date().isoformat()
+          fw_event=find(fw_kst,'FOMC 정책결정')
+          fw=next((m for m in (fw_event or {}).get('market_metrics',[]) if m.get('key')=='fedwatch_hike_25bp'),None)
+          assert fw and fw.get('metric_type')=='market_probability_snapshot',fw
+          assert fw.get('previous') and fw.get('consensus') and fw.get('actual') is None,fw
+          assert fw.get('value_role')=='market_forecast',fw
           mich=find('2026-09-11','University of Michigan Consumer Sentiment')
           assert mich,mich
           mm={m.get('key'):m for m in mich.get('market_metrics',[])}
@@ -79,7 +96,7 @@ jobs:
           assert micron and micron['datetime_kst']=='2026-10-01T05:30+09:00',micron
           assert not find('2026-09-23','Micron')
           print('VERIFIED_CALENDAR_ACCEPTANCE=PASS')
-          print('FOMC=',fomc['datetime_kst'],'MICH=',mm['umich_sentiment']['actual'],'FEDWATCH=',fw['actual'],'BOE=',boe['datetime_kst'],'CLAIMS=',claims['datetime_kst'],'MICRON=',micron['datetime_kst'])
+          print('FOMC=',fomc['datetime_kst'],'MICH=',mm['umich_sentiment']['actual'],'FEDWATCH_PREV/CURRENT=',fw['previous'],fw['consensus'],'BOE=',boe['datetime_kst'],'CLAIMS=',claims['datetime_kst'],'MICRON=',micron['datetime_kst'])
           PY
       - name: Publish verified calendar
         shell: bash

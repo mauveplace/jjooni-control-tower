@@ -269,7 +269,7 @@ def bea_events(events):
     except:return
     months='January|February|March|April|May|June|July|August|September|October|November|December'
     for m in re.finditer(rf'({months})\s+(\d{{1,2}})\s+8:30 AM\s+(.{{0,180}}?)(?=({months})\s+\d{{1,2}}\s+|To Be Announced|$)',txt):
-        mon,day,title=m.group(1),int(m.group(2)),m.group(3).strip();
+        mon,day,title=m.group(1),int(m.group(2)),m.group(3).strip();title=re.sub(r'^N\s*ews\s*','',title,flags=re.I)
         if not any(x in title for x in ['GDP','Personal Income and Outlays','International Trade']):continue
         try:d=datetime.strptime(f'2026 {mon} {day} 08:30','%Y %B %d %H:%M').replace(tzinfo=ET).astimezone(KST)
         except:continue
