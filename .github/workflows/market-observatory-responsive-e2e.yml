@@ -1,11 +1,19 @@
 name: Market Observatory Responsive E2E
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - market-observatory/index.html
+      - market-observatory/observatory-v2.js
+      - market-observatory/sector-etf-v1.js
+      - .github/workflows/market-observatory-responsive-e2e.yml
   push:
     branches: [main]
     paths:
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
+      - market-observatory/sector-etf-v1.js
       - .github/workflows/market-observatory-responsive-e2e.yml
   workflow_dispatch:
 
@@ -43,7 +51,9 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const cases=[
+              {name:'phone-small',width:360,height:800},
               {name:'phone',width:390,height:844},
+              {name:'phone-wide',width:430,height:932},
               {name:'tablet',width:800,height:1280},
             ];
             for(const tc of cases){
@@ -51,8 +61,9 @@ jobs:
               const errors=[];
               page.on('pageerror',e=>errors.push(String(e)));
               await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
-              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.4.1-responsive-history',{timeout:30000});
-              await page.waitForTimeout(5000);
+              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.responsive===true,{timeout:30000});
+              await page.click('.obsRange[data-for="marketChart"] button[data-range="30Y"]');
+              await page.waitForFunction(()=>{const s=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';return s.startsWith('30Y 표시')&&!s.includes('로딩중')},{timeout:30000});
               const base=await page.evaluate(()=>({
                 innerWidth:window.innerWidth,
                 scrollWidth:document.documentElement.scrollWidth,
@@ -65,8 +76,30 @@ jobs:
               assert(base.bodyScroll<=base.innerWidth+3,`${tc.name} body horizontal overflow ${base.bodyScroll}>${base.innerWidth}`);
               assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport ${JSON.stringify(base.cards)}`);
               assert(base.coverage,`${tc.name} market history coverage missing`);
-              const y=Number((base.coverage.match(/^(\d{4})/)||[])[1]);
+              const y=Number((base.coverage.match(/표시\s+(\d{4})/)||[])[1]);
               assert(y&&y<=2016,`${tc.name} long history not hydrated: ${base.coverage}`);
+
+              await page.click('button[data-tab="sectors"]');
+              await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1?.loaded===true,{timeout:30000});
+              await page.waitForTimeout(300);
+              const sector=await page.evaluate(()=>({
+                innerWidth:window.innerWidth,
+                scrollWidth:document.documentElement.scrollWidth,
+                bodyScroll:document.body.scrollWidth,
+                panel:(()=>{const x=document.querySelector('#sectors');if(!x)return null;const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})(),
+                cards:[...document.querySelectorAll('#sectors .obsSectorCard')].map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
+                sparks:[...document.querySelectorAll('#sectors .obsSpark')].slice(0,12).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}}),
+                chart:(()=>{const x=document.querySelector('#sectors .obsSectorChart');if(!x)return null;const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})(),
+                mobileRows:[...document.querySelectorAll('#sectors tbody tr')].slice(0,4).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,scrollWidth:x.scrollWidth}})
+              }));
+              const inside=xs=>xs.every(r=>r.left>=-2&&r.right<=sector.innerWidth+2&&r.scrollWidth<=Math.ceil(r.width)+2);
+              assert(sector.scrollWidth<=sector.innerWidth+3,`${tc.name} sector html horizontal overflow ${sector.scrollWidth}>${sector.innerWidth}`);
+              assert(sector.bodyScroll<=sector.innerWidth+3,`${tc.name} sector body horizontal overflow ${sector.bodyScroll}>${sector.innerWidth}`);
+              assert(sector.panel&&sector.panel.left>=-2&&sector.panel.right<=sector.innerWidth+2,`${tc.name} sector panel outside viewport`);
+              assert(inside(sector.cards),`${tc.name} sector card overflow ${JSON.stringify(sector.cards)}`);
+              assert(inside(sector.sparks),`${tc.name} sector spark overflow ${JSON.stringify(sector.sparks)}`);
+              assert(sector.chart&&inside([sector.chart]),`${tc.name} sector chart overflow ${JSON.stringify(sector.chart)}`);
+              if(tc.width<=430)assert(inside(sector.mobileRows),`${tc.name} sector metric row overflow ${JSON.stringify(sector.mobileRows)}`);
 
               await page.click('button[data-tab="calendar"]');
               await page.waitForTimeout(300);
