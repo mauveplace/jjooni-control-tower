@@ -2,7 +2,7 @@
 'use strict';
 if(window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1)return;
 const LEGACY_QA_TOKEN='RS vs SPY 1M';
-const STATE={version:'1.3',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
+const STATE={version:'1.4',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
@@ -23,10 +23,12 @@ function ensureStyle(){
  #sectors .obsSectorKpi{background:#fff;border:1px solid #e4eaf1;border-radius:13px;padding:10px;min-width:0}
  #sectors .obsSectorKpi span{display:block;font-size:8px;font-weight:850;color:#7b8798}
  #sectors .obsSectorKpi b{display:block;margin-top:4px;font-size:14px;color:#172033;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- #sectors .obsSectorGrid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}
+ #sectors{min-width:0;max-width:100%;overflow-x:clip}
+ #sectors .obsSectorGrid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;min-width:0;max-width:100%}
+ #sectors .obsSectorGrid>*{min-width:0;max-width:100%}
  #sectors .obsSectorCard{background:#fff;border:1px solid #e4eaf1;border-radius:15px;padding:13px;box-shadow:0 4px 16px rgba(12,31,54,.035);min-width:0}
  #sectors .obsSectorCard h3{margin:0 0 3px;font-size:14px}
- #sectors .obsSectorTableWrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #edf1f5;border-radius:11px;margin-top:9px}
+ #sectors .obsSectorTableWrap{width:100%;max-width:100%;min-width:0;overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #edf1f5;border-radius:11px;margin-top:9px}
  #sectors table{border-collapse:collapse;width:100%;min-width:760px;font-size:10px}
  #sectors th,#sectors td{padding:8px 7px;border-bottom:1px solid #eef2f6;text-align:right;white-space:nowrap}
  #sectors th{position:sticky;top:0;background:#f8fafc;color:#667085;font-size:9px;z-index:1}
@@ -49,9 +51,40 @@ function ensureStyle(){
  #sectors .obsSectorLeader{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eef2f6;font-size:10px}
  #sectors .obsSectorLeader:last-child{border-bottom:0}.obsSectorLeader b{font-size:11px}.obsSectorRank{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:999px;background:#f2f4f7;font-size:9px;font-weight:950;margin-right:7px}
  #sectors .obsSectorQuality{margin-top:10px;padding:9px 10px;border-radius:10px;font-size:9px;line-height:1.5;background:#f8fafc;border:1px solid #e8edf3;color:#667085}.obsSectorQuality.warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
- #sectors .obsSectorChart{height:330px;margin-top:8px}
+ #sectors .obsSectorChart{position:relative;width:100%;max-width:100%;min-width:0;height:330px;margin-top:8px;overflow:hidden}
+ #sectors .obsSectorChart canvas{display:block;width:100%!important;max-width:100%!important;min-width:0!important}
  #sectors .obsSectorLoading{padding:40px 14px;text-align:center;color:#718096;font-size:11px}
- @media(max-width:760px){#sectors .obsSectorHead{align-items:flex-start}#sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}#sectors .obsSectorGrid{grid-template-columns:1fr}#sectors .obsThemeRows{grid-template-columns:1fr}#sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#sectors .obsSectorChart{height:280px}#sectors .obsSpark svg{height:38px}}
+ @media(max-width:760px){
+  #sectors .obsSectorHead{align-items:flex-start;flex-wrap:wrap}
+  #sectors .obsSectorBadge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  #sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #sectors .obsSectorGrid{grid-template-columns:minmax(0,1fr)}
+  #sectors .obsSectorCard{width:100%;max-width:100%;padding:11px}
+  #sectors .obsSectorTableWrap{overflow:hidden}
+  #sectors table{display:block;width:100%;min-width:0}
+  #sectors thead{display:none}
+  #sectors tbody{display:grid;gap:8px;padding:7px;background:#f8fafc}
+  #sectors tbody tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;overflow:hidden;background:#fff;border:1px solid #e7edf4;border-radius:10px}
+  #sectors tbody td{display:block;min-width:0;padding:7px 3px;border:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #sectors tbody td::before{content:attr(data-label);display:block;margin-bottom:2px;color:#98a2b3;font-size:7px;font-weight:850}
+  #sectors tbody td:first-child{position:static;grid-column:1/-1;padding:8px 9px;text-align:left;background:#fff;border-bottom:1px solid #eef2f6;overflow:visible}
+  #sectors tbody td:first-child::before{display:none}
+  #sectors .obsThemeRows{grid-template-columns:minmax(0,1fr)}
+  #sectors .obsEtfCard{width:100%;max-width:100%;overflow:hidden}
+  #sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #sectors .obsSpark{width:100%;max-width:100%}
+  #sectors .obsSpark svg{width:100%;max-width:100%;height:38px;overflow:hidden}
+  #sectors .obsSectorChart{height:280px}
+  #sectors .obsSectorLeader{align-items:flex-start;flex-wrap:wrap}
+  #sectors .obsSectorLeader>b{min-width:0;max-width:100%;margin-left:auto;text-align:right;white-space:normal;overflow-wrap:anywhere}
+ }
+ @media(max-width:380px){
+  #sectors .obsSectorKpis{grid-template-columns:1fr 1fr;gap:6px}
+  #sectors .obsSectorKpi{padding:8px}
+  #sectors .obsSectorKpi b{font-size:12px}
+  #sectors .obsSectorCard{padding:9px}
+  #sectors tbody{padding:5px}
+ }
  `;(document.head||document.documentElement).appendChild(st);
 }
 
@@ -94,7 +127,7 @@ function themeHtml(){
 
 function classicTable(rows){
  const sorted=rows.slice().sort((a,b)=>(rsSpy(b,20)??-999)-(rsSpy(a,20)??-999));
- return `<div class="obsSectorTableWrap"><table><thead><tr><th>ETF / 섹터</th><th>가격</th>${H.map(d=>`<th>${d}일</th>`).join('')}<th>RS20 vs SPY</th></tr></thead><tbody>${sorted.map(r=>`<tr><td><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||'')}</div></td><td>${price(r.price)}</td>${H.map(d=>`<td class="${cls(ret(r,d))}">${pct(ret(r,d))}</td>`).join('')}<td class="${cls(rsSpy(r,20))}"><b>${pct(rsSpy(r,20))}</b></td></tr>`).join('')}</tbody></table></div>`;
+ return `<div class="obsSectorTableWrap"><table><thead><tr><th>ETF / 섹터</th><th>가격</th>${H.map(d=>`<th>${d}일</th>`).join('')}<th>RS20 vs SPY</th></tr></thead><tbody>${sorted.map(r=>`<tr><td><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||'')}</div></td><td data-label="가격">${price(r.price)}</td>${H.map(d=>`<td data-label="${d}일" class="${cls(ret(r,d))}">${pct(ret(r,d))}</td>`).join('')}<td data-label="RS20" class="${cls(rsSpy(r,20))}"><b>${pct(rsSpy(r,20))}</b></td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function drawRsChart(rows){
