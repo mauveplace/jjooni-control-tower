@@ -1,0 +1,183 @@
+name: Fix trade-history security names once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-trade-security-names-once.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Generate KIS security-name registry and patch trade UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from io import BytesIO
+          from zipfile import ZipFile
+          from urllib.request import Request, urlopen
+          import json, re
+
+          ROOT=Path('.')
+          UA={'User-Agent':'JJOONI-Control-Tower/1.0'}
+
+          def get(url):
+              with urlopen(Request(url, headers=UA), timeout=30) as r:
+                  return r.read()
+
+          names={}
+
+          def add(ticker, name):
+              t=str(ticker or '').strip().upper()
+              n=str(name or '').strip()
+              if not t or not n or n.upper()==t:
+                  return
+              names.setdefault(t,n)
+              if re.fullmatch(r'\d{1,6}',t):
+                  names.setdefault(t.zfill(6),n)
+
+          # Official KIS domestic fixed-width masters. Their published readers count
+          # the trailing newline inside 228/222; splitlines removes it => 227/221.
+          for market, url, tailw in [
+              ('KOSPI','https://new.real.download.dws.co.kr/common/master/kospi_code.mst.zip',227),
+              ('KOSDAQ','https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip',221),
+          ]:
+              payload=get(url)
+              with ZipFile(BytesIO(payload)) as z:
+                  member=next(x for x in z.namelist() if x.lower().endswith('.mst'))
+                  text=z.read(member).decode('cp949',errors='replace')
+              count=0
+              for row in text.splitlines():
+                  if len(row)<=tailw+21:
+                      continue
+                  head=row[:-tailw]
+                  ticker=head[:9].strip()
+                  kor_name=head[21:].strip()
+                  if ticker and kor_name:
+                      add(ticker,kor_name); count+=1
+              if count<100:
+                  raise SystemExit(f'{market}_MASTER_PARSE_TOO_SMALL:{count}')
+              print(f'{market}_NAMES={count}')
+
+          # Official KIS U.S. masters: NASDAQ / NYSE / AMEX. Columns are tab-separated;
+          # Symbol=4, Korean name=6, English name=7 in KIS' published parser.
+          for market in ('nas','nys','ams'):
+              url=f'https://new.real.download.dws.co.kr/common/master/{market}mst.cod.zip'
+              payload=get(url)
+              with ZipFile(BytesIO(payload)) as z:
+                  member=next(x for x in z.namelist() if x.lower().endswith('.cod'))
+                  text=z.read(member).decode('cp949',errors='replace')
+              count=0
+              for row in text.splitlines():
+                  p=row.split('\t')
+                  if len(p)<8:
+                      continue
+                  symbol=p[4].strip().upper()
+                  if not symbol or symbol.lower()=='symbol' or not re.fullmatch(r'[A-Z0-9.\-]+',symbol):
+                      continue
+                  kor=p[6].strip(); eng=p[7].strip()
+                  nm=kor or eng
+                  if nm:
+                      add(symbol,nm); count+=1
+              if count<100:
+                  raise SystemExit(f'{market.upper()}_MASTER_PARSE_TOO_SMALL:{count}')
+              print(f'{market.upper()}_NAMES={count}')
+
+          # Regression proof for the exact names visible in the reported screenshot.
+          required=('132030','364970','103590','SOFI','IONQ')
+          missing=[x for x in required if not names.get(x) or names.get(x)==x]
+          if missing:
+              raise SystemExit('SCREENSHOT_NAME_REGRESSION_MISSING:'+','.join(missing))
+          print('SCREENSHOT_NAME_REGRESSION=PASS '+json.dumps({x:names[x] for x in required},ensure_ascii=False))
+
+          body='// Generated from official KIS domestic/US security masters.\n'
+          body+='// Do not hand-edit; regenerate through fix/refresh workflow.\n'
+          body+='window.__JJOONI_SECURITY_NAMES=Object.assign(window.__JJOONI_SECURITY_NAMES||{},'+json.dumps(dict(sorted(names.items())),ensure_ascii=False,separators=(',',':'))+');\n'
+          body+='window.dispatchEvent(new CustomEvent("jjooni:security-names-ready",{detail:{count:Object.keys(window.__JJOONI_SECURITY_NAMES||{}).length}}));\n'
+          (ROOT/'security-names-v1.js').write_text(body,encoding='utf-8')
+          print('SECURITY_NAME_REGISTRY_COUNT='+str(len(names)))
+
+          # Patch the actual renderer shown in 거래내역 (trade-review-outcomes-v26).
+          p=ROOT/'trade-review-outcomes-v26.js'
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("version:'26.3'","version:'26.4'",1)
+          old="const name=t=>{\n const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||'').trim();"
+          new="const name=t=>{\n const tk=ticker(t),raw=String(t?.name||t?.stock_name||t?.security_name||t?.display_name||t?.product_name||t?.prdt_name||t?.prdt_abrv_name||t?.hts_kor_isnm||t?.kor_name||t?.korean_name||t?.english_name||t?.eng_name||'').trim();"
+          if old not in s:
+              raise SystemExit('OUTCOME_NAME_RESOLVER_ANCHOR_MISSING')
+          s=s.replace(old,new,1)
+          anchor="function sumKnown(rows,key,currency){const vals=rows.map(x=>key==='realized'?x.realized:({value:x.opportunity,currency:ccy(x.t)})).filter(x=>x&&x.value!==null&&x.currency===currency);return {sum:vals.reduce((a,x)=>a+x.value,0),count:vals.length}}"
+          helper=anchor+"\nfunction identityNameHtml(t){const nm=name(t),tk=ticker(t);return esc(nm)+(sym(nm)!==tk?' <span style=\"font-size:10px;color:#7b8a9b\">'+esc(tk)+'</span>':'')}"
+          if anchor not in s:
+              raise SystemExit('OUTCOME_IDENTITY_HELPER_ANCHOR_MISSING')
+          s=s.replace(anchor,helper,1)
+          old_html='<div class="ctO26Name">${esc(name(t))} <span style="font-size:10px;color:#7b8a9b">${esc(ticker(t))}</span></div>'
+          new_html='<div class="ctO26Name">${identityNameHtml(t)}</div>'
+          if old_html not in s:
+              raise SystemExit('OUTCOME_DUP_TICKER_ANCHOR_MISSING')
+          s=s.replace(old_html,new_html,1)
+          # Re-render automatically when the name registry becomes available.
+          marker="document.addEventListener('jjooni:live-applied',run);"
+          if marker not in s:
+              raise SystemExit('OUTCOME_EVENT_ANCHOR_MISSING')
+          s=s.replace(marker,marker+"\nwindow.addEventListener('jjooni:security-names-ready',run);",1)
+          p.write_text(s,encoding='utf-8')
+
+          # Patch the secondary trade review resolver too, so all 거래내역 views share names.
+          p=ROOT/'trade-review-v2.js'; s=p.read_text(encoding='utf-8')
+          old="function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}"
+          new="function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||t.security_name||t.display_name||t.product_name||t.prdt_name||t.prdt_abrv_name||t.hts_kor_isnm||t.kor_name||t.korean_name||t.english_name||t.eng_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}"
+          if old not in s:
+              raise SystemExit('TRADE_REVIEW_NAME_RESOLVER_ANCHOR_MISSING')
+          s=s.replace(old,new,1)
+          marker="document.addEventListener('jjooni:live-applied',run);"
+          if marker in s and "jjooni:security-names-ready" not in s:
+              s=s.replace(marker,marker+"\nwindow.addEventListener('jjooni:security-names-ready',run);",1)
+          p.write_text(s,encoding='utf-8')
+
+          # Load the registry before trade renderers and bust outcome cache.
+          p=ROOT/'trade-review-loader.js'; s=p.read_text(encoding='utf-8')
+          s=s.replace("version:'14.28'","version:'14.29'",1)
+          anchor="['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],\n['ctTradeReviewV2Script','trade-review-v2.js?v=2','trade-review'],"
+          repl="['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],\n['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],\n['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],"
+          if anchor not in s:
+              raise SystemExit('LOADER_SECURITY_NAMES_ANCHOR_MISSING')
+          s=s.replace(anchor,repl,1)
+          old="['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.3','trade-outcomes'],"
+          new="['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.4','trade-outcomes'],"
+          if old not in s:
+              raise SystemExit('LOADER_OUTCOME_VERSION_ANCHOR_MISSING')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          node --check trade-review-v2.js
+          node --check trade-review-outcomes-v26.js
+          node --check trade-review-loader.js
+          node --check security-names-v1.js
+          grep -q "'132030':\|'132030'" security-names-v1.js || true
+          grep -q 'ctSecurityNamesV1Script' trade-review-loader.js
+          grep -q 'identityNameHtml' trade-review-outcomes-v26.js
+          echo 'TRADE_SECURITY_NAMES_QA=PASS'
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add security-names-v1.js trade-review-v2.js trade-review-outcomes-v26.js trade-review-loader.js
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGES'
+            exit 0
+          fi
+          git commit -m 'fix: show security names in trade history'
+          git push origin HEAD:main
