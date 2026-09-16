@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-16T09:11:29+09:00",
+  "generated_kst": "2026-09-16T09:30:02+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2900,6 +2900,18 @@
           "previous": "3.75%",
           "consensus": "4.00%",
           "actual": null
+        },
+        {
+          "key": "fedwatch_hike_25bp",
+          "label": "CME FedWatch 25bp 인상확률 (2026-09-14 기준)",
+          "previous": "86.8%",
+          "consensus": "92.8%",
+          "actual": null,
+          "source": "CME Fed Funds futures settlement-derived",
+          "observed_date": "2026-09-14",
+          "previous_observed_date": "2026-09-11",
+          "metric_type": "market_probability_snapshot",
+          "value_role": "market_forecast"
         }
       ],
       "ff_match_score": 40,
@@ -2956,7 +2968,7 @@
       "source": "U.S. Department of Labor",
       "reference_period": "weekly",
       "previous": "206K",
-      "consensus": "208K",
+      "consensus": "207K",
       "actual": null,
       "te_forecast": null,
       "surprise": null,
@@ -2966,7 +2978,7 @@
           "key": "initial_claims",
           "label": "Initial Jobless Claims",
           "previous": "206K",
-          "consensus": "208K",
+          "consensus": "207K",
           "actual": null,
           "source": "FairEconomy/ForexFactory",
           "event_title": "Unemployment Claims",
@@ -4441,7 +4453,7 @@
   ],
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-16T05:48:04+09:00",
+  "key_event_seeded_kst": "2026-09-16T09:28:57+09:00",
   "time_contract": "ALL_TIMES_KST",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "quality": {
@@ -4466,22 +4478,22 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 1
+    "forecast": 7
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
-    "event_fields": 45,
-    "metric_fields_or_rows": 72
+    "event_fields": 46,
+    "metric_fields_or_rows": 71
   },
-  "retention_kst": "2026-09-16T05:49:17+09:00",
+  "retention_kst": "2026-09-16T09:30:02+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
   "market_event_refresh": {
     "faireconomy_rows": 105,
     "dynamic_metric_matches": 1,
     "verified_overrides_applied": 15,
     "fedwatch_forecast_applied": true,
-    "representative_values_synced": 2,
-    "refreshed_kst": "2026-09-16T05:49:21+09:00"
+    "representative_values_synced": 3,
+    "refreshed_kst": "2026-09-16T09:30:05+09:00"
   }
 }
