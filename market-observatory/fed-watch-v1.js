@@ -68,5 +68,45 @@ const st=document.createElement('style');st.textContent=`
 `;document.head.appendChild(st);
 const tabs=document.getElementById('tabs');if(tabs)tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b?.dataset.tab==='rates')setTimeout(run,0)});
 if(active()==='rates')run();
-window.__JJOONI_FED_WATCH={version:'1.0',data:'./data/fed-watch.json',contract:'CME_SETTLEMENT_DERIVED_FEDWATCH'};
+
+const AUTO_REFRESH_MS=60*60*1000;
+const AUTO_REFRESH_HEARTBEAT_MS=60*1000;
+const AUTO_REFRESH_STATE_KEY='JJOONI_OBSERVATORY_AUTO_REFRESH_V1';
+let autoRefreshDueAt=Date.now()+AUTO_REFRESH_MS;
+let autoRefreshPending=false;
+function reloadPreservingView(){
+  try{
+    sessionStorage.setItem(AUTO_REFRESH_STATE_KEY,JSON.stringify({tab:active(),scrollY:Math.max(0,window.scrollY||0),savedAt:Date.now()}));
+  }catch(_){ }
+  window.location.reload();
+}
+function restoreViewAfterAutoRefresh(){
+  try{
+    const raw=sessionStorage.getItem(AUTO_REFRESH_STATE_KEY);if(!raw)return;
+    sessionStorage.removeItem(AUTO_REFRESH_STATE_KEY);
+    const state=JSON.parse(raw);if(!state||Date.now()-Number(state.savedAt||0)>5*60*1000)return;
+    const tab=String(state.tab||'overview');
+    const restore=()=>{
+      const button=document.querySelector(`#tabs button[data-tab="${tab}"]`);
+      if(button&&!button.classList.contains('on'))button.click();
+      setTimeout(()=>window.scrollTo({top:Number(state.scrollY||0),left:0,behavior:'auto'}),500);
+    };
+    setTimeout(restore,350);
+  }catch(_){ }
+}
+function autoRefreshTick(){
+  const now=Date.now();if(now<autoRefreshDueAt)return;
+  autoRefreshDueAt=now+AUTO_REFRESH_MS;
+  if(document.visibilityState==='visible')reloadPreservingView();
+  else autoRefreshPending=true;
+}
+setInterval(autoRefreshTick,AUTO_REFRESH_HEARTBEAT_MS);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  if(autoRefreshPending||Date.now()>=autoRefreshDueAt){autoRefreshPending=false;reloadPreservingView();}
+});
+restoreViewAfterAutoRefresh();
+
+window.__JJOONI_FED_WATCH={version:'1.1',data:'./data/fed-watch.json',contract:'CME_SETTLEMENT_DERIVED_FEDWATCH'};
+window.__JJOONI_AUTO_REFRESH={version:'1.0',interval_minutes:60,mode:'PAGE_RELOAD_LATEST_PUBLISHED_DATA',preserve_view:true};
 })();
