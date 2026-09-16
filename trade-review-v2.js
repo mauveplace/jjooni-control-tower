@@ -41,7 +41,7 @@ function sleeve(t){
   if(a==='AI')return 'AI BOT';
   return a;
 }
-function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}
+function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||t.security_name||t.display_name||t.product_name||t.prdt_name||t.prdt_abrv_name||t.hts_kor_isnm||t.kor_name||t.korean_name||t.english_name||t.eng_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}
 function tradePx(t){return n(t.price||t.filled_price||t.avg_price)}
 function qty(t){return Math.abs(z(t.qty||t.quantity||t.filled_qty))}
 function currency(t){return String(t.currency||((String(t.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase()}
@@ -314,6 +314,7 @@ function restoreLegacy(panel){
 function run(){ensureStyle();ensureNav();syncMoreState();const p=qs('#panel-trades');if(p)render()}
 setTimeout(run,0);setTimeout(run,800);setTimeout(run,2200);
 document.addEventListener('jjooni:live-applied',run);
+window.addEventListener('jjooni:security-names-ready',run);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 window.addEventListener('resize',run,{passive:true});
 })();

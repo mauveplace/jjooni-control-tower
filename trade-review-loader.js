@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.28',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.29',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -47,13 +47,14 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
 ['ctUiRefactorV14Script','ui-refactor.js?v=1.5','ui-refactor'],
 ['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],
-['ctTradeReviewV2Script','trade-review-v2.js?v=2','trade-review'],
+['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],
+['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
 ['ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3.2','trade-readable'],
 ['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4','mobile-stability'],
 ['ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2','decision-impact'],
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
-['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.3','trade-outcomes'],
+['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.4','trade-outcomes'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.2','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
