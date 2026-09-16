@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - tools/enrich_economic_calendar.py
+      - tools/refresh_official_central_bank_actuals.py
       - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
-    # KST 07:05 / 13:05 / 19:05 / 22:05 / 00:35 / 03:35
-    - cron: '5 22,4,10,13 * * *'
-    - cron: '35 15,18 * * *'
+    # Baseline refreshes: 07:05 / 13:05 KST.
+    - cron: '5 22,4 * * *'
+    # Macro release window: 19:00-23:45 KST, every 15 minutes on weekdays.
+    - cron: '*/15 10-14 * * 1-5'
+    # FOMC/late-US release window: 02:00-04:45 KST, every 15 minutes.
+    - cron: '*/15 17-19 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +26,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,20 +34,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Refresh consensus and actual only
+      - name: Refresh consensus, actual and official central-bank fallback
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/enrich_economic_calendar.py
+          python -m py_compile tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py
           python tools/enrich_economic_calendar.py
+          python tools/refresh_official_central_bank_actuals.py
           python - <<'PY'
           import json
           c=json.load(open('market-observatory/data/economic-calendar.json'))
           assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
+          assert c.get('official_actual_contract')=='OFFICIAL_PRIMARY_FOMC_PLUS_MARKET_FEEDS_V1'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics']) for e in c.get('events',[]))
-          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('enrichment_updates'))
+          freshness=c.get('actual_freshness') or {}
+          assert freshness.get('status') in ['LIVE','PENDING','DEGRADED'],freshness
+          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('enrichment_updates'),freshness)
           PY
       - name: Publish calendar only
         shell: bash
@@ -54,13 +62,18 @@ jobs:
           git add market-observatory/data/economic-calendar.json
           if git diff --cached --quiet; then
             echo ECON_CAL_NO_CHANGE
-            exit 0
+          else
+            git commit -m 'data(observatory): refresh macro consensus actual and official fallback'
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase -X theirs origin/main
+              if git push origin HEAD:main; then break; fi
+              echo "ECON_CAL_PUSH_RETRY=$attempt"
+              if [ "$attempt" = 3 ]; then exit 1; fi
+            done
           fi
-          git commit -m 'data(observatory): refresh macro consensus and actual'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            echo "ECON_CAL_PUSH_RETRY=$attempt"
-          done
-          exit 1
+      - name: Signal overdue major actuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/refresh_official_central_bank_actuals.py --strict
