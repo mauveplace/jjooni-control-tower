@@ -1,0 +1,25 @@
+name: Observatory Hourly Refresh Contract
+
+on:
+  pull_request:
+    paths:
+      - market-observatory/fed-watch-v1.js
+      - tests/test_observatory_hourly_refresh_contract.py
+      - .github/workflows/observatory-hourly-refresh-contract.yml
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/fed-watch-v1.js
+      - tests/test_observatory_hourly_refresh_contract.py
+      - .github/workflows/observatory-hourly-refresh-contract.yml
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate hourly refresh contract
+        run: python tests/test_observatory_hourly_refresh_contract.py
