@@ -52,7 +52,7 @@ jobs:
                 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
                 try{
                   await page.goto(process.env.URL+`?public_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.6.0-calendar-semantics',{timeout:20000});
+                  await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.version==='2.8.0-yield-maturity-trends',{timeout:20000});
                   await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.version==='1.1',{timeout:12000});
                   await page.waitForFunction(()=>typeof DATA!=='undefined'&&DATA?.history_loaded===true,{timeout:20000});
                   await page.waitForTimeout(1200);
@@ -97,6 +97,31 @@ jobs:
                   const y1=await checkRange('1Y',2025,2026);
                   const y10=await checkRange('10Y',2015,2017);
                   const y30=await checkRange('30Y',1996,1998);
+
+                  await page.click('button[data-tab="rates"]');
+                  await page.waitForTimeout(500);
+                  const yieldTrend=await page.evaluate(()=> {
+                    const ch=window.Chart?.getChart ? window.Chart.getChart(document.getElementById('usCurve')) : null;
+                    const buttons=[...document.querySelectorAll('.obsRange[data-for="usCurve"] button[data-range]')].map(b=>b.dataset.range);
+                    return {
+                      title:document.querySelector('#usCurve')?.closest('.card')?.querySelector('h3')?.textContent||'',
+                      datasets:(ch?.data?.datasets||[]).map(d=>d.label),
+                      labels:(ch?.data?.labels||[]).length,
+                      buttons
+                    };
+                  });
+                  assert(yieldTrend.title.includes('미국 국채금리 추세'),`${tc.name} yield title invalid: ${yieldTrend.title}`);
+                  for(const label of ['3개월물','2년물','10년물','30년물']) assert(yieldTrend.datasets.includes(label),`${tc.name} missing yield series ${label}: ${JSON.stringify(yieldTrend.datasets)}`);
+                  for(const range of ['1M','3M','6M','1Y','3Y']) assert(yieldTrend.buttons.includes(range),`${tc.name} missing yield range ${range}: ${JSON.stringify(yieldTrend.buttons)}`);
+                  assert(yieldTrend.labels>20,`${tc.name} yield trend has too few dates: ${yieldTrend.labels}`);
+                  await page.click('.obsRange[data-for="usCurve"] button[data-range="3M"]');
+                  await page.waitForTimeout(350);
+                  const yield3m=await page.evaluate(()=>({
+                    coverage:document.querySelector('[data-coverage="usCurve"]')?.textContent||'',
+                    labels:(window.Chart?.getChart ? window.Chart.getChart(document.getElementById('usCurve'))?.data?.labels : [])||[]
+                  }));
+                  assert(yield3m.coverage.startsWith('3M 표시 '),`${tc.name} yield 3M control stale: ${yield3m.coverage}`);
+                  assert(yield3m.labels.length>10,`${tc.name} yield 3M too few labels: ${yield3m.labels.length}`);
 
                   await page.click('button[data-tab="calendar"]');
                   await page.waitForTimeout(700);
