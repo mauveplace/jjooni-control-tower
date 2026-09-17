@@ -178,7 +178,7 @@ def add_official_yields(series):
         try:us.extend(treasury_rows(y))
         except:pass
     us=sorted({x['date']:x for x in us}.values(),key=lambda x:x['date'])
-    for key,col in [('US2Y','2 Yr'),('US5Y_OFFICIAL','5 Yr'),('US10Y_OFFICIAL','10 Yr'),('US30Y_OFFICIAL','30 Yr')]:
+    for key,col in [('US3M','3 Mo'),('US2Y','2 Yr'),('US5Y_OFFICIAL','5 Yr'),('US10Y_OFFICIAL','10 Yr'),('US30Y_OFFICIAL','30 Yr')]:
         series[key]=[{'date':x['date'],'value':x['values'].get(col)} for x in us if x['values'].get(col) is not None]
     if series.get('US2Y') and series.get('US10Y_OFFICIAL'):
         a={x['date']:x['value'] for x in series['US10Y_OFFICIAL']};b={x['date']:x['value'] for x in series['US2Y']};series['US_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))]
@@ -193,8 +193,8 @@ def add_official_yields(series):
                 if c.lower().replace(' ','') in k.lower().replace(' ',''):return k
         return None
     if jp:
-        k2=find_key(jp[-1],['2Y','2-year','2 years']);k10=find_key(jp[-1],['10Y','10-year','10 years']);k30=find_key(jp[-1],['30Y','30-year','30 years'])
-        for name,k in [('JP2Y',k2),('JP10Y',k10),('JP30Y',k30)]:
+        k2=find_key(jp[-1],['2Y','2-year','2 years']);k5=find_key(jp[-1],['5Y','5-year','5 years']);k10=find_key(jp[-1],['10Y','10-year','10 years']);k30=find_key(jp[-1],['30Y','30-year','30 years'])
+        for name,k in [('JP2Y',k2),('JP5Y',k5),('JP10Y',k10),('JP30Y',k30)]:
             if k:series[name]=[{'date':x['date'],'value':x['values'].get(k)} for x in jp if x['values'].get(k) is not None]
         if k2 and k10:
             a={x['date']:x['value'] for x in series['JP10Y']};b={x['date']:x['value'] for x in series['JP2Y']};series['JP_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))]
