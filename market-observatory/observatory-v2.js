@@ -5,7 +5,7 @@ const RANGE_ORDER=['1M','3M','6M','1Y','3Y','5Y','10Y','20Y','30Y','ALL'];
 const DAYS={'1M':31,'3M':92,'6M':184,'1Y':366,'3Y':1096,'5Y':1827,'10Y':3653,'20Y':7306,'30Y':10958,'ALL':999999};
 const LONG_RANGES=new Set(['5Y','10Y','20Y','30Y','ALL']);
 const active={};
-const CURVE_IDS=new Set(['usCurve','jpCurve']);
+const CURVE_IDS=new Set();
 const CURVE_MODES=[
   {key:'NOW',label:'현재'},
   {key:'1M',label:'1개월 전'},
@@ -296,5 +296,5 @@ window.addEventListener('load',()=>{
   try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){}
   setTimeout(()=>hydrateHistory(false),80);
 });
-window.__JJOONI_OBSERVATORY_UI={version:'2.7.0-curve-controls',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,curve_modes:CURVE_MODES.map(x=>x.key),curve_controls:'CURRENT_VS_SNAPSHOT',x_axis_dates:true};
+window.__JJOONI_OBSERVATORY_UI={version:'2.8.0-yield-maturity-trends',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true};
 })();
