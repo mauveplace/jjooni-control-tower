@@ -134,7 +134,7 @@ jobs:
           assert o.get('history_target_years')==30
           assert o.get('history_contract')=='IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT'
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
-          for k in ['KOSPI','KOSDAQ','NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US2Y','US10Y_OFFICIAL','JP2Y','JP10Y']:
+          for k in ['KOSPI','KOSDAQ','NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','JP2Y','JP5Y','JP10Y','JP30Y']:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
           for k in ['KOSPI','KOSDAQ','US_2S10S','JP_2S10S','KR10Y']:
               assert o.get('latest',{}).get(k) is not None,(k,o.get('latest',{}).get(k))
@@ -209,9 +209,12 @@ jobs:
           for token in ['FOMC Market Pricing · FedWatch','fed-watch.json','hike_25bp_probability','change_1w_pctpt']:
               assert token in fedjs,token
           obsui=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
-          for token in ['CURVE_IDS','curveFiltered','ensureCurveToolbar','CURRENT_VS_SNAPSHOT','금리 (%)']:
+          for token in ['MATURITY_TIME_SERIES','RANGE_ORDER','filtered(labels,sets,range)']:
               assert token in obsui,token
-          assert 'observatory-v2.js?v=2.7.0' in html
+          for token in ['미국 국채금리 추세','3개월물','2년물','10년물','30년물']:
+              assert token in html,token
+          assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
+          assert 'observatory-v2.js?v=2.8.0' in html
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))
