@@ -208,6 +208,10 @@ jobs:
           fedjs=Path('market-observatory/fed-watch-v1.js').read_text(encoding='utf-8')
           for token in ['FOMC Market Pricing · FedWatch','fed-watch.json','hike_25bp_probability','change_1w_pctpt']:
               assert token in fedjs,token
+          obsui=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
+          for token in ['CURVE_IDS','curveFiltered','ensureCurveToolbar','CURRENT_VS_SNAPSHOT','금리 (%)']:
+              assert token in obsui,token
+          assert 'observatory-v2.js?v=2.7.0' in html
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))
