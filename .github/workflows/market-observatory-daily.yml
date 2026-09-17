@@ -174,14 +174,23 @@ jobs:
           metrics={m.get('key'):m for m in fomc.get('market_metrics',[])}
           rate=metrics.get('fed_rate') or {}
           fw=metrics.get('fedwatch_hike_25bp') or {}
-          assert rate.get('previous') and rate.get('consensus'),rate
+          # Optional vendor enrichment must never block publication of fresh market data.
+          # Structural semantics remain hard requirements; unavailable values are surfaced as warnings.
+          for key in ['previous','consensus','actual']:
+              assert key in rate,(key,rate)
           fomc_dt=datetime.fromisoformat(fomc['datetime_kst'])
           now=datetime.now(KST)
+          if not rate.get('previous') or not rate.get('consensus'):
+              print('MARKET_OBSERVATORY_WARN=FOMC_RATE_REFERENCE_MISSING',rate)
           if fomc_dt <= now-timedelta(minutes=45):
               freshness=c.get('actual_freshness') or {}
               if rate.get('actual') is None:
                   assert freshness.get('status') in ['PENDING','DEGRADED'],(rate,freshness)
-          assert fw.get('previous') and fw.get('consensus') and fw.get('actual') is None,fw
+          for key in ['previous','consensus','actual']:
+              assert key in fw,(key,fw)
+          if not fw.get('previous') or not fw.get('consensus'):
+              print('MARKET_OBSERVATORY_WARN=FEDWATCH_REFERENCE_MISSING',fw)
+          assert fw.get('actual') is None,fw
           assert fw.get('metric_type')=='market_probability_snapshot' and fw.get('value_role')=='market_forecast',fw
           assert a.get('schema')=='JJOONI_MARKET_OBSERVATORY_AI_READ_CONTRACT_V1'
           assert any(x.get('path')=='./fed-watch.json' and x.get('required') for x in a.get('required_reads',[]))
