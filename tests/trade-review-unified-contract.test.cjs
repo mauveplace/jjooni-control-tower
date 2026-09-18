@@ -14,10 +14,10 @@ test('trade review uses individual BUY and SELL fills in strict recent order',()
 });
 
 test('current-price delta is per fill quantity and never waits seven days',()=>{
-  assert.match(outcomes,/const op=cp!==null\?\(px\(t\)-cp\)\*qty\(t\):null/);
+  assert.match(outcomes,/sd==='BUY'\?\(cp-px\(t\)\)\*qty\(t\):\(px\(t\)-cp\)\*qty\(t\)/);
   assert.doesNotMatch(outcomes,/pending:age<7/);
   assert.doesNotMatch(outcomes,/기회손익 \$\{x\.pending\?/);
-  assert.match(outcomes,/당일 거래도 현재가가 있으면 즉시 계산/);
+  assert.match(outcomes,/매수=\(현재가−매수가\)×수량/);
   assert.match(outcomes,/개별 체결 수량만 반영/);
 });
 
@@ -35,4 +35,13 @@ test('compact PB dates are parsed before recent sorting',()=>{
   assert.match(outcomes,/raw\.match\(\/\^\(\\d\{2\}\)\(\\d\{2\}\)\(\\d\{2\}\)/);
   assert.match(outcomes,/raw\.match\(\/\^\(\\d\{4\}\)\(\\d\{2\}\)\(\\d\{2\}\)/);
   assert.match(outcomes,/const dt=tradeTs\(t\)/);
+});
+
+
+test('trade-review sign is favorable-positive for both sides',()=>{
+  assert.match(outcomes,/현재 수익 · 매수가보다 상승/);
+  assert.match(outcomes,/현재 손실 · 매수가보다 하락/);
+  assert.match(outcomes,/회피손실 · 매도 후 하락/);
+  assert.match(outcomes,/기회손실 · 매도 후 상승/);
+  assert.match(outcomes,/복기손익 합계/);
 });
