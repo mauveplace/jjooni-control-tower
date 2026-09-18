@@ -261,12 +261,14 @@ jobs:
           assert h.get('schema')=='JJOONI_MARKET_HISTORY_30Y_V1' and h.get('target_years')==30
           assert s.get('schema')=='JJOONI_OBSERVATORY_SECTOR_ETF_V1'
           assert s.get('read_only') is True and s.get('contains_account_data') is False
-          assert s.get('universe_version')=='SONG_SECTOR_UNIVERSE_V1'
+          assert s.get('universe_version')=='SONG_SECTOR_UNIVERSE_V2_COUNTRY'
           classic=next(g['rows'] for g in s.get('groups',[]) if g.get('key')=='classic')
           assert len(classic)==11
           assert s.get('quality',{}).get('classic_priced_count',0)>=9
-          for ticker in ['XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE','SMH','IGV','XBI','KRE']:
+          for ticker in ['XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE','SMH','IGV','XBI','KRE','SPY','EWY','EWJ','MCHI','EWT','INDA','EWZ','VGK']:
               assert ticker in s.get('series',{}),ticker
+          country=next(g['rows'] for g in s.get('groups',[]) if g.get('key')=='country')
+          assert [r.get('ticker') for r in country]==['SPY','EWY','EWJ','MCHI','EWT','INDA','EWZ','VGK']
           assert f.get('schema')=='JJOONI_FED_WATCH_V1'
           assert f.get('read_only') is True and f.get('contains_account_data') is False
           assert f.get('meeting_date') and f.get('market_data_as_of')
