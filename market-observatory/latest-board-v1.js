@@ -86,7 +86,7 @@ let SECTOR_DATA=null,SECTOR_PROMISE=null;
 function loadSector(){if(SECTOR_DATA)return Promise.resolve(SECTOR_DATA);if(SECTOR_PROMISE)return SECTOR_PROMISE;SECTOR_PROMISE=fetch('./data/sector-etf.json?cb='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('sector-etf '+r.status);return r.json()}).then(d=>{if(d?.schema!=='JJOONI_OBSERVATORY_SECTOR_ETF_V1')throw new Error('sector schema');SECTOR_DATA=d;return d}).finally(()=>{SECTOR_PROMISE=null});return SECTOR_PROMISE}
 function renderSector(){const d=SECTOR_DATA;if(!d){setHeader(TAB_CONFIG.sectors.title,TAB_CONFIG.sectors.sub,'',false);setGrid(customTile('SECTOR','데이터','불러오는 중','sector-etf lazy load'),1);pulseChips(['Sector ETF 로딩중']);loadSector().then(()=>{if(activeTab()==='sectors')renderSector()}).catch(()=>{if(activeTab()==='sectors'){setGrid(customTile('SECTOR','데이터','로딩 실패','다음 갱신 후 재시도','down'),1);pulseChips(['Sector ETF 로딩 실패'])}});return}
  const s=d.summary||{},lead=s.leaders_1m_rs_spy?.[0],lag=s.laggards_1m_rs_spy?.[0],spread=num(s.growth_defense_spread_1m_pct),spy=d.benchmarks?.SPY,qqq=d.benchmarks?.QQQ;
- const rows=[
+ const base=[
   customTile('BREADTH','MA20 상회',`${s.classic_above_ma20??'—'} / ${s.classic_count??11}`,'S&P 500 11개 섹터','flat',d.as_of_date||''),
   customTile('LEADER','1M RS 강세',lead?`${lead.ticker} ${lead.value>=0?'+':''}${Number(lead.value).toFixed(2)}%`:'—','vs SPY','up',d.as_of_date||''),
   customTile('LAGGARD','1M RS 약세',lag?`${lag.ticker} ${Number(lag.value).toFixed(2)}%`:'—','vs SPY','down',d.as_of_date||''),
@@ -94,7 +94,14 @@ function renderSector(){const d=SECTOR_DATA;if(!d){setHeader(TAB_CONFIG.sectors.
   customTile('BENCH','SPY 1M',spy?.ret_1m_pct==null?'—':`${spy.ret_1m_pct>=0?'+':''}${Number(spy.ret_1m_pct).toFixed(2)}%`,'benchmark',cls(spy?.ret_1m_pct),d.as_of_date||''),
   customTile('BENCH','QQQ 1M',qqq?.ret_1m_pct==null?'—':`${qqq.ret_1m_pct>=0?'+':''}${Number(qqq.ret_1m_pct).toFixed(2)}%`,'benchmark',cls(qqq?.ret_1m_pct),d.as_of_date||'')
  ];
- setHeader(TAB_CONFIG.sectors.title,TAB_CONFIG.sectors.sub,String(d.generated_kst||'').replace('T',' ').slice(0,16),false);setGrid(rows.join(''),rows.length);pulseChips([`MA20 ${s.classic_above_ma20??'—'}/${s.classic_count??11}`,lead?`강세 ${lead.ticker}`:'강세 —',lag?`약세 ${lag.ticker}`:'약세 —',spread==null?'성장-방어 —':`성장-방어 ${spread>=0?'+':''}${spread.toFixed(2)}%`])}
+ const themes=(d.groups||[]).filter(g=>g.key!=='classic').map(g=>{
+   const members=g.rows||[];
+   const best=members.map(r=>({ticker:r.ticker,rs:num(r.rs_spy_20d_pct),ret:num(r.ret_20d_pct)})).sort((a,b)=>(b.rs??-999)-(a.rs??-999))[0];
+   const value=best?`${best.ticker} ${best.ret==null?'':(best.ret>=0?'+':'')+best.ret.toFixed(1)+'%'}`:'—';
+   return customTile('THEME',g.label||g.key,value,`${members.map(r=>r.ticker).join(' · ')} · 상세 아래`,cls(best?.ret),d.as_of_date||'');
+ });
+ const rows=[...base,...themes];
+ setHeader(TAB_CONFIG.sectors.title,'S&P 500 11개 섹터 + 추가 테마·업종 ETF 전체 표시',String(d.generated_kst||'').replace('T',' ').slice(0,16),false);setGrid(rows.join(''),rows.length);pulseChips([`MA20 ${s.classic_above_ma20??'—'}/${s.classic_count??11}`,...((d.groups||[]).filter(g=>g.key!=='classic').map(g=>g.label||g.key))])}
 function renderTripod(){const t=(typeof DATA!=='undefined'&&DATA?.tripod_latest)||{},ndx=stat(BY_KEY.NASDAQ100),vix=stat(BY_KEY.VIX),ma=num(t.ma250),v10=num(t.vix10),dd=num(t.drawdown_52w_pct);const rows=[
  customTile('REGIME','현재 상태',t.regime||'—','NASDAQ100 vs MA250'),
  customTile('TARGET','목표 노출',t.target||'—','송팀장 Tri-Pod'),
@@ -121,5 +128,5 @@ const st=document.createElement('style');st.textContent=`
 @media(max-width:760px){.latestBoardWrap{padding:0 10px;margin-top:9px}.latestBoardHead{align-items:flex-start;flex-direction:column;gap:7px}.latestBoardTitleBox{display:block}.latestBoardTitleBox span{display:block;margin-top:2px}.latestBoardTools{width:100%;align-items:flex-start;flex-direction:column-reverse;gap:5px}.latestCompare{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none}.latestCompare::-webkit-scrollbar{display:none}.latestCompare button{flex:0 0 auto;min-height:28px}.latestBoardGrid:not(.grouped){grid-template-columns:none!important;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestBoardGrid:not(.grouped)::-webkit-scrollbar{display:none}.latestGroup{padding:8px;margin-bottom:8px}.latestGroupHead{align-items:flex-start}.latestGroupHead>div{display:block}.latestGroupHead span{display:block;margin-top:2px}.latestGroupGrid{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:minmax(138px,42vw);gap:6px;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.latestGroupGrid::-webkit-scrollbar{display:none}.latestTile{padding:8px 9px;scroll-snap-align:start}.latestTile strong{font-size:17px}.latestTileFoot{font-size:8px}.obsIndexGrid .card:last-child{grid-column:auto}}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'2.3',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'2.4',contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
