@@ -45,3 +45,15 @@ test('trade-review sign is favorable-positive for both sides',()=>{
   assert.match(outcomes,/기회손실 · 매도 후 상승/);
   assert.match(outcomes,/복기손익 합계/);
 });
+
+
+test('post-trade horizon buttons use historical basis without current-price substitution',()=>{
+  for(const label of ['현재','5영업일','10영업일','1개월','6개월']){
+    assert.match(outcomes,new RegExp(label));
+  }
+  assert.match(outcomes,/data-horizon-v26/);
+  assert.match(outcomes,/trade_review_horizons/);
+  assert.match(outcomes,/b\.state==='PENDING'/);
+  assert.match(outcomes,/sd==='BUY'\?\(cp-entry\)\*qty\(t\):\(entry-cp\)\*qty\(t\)/);
+  assert.match(outcomes,/해당 기준가가 확정된 거래만 반영/);
+});
