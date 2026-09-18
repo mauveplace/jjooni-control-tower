@@ -23,6 +23,9 @@ on:
       - market-observatory/data/ai-read-contract.json
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-daily.yml
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
   schedule:
     # Redundant hourly watchdog. GitHub scheduled runs can be delayed/dropped,
     # so check four off-peak minutes per hour and rebuild only when data is stale.
@@ -44,7 +47,7 @@ concurrency:
 
 jobs:
   hourly_gate:
-    if: ${{ github.event_name == 'schedule' && github.event.schedule == '7,22,37,52 * * * *' }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '7,22,37,52 * * * *') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-latest
     outputs:
       should_refresh: ${{ steps.fresh.outputs.should_refresh }}
@@ -137,7 +140,7 @@ jobs:
           exit 1
 
   build:
-    if: ${{ github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *' }}
+    if: ${{ github.event_name != 'workflow_run' && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
