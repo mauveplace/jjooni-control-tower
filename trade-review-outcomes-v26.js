@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.6',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'BUY=(current-trade)*qty;SELL=(trade-current)*qty'};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.7',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'BUY=(basis-trade)*qty;SELL=(trade-basis)*qty',horizon:'now',horizon_label:'현재'};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -13,6 +13,14 @@ const qty=t=>Math.abs(n(t?.qty??t?.quantity??t?.filled_qty)??0);
 const px=t=>n(t?.price??t?.filled_price??t?.avg_price);
 const ccy=t=>String(t?.currency||((String(t?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase();
 const ts=t=>String(t?.filled_at_kst||t?.filled_at||t?.trade_date||t?.date||'');
+const HORIZONS=[
+ {key:'now',label:'현재'},
+ {key:'5d',label:'5영업일'},
+ {key:'10d',label:'10영업일'},
+ {key:'1m',label:'1개월'},
+ {key:'6m',label:'6개월'}
+];
+const horizonDef=key=>HORIZONS.find(x=>x.key===key)||HORIZONS[0];
 function tradeTs(t){
  const raw=ts(t).trim();
  if(!raw)return 0;
@@ -133,6 +141,45 @@ function reconstructRealized(trades){
  return map;
 }
 
+
+function tradeDateKey(t){
+ const raw=ts(t).trim();
+ let m=raw.match(/^(\d{4})[-/.]?(\d{2})[-/.]?(\d{2})/);
+ if(m)return `${m[1]}-${m[2]}-${m[3]}`;
+ m=raw.match(/^(\d{2})(\d{2})(\d{2})/);
+ if(m)return `20${m[1]}-${m[2]}-${m[3]}`;
+ return '';
+}
+function horizonStore(){
+ let h=null;
+ try{
+  const d=(typeof D!=='undefined'&&D)?D:window.D;
+  h=d?.human?.trade_review_horizons||null;
+  if(h&&typeof h==='object'&&Object.keys(h).length)window.__JJOONI_TRADE_HORIZONS_V26=h;
+ }catch(_){}
+ return h||window.__JJOONI_TRADE_HORIZONS_V26||{};
+}
+function horizonBasis(t,key,curMap){
+ const def=horizonDef(key);
+ if(key==='now'){
+  const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
+  return {price:cp,state:cp!==null?'PASS':'UNAVAILABLE',date:'',target:'',label:def.label};
+ }
+ const date=tradeDateKey(t),store=horizonStore(),marks=store[ticker(t)+'|'+date]||{},mark=marks[key]||{};
+ const hp=n(mark.p??mark.price);
+ return {
+  price:hp!==null&&hp>0?hp:null,
+  state:String(mark.s||mark.status||'UNAVAILABLE').toUpperCase(),
+  date:String(mark.d||mark.date||''),
+  target:String(mark.t||mark.target||''),
+  label:String(mark.l||mark.label||def.label)
+ };
+}
+function shortBasisDate(v){
+ const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+ return m?`${m[2]}/${m[3]}`:'';
+}
+
 function currentPriceMap(trades){
  const m=new Map();
  const set=(a,s,v)=>{const x=n(v);if(x!==null&&x>0&&s)m.set(String(a||'')+'|'+sym(s),x)};
@@ -143,14 +190,15 @@ function currentPriceMap(trades){
 }
 
 function buildRows(){
- const trades=collectTrades(),realized=reconstructRealized(trades),curMap=currentPriceMap(trades);
+ const trades=collectTrades(),realized=reconstructRealized(trades),curMap=currentPriceMap(trades),horizon=RT.horizon||'now';
  return trades.filter(t=>['BUY','SELL'].includes(side(t))&&ticker(t)&&qty(t)>0&&px(t)!==null).map(t=>{
   const sd=side(t);
   const r=sd==='SELL'?(realized.get(t)||{value:null,currency:ccy(t),basis:'COST_BASIS_INCOMPLETE',state:'NA'}):{value:null,currency:ccy(t),basis:'BUY_NOT_REALIZED',state:'NA'};
-  const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
-  const op=cp!==null?(sd==='BUY'?(cp-px(t))*qty(t):(px(t)-cp)*qty(t)):null;
+  const mark=horizonBasis(t,horizon,curMap),cp=mark.price,entry=px(t);
+  const op=cp!==null?(sd==='BUY'?(cp-entry)*qty(t):(entry-cp)*qty(t)):null;
+  const perf=cp!==null&&entry>0?(sd==='BUY'?(cp/entry-1)*100:((entry-cp)/entry)*100):null;
   const dt=tradeTs(t);
-  return {t,realized:r,current:cp,opportunity:op,time:dt,seq:t.__seq,trade_side:sd};
+  return {t,realized:r,current:cp,opportunity:op,performance_pct:perf,time:dt,seq:t.__seq,trade_side:sd,basis:mark};
  }).sort((a,b)=>b.time-a.time||b.seq-a.seq).slice(0,40);
 }
 
@@ -159,7 +207,7 @@ function ensureStyle(){
  const s=document.createElement('style');s.id='ctTradeOutcomeV26Style';s.textContent=`
  #ctTradeOutcomeV26{margin:8px 0 12px;font-family:system-ui,-apple-system,sans-serif;color:#172b45}
  .ctO26Head{display:flex;justify-content:space-between;gap:10px;align-items:end;margin:0 2px 7px}.ctO26Title{font-size:17px;font-weight:950}.ctO26Sub{font-size:10px;color:#718196;margin-top:2px}.ctO26Badge{font-size:10px;font-weight:850;color:#38526c;background:#eef4fa;border:1px solid #d9e4ef;border-radius:999px;padding:5px 8px;white-space:nowrap}
- .ctO26Summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:7px}.ctO26Sum{background:#fff;border:1px solid #e0e7ef;border-radius:10px;padding:8px 10px;min-height:54px}.ctO26Sum span{display:block;font-size:10px;color:#718196;font-weight:750}.ctO26Sum b{display:block;font-size:16px;line-height:1.15;margin-top:4px;letter-spacing:-.02em}.ctO26Sum small{display:block;font-size:9px;color:#8a98a8;margin-top:2px}
+ .ctO26Horizons{display:flex;gap:5px;overflow-x:auto;padding:1px 1px 7px;margin:0 1px 2px;scrollbar-width:none}.ctO26Horizons::-webkit-scrollbar{display:none}.ctO26HBtn{appearance:none;border:1px solid #dbe5ef;background:#fff;color:#5f7186;border-radius:999px;padding:6px 10px;font:850 10px/1 system-ui;white-space:nowrap;cursor:pointer}.ctO26HBtn.active{background:#0b3b70;border-color:#0b3b70;color:#fff}.ctO26Summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:7px}.ctO26Sum{background:#fff;border:1px solid #e0e7ef;border-radius:10px;padding:8px 10px;min-height:54px}.ctO26Sum span{display:block;font-size:10px;color:#718196;font-weight:750}.ctO26Sum b{display:block;font-size:16px;line-height:1.15;margin-top:4px;letter-spacing:-.02em}.ctO26Sum small{display:block;font-size:9px;color:#8a98a8;margin-top:2px}
  .ctO26List{display:grid;gap:5px}.ctO26Row{background:#fff;border:1px solid #e1e7ee;border-radius:10px;padding:8px 10px;display:grid;grid-template-columns:minmax(150px,1.35fr) repeat(2,minmax(105px,.65fr));gap:8px;align-items:center;box-shadow:0 2px 8px rgba(22,43,69,.025)}.ctO26Name{font-size:13px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ctO26Meta{font-size:10px;color:#748398;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ctO26Metric span{display:block;font-size:9px;color:#78889c;font-weight:750}.ctO26Metric b{display:block;font-size:13px;margin-top:2px}.ctO26Metric small{font-size:8px;color:#93a0ad}.ctO26Metric .pos{color:#d43f53}.ctO26Metric .neg{color:#2167c9}.ctO26Metric .zero{color:#48596b}.ctO26Metric .na{color:#8b98a6}.ctO26Empty{background:#fff;border:1px dashed #dce5ee;border-radius:10px;padding:14px;font-size:12px;color:#748398;text-align:center}
  @media(max-width:700px){.ctO26Row{grid-template-columns:1fr 1fr;gap:6px}.ctO26Identity{grid-column:1/-1}.ctO26Metric b{font-size:12px}.ctO26Summary{grid-template-columns:1fr 1fr}}
  `;document.head.appendChild(s);
@@ -172,15 +220,18 @@ function render(){
  ensureStyle();
  let root=q('#ctTradeOutcomeV26',panel);if(!root){root=document.createElement('section');root.id='ctTradeOutcomeV26';panel.prepend(root)}
  root.removeAttribute('data-ct-trade-review-legacy');root.style.setProperty('display','block','important');
- const rows=buildRows(),krR=sumKnown(rows,'realized','KRW'),krO=sumKnown(rows,'opportunity','KRW');
+ const hdef=horizonDef(RT.horizon||'now'),rows=buildRows(),krR=sumKnown(rows,'realized','KRW'),krO=sumKnown(rows,'opportunity','KRW');
  const usdR=sumKnown(rows,'realized','USD'),usdO=sumKnown(rows,'opportunity','USD');
  const buyCount=rows.filter(x=>x.trade_side==='BUY').length,sellCount=rows.filter(x=>x.trade_side==='SELL').length;
  const knownR=rows.filter(x=>x.trade_side==='SELL'&&x.realized.value!==null).length,knownO=rows.filter(x=>x.opportunity!==null).length;
  const sumTxt=(kr,usd)=>{const a=[];if(kr.count)a.push(money(kr.sum,'KRW'));if(usd.count)a.push(money(usd.sum,'USD'));return a.length?a.join(' · '):'—'};
- root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">개별 체결 기준 · 매수=(현재가−매수가)×수량 · 매도=(매도가−현재가)×수량 · +는 유리, −는 불리</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
- <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>복기손익 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 개별 체결 수량만 반영</small></div></div>
- <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side;const opWord=op===null?'현재가 없음':sd==='SELL'?(op<0?'기회손실 · 매도 후 상승':op>0?'회피손실 · 매도 후 하락':'변동 없음'):(op>0?'현재 수익 · 매수가보다 상승':op<0?'현재 손실 · 매수가보다 하락':'변동 없음');return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>복기손익</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${x.current!==null?' · 현재 '+price(x.current,ccy(t)):''} · ${sd==='BUY'?qty(t).toLocaleString()+' × (현재가−매수가)':qty(t).toLocaleString()+' × (매도가−현재가)'}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
- RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.trade_count=rows.length;RT.buy_count=buyCount;RT.sell_count=sellCount;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=sellCount-knownR;RT.missing_opportunity=rows.length-knownO;
+ const hbuttons=HORIZONS.map(h=>`<button type="button" class="ctO26HBtn ${h.key===(RT.horizon||'now')?'active':''}" data-horizon-v26="${h.key}" aria-pressed="${h.key===(RT.horizon||'now')?'true':'false'}">${h.label}</button>`).join('');
+ root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">체결 이후 기준시점별 복기 · 매수=(기준가−매수가)×수량 · 매도=(매도가−기준가)×수량 · +는 유리, −는 불리</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
+ <div class="ctO26Horizons" role="group" aria-label="체결 후 성과 기준">${hbuttons}</div>
+ <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>${esc(hdef.label)} 복기손익 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 해당 기준가가 확정된 거래만 반영</small></div></div>
+ <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side,b=x.basis||{},label=b.label||hdef.label;let opWord;if(op===null){opWord=b.state==='PENDING'?label+' 아직 미도달':b.state==='UNAVAILABLE'?label+' 기준가 없음':'기준가 없음'}else if(sd==='SELL'){opWord=op<0?'기회손실 · 매도 후 상승':op>0?'회피손실 · 매도 후 하락':'변동 없음'}else{opWord=op>0?label+' 기준 수익':op<0?label+' 기준 손실':'변동 없음'}const basisDate=shortBasisDate(b.date),target=shortBasisDate(b.target),basisTxt=x.current!==null?' · '+label+' '+price(x.current,ccy(t))+(basisDate?' ('+basisDate+')':''):(target?' · 목표 '+target:'');const pctTxt=x.performance_pct===null?'':` · ${x.performance_pct>=0?'+':''}${x.performance_pct.toFixed(2)}%`;return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-horizon="${esc(RT.horizon||'now')}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>${esc(label)} 복기손익</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${basisTxt}${pctTxt}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
+ root.querySelectorAll('[data-horizon-v26]').forEach(btn=>btn.addEventListener('click',()=>{const key=String(btn.dataset.horizonV26||'now');if(key===(RT.horizon||'now'))return;RT.horizon=key;RT.horizon_label=horizonDef(key).label;render()}));
+ RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.horizon_label=hdef.label;RT.trade_count=rows.length;RT.buy_count=buyCount;RT.sell_count=sellCount;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=sellCount-knownR;RT.missing_opportunity=rows.length-knownO;
 }
 
 function run(){try{render()}catch(e){RT.state='ACTIVE';RT.render_state='ERROR';RT.error=String(e&&e.message||e)}}
