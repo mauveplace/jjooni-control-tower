@@ -157,6 +157,18 @@ function mergeTrades(live){
 
 function syncTradeCurrentPrices(){
  if(typeof D==='undefined'||!D.human)return;
+ const horizonMap=((TRADE_QUOTES||{}).trade_horizons)||{};
+ if(horizonMap&&typeof horizonMap==='object'&&Object.keys(horizonMap).length){
+   D.human.trade_review_horizons=horizonMap;
+   D.human.trade_review_horizons_asof=String((TRADE_QUOTES||{}).trade_horizons_asof||'');
+   D.human.trade_review_horizons_source=String((((TRADE_QUOTES||{}).trade_horizon_meta)||{}).source||'TOSS_OPENAPI_CANDLES_1D_UNADJUSTED');
+   window.__JJOONI_TRADE_HORIZONS_V26=horizonMap;
+ }else{
+   delete D.human.trade_review_horizons;
+   delete D.human.trade_review_horizons_asof;
+   delete D.human.trade_review_horizons_source;
+   window.__JJOONI_TRADE_HORIZONS_V26={};
+ }
  const px=new Map(),src=new Map(),put=(ticker,price,source)=>{const k=sym(ticker),v=n(price);if(k&&v!=null&&v>0&&!px.has(k)){px.set(k,v);src.set(k,source||'CURRENT_QUOTE')}};
  const side=((TRADE_QUOTES||{}).q)||{};Object.entries(side).forEach(([ticker,q])=>put(ticker,q&&q.p,q&&q.s));
  if(CANON)Object.values(CANON.accounts||{}).forEach(c=>(c.positions||[]).forEach(p=>put(p.ticker,p.current_price||p.price,p.price_source||c.source)));
