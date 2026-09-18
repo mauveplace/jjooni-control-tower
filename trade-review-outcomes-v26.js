@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.4',rendered_at:null,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.5',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'qty*(trade_price-current_price)'};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -126,14 +126,14 @@ function currentPriceMap(trades){
 
 function buildRows(){
  const trades=collectTrades(),realized=reconstructRealized(trades),curMap=currentPriceMap(trades);
- return trades.filter(t=>side(t)==='SELL'&&ticker(t)&&qty(t)>0&&px(t)!==null).map(t=>{
-  const r=realized.get(t)||{value:null,currency:ccy(t),basis:'COST_BASIS_INCOMPLETE',state:'NA'};
+ return trades.filter(t=>['BUY','SELL'].includes(side(t))&&ticker(t)&&qty(t)>0&&px(t)!==null).map(t=>{
+  const sd=side(t);
+  const r=sd==='SELL'?(realized.get(t)||{value:null,currency:ccy(t),basis:'COST_BASIS_INCOMPLETE',state:'NA'}):{value:null,currency:ccy(t),basis:'BUY_NOT_REALIZED',state:'NA'};
   const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
   const op=cp!==null?(px(t)-cp)*qty(t):null;
   const dt=Date.parse(ts(t))||Date.parse(String(t.trade_date||'')+'T00:00:00+09:00')||0;
-  const age=dt?Math.max(0,Math.floor((Date.now()-dt)/86400000)):999;
-  return {t,realized:r,current:cp,opportunity:op,pending:age<7,time:dt};
- }).sort((a,b)=>b.time-a.time).slice(0,16);
+  return {t,realized:r,current:cp,opportunity:op,time:dt,seq:t.__seq,trade_side:sd};
+ }).sort((a,b)=>b.time-a.time||b.seq-a.seq).slice(0,40);
 }
 
 function ensureStyle(){
@@ -156,12 +156,13 @@ function render(){
  root.removeAttribute('data-ct-trade-review-legacy');root.style.setProperty('display','block','important');
  const rows=buildRows(),krR=sumKnown(rows,'realized','KRW'),krO=sumKnown(rows,'opportunity','KRW');
  const usdR=sumKnown(rows,'realized','USD'),usdO=sumKnown(rows,'opportunity','USD');
- const knownR=rows.filter(x=>x.realized.value!==null).length,knownO=rows.filter(x=>x.opportunity!==null).length;
+ const buyCount=rows.filter(x=>x.trade_side==='BUY').length,sellCount=rows.filter(x=>x.trade_side==='SELL').length;
+ const knownR=rows.filter(x=>x.trade_side==='SELL'&&x.realized.value!==null).length,knownO=rows.filter(x=>x.opportunity!==null).length;
  const sumTxt=(kr,usd)=>{const a=[];if(kr.count)a.push(money(kr.sum,'KRW'));if(usd.count)a.push(money(usd.sum,'USD'));return a.length?a.join(' · '):'—'};
- root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기 · 손익</div><div class="ctO26Sub">실현손익과 매도 후 현재가 기준 기회손익을 같은 거래에서 봅니다.</div></div><div class="ctO26Badge">SELL ${rows.length}건</div></div>
- <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>${knownR}/${rows.length}건 원가근거 확인</small></div><div class="ctO26Sum"><span>기회손익 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 현재가 확인 · +는 회피손실</small></div></div>
- <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity;const opWord=op===null?'현재가 없음':op<0?'놓친수익':op>0?'회피손실':'중립';return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(String(t.trade_date||ts(t)).slice(0,10))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${cls(r.value)}">${esc(money(r.value,r.currency))}</b><small>${r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>기회손익 ${x.pending?'· 잠정':''}</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${x.current!==null?' · 현재 '+price(x.current,ccy(t)):''}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 매도 거래가 없습니다.</div>'}</div>`;
- RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.sell_count=rows.length;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=rows.length-knownR;RT.missing_opportunity=rows.length-knownO;
+ root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">개별 체결 기준 · 복기값 = 거래수량 × (당시 거래가 − 현재가) · 당일 거래도 현재가가 있으면 즉시 계산</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
+ <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>현재가 차이 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 개별 체결 수량만 반영</small></div></div>
+ <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side;const opWord=op===null?'현재가 없음':sd==='SELL'?(op<0?'놓친수익':op>0?'회피손실':'변동 없음'):(op>0?'현재가보다 비싸게 매수':op<0?'현재가보다 싸게 매수':'변동 없음');return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>현재가 차이</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${x.current!==null?' · 현재 '+price(x.current,ccy(t)):''} · ${qty(t).toLocaleString()} × (거래가−현재가)</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
+ RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.trade_count=rows.length;RT.buy_count=buyCount;RT.sell_count=sellCount;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=sellCount-knownR;RT.missing_opportunity=rows.length-knownO;
 }
 
 function run(){try{render()}catch(e){RT.state='ACTIVE';RT.render_state='ERROR';RT.error=String(e&&e.message||e)}}
