@@ -9,7 +9,7 @@ function active(){return document.querySelector('#tabs button.on[data-tab]')?.da
 function load(){
   if(DATA)return Promise.resolve(DATA);
   if(PROMISE)return PROMISE;
-  PROMISE=fetch('./data/fed-watch.json',{cache:'no-cache'})
+  PROMISE=fetch('./data/fed-watch.json?cb='+Date.now(),{cache:'no-store'})
     .then(r=>{if(!r.ok)throw new Error(`fed-watch ${r.status}`);return r.json()})
     .then(d=>{if(d?.schema!=='JJOONI_FED_WATCH_V1')throw new Error('fed-watch schema');DATA=d;return d})
     .finally(()=>{PROMISE=null});
@@ -78,7 +78,9 @@ function reloadPreservingView(){
   try{
     sessionStorage.setItem(AUTO_REFRESH_STATE_KEY,JSON.stringify({tab:active(),scrollY:Math.max(0,window.scrollY||0),savedAt:Date.now()}));
   }catch(_){ }
-  window.location.reload();
+  try{
+    const u=new URL(window.location.href);u.searchParams.set('refresh_ts',String(Date.now()));window.location.replace(u.toString());
+  }catch(_){window.location.reload();}
 }
 function restoreViewAfterAutoRefresh(){
   try{
@@ -107,6 +109,6 @@ document.addEventListener('visibilitychange',()=>{
 });
 restoreViewAfterAutoRefresh();
 
-window.__JJOONI_FED_WATCH={version:'1.1',data:'./data/fed-watch.json',contract:'CME_SETTLEMENT_DERIVED_FEDWATCH'};
-window.__JJOONI_AUTO_REFRESH={version:'1.0',interval_minutes:60,mode:'PAGE_RELOAD_LATEST_PUBLISHED_DATA',preserve_view:true};
+window.__JJOONI_FED_WATCH={version:'1.2',data:'./data/fed-watch.json',contract:'CME_SETTLEMENT_DERIVED_FEDWATCH'};
+window.__JJOONI_AUTO_REFRESH={version:'1.1',interval_minutes:60,mode:'PAGE_RELOAD_LATEST_PUBLISHED_DATA',preserve_view:true};
 })();
