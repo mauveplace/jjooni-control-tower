@@ -2,7 +2,7 @@
 'use strict';
 if(window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1)return;
 const LEGACY_QA_TOKEN='RS vs SPY 1M';
-const STATE={version:'1.5',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
+const STATE={version:'1.6',status:'BOOTING',loaded:false,loading:false,error:null,chart_error:null,rendered_at:null};
 window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1=STATE;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
@@ -160,7 +160,7 @@ async function load(){
  STATE.loading=true;STATE.status='LOADING';
  const box=q('#sectors .obsSectorLoading');if(box)box.textContent='섹터 ETF 완료 일봉을 불러오는 중입니다…';
  try{
-   const r=await fetch('./data/sector-etf.json',{cache:'no-cache'});if(!r.ok)throw new Error('sector-etf '+r.status);
+   const r=await fetch('./data/sector-etf.json?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('sector-etf '+r.status);
    const d=await r.json();if(d?.schema!=='JJOONI_OBSERVATORY_SECTOR_ETF_V1')throw new Error('sector-etf schema mismatch');
    DATA=d;render();return d;
  }catch(e){STATE.status='ERROR';STATE.error=String(e);const panel=q('#sectors');if(panel)panel.innerHTML='<div class="obsSectorLoading">섹터 ETF 원천 데이터를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.</div>';console.error(e);return null}
