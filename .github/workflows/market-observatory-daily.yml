@@ -24,7 +24,14 @@ on:
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-daily.yml
   workflow_run:
-    workflows: ["pages build and deployment"]
+    # Opportunistic heartbeats from already-running workflows.
+    # Each completion only refreshes Observatory when generated_kst is stale.
+    workflows:
+      - "pages build and deployment"
+      - "Economic Calendar Light Refresh"
+      - "Market Observatory Calendar Actual Capture"
+      - "Market Observatory Verified Calendar"
+      - "Public Market + TRI-POD Daily Sidecar"
     types: [completed]
   schedule:
     # Redundant hourly watchdog. GitHub scheduled runs can be delayed/dropped,
