@@ -218,6 +218,9 @@ jobs:
               assert token in html,token
           assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
           assert 'observatory-v2.js?v=2.8.0' in html
+          assert "cache:'no-store'" in html and "'cb='+Date.now()" in html
+          assert 'latest-board-v1.js?v=2.3' in html
+          assert 'fed-watch-v1.js?v=1.2' in html
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))
