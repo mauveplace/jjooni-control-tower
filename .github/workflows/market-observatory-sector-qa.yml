@@ -57,15 +57,17 @@ jobs:
               for k in required:
                   assert r.get(k) is not None,(r['ticker'],k)
               assert len(d.get('series',{}).get(r['ticker'],[]))>=100,(r['ticker'],'sparkline history')
+          theme_keys=[g['key'] for g in d['groups'] if g['key']!='classic']
+          assert theme_keys==['semiconductor','software','biotech','financial','defense_infra','robotics'],theme_keys
           theme_rows=[r for g in d['groups'] if g['key']!='classic' for r in g.get('rows',[])]
           for r in theme_rows:
               series=d.get('series',{}).get(r['ticker'],[])
               assert len(series)>=100,(r['ticker'],len(series))
           js=Path('market-observatory/sector-etf-v1.js').read_text(encoding='utf-8')
-          for token in ['data-tab="sectors"','sector-etf.json','송팀장 Sector Observatory','const H=[1,5,10,20,50,100]','20일 RS','function sparkline(r)','obsSpark','obsClassicSparkCell','최근 100거래일','READY_LAZY',"version:'1.5'",'data-label="가격"','obsSectorGrid>*{min-width:0']:
+          for token in ['data-tab="sectors"','sector-etf.json','송팀장 Sector Observatory','const H=[1,5,10,20,50,100]','20일 RS','function sparkline(r)','obsSpark','obsClassicSparkCell','최근 100거래일','READY_LAZY',"version:'1.6'",'data-label="가격"','obsSectorGrid>*{min-width:0']:
               assert token in js,token
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
-          assert './sector-etf-v1.js?v=1.5' in html
+          assert './sector-etf-v1.js?v=1.6' in html
           assert '<button data-tab="sectors">섹터·ETF</button>' in html,'static sector tab missing'
           assert '<section class="panel" id="sectors">' in html,'static sector panel missing'
           assert html.find('data-tab="sectors"') < html.find('data-tab="tripod"'),'sector tab order broken'
