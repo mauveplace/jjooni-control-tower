@@ -15,11 +15,11 @@ test('trade review uses individual BUY and SELL fills in strict recent order',()
 });
 
 test('current-price delta is per fill quantity and never waits seven days',()=>{
-  assert.match(outcomes,/sd==='BUY'\?\(cp-px\(t\)\)\*qty\(t\):\(px\(t\)-cp\)\*qty\(t\)/);
+  assert.match(outcomes,/sd==='BUY'\?\(cp-entry\)\*qty\(t\):\(entry-cp\)\*qty\(t\)/);
   assert.doesNotMatch(outcomes,/pending:age<7/);
   assert.doesNotMatch(outcomes,/기회손익 \$\{x\.pending\?/);
-  assert.match(outcomes,/매수=\(현재가−매수가\)×수량/);
-  assert.match(outcomes,/개별 체결 수량만 반영/);
+  assert.match(outcomes,/매수=\(기준가−매수가\)×수량/);
+  assert.match(outcomes,/해당 기준가가 확정된 거래만 반영/);
 });
 
 test('only one canonical trade review is rendered',()=>{
@@ -40,8 +40,8 @@ test('compact PB dates are parsed before recent sorting',()=>{
 
 
 test('trade-review sign is favorable-positive for both sides',()=>{
-  assert.match(outcomes,/현재 수익 · 매수가보다 상승/);
-  assert.match(outcomes,/현재 손실 · 매수가보다 하락/);
+  assert.match(outcomes,/label\+' 기준 수익'/);
+  assert.match(outcomes,/label\+' 기준 손실'/);
   assert.match(outcomes,/회피손실 · 매도 후 하락/);
   assert.match(outcomes,/기회손실 · 매도 후 상승/);
   assert.match(outcomes,/복기손익 합계/);
