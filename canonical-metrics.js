@@ -97,7 +97,7 @@ if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
 if(!window.__JJOONI_BENCHMARK_EXCESS_BOOTSTRAPPED){
  window.__JJOONI_BENCHMARK_EXCESS_BOOTSTRAPPED=true;
  const b=document.createElement('script');
- b.src='benchmark-excess-v1.js?v=1.0&_='+Date.now();
+ b.src='benchmark-excess-v1.js?v=1.1&_='+Date.now();
  b.async=false;
  b.onerror=()=>console.warn('CT benchmark excess surface load failed');
  (document.head||document.documentElement).appendChild(b);
