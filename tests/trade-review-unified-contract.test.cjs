@@ -28,3 +28,11 @@ test('only one canonical trade review is rendered',()=>{
   const run=grouped.match(/function run\(\)\{[\s\S]*?\n\}/)?.[0]||'';
   assert.doesNotMatch(run,/\brender\(\)/);
 });
+
+
+test('compact PB dates are parsed before recent sorting',()=>{
+  assert.match(outcomes,/function tradeTs\(t\)/);
+  assert.match(outcomes,/raw\.match\(\/\^\(\\d\{2\}\)\(\\d\{2\}\)\(\\d\{2\}\)/);
+  assert.match(outcomes,/raw\.match\(\/\^\(\\d\{4\}\)\(\\d\{2\}\)\(\\d\{2\}\)/);
+  assert.match(outcomes,/const dt=tradeTs\(t\)/);
+});
