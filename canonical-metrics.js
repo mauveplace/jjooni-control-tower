@@ -92,6 +92,17 @@ if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
  (document.head||document.documentElement).appendChild(v);
 }
 
+// Investor-flow surface: renders market-wide KOSPI/KOSDAQ flow separately
+// from per-stock KIS estimate slots and consumes the server-side regime SSOT.
+if(!window.__JJOONI_INVESTOR_FLOW_BOOTSTRAPPED){
+ window.__JJOONI_INVESTOR_FLOW_BOOTSTRAPPED=true;
+ const f=document.createElement('script');
+ f.src='investor-flow-v1.js?v=1.0&_='+Date.now();
+ f.async=false;
+ f.onerror=()=>console.warn('CT investor flow surface load failed');
+ (document.head||document.documentElement).appendChild(f);
+}
+
 // Stability-first TRI-POD daily surface. The decrypted legacy card is historical
 // and remains quarantined unless a complete verified daily signal is available.
 if(!window.__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED){
