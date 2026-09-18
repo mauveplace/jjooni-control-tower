@@ -13,6 +13,24 @@ const qty=t=>Math.abs(n(t?.qty??t?.quantity??t?.filled_qty)??0);
 const px=t=>n(t?.price??t?.filled_price??t?.avg_price);
 const ccy=t=>String(t?.currency||((String(t?.market||'').toUpperCase()==='US')?'USD':'KRW')).toUpperCase();
 const ts=t=>String(t?.filled_at_kst||t?.filled_at||t?.trade_date||t?.date||'');
+function tradeTs(t){
+ const raw=ts(t).trim();
+ if(!raw)return 0;
+ let m=raw.match(/^(\d{2})(\d{2})(\d{2})(?:\D?(\d{2})(\d{2})(\d{2})?)?$/);
+ if(m){
+  const y=2000+Number(m[1]),mo=Number(m[2]),d=Number(m[3]),hh=Number(m[4]||0),mm=Number(m[5]||0),ss=Number(m[6]||0);
+  const v=Date.parse(`${String(y).padStart(4,'0')}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}+09:00`);
+  return Number.isFinite(v)?v:0;
+ }
+ m=raw.match(/^(\d{4})(\d{2})(\d{2})(?:\D?(\d{2})(\d{2})(\d{2})?)?$/);
+ if(m){
+  const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]),hh=Number(m[4]||0),mm=Number(m[5]||0),ss=Number(m[6]||0);
+  const v=Date.parse(`${String(y).padStart(4,'0')}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}+09:00`);
+  return Number.isFinite(v)?v:0;
+ }
+ const v=Date.parse(raw.length<=10?raw+'T00:00:00+09:00':raw);
+ return Number.isFinite(v)?v:0;
+}
 const ticker=t=>sym(t?.ticker||t?.symbol);
 const VERIFIED_SECURITY_NAMES={
  'IBBQ':'Invesco Nasdaq Biotechnology ETF',
@@ -87,8 +105,8 @@ function collectTrades(){
 function reconstructRealized(trades){
  const books=new Map(),map=new Map();
  const ordered=[...trades].sort((a,b)=>{
-  const at=Date.parse(ts(a))||Date.parse(String(a.trade_date||'')+'T00:00:00+09:00')||0;
-  const bt=Date.parse(ts(b))||Date.parse(String(b.trade_date||'')+'T00:00:00+09:00')||0;
+  const at=tradeTs(a);
+  const bt=tradeTs(b);
   return at-bt||a.__seq-b.__seq;
  });
  for(const t of ordered){
@@ -131,7 +149,7 @@ function buildRows(){
   const r=sd==='SELL'?(realized.get(t)||{value:null,currency:ccy(t),basis:'COST_BASIS_INCOMPLETE',state:'NA'}):{value:null,currency:ccy(t),basis:'BUY_NOT_REALIZED',state:'NA'};
   const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
   const op=cp!==null?(px(t)-cp)*qty(t):null;
-  const dt=Date.parse(ts(t))||Date.parse(String(t.trade_date||'')+'T00:00:00+09:00')||0;
+  const dt=tradeTs(t);
   return {t,realized:r,current:cp,opportunity:op,time:dt,seq:t.__seq,trade_side:sd};
  }).sort((a,b)=>b.time-a.time||b.seq-a.seq).slice(0,40);
 }
