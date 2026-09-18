@@ -40,8 +40,20 @@ function computeMixed({portfolio_return,kospi_return,ndx_return,kr_value,us_valu
   us_value:uv
  };
 }
+function computePortfolioReturnFromAccounts(accounts,ids=IDS){
+ let pnlSum=0,baseSum=0,used=0;
+ for(const id of ids){
+  const a=(accounts||{})[id]||{},pnl=n(a.today_pnl),ret=n(a.today_return),nav=n(a.nav);
+  if(pnl==null||ret==null)continue;
+  let base=null;
+  if(Math.abs(ret)>1e-12)base=pnl/(ret/100);
+  else if(Math.abs(pnl)<0.01&&nav!=null&&nav>0)base=nav;
+  if(base!=null&&base>0){pnlSum+=pnl;baseSum+=base;used++}
+ }
+ return used===ids.length&&baseSum>0?{return_pct:100*pnlSum/baseSum,pnl_sum:pnlSum,base_sum:baseSum,used}:null;
+}
 
-const API={classifyPosition,computeMixed};
+const API={classifyPosition,computeMixed,computePortfolioReturnFromAccounts};
 if(typeof module==='object'&&module.exports)module.exports=API;
 root.__JJOONI_BENCHMARK_EXCESS_API_V1=API;
 if(!root.document)return;
@@ -73,26 +85,16 @@ function portfolioDayReturn(){
  // Current production accounts expose today_pnl + today_return but intentionally
  // do not carry previous_nav/net_flow. Rebuild the same modeled denominator from
  // each account's own return contract instead of treating the aggregate as missing.
- let pnlSum=0,baseSum=0,used=0;
- for(const id of IDS){
-  const a=accounts[id]||{},pnl=n(a.today_pnl),ret=n(a.today_return),nav=n(a.nav);
-  if(pnl==null||ret==null)continue;
-  let base=null;
-  if(Math.abs(ret)>1e-12)base=pnl/(ret/100);
-  else if(Math.abs(pnl)<0.01&&nav!=null&&nav>0)base=nav;
-  if(base!=null&&base>0){
-   pnlSum+=pnl;baseSum+=base;used++;
-  }
- }
- if(used===IDS.length&&baseSum>0){
+ const derived=computePortfolioReturnFromAccounts(accounts,IDS);
+ if(derived){
   S.portfolio_return_source='ACCOUNT_TODAY_RETURN_IMPLIED_BASE';
-  S.portfolio_return_accounts=used;
-  S.portfolio_day_pnl=pnlSum;
-  S.portfolio_return_base=baseSum;
-  return 100*pnlSum/baseSum;
+  S.portfolio_return_accounts=derived.used;
+  S.portfolio_day_pnl=derived.pnl_sum;
+  S.portfolio_return_base=derived.base_sum;
+  return derived.return_pct;
  }
  S.portfolio_return_source='UNAVAILABLE';
- S.portfolio_return_accounts=used;
+ S.portfolio_return_accounts=0;
  return null;
 }
 
@@ -155,10 +157,10 @@ function render(){
  const pr=portfolioDayReturn(),ex=exposure(),k=kospi(),x=ndx();
  if(!value||!mini){S.state='WAITING_DOM';S.last_reason='VALUE_OR_MINI_NOT_FOUND';return}
  if(pr==null||!ex||!k||!x||ex.coverage<0.95){
-  value.textContent='—';
-  mini.textContent='BM 입력값 검증 대기 · '+(S.last_reason||'확인 중');
-  value.title='6계좌 당일수익률·KOSPI·최신 완료 NDX·투자비중이 모두 확인돼야 계산합니다.';
   S.state='BLOCKED';S.last_reason=pr==null?'PORTFOLIO_RETURN_MISSING':!ex?'EXPOSURE_MISSING':!k?'KOSPI_MISSING':!x?'NDX_MISSING':'EXPOSURE_COVERAGE_LOW';
+  value.textContent='—';
+  mini.textContent='BM 입력값 검증 대기 · '+S.last_reason;
+  value.title='6계좌 당일수익률·KOSPI·최신 완료 NDX·투자비중이 모두 확인돼야 계산합니다.';
   return;
  }
  const r=computeMixed({portfolio_return:pr,kospi_return:k.return_pct,ndx_return:x.return_pct,kr_value:ex.kr,us_value:ex.us});
