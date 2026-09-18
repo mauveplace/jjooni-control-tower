@@ -311,7 +311,21 @@ function restoreLegacy(panel){
   qsa('[data-ct-trade-review-legacy="1"]',panel).forEach(e=>{e.style.removeProperty('display');delete e.dataset.ctTradeReviewLegacy});
 }
 
-function run(){ensureStyle();ensureNav();syncMoreState();const p=qs('#panel-trades');if(p)render()}
+function run(){
+  ensureStyle();ensureNav();syncMoreState();
+  const p=qs('#panel-trades');if(!p)return;
+  const duplicate=qs('#ctTradeReviewV2',p);if(duplicate)duplicate.remove();
+  qsa(':scope > *',p).forEach(e=>{
+    if(e.id==='ctTradeOutcomeV26'){
+      e.removeAttribute('data-ct-trade-review-legacy');
+      e.style.setProperty('display','block','important');
+      return;
+    }
+    e.dataset.ctTradeReviewLegacy='1';
+    e.style.setProperty('display','none','important');
+  });
+  window.__JJOONI_TRADE_REVIEW_V2={state:'SUPERSEDED',owner:'trade-review-outcomes-v26',grouping:'individual-fills'};
+}
 setTimeout(run,0);setTimeout(run,800);setTimeout(run,2200);
 document.addEventListener('jjooni:live-applied',run);
 window.addEventListener('jjooni:security-names-ready',run);
