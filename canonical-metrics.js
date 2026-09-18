@@ -92,6 +92,17 @@ if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
  (document.head||document.documentElement).appendChild(v);
 }
 
+// Fresh mixed-benchmark excess return. This card is a same-day analytic and
+// must not depend on the stale historical PB ledger.
+if(!window.__JJOONI_BENCHMARK_EXCESS_BOOTSTRAPPED){
+ window.__JJOONI_BENCHMARK_EXCESS_BOOTSTRAPPED=true;
+ const b=document.createElement('script');
+ b.src='benchmark-excess-v1.js?v=1.0&_='+Date.now();
+ b.async=false;
+ b.onerror=()=>console.warn('CT benchmark excess surface load failed');
+ (document.head||document.documentElement).appendChild(b);
+}
+
 // Investor-flow surface: renders market-wide KOSPI/KOSDAQ flow separately
 // from per-stock KIS estimate slots and consumes the server-side regime SSOT.
 if(!window.__JJOONI_INVESTOR_FLOW_BOOTSTRAPPED){
