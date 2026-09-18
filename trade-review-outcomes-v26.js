@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.5',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'qty*(trade_price-current_price)'};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.6',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'BUY=(current-trade)*qty;SELL=(trade-current)*qty'};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -148,7 +148,7 @@ function buildRows(){
   const sd=side(t);
   const r=sd==='SELL'?(realized.get(t)||{value:null,currency:ccy(t),basis:'COST_BASIS_INCOMPLETE',state:'NA'}):{value:null,currency:ccy(t),basis:'BUY_NOT_REALIZED',state:'NA'};
   const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
-  const op=cp!==null?(px(t)-cp)*qty(t):null;
+  const op=cp!==null?(sd==='BUY'?(cp-px(t))*qty(t):(px(t)-cp)*qty(t)):null;
   const dt=tradeTs(t);
   return {t,realized:r,current:cp,opportunity:op,time:dt,seq:t.__seq,trade_side:sd};
  }).sort((a,b)=>b.time-a.time||b.seq-a.seq).slice(0,40);
@@ -177,9 +177,9 @@ function render(){
  const buyCount=rows.filter(x=>x.trade_side==='BUY').length,sellCount=rows.filter(x=>x.trade_side==='SELL').length;
  const knownR=rows.filter(x=>x.trade_side==='SELL'&&x.realized.value!==null).length,knownO=rows.filter(x=>x.opportunity!==null).length;
  const sumTxt=(kr,usd)=>{const a=[];if(kr.count)a.push(money(kr.sum,'KRW'));if(usd.count)a.push(money(usd.sum,'USD'));return a.length?a.join(' · '):'—'};
- root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">개별 체결 기준 · 복기값 = 거래수량 × (당시 거래가 − 현재가) · 당일 거래도 현재가가 있으면 즉시 계산</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
- <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>현재가 차이 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 개별 체결 수량만 반영</small></div></div>
- <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side;const opWord=op===null?'현재가 없음':sd==='SELL'?(op<0?'놓친수익':op>0?'회피손실':'변동 없음'):(op>0?'현재가보다 비싸게 매수':op<0?'현재가보다 싸게 매수':'변동 없음');return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>현재가 차이</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${x.current!==null?' · 현재 '+price(x.current,ccy(t)):''} · ${qty(t).toLocaleString()} × (거래가−현재가)</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
+ root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">개별 체결 기준 · 매수=(현재가−매수가)×수량 · 매도=(매도가−현재가)×수량 · +는 유리, −는 불리</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
+ <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>복기손익 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 개별 체결 수량만 반영</small></div></div>
+ <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side;const opWord=op===null?'현재가 없음':sd==='SELL'?(op<0?'기회손실 · 매도 후 상승':op>0?'회피손실 · 매도 후 하락':'변동 없음'):(op>0?'현재 수익 · 매수가보다 상승':op<0?'현재 손실 · 매수가보다 하락':'변동 없음');return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>복기손익</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${x.current!==null?' · 현재 '+price(x.current,ccy(t)):''} · ${sd==='BUY'?qty(t).toLocaleString()+' × (현재가−매수가)':qty(t).toLocaleString()+' × (매도가−현재가)'}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
  RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.trade_count=rows.length;RT.buy_count=buyCount;RT.sell_count=sellCount;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=sellCount-knownR;RT.missing_opportunity=rows.length-knownO;
 }
 
