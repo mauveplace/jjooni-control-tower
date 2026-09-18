@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-18T10:15:13+09:00",
+  "generated_kst": "2026-09-18T18:34:59+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -8,9 +8,9 @@
   "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_METHODOLOGY_NEAREST_NODE_V1",
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
-  "market_data_as_of": "2026-09-16",
+  "market_data_as_of": "2026-09-17",
   "expected_market_data_date": "2026-09-17",
-  "observed_at": "2026-09-18T10:15:13+09:00",
+  "observed_at": "2026-09-18T18:34:59+09:00",
   "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
@@ -22,31 +22,23 @@
       "action": "HOLD",
       "move_bp": 0,
       "target": "3.75-4.00",
-      "probability": 0.512857
+      "probability": 0.446429
     },
     {
       "action": "HIKE_25BP",
       "move_bp": 25,
       "target": "4.00-4.25",
-      "probability": 0.487143
+      "probability": 0.553571
     }
   ],
-  "hold_probability": 0.512857,
-  "hike_any_probability": 0.487143,
-  "hike_25bp_probability": 0.487143,
+  "hold_probability": 0.446429,
+  "hike_any_probability": 0.553571,
+  "hike_25bp_probability": 0.553571,
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
-  "change_1d_pctpt": 2.21,
+  "change_1d_pctpt": 6.64,
   "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-10",
-      "hold_probability": 0.623571,
-      "hike_any_probability": 0.376429,
-      "hike_25bp_probability": 0.376429,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-11",
       "hold_probability": 0.512857,
@@ -78,20 +70,28 @@
       "hike_25bp_probability": 0.487143,
       "cut_any_probability": 0,
       "cut_25bp_probability": 0
+    },
+    {
+      "trade_date": "2026-09-17",
+      "hold_probability": 0.446429,
+      "hike_any_probability": 0.553571,
+      "hike_25bp_probability": 0.553571,
+      "cut_any_probability": 0,
+      "cut_25bp_probability": 0
     }
   ],
   "calculation": {
-    "start_effr_implied": 3.883214,
-    "end_effr_implied": 4.005,
+    "start_effr_implied": 3.881607,
+    "end_effr_implied": 4.02,
     "meeting_month_avg_effr": 3.895,
-    "expected_change_bp": 12.179,
+    "expected_change_bp": 13.839,
     "anchor_month": "2026-11",
     "days_before_including_meeting": 28,
     "days_after": 3
   },
   "quality": {
     "state": "PASS",
-    "cme_trade_date_gap_days": 1,
+    "cme_trade_date_gap_days": 0,
     "fred_target_dates": {
       "lower": "2026-09-17",
       "upper": "2026-09-17",
