@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_HUMAN_UI_V6)return;
-window.__JJOONI_HUMAN_UI_V6={state:'BOOTING',version:'6.2'};
+window.__JJOONI_HUMAN_UI_V6={state:'BOOTING',version:'6.3'};
 
 const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',AI:'AI BOT',TRIPOD:'TRI-POD'};
@@ -142,7 +142,7 @@ function updateProducerBadge(){
 function updateHeroCompletion(){
  const e=qs('#overviewDailyReturn'),C=canon();if(!e||!C.total)return;
  const missing=(C.total.missing_today||[]).length;
- const text=C.total.today_complete?'합산 완료':missing?`미연결 ${missing}계좌`:'일부 산정';
+ const text=C.total.today_complete?'합산 완료':missing?`오늘손익 미산정 ${missing}계좌`:'일부 산정';
  if(e.textContent!==text)e.textContent=text;e.classList.add('ctHumanCompletionV6');
 }
 function scrubKnownCodes(){
@@ -152,7 +152,7 @@ function scrubKnownCodes(){
 function apply(){
  ensureStyle();updateAccountCards();updateTrust();updateProducerBadge();updateHeroCompletion();scrubKnownCodes();
  const rows=trustRows(),counts={measured:0,modeled:0,reference:0};rows.forEach(r=>counts[r.kind]++);const age=basisAgeMs();
- window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.2',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
+ window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.3',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
 }
 let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;apply()},45)}
 document.addEventListener('jjooni:live-applied',schedule);
