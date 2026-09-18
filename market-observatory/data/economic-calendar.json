@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-18T22:42:11+09:00",
+  "generated_kst": "2026-09-18T23:11:14+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2893,7 +2893,7 @@
         {
           "key": "fed_rate",
           "label": "Federal Funds Rate",
-          "source": "FairEconomy/ForexFactory",
+          "source": "Federal Reserve official FOMC statement",
           "event_title": "Federal Funds Rate",
           "datetime_source": "2026-09-16T14:00:00-04:00",
           "impact": "High",
@@ -2906,7 +2906,7 @@
       "ff_match_score": 40,
       "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-18T22:42:11+09:00",
+      "official_actual_checked_kst": "2026-09-18T23:11:14+09:00",
       "_verified_override": true
     },
     {
@@ -3481,18 +3481,6 @@
           "previous": null,
           "consensus": null,
           "actual": null
-        },
-        {
-          "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (2026-09-17 기준)",
-          "previous": "48.7%",
-          "consensus": "55.4%",
-          "actual": null,
-          "source": "CME Fed Funds futures settlement-derived",
-          "observed_date": "2026-09-17",
-          "previous_observed_date": "2026-09-16",
-          "metric_type": "market_probability_snapshot",
-          "value_role": "market_forecast"
         }
       ],
       "fedwatch_as_of": "2026-09-17"
@@ -4482,11 +4470,11 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 7
+    "forecast": 1
   },
   "actual_freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-09-18T22:42:11+09:00",
+    "checked_kst": "2026-09-18T23:11:14+09:00",
     "grace_minutes": 45,
     "pending_window_hours": 8,
     "pending_count": 0,
@@ -4496,13 +4484,13 @@
       {
         "event_kst": "2026-09-17T03:00:00+09:00",
         "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "result": "UPDATED",
+        "result": "CONFIRMED",
         "actual": "4.00%"
       }
     ]
   },
   "official_actual_contract": "OFFICIAL_PRIMARY_FOMC_PLUS_MARKET_FEEDS_V1",
-  "official_actual_updated_kst": "2026-09-18T22:42:11+09:00",
+  "official_actual_updated_kst": "2026-09-18T23:11:14+09:00",
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
