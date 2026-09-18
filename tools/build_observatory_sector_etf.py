@@ -61,6 +61,16 @@ GROUPS = [
         ('BOTZ', 'Global X Robotics & Artificial Intelligence ETF'),
         ('ROBO', 'ROBO Global Robotics and Automation Index ETF'),
     ]),
+    ('country', '국가별 대표 ETF', [
+        ('SPY', '미국 · SPDR S&P 500 ETF Trust'),
+        ('EWY', '한국 · iShares MSCI South Korea ETF'),
+        ('EWJ', '일본 · iShares MSCI Japan ETF'),
+        ('MCHI', '중국 · iShares MSCI China ETF'),
+        ('EWT', '대만 · iShares MSCI Taiwan ETF'),
+        ('INDA', '인도 · iShares MSCI India ETF'),
+        ('EWZ', '브라질 · iShares MSCI Brazil ETF'),
+        ('VGK', '유럽 · Vanguard FTSE Europe ETF'),
+    ]),
 ]
 
 HORIZONS = (1, 5, 10, 20, 50, 100)
@@ -265,7 +275,7 @@ def build():
         'as_of_date': as_of_date,
         'read_only': True,
         'contains_account_data': False,
-        'universe_version': 'SONG_SECTOR_UNIVERSE_V1',
+        'universe_version': 'SONG_SECTOR_UNIVERSE_V2_COUNTRY',
         'source_contract': 'YAHOO_PUBLIC_COMPLETED_DAILY_REFERENCE',
         'horizons_sessions': list(HORIZONS),
         'benchmarks': {
