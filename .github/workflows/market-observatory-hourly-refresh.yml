@@ -1,0 +1,124 @@
+name: Market Observatory Hourly Data Refresh
+
+on:
+  schedule:
+    # GitHub cron can be delayed. Three checks per hour + freshness guard
+    # keeps actual publication close to hourly without rebuilding every 20 min.
+    - cron: '7,27,47 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/market-observatory-hourly-refresh.yml
+      - tools/build_market_observatory.py
+      - tools/backfill_market_history_30y.py
+      - tools/add_observatory_equities.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-hourly-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Freshness gate
+        id: gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          event=os.environ.get('EVENT_NAME','')
+          refresh=True
+          age_min=None
+          try:
+              o=json.loads(Path('market-observatory/data/observatory.json').read_text(encoding='utf-8'))
+              dt=datetime.fromisoformat(str(o.get('generated_kst') or ''))
+              if dt.tzinfo is None:
+                  dt=dt.replace(tzinfo=timezone.utc)
+              age_min=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
+              if event=='schedule' and age_min < 50:
+                  refresh=False
+          except Exception:
+              refresh=True
+          print(f"should_refresh={'true' if refresh else 'false'}")
+          print(f"age_min={'' if age_min is None else round(age_min,1)}")
+          PY
+
+      - name: Build hourly market snapshot
+        if: steps.gate.outputs.should_refresh == 'true'
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp market-observatory/data/economic-calendar.json /tmp/economic-calendar.json
+          python -m py_compile tools/build_market_observatory.py tools/backfill_market_history_30y.py tools/add_observatory_equities.py
+          python tools/build_market_observatory.py
+          cp /tmp/economic-calendar.json market-observatory/data/economic-calendar.json
+          python tools/backfill_market_history_30y.py
+          python tools/add_observatory_equities.py
+
+      - name: Hourly acceptance
+        if: steps.gate.outputs.should_refresh == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          o=json.load(open('market-observatory/data/observatory.json'))
+          dt=datetime.fromisoformat(o['generated_kst'])
+          age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
+          assert age < 10, age
+          for k in ['KOSPI','KOSDAQ','NASDAQ100','SP500','VIX','USDKRW','WTI','US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL']:
+              assert len(o.get('series',{}).get(k) or []) > 5, (k,len(o.get('series',{}).get(k) or []))
+          assert o.get('history_contract')=='IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT'
+          print('OBSERVATORY_HOURLY_ACCEPTANCE=PASS')
+          print('generated_kst=',o['generated_kst'])
+          PY
+
+      - name: Publish hourly market snapshot
+        if: steps.gate.outputs.should_refresh == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/observatory.json
+          if git diff --cached --quiet; then
+            echo OBSERVATORY_HOURLY_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): hourly market refresh'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "OBSERVATORY_HOURLY_PUSH_RETRY=$attempt"
+          done
+          echo OBSERVATORY_HOURLY_PUSH_FAILED >&2
+          exit 1
+
+      - name: Fresh enough - skip rebuild
+        if: steps.gate.outputs.should_refresh != 'true'
+        run: echo "OBSERVATORY_HOURLY_SKIP age_min=${{ steps.gate.outputs.age_min }}"
