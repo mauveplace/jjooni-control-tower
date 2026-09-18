@@ -6,6 +6,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const outcomes=fs.readFileSync(path.join(root,'trade-review-outcomes-v26.js'),'utf8');
 const grouped=fs.readFileSync(path.join(root,'trade-review-v2.js'),'utf8');
+const bridge=fs.readFileSync(path.join(root,'live-bridge.js'),'utf8');
 
 test('trade review uses individual BUY and SELL fills in strict recent order',()=>{
   assert.match(outcomes,/\['BUY','SELL'\]\.includes\(side\(t\)\)/);
@@ -56,4 +57,12 @@ test('post-trade horizon buttons use historical basis without current-price subs
   assert.match(outcomes,/b\.state==='PENDING'/);
   assert.match(outcomes,/sd==='BUY'\?\(cp-entry\)\*qty\(t\):\(entry-cp\)\*qty\(t\)/);
   assert.match(outcomes,/해당 기준가가 확정된 거래만 반영/);
+});
+
+
+test('live bridge streams daily horizon marks from the quote sidecar',()=>{
+  assert.match(bridge,/trade_horizons/);
+  assert.match(bridge,/trade_review_horizons/);
+  assert.match(bridge,/__JJOONI_TRADE_HORIZONS_V26/);
+  assert.match(bridge,/TRADE_QUOTES=JSON\.parse\(kv\.TRADE_QUOTES_JSON/);
 });
