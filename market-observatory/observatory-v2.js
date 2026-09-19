@@ -295,6 +295,9 @@ window.addEventListener('load',()=>{
   document.querySelectorAll('canvas').forEach(c=>ensureToolbar(c.id));
   try{if(typeof renderCalendar==='function')renderCalendar()}catch(_){}
   setTimeout(()=>hydrateHistory(false),80);
+  if(!document.querySelector('script[data-official-macro-runtime]')){
+    const s=document.createElement('script');s.dataset.officialMacroRuntime='1';s.src='./official-macro-v1.js?v=1.0';document.body.appendChild(s);
+  }
 });
-window.__JJOONI_OBSERVATORY_UI={version:'2.8.0-yield-maturity-trends',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true};
+window.__JJOONI_OBSERVATORY_UI={version:'2.8.1-official-macro-loader',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true};
 })();
