@@ -501,7 +501,7 @@ def build_kr(calendar: dict):
         consensus = num(cc.get("consensus"))
         return {
             "key": metric_key, "name": name, "country": "KR", "group": group,
-            "frequency": "daily" if metric_key == "KR_BASE_RATE" else ("quarterly" if metric_key == "KR_GDP" else "monthly"),
+            "frequency": "quarterly" if metric_key == "KR_GDP" else "monthly",
             "unit": unit, "target": target, "historical_position": historical_position(hist), "history": hist, "latest": latest, "previous_period": prev,
             "release": {
                 "actual": r4(rel_actual), "measure": unit,
@@ -516,7 +516,7 @@ def build_kr(calendar: dict):
         }
 
     try:
-        rows = ecos_search(key, "722Y001", "D", start_d, end_d, "0101000")
+        rows = ecos_search(key, "722Y001", "M", start_m, end_m, "0101000")
         metrics["KR_BASE_RATE"] = make_metric("KR_BASE_RATE", "한국 기준금리", "policy", "BOK", rows, "level", "%")
     except Exception as e:
         errors["KR_BASE_RATE"] = str(e)
