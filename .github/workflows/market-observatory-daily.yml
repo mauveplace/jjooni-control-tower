@@ -324,7 +324,7 @@ jobs:
           for token in ['미국 국채금리 추세','3개월물','2년물','10년물','30년물']:
               assert token in html,token
           assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
-          assert 'observatory-v2.js?v=2.8.0' in html
+          assert 'observatory-v2.js?v=2.8.1' in html
           assert "cache:'no-store'" in html and "'cb='+Date.now()" in html
           assert 'latest-board-v1.js?v=2.4' in html
           assert 'fed-watch-v1.js?v=1.2' in html
