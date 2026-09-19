@@ -398,13 +398,30 @@ def ecos_url(key: str, service: str, *parts) -> str:
 
 
 def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: str, item2: str | None = None):
-    parts = ["1", "10000", stat, cycle, start, end, item1]
-    if item2:
-        parts.append(item2)
-    obj = req_json(ecos_url(key, "StatisticSearch", *parts))
-    rows = ((obj.get("StatisticSearch") or {}).get("row") or [])
+    page_size = 1000
+    raw_rows = []
+    begin = 1
+    total = None
+    while total is None or begin <= total:
+        finish = begin + page_size - 1
+        parts = [str(begin), str(finish), stat, cycle, start, end, item1]
+        if item2:
+            parts.append(item2)
+        obj = req_json(ecos_url(key, "StatisticSearch", *parts))
+        block = obj.get("StatisticSearch") or {}
+        rows = block.get("row") or []
+        if total is None:
+            try:
+                total = int(block.get("list_total_count") or len(rows))
+            except Exception:
+                total = len(rows)
+        raw_rows.extend(rows)
+        if not rows or len(rows) < page_size:
+            break
+        begin += page_size
+
     out = []
-    for r in rows:
+    for r in raw_rows:
         v = num(r.get("DATA_VALUE"))
         if v is None:
             continue
@@ -419,11 +436,12 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
         else:
             p = t
         out.append({"date": p, "value": v})
-    return sorted(out, key=lambda x: x["date"])
+    ded = {x["date"]: x for x in out}
+    return [ded[k] for k in sorted(ded)]
 
 
 def ecos_items(key: str, stat: str):
-    obj = req_json(ecos_url(key, "StatisticItemList", "1", "10000", stat))
+    obj = req_json(ecos_url(key, "StatisticItemList", "1", "1000", stat))
     return ((obj.get("StatisticItemList") or {}).get("row") or [])
 
 
