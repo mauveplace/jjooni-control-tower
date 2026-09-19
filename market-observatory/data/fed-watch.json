@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-19T15:52:07+09:00",
+  "generated_kst": "2026-09-19T16:05:00+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -10,7 +10,7 @@
   "meeting_date": "2026-10-28",
   "market_data_as_of": "2026-09-18",
   "expected_market_data_date": "2026-09-18",
-  "observed_at": "2026-09-19T15:52:07+09:00",
+  "observed_at": "2026-09-19T16:05:00+09:00",
   "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
@@ -37,16 +37,8 @@
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
   "change_1d_pctpt": 2.21,
-  "change_1w_pctpt": 8.86,
+  "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-11",
-      "hold_probability": 0.512857,
-      "hike_any_probability": 0.487143,
-      "hike_25bp_probability": 0.487143,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-14",
       "hold_probability": 0.535,
@@ -105,7 +97,7 @@
       "upper": "2026-09-18",
       "effr": "2026-09-17"
     },
-    "history_points": 6
+    "history_points": 5
   },
   "provenance": {
     "cme_settlements": "https://www.cmegroup.com/CmeWS/mvc/Settlements/Futures/Settlements/305/FUT",
