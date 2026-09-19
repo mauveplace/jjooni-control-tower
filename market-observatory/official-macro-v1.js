@@ -116,7 +116,11 @@ function showDetail(key){
  box.innerHTML='<div class="obsMacroDetailHead"><div><div class="obsMacroTitle">'+esc(m.name||key)+'</div><div class="obsMacroSub">'+esc(key)+' · '+esc(m.frequency||'')+' · '+esc(m.status||'')+'</div><div class="obsMacroSource">'+src.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><span class="obsMacroBadge '+(m.status==='SOURCE_PENDING'?'pending':'live')+'">'+esc(m.primary_source?.institution||'OFFICIAL')+'</span></div>'+
  '<div class="obsMacroKpis">'+
   kpi('현재',currentValue(m))+kpi('Previous',r.previous==null?'—':fmt(r.previous))+kpi('Consensus',r.consensus==null?'—':fmt(r.consensus))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise))+
-  kpi('3M annualized / avg',l.ann_3m!=null?fmt(l.ann_3m)+'%':(l.avg_3m!=null?fmt(l.avg_3m):'—'))+kpi('6M annualized / avg',l.ann_6m!=null?fmt(l.ann_6m)+'%':(l.avg_6m!=null?fmt(l.avg_6m):'—'))+'</div>'+
+  kpi('3M annualized / avg',l.ann_3m!=null?fmt(l.ann_3m)+'%':(l.avg_3m!=null?fmt(l.avg_3m):'—'))+kpi('6M annualized / avg',l.ann_6m!=null?fmt(l.ann_6m)+'%':(l.avg_6m!=null?fmt(l.avg_6m):'—'))+
+  kpi('1Y 평균',m.historical_position?.avg_1y==null?'—':fmt(m.historical_position.avg_1y))+
+  kpi('5Y 평균',m.historical_position?.avg_5y==null?'—':fmt(m.historical_position.avg_5y))+
+  kpi('코로나 전 평균',m.historical_position?.pre_covid_avg==null?'—':fmt(m.historical_position.pre_covid_avg))+
+  kpi('목표 / 기준',m.target==null?'—':fmt(m.target)+(m.unit&&String(m.unit).includes('%')?'%':''))+'</div>'+
  '<div class="obsMacroRange">'+['3Y','5Y','10Y','ALL'].map(x=>'<button data-macro-range="'+x+'" class="'+(STATE.range===x?'on':'')+'">'+x+'</button>').join('')+'</div>'+
  '<div class="obsMacroChart"><canvas id="officialMacroChart"></canvas></div>'+
  '<div class="obsMacroNotes"><b>Actual SSOT:</b> '+esc(m.primary_source?.name||m.primary_source?.institution||'—')+' · <b>Consensus:</b> '+esc(r.consensus_source?.provider||'별도 시장데이터')+'<br>'+
