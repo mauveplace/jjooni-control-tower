@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-19T09:26:38+09:00",
+  "generated_kst": "2026-09-19T09:35:00+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2899,14 +2899,10 @@
           "impact": "High",
           "previous": "3.75%",
           "consensus": "4.00%",
-          "actual": "4.00%",
-          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
+          "actual": "4.00%"
         }
       ],
       "ff_match_score": 40,
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-19T09:26:38+09:00",
       "_verified_override": true
     },
     {
@@ -4457,7 +4453,7 @@
   ],
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-19T09:25:16+09:00",
+  "key_event_seeded_kst": "2026-09-19T09:34:59+09:00",
   "time_contract": "ALL_TIMES_KST",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "quality": {
@@ -4482,7 +4478,7 @@
   },
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 7
+    "forecast": 3
   },
   "actual_freshness": {
     "status": "LIVE",
@@ -4506,10 +4502,10 @@
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
-    "event_fields": 48,
-    "metric_fields_or_rows": 71
+    "event_fields": 3,
+    "metric_fields_or_rows": 2
   },
-  "retention_kst": "2026-09-19T09:26:38+09:00",
+  "retention_kst": "2026-09-19T09:35:00+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
   "market_event_refresh": {
     "faireconomy_rows": 105,
@@ -4517,6 +4513,6 @@
     "verified_overrides_applied": 15,
     "fedwatch_forecast_applied": true,
     "representative_values_synced": 3,
-    "refreshed_kst": "2026-09-19T09:26:42+09:00"
+    "refreshed_kst": "2026-09-19T09:35:00+09:00"
   }
 }
