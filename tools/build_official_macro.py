@@ -398,7 +398,7 @@ def ecos_url(key: str, service: str, *parts) -> str:
 
 
 def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: str, item2: str | None = None):
-    page_size = 1000
+    page_size = 10 if str(key).strip().lower() == "sample" else 1000
     raw_rows = []
     begin = 1
     total = None
@@ -441,8 +441,25 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
 
 
 def ecos_items(key: str, stat: str):
-    obj = req_json(ecos_url(key, "StatisticItemList", "1", "1000", stat))
-    return ((obj.get("StatisticItemList") or {}).get("row") or [])
+    page_size = 10 if str(key).strip().lower() == "sample" else 1000
+    out = []
+    begin = 1
+    total = None
+    while total is None or begin <= total:
+        finish = begin + page_size - 1
+        obj = req_json(ecos_url(key, "StatisticItemList", str(begin), str(finish), stat))
+        block = obj.get("StatisticItemList") or {}
+        rows = block.get("row") or []
+        if total is None:
+            try:
+                total = int(block.get("list_total_count") or len(rows))
+            except Exception:
+                total = len(rows)
+        out.extend(rows)
+        if not rows or len(rows) < page_size:
+            break
+        begin += page_size
+    return out
 
 
 def find_ecos_item(key: str, stat: str, terms: list[str]):
