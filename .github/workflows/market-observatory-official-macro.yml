@@ -1,0 +1,128 @@
+name: Market Observatory Official Macro
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_official_macro.py
+      - market-observatory/official-macro-v1.js
+      - market-observatory/observatory-v2.js
+      - market-observatory/data/ai-read-contract.json
+      - .github/workflows/market-observatory-official-macro.yml
+  schedule:
+    # Korea 08:00 releases + buffer
+    - cron: '10 23 * * 0-4'
+    # US 08:30 ET releases during daylight / standard time + buffer
+    - cron: '45 12 * * 1-5'
+    - cron: '45 13 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-official-macro
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build official macro dataset
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_official_macro.py
+          python tools/build_official_macro.py
+
+      - name: Official macro acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          d=json.load(open('market-observatory/data/official-macro.json',encoding='utf-8'))
+          v=json.load(open('market-observatory/data/official-macro-vintages.json',encoding='utf-8'))
+          a=json.load(open('market-observatory/data/ai-read-contract.json',encoding='utf-8'))
+
+          assert d['schema']=='JJOONI_OFFICIAL_MACRO_V1'
+          assert d['read_only'] is True and d['contains_account_data'] is False
+          assert d['scope']=='OFFICIAL_MACRO_ONLY_MARKET_INDICATORS_EXCLUDED'
+          assert d['history_target_years']==10
+          assert d['actual_contract']=='OFFICIAL_PRIMARY_SOURCE_LOGICAL_SSOT'
+          assert d['consensus_contract']=='CONSENSUS_IS_SEPARATE_MARKET_DATA_NOT_OFFICIAL_ACTUAL'
+          assert d['revision_contract']=='PROSPECTIVE_VINTAGE_LEDGER_NO_OVERWRITE'
+
+          required_us=['US_FED_FUNDS','US_CORE_PCE','US_PCE','US_CORE_CPI','US_CPI','US_NFP','US_UNEMPLOYMENT','US_AHE','US_JOLTS','US_ECI','US_GDP','US_SEP_DOT_PLOT']
+          required_kr=['KR_BASE_RATE','KR_CPI','KR_GDP','KR_BOK_OUTLOOK','KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_EXPORT_1_20','KR_CURRENT_ACCOUNT','KR_EMPLOYMENT','KR_INDUSTRIAL_PRODUCTION']
+          for k in required_us+required_kr:
+              assert k in d['metrics'],k
+
+          for k in ['US_CORE_PCE','US_CORE_CPI','US_NFP','US_UNEMPLOYMENT','US_GDP']:
+              m=d['metrics'][k]
+              assert m.get('status')=='LIVE',(k,m.get('status'),m.get('error'))
+              assert len(m.get('history') or [])>=20,(k,len(m.get('history') or []))
+              assert (m.get('primary_source') or {}).get('institution') in ['FED','BLS','BEA']
+              assert (m.get('transport_source') or {}).get('provider')
+              r=m.get('release') or {}
+              assert 'actual' in r and 'consensus' in r
+              assert (r.get('consensus_source') or {}).get('contract')=='MARKET_CONSENSUS_SEPARATE_FROM_OFFICIAL_ACTUAL'
+
+          # Korea official connectors may degrade when ECOS is temporarily unavailable,
+          # but source-pending values must be explicit instead of fabricated.
+          for k in ['KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_EXPORT_1_20']:
+              assert d['metrics'][k].get('status') in ['LIVE','SOURCE_PENDING','DEGRADED']
+
+          assert v['schema']=='JJOONI_OFFICIAL_MACRO_VINTAGES_V1'
+          assert isinstance(v.get('vintages'),dict) and len(v['vintages'])>0
+
+          tree=d['macro']['official']
+          assert all(x in tree['us'] for x in ['inflation','labor','growth','fed'])
+          assert all(x in tree['kr'] for x in ['inflation','growth','exports','semiconductor'])
+
+          js=Path('market-observatory/official-macro-v1.js').read_text(encoding='utf-8')
+          for token in ['Macro Official Data','공식 거시','official-macro.json','10Y','SOURCE_PENDING','AUTOBOT']:
+              assert token in js,token
+          loader=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
+          assert 'official-macro-v1.js?v=1.0' in loader
+          assert any(x.get('path')=='./official-macro.json' and x.get('required') for x in a.get('required_reads',[]))
+          assert (a.get('official_macro_policy') or {}).get('scope','').startswith('Official macro only')
+
+          print('OFFICIAL_MACRO_ACCEPTANCE=PASS')
+          print('live_metrics=',d['quality']['live_metrics'])
+          print('pending_metrics=',d['quality']['pending_metrics'])
+          print('vintage_keys=',d['quality']['vintage_keys'])
+          PY
+
+      - name: Publish official macro data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/official-macro.json market-observatory/data/official-macro-vintages.json
+          if git diff --cached --quiet; then
+            echo OFFICIAL_MACRO_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): refresh official macro data'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            echo OFFICIAL_MACRO_PUSH_RETRY=$attempt
+          done
+          exit 1

@@ -3,6 +3,13 @@
   "purpose": "Mandatory market inputs for Roy and other PB/strategy agents before producing an investment strategy.",
   "required_reads": [
     {
+      "path": "./official-macro.json",
+      "role": "official US/KR macro actuals, history, revisions and macro regimes",
+      "required": true,
+      "usable_rule": "schema == JJOONI_OFFICIAL_MACRO_V1; official actual and market consensus must remain source-separated",
+      "fallback": "If an official metric is SOURCE_PENDING/DEGRADED, do not invent or infer the missing official value from market prices."
+    },
+    {
       "path": "./fed-watch.json",
       "role": "FOMC policy probability",
       "required": true,
@@ -43,5 +50,13 @@
     "stale_behavior": "Never quote a stale probability as a current fact. Refresh/verify first.",
     "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale."
   },
-  "agent_instruction": "Before strategy generation, read all required sources. Distinguish observed market facts from interpretation. Do not infer a FedWatch probability from Treasury yields alone when fed-watch.json is unavailable."
+  "agent_instruction": "Before strategy generation, read all required sources including official-macro.json. Distinguish official actuals, market consensus, observed market facts and interpretation. Do not infer a FedWatch probability from Treasury yields alone, and do not fabricate official macro values when a source is pending.",
+  "official_macro_policy": {
+    "scope": "Official macro only. Keep real yields, HY spreads, breadth, SOXX/QQQ and other market-price indicators outside this contract until the separate market-indicator phase.",
+    "actual_ssot": "Fed/BLS/BEA/BOK/KOSTAT/KCS/MOTIE as applicable; transport layers must be identified separately.",
+    "history": "Use 10-year history where available and preserve YoY/MoM/3M annualized/6M annualized features for inflation indices.",
+    "revisions": "Never overwrite revisions silently. Read vintage_history for release revisions.",
+    "consensus": "Consensus is market data, never an official-source actual.",
+    "regime": "Regime labels are informational features and must not be used as a standalone AUTOBOT trade trigger."
+  }
 }
