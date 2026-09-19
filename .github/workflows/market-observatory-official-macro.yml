@@ -94,7 +94,7 @@ jobs:
           assert all(x in tree['kr'] for x in ['inflation','growth','exports','semiconductor'])
 
           js=Path('market-observatory/official-macro-v1.js').read_text(encoding='utf-8')
-          for token in ['Macro Official Data','공식 거시','official-macro.json','10Y','SOURCE_PENDING','decision_engine']:
+          for token in ['Macro Official Data','공식 거시','official-macro.json','10Y','SOURCE_PENDING','AUTOBOT']:
               assert token in js,token
           loader=Path('market-observatory/observatory-v2.js').read_text(encoding='utf-8')
           assert 'official-macro-v1.js?v=1.0' in loader
