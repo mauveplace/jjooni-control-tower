@@ -28,3 +28,12 @@ test('30-day flow adjusted return is labelled as operating return, not generic c
  const s=fs.readFileSync('toss-account-basis-v43.js','utf8');
  assert.match(s,/30D Flow-adjusted 운용수익률/);
 });
+
+
+test('canonical bootstrap loads Toss basis authority and encrypted shell cache-busts it',()=>{
+ const canonical=fs.readFileSync('canonical-metrics.js','utf8');
+ const index=fs.readFileSync('index.html','utf8');
+ assert.match(canonical,/__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED/);
+ assert.match(canonical,/toss-account-basis-v43\.js\?v=43\.0/);
+ assert.match(index,/canonical-metrics\.js\?v=33\.3/);
+});
