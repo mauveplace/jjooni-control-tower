@@ -92,6 +92,18 @@ if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
  (document.head||document.documentElement).appendChild(v);
 }
 
+// Toss account-basis authority: current total asset must match the same
+// canonical NAV used by the Control Tower overview. Historical NAV stays a
+// performance-basis field and is never presented as the current total asset.
+if(!window.__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED){
+ window.__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED=true;
+ const t=document.createElement('script');
+ t.src='toss-account-basis-v43.js?v=43.0&_='+Date.now();
+ t.async=false;
+ t.onerror=()=>console.warn('CT Toss account-basis authority load failed');
+ (document.head||document.documentElement).appendChild(t);
+}
+
 // Fresh mixed-benchmark excess return. This card is a same-day analytic and
 // must not depend on the stale historical PB ledger.
 if(!window.__JJOONI_BENCHMARK_EXCESS_BOOTSTRAPPED){
