@@ -81,6 +81,43 @@ jobs:
               assert 'actual' in r and 'consensus' in r
               assert (r.get('consensus_source') or {}).get('contract')=='MARKET_CONSENSUS_SEPARATE_FROM_OFFICIAL_ACTUAL'
 
+          # Consensus must be measure-safe: no YoY/MoM, country, or unit cross-wiring.
+          cpi=d['metrics']['US_CPI']['release']
+          assert cpi.get('measure')=='MoM %'
+          assert (cpi.get('consensus_source') or {}).get('market_metric_key') in [None,'cpi_mom']
+          if cpi.get('consensus') is not None:
+              assert abs(float(cpi['consensus'])) < 2.0,cpi
+
+          core_cpi=d['metrics']['US_CORE_CPI']['release']
+          assert (core_cpi.get('consensus_source') or {}).get('market_metric_key') in [None,'core_cpi_mom']
+          if core_cpi.get('consensus') is not None:
+              assert abs(float(core_cpi['consensus'])) < 2.0,core_cpi
+
+          unemp=d['metrics']['US_UNEMPLOYMENT']['release']
+          assert (unemp.get('consensus_source') or {}).get('market_metric_key') in [None,'unemployment']
+          if unemp.get('consensus') is not None:
+              assert 1.0 <= float(unemp['consensus']) <= 15.0,unemp
+
+          jolts=d['metrics']['US_JOLTS']['release']
+          assert (jolts.get('consensus_source') or {}).get('market_metric_key') in [None,'jolts']
+          if jolts.get('consensus') is not None:
+              assert float(jolts['consensus']) > 1000.0,jolts
+
+          fed=d['metrics']['US_FED_FUNDS']['release']
+          assert (fed.get('consensus_source') or {}).get('market_metric_key') in [None,'fed_rate']
+          if fed.get('consensus') is not None:
+              assert 0.0 <= float(fed['consensus']) <= 20.0,fed
+
+          kr_cpi=d['metrics']['KR_CPI']['release']
+          assert kr_cpi.get('measure')=='YoY %'
+          assert (kr_cpi.get('consensus_source') or {}).get('market_metric_key') in [None,'kr_cpi_yoy']
+
+          kr_core=d['metrics'].get('KR_CORE_CPI') or {}
+          if kr_core.get('status')=='LIVE':
+              hr=(d['metrics']['KR_CPI'].get('latest') or {}).get('raw')
+              cr=(kr_core.get('latest') or {}).get('raw')
+              assert hr and cr and 0.80 <= float(cr)/float(hr) <= 1.20,(hr,cr,kr_core)
+
           # Korea official connectors may degrade when ECOS is temporarily unavailable,
           # but source-pending values must be explicit instead of fabricated.
           for k in ['KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_EXPORT_1_20']:
