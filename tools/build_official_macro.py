@@ -517,6 +517,8 @@ def build_kr(calendar: dict):
             errors["KR_CURRENT_ACCOUNT"] = str(e)
 
     pending = {
+        "KR_CORE_CPI": ("Core CPI", "inflation", "KOSTAT", "KOSTAT core CPI ECOS item discovery pending"),
+        "KR_CURRENT_ACCOUNT": ("경상수지", "external", "BOK", "BOK ECOS 301Y017 item mapping pending"),
         "KR_BOK_OUTLOOK": ("한국은행 경제전망", "growth", "BOK", "Structured forecast table parser pending"),
         "KR_EXPORT_YOY": ("수출 YoY", "exports", "KCS/MOTIE", "Official customs/industry structured series connector pending"),
         "KR_SEMICON_EXPORT_YOY": ("반도체 수출 YoY", "exports", "KCS/MOTIE", "Official semiconductor export structured series connector pending"),
