@@ -27,8 +27,8 @@ FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv"
 FRED_SOURCE = "Federal Reserve Bank of St. Louis FRED transport"
 
 US_DEF = {
-    "US_CPI": {"series": "CPIAUCSL", "institution": "BLS", "name": "CPI", "group": "inflation", "kind": "monthly_index", "target": 2.0},
-    "US_CORE_CPI": {"series": "CPILFESL", "institution": "BLS", "name": "Core CPI", "group": "inflation", "kind": "monthly_index", "target": 2.0},
+    "US_CPI": {"series": "CPIAUCSL", "institution": "BLS", "name": "CPI", "group": "inflation", "kind": "monthly_index"},
+    "US_CORE_CPI": {"series": "CPILFESL", "institution": "BLS", "name": "Core CPI", "group": "inflation", "kind": "monthly_index"},
     "US_PCE": {"series": "PCEPI", "institution": "BEA", "name": "PCE", "group": "inflation", "kind": "monthly_index", "target": 2.0},
     "US_CORE_PCE": {"series": "PCEPILFE", "institution": "BEA", "name": "Core PCE", "group": "inflation", "kind": "monthly_index", "target": 2.0},
     "US_NFP": {"series": "PAYEMS", "institution": "BLS", "name": "Nonfarm Payrolls", "group": "labor", "kind": "monthly_change", "unit": "K"},
@@ -259,6 +259,25 @@ def release_value(metric_key: str, latest: dict):
     return latest.get("value"), None
 
 
+def historical_position(hist: list[dict], field: str = "value"):
+    xs = [(str(x.get("period") or "")[:10], num(x.get(field))) for x in hist]
+    xs = [(d, v) for d, v in xs if d and v is not None]
+    if not xs:
+        return {"avg_1y": None, "avg_5y": None, "pre_covid_avg": None}
+    last = date.fromisoformat(xs[-1][0])
+    c1 = (last - timedelta(days=366)).isoformat()
+    c5 = (last - timedelta(days=3653 // 2)).isoformat()  # replaced below with exact 5Y
+    c5 = (last - timedelta(days=365*5 + 2)).isoformat()
+    def avg(rows):
+        return r4(sum(v for _, v in rows) / len(rows)) if rows else None
+    return {
+        "avg_1y": avg([(d, v) for d, v in xs if d >= c1]),
+        "avg_5y": avg([(d, v) for d, v in xs if d >= c5]),
+        "pre_covid_avg": avg([(d, v) for d, v in xs if "2015-01-01" <= d <= "2019-12-31"]),
+        "latest_percentile_10y": r4(100.0 * sum(1 for _, v in xs if v <= xs[-1][1]) / len(xs)),
+    }
+
+
 def metric_payload(metric_key: str, cfg: dict, rows: list[dict], calendar: dict):
     hist = metric_history(cfg["kind"], rows)
     cutoff = (date.today() - timedelta(days=3653 + 400)).isoformat()
@@ -310,6 +329,7 @@ def metric_payload(metric_key: str, cfg: dict, rows: list[dict], calendar: dict)
             },
         },
         "target": cfg.get("target"),
+        "historical_position": historical_position(hist),
         "history": hist,
         "status": "LIVE" if latest else "DEGRADED",
     }
@@ -447,7 +467,7 @@ def build_kr(calendar: dict):
         return {
             "key": metric_key, "name": name, "country": "KR", "group": group,
             "frequency": "daily" if metric_key == "KR_BASE_RATE" else ("quarterly" if metric_key == "KR_GDP" else "monthly"),
-            "unit": unit, "target": target, "history": hist, "latest": latest, "previous_period": prev,
+            "unit": unit, "target": target, "historical_position": historical_position(hist), "history": hist, "latest": latest, "previous_period": prev,
             "release": {
                 "actual": r4(rel_actual), "measure": unit,
                 "previous": r4(prev.get("value")) if prev else None,
@@ -478,7 +498,7 @@ def build_kr(calendar: dict):
     if core_item:
         try:
             rows = ecos_search(key, "901Y009", "M", start_m, end_m, core_item)
-            metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", 2.0, f"ECOS item {core_item}")
+            metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", None, f"ECOS item {core_item}")
         except Exception as e:
             errors["KR_CORE_CPI"] = str(e)
 
