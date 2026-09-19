@@ -93,7 +93,7 @@ function primarySeries(m){
 }
 function cutoff(points,range){
  if(!points.length||range==='ALL')return points;
- const last=new Date(points[points.length-1].date+'T00:00:00Z');const days={3Y:1096,5Y:1827,10Y:3653}[range]||3653;
+ const last=new Date(points[points.length-1].date+'T00:00:00Z');const days={'3Y':1096,'5Y':1827,'10Y':3653}[range]||3653;
  last.setUTCDate(last.getUTCDate()-days);const cut=last.toISOString().slice(0,10);return points.filter(x=>x.date>=cut);
 }
 const markerPlugin={id:'officialMacroMarkers',afterDatasetsDraw(chart,args,opts){
