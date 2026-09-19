@@ -56,6 +56,35 @@ CONSENSUS_ALIASES = {
     "KR_BASE_RATE": ["기준금리", "통화정책"],
 }
 
+# Consensus must be matched to the exact market measure used by release.actual.
+# Never infer across YoY/MoM/QoQ, countries, or unrelated metrics in the same event.
+MARKET_METRIC_KEYS = {
+    "US_CPI": "cpi_mom",
+    "US_CORE_CPI": "core_cpi_mom",
+    "US_CORE_PCE": "core_pce_mom",
+    "US_NFP": "nfp",
+    "US_UNEMPLOYMENT": "unemployment",
+    "US_AHE": "avg_hourly_mom",
+    "US_JOLTS": "jolts",
+    "US_ECI": "eci",
+    "US_FED_FUNDS": "fed_rate",
+    "KR_CPI": "kr_cpi_yoy",
+    "KR_GDP": "gdp_qoq",
+}
+
+
+def market_num(metric_key: str, value):
+    x = num(value)
+    if x is None:
+        return None
+    s = str(value or "").strip().upper().replace(",", "")
+    if metric_key in {"US_NFP", "US_JOLTS"}:
+        if re.search(r"M\\s*$", s):
+            return x * 1000.0
+        if re.search(r"K\\s*$", s):
+            return x
+    return x
+
 
 def now_kst() -> datetime:
     return datetime.now(KST)
@@ -214,33 +243,31 @@ def latest_non_null(hist: list[dict], key: str = "value"):
 
 
 def calendar_consensus(metric_key: str, calendar: dict):
-    aliases = [a.lower() for a in CONSENSUS_ALIASES.get(metric_key, [])]
-    if not aliases:
+    expected_key = MARKET_METRIC_KEYS.get(metric_key)
+    if not expected_key:
         return None
+    expected_country = "US" if metric_key.startswith("US_") else ("KR" if metric_key.startswith("KR_") else None)
+    cutoff = now_kst().isoformat(timespec="seconds")
     candidates = []
     for e in calendar.get("events", []):
+        if expected_country and str(e.get("country") or "").upper() != expected_country:
+            continue
         title = str(e.get("title") or "")
-        event_text = (title + " " + str(e.get("category") or "")).lower()
         dt = str(e.get("datetime_kst") or e.get("date") or "")
+        # Future releases must never supply consensus for the latest already-released official observation.
+        if dt and dt > cutoff:
+            continue
         for m in e.get("market_metrics", []) or []:
-            text = (str(m.get("key") or "") + " " + str(m.get("label") or "") + " " + event_text).lower()
-            if any(a in text for a in aliases):
-                candidates.append((dt, {
-                    "previous": m.get("previous"),
-                    "consensus": m.get("consensus"),
-                    "calendar_actual": m.get("actual"),
-                    "event": title,
-                    "event_kst": dt,
-                    "source": e.get("market_data_source") or e.get("source") or "economic-calendar",
-                }))
-        if any(a in event_text for a in aliases):
+            if str(m.get("key") or "").strip().lower() != expected_key:
+                continue
             candidates.append((dt, {
-                "previous": e.get("previous"),
-                "consensus": e.get("consensus"),
-                "calendar_actual": e.get("actual"),
+                "previous": m.get("previous"),
+                "consensus": m.get("consensus"),
+                "calendar_actual": m.get("actual"),
                 "event": title,
                 "event_kst": dt,
-                "source": e.get("market_data_source") or e.get("source") or "economic-calendar",
+                "market_metric_key": expected_key,
+                "source": m.get("source") or e.get("market_data_source") or e.get("source") or "economic-calendar",
             }))
     if not candidates:
         return None
@@ -292,7 +319,7 @@ def metric_payload(metric_key: str, cfg: dict, rows: list[dict], calendar: dict)
                 break
     rel_actual, rel_measure = release_value(metric_key, latest or {})
     cc = calendar_consensus(metric_key, calendar) or {}
-    consensus = num(cc.get("consensus"))
+    consensus = market_num(metric_key, cc.get("consensus"))
     surprise = None if rel_actual is None or consensus is None else r4(rel_actual - consensus)
     source_url = f"https://fred.stlouisfed.org/series/{cfg['series']}"
     transport = {
@@ -371,7 +398,7 @@ def build_us(calendar: dict):
                 "actual": latest.get("value") if latest else None,
                 "measure": "target midpoint %",
                 "previous": hist[-2].get("value") if len(hist) > 1 else None,
-                "consensus": r4(num(cc.get("consensus"))),
+                "consensus": r4(market_num("US_FED_FUNDS", cc.get("consensus"))),
                 "surprise": None,
                 "consensus_source": {"provider": cc.get("source"), "event": cc.get("event"), "contract": "MARKET_CONSENSUS_SEPARATE_FROM_OFFICIAL_ACTUAL"},
             },
@@ -498,13 +525,14 @@ def build_kr(calendar: dict):
             prev = latest_non_null(hist[:i])
         cc = calendar_consensus(metric_key, calendar) or {}
         rel_actual = latest.get("value") if latest else None
-        consensus = num(cc.get("consensus"))
+        consensus = market_num(metric_key, cc.get("consensus"))
+        rel_measure = "YoY %" if kind == "monthly_index" else unit
         return {
             "key": metric_key, "name": name, "country": "KR", "group": group,
             "frequency": "quarterly" if metric_key == "KR_GDP" else "monthly",
             "unit": unit, "target": target, "historical_position": historical_position(hist), "history": hist, "latest": latest, "previous_period": prev,
             "release": {
-                "actual": r4(rel_actual), "measure": unit,
+                "actual": r4(rel_actual), "measure": rel_measure,
                 "previous": r4(prev.get("value")) if prev else None,
                 "consensus": r4(consensus),
                 "surprise": None if rel_actual is None or consensus is None else r4(rel_actual - consensus),
@@ -533,7 +561,17 @@ def build_kr(calendar: dict):
     if core_item:
         try:
             rows = ecos_search(key, "901Y009", "M", start_m, end_m, core_item)
-            metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", None, f"ECOS item {core_item}")
+            # Both headline and core CPI are 2020=100 index series. Reject a discovered item
+            # whose level is structurally incompatible instead of publishing a fabricated core CPI.
+            candidate_hist = metric_history("monthly_index", rows)
+            candidate_latest = latest_non_null(candidate_hist)
+            headline_latest = (metrics.get("KR_CPI") or {}).get("latest") or {}
+            core_raw = num((candidate_latest or {}).get("raw"))
+            headline_raw = num(headline_latest.get("raw"))
+            ratio = None if core_raw is None or headline_raw in (None, 0) else core_raw / headline_raw
+            if ratio is None or not (0.80 <= ratio <= 1.20):
+                raise RuntimeError(f"KR_CORE_CPI_SERIES_MISMATCH:item={core_item}:ratio={ratio}")
+            metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", None, f"ECOS item {core_item}; level-ratio validated vs headline CPI")
         except Exception as e:
             errors["KR_CORE_CPI"] = str(e)
 
