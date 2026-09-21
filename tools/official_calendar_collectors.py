@@ -51,7 +51,10 @@ def parse_claims(text,dt):
     return [metric('initial_claims','Initial Jobless Claims',val,**({'previous':f'{int(p[1].replace(",",""))/1000:g}K'} if p else {}))]
 
 def parse_boj(text,dt):
-    if not re.search(rf'{dt:%B}\s+{dt.day}\s*,?\s*{dt.year}',text[:500],re.I): raise ValueError('RELEASE_DATE_MISMATCH')
+    # PDF glyph spacing can split the year ("202 6"). Normalize only
+    # whitespace; keep the complete release date bound to this event.
+    header=re.sub(r'\s+','',text[:500])
+    if not re.search(rf'{dt:%B}{dt.day},?{dt.year}(?!\d)',header,re.I): raise ValueError('RELEASE_DATE_MISMATCH')
     m=re.search(r'uncollateralized overnight call rate.{0,100}?around\s+([\d.]+)\s*percent',text,re.I)
     if not m: raise ValueError('BOJ_RATE_PARSE_MISS')
     return [metric('boj_policy_rate','BOJ overnight call rate target',f'{float(m[1]):.2f}%')]

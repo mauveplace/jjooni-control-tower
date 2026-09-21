@@ -51,6 +51,10 @@ class CalendarActualRegression(unittest.TestCase):
     def test_boj_parser(self):
         rows=parse_boj('September 18, 2026 The Bank will encourage the uncollateralized overnight call rate to remain at around 1.25 percent.',datetime(2026,9,18,tzinfo=KST))
         self.assertEqual(rows[0]['actual'],'1.25%')
+    def test_boj_pdf_split_year_still_date_bound(self):
+        text='1 September 18, 202 6 Bank of Japan The Bank will encourage the uncollateralized overnight call rate to remain at around 1.25 percent.'
+        self.assertEqual(parse_boj(text,datetime(2026,9,18,tzinfo=KST))[0]['actual'],'1.25%')
+        with self.assertRaises(ValueError): parse_boj(text,datetime(2026,9,17,tzinfo=KST))
     def test_boe_parser(self):
         rows=parse_boe('Published on 17 September 2026 At its meeting ending on 16 September 2026, the Monetary Policy Committee (MPC) voted by a majority of 6–3 to maintain Bank Rate at 3.75%. Three members voted to increase Bank Rate by 0.25 percentage points, to 4%.',datetime(2026,9,17,tzinfo=KST))
         self.assertEqual([r['actual'] for r in rows],['3.75%','3-0-6'])
