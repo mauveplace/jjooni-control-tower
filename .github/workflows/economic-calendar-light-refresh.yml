@@ -64,6 +64,20 @@ jobs:
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics']) for e in c.get('events',[]))
           freshness=c.get('actual_freshness') or {}
           assert freshness.get('status') in ['LIVE','PENDING','DEGRADED'],freshness
+          # Exercise the health contract against recovered production records,
+          # without writing the simulated missing values back to the calendar.
+          from copy import deepcopy
+          from datetime import datetime
+          import sys
+          sys.path.insert(0, 'tools')
+          from calendar_actual_contract import build_freshness, KST
+          for event in c.get('events', []):
+              if event.get('actual_status') != 'RELEASED' or event.get('source_tier') != 'OFFICIAL':
+                  continue
+              simulated=deepcopy(event)
+              simulated['actual']=None
+              health=build_freshness({'events':[simulated]},datetime.now(KST),[])
+              assert health['status'] != 'LIVE',event['title']
           print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('enrichment_updates'),freshness)
           PY
       - name: Publish calendar only
@@ -90,4 +104,3 @@ jobs:
         run: |
           set -euo pipefail
           python tools/refresh_official_central_bank_actuals.py --health-only --strict
-
