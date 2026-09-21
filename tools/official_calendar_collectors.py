@@ -181,15 +181,25 @@ def apply_official_actuals(calendar,now):
         if kind:
             e['actual_watch']=True
             e['actual_expected']=True
+        expected=REGISTRY.get(kind,())
+        if kind=='BLS_jltst':
+            from official_bls_actuals import cached_document,release_url
+            document=cached_document(release_url(e))
+            if document and re.search(r'ANNUAL\s+\d{4}',document[1]['text'][:1000]):
+                expected=('state_jolts_annual_publication',)
+                e['release_kind']='annual_data_publication'
+                e['actual_contract_note']='Official annual dataset publication notice; no monthly national JOLTS headline is announced.'
         if e.get('time_status')=='TBD':
             e['sort_datetime_kst']=e['datetime_kst']; e['release_date']=dt.date().isoformat()
-        if kind in ('BLS_jltst','BLS_vet'):
-            wrong=[m for m in e.get('market_metrics',[]) if m.get('key') not in REGISTRY[kind]]
+        if kind in ('BLS_jltst','BLS_vet','BLS_prin','BLS_prin1'):
+            wrong=[m for m in e.get('market_metrics',[]) if m.get('key') not in expected]
             if wrong:
-                e['metric_contract_correction']={'reason':'TITLE_SUBSTRING_COLLISION','removed_keys':[m.get('key') for m in wrong]}
-                e['market_metrics']=[m for m in e.get('market_metrics',[]) if m.get('key') in REGISTRY[kind]]
+                removed=set((e.get('metric_contract_correction') or {}).get('removed_keys',[]))
+                removed.update(m.get('key') for m in wrong)
+                e['metric_contract_correction']={'reason':'TITLE_SUBSTRING_COLLISION','removed_keys':sorted(removed)}
+                e['market_metrics']=[m for m in e.get('market_metrics',[]) if m.get('key') in expected]
         old={m.get('key'):m for m in e.get('market_metrics',[])}
-        for key in REGISTRY.get(kind,()):
+        for key in expected:
             old.setdefault(key,metric(key,key,None))
         e['market_metrics']=list(old.values())
         start=dt.replace(hour=0,minute=0,second=0) if e.get('time_status')=='TBD' else dt
@@ -197,23 +207,30 @@ def apply_official_actuals(calendar,now):
         incomplete=clean(e.get('actual')) is None or any(actual_expected(m) and clean(m.get('actual')) is None for m in old.values())
         # Inspect recent window each refresh and keep older unresolved work observable.
         historical=now-dt>timedelta(days=14)
-        if historical and (not incomplete or historical_attempts>=historical_limit): continue
+        cached=False
+        if kind and kind.startswith('BLS_'):
+            from official_bls_actuals import release_documents,release_url
+            cached=release_url(e) in release_documents()
+        if historical and (not incomplete or (not cached and historical_attempts>=historical_limit)): continue
         if incomplete:
             candidates.append({'title':e['title'],'date':dt.date().isoformat(),'adapter':kind,
                                'official_adapter_status':'REGISTERED' if kind else 'NOT_REGISTERED',
                                'fallback_tiers':['SECONDARY','MARKET_FEED']})
         if not kind: continue
         if not incomplete and e.get('source_tier')=='OFFICIAL': continue
-        if historical: historical_attempts+=1
+        if historical and not cached: historical_attempts+=1
         e['actual_backfill_checked_kst']=now.isoformat(timespec='seconds')
         result=collect(e,kind,checks)
         if not result: continue
         rows,url=result
         provenance={'source_tier':'OFFICIAL','source_url':url,'official_url':url,'checked_kst':now.isoformat(timespec='seconds'),'verification_status':'VERIFIED_OFFICIAL','source':kind+' official release'}
         for m in rows:
-            m.update(provenance); old[m['key']]=merge_observation(old.get(m['key'],{}),m)
-        representative=old[REGISTRY[kind][0]]
+            m={**provenance,**m}
+            old[m['key']]=merge_observation(old.get(m['key'],{}),m)
+        representative=old[expected[0]]
         patch=dict(provenance,actual=representative['actual'],market_metrics=list(old.values()),actual_source=kind+' official release')
+        from calendar_actual_contract import PROVENANCE
+        patch.update({k:representative[k] for k in PROVENANCE if k in representative})
         if clean(representative.get('previous')) is not None: patch['previous']=representative['previous']
         # Keep compact previous/consensus identical to primary metric.
         for f in ('previous','consensus'):

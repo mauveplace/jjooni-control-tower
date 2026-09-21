@@ -240,7 +240,8 @@ def parse_ics_dt(v):
 def bls_events(events):
     try:txt=get_text('https://www.bls.gov/schedule/news_release/bls.ics')
     except:return
-    blocks=txt.replace('\r','').split('BEGIN:VEVENT')
+    # RFC 5545 folded lines can otherwise lose the reference period.
+    blocks=re.sub(r'\n[ \t]', '', txt.replace('\r','')).split('BEGIN:VEVENT')
     allow=['Consumer Price Index','Employment Situation','Producer Price Index','Job Openings and Labor Turnover','Employment Cost Index','Productivity and Costs','U.S. Import and Export Price Indexes']
     for b in blocks[1:]:
         sm=re.search(r'\nSUMMARY:(.+)',b);dm=re.search(r'\nDTSTART[^:]*:(.+)',b)
@@ -248,7 +249,9 @@ def bls_events(events):
         title=sm.group(1).strip().replace('\\,',',');
         if not any(x.lower() in title.lower() for x in allow):continue
         dt=parse_ics_dt(dm.group(1)); imp=3 if any(x in title for x in ['Consumer Price Index','Employment Situation']) else 2
-        add_event(events,dt,title,'US','물가/고용',imp,'BLS')
+        description=re.search(r'\nDESCRIPTION:(.+)',b)
+        ref=description.group(1).strip().replace('\\n',' ') if description else ''
+        add_event(events,dt,title,'US','물가/고용',imp,'BLS',ref)
 
 def fixed_policy_events(events):
     # 2026 official calendars; yearly source refresh is explicit in metadata.
@@ -303,4 +306,3 @@ def main():
     CAL.write_text(json.dumps(calendar,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('MARKET_OBSERVATORY_BUILD=PASS');print('generated_kst='+out['generated_kst']);print('series='+str(len(series)));print('calendar_events='+str(len(json.loads(CAL.read_text())['events'])))
 if __name__=='__main__':main()
-

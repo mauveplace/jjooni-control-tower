@@ -104,7 +104,9 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
         if not dt:
             continue
         age = now - dt.astimezone(KST)
-        if age < timedelta(minutes=-5) or (age > timedelta(days=14) and clean(event.get('actual')) is not None):
+        rate = next((m for m in event.get('market_metrics', []) if m.get('key') == 'fed_rate'), {})
+        complete = clean(event.get('actual')) is not None and clean(rate.get('actual')) is not None
+        if age < timedelta(0) or (complete and event.get('source_tier') == 'OFFICIAL' and rate.get('source_tier') == 'OFFICIAL'):
             continue
 
         release_day = dt.astimezone(ET).strftime('%Y%m%d')
@@ -126,6 +128,8 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
             event['official_actual_url'] = url
             event['official_actual_checked_kst'] = now.isoformat(timespec='seconds')
             event['market_data_source'] = append_source(event.get('market_data_source'), 'Federal Reserve official')
+            if not rate:
+                event.setdefault('market_metrics', []).append({'key': 'fed_rate', 'label': 'Federal Funds Rate'})
             for metric in event.get('market_metrics') or []:
                 if metric.get('key') == 'fed_rate':
                     metric['actual'] = actual
@@ -196,4 +200,3 @@ def main() -> int:
 
 if __name__ == '__main__':
     raise SystemExit(main())
-

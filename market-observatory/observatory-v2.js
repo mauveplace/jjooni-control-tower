@@ -229,8 +229,8 @@ function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
 window.chart=function(id,labels,sets){RAW[id]={labels:[...(labels||[])],sets:(sets||[]).map(s=>({...s,data:[...(s.data||[])]}))};draw(id,labels,sets)};
 
 function val(v){return v==null||v===''?'—':String(v)}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]))}
-function actualText(e,m){if(m.actual!=null&&m.actual!=='')return val(m.actual);if(m.metric_type==='market_probability_snapshot'||m.value_role==='market_forecast'||e.actual_expected===false)return '—';return e.actual_status==='OVERDUE'?'수집 지연':e.actual_status==='PENDING'?'Actual 확인 중':'—'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function actualText(e,m){if(m.actual!=null&&m.actual!=='')return val(m.actual)+(m.value_vintage==='LATEST_REVISION'?' (수정치)':'');if(m.metric_type==='market_probability_snapshot'||m.value_role==='market_forecast'||m.value_role==='schedule_only'||m.actual_expected===false||e.actual_expected===false)return '—';return e.actual_status==='OVERDUE'?'수집 지연':e.actual_status==='PENDING'?'Actual 확인 중':'—'}
 function eventMetricsHtml(e){
   const ms=(e.market_metrics||[]).filter(m=>m&&m.label);
   if(ms.length)return `<div class="obsMetricTable">${ms.map(m=>{const market=m.metric_type==='market_probability_snapshot';return `<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">${market?'1거래일 전':'이전'} <b>${esc(val(m.previous))}</b></div><div class="forecast">${market?'현재 시장예측':'예측'} <b>${esc(val(m.consensus))}</b></div><div class="actual">${market?'발표 결과':'실제'} <b>${esc(actualText(e,m))}</b></div></div>`}).join('')}</div>`;
@@ -239,7 +239,8 @@ function eventMetricsHtml(e){
 function releasedActual(e){const ms=(e.market_metrics||[]).filter(Boolean);if(ms.length)return ms.some(m=>m.metric_type!=='market_probability_snapshot'&&m.actual!=null&&m.actual!=='');return e.actual!=null&&e.actual!==''}
 function eventStatus(e){if(e.actual_status==='OVERDUE')return'<span class="obsMissing">수집 지연</span>';if(e.actual_status==='PENDING')return'<span class="obsAwaiting">Actual 확인 중</span>';if(e.actual_status==='NOT_APPLICABLE')return'<span class="obsPending">일정 안내</span>';if(e.time_status==='TBD'&&!releasedActual(e))return'<span class="obsPending">발표시간 미정</span>';const t=Date.parse(e.datetime_kst||e.date||'');if(Number.isFinite(t)&&Date.now()<t)return'<span class="obsPending">예정</span>';if(releasedActual(e))return'<span class="obsDone">발표완료</span>';if(Number.isFinite(t)&&Date.now()-t<=86400000)return'<span class="obsAwaiting">결과 대기</span>';return'<span class="obsMissing">값 미수집</span>'}
 window.renderCalendar=function(){
-  if(typeof CAL==='undefined')return;
+  if(typeof CAL==='undefined'||!CAL)return;
+  calendarLiveStatus();
   const month=typeof calMonth!=='undefined'?calMonth:new Date().toISOString().slice(0,7);
   const title=document.querySelector('#calendarMonth');if(title)title.textContent=month;
   const xs=(CAL.events||[]).filter(e=>String(e.datetime_kst||e.date||'').startsWith(month));
@@ -249,6 +250,39 @@ window.renderCalendar=function(){
     return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div class="obsEventMain"><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''} · ${status}</div>${eventMetricsHtml(e)}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`;
   }).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>';
 };
+
+const CALENDAR_REFRESH_MS=2*60*1000;
+let calendarRefreshInFlight=false,calendarLastChecked=0,calendarRefreshError=false;
+function calendarLiveStatus(){
+  if(typeof CAL==='undefined'||!CAL)return;
+  const head=document.querySelector('#calendar .calendar-head');if(!head)return;
+  let status=document.querySelector('#calendarLiveStatus');
+  if(!status){status=document.createElement('div');status.id='calendarLiveStatus';status.className='meta';status.setAttribute('role','status');head.insertAdjacentElement('afterend',status)}
+  const health=CAL.actual_freshness||{};
+  const label=health.status==='DEGRADED'?`수집 지연 ${health.overdue_count||0}건`:health.status==='PENDING'?`발표 확인 중 ${health.pending_count||0}건`:health.status==='LIVE'?'발표값 확인 완료':'상태 확인 중';
+  status.textContent=`${label} · 갱신 ${String(CAL.generated_kst||'').replace('T',' ').slice(0,16)} KST${calendarRefreshError?' · 새 데이터 연결 재시도 중':' · 자동 갱신'}`;
+}
+async function refreshCalendarData(force=false){
+  if(calendarRefreshInFlight||document.hidden||typeof CAL==='undefined'||!CAL)return false;
+  if(!document.querySelector('#calendar.on')||document.querySelector('#obsCalEditor.on'))return false;
+  if(!force&&Date.now()-calendarLastChecked<CALENDAR_REFRESH_MS)return false;
+  calendarRefreshInFlight=true;calendarLastChecked=Date.now();
+  try{
+    const response=await fetch('./data/economic-calendar.json?refresh='+Date.now(),{cache:'no-store'});
+    if(!response.ok)throw new Error('calendar HTTP '+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data.events)||!data.generated_kst||!data.actual_freshness)throw new Error('calendar contract missing');
+    calendarRefreshError=false;
+    if(Date.parse(data.generated_kst)>=Date.parse(CAL.generated_kst||0)){
+      CAL=data;window.renderCalendar(); // Editor wrapper reapplies this device's explicit edits.
+    }
+    calendarLiveStatus();return true;
+  }catch(error){calendarRefreshError=true;calendarLiveStatus();console.warn('Calendar refresh failed; preserving displayed observations',error);return false}
+  finally{calendarRefreshInFlight=false}
+}
+setInterval(()=>refreshCalendarData(),CALENDAR_REFRESH_MS);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCalendarData()});
+document.addEventListener('click',event=>{if(event.target.closest('button[data-tab="calendar"]'))refreshCalendarData()});
 
 function mergeSeries(base,recent){
   const m=new Map();
@@ -300,6 +334,5 @@ window.addEventListener('load',()=>{
     const s=document.createElement('script');s.dataset.officialMacroRuntime='1';s.src='./official-macro-v1.js?v=1.0';document.body.appendChild(s);
   }
 });
-window.__JJOONI_OBSERVATORY_UI={version:'2.8.1-official-macro-loader',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true};
+window.__JJOONI_OBSERVATORY_UI={version:'2.11-calendar-refresh',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true,calendar_refresh_ms:CALENDAR_REFRESH_MS,refresh_calendar:refreshCalendarData};
 })();
-

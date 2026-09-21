@@ -8,9 +8,16 @@ on:
       - tools/calendar_actual_contract.py
       - tools/official_calendar_collectors.py
       - tools/official_bls_actuals.py
+      - tools/official_bls_api.py
       - tools/official_bok_policy.py
-      - tests/test_calendar_actual_contract.py
       - tools/refresh_official_central_bank_actuals.py
+      - tools/publish_observatory_data.py
+      - tools/refresh_calendar_pipeline.py
+      - tools/persist_calendar_history.py
+      - tools/archive_calendar_actuals.py
+      - tests/test_calendar_actual_contract.py
+      - tests/test_official_historical_actuals.py
+      - tests/test_calendar_pipeline.py
       - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
     # 06:05/06:15 KST weekdays = previous UTC day 21:05/21:15.
@@ -47,7 +54,7 @@ jobs:
       - name: Install official document parser and run regression tests
         run: |
           python -m pip install 'pypdf>=5,<7'
-          python -m unittest discover -s tests -p 'test_calendar_actual_contract.py' -v
+          python -m unittest discover -s tests -p 'test*.py' -v
       - name: Refresh consensus, actual and official central-bank fallback
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
@@ -55,10 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py
-          python tools/enrich_economic_calendar.py
-          python tools/refresh_official_central_bank_actuals.py --health-only
-          python tools/archive_calendar_actuals.py
-          python tests/test_calendar_data_quality.py
+          python tools/refresh_calendar_pipeline.py
           python - <<'PY'
           import json
           c=json.load(open('market-observatory/data/economic-calendar.json'))
@@ -89,19 +93,8 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
-          if git diff --cached --quiet; then
-            echo ECON_CAL_NO_CHANGE
-          else
-            git commit -m 'data(observatory): refresh macro consensus actual and official fallback'
-            for attempt in 1 2 3; do
-              git fetch origin main
-              git rebase -X theirs origin/main
-              if git push origin HEAD:main; then break; fi
-              echo "ECON_CAL_PUSH_RETRY=$attempt"
-              if [ "$attempt" = 3 ]; then exit 1; fi
-            done
-          fi
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh macro consensus actual and official fallback' market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json
+
       - name: Signal overdue major actuals
         shell: bash
         run: |

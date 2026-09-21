@@ -15,7 +15,7 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    const response=await probe.request.get(base+'data/economic-calendar.json?qa='+Date.now());
    if(response.ok()){
     const data=await response.json();
-    ready=targets.every(([date,title,value])=>data.events.some(e=>e.datetime_kst.startsWith(date)&&e.title.includes(title)&&e.actual===value&&e.source_tier==='OFFICIAL'));
+    ready=data.actual_freshness?.overdue_count===0&&targets.every(([date,title,value])=>data.events.some(e=>e.datetime_kst.startsWith(date)&&e.title.includes(title)&&e.actual===value&&e.source_tier==='OFFICIAL'));
     if(ready){console.log('DEPLOYED_CALENDAR',data.generated_kst,data.actual_freshness);break;}
    }
    if(attempt<12) await new Promise(resolve=>setTimeout(resolve,15000));
@@ -40,6 +40,29 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    }
    const size=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));
    assert(size.scroll<=size.width+3,'calendar horizontal overflow');
+   // Exercise a new published payload without changing server data. The same
+   // public poll function must refresh values/status and preserve month selection.
+   const month=await page.locator('#calendarMonth').innerText();
+   const simulated=structuredClone(data);
+   const delayed=simulated.events.find(e=>e.title==='U.S. Initial Jobless Claims'&&e.datetime_kst.startsWith('2026-09-17'));
+   delayed.actual=null;delayed.actual_status='OVERDUE';
+   for(const metric of delayed.market_metrics||[])metric.actual=null;
+   simulated.actual_freshness={...simulated.actual_freshness,status:'DEGRADED',overdue_count:1};
+   simulated.generated_kst=new Date(Date.now()+60000).toISOString();
+   await page.route('**/data/economic-calendar.json?refresh=*',route=>route.fulfill({json:simulated}));
+   assert(await page.evaluate(()=>window.__JJOONI_OBSERVATORY_UI.refresh_calendar(true)));
+   assert.equal(await page.locator('#calendarMonth').innerText(),month);
+   const delayedRow=page.locator('#events .event').filter({hasText:'U.S. Initial Jobless Claims'});
+   assert((await delayedRow.innerText()).includes('수집 지연'));
+   assert((await page.locator('#calendarLiveStatus').innerText()).includes('수집 지연 1건'));
+   await delayedRow.screenshot({path:`calendar-${width}-overdue.png`});
+   // A failed poll preserves the last payload, and reports connection failure.
+   await page.unroute('**/data/economic-calendar.json?refresh=*');
+   await page.route('**/data/economic-calendar.json?refresh=*',route=>route.fulfill({status:503,body:'Unavailable'}));
+   assert.equal(await page.evaluate(()=>window.__JJOONI_OBSERVATORY_UI.refresh_calendar(true)),false);
+   assert((await delayedRow.innerText()).includes('수집 지연'));
+   assert((await page.locator('#calendarLiveStatus').innerText()).includes('연결 재시도'));
+   report.push({width,poll_update:'PASS',poll_failure_preserves_values:'PASS',selected_month_preserved:true});
    await page.close();
   }
   fs.writeFileSync('calendar-production-qa.json',JSON.stringify({status:'PASS',report},null,2));

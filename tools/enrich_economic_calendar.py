@@ -128,7 +128,8 @@ def detail_specs(title):
     from official_bls_actuals import DEFS,LABELS
     if title in ('State Job Openings and Labor Turnover','Employment Situation of Veterans'):
         return [dict(key=k,label=LABELS[k],aliases=[]) for k in DEFS[title][1]]
-    if title.startswith('Productivity and Costs by Industry:'): return []
+    if title.startswith('Productivity and Costs by Industry:') and title in DEFS:
+        return [dict(key=k,label=LABELS.get(k,k),aliases=[]) for k in DEFS[title][1]]
     t=norm(title)
     for k,v in DETAIL_GROUPS.items():
         if norm(k) in t:return v
@@ -235,7 +236,8 @@ def apply_detailed_metrics(event,ff):
         # Keep configured rows even when not yet published so the UI clearly shows what is awaited.
         metrics.append(m)
     metrics.extend(m for key,m in old.items() if key not in {s['key'] for s in specs})
-    event['market_metrics']=metrics
+    removed=set((event.get('metric_contract_correction') or {}).get('removed_keys',[]))
+    event['market_metrics']=[m for m in metrics if m['key'] not in removed]
     # Backward-compatible representative values for compact clients.
     primary=next((m for m in metrics if any(m.get(k) is not None for k in ['previous','consensus','actual'])),None)
     if primary:
@@ -298,4 +300,3 @@ def main():
     CAL.write_text(json.dumps(c,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('ECON_CAL_ENRICH_V2=PASS te_rows=',len(te),'ff_rows=',len(ff),'te_matched=',matched_te,'ff_events=',matched_ff_events,'ff_metrics=',matched_ff_metrics,'actual_updates=',actual_updates,'forecast_updates=',forecast_updates)
 if __name__=='__main__':main()
-

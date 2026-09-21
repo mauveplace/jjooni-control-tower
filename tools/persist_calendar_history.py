@@ -6,37 +6,10 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 KST=ZoneInfo('Asia/Seoul')
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+from calendar_actual_contract import retain_calendar, event_key, clean
 
 ROOT=Path(__file__).resolve().parents[1]
 CURRENT=ROOT/'market-observatory'/'data'/'economic-calendar.json'
-
-
-def clean(v):
-    if v is None:return None
-    s=str(v).strip()
-    return None if s in ('','None','null','nan','N/A','-','—') else s
-
-
-def key(e):
-    return (
-        str(e.get('datetime_kst') or e.get('date') or '')[:10],
-        str(e.get('country') or ''),
-        str(e.get('title') or '').strip(),
-    )
-
-
-def metric_key(m):
-    return str(m.get('key') or m.get('label') or '').strip()
-
-
-def metric_fields(m):
-    fields=['previous','consensus','actual','event_title','datetime_source','impact','source']
-    if m.get('metric_type')=='market_probability_snapshot':
-        fields.remove('actual')
-    return fields
 
 
 def main():
@@ -50,8 +23,14 @@ def main():
 
     cur=json.loads(CURRENT.read_text(encoding='utf-8'))
     prev=json.loads(prev_path.read_text(encoding='utf-8'))
+    before={event_key(e):e for e in cur.get('events',[])}
     retain_calendar(cur, prev)
     kept_fields=kept_metrics=0
+    for event in cur['events']:
+        old=before.get(event_key(event),{})
+        kept_fields+=sum(clean(event.get(k)) is not None and clean(old.get(k)) is None for k in ('actual','previous','consensus'))
+        metrics={m.get('key'):m for m in old.get('market_metrics',[])}
+        kept_metrics+=sum(clean(m.get(k)) is not None and clean(metrics.get(m.get('key'),{}).get(k)) is None for m in event.get('market_metrics',[]) for k in ('actual','previous','consensus'))
     cur['retention_contract']='PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1'
     cur['retention_note']='Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.'
     cur['retention_preserved']={'event_fields':kept_fields,'metric_fields_or_rows':kept_metrics}

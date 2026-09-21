@@ -9,15 +9,6 @@ on:
       - tools/build_fed_watch.py
       - tools/postprocess_market_observatory.py
       - tools/backfill_market_history_30y.py
-      - tools/enrich_economic_calendar.py
-      - tools/calendar_actual_contract.py
-      - tools/official_calendar_collectors.py
-      - tools/official_bls_actuals.py
-      - tools/official_bok_policy.py
-      - tests/test_calendar_actual_contract.py
-      - tools/refresh_official_central_bank_actuals.py
-      - tools/persist_calendar_history.py
-      - tools/archive_calendar_actuals.py
       - tools/add_observatory_equities.py
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
@@ -106,7 +97,7 @@ jobs:
       - name: Install official document parser and run regression tests
         run: |
           python -m pip install 'pypdf>=5,<7'
-          python -m unittest discover -s tests -p 'test_calendar_actual_contract.py' -v
+          python -m unittest discover -s tests -p 'test*.py' -v
       - name: Build lightweight market snapshot
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
@@ -142,19 +133,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/observatory.json
-          if git diff --cached --quiet; then
-            echo OBSERVATORY_HOURLY_NO_CHANGE
-            exit 0
-          fi
-          git commit -m 'data(observatory): hourly market refresh'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            echo "OBSERVATORY_HOURLY_PUSH_RETRY=$attempt"
-          done
-          exit 1
+          python tools/publish_observatory_data.py --message 'data(observatory): hourly market refresh' market-observatory/data/observatory.json
 
   build:
     if: ${{ github.event_name != 'workflow_run' && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') }}
@@ -182,22 +161,15 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet 'curl_cffi>=0.7,<1' 'pypdf>=5,<7'
-          python -m unittest discover -s tests -p 'test_calendar_actual_contract.py' -v
+          python -m unittest discover -s tests -p 'test*.py' -v
           python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/calendar_market_events.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
           python tests/test_market_observatory_completed_session.py
           python tests/test_calendar_market_semantics.py
           python tools/build_market_observatory.py
-          python tools/calendar_market_events.py seed
           python tools/postprocess_market_observatory.py
           python tools/backfill_market_history_30y.py
-          python tools/enrich_economic_calendar.py
-          python tools/refresh_official_central_bank_actuals.py --health-only
-          python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
           python tools/build_fed_watch.py
-          python tools/calendar_market_events.py refresh
-          python tools/refresh_official_central_bank_actuals.py --health-only
-          python tools/archive_calendar_actuals.py
-          python tests/test_calendar_data_quality.py
+          python tools/refresh_calendar_pipeline.py --seed --previous /tmp/economic-calendar-prev.json
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
       - name: Install Observatory UI runtimes and optimize bootstrap
@@ -353,17 +325,4 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/index.html
-          if git diff --cached --quiet; then
-            echo MARKET_OBSERVATORY_NO_CHANGE
-            exit 0
-          fi
-          git commit -m 'data(observatory): refresh latest market board calendar sectors and FedWatch'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            echo "MARKET_OBSERVATORY_PUSH_RETRY=$attempt"
-          done
-          exit 1
-
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html

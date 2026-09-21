@@ -2,20 +2,12 @@ name: Market Observatory Verified Calendar
 
 on:
   workflow_run:
-    workflows: ["Market Observatory Daily + Calendar"]
+    workflows: ["Market Observatory Daily + Calendar", "Economic Calendar Light Refresh"]
     types: [completed]
   push:
     branches: [main]
     paths:
       - tools/calendar_market_events.py
-      - tools/enrich_economic_calendar.py
-      - tools/calendar_actual_contract.py
-      - tools/official_calendar_collectors.py
-      - tools/official_bls_actuals.py
-      - tools/official_bok_policy.py
-      - tests/test_calendar_actual_contract.py
-      - tools/persist_calendar_history.py
-      - tools/archive_calendar_actuals.py
       - tools/build_market_observatory.py
       - tests/test_calendar_market_semantics.py
       - tests/test_calendar_data_quality.py
@@ -51,7 +43,7 @@ jobs:
       - name: Install official document parser and run regression tests
         run: |
           python -m pip install 'pypdf>=5,<7'
-          python -m unittest discover -s tests -p 'test_calendar_actual_contract.py' -v
+          python -m unittest discover -s tests -p 'test*.py' -v
       - name: Seed and merge verified key events
         shell: bash
         run: |
@@ -59,13 +51,7 @@ jobs:
           cp market-observatory/data/economic-calendar.json /tmp/economic-calendar-prev.json
           python -m py_compile tools/calendar_market_events.py tools/enrich_economic_calendar.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
           python tests/test_calendar_market_semantics.py
-          python tools/calendar_market_events.py seed
-          python tools/enrich_economic_calendar.py
-          python tools/persist_calendar_history.py /tmp/economic-calendar-prev.json
-          python tools/calendar_market_events.py refresh
-          python tools/refresh_official_central_bank_actuals.py --health-only
-          python tools/archive_calendar_actuals.py
-          python tests/test_calendar_data_quality.py
+          python tools/refresh_calendar_pipeline.py --seed --previous /tmp/economic-calendar-prev.json
       - name: Acceptance contract
         shell: bash
         run: |
@@ -115,23 +101,4 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
-          if git diff --cached --quiet; then
-            echo VERIFIED_CALENDAR_NO_CHANGE
-            exit 0
-          fi
-          git commit -m 'data(observatory): merge verified calendar actuals and key events'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            # During rebase, "theirs" is this freshly verified calendar commit.
-            # Keep it for generated-file conflicts while preserving unrelated
-            # commits that another calendar workflow may have just published.
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            echo "VERIFIED_CALENDAR_PUSH_RETRY=$attempt"
-          done
-          echo 'VERIFIED_CALENDAR_PUSH_FAILED_AFTER_RETRIES' >&2
-          exit 1
-
+          python tools/publish_observatory_data.py --message 'data(observatory): merge verified calendar actuals and key events' market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json

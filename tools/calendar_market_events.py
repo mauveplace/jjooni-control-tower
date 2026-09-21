@@ -187,6 +187,8 @@ def ff_match(rows, day, country, contains):
 
 
 def merge_metric(event, metric):
+    if metric.get('key') in (event.get('metric_contract_correction') or {}).get('removed_keys', []):
+        return
     rows = event.setdefault('market_metrics', [])
     key = metric.get('key') or metric.get('label')
     for i, old in enumerate(rows):

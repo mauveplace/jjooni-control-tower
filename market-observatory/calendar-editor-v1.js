@@ -3,7 +3,7 @@
 const LS='jjooni_obs_calendar_local_overrides_v1';
 let SERVER=[];
 const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const clean=v=>{const s=String(v??'').trim();return s===''?null:s};
 function eventId(e){return [String(e.datetime_kst||e.date||'').slice(0,10),e.country||'',e.title||''].join('|')}
 function locals(){try{return JSON.parse(localStorage.getItem(LS)||'{}')||{}}catch(_){return{}}}
@@ -14,7 +14,7 @@ function mergeMetrics(base,extra){const out=[],map=new Map();for(const m of(base
 function mergeSources(...values){const out=[];for(const value of values)for(const part of String(value||'').split(' + ')){const s=part.trim();if(s&&!out.includes(s))out.push(s)}return out.join(' + ')}
 function applyServer(e){for(const o of SERVER){if(!serverMatch(e,o))continue;if(o.market_metrics)e.market_metrics=mergeMetrics(e.market_metrics,o.market_metrics);const values=mergeObservation(e,o);for(const k of ['previous','consensus','actual','source_tier','source_url','official_url','checked_kst','verification_status'])if(values[k]!=null)e[k]=values[k];e.market_data_source=mergeSources(e.market_data_source,o.source);e._server_override=true}const p=(e.market_metrics||[]).find(m=>m.metric_type!=='market_probability_snapshot'&&(m.previous!=null||m.consensus!=null||m.actual!=null));if(p)for(const k of ['previous','consensus','actual'])if(p[k]!=null)e[k]=p[k]}
 function applyLocal(e){const o=locals()[eventId(e)];if(!o)return;if(o.event)for(const k of ['previous','consensus','actual'])if(k in o.event)e[k]=o.event[k];if(o.metrics){const ms=e.market_metrics||[];for(const m of ms){const key=m.key||m.label;if(o.metrics[key])Object.assign(m,o.metrics[key])}for(const [key,v] of Object.entries(o.metrics)){if(!ms.some(m=>(m.key||m.label)===key))ms.push({key,label:v.label||key,...v})}e.market_metrics=ms}e._local_override=true;e.market_data_source=mergeSources(e.market_data_source,'수동수정(이 기기)')}
-function applyAll(){if(typeof CAL==='undefined'||!CAL?.events)return;for(const e of CAL.events){applyServer(e);applyLocal(e)}}
+function applyAll(){if(typeof CAL==='undefined'||!CAL?.events)return;const canonical=CAL.official_actual_contract==='OFFICIAL_REGISTRY_BACKFILL_V2';for(const e of CAL.events){if(!canonical)applyServer(e);applyLocal(e)}}
 function kstToday(){const p=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const m=Object.fromEntries(p.map(x=>[x.type,x.value]));return `${m.year}-${m.month}-${m.day}`}
 function plusDays(s,n){const [y,m,d]=String(s).split('-').map(Number),x=new Date(Date.UTC(y,m-1,d+n));return x.toISOString().slice(0,10)}
 function eventDate(e){return String(e.datetime_kst||e.date||'').slice(0,10)}
@@ -42,4 +42,3 @@ const style=document.createElement('style');style.textContent=`
 `;document.head.appendChild(style);init();
 window.__JJOONI_CALENDAR_EDITOR={version:'1.1',storage:LS,mode:'SERVER_SEED_PLUS_LOCAL_OVERRIDE_NEXT7_FIRST'};
 })();
-

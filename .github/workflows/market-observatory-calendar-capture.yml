@@ -2,12 +2,14 @@ name: Market Observatory Calendar Actual Capture
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '45 12 * * *'
-    - cron: '45 13 * * *'
+  # Scheduled capture is owned by Light Refresh; retain manual repair entrypoint.
 
 permissions:
   contents: write
+
+concurrency:
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
 
 jobs:
   capture:
@@ -17,24 +19,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Capture released economic values
+        env:
+          TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
         run: |
-          python tools/enrich_economic_calendar.py
-          python tools/archive_calendar_actuals.py
+          set -euo pipefail
+          python -m pip install 'pypdf>=5,<7'
+          python -m unittest discover -s tests -p 'test*.py' -v
+          python tools/refresh_calendar_pipeline.py
       - name: Publish
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
-          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'data(observatory): archive released economic actuals'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            echo "CALENDAR_CAPTURE_PUSH_RETRY=$attempt"
-          done
-          exit 1
+          python tools/publish_observatory_data.py --message 'data(observatory): archive released economic actuals' market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json

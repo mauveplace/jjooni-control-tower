@@ -1,5 +1,9 @@
 """Date-bound BLS release-vintage collectors (never today's revised series)."""
 import re,html
+import json
+from pathlib import Path
+from functools import lru_cache
+from datetime import datetime
 from html.parser import HTMLParser
 from zoneinfo import ZoneInfo
 
@@ -13,8 +17,38 @@ DEFS={
  'Employment Cost Index':('eci',('eci',)),
  'State Job Openings and Labor Turnover':('jltst',('state_job_openings_decreased',)),
  'Employment Situation of Veterans':('vet',('veteran_unemployment',)),
+ 'Productivity and Costs by Industry: Wholesale Trade and Retail Trade':('prin1',('wholesale_productivity','retail_productivity')),
+ 'Productivity and Costs by Industry: Manufacturing and Mining Industries':('prin',('manufacturing_productivity_increased_industries',)),
 }
 LABELS={'state_job_openings_decreased':'구인율 하락 주 수','veteran_unemployment':'참전군인 연평균 실업률'}
+CACHE = Path(__file__).resolve().parents[1]/'market-observatory/data/calendar-official-release-cache.json'
+
+@lru_cache(maxsize=1)
+def release_documents():
+ return json.loads(CACHE.read_text(encoding='utf-8')).get('documents',{}) if CACHE.exists() else {}
+
+def release_url(e):
+ from calendar_actual_contract import release_time
+ code=DEFS[e['title']][0]
+ dt=release_time(e).astimezone(ZoneInfo('America/New_York'))
+ return f'https://www.bls.gov/news.release/archives/{code}_{dt:%m%d%Y}.htm'
+
+def cached_document(url):
+ record=release_documents().get(url)
+ if not record:return None
+ # Text and table cells observed on the official page; no hand-entered Actuals.
+ raw=html.escape(record['text'])
+ for row in record.get('rows',[]):
+  raw+='<table><tr>'+''.join('<td>'+html.escape(cell)+'</td>' for cell in row)+'</tr></table>'
+ return raw,record
+
+def save_document(url,raw,context):
+ from calendar_actual_contract import KST
+ documents=release_documents()
+ documents[url]={'url':url,'context':context,'text':clean_text(raw),
+                 'rows':[r for r in TableRows(raw).rows if any('Final demand less foods and energy' in c for c in r)],
+                 'observed_kst':datetime.now(KST).isoformat(timespec='seconds')}
+ CACHE.write_text(json.dumps({'schema':'OFFICIAL_RELEASE_DOCUMENT_CACHE_V1','documents':documents},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 class TableRows(HTMLParser):
  def __init__(self,raw):
@@ -67,15 +101,23 @@ def parse_bls(raw,code,dt):
     if re.fullmatch(r'-?\d+(?:\.\d+)?',nums[1]):vals['core_ppi_yoy']=nums[1]+'%'
     break
  elif code=='empsit':
-  lead=after(t,r'Total nonfarm payroll employment',250)
-  n=re.search(r'(increased|rose|grew|declined|decreased|fell|changed little).*?([\d,]+)',lead,re.I)
-  if n:vals['nfp']=('-' if n[1].lower() in ('declined','decreased','fell') else '')+f'{int(n[2].replace(",",""))/1000:g}K'
+  lead=after(t,r'(?:Total )?nonfarm payroll employment',170)
+  n=re.match(r'\s*\(([+-]?\d[\d,]*)\)',lead)
+  if n:vals['nfp']=f'{int(n[1].replace(",",""))/1000:g}K'
+  else:
+   n=re.match(r'\s*(increased|rose|grew|declined|decreased|fell|edged up|edged down)(?:\s+by)?\s+(\d[\d,]*)\b',lead,re.I)
+   if n:vals['nfp']=('-' if n[1].lower() in ('declined','decreased','fell','edged down') else '')+f'{int(n[2].replace(",",""))/1000:g}K'
   u=re.search(r'unemployment rate.{0,80}?(\d+\.\d+) percent',t,re.I)
   if u:vals['unemployment']=u[1]+'%'
   a=after(t,r'average hourly earnings for all employees on private nonfarm payrolls',250)
   x=re.search(r'(?:or\s+)(\d+\.\d+) percent',a,re.I)
   if x:vals['avg_hourly_mom']=('-' if re.search('fell|declined|decreased',a[:80],re.I) else '')+x[1]+'%'
   elif re.search('unchanged',a[:120],re.I):vals['avg_hourly_mom']='0.0%'
+  else:
+   cents=re.search(r'at \$(\d+\.\d+).{0,60}\(([+-]\d+) cents\)',a,re.I)
+   if cents:
+    current,change=float(cents[1]),int(cents[2])/100
+    vals['avg_hourly_mom']=f'{change/(current-change)*100:.1f}%'
   vals['avg_hourly_yoy']=signed(after(t,r'Over the (?:past 12 months|year),\s*average hourly earnings (?:have )?',150))
  elif code=='jolts':
   s=after(t,r'(?:The number of job openings|Job openings)',280)
@@ -94,6 +136,19 @@ def parse_bls(raw,code,dt):
   s=after(t,r'(?:jobless|unemployment) rate for all veterans',180)
   n=re.search(r'(?:to|at) (\d+\.\d+) percent',s)
   if n:vals['veteran_unemployment']=n[1]+'%'
+ elif code=='prin1':
+  s=after(t,r'Labor productivity',180)
+  m=re.search(r'(grew|rose|increased|fell|declined) (\d+\.\d+) percent in wholesale trade and (\d+\.\d+) percent in retail trade',s,re.I)
+  if m:
+   sign='-' if m[1].lower() in ('fell','declined') else ''
+   vals.update(wholesale_productivity=sign+m[2]+'%',retail_productivity=sign+m[3]+'%')
+ elif code=='prin':
+  m=re.search(r'Labor productivity increased in (\d+) of the (\d+) covered four-digit NAICS manufacturing industries',t,re.I)
+  if m:vals['manufacturing_productivity_increased_industries']=m[1]+' / '+m[2]+' industries'
+ if code=='jltst' and re.search(r'ANNUAL (\d{4})',t[:800]):
+  year=re.search(r'ANNUAL (\d{4})',t[:800])[1]
+  if re.search(r'Annual state Job Openings and Labor Turnover Survey.*?estimates for '+year+r' are now available',t,re.I):
+   vals={'state_jolts_annual_publication':year+' annual dataset released'}
  return [dict(key=k,label=LABELS.get(k,k),actual=v) for k,v in vals.items() if v is not None],t[:4000]
 
 def collect_bls(e,kind,checks):
@@ -102,6 +157,17 @@ def collect_bls(e,kind,checks):
  code=kind.removeprefix('BLS_');dt=release_time(e).astimezone(ZoneInfo('America/New_York'))
  stem=f'{code}_{dt:%m%d%Y}'
  urls=[f'https://www.bls.gov/news.release/archives/{stem}.htm',f'https://www.bls.gov/news.release/archives/{stem}.pdf',f'https://www.bls.gov/news.release/history/{stem}.txt']
+ cached=cached_document(urls[0])
+ if cached:
+  raw,record=cached
+  rows,_=parse_bls(raw,code,dt)
+  if rows:
+   e['reference_period']=record['context'].replace(' (PDF)','').replace(' (HTML)','')
+   for row in rows:
+    row['observed_kst']=record['observed_kst']
+    row['value_vintage']='AS_RELEASED'
+   checks.append(dict(adapter=kind,title=e['title'],url=urls[0],result='OFFICIAL_DOCUMENT_CACHE',observed_kst=record['observed_kst']))
+   return rows,urls[0]
  for url in urls:
   check={'adapter':kind,'title':e['title'],'url':url}
   try:
@@ -111,9 +177,13 @@ def collect_bls(e,kind,checks):
    check.update(result='PARTIAL' if missing else 'PARSED',missing_metrics=missing)
    if missing:check['document_prefix']=prefix
    checks.append(check)
-   if rows:return rows,url
+   if rows:
+    if not missing:save_document(urls[0],raw,e.get('reference_period',''))
+    for row in rows:row['value_vintage']='AS_RELEASED'
+    return rows,url
   except Exception as exc:
    check.update(result=f'HTTP_{exc.code}' if hasattr(exc,'code') else type(exc).__name__,error=str(exc)[:250])
    if hasattr(exc,'read'):check['response_prefix']=exc.read(350).decode('utf-8',errors='replace')
    checks.append(check)
- return None
+ from official_bls_api import collect_api
+ return collect_api(e,code,checks)

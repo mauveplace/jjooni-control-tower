@@ -6,7 +6,8 @@ from zoneinfo import ZoneInfo
 KST = ZoneInfo('Asia/Seoul')
 PROVENANCE = ('source_tier', 'source_url', 'official_url', 'checked_kst',
               'observed_kst', 'verification_status', 'actual_source',
-              'official_actual_source', 'official_actual_url', 'official_actual_checked_kst')
+              'official_actual_source', 'official_actual_url', 'official_actual_checked_kst',
+              'value_vintage', 'series_id')
 RANK = {'OFFICIAL': 3, 'SECONDARY': 2, 'MARKET_FEED': 1}
 
 def clean(v):
@@ -19,10 +20,12 @@ def merge_observation(old, new):
     """Null never erases facts; provenance follows the winning actual atomically."""
     out = deepcopy(old)
     accepted = clean(new.get('actual')) is not None and (clean(old.get('actual')) is None or rank(new) >= rank(old))
+    if rank(new) == rank(old) and old.get('value_vintage') == 'AS_RELEASED' and new.get('value_vintage') == 'LATEST_REVISION':
+        accepted = False
     if accepted and rank(new)==rank(old) and clean(old.get('actual')) is not None:
         old_time=old.get('checked_kst') or old.get('observed_kst')
         new_time=new.get('checked_kst') or new.get('observed_kst')
-        if old_time and (not new_time or str(new_time)<str(old_time)):
+        if old_time and (not new_time or str(new_time)<str(old_time)) and not (new.get('value_vintage')=='AS_RELEASED' and old.get('value_vintage')=='LATEST_REVISION'):
             accepted=False
     protected = {'actual', 'source', 'market_data_source', *PROVENANCE}
     for k, v in new.items():
@@ -48,7 +51,8 @@ def merge_observation(old, new):
         for m in new.get('market_metrics', []):
             key = m.get('key') or m.get('label')
             metrics[key] = merge_observation(metrics.get(key, {}), m)
-        out['market_metrics'] = list(metrics.values())
+        removed = set((out.get('metric_contract_correction') or {}).get('removed_keys', []))
+        out['market_metrics'] = [m for key, m in metrics.items() if key not in removed]
     return out
 
 def event_key(e):
@@ -59,14 +63,13 @@ def event_key(e):
 
 def retain_calendar(current, previous):
     old = {event_key(e): e for e in previous.get('events', [])}
-    rows = []
-    seen = set()
+    rows = {}
     for e in current.get('events', []):
         key = event_key(e)
-        rows.append(merge_observation(old.get(key, {}), e)); seen.add(key)
+        rows[key] = merge_observation(rows.get(key, old.get(key, {})), e)
     # Preserve unresolved releases as well as observations after feed rollover.
-    rows.extend(deepcopy(e) for k, e in old.items() if k not in seen)
-    current['events'] = sorted(rows, key=lambda e: str(e.get('datetime_kst', '')))
+    rows.update({k: deepcopy(e) for k, e in old.items() if k not in rows})
+    current['events'] = sorted(rows.values(), key=lambda e: str(e.get('datetime_kst', '')))
     return current
 
 def actual_expected(row):
