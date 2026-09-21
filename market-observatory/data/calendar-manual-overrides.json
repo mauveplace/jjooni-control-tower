@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-21T18:30:16+09:00",
+  "generated_kst": "2026-09-21T18:33:08+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
     {
@@ -59,20 +59,20 @@
         "country": "KR",
         "category": "물가/무역",
         "importance": 2,
+        "source": "BOK",
         "reference_period": "",
         "previous": "+0.9%",
         "consensus": null,
+        "actual": "-3.7%",
         "te_forecast": null,
         "surprise": null,
+        "market_data_source": "한국은행 2026년 8월 수출입물가지수 및 무역지수(잠정)",
         "_verified_override": true,
         "actual_due_kst": "2026-09-15T06:45:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BOK",
-        "actual": "-3.7%",
-        "market_data_source": "한국은행 2026년 8월 수출입물가지수 및 무역지수(잠정)"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "한국은행 2026년 8월 수출입물가지수 및 무역지수(잠정)",
-      "actual": "-3.7%"
+      "actual": "-3.7%",
+      "source": "한국은행 2026년 8월 수출입물가지수 및 무역지수(잠정)"
     },
     {
       "match": {
@@ -98,20 +98,20 @@
         "country": "US",
         "category": "물가/고용",
         "importance": 2,
+        "source": "BLS",
         "reference_period": "",
         "previous": "7.18M",
         "consensus": "7.33M",
+        "actual": "7.27M",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
         "_verified_override": true,
         "actual_due_kst": "2026-09-01T23:45:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BLS",
-        "actual": "7.27M",
-        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
-      "actual": "7.27M"
+      "actual": "7.27M",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
     },
     {
       "match": {
@@ -145,20 +145,20 @@
         "country": "US",
         "category": "물가/고용",
         "importance": 2,
+        "source": "BLS",
         "reference_period": "",
         "previous": "1.4%",
         "consensus": "1.4%",
+        "actual": "1.4%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
         "_verified_override": true,
         "actual_due_kst": "2026-09-03T22:15:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BLS",
-        "actual": "1.4%",
-        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
-      "actual": "1.4%"
+      "actual": "1.4%",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
     },
     {
       "match": {
@@ -200,20 +200,20 @@
         "country": "US",
         "category": "물가/고용",
         "importance": 3,
+        "source": "BLS",
         "reference_period": "",
         "previous": "21K",
         "consensus": "55K",
+        "actual": "162K",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
         "_verified_override": true,
         "actual_due_kst": "2026-09-04T22:15:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BLS",
-        "actual": "162K",
-        "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
-      "actual": "162K"
+      "actual": "162K",
+      "source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory"
     },
     {
       "match": {
@@ -247,20 +247,20 @@
         "country": "KR",
         "category": "물가",
         "importance": 3,
+        "source": "KOSTAT",
         "reference_period": "",
         "previous": "2.8%",
         "consensus": "3.2%",
+        "actual": "3.1%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "Korea official release + KOSTAT / market consensus cross-check + Korea official release + market consensus cross-check",
         "_verified_override": true,
         "actual_due_kst": "2026-09-02T08:45:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "KOSTAT",
-        "actual": "3.1%",
-        "market_data_source": "Korea official release + KOSTAT / market consensus cross-check"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "Korea official release + KOSTAT / market consensus cross-check",
-      "actual": "3.1%"
+      "actual": "3.1%",
+      "source": "Korea official release + KOSTAT / market consensus cross-check + Korea official release + market consensus cross-check"
     },
     {
       "match": {
@@ -294,20 +294,20 @@
         "country": "KR",
         "category": "고용",
         "importance": 2,
+        "source": "KOSTAT",
         "reference_period": "",
         "previous": "2.8%",
         "consensus": "3.1%",
+        "actual": "2.7%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "KOSTAT official release + KOSTAT / market calendar cross-check + KOSTAT official release + market calendar cross-check",
         "_verified_override": true,
         "actual_due_kst": "2026-09-09T08:45:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "KOSTAT",
-        "actual": "2.7%",
-        "market_data_source": "KOSTAT official release + KOSTAT / market calendar cross-check"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "KOSTAT official release + KOSTAT / market calendar cross-check",
-      "actual": "2.7%"
+      "actual": "2.7%",
+      "source": "KOSTAT official release + KOSTAT / market calendar cross-check + KOSTAT official release + market calendar cross-check"
     },
     {
       "match": {
@@ -357,20 +357,20 @@
         "country": "US",
         "category": "물가/고용",
         "importance": 2,
+        "source": "BLS",
         "reference_period": "",
         "previous": "0.1%",
         "consensus": "0.4%",
+        "actual": "0.4%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
         "_verified_override": true,
         "actual_due_kst": "2026-09-10T22:15:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BLS",
-        "actual": "0.4%",
-        "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
-      "actual": "0.4%"
+      "actual": "0.4%",
+      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check"
     },
     {
       "match": {
@@ -420,20 +420,20 @@
         "country": "US",
         "category": "물가/고용",
         "importance": 3,
+        "source": "BLS",
         "reference_period": "",
         "previous": "3.4%",
         "consensus": "3.4%",
+        "actual": "3.4%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
         "_verified_override": true,
         "actual_due_kst": "2026-09-11T22:15:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "BLS",
-        "actual": "3.4%",
-        "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
-      "actual": "3.4%"
+      "actual": "3.4%",
+      "source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check"
     },
     {
       "match": {
@@ -475,20 +475,20 @@
         "country": "US",
         "category": "심리/기대인플레",
         "importance": 3,
+        "source": "University of Michigan",
         "reference_period": "2026-09 preliminary",
         "previous": "51.7",
         "consensus": "51.0",
+        "actual": "47.8",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters",
         "_verified_override": true,
         "actual_due_kst": "2026-09-11T23:45:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "University of Michigan",
-        "actual": "47.8",
-        "market_data_source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters"
+        "actual_due_policy": "RELEASE_PLUS_GRACE"
       },
-      "source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters",
-      "actual": "47.8"
+      "actual": "47.8",
+      "source": "University of Michigan official + Reuters/Investing consensus cross-check + University of Michigan / Reuters"
     },
     {
       "match": {
@@ -614,13 +614,13 @@
           "label": "Federal Funds Rate",
           "previous": "3.75%",
           "consensus": "4.00%",
-          "source": "Federal Reserve official FOMC statement",
-          "actual": "4.00%",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "checked_kst": "2026-09-21T18:30:13+09:00",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "source_tier": "OFFICIAL"
+          "source_tier": "OFFICIAL",
+          "actual": "4.00%",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source": "Federal Reserve official FOMC statement",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
         }
       ],
       "previous": "3.75%",
@@ -631,36 +631,36 @@
         "country": "US",
         "category": "중앙은행",
         "importance": 3,
+        "source": "Federal Reserve",
         "reference_period": "",
         "previous": "3.75%",
         "consensus": "4.00%",
+        "actual": "4.00%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "Federal Reserve official + FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived",
+        "official_actual_source": "Federal Reserve official FOMC statement",
+        "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+        "official_actual_checked_kst": "2026-09-21T18:32:56+09:00",
         "_verified_override": true,
         "actual_due_kst": "2026-09-17T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "source": "Federal Reserve",
-        "actual": "4.00%",
-        "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "verification_status": "VERIFIED_OFFICIAL",
-        "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "official_actual_checked_kst": "2026-09-21T18:30:13+09:00",
         "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T18:30:13+09:00"
+        "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+        "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "verification_status": "VERIFIED_OFFICIAL"
       },
-      "source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
-      "actual": "4.00%",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-21T18:30:13+09:00",
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "checked_kst": "2026-09-21T18:30:13+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "source_tier": "OFFICIAL"
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "official_actual_checked_kst": "2026-09-21T18:32:56+09:00",
+      "source_tier": "OFFICIAL",
+      "actual": "4.00%",
+      "checked_kst": "2026-09-21T18:32:56+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "source": "Federal Reserve official + FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
     },
     {
       "match": {
@@ -675,26 +675,26 @@
           "previous": "3.75%",
           "consensus": "3.75%",
           "event_title": "Official Bank Rate",
-          "source": "BOE official release",
-          "actual": "3.75%",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "source_tier": "OFFICIAL"
+          "source_tier": "OFFICIAL",
+          "actual": "3.75%",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source": "BOE official release",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
         },
         {
           "key": "boe_vote_split",
           "label": "MPC 금리투표 (인상-인하-동결)",
           "previous": "3-0-6",
           "consensus": "3-0-6",
-          "source": "BOE official release",
-          "actual": "3-0-6",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "source_tier": "OFFICIAL"
+          "source_tier": "OFFICIAL",
+          "actual": "3-0-6",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source": "BOE official release",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
         }
       ],
       "previous": "3.75%",
@@ -705,34 +705,34 @@
         "country": "GB",
         "category": "중앙은행",
         "importance": 3,
+        "source": "BOE official release",
         "reference_period": "September 2026 MPC",
         "previous": "3.75%",
         "consensus": "3.75%",
+        "actual": "3.75%",
         "te_forecast": null,
         "surprise": "actual_vs_consensus",
+        "market_data_source": "BOE official release",
         "_verified_override": true,
         "actual_due_kst": "2026-09-17T20:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "actual_watch": true,
         "actual_expected": true,
-        "source": "BOE official release",
-        "actual": "3.75%",
-        "market_data_source": "BOE official release + FairEconomy/ForexFactory",
         "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "verification_status": "VERIFIED_OFFICIAL",
         "actual_source": "BOE official release",
-        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
         "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T13:25:23+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
       },
-      "source": "BOE official release + FairEconomy/ForexFactory",
-      "actual": "3.75%",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-      "checked_kst": "2026-09-21T13:25:23+09:00",
-      "actual_source": "BOE official release",
       "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-      "source_tier": "OFFICIAL"
+      "source_tier": "OFFICIAL",
+      "actual": "3.75%",
+      "checked_kst": "2026-09-21T18:32:56+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "BOE official release",
+      "source": "BOE official release",
+      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
     },
     {
       "match": {
@@ -741,32 +741,37 @@
         "title_contains": "2026년 8월 생산자물가지수(잠정)"
       },
       "source": "BOK official release",
+      "source_tier": "OFFICIAL",
+      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "checked_kst": "2026-09-21T18:32:56+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "BOK official release",
       "event": {
         "datetime_kst": "2026-09-18T06:00+09:00",
         "title": "2026년 8월 생산자물가지수(잠정)",
         "country": "KR",
         "category": "물가",
         "importance": 2,
+        "source": "BOK official release",
         "reference_period": "",
         "previous": null,
         "consensus": null,
+        "actual": "0.2%",
         "te_forecast": null,
         "surprise": null,
+        "market_data_source": "BOK official release",
         "official_release_url": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?depth=201264&menuNo=201264&nttId=11064859&oldMenuNo=201150&programType=newsData&relate=Y",
         "actual_due_kst": "2026-09-18T06:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "actual_watch": true,
         "actual_expected": true,
-        "source": "BOK official release",
-        "actual": "0.2%",
-        "market_data_source": "BOK official release",
-        "_verified_override": true,
         "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-        "verification_status": "VERIFIED_OFFICIAL",
         "actual_source": "BOK official release",
-        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
         "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T13:25:23+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
       },
       "market_metrics": [
         {
@@ -774,145 +779,25 @@
           "label": "PPI MoM",
           "actual": "0.2%",
           "source": "BOK official release",
-          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
           "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "source_tier": "OFFICIAL"
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         },
         {
           "key": "kr_ppi_yoy",
           "label": "PPI YoY",
           "actual": "7.9%",
           "source": "BOK official release",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "source_tier": "OFFICIAL"
-        }
-      ],
-      "actual": "0.2%",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-      "checked_kst": "2026-09-21T13:25:23+09:00",
-      "actual_source": "BOK official release",
-      "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-      "source_tier": "OFFICIAL"
-    },
-    {
-      "match": {
-        "date": "2026-09-17",
-        "country": "US",
-        "title_contains": "U.S. Initial Jobless Claims"
-      },
-      "source": "DOL official release",
-      "event": {
-        "datetime_kst": "2026-09-17T21:30+09:00",
-        "title": "U.S. Initial Jobless Claims",
-        "country": "US",
-        "category": "고용",
-        "importance": 2,
-        "source": "DOL official release",
-        "reference_period": "weekly",
-        "previous": "206K",
-        "consensus": "207K",
-        "actual": "196K",
-        "te_forecast": null,
-        "surprise": "actual_vs_consensus",
-        "market_data_source": "DOL official release",
-        "actual_due_kst": "2026-09-17T22:15:00+09:00",
-        "actual_due_policy": "RELEASE_PLUS_GRACE",
-        "actual_watch": true,
-        "actual_expected": true,
-        "_verified_override": true,
-        "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-        "verification_status": "VERIFIED_OFFICIAL",
-        "actual_source": "DOL official release",
-        "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-        "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T13:27:28+09:00"
-      },
-      "market_metrics": [
-        {
-          "key": "initial_claims",
-          "label": "Initial Jobless Claims",
-          "previous": "206K",
-          "consensus": "207K",
-          "actual": "196K",
-          "source": "DOL official release",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-          "checked_kst": "2026-09-21T13:27:28+09:00",
-          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-          "source_tier": "OFFICIAL"
-        }
-      ],
-      "previous": "206K",
-      "consensus": "207K",
-      "actual": "196K",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-      "checked_kst": "2026-09-21T13:27:28+09:00",
-      "actual_source": "DOL official release",
-      "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-      "source_tier": "OFFICIAL"
-    },
-    {
-      "match": {
-        "date": "2026-09-18",
-        "country": "JP",
-        "title_contains": "BOJ 금융정책결정회의 결과 (발표시간 미정)"
-      },
-      "source": "BOJ official release",
-      "source_tier": "OFFICIAL",
-      "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-      "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-      "checked_kst": "2026-09-21T18:30:13+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOJ official release",
-      "event": {
-        "datetime_kst": "2026-09-18T12:00+09:00",
-        "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
-        "country": "JP",
-        "category": "중앙은행",
-        "importance": 3,
-        "source": "BOJ official release",
-        "reference_period": "Sep 17-18, 2026 meeting",
-        "time_status": "TBD",
-        "previous": null,
-        "consensus": null,
-        "actual": "1.25%",
-        "te_forecast": null,
-        "surprise": null,
-        "market_data_source": "BOJ official release",
-        "actual_due_kst": "2026-09-19T00:00:00+09:00",
-        "actual_due_policy": "MEETING_DAY_END_KST",
-        "release_date": "2026-09-18",
-        "sort_datetime_kst": "2026-09-18T12:00+09:00",
-        "actual_watch": true,
-        "actual_expected": true,
-        "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "verification_status": "VERIFIED_OFFICIAL",
-        "actual_source": "BOJ official release",
-        "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T18:30:13+09:00"
-      },
-      "market_metrics": [
-        {
-          "key": "boj_policy_rate",
-          "label": "BOJ overnight call rate target",
-          "actual": "1.25%",
-          "source": "BOJ official release",
           "source_tier": "OFFICIAL",
-          "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-          "checked_kst": "2026-09-21T18:30:13+09:00",
+          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
-      "actual": "1.25%"
+      "actual": "0.2%"
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
