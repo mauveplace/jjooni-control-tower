@@ -1,0 +1,89 @@
+name: PB Toss On-Demand Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - sync-requests/pb-toss-sync.request
+      - .github/workflows/pb-toss-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Trigger CT fast refresh
+        shell: bash
+        env:
+          JJOONI_CT_PASSWORD: ${{ secrets.JJOONI_CT_PASSWORD }}
+          CT_PASSWORD: ${{ secrets.CT_PASSWORD }}
+          CT_SESSION_PW: ${{ secrets.CT_SESSION_PW }}
+          CONTROL_TOWER_PASSWORD: ${{ secrets.CONTROL_TOWER_PASSWORD }}
+          FAST_REFRESH_SECRET: ${{ secrets.FAST_REFRESH_SECRET }}
+          CT_FAST_SECRET: ${{ secrets.CT_FAST_SECRET }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, time, hmac, hashlib, json, urllib.request, urllib.error
+
+          base='https://jjooni-ct-fast-apgynr7pea-du.a.run.app'
+          candidates=[
+              ('JJOONI_CT_PASSWORD', os.getenv('JJOONI_CT_PASSWORD','')),
+              ('CT_PASSWORD', os.getenv('CT_PASSWORD','')),
+              ('CT_SESSION_PW', os.getenv('CT_SESSION_PW','')),
+              ('CONTROL_TOWER_PASSWORD', os.getenv('CONTROL_TOWER_PASSWORD','')),
+              ('FAST_REFRESH_SECRET', os.getenv('FAST_REFRESH_SECRET','')),
+              ('CT_FAST_SECRET', os.getenv('CT_FAST_SECRET','')),
+          ]
+          candidates=[x for x in candidates if x[1]]
+          if not candidates:
+              raise SystemExit('NO_SYNC_SECRET_AVAILABLE')
+
+          buckets=[int(time.time()//30), int(time.time()//30)-1, int(time.time()//30)+1]
+          last=None
+          for name, secret in candidates:
+              for bucket in buckets:
+                  msg=f'ct-fast:{bucket}'.encode()
+                  sig=hmac.new(secret.encode(), msg, hashlib.sha256).hexdigest()
+                  req=urllib.request.Request(
+                      base+'/refresh',
+                      data=b'',
+                      method='POST',
+                      headers={
+                          'X-CT-Epoch':str(bucket),
+                          'X-CT-Proof':sig,
+                          'X-CT-Force':'true',
+                          'Content-Type':'application/json',
+                          'User-Agent':'jjooni-pb-sync/1.0',
+                      },
+                  )
+                  try:
+                      with urllib.request.urlopen(req, timeout=20) as r:
+                          body=r.read().decode('utf-8','replace')
+                          status=r.status
+                  except urllib.error.HTTPError as e:
+                      status=e.code
+                      body=e.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=f'{name}:ERR:{type(e).__name__}:{e}'
+                      continue
+
+                  print(f'{name}:HTTP_{status}')
+                  if status==200:
+                      try:
+                          data=json.loads(body or '{}')
+                      except Exception:
+                          data={}
+                      print('SYNC_STATUS='+str(data.get('status','UNKNOWN')))
+                      print('SNAPSHOT_ID='+str(data.get('snapshot_id','')))
+                      print('DURATION_MS='+str(data.get('duration_ms','')))
+                      if str(data.get('status','')) in {'PASS','PARTIAL','SKIP_RECENT'}:
+                          raise SystemExit(0)
+                  last=f'{name}:HTTP_{status}'
+
+          raise SystemExit('SYNC_FAILED '+str(last))
+          PY
