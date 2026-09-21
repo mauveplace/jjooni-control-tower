@@ -97,17 +97,23 @@ def parse_bls(raw,code,dt):
  return [dict(key=k,label=LABELS.get(k,k),actual=v) for k,v in vals.items() if v is not None],t[:4000]
 
 def collect_bls(e,kind,checks):
- from official_calendar_collectors import raw_fetch
+ from official_calendar_collectors import raw_fetch,text_fetch
  from calendar_actual_contract import release_time
  code=kind.removeprefix('BLS_');dt=release_time(e).astimezone(ZoneInfo('America/New_York'))
- url=f'https://www.bls.gov/news.release/archives/{code}_{dt:%m%d%Y}.htm'
- check={'adapter':kind,'title':e['title'],'url':url}
- try:
-  raw=raw_fetch(url).decode('utf-8',errors='replace');rows,prefix=parse_bls(raw,code,dt)
-  expected=DEFS[e['title']][1];missing=[k for k in expected if k not in {r['key'] for r in rows}]
-  check.update(result='PARTIAL' if missing else 'PARSED',missing_metrics=missing)
-  if missing:check['document_prefix']=prefix
-  checks.append(check)
-  return (rows,url) if rows else None
- except Exception as exc:
-  check.update(result=f'HTTP_{exc.code}' if hasattr(exc,'code') else type(exc).__name__,error=str(exc)[:250]);checks.append(check);return None
+ stem=f'{code}_{dt:%m%d%Y}'
+ urls=[f'https://www.bls.gov/news.release/archives/{stem}.htm',f'https://www.bls.gov/news.release/archives/{stem}.pdf',f'https://www.bls.gov/news.release/history/{stem}.txt']
+ for url in urls:
+  check={'adapter':kind,'title':e['title'],'url':url}
+  try:
+   raw=text_fetch(url) if url.endswith('.pdf') else raw_fetch(url).decode('utf-8',errors='replace')
+   rows,prefix=parse_bls(raw,code,dt)
+   expected=DEFS[e['title']][1];missing=[k for k in expected if k not in {r['key'] for r in rows}]
+   check.update(result='PARTIAL' if missing else 'PARSED',missing_metrics=missing)
+   if missing:check['document_prefix']=prefix
+   checks.append(check)
+   if rows:return rows,url
+  except Exception as exc:
+   check.update(result=f'HTTP_{exc.code}' if hasattr(exc,'code') else type(exc).__name__,error=str(exc)[:250])
+   if hasattr(exc,'read'):check['response_prefix']=exc.read(350).decode('utf-8',errors='replace')
+   checks.append(check)
+ return None

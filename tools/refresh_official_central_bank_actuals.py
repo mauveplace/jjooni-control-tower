@@ -58,6 +58,7 @@ def mixed_number(token: str) -> float:
 
 
 def fed_target_upper_from_statement(text: str) -> float | None:
+    text = re.sub(r"[‐‑‒–—−]", "-", text)
     patterns = [
         r'target range for the federal funds rate.{0,220}?(?:to|at)\s+'
         r'(\d+(?:-\d+/\d+|\.\d+)?)\s+to\s+'

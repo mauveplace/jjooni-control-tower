@@ -1,0 +1,35 @@
+name: Calendar Official Source Probe
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/calendar-official-source-probe.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect official HTML, downloadable files and API availability
+        run: |
+          python - <<'PY'
+          import urllib.request,concurrent.futures,json
+          urls=[
+          'https://www.bls.gov/news.release/archives/ximpim_09162026.htm',
+          'https://www.bls.gov/news.release/archives/ximpim_09162026.pdf',
+          'https://www.bls.gov/news.release/pdf/ximpim.pdf',
+          'https://download.bls.gov/pub/news.release/ximpim.txt',
+          'https://api.bls.gov/publicAPI/v2/timeseries/data/CES0500000003?startyear=2026&endyear=2026',
+          'https://www.bls.gov/news.release/history/empsit_09042026.txt',
+          'https://bls.gov/news.release/archives/ximpim_09162026.htm']
+          def probe(url):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 JJOONI-Official-Calendar/2.0'}),timeout=10) as r:
+                      raw=r.read()
+                      return dict(url=url,status=r.status,bytes=len(raw),prefix=raw[:450].decode('utf-8','replace'))
+              except Exception as e:
+                  return dict(url=url,status=getattr(e,'code',None),error=str(e),prefix=e.read(450).decode('utf-8','replace') if hasattr(e,'read') else '')
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              for result in pool.map(probe,urls):print(json.dumps(result))
+          PY
