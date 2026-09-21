@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-21T13:25:38+09:00",
+  "generated_kst": "2026-09-21T13:27:31+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
     {
@@ -614,13 +614,13 @@
           "label": "Federal Funds Rate",
           "previous": "3.75%",
           "consensus": "4.00%",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "source_tier": "OFFICIAL",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
+          "actual": "4.00%",
+          "source_tier": "OFFICIAL",
+          "checked_kst": "2026-09-21T13:27:28+09:00",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "actual": "4.00%"
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "previous": "3.75%",
@@ -640,27 +640,27 @@
         "actual_due_kst": "2026-09-17T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "source": "Federal Reserve",
-        "source_tier": "OFFICIAL",
-        "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
         "actual": "4.00%",
-        "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+        "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
         "official_actual_source": "Federal Reserve official FOMC statement",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "official_actual_checked_kst": "2026-09-21T13:25:23+09:00",
+        "official_actual_checked_kst": "2026-09-21T13:27:28+09:00",
+        "source_tier": "OFFICIAL",
         "verification_status": "VERIFIED_OFFICIAL",
-        "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T13:25:23+09:00"
+        "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+        "checked_kst": "2026-09-21T13:27:28+09:00",
+        "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
       },
-      "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-21T13:25:23+09:00",
-      "source_tier": "OFFICIAL",
       "source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
-      "checked_kst": "2026-09-21T13:25:23+09:00",
+      "actual": "4.00%",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "source_tier": "OFFICIAL",
+      "official_actual_checked_kst": "2026-09-21T13:27:28+09:00",
+      "checked_kst": "2026-09-21T13:27:28+09:00",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "actual": "4.00%"
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_actual_source": "Federal Reserve official FOMC statement"
     },
     {
       "match": {
@@ -675,26 +675,26 @@
           "previous": "3.75%",
           "consensus": "3.75%",
           "event_title": "Official Bank Rate",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "source_tier": "OFFICIAL",
           "source": "BOE official release",
+          "actual": "3.75%",
+          "source_tier": "OFFICIAL",
           "checked_kst": "2026-09-21T13:25:23+09:00",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "actual": "3.75%"
+          "verification_status": "VERIFIED_OFFICIAL"
         },
         {
           "key": "boe_vote_split",
           "label": "MPC 금리투표 (인상-인하-동결)",
           "previous": "3-0-6",
           "consensus": "3-0-6",
-          "verification_status": "VERIFIED_OFFICIAL",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "source_tier": "OFFICIAL",
           "source": "BOE official release",
+          "actual": "3-0-6",
+          "source_tier": "OFFICIAL",
           "checked_kst": "2026-09-21T13:25:23+09:00",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "actual": "3-0-6"
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "previous": "3.75%",
@@ -715,24 +715,24 @@
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "actual_watch": true,
         "actual_expected": true,
-        "actual_source": "BOE official release",
         "source": "BOE official release",
-        "source_tier": "OFFICIAL",
-        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
         "actual": "3.75%",
-        "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "verification_status": "VERIFIED_OFFICIAL",
         "market_data_source": "BOE official release + FairEconomy/ForexFactory",
-        "checked_kst": "2026-09-21T13:25:23+09:00"
+        "source_tier": "OFFICIAL",
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+        "actual_source": "BOE official release",
+        "checked_kst": "2026-09-21T13:25:23+09:00",
+        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
       },
-      "actual_source": "BOE official release",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-      "source_tier": "OFFICIAL",
       "source": "BOE official release + FairEconomy/ForexFactory",
+      "actual": "3.75%",
+      "source_tier": "OFFICIAL",
+      "actual_source": "BOE official release",
       "checked_kst": "2026-09-21T13:25:23+09:00",
+      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
       "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-      "actual": "3.75%"
+      "verification_status": "VERIFIED_OFFICIAL"
     },
     {
       "match": {
@@ -741,12 +741,6 @@
         "title_contains": "2026년 8월 생산자물가지수(잠정)"
       },
       "source": "BOK official release",
-      "source_tier": "OFFICIAL",
-      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-      "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-      "checked_kst": "2026-09-21T13:25:23+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOK official release",
       "event": {
         "datetime_kst": "2026-09-18T06:00+09:00",
         "title": "2026년 8월 생산자물가지수(잠정)",
@@ -763,15 +757,16 @@
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "actual_watch": true,
         "actual_expected": true,
-        "actual_source": "BOK official release",
         "source": "BOK official release",
-        "source_tier": "OFFICIAL",
-        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
         "actual": "0.2%",
-        "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-        "verification_status": "VERIFIED_OFFICIAL",
         "market_data_source": "BOK official release",
-        "checked_kst": "2026-09-21T13:25:23+09:00"
+        "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+        "actual_source": "BOK official release",
+        "checked_kst": "2026-09-21T13:25:23+09:00",
+        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
       },
       "market_metrics": [
         {
@@ -780,9 +775,9 @@
           "actual": "0.2%",
           "source": "BOK official release",
           "source_tier": "OFFICIAL",
+          "checked_kst": "2026-09-21T13:25:23+09:00",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
         },
         {
@@ -791,13 +786,76 @@
           "actual": "7.9%",
           "source": "BOK official release",
           "source_tier": "OFFICIAL",
+          "checked_kst": "2026-09-21T13:25:23+09:00",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "checked_kst": "2026-09-21T13:25:23+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
-      "actual": "0.2%"
+      "actual": "0.2%",
+      "source_tier": "OFFICIAL",
+      "actual_source": "BOK official release",
+      "checked_kst": "2026-09-21T13:25:23+09:00",
+      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "verification_status": "VERIFIED_OFFICIAL"
+    },
+    {
+      "match": {
+        "date": "2026-09-17",
+        "country": "US",
+        "title_contains": "U.S. Initial Jobless Claims"
+      },
+      "source": "DOL official release",
+      "source_tier": "OFFICIAL",
+      "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "checked_kst": "2026-09-21T13:27:28+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "DOL official release",
+      "event": {
+        "datetime_kst": "2026-09-17T21:30+09:00",
+        "title": "U.S. Initial Jobless Claims",
+        "country": "US",
+        "category": "고용",
+        "importance": 2,
+        "source": "DOL official release",
+        "reference_period": "weekly",
+        "previous": "206K",
+        "consensus": "207K",
+        "actual": "196K",
+        "te_forecast": null,
+        "surprise": "actual_vs_consensus",
+        "market_data_source": "DOL official release",
+        "actual_due_kst": "2026-09-17T22:15:00+09:00",
+        "actual_due_policy": "RELEASE_PLUS_GRACE",
+        "actual_watch": true,
+        "actual_expected": true,
+        "source_tier": "OFFICIAL",
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+        "actual_source": "DOL official release",
+        "checked_kst": "2026-09-21T13:27:28+09:00",
+        "source_url": "https://oui.doleta.gov/press/2026/091726.pdf"
+      },
+      "market_metrics": [
+        {
+          "key": "initial_claims",
+          "label": "Initial Jobless Claims",
+          "previous": "206K",
+          "consensus": "207K",
+          "actual": "196K",
+          "source": "DOL official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "checked_kst": "2026-09-21T13:27:28+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
+        }
+      ],
+      "previous": "206K",
+      "consensus": "207K",
+      "actual": "196K"
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
