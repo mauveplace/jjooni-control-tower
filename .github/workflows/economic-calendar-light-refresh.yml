@@ -27,8 +27,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: economic-calendar-light-refresh
-  cancel-in-progress: true
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
 
 jobs:
   refresh:
@@ -38,6 +38,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

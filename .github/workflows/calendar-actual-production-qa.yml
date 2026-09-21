@@ -1,0 +1,42 @@
+name: Calendar Actual Production QA
+on:
+  workflow_run:
+    workflows: ["Market Observatory Verified Calendar"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: calendar-actual-production-qa
+  cancel-in-progress: false
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Existing tests and new actual regressions
+        run: |
+          python -m unittest discover -s tests -p 'test*.py' -v
+          node --test tests/*.test.cjs
+      - name: Install Chromium test runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Check deployed JSON and desktop/mobile actual columns
+        run: node tests/calendar-actual-production.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calendar-production-verification
+          path: |
+            calendar-*.png
+            calendar-production-qa.json

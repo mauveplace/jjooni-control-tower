@@ -42,7 +42,7 @@ def metric(key,label,actual,**kw):
 
 def parse_claims(text,dt):
     # data.pdf rolls weekly: require the embargo/release date, not only a number.
-    stamp=rf'{dt:%B}\s+{dt.day},?\s+{dt.year}'
+    stamp=rf'{dt:%B}\s+{dt.day}\s*,?\s*{dt.year}'
     if not re.search(stamp,text[:1000],re.I): raise ValueError('RELEASE_DATE_MISMATCH')
     m=re.search(r'advance figure for seasonally adjusted initial claims was\s+([\d,]+)',text,re.I)
     if not m: raise ValueError('INITIAL_CLAIMS_PARSE_MISS')
@@ -51,7 +51,7 @@ def parse_claims(text,dt):
     return [metric('initial_claims','Initial Jobless Claims',val,**({'previous':f'{int(p[1].replace(",",""))/1000:g}K'} if p else {}))]
 
 def parse_boj(text,dt):
-    if not re.search(rf'{dt:%B}\s+{dt.day},?\s+{dt.year}',text[:500],re.I): raise ValueError('RELEASE_DATE_MISMATCH')
+    if not re.search(rf'{dt:%B}\s+{dt.day}\s*,?\s*{dt.year}',text[:500],re.I): raise ValueError('RELEASE_DATE_MISMATCH')
     m=re.search(r'uncollateralized overnight call rate.{0,100}?around\s+([\d.]+)\s*percent',text,re.I)
     if not m: raise ValueError('BOJ_RATE_PARSE_MISS')
     return [metric('boj_policy_rate','BOJ overnight call rate target',f'{float(m[1]):.2f}%')]
@@ -115,7 +115,7 @@ def discover_bok(e):
 def collect(e,kind,checks):
     dt=release_time(e)
     if kind=='DOL':
-        urls=[f'https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/{dt.year}/ui-claims-{dt:%Y%m%d}.pdf','https://www.dol.gov/ui/data.pdf']
+        urls=[f'https://oui.doleta.gov/press/{dt.year}/{dt:%m%d%y}.pdf',f'https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/{dt.year}/ui-claims-{dt:%Y%m%d}.pdf','https://www.dol.gov/ui/data.pdf']
         parser=lambda t:parse_claims(t,dt)
     elif kind=='BOJ':
         urls=[f'https://www.boj.or.jp/en/mopo/mpmdeci/mpr_{dt.year}/k{dt:%y%m%d}a.pdf']
@@ -140,9 +140,11 @@ def collect(e,kind,checks):
     for url in urls:
         check={'adapter':kind,'title':e['title'],'url':url}
         try:
-            rows=parser(text_fetch(url)); check['result']='PARSED'; checks.append(check)
+            document=text_fetch(url)
+            rows=parser(document); check['result']='PARSED'; checks.append(check)
             return rows,url
         except Exception as exc:
+            if isinstance(exc,ValueError): check['document_prefix']=document[:300]
             check.update(result=f'HTTP_{exc.code}' if hasattr(exc,'code') else type(exc).__name__,error=str(exc)[:200]); checks.append(check)
     return None
 

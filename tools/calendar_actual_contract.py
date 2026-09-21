@@ -33,7 +33,7 @@ def merge_observation(old, new):
                 continue
             out[k] = deepcopy(v)
     if accepted:
-        for k in protected:
+        for k in PROVENANCE:
             out.pop(k, None)
         for k in protected:
             if clean(new.get(k)) is not None:
