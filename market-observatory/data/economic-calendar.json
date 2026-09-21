@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-21T09:07:52+09:00",
+  "generated_kst": "2026-09-21T09:20:23+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2857,12 +2857,12 @@
           "key": "us_import_price_mom",
           "label": "U.S. Import Prices MoM",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "Import Prices m/m",
-          "datetime_source": "2026-09-16T08:30:00-04:00",
-          "impact": "Low",
           "previous": "-0.4%",
           "consensus": "0.4%",
-          "actual": null
+          "actual": null,
+          "event_title": "Import Prices m/m",
+          "datetime_source": "2026-09-16T08:30:00-04:00",
+          "impact": "Low"
         },
         {
           "key": "us_export_price_mom",
@@ -2872,8 +2872,7 @@
           "consensus": null,
           "actual": null
         }
-      ],
-      "ff_match_score": 40
+      ]
     },
     {
       "datetime_kst": "2026-09-17T03:00+09:00",
@@ -2888,25 +2887,24 @@
       "actual": "4.00%",
       "te_forecast": null,
       "surprise": "actual_vs_consensus",
-      "market_data_source": "FairEconomy/ForexFactory + Federal Reserve official + CME Fed Funds futures settlement-derived",
+      "market_data_source": "Federal Reserve official + FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived",
       "market_metrics": [
         {
           "key": "fed_rate",
           "label": "Federal Funds Rate",
-          "source": "Federal Reserve official FOMC statement",
-          "event_title": "Federal Funds Rate",
-          "datetime_source": "2026-09-16T14:00:00-04:00",
-          "impact": "High",
+          "source": "FairEconomy/ForexFactory",
           "previous": "3.75%",
           "consensus": "4.00%",
           "actual": "4.00%",
-          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
+          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+          "event_title": "Federal Funds Rate",
+          "datetime_source": "2026-09-16T14:00:00-04:00",
+          "impact": "High"
         }
       ],
-      "ff_match_score": 40,
       "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-21T09:07:52+09:00",
+      "official_actual_checked_kst": "2026-09-21T09:20:23+09:00",
       "_verified_override": true
     },
     {
@@ -2928,26 +2926,25 @@
           "key": "boe_bank_rate",
           "label": "Bank of England Bank Rate",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "Official Bank Rate",
-          "datetime_source": "2026-09-17T07:00:00-04:00",
-          "impact": "High",
           "previous": "3.75%",
           "consensus": "3.75%",
-          "actual": null
+          "actual": null,
+          "event_title": "Official Bank Rate",
+          "datetime_source": "2026-09-17T07:00:00-04:00",
+          "impact": "High"
         },
         {
           "key": "boe_vote_split",
           "label": "MPC 금리투표 (인상-인하-동결)",
           "source": "FairEconomy/ForexFactory",
-          "event_title": "MPC Official Bank Rate Votes",
-          "datetime_source": "2026-09-17T07:00:00-04:00",
-          "impact": "High",
           "previous": "3-0-6",
           "consensus": "3-0-6",
-          "actual": null
+          "actual": null,
+          "event_title": "MPC Official Bank Rate Votes",
+          "datetime_source": "2026-09-17T07:00:00-04:00",
+          "impact": "High"
         }
       ],
-      "ff_match_score": 57,
       "_verified_override": true
     },
     {
@@ -3035,13 +3032,36 @@
       "importance": 2,
       "source": "University of Michigan",
       "reference_period": "2026-09 final",
-      "previous": null,
-      "consensus": null,
+      "previous": "47.8",
+      "consensus": "47.5",
       "actual": null,
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
-      "market_metrics": []
+      "market_data_source": "FairEconomy/ForexFactory",
+      "market_metrics": [
+        {
+          "key": "umich_sentiment",
+          "label": "UoM Consumer Sentiment",
+          "previous": "47.8",
+          "consensus": "47.5",
+          "actual": null,
+          "source": "FairEconomy/ForexFactory",
+          "event_title": "Revised UoM Consumer Sentiment",
+          "datetime_source": "2026-09-25T10:00:00-04:00",
+          "impact": "Medium"
+        },
+        {
+          "key": "umich_inflation_1y",
+          "label": "UoM 1Y Inflation Expectations",
+          "previous": "4.6%",
+          "consensus": null,
+          "actual": null,
+          "source": "FairEconomy/ForexFactory",
+          "event_title": "Revised UoM Inflation Expectations",
+          "datetime_source": "2026-09-25T10:00:00-04:00",
+          "impact": "Medium"
+        }
+      ]
     },
     {
       "datetime_kst": "2026-09-29T06:00+09:00",
@@ -3481,6 +3501,18 @@
           "previous": null,
           "consensus": null,
           "actual": null
+        },
+        {
+          "key": "fedwatch_hike_25bp",
+          "label": "CME FedWatch 25bp 인상확률 (2026-09-18 기준)",
+          "previous": "55.4%",
+          "consensus": "57.6%",
+          "actual": null,
+          "source": "CME Fed Funds futures settlement-derived",
+          "observed_date": "2026-09-18",
+          "previous_observed_date": "2026-09-17",
+          "metric_type": "market_probability_snapshot",
+          "value_role": "market_forecast"
         }
       ],
       "fedwatch_as_of": "2026-09-18"
@@ -4445,7 +4477,7 @@
   ],
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-20T10:00:47+09:00",
+  "key_event_seeded_kst": "2026-09-21T09:19:03+09:00",
   "time_contract": "ALL_TIMES_KST",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "quality": {
@@ -4474,7 +4506,7 @@
   },
   "actual_freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-09-21T09:07:52+09:00",
+    "checked_kst": "2026-09-21T09:20:23+09:00",
     "grace_minutes": 45,
     "pending_window_hours": 8,
     "pending_count": 0,
@@ -4484,27 +4516,27 @@
       {
         "event_kst": "2026-09-17T03:00:00+09:00",
         "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "result": "CONFIRMED",
+        "result": "UPDATED",
         "actual": "4.00%"
       }
     ]
   },
   "official_actual_contract": "OFFICIAL_PRIMARY_FOMC_PLUS_MARKET_FEEDS_V1",
-  "official_actual_updated_kst": "2026-09-21T09:07:52+09:00",
+  "official_actual_updated_kst": "2026-09-21T09:20:23+09:00",
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
   "retention_preserved": {
-    "event_fields": 48,
-    "metric_fields_or_rows": 72
+    "event_fields": 56,
+    "metric_fields_or_rows": 91
   },
-  "retention_kst": "2026-09-20T10:02:03+09:00",
+  "retention_kst": "2026-09-21T09:20:23+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
   "market_event_refresh": {
-    "faireconomy_rows": 105,
-    "dynamic_metric_matches": 1,
+    "faireconomy_rows": 75,
+    "dynamic_metric_matches": 2,
     "verified_overrides_applied": 15,
     "fedwatch_forecast_applied": true,
-    "representative_values_synced": 3,
-    "refreshed_kst": "2026-09-20T10:02:07+09:00"
+    "representative_values_synced": 4,
+    "refreshed_kst": "2026-09-21T09:20:27+09:00"
   }
 }
