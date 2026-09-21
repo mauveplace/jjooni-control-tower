@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-21T18:50:59+09:00",
+  "generated_kst": "2026-09-21T18:51:32+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -29,6 +29,9 @@
       ],
       "actual_due_kst": "2026-01-08T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -65,6 +68,9 @@
       ],
       "actual_due_kst": "2026-01-08T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -117,6 +123,9 @@
       ],
       "actual_due_kst": "2026-01-09T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -169,6 +178,9 @@
       ],
       "actual_due_kst": "2026-01-13T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -221,6 +233,9 @@
       ],
       "actual_due_kst": "2026-01-14T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -229,18 +244,41 @@
       "country": "KR",
       "category": "중앙은행",
       "importance": 3,
-      "source": "BOK",
+      "source": "BOK_RATE official release",
       "reference_period": "",
       "previous": null,
       "consensus": null,
-      "actual": null,
+      "actual": "2.50%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [],
+      "market_data_source": "BOK_RATE official release",
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "한국은행 기준금리",
+          "source": "BOK_RATE official release",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL",
+          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+          "checked_kst": "2026-09-21T18:51:24+09:00",
+          "actual": "2.50%",
+          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2"
+        }
+      ],
       "actual_due_kst": "2026-01-15T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "actual_status": "OVERDUE"
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_source": "BOK_RATE official release",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
+      "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+      "actual_status": "RELEASED"
     },
     {
       "datetime_kst": "2026-01-15T22:30+09:00",
@@ -276,6 +314,9 @@
       ],
       "actual_due_kst": "2026-01-15T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -300,10 +341,24 @@
           "previous": null,
           "consensus": null,
           "actual": null
+        },
+        {
+          "key": "state_job_openings_decreased",
+          "label": "구인율 하락 주 수",
+          "actual": null
         }
       ],
       "actual_due_kst": "2026-01-28T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "metric_contract_correction": {
+        "reason": "TITLE_SUBSTRING_COLLISION",
+        "removed_keys": [
+          "jolts"
+        ]
+      },
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -368,6 +423,9 @@
       ],
       "actual_due_kst": "2026-01-29T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -420,6 +478,9 @@
       ],
       "actual_due_kst": "2026-01-30T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -448,6 +509,9 @@
       ],
       "actual_due_kst": "2026-02-06T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -484,6 +548,9 @@
       ],
       "actual_due_kst": "2026-02-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -512,6 +579,8 @@
       ],
       "actual_due_kst": "2026-02-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -564,25 +633,8 @@
       ],
       "actual_due_kst": "2026-02-11T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "actual_status": "OVERDUE"
-    },
-    {
-      "datetime_kst": "2026-02-12T10:00+09:00",
-      "title": "한국은행 통화정책방향 결정회의",
-      "country": "KR",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "BOK",
-      "reference_period": "",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [],
-      "actual_due_kst": "2026-02-12T10:45:00+09:00",
-      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -635,6 +687,8 @@
       ],
       "actual_due_kst": "2026-02-13T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -659,10 +713,54 @@
           "previous": null,
           "consensus": null,
           "actual": null
+        },
+        {
+          "key": "state_job_openings_decreased",
+          "label": "구인율 하락 주 수",
+          "actual": null
         }
       ],
       "actual_due_kst": "2026-02-20T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "metric_contract_correction": {
+        "reason": "TITLE_SUBSTRING_COLLISION",
+        "removed_keys": [
+          "jolts"
+        ]
+      },
+      "actual_status": "OVERDUE"
+    },
+    {
+      "datetime_kst": "2026-02-26T10:00+09:00",
+      "title": "한국은행 통화정책방향 결정회의",
+      "country": "KR",
+      "category": "중앙은행",
+      "importance": 3,
+      "source": "BOK",
+      "reference_period": "",
+      "previous": null,
+      "consensus": null,
+      "actual": null,
+      "te_forecast": null,
+      "surprise": null,
+      "market_data_source": null,
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
+      "actual_due_kst": "2026-02-26T10:45:00+09:00",
+      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_corrected_from": "2026-02-12T10:00+09:00",
+      "release_date": "2026-02-26",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -715,6 +813,8 @@
       ],
       "actual_due_kst": "2026-02-27T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -751,6 +851,8 @@
       ],
       "actual_due_kst": "2026-03-05T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -787,6 +889,8 @@
       ],
       "actual_due_kst": "2026-03-05T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -839,6 +943,8 @@
       ],
       "actual_due_kst": "2026-03-06T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -891,6 +997,8 @@
       ],
       "actual_due_kst": "2026-03-11T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -919,6 +1027,8 @@
       ],
       "actual_due_kst": "2026-03-13T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -971,6 +1081,8 @@
       ],
       "actual_due_kst": "2026-03-18T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1035,6 +1147,8 @@
       ],
       "actual_due_kst": "2026-03-24T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1071,6 +1185,8 @@
       ],
       "actual_due_kst": "2026-03-25T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1099,6 +1215,8 @@
       ],
       "actual_due_kst": "2026-03-31T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1151,6 +1269,8 @@
       ],
       "actual_due_kst": "2026-04-03T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1167,9 +1287,19 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": [],
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
       "actual_due_kst": "2026-04-10T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1222,6 +1352,8 @@
       ],
       "actual_due_kst": "2026-04-10T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1274,6 +1406,8 @@
       ],
       "actual_due_kst": "2026-04-14T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1310,6 +1444,8 @@
       ],
       "actual_due_kst": "2026-04-15T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1358,10 +1494,26 @@
           "previous": null,
           "consensus": null,
           "actual": null
+        },
+        {
+          "key": "veteran_unemployment",
+          "label": "참전군인 연평균 실업률",
+          "actual": null
         }
       ],
       "actual_due_kst": "2026-04-28T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "metric_contract_correction": {
+        "reason": "TITLE_SUBSTRING_COLLISION",
+        "removed_keys": [
+          "nfp",
+          "unemployment",
+          "avg_hourly_mom",
+          "avg_hourly_yoy"
+        ]
+      },
       "actual_status": "OVERDUE"
     },
     {
@@ -1418,6 +1570,8 @@
       ],
       "actual_due_kst": "2026-04-30T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1446,6 +1600,8 @@
       ],
       "actual_due_kst": "2026-05-05T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1482,6 +1638,8 @@
       ],
       "actual_due_kst": "2026-05-07T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1534,6 +1692,8 @@
       ],
       "actual_due_kst": "2026-05-08T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1586,6 +1746,8 @@
       ],
       "actual_due_kst": "2026-05-12T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1638,25 +1800,8 @@
       ],
       "actual_due_kst": "2026-05-13T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "actual_status": "OVERDUE"
-    },
-    {
-      "datetime_kst": "2026-05-14T10:00+09:00",
-      "title": "한국은행 통화정책방향 결정회의",
-      "country": "KR",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "BOK",
-      "reference_period": "",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [],
-      "actual_due_kst": "2026-05-14T10:45:00+09:00",
-      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1693,6 +1838,39 @@
       ],
       "actual_due_kst": "2026-05-14T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_status": "OVERDUE"
+    },
+    {
+      "datetime_kst": "2026-05-28T10:00+09:00",
+      "title": "한국은행 통화정책방향 결정회의",
+      "country": "KR",
+      "category": "중앙은행",
+      "importance": 3,
+      "source": "BOK",
+      "reference_period": "",
+      "previous": null,
+      "consensus": null,
+      "actual": null,
+      "te_forecast": null,
+      "surprise": null,
+      "market_data_source": null,
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
+      "actual_due_kst": "2026-05-28T10:45:00+09:00",
+      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_corrected_from": "2026-05-14T10:00+09:00",
+      "release_date": "2026-05-28",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1757,6 +1935,8 @@
       ],
       "actual_due_kst": "2026-06-02T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1793,6 +1973,8 @@
       ],
       "actual_due_kst": "2026-06-04T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1845,6 +2027,8 @@
       ],
       "actual_due_kst": "2026-06-05T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1897,6 +2081,8 @@
       ],
       "actual_due_kst": "2026-06-10T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1949,6 +2135,8 @@
       ],
       "actual_due_kst": "2026-06-11T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1985,6 +2173,8 @@
       ],
       "actual_due_kst": "2026-06-16T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -1997,10 +2187,10 @@
       "reference_period": "",
       "previous": null,
       "consensus": null,
-      "actual": null,
+      "actual": "3.75%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
+      "market_data_source": "Federal Reserve official",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -2013,6 +2203,14 @@
       ],
       "actual_due_kst": "2026-06-18T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
       "actual_status": "OVERDUE"
     },
     {
@@ -2077,6 +2275,8 @@
       ],
       "actual_due_kst": "2026-06-30T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2129,6 +2329,8 @@
       ],
       "actual_due_kst": "2026-07-02T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2181,6 +2383,8 @@
       ],
       "actual_due_kst": "2026-07-14T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2233,6 +2437,8 @@
       ],
       "actual_due_kst": "2026-07-15T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2249,9 +2455,19 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": [],
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
       "actual_due_kst": "2026-07-16T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2288,6 +2504,8 @@
       ],
       "actual_due_kst": "2026-07-17T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2312,10 +2530,23 @@
           "previous": null,
           "consensus": null,
           "actual": null
+        },
+        {
+          "key": "state_job_openings_decreased",
+          "label": "구인율 하락 주 수",
+          "actual": null
         }
       ],
       "actual_due_kst": "2026-07-22T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "metric_contract_correction": {
+        "reason": "TITLE_SUBSTRING_COLLISION",
+        "removed_keys": [
+          "jolts"
+        ]
+      },
       "actual_status": "OVERDUE"
     },
     {
@@ -2328,10 +2559,10 @@
       "reference_period": "",
       "previous": null,
       "consensus": null,
-      "actual": null,
+      "actual": "3.75%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
+      "market_data_source": "Federal Reserve official",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -2344,6 +2575,14 @@
       ],
       "actual_due_kst": "2026-07-30T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
       "actual_status": "OVERDUE"
     },
     {
@@ -2372,6 +2611,8 @@
       ],
       "actual_due_kst": "2026-07-31T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2400,6 +2641,8 @@
       ],
       "actual_due_kst": "2026-08-04T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2436,6 +2679,8 @@
       ],
       "actual_due_kst": "2026-08-06T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2488,6 +2733,8 @@
       ],
       "actual_due_kst": "2026-08-07T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2540,25 +2787,8 @@
       ],
       "actual_due_kst": "2026-08-12T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "actual_status": "OVERDUE"
-    },
-    {
-      "datetime_kst": "2026-08-13T10:00+09:00",
-      "title": "한국은행 통화정책방향 결정회의",
-      "country": "KR",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "BOK",
-      "reference_period": "",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [],
-      "actual_due_kst": "2026-08-13T10:45:00+09:00",
-      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2611,6 +2841,8 @@
       ],
       "actual_due_kst": "2026-08-13T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2647,6 +2879,39 @@
       ],
       "actual_due_kst": "2026-08-18T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_status": "OVERDUE"
+    },
+    {
+      "datetime_kst": "2026-08-27T10:00+09:00",
+      "title": "한국은행 통화정책방향 결정회의",
+      "country": "KR",
+      "category": "중앙은행",
+      "importance": 3,
+      "source": "BOK",
+      "reference_period": "",
+      "previous": null,
+      "consensus": null,
+      "actual": null,
+      "te_forecast": null,
+      "surprise": null,
+      "market_data_source": null,
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
+      "actual_due_kst": "2026-08-27T10:45:00+09:00",
+      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_corrected_from": "2026-08-13T10:00+09:00",
+      "release_date": "2026-08-27",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2676,6 +2941,8 @@
       "source": "BLS",
       "actual": "7.27M",
       "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "RELEASED"
     },
     {
@@ -2750,6 +3017,8 @@
       "source": "BLS",
       "actual": "1.4%",
       "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "RELEASED"
     },
     {
@@ -2803,6 +3072,8 @@
       "source": "BLS",
       "actual": "162K",
       "market_data_source": "Forex Factory/Fair Economy historical calendar + FairEconomy/ForexFactory",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "OVERDUE"
     },
     {
@@ -2899,6 +3170,9 @@
       "source": "BLS",
       "actual": "0.4%",
       "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -2964,6 +3238,9 @@
       "source": "BLS",
       "actual": "3.4%",
       "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -3109,6 +3386,9 @@
       ],
       "actual_due_kst": "2026-09-16T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -3133,11 +3413,11 @@
           "impact": "High",
           "actual": "4.00%",
           "source": "Federal Reserve official FOMC statement",
-          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
           "verification_status": "VERIFIED_OFFICIAL",
-          "checked_kst": "2026-09-21T18:50:58+09:00",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
+          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+          "checked_kst": "2026-09-21T18:51:24+09:00",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
         }
       ],
       "_verified_override": true,
@@ -3146,14 +3426,14 @@
       "actual": "4.00%",
       "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
       "source": "Federal Reserve",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "checked_kst": "2026-09-21T18:50:58+09:00",
-      "source_tier": "OFFICIAL",
-      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
       "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_checked_kst": "2026-09-21T18:50:58+09:00",
+      "source_tier": "OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
       "actual_status": "RELEASED"
     },
     {
@@ -3181,11 +3461,11 @@
           "impact": "High",
           "actual": "3.75%",
           "source": "BOE official release",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         },
         {
           "key": "boe_vote_split",
@@ -3197,11 +3477,11 @@
           "impact": "High",
           "actual": "3-0-6",
           "source": "BOE official release",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         }
       ],
       "_verified_override": true,
@@ -3209,12 +3489,12 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_source": "BOE official release",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
       "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
       "checked_kst": "2026-09-21T18:32:56+09:00",
-      "source_tier": "OFFICIAL",
       "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOE official release",
       "actual_status": "RELEASED"
     },
     {
@@ -3242,11 +3522,11 @@
           "event_title": "Unemployment Claims",
           "datetime_source": "2026-09-17T08:30:00-04:00",
           "impact": "Medium",
-          "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:34:01+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf"
+          "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-17T22:15:00+09:00",
@@ -3254,12 +3534,12 @@
       "actual_watch": true,
       "actual_expected": true,
       "_verified_override": true,
+      "actual_source": "DOL official release",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
       "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
       "checked_kst": "2026-09-21T18:34:01+09:00",
-      "source_tier": "OFFICIAL",
       "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "DOL official release",
       "actual_status": "RELEASED"
     },
     {
@@ -3282,22 +3562,22 @@
           "label": "PPI MoM",
           "actual": "0.2%",
           "source": "BOK official release",
-          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         },
         {
           "key": "kr_ppi_yoy",
           "label": "PPI YoY",
           "actual": "7.9%",
           "source": "BOK official release",
-          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         }
       ],
       "official_release_url": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?depth=201264&menuNo=201264&nttId=11064859&oldMenuNo=201150&programType=newsData&relate=Y",
@@ -3306,12 +3586,12 @@
       "actual_watch": true,
       "actual_expected": true,
       "_verified_override": true,
+      "actual_source": "BOK official release",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
       "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
       "checked_kst": "2026-09-21T18:32:56+09:00",
-      "source_tier": "OFFICIAL",
       "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOK official release",
       "actual_status": "RELEASED"
     },
     {
@@ -3335,11 +3615,11 @@
           "label": "BOJ overnight call rate target",
           "actual": "1.25%",
           "source": "BOJ official release",
-          "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "checked_kst": "2026-09-21T18:34:01+09:00",
-          "source_tier": "OFFICIAL",
-          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf"
+          "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_tier": "OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-19T00:00:00+09:00",
@@ -3349,12 +3629,12 @@
       "sort_datetime_kst": "2026-09-18T12:00+09:00",
       "release_date": "2026-09-18",
       "_verified_override": true,
+      "actual_source": "BOJ official release",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_tier": "OFFICIAL",
       "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
       "checked_kst": "2026-09-21T18:34:01+09:00",
-      "source_tier": "OFFICIAL",
       "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOJ official release",
       "actual_status": "RELEASED"
     },
     {
@@ -3459,6 +3739,8 @@
       ],
       "actual_due_kst": "2026-09-29T23:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -3650,6 +3932,8 @@
       ],
       "actual_due_kst": "2026-10-02T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -3721,6 +4005,8 @@
       ],
       "actual_due_kst": "2026-10-14T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -3773,6 +4059,8 @@
       ],
       "actual_due_kst": "2026-10-15T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -3828,6 +4116,8 @@
       ],
       "actual_due_kst": "2026-10-16T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -3844,9 +4134,19 @@
       "te_forecast": null,
       "surprise": null,
       "market_data_source": null,
-      "market_metrics": [],
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
       "actual_due_kst": "2026-10-22T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4043,6 +4343,8 @@
       ],
       "actual_due_kst": "2026-10-30T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4090,6 +4392,8 @@
       ],
       "actual_due_kst": "2026-11-04T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4145,6 +4449,8 @@
       ],
       "actual_due_kst": "2026-11-05T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4197,6 +4503,8 @@
       ],
       "actual_due_kst": "2026-11-06T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4249,6 +4557,8 @@
       ],
       "actual_due_kst": "2026-11-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4267,25 +4577,6 @@
       "market_data_source": null,
       "market_metrics": [],
       "actual_due_kst": "2026-11-11T08:45:00+09:00",
-      "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "actual_status": "SCHEDULED"
-    },
-    {
-      "datetime_kst": "2026-11-12T10:00+09:00",
-      "title": "한국은행 통화정책방향 결정회의",
-      "country": "KR",
-      "category": "중앙은행",
-      "importance": 3,
-      "source": "BOK",
-      "reference_period": "",
-      "previous": null,
-      "consensus": null,
-      "actual": null,
-      "te_forecast": null,
-      "surprise": null,
-      "market_data_source": null,
-      "market_metrics": [],
-      "actual_due_kst": "2026-11-12T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_status": "SCHEDULED"
     },
@@ -4339,6 +4630,8 @@
       ],
       "actual_due_kst": "2026-11-13T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4375,6 +4668,8 @@
       ],
       "actual_due_kst": "2026-11-17T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4458,6 +4753,37 @@
       "actual_status": "SCHEDULED"
     },
     {
+      "datetime_kst": "2026-11-26T10:00+09:00",
+      "title": "한국은행 통화정책방향 결정회의",
+      "country": "KR",
+      "category": "중앙은행",
+      "importance": 3,
+      "source": "BOK",
+      "reference_period": "",
+      "previous": null,
+      "consensus": null,
+      "actual": null,
+      "te_forecast": null,
+      "surprise": null,
+      "market_data_source": null,
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "bok_base_rate",
+          "actual": null
+        }
+      ],
+      "actual_due_kst": "2026-11-26T10:45:00+09:00",
+      "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "schedule_corrected_from": "2026-11-12T10:00+09:00",
+      "release_date": "2026-11-26",
+      "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+      "schedule_checked_kst": "2026-09-21T18:51:24+09:00",
+      "actual_watch": true,
+      "actual_expected": true,
+      "actual_status": "SCHEDULED"
+    },
+    {
       "datetime_kst": "2026-11-30T08:00+09:00",
       "title": "2026년 10월 산업활동동향",
       "country": "KR",
@@ -4502,6 +4828,8 @@
       ],
       "actual_due_kst": "2026-12-02T00:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4601,6 +4929,8 @@
       ],
       "actual_due_kst": "2026-12-04T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4637,6 +4967,8 @@
       ],
       "actual_due_kst": "2026-12-08T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4736,6 +5068,8 @@
       ],
       "actual_due_kst": "2026-12-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4788,6 +5122,8 @@
       ],
       "actual_due_kst": "2026-12-15T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4843,6 +5179,8 @@
       ],
       "actual_due_kst": "2026-12-17T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
+      "actual_watch": true,
+      "actual_expected": true,
       "actual_status": "SCHEDULED"
     },
     {
@@ -4974,7 +5312,7 @@
   ],
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-21T18:39:59+09:00",
+  "key_event_seeded_kst": "2026-09-21T18:51:24+09:00",
   "time_contract": "ALL_TIMES_KST",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "quality": {
@@ -4990,18 +5328,253 @@
     "lookback_days": 14,
     "unresolved_candidates": [
       {
+        "title": "Job Openings and Labor Turnover Survey",
+        "date": "2026-01-08",
+        "adapter": "BLS_jolts",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Productivity and Costs",
+        "date": "2026-01-08",
+        "adapter": "BLS_prod2",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Employment Situation",
+        "date": "2026-01-09",
+        "adapter": "BLS_empsit",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Consumer Price Index",
+        "date": "2026-01-13",
+        "adapter": "BLS_cpi",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Producer Price Index",
+        "date": "2026-01-14",
+        "adapter": "BLS_ppi",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "한국은행 통화정책방향 결정회의",
+        "date": "2026-01-15",
+        "adapter": "BOK_RATE",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
         "title": "U.S. Import and Export Price Indexes",
-        "date": "2026-09-16",
+        "date": "2026-01-15",
+        "adapter": "BLS_ximpim",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "State Job Openings and Labor Turnover",
+        "date": "2026-01-28",
+        "adapter": "BLS_jltst",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "FOMC 정책결정",
+        "date": "2026-01-29",
         "adapter": null,
         "official_adapter_status": "NOT_REGISTERED",
         "fallback_tiers": [
           "SECONDARY",
           "MARKET_FEED"
         ]
+      },
+      {
+        "title": "Productivity and Costs",
+        "date": "2026-01-29",
+        "adapter": "BLS_prod2",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Producer Price Index",
+        "date": "2026-01-30",
+        "adapter": "BLS_ppi",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Job Openings and Labor Turnover Survey",
+        "date": "2026-02-06",
+        "adapter": "BLS_jolts",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "U.S. Import and Export Price Indexes",
+        "date": "2026-02-10",
+        "adapter": "BLS_ximpim",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "U.S. Import and Export Price Indexes",
+        "date": "2026-09-16",
+        "adapter": "BLS_ximpim",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
       }
     ],
-    "checks": [],
-    "checked_kst": "2026-09-21T18:50:58+09:00"
+    "checks": [
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_01072026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_empsit",
+        "title": "Employment Situation",
+        "url": "https://www.bls.gov/news.release/archives/empsit_01092026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_01132026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_01142026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BOK_RATE",
+        "title": "한국은행 통화정책방향 결정회의",
+        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+        "result": "PARSED"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_01152026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_jltst",
+        "title": "State Job Openings and Labor Turnover",
+        "url": "https://www.bls.gov/news.release/archives/jltst_01272026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_01292026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_01302026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_02052026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_02102026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_09102026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_09112026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_09162026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      }
+    ],
+    "checked_kst": "2026-09-21T18:51:24+09:00"
   },
   "enrichment_errors": [
     {
@@ -5022,11 +5595,11 @@
   ],
   "actual_freshness": {
     "status": "DEGRADED",
-    "checked_kst": "2026-09-21T18:50:59+09:00",
+    "checked_kst": "2026-09-21T18:51:32+09:00",
     "grace_minutes": 45,
     "unresolved_expiry": null,
     "pending_count": 0,
-    "overdue_count": 71,
+    "overdue_count": 70,
     "pending_events": [],
     "overdue_events": [
       {
@@ -5095,16 +5668,6 @@
         "status": "OVERDUE"
       },
       {
-        "datetime_kst": "2026-01-15T10:00:00+09:00",
-        "actual_due_kst": "2026-01-15T10:45:00+09:00",
-        "title": "한국은행 통화정책방향 결정회의",
-        "country": "KR",
-        "missing_metrics": [
-          "event.actual"
-        ],
-        "status": "OVERDUE"
-      },
-      {
         "datetime_kst": "2026-01-15T22:30:00+09:00",
         "actual_due_kst": "2026-01-15T23:15:00+09:00",
         "title": "U.S. Import and Export Price Indexes",
@@ -5123,7 +5686,8 @@
         "country": "US",
         "missing_metrics": [
           "event.actual",
-          "jolts"
+          "jolts",
+          "state_job_openings_decreased"
         ],
         "status": "OVERDUE"
       },
@@ -5213,16 +5777,6 @@
         "status": "OVERDUE"
       },
       {
-        "datetime_kst": "2026-02-12T10:00:00+09:00",
-        "actual_due_kst": "2026-02-12T10:45:00+09:00",
-        "title": "한국은행 통화정책방향 결정회의",
-        "country": "KR",
-        "missing_metrics": [
-          "event.actual"
-        ],
-        "status": "OVERDUE"
-      },
-      {
         "datetime_kst": "2026-02-13T22:30:00+09:00",
         "actual_due_kst": "2026-02-13T23:15:00+09:00",
         "title": "Consumer Price Index",
@@ -5243,7 +5797,19 @@
         "country": "US",
         "missing_metrics": [
           "event.actual",
-          "jolts"
+          "jolts",
+          "state_job_openings_decreased"
+        ],
+        "status": "OVERDUE"
+      },
+      {
+        "datetime_kst": "2026-02-26T10:00:00+09:00",
+        "actual_due_kst": "2026-02-26T10:45:00+09:00",
+        "title": "한국은행 통화정책방향 결정회의",
+        "country": "KR",
+        "missing_metrics": [
+          "event.actual",
+          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -5404,7 +5970,8 @@
         "title": "한국은행 통화정책방향 결정회의",
         "country": "KR",
         "missing_metrics": [
-          "event.actual"
+          "event.actual",
+          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -5458,7 +6025,8 @@
           "nfp",
           "unemployment",
           "avg_hourly_mom",
-          "avg_hourly_yoy"
+          "avg_hourly_yoy",
+          "veteran_unemployment"
         ],
         "status": "OVERDUE"
       },
@@ -5550,16 +6118,6 @@
         "status": "OVERDUE"
       },
       {
-        "datetime_kst": "2026-05-14T10:00:00+09:00",
-        "actual_due_kst": "2026-05-14T10:45:00+09:00",
-        "title": "한국은행 통화정책방향 결정회의",
-        "country": "KR",
-        "missing_metrics": [
-          "event.actual"
-        ],
-        "status": "OVERDUE"
-      },
-      {
         "datetime_kst": "2026-05-14T21:30:00+09:00",
         "actual_due_kst": "2026-05-14T22:15:00+09:00",
         "title": "U.S. Import and Export Price Indexes",
@@ -5568,6 +6126,17 @@
           "event.actual",
           "us_import_price_mom",
           "us_export_price_mom"
+        ],
+        "status": "OVERDUE"
+      },
+      {
+        "datetime_kst": "2026-05-28T10:00:00+09:00",
+        "actual_due_kst": "2026-05-28T10:45:00+09:00",
+        "title": "한국은행 통화정책방향 결정회의",
+        "country": "KR",
+        "missing_metrics": [
+          "event.actual",
+          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -5666,7 +6235,6 @@
         "title": "FOMC 정책결정",
         "country": "US",
         "missing_metrics": [
-          "event.actual",
           "fed_rate"
         ],
         "status": "OVERDUE"
@@ -5742,7 +6310,8 @@
         "title": "한국은행 통화정책방향 결정회의",
         "country": "KR",
         "missing_metrics": [
-          "event.actual"
+          "event.actual",
+          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -5765,7 +6334,8 @@
         "country": "US",
         "missing_metrics": [
           "event.actual",
-          "jolts"
+          "jolts",
+          "state_job_openings_decreased"
         ],
         "status": "OVERDUE"
       },
@@ -5775,7 +6345,6 @@
         "title": "FOMC 정책결정",
         "country": "US",
         "missing_metrics": [
-          "event.actual",
           "fed_rate"
         ],
         "status": "OVERDUE"
@@ -5843,16 +6412,6 @@
         "status": "OVERDUE"
       },
       {
-        "datetime_kst": "2026-08-13T10:00:00+09:00",
-        "actual_due_kst": "2026-08-13T10:45:00+09:00",
-        "title": "한국은행 통화정책방향 결정회의",
-        "country": "KR",
-        "missing_metrics": [
-          "event.actual"
-        ],
-        "status": "OVERDUE"
-      },
-      {
         "datetime_kst": "2026-08-13T21:30:00+09:00",
         "actual_due_kst": "2026-08-13T22:15:00+09:00",
         "title": "Producer Price Index",
@@ -5875,6 +6434,17 @@
           "event.actual",
           "us_import_price_mom",
           "us_export_price_mom"
+        ],
+        "status": "OVERDUE"
+      },
+      {
+        "datetime_kst": "2026-08-27T10:00:00+09:00",
+        "actual_due_kst": "2026-08-27T10:45:00+09:00",
+        "title": "한국은행 통화정책방향 결정회의",
+        "country": "KR",
+        "missing_metrics": [
+          "event.actual",
+          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -5903,10 +6473,141 @@
     ],
     "official_checks": [
       {
+        "event_kst": "2026-01-29T04:00:00+09:00",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+        "result": "PARSE_MISS"
+      },
+      {
+        "event_kst": "2026-03-19T03:00:00+09:00",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+        "result": "PARSE_MISS"
+      },
+      {
+        "event_kst": "2026-04-30T03:00:00+09:00",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+        "result": "PARSE_MISS"
+      },
+      {
+        "event_kst": "2026-06-18T03:00:00+09:00",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+        "result": "UPDATED",
+        "actual": "3.75%"
+      },
+      {
+        "event_kst": "2026-07-30T03:00:00+09:00",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+        "result": "UPDATED",
+        "actual": "3.75%"
+      },
+      {
         "event_kst": "2026-09-17T03:00:00+09:00",
         "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
         "result": "CONFIRMED",
         "actual": "4.00%"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_01072026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_empsit",
+        "title": "Employment Situation",
+        "url": "https://www.bls.gov/news.release/archives/empsit_01092026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_01132026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_01142026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BOK_RATE",
+        "title": "한국은행 통화정책방향 결정회의",
+        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+        "result": "PARSED"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_01152026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_jltst",
+        "title": "State Job Openings and Labor Turnover",
+        "url": "https://www.bls.gov/news.release/archives/jltst_01272026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_01292026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_01302026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_02052026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_02102026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ppi",
+        "title": "Producer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/ppi_09102026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_09112026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_09162026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden"
       }
     ]
   },
@@ -5926,14 +6627,14 @@
     "actual": 0,
     "forecast": 0
   },
-  "official_actual_updated_kst": "2026-09-21T18:50:59+09:00",
+  "official_actual_updated_kst": "2026-09-21T18:51:32+09:00",
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,
     "metric_fields_or_rows": 0
   },
-  "retention_kst": "2026-09-21T18:39:59+09:00",
+  "retention_kst": "2026-09-21T18:51:31+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
   "market_event_refresh": {
     "faireconomy_rows": 75,
@@ -5941,6 +6642,6 @@
     "verified_overrides_applied": 18,
     "fedwatch_forecast_applied": true,
     "representative_values_synced": 0,
-    "refreshed_kst": "2026-09-21T18:39:59+09:00"
+    "refreshed_kst": "2026-09-21T18:51:31+09:00"
   }
 }
