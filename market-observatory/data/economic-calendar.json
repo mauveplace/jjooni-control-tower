@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-21T18:54:21+09:00",
+  "generated_kst": "2026-09-21T18:54:45+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -258,27 +258,27 @@
           "label": "한국은행 기준금리",
           "source": "BOK_RATE official release",
           "actual": "2.50%",
-          "checked_kst": "2026-09-21T18:51:24+09:00",
           "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2"
+          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+          "checked_kst": "2026-09-21T18:51:24+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-01-15T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
+      "_verified_override": true,
+      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
       "actual_source": "BOK_RATE official release",
-      "verification_status": "VERIFIED_OFFICIAL",
       "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
       "checked_kst": "2026-09-21T18:51:24+09:00",
-      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
-      "_verified_override": true,
       "actual_status": "RELEASED"
     },
     {
@@ -369,7 +369,7 @@
       "actual": "3.75%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "Federal Reserve official",
+      "market_data_source": "Federal Reserve official FOMC statement",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -378,8 +378,8 @@
           "previous": null,
           "consensus": null,
           "actual": "3.75%",
-          "source_tier": "OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+          "source_tier": "OFFICIAL",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
           "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
@@ -387,13 +387,14 @@
       ],
       "actual_due_kst": "2026-01-29T04:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "source_tier": "OFFICIAL",
+      "_verified_override": true,
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
       "actual_status": "RELEASED"
     },
@@ -757,12 +758,12 @@
           "key": "bok_base_rate",
           "label": "한국은행 기준금리",
           "actual": "2.50%",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
-          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source": "BOK_RATE official release",
+          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2"
+          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+          "checked_kst": "2026-09-21T18:54:13+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-02-26T10:45:00+09:00",
@@ -770,16 +771,17 @@
       "schedule_corrected_from": "2026-02-12T10:00+09:00",
       "release_date": "2026-02-26",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_backfill_checked_kst": "2026-09-21T18:54:13+09:00",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
+      "_verified_override": true,
       "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_tier": "OFFICIAL",
       "actual_source": "BOK_RATE official release",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -1124,7 +1126,7 @@
       "actual": "3.75%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "Federal Reserve official",
+      "market_data_source": "Federal Reserve official FOMC statement",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -1133,8 +1135,8 @@
           "previous": null,
           "consensus": null,
           "actual": "3.75%",
-          "source_tier": "OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+          "source_tier": "OFFICIAL",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
           "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
@@ -1142,13 +1144,14 @@
       ],
       "actual_due_kst": "2026-03-19T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "source_tier": "OFFICIAL",
+      "_verified_override": true,
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
       "actual_status": "RELEASED"
     },
@@ -1188,6 +1191,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1226,6 +1230,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1256,6 +1261,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1310,6 +1316,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1318,28 +1325,41 @@
       "country": "KR",
       "category": "중앙은행",
       "importance": 3,
-      "source": "BOK",
+      "source": "BOK_RATE official release",
       "reference_period": "",
       "previous": null,
       "consensus": null,
-      "actual": null,
+      "actual": "2.50%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
+      "market_data_source": "BOK_RATE official release",
       "market_metrics": [
         {
           "key": "bok_base_rate",
-          "label": "bok_base_rate",
-          "actual": null
+          "label": "한국은행 기준금리",
+          "actual": "2.50%",
+          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+          "source_tier": "OFFICIAL",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+          "source": "BOK_RATE official release",
+          "checked_kst": "2026-09-21T18:54:36+09:00"
         }
       ],
       "actual_due_kst": "2026-04-10T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
-      "actual_status": "OVERDUE"
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
+      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+      "actual_source": "BOK_RATE official release",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+      "checked_kst": "2026-09-21T18:54:36+09:00",
+      "actual_status": "RELEASED"
     },
     {
       "datetime_kst": "2026-04-10T21:30+09:00",
@@ -1393,6 +1413,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1447,6 +1468,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1485,6 +1507,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1523,6 +1546,7 @@
           "avg_hourly_yoy"
         ]
       },
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1538,7 +1562,7 @@
       "actual": "3.75%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": "Federal Reserve official",
+      "market_data_source": "Federal Reserve official FOMC statement",
       "market_metrics": [
         {
           "key": "fed_rate",
@@ -1547,8 +1571,8 @@
           "previous": null,
           "consensus": null,
           "actual": "3.75%",
-          "source_tier": "OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+          "source_tier": "OFFICIAL",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
           "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
@@ -1556,13 +1580,14 @@
       ],
       "actual_due_kst": "2026-04-30T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "source_tier": "OFFICIAL",
+      "_verified_override": true,
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
       "actual_status": "RELEASED"
     },
@@ -1594,6 +1619,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1624,6 +1650,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1662,6 +1689,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -1890,7 +1918,7 @@
       "schedule_corrected_from": "2026-05-14T10:00+09:00",
       "release_date": "2026-05-28",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_status": "OVERDUE"
@@ -2225,15 +2253,15 @@
       ],
       "actual_due_kst": "2026-06-18T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_tier": "OFFICIAL",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
-      "checked_kst": "2026-09-21T18:51:24+09:00",
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
-      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
       "_verified_override": true,
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -2488,7 +2516,7 @@
       "actual_due_kst": "2026-07-16T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_status": "OVERDUE"
@@ -2592,15 +2620,15 @@
       ],
       "actual_due_kst": "2026-07-30T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_tier": "OFFICIAL",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
-      "checked_kst": "2026-09-21T18:51:24+09:00",
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
-      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
       "_verified_override": true,
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
+      "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -2927,7 +2955,7 @@
       "schedule_corrected_from": "2026-08-13T10:00+09:00",
       "release_date": "2026-08-27",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_status": "OVERDUE"
@@ -3190,7 +3218,7 @@
       "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
       "actual_watch": true,
       "actual_expected": true,
-      "actual_backfill_checked_kst": "2026-09-21T18:54:13+09:00",
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -3258,7 +3286,7 @@
       "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
       "actual_watch": true,
       "actual_expected": true,
-      "actual_backfill_checked_kst": "2026-09-21T18:54:13+09:00",
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -3406,7 +3434,7 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
-      "actual_backfill_checked_kst": "2026-09-21T18:54:13+09:00",
+      "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "OVERDUE"
     },
     {
@@ -3431,11 +3459,11 @@
           "impact": "High",
           "actual": "4.00%",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+          "checked_kst": "2026-09-21T18:54:36+09:00"
         }
       ],
       "_verified_override": true,
@@ -3444,14 +3472,14 @@
       "actual": "4.00%",
       "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
       "source": "Federal Reserve",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "source_tier": "OFFICIAL",
-      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
-      "official_actual_source": "Federal Reserve official FOMC statement",
-      "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "official_actual_source": "Federal Reserve official FOMC statement",
+      "checked_kst": "2026-09-21T18:54:36+09:00",
+      "official_actual_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_status": "RELEASED"
     },
     {
@@ -3479,11 +3507,11 @@
           "impact": "High",
           "actual": "3.75%",
           "source": "BOE official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         },
         {
           "key": "boe_vote_split",
@@ -3495,11 +3523,11 @@
           "impact": "High",
           "actual": "3-0-6",
           "source": "BOE official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "_verified_override": true,
@@ -3507,12 +3535,12 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
+      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
       "actual_source": "BOE official release",
-      "verification_status": "VERIFIED_OFFICIAL",
       "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
       "checked_kst": "2026-09-21T18:32:56+09:00",
-      "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
       "actual_status": "RELEASED"
     },
     {
@@ -3540,11 +3568,11 @@
           "event_title": "Unemployment Claims",
           "datetime_source": "2026-09-17T08:30:00-04:00",
           "impact": "Medium",
-          "checked_kst": "2026-09-21T18:34:01+09:00",
           "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf"
+          "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "checked_kst": "2026-09-21T18:34:01+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-17T22:15:00+09:00",
@@ -3552,12 +3580,12 @@
       "actual_watch": true,
       "actual_expected": true,
       "_verified_override": true,
+      "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
       "actual_source": "DOL official release",
-      "verification_status": "VERIFIED_OFFICIAL",
       "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
       "checked_kst": "2026-09-21T18:34:01+09:00",
-      "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
       "actual_status": "RELEASED"
     },
     {
@@ -3580,22 +3608,22 @@
           "label": "PPI MoM",
           "actual": "0.2%",
           "source": "BOK official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         },
         {
           "key": "kr_ppi_yoy",
           "label": "PPI YoY",
           "actual": "7.9%",
           "source": "BOK official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "official_release_url": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?depth=201264&menuNo=201264&nttId=11064859&oldMenuNo=201150&programType=newsData&relate=Y",
@@ -3604,12 +3632,12 @@
       "actual_watch": true,
       "actual_expected": true,
       "_verified_override": true,
+      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
       "actual_source": "BOK official release",
-      "verification_status": "VERIFIED_OFFICIAL",
       "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
       "checked_kst": "2026-09-21T18:32:56+09:00",
-      "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
       "actual_status": "RELEASED"
     },
     {
@@ -3633,11 +3661,11 @@
           "label": "BOJ overnight call rate target",
           "actual": "1.25%",
           "source": "BOJ official release",
-          "checked_kst": "2026-09-21T18:34:01+09:00",
           "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-          "verification_status": "VERIFIED_OFFICIAL",
           "source_tier": "OFFICIAL",
-          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf"
+          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "checked_kst": "2026-09-21T18:34:01+09:00",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-19T00:00:00+09:00",
@@ -3647,12 +3675,12 @@
       "sort_datetime_kst": "2026-09-18T12:00+09:00",
       "release_date": "2026-09-18",
       "_verified_override": true,
+      "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
       "actual_source": "BOJ official release",
-      "verification_status": "VERIFIED_OFFICIAL",
       "source_tier": "OFFICIAL",
+      "verification_status": "VERIFIED_OFFICIAL",
       "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
       "checked_kst": "2026-09-21T18:34:01+09:00",
-      "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
       "actual_status": "RELEASED"
     },
     {
@@ -4162,7 +4190,7 @@
       "actual_due_kst": "2026-10-22T10:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_status": "SCHEDULED"
@@ -4796,7 +4824,7 @@
       "schedule_corrected_from": "2026-11-12T10:00+09:00",
       "release_date": "2026-11-26",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-      "schedule_checked_kst": "2026-09-21T18:54:13+09:00",
+      "schedule_checked_kst": "2026-09-21T18:54:36+09:00",
       "actual_watch": true,
       "actual_expected": true,
       "actual_status": "SCHEDULED"
@@ -5330,7 +5358,7 @@
   ],
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-09-21T18:51:24+09:00",
+  "key_event_seeded_kst": "2026-09-21T18:54:36+09:00",
   "time_contract": "ALL_TIMES_KST",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "quality": {
@@ -5346,9 +5374,29 @@
     "lookback_days": 14,
     "unresolved_candidates": [
       {
-        "title": "Employment Cost Index",
-        "date": "2026-02-10",
-        "adapter": "BLS_eci",
+        "title": "Productivity and Costs",
+        "date": "2026-03-24",
+        "adapter": "BLS_prod2",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "U.S. Import and Export Price Indexes",
+        "date": "2026-03-25",
+        "adapter": "BLS_ximpim",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
+        "title": "Job Openings and Labor Turnover Survey",
+        "date": "2026-03-31",
+        "adapter": "BLS_jolts",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
           "SECONDARY",
@@ -5357,7 +5405,7 @@
       },
       {
         "title": "Employment Situation",
-        "date": "2026-02-11",
+        "date": "2026-04-03",
         "adapter": "BLS_empsit",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
@@ -5366,28 +5414,8 @@
         ]
       },
       {
-        "title": "Consumer Price Index",
-        "date": "2026-02-13",
-        "adapter": "BLS_cpi",
-        "official_adapter_status": "REGISTERED",
-        "fallback_tiers": [
-          "SECONDARY",
-          "MARKET_FEED"
-        ]
-      },
-      {
-        "title": "State Job Openings and Labor Turnover",
-        "date": "2026-02-20",
-        "adapter": "BLS_jltst",
-        "official_adapter_status": "REGISTERED",
-        "fallback_tiers": [
-          "SECONDARY",
-          "MARKET_FEED"
-        ]
-      },
-      {
         "title": "한국은행 통화정책방향 결정회의",
-        "date": "2026-02-26",
+        "date": "2026-04-10",
         "adapter": "BOK_RATE",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
@@ -5396,8 +5424,18 @@
         ]
       },
       {
+        "title": "Consumer Price Index",
+        "date": "2026-04-10",
+        "adapter": "BLS_cpi",
+        "official_adapter_status": "REGISTERED",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ]
+      },
+      {
         "title": "Producer Price Index",
-        "date": "2026-02-27",
+        "date": "2026-04-14",
         "adapter": "BLS_ppi",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
@@ -5407,7 +5445,7 @@
       },
       {
         "title": "U.S. Import and Export Price Indexes",
-        "date": "2026-03-05",
+        "date": "2026-04-15",
         "adapter": "BLS_ximpim",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
@@ -5416,9 +5454,9 @@
         ]
       },
       {
-        "title": "Productivity and Costs",
-        "date": "2026-03-05",
-        "adapter": "BLS_prod2",
+        "title": "Employment Situation of Veterans",
+        "date": "2026-04-28",
+        "adapter": "BLS_vet",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
           "SECONDARY",
@@ -5426,19 +5464,9 @@
         ]
       },
       {
-        "title": "Employment Situation",
-        "date": "2026-03-06",
-        "adapter": "BLS_empsit",
-        "official_adapter_status": "REGISTERED",
-        "fallback_tiers": [
-          "SECONDARY",
-          "MARKET_FEED"
-        ]
-      },
-      {
-        "title": "Consumer Price Index",
-        "date": "2026-03-11",
-        "adapter": "BLS_cpi",
+        "title": "Employment Cost Index",
+        "date": "2026-04-30",
+        "adapter": "BLS_eci",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
           "SECONDARY",
@@ -5447,7 +5475,7 @@
       },
       {
         "title": "Job Openings and Labor Turnover Survey",
-        "date": "2026-03-13",
+        "date": "2026-05-05",
         "adapter": "BLS_jolts",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
@@ -5456,9 +5484,9 @@
         ]
       },
       {
-        "title": "Producer Price Index",
-        "date": "2026-03-18",
-        "adapter": "BLS_ppi",
+        "title": "Productivity and Costs",
+        "date": "2026-05-07",
+        "adapter": "BLS_prod2",
         "official_adapter_status": "REGISTERED",
         "fallback_tiers": [
           "SECONDARY",
@@ -5478,25 +5506,73 @@
     ],
     "checks": [
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_03242026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
       },
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/archives/eci_02102026.pdf",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_03242026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
       },
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/history/eci_02102026.txt",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/history/prod2_03242026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_03252026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_03252026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/history/ximpim_03252026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_03312026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/history/jolts_03312026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5504,7 +5580,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_02112026.htm",
+        "url": "https://www.bls.gov/news.release/archives/empsit_04032026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5512,7 +5588,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_02112026.pdf",
+        "url": "https://www.bls.gov/news.release/archives/empsit_04032026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5520,55 +5596,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/history/empsit_02112026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_02132026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_02132026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_02132026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/archives/jltst_02192026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/archives/jltst_02192026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/history/jltst_02192026.txt",
+        "url": "https://www.bls.gov/news.release/history/empsit_04032026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5576,101 +5604,13 @@
       {
         "adapter": "BOK_RATE",
         "title": "한국은행 통화정책방향 결정회의",
-        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
         "result": "PARSED"
       },
       {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_02272026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_02272026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/history/ppi_02272026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/archives/ximpim_03052026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/archives/ximpim_03052026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/history/ximpim_03052026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/archives/prod2_03052026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/history/prod2_03052026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_03062026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_03062026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/history/empsit_03062026.txt",
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_04102026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5678,7 +5618,7 @@
       {
         "adapter": "BLS_cpi",
         "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_03112026.htm",
+        "url": "https://www.bls.gov/news.release/archives/cpi_04102026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5686,39 +5626,7 @@
       {
         "adapter": "BLS_cpi",
         "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_03112026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_03112026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/archives/jolts_03132026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/history/jolts_03132026.txt",
+        "url": "https://www.bls.gov/news.release/history/cpi_04102026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5726,7 +5634,7 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_03182026.htm",
+        "url": "https://www.bls.gov/news.release/archives/ppi_04142026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5734,7 +5642,7 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_03182026.pdf",
+        "url": "https://www.bls.gov/news.release/archives/ppi_04142026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5742,7 +5650,127 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/history/ppi_03182026.txt",
+        "url": "https://www.bls.gov/news.release/history/ppi_04142026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_04152026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_04152026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/history/ximpim_04152026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/archives/vet_04282026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/archives/vet_04282026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/history/vet_04282026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/archives/eci_04302026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/history/eci_04302026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_05052026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/history/jolts_05052026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_05072026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/history/prod2_05072026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -5820,7 +5848,7 @@
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
       }
     ],
-    "checked_kst": "2026-09-21T18:54:13+09:00"
+    "checked_kst": "2026-09-21T18:54:36+09:00"
   },
   "enrichment_errors": [
     {
@@ -5841,11 +5869,11 @@
   ],
   "actual_freshness": {
     "status": "DEGRADED",
-    "checked_kst": "2026-09-21T18:54:21+09:00",
+    "checked_kst": "2026-09-21T18:54:45+09:00",
     "grace_minutes": 45,
     "unresolved_expiry": null,
     "pending_count": 0,
-    "overdue_count": 66,
+    "overdue_count": 65,
     "pending_events": [],
     "overdue_events": [
       {
@@ -6172,17 +6200,6 @@
           "unemployment",
           "avg_hourly_mom",
           "avg_hourly_yoy"
-        ],
-        "status": "OVERDUE"
-      },
-      {
-        "datetime_kst": "2026-04-10T10:00:00+09:00",
-        "actual_due_kst": "2026-04-10T10:45:00+09:00",
-        "title": "한국은행 통화정책방향 결정회의",
-        "country": "KR",
-        "missing_metrics": [
-          "event.actual",
-          "bok_base_rate"
         ],
         "status": "OVERDUE"
       },
@@ -6668,49 +6685,79 @@
     ],
     "official_checks": [
       {
-        "event_kst": "2026-01-29T04:00:00+09:00",
-        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
-        "result": "UPDATED",
-        "actual": "3.75%"
-      },
-      {
-        "event_kst": "2026-03-19T03:00:00+09:00",
-        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
-        "result": "UPDATED",
-        "actual": "3.75%"
-      },
-      {
-        "event_kst": "2026-04-30T03:00:00+09:00",
-        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
-        "result": "UPDATED",
-        "actual": "3.75%"
-      },
-      {
         "event_kst": "2026-09-17T03:00:00+09:00",
         "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
         "result": "CONFIRMED",
         "actual": "4.00%"
       },
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_03242026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
       },
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/archives/eci_02102026.pdf",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_03242026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
       },
       {
-        "adapter": "BLS_eci",
-        "title": "Employment Cost Index",
-        "url": "https://www.bls.gov/news.release/history/eci_02102026.txt",
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/history/prod2_03242026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_03252026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_03252026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/history/ximpim_03252026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_03312026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/history/jolts_03312026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6718,7 +6765,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_02112026.htm",
+        "url": "https://www.bls.gov/news.release/archives/empsit_04032026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6726,7 +6773,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_02112026.pdf",
+        "url": "https://www.bls.gov/news.release/archives/empsit_04032026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6734,55 +6781,7 @@
       {
         "adapter": "BLS_empsit",
         "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/history/empsit_02112026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_02132026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_02132026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_02132026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/archives/jltst_02192026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/archives/jltst_02192026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jltst",
-        "title": "State Job Openings and Labor Turnover",
-        "url": "https://www.bls.gov/news.release/history/jltst_02192026.txt",
+        "url": "https://www.bls.gov/news.release/history/empsit_04032026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6790,101 +6789,13 @@
       {
         "adapter": "BOK_RATE",
         "title": "한국은행 통화정책방향 결정회의",
-        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+        "url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
         "result": "PARSED"
       },
       {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_02272026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_02272026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ppi",
-        "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/history/ppi_02272026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/archives/ximpim_03052026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/archives/ximpim_03052026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_ximpim",
-        "title": "U.S. Import and Export Price Indexes",
-        "url": "https://www.bls.gov/news.release/history/ximpim_03052026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/archives/prod2_03052026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_prod2",
-        "title": "Productivity and Costs",
-        "url": "https://www.bls.gov/news.release/history/prod2_03052026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_03062026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/archives/empsit_03062026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_empsit",
-        "title": "Employment Situation",
-        "url": "https://www.bls.gov/news.release/history/empsit_03062026.txt",
+        "adapter": "BLS_cpi",
+        "title": "Consumer Price Index",
+        "url": "https://www.bls.gov/news.release/archives/cpi_04102026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6892,7 +6803,7 @@
       {
         "adapter": "BLS_cpi",
         "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_03112026.htm",
+        "url": "https://www.bls.gov/news.release/archives/cpi_04102026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6900,39 +6811,7 @@
       {
         "adapter": "BLS_cpi",
         "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_03112026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_03112026.txt",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/archives/jolts_03132026.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
-      },
-      {
-        "adapter": "BLS_jolts",
-        "title": "Job Openings and Labor Turnover Survey",
-        "url": "https://www.bls.gov/news.release/history/jolts_03132026.txt",
+        "url": "https://www.bls.gov/news.release/history/cpi_04102026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6940,7 +6819,7 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_03182026.htm",
+        "url": "https://www.bls.gov/news.release/archives/ppi_04142026.htm",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6948,7 +6827,7 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/ppi_03182026.pdf",
+        "url": "https://www.bls.gov/news.release/archives/ppi_04142026.pdf",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -6956,7 +6835,127 @@
       {
         "adapter": "BLS_ppi",
         "title": "Producer Price Index",
-        "url": "https://www.bls.gov/news.release/history/ppi_03182026.txt",
+        "url": "https://www.bls.gov/news.release/history/ppi_04142026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_04152026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/archives/ximpim_04152026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_ximpim",
+        "title": "U.S. Import and Export Price Indexes",
+        "url": "https://www.bls.gov/news.release/history/ximpim_04152026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/archives/vet_04282026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/archives/vet_04282026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_vet",
+        "title": "Employment Situation of Veterans",
+        "url": "https://www.bls.gov/news.release/history/vet_04282026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/archives/eci_04302026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_eci",
+        "title": "Employment Cost Index",
+        "url": "https://www.bls.gov/news.release/history/eci_04302026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/archives/jolts_05052026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_jolts",
+        "title": "Job Openings and Labor Turnover Survey",
+        "url": "https://www.bls.gov/news.release/history/jolts_05052026.txt",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/archives/prod2_05072026.pdf",
+        "result": "HTTP_403",
+        "error": "HTTP Error 403: Forbidden",
+        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
+      },
+      {
+        "adapter": "BLS_prod2",
+        "title": "Productivity and Costs",
+        "url": "https://www.bls.gov/news.release/history/prod2_05072026.txt",
         "result": "HTTP_403",
         "error": "HTTP Error 403: Forbidden",
         "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce"
@@ -7051,21 +7050,21 @@
     "actual": 0,
     "forecast": 0
   },
-  "official_actual_updated_kst": "2026-09-21T18:54:21+09:00",
+  "official_actual_updated_kst": "2026-09-21T18:54:45+09:00",
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,
     "metric_fields_or_rows": 0
   },
-  "retention_kst": "2026-09-21T18:51:31+09:00",
+  "retention_kst": "2026-09-21T18:54:44+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
   "market_event_refresh": {
     "faireconomy_rows": 75,
     "dynamic_metric_matches": 2,
-    "verified_overrides_applied": 18,
+    "verified_overrides_applied": 25,
     "fedwatch_forecast_applied": true,
-    "representative_values_synced": 0,
-    "refreshed_kst": "2026-09-21T18:51:31+09:00"
+    "representative_values_synced": 3,
+    "refreshed_kst": "2026-09-21T18:54:44+09:00"
   }
 }
