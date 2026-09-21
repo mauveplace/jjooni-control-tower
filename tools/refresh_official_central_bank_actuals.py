@@ -103,7 +103,7 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
         if not dt:
             continue
         age = now - dt.astimezone(KST)
-        if age < timedelta(minutes=-5) or age > timedelta(days=14):
+        if age < timedelta(minutes=-5) or (age > timedelta(days=14) and clean(event.get('actual')) is not None):
             continue
 
         release_day = dt.astimezone(ET).strftime('%Y%m%d')

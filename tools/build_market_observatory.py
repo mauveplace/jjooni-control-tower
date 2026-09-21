@@ -254,7 +254,7 @@ def fixed_policy_events(events):
     # 2026 official calendars; yearly source refresh is explicit in metadata.
     for md in ['01-28','03-18','04-29','06-17','07-29','09-16','10-28','12-09']:
         d='2026-'+md+'T15:00+09:00';add_event(events,d,'FOMC 정책결정','US','중앙은행',3,'Federal Reserve')
-    for md in ['01-15','02-12','04-10','05-14','07-16','08-13','10-22','11-12']:
+    for md in ['01-15','02-26','04-10','05-28','07-16','08-27','10-22','11-26']:
         d='2026-'+md+'T10:00+09:00';add_event(events,d,'한국은행 통화정책방향 결정회의','KR','중앙은행',3,'BOK')
 
 def korea_core_events(events):

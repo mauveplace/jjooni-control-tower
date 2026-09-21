@@ -7,6 +7,8 @@ on:
       - tools/enrich_economic_calendar.py
       - tools/calendar_actual_contract.py
       - tools/official_calendar_collectors.py
+      - tools/official_bls_actuals.py
+      - tools/official_bok_policy.py
       - tests/test_calendar_actual_contract.py
       - tools/refresh_official_central_bank_actuals.py
       - .github/workflows/economic-calendar-light-refresh.yml

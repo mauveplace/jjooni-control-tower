@@ -1,5 +1,6 @@
 """Date-bound official adapters. Failed requests are observable, never empty success."""
 import html
+import os
 import io
 import re
 import urllib.request
@@ -96,13 +97,20 @@ def parse_bok(text,year,month):
 
 def adapter_id(e):
     t=e.get('title',''); c=e.get('country')
+    from official_bls_actuals import DEFS
+    if c=='US' and t in DEFS: return 'BLS_'+DEFS[t][0]
     if c=='US' and 'Initial Jobless Claims' in t: return 'DOL'
+    if c=='KR' and t=='한국은행 통화정책방향 결정회의': return 'BOK_RATE'
     if c=='KR' and '생산자물가' in t: return 'BOK'
     if c=='JP' and ('BOJ' in t or 'Bank of Japan' in t): return 'BOJ'
     if c=='GB' and 'Bank of England' in t: return 'BOE'
     return None
 
 REGISTRY={'DOL':('initial_claims',),'BOK':('kr_ppi_mom','kr_ppi_yoy'),'BOJ':('boj_policy_rate',),'BOE':('boe_bank_rate','boe_vote_split')}
+
+from official_bls_actuals import DEFS as BLS_DEFS
+REGISTRY.update({'BLS_'+code:keys for code,keys in BLS_DEFS.values()})
+REGISTRY['BOK_RATE']=('bok_base_rate',)
 
 def discover_bok(e):
     period=re.search(r'(\d{4})년\s*(\d+)월',e['title'])
@@ -117,6 +125,12 @@ def discover_bok(e):
 
 def collect(e,kind,checks):
     dt=release_time(e)
+    if kind=='BOK_RATE':
+        from official_bok_policy import collect_policy
+        return collect_policy(e,checks)
+    if kind.startswith('BLS_'):
+        from official_bls_actuals import collect_bls
+        return collect_bls(e,kind,checks)
     if kind=='DOL':
         urls=[f'https://oui.doleta.gov/press/{dt.year}/{dt:%m%d%y}.pdf',f'https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/{dt.year}/ui-claims-{dt:%Y%m%d}.pdf','https://www.dol.gov/ui/data.pdf']
         parser=lambda t:parse_claims(t,dt)
@@ -152,15 +166,28 @@ def collect(e,kind,checks):
     return None
 
 def apply_official_actuals(calendar,now):
-    checks=[]; updates=0; candidates=[]
-    for e in calendar.get('events',[]):
+    checks=[]; updates=0; candidates=[]; historical_attempts=0
+    historical_limit=int(os.getenv('CALENDAR_HISTORICAL_BATCH','12'))
+    for e in sorted(calendar.get('events',[]),key=lambda e:e.get('actual_backfill_checked_kst','')):
         kind=adapter_id(e); dt=release_time(e)
         if not dt or not actual_expected(e): continue
+        if kind=='BOK_RATE':
+            try:
+                from official_bok_policy import correct_date
+                correct_date(e,now);dt=release_time(e)
+            except Exception as exc:
+                checks.append(dict(adapter=kind,title=e['title'],result='SCHEDULE_LOOKUP_FAILED',error=str(exc)[:200]))
+                continue
         if kind:
             e['actual_watch']=True
             e['actual_expected']=True
         if e.get('time_status')=='TBD':
             e['sort_datetime_kst']=e['datetime_kst']; e['release_date']=dt.date().isoformat()
+        if kind in ('BLS_jltst','BLS_vet'):
+            wrong=[m for m in e.get('market_metrics',[]) if m.get('key') not in REGISTRY[kind]]
+            if wrong:
+                e['metric_contract_correction']={'reason':'TITLE_SUBSTRING_COLLISION','removed_keys':[m.get('key') for m in wrong]}
+                e['market_metrics']=[m for m in e.get('market_metrics',[]) if m.get('key') in REGISTRY[kind]]
         old={m.get('key'):m for m in e.get('market_metrics',[])}
         for key in REGISTRY.get(kind,()):
             old.setdefault(key,metric(key,key,None))
@@ -169,13 +196,16 @@ def apply_official_actuals(calendar,now):
         if now<start: continue
         incomplete=clean(e.get('actual')) is None or any(actual_expected(m) and clean(m.get('actual')) is None for m in old.values())
         # Inspect recent window each refresh and keep older unresolved work observable.
-        if now-dt>timedelta(days=14): continue
+        historical=now-dt>timedelta(days=14)
+        if historical and (not incomplete or historical_attempts>=historical_limit): continue
         if incomplete:
             candidates.append({'title':e['title'],'date':dt.date().isoformat(),'adapter':kind,
                                'official_adapter_status':'REGISTERED' if kind else 'NOT_REGISTERED',
                                'fallback_tiers':['SECONDARY','MARKET_FEED']})
         if not kind: continue
         if not incomplete and e.get('source_tier')=='OFFICIAL': continue
+        if historical: historical_attempts+=1
+        e['actual_backfill_checked_kst']=now.isoformat(timespec='seconds')
         result=collect(e,kind,checks)
         if not result: continue
         rows,url=result

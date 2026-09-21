@@ -125,6 +125,10 @@ def prefs_for(title):
     return []
 
 def detail_specs(title):
+    from official_bls_actuals import DEFS,LABELS
+    if title in ('State Job Openings and Labor Turnover','Employment Situation of Veterans'):
+        return [dict(key=k,label=LABELS[k],aliases=[]) for k in DEFS[title][1]]
+    if title.startswith('Productivity and Costs by Industry:'): return []
     t=norm(title)
     for k,v in DETAIL_GROUPS.items():
         if norm(k) in t:return v

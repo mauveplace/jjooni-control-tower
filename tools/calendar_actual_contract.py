@@ -52,6 +52,9 @@ def merge_observation(old, new):
     return out
 
 def event_key(e):
+    # A corrected BOK meeting date must not resurrect the old hardcoded day.
+    if e.get('country')=='KR' and e.get('title')=='한국은행 통화정책방향 결정회의':
+        return (str(e.get('datetime_kst',''))[:7],e['country'],e['title'])
     return (str(e.get('release_date') or e.get('datetime_kst') or e.get('date') or '')[:10], e.get('country'), e.get('title'))
 
 def retain_calendar(current, previous):
