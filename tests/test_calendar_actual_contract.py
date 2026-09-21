@@ -76,6 +76,19 @@ class CalendarActualRegression(unittest.TestCase):
             with patch('calendar_market_events.OVR',p): apply_overrides(c)
         self.assertEqual(c['events'][0]['actual'],'196K'); self.assertEqual(c['events'][0]['source_tier'],'OFFICIAL')
 
+    def test_recent_backfill_tracks_events_without_official_adapter(self):
+        c={'events':[self.event()]}
+        updates,checks=apply_official_actuals(c,self.now)
+        self.assertEqual(updates,0)
+        self.assertEqual(c['actual_backfill']['unresolved_candidates'][0]['official_adapter_status'],'NOT_REGISTERED')
+
+    def test_official_registry_respects_explicit_no_actual_contract(self):
+        c={'events':[self.event(title='BOJ meeting schedule',country='JP',actual_expected=False)]}
+        with patch('official_calendar_collectors.collect') as collect:
+            apply_official_actuals(c,self.now)
+            collect.assert_not_called()
+        self.assertFalse(c['events'][0]['actual_expected'])
+
     def test_repeated_archive_merge_deduplicates_source_tokens(self):
         from calendar_market_events import apply_overrides
         import tempfile,json

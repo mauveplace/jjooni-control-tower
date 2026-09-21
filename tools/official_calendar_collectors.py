@@ -6,7 +6,7 @@ import urllib.request
 import urllib.parse
 from datetime import timedelta
 from html.parser import HTMLParser
-from calendar_actual_contract import KST, release_time, merge_observation, clean
+from calendar_actual_contract import KST, release_time, merge_observation, clean, actual_expected
 
 UA = 'Mozilla/5.0 JJOONI-Official-Calendar/2.0'
 
@@ -155,21 +155,26 @@ def apply_official_actuals(calendar,now):
     checks=[]; updates=0; candidates=[]
     for e in calendar.get('events',[]):
         kind=adapter_id(e); dt=release_time(e)
-        if not kind or not dt: continue
-        e['actual_watch']=True
-        e['actual_expected']=True
+        if not dt or not actual_expected(e): continue
+        if kind:
+            e['actual_watch']=True
+            e['actual_expected']=True
         if e.get('time_status')=='TBD':
             e['sort_datetime_kst']=e['datetime_kst']; e['release_date']=dt.date().isoformat()
         old={m.get('key'):m for m in e.get('market_metrics',[])}
-        for key in REGISTRY[kind]:
+        for key in REGISTRY.get(kind,()):
             old.setdefault(key,metric(key,key,None))
         e['market_metrics']=list(old.values())
         start=dt.replace(hour=0,minute=0,second=0) if e.get('time_status')=='TBD' else dt
         if now<start: continue
-        incomplete=clean(e.get('actual')) is None or any(clean(old[k].get('actual')) is None for k in REGISTRY[kind])
+        incomplete=clean(e.get('actual')) is None or any(actual_expected(m) and clean(m.get('actual')) is None for m in old.values())
         # Inspect recent window each refresh and keep older unresolved work observable.
-        if incomplete: candidates.append({'title':e['title'],'date':dt.date().isoformat(),'adapter':kind})
         if now-dt>timedelta(days=14): continue
+        if incomplete:
+            candidates.append({'title':e['title'],'date':dt.date().isoformat(),'adapter':kind,
+                               'official_adapter_status':'REGISTERED' if kind else 'NOT_REGISTERED',
+                               'fallback_tiers':['SECONDARY','MARKET_FEED']})
+        if not kind: continue
         if not incomplete and e.get('source_tier')=='OFFICIAL': continue
         result=collect(e,kind,checks)
         if not result: continue
