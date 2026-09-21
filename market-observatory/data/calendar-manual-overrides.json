@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-09-21T19:08:45+09:00",
+  "generated_kst": "2026-09-21T23:06:25+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
     {
@@ -376,7 +376,7 @@
         "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check",
         "actual_watch": true,
         "actual_expected": true,
-        "actual_backfill_checked_kst": "2026-09-21T19:08:37+09:00"
+        "actual_backfill_checked_kst": "2026-09-21T23:06:12+09:00"
       },
       "actual": "0.4%",
       "source": "FairEconomy/ForexFactory + BLS official Aug 2026 PPI + Forex Factory market calendar cross-check"
@@ -442,7 +442,7 @@
         "market_data_source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check",
         "actual_watch": true,
         "actual_expected": true,
-        "actual_backfill_checked_kst": "2026-09-21T19:08:37+09:00"
+        "actual_backfill_checked_kst": "2026-09-21T23:06:12+09:00"
       },
       "actual": "3.4%",
       "source": "FairEconomy/ForexFactory + BLS official Aug 2026 CPI + Reuters/Forex Factory market calendar cross-check"
@@ -628,8 +628,8 @@
           "consensus": "4.00%",
           "actual": "4.00%",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T19:08:37+09:00",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+          "checked_kst": "2026-09-21T23:06:12+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
           "source_tier": "OFFICIAL"
@@ -654,22 +654,22 @@
         "actual": "4.00%",
         "market_data_source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
         "source": "Federal Reserve",
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T23:06:12+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T23:06:12+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T19:08:37+09:00",
-        "official_actual_checked_kst": "2026-09-21T19:08:37+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "actual": "4.00%",
       "source": "FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived + Federal Reserve official FOMC statement",
-      "checked_kst": "2026-09-21T19:08:37+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "official_actual_checked_kst": "2026-09-21T19:08:37+09:00",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
+      "checked_kst": "2026-09-21T23:06:12+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "official_actual_checked_kst": "2026-09-21T23:06:12+09:00",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -689,8 +689,8 @@
           "event_title": "Official Bank Rate",
           "actual": "3.75%",
           "source": "BOE official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "source_tier": "OFFICIAL"
@@ -702,8 +702,8 @@
           "consensus": "3-0-6",
           "actual": "3-0-6",
           "source": "BOE official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "source_tier": "OFFICIAL"
@@ -730,20 +730,20 @@
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "actual_watch": true,
         "actual_expected": true,
-        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "actual_source": "BOE official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "actual_source": "BOE official release",
+        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
         "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "checked_kst": "2026-09-21T18:32:56+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "actual": "3.75%",
       "source": "BOE official release",
-      "checked_kst": "2026-09-21T18:32:56+09:00",
-      "actual_source": "BOE official release",
       "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+      "checked_kst": "2026-09-21T18:32:56+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+      "actual_source": "BOE official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -773,12 +773,12 @@
         "actual_watch": true,
         "actual_expected": true,
         "_verified_override": true,
-        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-        "actual_source": "BOK official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "actual_source": "BOK official release",
+        "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
         "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-        "checked_kst": "2026-09-21T18:32:56+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -786,8 +786,8 @@
           "label": "PPI MoM",
           "actual": "0.2%",
           "source": "BOK official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "source_tier": "OFFICIAL"
@@ -797,19 +797,19 @@
           "label": "PPI YoY",
           "actual": "7.9%",
           "source": "BOK official release",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
           "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "checked_kst": "2026-09-21T18:32:56+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "0.2%",
-      "checked_kst": "2026-09-21T18:32:56+09:00",
-      "actual_source": "BOK official release",
       "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "checked_kst": "2026-09-21T18:32:56+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "actual_source": "BOK official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -838,12 +838,12 @@
         "actual_watch": true,
         "actual_expected": true,
         "_verified_override": true,
-        "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-        "actual_source": "DOL official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:34:01+09:00",
+        "actual_source": "DOL official release",
+        "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
         "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-        "checked_kst": "2026-09-21T18:34:01+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -853,8 +853,8 @@
           "consensus": "207K",
           "actual": "196K",
           "source": "DOL official release",
-          "checked_kst": "2026-09-21T18:34:01+09:00",
           "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+          "checked_kst": "2026-09-21T18:34:01+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
           "source_tier": "OFFICIAL"
@@ -863,11 +863,11 @@
       "previous": "206K",
       "consensus": "207K",
       "actual": "196K",
-      "checked_kst": "2026-09-21T18:34:01+09:00",
-      "actual_source": "DOL official release",
       "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "checked_kst": "2026-09-21T18:34:01+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "actual_source": "DOL official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -899,12 +899,12 @@
         "sort_datetime_kst": "2026-09-18T12:00+09:00",
         "release_date": "2026-09-18",
         "_verified_override": true,
-        "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "actual_source": "BOJ official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:34:01+09:00",
+        "actual_source": "BOJ official release",
+        "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
         "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "checked_kst": "2026-09-21T18:34:01+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -912,19 +912,19 @@
           "label": "BOJ overnight call rate target",
           "actual": "1.25%",
           "source": "BOJ official release",
-          "checked_kst": "2026-09-21T18:34:01+09:00",
           "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "checked_kst": "2026-09-21T18:34:01+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "1.25%",
-      "checked_kst": "2026-09-21T18:34:01+09:00",
-      "actual_source": "BOJ official release",
       "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+      "checked_kst": "2026-09-21T18:34:01+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+      "actual_source": "BOJ official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -951,17 +951,17 @@
         "actual_due_kst": "2026-01-15T10:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-        "schedule_checked_kst": "2026-09-21T19:08:37+09:00",
+        "schedule_checked_kst": "2026-09-21T23:06:12+09:00",
         "actual_watch": true,
         "actual_expected": true,
         "actual_backfill_checked_kst": "2026-09-21T18:51:24+09:00",
         "_verified_override": true,
-        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
-        "actual_source": "BOK_RATE official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:51:24+09:00",
+        "actual_source": "BOK_RATE official release",
+        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
         "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
-        "checked_kst": "2026-09-21T18:51:24+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -969,19 +969,19 @@
           "label": "한국은행 기준금리",
           "actual": "2.50%",
           "source": "BOK_RATE official release",
-          "checked_kst": "2026-09-21T18:51:24+09:00",
           "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+          "checked_kst": "2026-09-21T18:51:24+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "2.50%",
-      "checked_kst": "2026-09-21T18:51:24+09:00",
-      "actual_source": "BOK_RATE official release",
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
+      "actual_source": "BOK_RATE official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -1008,21 +1008,21 @@
         "actual_due_kst": "2026-06-18T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T18:51:24+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T18:51:24+09:00",
-        "official_actual_checked_kst": "2026-09-21T18:51:24+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "actual": "3.75%",
-      "checked_kst": "2026-09-21T18:51:24+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -1051,21 +1051,21 @@
         "actual_due_kst": "2026-07-30T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T18:51:24+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T18:51:24+09:00",
-        "official_actual_checked_kst": "2026-09-21T18:51:24+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "actual": "3.75%",
-      "checked_kst": "2026-09-21T18:51:24+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
+      "checked_kst": "2026-09-21T18:51:24+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "official_actual_checked_kst": "2026-09-21T18:51:24+09:00",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -1094,14 +1094,14 @@
         "actual_due_kst": "2026-01-29T04:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T18:54:13+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T18:54:13+09:00",
-        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "market_metrics": [
         {
@@ -1109,19 +1109,19 @@
           "label": "Federal Funds Rate",
           "actual": "3.75%",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+          "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "3.75%",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -1152,17 +1152,17 @@
         "schedule_corrected_from": "2026-02-12T10:00+09:00",
         "release_date": "2026-02-26",
         "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-        "schedule_checked_kst": "2026-09-21T19:08:37+09:00",
+        "schedule_checked_kst": "2026-09-21T23:06:12+09:00",
         "actual_watch": true,
         "actual_expected": true,
         "actual_backfill_checked_kst": "2026-09-21T18:54:13+09:00",
         "_verified_override": true,
-        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
-        "actual_source": "BOK_RATE official release",
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "checked_kst": "2026-09-21T18:54:13+09:00",
+        "actual_source": "BOK_RATE official release",
+        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
         "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
-        "checked_kst": "2026-09-21T18:54:13+09:00"
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -1170,19 +1170,19 @@
           "label": "한국은행 기준금리",
           "actual": "2.50%",
           "source": "BOK_RATE official release",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
           "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+          "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "2.50%",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
-      "actual_source": "BOK_RATE official release",
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=c8d9eed3100140ba91842ab52723870e&fileSn=2",
+      "actual_source": "BOK_RATE official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -1209,14 +1209,14 @@
         "actual_due_kst": "2026-03-19T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T18:54:13+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T18:54:13+09:00",
-        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "market_metrics": [
         {
@@ -1224,19 +1224,19 @@
           "label": "Federal Funds Rate",
           "actual": "3.75%",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+          "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "3.75%",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -1265,14 +1265,14 @@
         "actual_due_kst": "2026-04-30T03:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "_verified_override": true,
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T18:54:13+09:00",
         "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
         "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
-        "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
         "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
-        "official_actual_source": "Federal Reserve official FOMC statement",
-        "checked_kst": "2026-09-21T18:54:13+09:00",
-        "official_actual_checked_kst": "2026-09-21T18:54:13+09:00"
+        "verification_status": "VERIFIED_OFFICIAL",
+        "official_actual_source": "Federal Reserve official FOMC statement"
       },
       "market_metrics": [
         {
@@ -1280,19 +1280,19 @@
           "label": "Federal Funds Rate",
           "actual": "3.75%",
           "source": "Federal Reserve official FOMC statement",
-          "checked_kst": "2026-09-21T18:54:13+09:00",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+          "checked_kst": "2026-09-21T18:54:13+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "3.75%",
-      "checked_kst": "2026-09-21T18:54:13+09:00",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+      "checked_kst": "2026-09-21T18:54:13+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "official_actual_checked_kst": "2026-09-21T18:54:13+09:00",
-      "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
       "official_actual_source": "Federal Reserve official FOMC statement",
       "source_tier": "OFFICIAL"
@@ -1321,17 +1321,17 @@
         "actual_due_kst": "2026-04-10T10:45:00+09:00",
         "actual_due_policy": "RELEASE_PLUS_GRACE",
         "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-        "schedule_checked_kst": "2026-09-21T19:08:37+09:00",
+        "schedule_checked_kst": "2026-09-21T23:06:12+09:00",
         "actual_watch": true,
         "actual_expected": true,
         "actual_backfill_checked_kst": "2026-09-21T18:54:36+09:00",
-        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
-        "actual_source": "BOK_RATE official release",
+        "_verified_override": true,
         "source_tier": "OFFICIAL",
-        "verification_status": "VERIFIED_OFFICIAL",
-        "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
         "checked_kst": "2026-09-21T18:54:36+09:00",
-        "_verified_override": true
+        "actual_source": "BOK_RATE official release",
+        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+        "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -1339,19 +1339,19 @@
           "label": "한국은행 기준금리",
           "actual": "2.50%",
           "source": "BOK_RATE official release",
-          "checked_kst": "2026-09-21T18:54:36+09:00",
           "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+          "checked_kst": "2026-09-21T18:54:36+09:00",
           "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
           "source_tier": "OFFICIAL"
         }
       ],
       "actual": "2.50%",
-      "checked_kst": "2026-09-21T18:54:36+09:00",
-      "actual_source": "BOK_RATE official release",
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+      "checked_kst": "2026-09-21T18:54:36+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
       "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=67c5323a73fb4b4583fc0db39562aaf3&fileSn=2",
+      "actual_source": "BOK_RATE official release",
       "source_tier": "OFFICIAL"
     },
     {
@@ -1361,12 +1361,6 @@
         "title_contains": "한국은행 통화정책방향 결정회의"
       },
       "source": "BOK_RATE official release",
-      "source_tier": "OFFICIAL",
-      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
-      "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
-      "checked_kst": "2026-09-21T19:08:37+09:00",
-      "verification_status": "VERIFIED_OFFICIAL",
-      "actual_source": "BOK_RATE official release",
       "event": {
         "datetime_kst": "2026-05-28T10:00+09:00",
         "title": "한국은행 통화정책방향 결정회의",
@@ -1386,16 +1380,17 @@
         "schedule_corrected_from": "2026-05-14T10:00+09:00",
         "release_date": "2026-05-28",
         "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
-        "schedule_checked_kst": "2026-09-21T19:08:37+09:00",
+        "schedule_checked_kst": "2026-09-21T23:06:12+09:00",
         "actual_watch": true,
         "actual_expected": true,
         "actual_backfill_checked_kst": "2026-09-21T19:08:37+09:00",
-        "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
-        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
-        "verification_status": "VERIFIED_OFFICIAL",
-        "actual_source": "BOK_RATE official release",
+        "_verified_override": true,
         "source_tier": "OFFICIAL",
-        "checked_kst": "2026-09-21T19:08:37+09:00"
+        "checked_kst": "2026-09-21T19:08:37+09:00",
+        "actual_source": "BOK_RATE official release",
+        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
+        "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
+        "verification_status": "VERIFIED_OFFICIAL"
       },
       "market_metrics": [
         {
@@ -1403,14 +1398,76 @@
           "label": "한국은행 기준금리",
           "actual": "2.50%",
           "source": "BOK_RATE official release",
-          "source_tier": "OFFICIAL",
-          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
           "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
           "checked_kst": "2026-09-21T19:08:37+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
+          "source_tier": "OFFICIAL"
+        }
+      ],
+      "actual": "2.50%",
+      "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
+      "checked_kst": "2026-09-21T19:08:37+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=075c50ad6b6a4bf287f56189695ac18f&fileSn=2",
+      "actual_source": "BOK_RATE official release",
+      "source_tier": "OFFICIAL"
+    },
+    {
+      "match": {
+        "date": "2026-07-16",
+        "country": "KR",
+        "title_contains": "한국은행 통화정책방향 결정회의"
+      },
+      "source": "BOK_RATE official release",
+      "source_tier": "OFFICIAL",
+      "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+      "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+      "checked_kst": "2026-09-21T23:06:12+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "BOK_RATE official release",
+      "event": {
+        "datetime_kst": "2026-07-16T10:00+09:00",
+        "title": "한국은행 통화정책방향 결정회의",
+        "country": "KR",
+        "category": "중앙은행",
+        "importance": 3,
+        "source": "BOK_RATE official release",
+        "reference_period": "",
+        "previous": null,
+        "consensus": null,
+        "actual": "2.75%",
+        "te_forecast": null,
+        "surprise": null,
+        "market_data_source": "BOK_RATE official release",
+        "actual_due_kst": "2026-07-16T10:45:00+09:00",
+        "actual_due_policy": "RELEASE_PLUS_GRACE",
+        "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
+        "schedule_checked_kst": "2026-09-21T23:06:12+09:00",
+        "actual_watch": true,
+        "actual_expected": true,
+        "actual_backfill_checked_kst": "2026-09-21T23:06:12+09:00",
+        "source_tier": "OFFICIAL",
+        "checked_kst": "2026-09-21T23:06:12+09:00",
+        "actual_source": "BOK_RATE official release",
+        "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+        "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+        "verification_status": "VERIFIED_OFFICIAL"
+      },
+      "market_metrics": [
+        {
+          "key": "bok_base_rate",
+          "label": "한국은행 기준금리",
+          "actual": "2.75%",
+          "source": "BOK_RATE official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+          "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=17f5a7b898ce4a92b3715cb6a3bd7051&fileSn=2",
+          "checked_kst": "2026-09-21T23:06:12+09:00",
           "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
-      "actual": "2.50%"
+      "actual": "2.75%"
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
