@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_V1",
-  "generated_kst": "2026-09-21T18:33:08+09:00",
+  "generated_kst": "2026-09-21T18:34:04+09:00",
   "timezone": "Asia/Seoul",
   "events": [
     {
@@ -2689,7 +2689,7 @@
       "consensus": "3.2%",
       "te_forecast": null,
       "surprise": "actual_vs_consensus",
-      "market_data_source": "Korea official release + KOSTAT / market consensus cross-check + Korea official release + market consensus cross-check",
+      "market_data_source": "Korea official release + KOSTAT / market consensus cross-check + Korea official release + KOSTAT / market consensus cross-check + Korea official release + market consensus cross-check",
       "market_metrics": [
         {
           "key": "kr_cpi_yoy",
@@ -2713,7 +2713,6 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "source": "KOSTAT",
       "actual": "3.1%",
-      "market_data_source": "Korea official release + KOSTAT / market consensus cross-check",
       "actual_status": "RELEASED"
     },
     {
@@ -2817,7 +2816,7 @@
       "consensus": "3.1%",
       "te_forecast": null,
       "surprise": "actual_vs_consensus",
-      "market_data_source": "KOSTAT official release + KOSTAT / market calendar cross-check + KOSTAT official release + market calendar cross-check",
+      "market_data_source": "KOSTAT official release + KOSTAT / market calendar cross-check + KOSTAT official release + KOSTAT / market calendar cross-check + KOSTAT official release + market calendar cross-check",
       "market_metrics": [
         {
           "key": "kr_unemployment_sa",
@@ -2841,7 +2840,6 @@
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "source": "KOSTAT",
       "actual": "2.7%",
-      "market_data_source": "KOSTAT official release + KOSTAT / market calendar cross-check",
       "actual_status": "RELEASED"
     },
     {
@@ -3135,24 +3133,26 @@
           "impact": "High",
           "actual": "4.00%",
           "source": "Federal Reserve official FOMC statement",
-          "source_tier": "OFFICIAL",
+          "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
           "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-          "checked_kst": "2026-09-21T18:32:56+09:00",
-          "verification_status": "VERIFIED_OFFICIAL"
+          "checked_kst": "2026-09-21T18:34:01+09:00",
+          "source_tier": "OFFICIAL"
         }
       ],
       "official_actual_source": "Federal Reserve official FOMC statement",
       "official_actual_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "official_actual_checked_kst": "2026-09-21T18:32:56+09:00",
+      "official_actual_checked_kst": "2026-09-21T18:34:01+09:00",
       "_verified_override": true,
       "actual_due_kst": "2026-09-17T03:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "source_tier": "OFFICIAL",
       "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
       "official_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm",
-      "checked_kst": "2026-09-21T18:32:56+09:00",
+      "checked_kst": "2026-09-21T18:34:01+09:00",
       "verification_status": "VERIFIED_OFFICIAL",
+      "actual": "4.00%",
+      "market_data_source": "Federal Reserve official + FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived",
       "actual_status": "RELEASED"
     },
     {
@@ -3179,12 +3179,12 @@
           "datetime_source": "2026-09-17T07:00:00-04:00",
           "impact": "High",
           "actual": "3.75%",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "source": "BOE official release",
-          "source_tier": "OFFICIAL",
           "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "source_tier": "OFFICIAL"
         },
         {
           "key": "boe_vote_split",
@@ -3195,12 +3195,12 @@
           "datetime_source": "2026-09-17T07:00:00-04:00",
           "impact": "High",
           "actual": "3-0-6",
-          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "source": "BOE official release",
-          "source_tier": "OFFICIAL",
           "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+          "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026"
+          "source_tier": "OFFICIAL"
         }
       ],
       "_verified_override": true,
@@ -3241,18 +3241,24 @@
           "event_title": "Unemployment Claims",
           "datetime_source": "2026-09-17T08:30:00-04:00",
           "impact": "Medium",
-          "checked_kst": "2026-09-21T13:27:28+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
           "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
           "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
-          "source_tier": "OFFICIAL",
-          "verification_status": "VERIFIED_OFFICIAL"
+          "checked_kst": "2026-09-21T18:34:01+09:00",
+          "source_tier": "OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-17T22:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_watch": true,
       "actual_expected": true,
-      "actual_status": "OVERDUE"
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "DOL official release",
+      "source_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "official_url": "https://oui.doleta.gov/press/2026/091726.pdf",
+      "checked_kst": "2026-09-21T18:34:01+09:00",
+      "source_tier": "OFFICIAL",
+      "actual_status": "RELEASED"
     },
     {
       "datetime_kst": "2026-09-18T06:00+09:00",
@@ -3273,23 +3279,23 @@
           "key": "kr_ppi_mom",
           "label": "PPI MoM",
           "actual": "0.2%",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "source": "BOK official release",
-          "source_tier": "OFFICIAL",
           "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "source_tier": "OFFICIAL"
         },
         {
           "key": "kr_ppi_yoy",
           "label": "PPI YoY",
           "actual": "7.9%",
-          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "source": "BOK official release",
-          "source_tier": "OFFICIAL",
           "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+          "official_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
           "checked_kst": "2026-09-21T18:32:56+09:00",
-          "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf"
+          "source_tier": "OFFICIAL"
         }
       ],
       "official_release_url": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?depth=201264&menuNo=201264&nttId=11064859&oldMenuNo=201150&programType=newsData&relate=Y",
@@ -3303,6 +3309,7 @@
       "verification_status": "VERIFIED_OFFICIAL",
       "checked_kst": "2026-09-21T18:32:56+09:00",
       "source_url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+      "_verified_override": true,
       "actual_status": "RELEASED"
     },
     {
@@ -3319,12 +3326,18 @@
       "actual": "1.25%",
       "te_forecast": null,
       "surprise": null,
-      "market_data_source": null,
+      "market_data_source": "BOJ official release",
       "market_metrics": [
         {
           "key": "boj_policy_rate",
-          "label": "boj_policy_rate",
-          "actual": null
+          "label": "BOJ overnight call rate target",
+          "actual": "1.25%",
+          "source": "BOJ official release",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+          "checked_kst": "2026-09-21T18:34:01+09:00",
+          "source_tier": "OFFICIAL"
         }
       ],
       "actual_due_kst": "2026-09-19T00:00:00+09:00",
@@ -3333,7 +3346,13 @@
       "actual_expected": true,
       "sort_datetime_kst": "2026-09-18T12:00+09:00",
       "release_date": "2026-09-18",
-      "actual_status": "OVERDUE"
+      "verification_status": "VERIFIED_OFFICIAL",
+      "actual_source": "BOJ official release",
+      "source_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+      "official_url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
+      "checked_kst": "2026-09-21T18:34:01+09:00",
+      "source_tier": "OFFICIAL",
+      "actual_status": "RELEASED"
     },
     {
       "datetime_kst": "2026-09-23T06:00+09:00",
@@ -4975,13 +4994,19 @@
     ],
     "checks": [
       {
+        "adapter": "DOL",
+        "title": "U.S. Initial Jobless Claims",
+        "url": "https://oui.doleta.gov/press/2026/091726.pdf",
+        "result": "PARSED"
+      },
+      {
         "adapter": "BOJ",
         "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
         "url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
         "result": "PARSED"
       }
     ],
-    "checked_kst": "2026-09-21T18:30:13+09:00"
+    "checked_kst": "2026-09-21T18:34:01+09:00"
   },
   "enrichment_errors": [
     {
@@ -5002,11 +5027,11 @@
   ],
   "actual_freshness": {
     "status": "DEGRADED",
-    "checked_kst": "2026-09-21T18:33:08+09:00",
+    "checked_kst": "2026-09-21T18:34:04+09:00",
     "grace_minutes": 45,
     "unresolved_expiry": null,
     "pending_count": 0,
-    "overdue_count": 73,
+    "overdue_count": 71,
     "pending_events": [],
     "overdue_events": [
       {
@@ -5879,28 +5904,6 @@
           "us_export_price_mom"
         ],
         "status": "OVERDUE"
-      },
-      {
-        "datetime_kst": "2026-09-17T21:30:00+09:00",
-        "actual_due_kst": "2026-09-17T22:15:00+09:00",
-        "title": "U.S. Initial Jobless Claims",
-        "country": "US",
-        "missing_metrics": [
-          "event.actual",
-          "initial_claims"
-        ],
-        "status": "OVERDUE"
-      },
-      {
-        "datetime_kst": "2026-09-18T12:00:00+09:00",
-        "actual_due_kst": "2026-09-19T00:00:00+09:00",
-        "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
-        "country": "JP",
-        "missing_metrics": [
-          "event.actual",
-          "boj_policy_rate"
-        ],
-        "status": "OVERDUE"
       }
     ],
     "official_checks": [
@@ -5911,58 +5914,30 @@
         "actual": "4.00%"
       },
       {
-        "adapter": "BOE",
-        "title": "Bank of England 금리 결정",
-        "url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "result": "PARSED"
-      },
-      {
         "adapter": "DOL",
         "title": "U.S. Initial Jobless Claims",
-        "url": "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/2026/ui-claims-20260917.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden"
-      },
-      {
-        "adapter": "DOL",
-        "title": "U.S. Initial Jobless Claims",
-        "url": "https://www.dol.gov/ui/data.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden"
-      },
-      {
-        "adapter": "BOK",
-        "title": "2026년 8월 생산자물가지수(잠정)",
-        "url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
+        "url": "https://oui.doleta.gov/press/2026/091726.pdf",
         "result": "PARSED"
       },
       {
         "adapter": "BOJ",
         "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
         "url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "result": "ValueError",
-        "error": "RELEASE_DATE_MISMATCH"
+        "result": "PARSED"
       }
     ]
   },
   "official_actual_contract": "OFFICIAL_REGISTRY_BACKFILL_V2",
-  "official_actual_updated_kst": "2026-09-21T18:33:08+09:00",
-  "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
-  "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.",
-  "retention_preserved": {
-    "event_fields": 59,
-    "metric_fields_or_rows": 94
-  },
-  "enrichment_updates": {
-    "actual": 0,
-    "forecast": 0
-  },
-  "official_actual_updated_kst": "2026-09-21T18:30:16+09:00",
+  "official_actual_updated_kst": "2026-09-21T18:34:04+09:00",
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,
     "metric_fields_or_rows": 0
+  },
+  "enrichment_updates": {
+    "actual": 0,
+    "forecast": 0
   },
   "retention_kst": "2026-09-21T18:30:15+09:00",
   "verified_override_contract": "SERVER_SIDE_VERIFIED_OVERRIDE_MERGE_V1",
@@ -5974,82 +5949,15 @@
     "representative_values_synced": 3,
     "refreshed_kst": "2026-09-21T10:02:37+09:00"
   },
-  "actual_backfill": {
-    "lookback_days": 14,
-    "unresolved_candidates": [
-      {
-        "title": "Bank of England 금리 결정",
-        "date": "2026-09-17",
-        "adapter": "BOE"
-      },
-      {
-        "title": "U.S. Initial Jobless Claims",
-        "date": "2026-09-17",
-        "adapter": "DOL"
-      },
-      {
-        "title": "2026년 8월 생산자물가지수(잠정)",
-        "date": "2026-09-18",
-        "adapter": "BOK"
-      },
-      {
-        "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
-        "date": "2026-09-18",
-        "adapter": "BOJ"
-      }
-    ],
-    "checks": [
-      {
-        "adapter": "BOE",
-        "title": "Bank of England 금리 결정",
-        "url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
-        "result": "PARSED"
-      },
-      {
-        "adapter": "DOL",
-        "title": "U.S. Initial Jobless Claims",
-        "url": "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/2026/ui-claims-20260917.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden"
-      },
-      {
-        "adapter": "DOL",
-        "title": "U.S. Initial Jobless Claims",
-        "url": "https://www.dol.gov/ui/data.pdf",
-        "result": "HTTP_403",
-        "error": "HTTP Error 403: Forbidden"
-      },
-      {
-        "adapter": "BOK",
-        "title": "2026년 8월 생산자물가지수(잠정)",
-        "url": "https://www.bok.or.kr/fileSrc/portal/a24407c9b85f48a9b30e961a5c3be058/1/3a0bcf6e213a41acb0d591e10cf99de1.pdf",
-        "result": "PARSED"
-      },
-      {
-        "adapter": "BOJ",
-        "title": "BOJ 금융정책결정회의 결과 (발표시간 미정)",
-        "url": "https://www.boj.or.jp/en/mopo/mpmdeci/mpr_2026/k260918a.pdf",
-        "result": "ValueError",
-        "error": "RELEASE_DATE_MISMATCH"
-      }
-    ],
-    "checked_kst": "2026-09-21T18:32:56+09:00"
-  },
-  "enrichment_errors": [
-    {
-      "source": "Trading Economics",
-      "error": "HTTPError",
-      "http_status": 410
-    },
-    {
-      "source": "FairEconomy/lastweek",
-      "error": "HTTPError",
-      "http_status": 404
-    },
-    {
-      "source": "FairEconomy/nextweek",
-      "error": "HTTPError",
-      "http_status": 404
-    }
-  ]
+  "enrichment_contract": "OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL_V2",
+  "enrichment_note": "Official agencies remain schedule authority. U.S. releases are decomposed into granular market_metrics from FairEconomy/ForexFactory. Captured observations persist after weekly feeds roll forward; missing values are never invented.",
+  "enrichment_sources": [
+    "Trading Economics unavailable/guest-limited",
+    "FairEconomy/ForexFactory weekly public feed"
+  ],
+  "enrichment_matched": {
+    "trading_economics": 0,
+    "faireconomy_events": 0,
+    "faireconomy_metrics": 0
+  }
 }
