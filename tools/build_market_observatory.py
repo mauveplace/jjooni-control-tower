@@ -5,6 +5,10 @@ from datetime import datetime, date, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+
 ROOT=Path(__file__).resolve().parents[1]
 OUT_DIR=ROOT/'market-observatory'/'data'; OUT_DIR.mkdir(parents=True,exist_ok=True)
 OBS=OUT_DIR/'observatory.json'; CAL=OUT_DIR/'economic-calendar.json'
@@ -294,6 +298,9 @@ def main():
     us_completed_session_date=next(iter(set(us_session_dates.values()))) if len(set(us_session_dates.values()))==1 else None
     out={'schema':'JJOONI_MARKET_OBSERVATORY_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'read_only':True,'contains_account_data':False,'us_market_session_contract':'COMMON_LAST_COMPLETED_US_SESSION_V1','us_completed_session_date':us_completed_session_date,'latest':latest,'series':series,'curves':{'US_CURVE':curve_payload(us,['3 Mo','2 Yr','5 Yr','10 Yr','30 Yr']),'JP_CURVE':curve_payload(jp,['2Y','5Y','10Y','20Y','30Y'])},'tripod_latest':sig,'tripod_history':th[-800:],'signal_log':log[-100:],'sources':{'US_TREASURY':'US Treasury','JP_JGB':'Japan MOF','KR_RATES':'BOK ECOS','MARKETS':'Yahoo public daily','TRIPOD':'derived completed-session daily'}}
     OBS.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    CAL.write_text(json.dumps(calendar_build(),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    old_calendar=json.loads(CAL.read_text(encoding='utf-8')) if CAL.exists() else {'events':[]}
+    calendar=retain_calendar(calendar_build(),old_calendar)
+    CAL.write_text(json.dumps(calendar,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('MARKET_OBSERVATORY_BUILD=PASS');print('generated_kst='+out['generated_kst']);print('series='+str(len(series)));print('calendar_events='+str(len(json.loads(CAL.read_text())['events'])))
 if __name__=='__main__':main()
+

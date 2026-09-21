@@ -9,6 +9,10 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 OVR = ROOT / 'market-observatory' / 'data' / 'calendar-manual-overrides.json'
@@ -53,7 +57,7 @@ def upsert(events, payload):
     country = payload['country']
     for e in events:
         if e.get('datetime_kst') == dt and e.get('title') == title and e.get('country') == country:
-            e.update(payload)
+            e.update(merge_observation(e, payload))
             return e
     events.append(payload)
     return payload
@@ -112,6 +116,9 @@ def seed():
             'country': 'JP', 'category': '중앙은행', 'importance': 3,
             'source': 'Bank of Japan', 'reference_period': 'Sep 17-18, 2026 meeting',
             'time_status': 'TBD',
+            'release_date': '2026-09-18',
+            'sort_datetime_kst': '2026-09-18T12:00+09:00',
+            'actual_due_policy': 'MEETING_DAY_END_KST',
         },
         {
             # Micron officially scheduled its FY2026 Q4 call for Sep 30,
@@ -119,6 +126,7 @@ def seed():
             'datetime_kst': '2026-10-01T05:30+09:00',
             'title': 'Micron FY2026 Q4 실적 컨퍼런스콜 (미 현지 9/30)',
             'country': 'US', 'category': '기업실적', 'importance': 2,
+            'actual_expected': False, 'value_role': 'schedule_only',
             'source': 'Micron Investor Relations', 'reference_period': 'FY2026 Q4',
         },
     ]
@@ -183,11 +191,7 @@ def merge_metric(event, metric):
     key = metric.get('key') or metric.get('label')
     for i, old in enumerate(rows):
         if (old.get('key') or old.get('label')) == key:
-            merged = dict(old)
-            for k, v in metric.items():
-                if clean(v) is not None:
-                    merged[k] = v
-            rows[i] = merged
+            rows[i] = merge_observation(old, metric)
             return
     rows.append(metric)
 
@@ -270,7 +274,11 @@ def sync_representative_values(event):
     for key in ['previous','consensus','actual']:
         value = clean(primary.get(key))
         if value is not None and clean(event.get(key)) != value:
-            event[key] = primary[key]
+            if key == 'actual':
+                merged = merge_observation(event, {k:primary[k] for k in ['actual',*PROVENANCE] if k in primary})
+                event.update(merged)
+            else:
+                event[key] = primary[key]
             changed = True
     source = clean(primary.get('source'))
     merged_source = merge_sources(event.get('market_data_source'), source)
@@ -290,6 +298,7 @@ def add_ff_metric(event, row, key, label, source='FairEconomy/ForexFactory'):
         'consensus': clean(row.get('forecast')),
         'actual': clean(row.get('actual')),
         'source': source,
+        'source_tier': 'MARKET_FEED',
         'event_title': clean(row.get('title')),
         'datetime_source': clean(row.get('date')),
         'impact': clean(row.get('impact')),
@@ -323,9 +332,8 @@ def apply_overrides(c):
         ensure_fields(target)
         for metric in override.get('market_metrics') or []:
             merge_metric(target, metric)
-        for k in ['previous', 'consensus', 'actual']:
-            if clean(override.get(k)) is not None:
-                target[k] = override[k]
+        patch = {k:override[k] for k in ['previous','consensus','actual',*PROVENANCE] if k in override}
+        target.update(merge_observation(target, patch))
         src = clean(override.get('source'))
         if src:
             existing = clean(target.get('market_data_source'))
@@ -340,7 +348,10 @@ def apply_overrides(c):
         if primary:
             for k in ['previous', 'consensus', 'actual']:
                 if clean(primary.get(k)) is not None:
-                    target[k] = primary[k]
+                    if k == 'actual':
+                        target.update(merge_observation(target,{f:primary[f] for f in ['actual',*PROVENANCE] if f in primary}))
+                    else:
+                        target[k] = primary[k]
         target['_verified_override'] = True
         applied += 1
     return applied
@@ -389,3 +400,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

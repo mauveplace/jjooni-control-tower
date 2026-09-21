@@ -230,13 +230,14 @@ window.chart=function(id,labels,sets){RAW[id]={labels:[...(labels||[])],sets:(se
 
 function val(v){return v==null||v===''?'—':String(v)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]))}
+function actualText(e,m){if(m.actual!=null&&m.actual!=='')return val(m.actual);if(m.metric_type==='market_probability_snapshot'||m.value_role==='market_forecast'||e.actual_expected===false)return '—';return e.actual_status==='OVERDUE'?'수집 지연':e.actual_status==='PENDING'?'Actual 확인 중':'—'}
 function eventMetricsHtml(e){
   const ms=(e.market_metrics||[]).filter(m=>m&&m.label);
-  if(ms.length)return `<div class="obsMetricTable">${ms.map(m=>{const market=m.metric_type==='market_probability_snapshot';return `<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">${market?'1거래일 전':'이전'} <b>${esc(val(m.previous))}</b></div><div class="forecast">${market?'현재 시장예측':'예측'} <b>${esc(val(m.consensus))}</b></div><div class="actual">${market?'발표 결과':'실제'} <b>${esc(val(m.actual))}</b></div></div>`}).join('')}</div>`;
-  return `<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(val(e.actual))}</b></span></div>`;
+  if(ms.length)return `<div class="obsMetricTable">${ms.map(m=>{const market=m.metric_type==='market_probability_snapshot';return `<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">${market?'1거래일 전':'이전'} <b>${esc(val(m.previous))}</b></div><div class="forecast">${market?'현재 시장예측':'예측'} <b>${esc(val(m.consensus))}</b></div><div class="actual">${market?'발표 결과':'실제'} <b>${esc(actualText(e,m))}</b></div></div>`}).join('')}</div>`;
+  return `<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(actualText(e,e))}</b></span></div>`;
 }
 function releasedActual(e){const ms=(e.market_metrics||[]).filter(Boolean);if(ms.length)return ms.some(m=>m.metric_type!=='market_probability_snapshot'&&m.actual!=null&&m.actual!=='');return e.actual!=null&&e.actual!==''}
-function eventStatus(e){const t=Date.parse(e.datetime_kst||e.date||'');if(Number.isFinite(t)&&Date.now()<t)return'<span class="obsPending">예정</span>';if(releasedActual(e))return'<span class="obsDone">발표완료</span>';if(Number.isFinite(t)&&Date.now()-t<=86400000)return'<span class="obsAwaiting">결과 대기</span>';return'<span class="obsMissing">값 미수집</span>'}
+function eventStatus(e){if(e.actual_status==='OVERDUE')return'<span class="obsMissing">수집 지연</span>';if(e.actual_status==='PENDING')return'<span class="obsAwaiting">Actual 확인 중</span>';if(e.actual_status==='NOT_APPLICABLE')return'<span class="obsPending">일정 안내</span>';if(e.time_status==='TBD'&&!releasedActual(e))return'<span class="obsPending">발표시간 미정</span>';const t=Date.parse(e.datetime_kst||e.date||'');if(Number.isFinite(t)&&Date.now()<t)return'<span class="obsPending">예정</span>';if(releasedActual(e))return'<span class="obsDone">발표완료</span>';if(Number.isFinite(t)&&Date.now()-t<=86400000)return'<span class="obsAwaiting">결과 대기</span>';return'<span class="obsMissing">값 미수집</span>'}
 window.renderCalendar=function(){
   if(typeof CAL==='undefined')return;
   const month=typeof calMonth!=='undefined'?calMonth:new Date().toISOString().slice(0,7);
@@ -244,7 +245,7 @@ window.renderCalendar=function(){
   const xs=(CAL.events||[]).filter(e=>String(e.datetime_kst||e.date||'').startsWith(month));
   const box=document.querySelector('#events');if(!box)return;
   box.innerHTML=xs.length?xs.map(e=>{
-    const dt=(e.datetime_kst||e.date||'').slice(5,16).replace('T',' '),status=eventStatus(e);
+    const dt=(e.time_status==='TBD'?String(e.release_date||e.datetime_kst||'').slice(5,10)+' 시간 미정':(e.datetime_kst||e.date||'').slice(5,16).replace('T',' ')),status=eventStatus(e);
     return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div class="obsEventMain"><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''} · ${status}</div>${eventMetricsHtml(e)}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`;
   }).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>';
 };
@@ -301,3 +302,4 @@ window.addEventListener('load',()=>{
 });
 window.__JJOONI_OBSERVATORY_UI={version:'2.8.1-official-macro-loader',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true};
 })();
+

@@ -5,9 +5,16 @@ on:
     branches: [main]
     paths:
       - tools/enrich_economic_calendar.py
+      - tools/calendar_actual_contract.py
+      - tools/official_calendar_collectors.py
+      - tests/test_calendar_actual_contract.py
       - tools/refresh_official_central_bank_actuals.py
       - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
+    # 06:05/06:15 KST weekdays = previous UTC day 21:05/21:15.
+    - cron: '5,15 21 * * 0-4'
+    # BOJ decision window 11:05-16:35 KST, bounded to weekdays.
+    - cron: '5,35 2-7 * * 1-5'
     # Baseline refreshes: 07:05 / 13:05 KST.
     - cron: '5 22,4 * * *'
     # Macro release window: 19:00-23:45 KST, every 15 minutes on weekdays.
@@ -34,6 +41,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install official document parser and run regression tests
+        run: |
+          python -m pip install 'pypdf>=5,<7'
+          python -m unittest discover -s tests -p 'test_calendar_actual_contract.py' -v
       - name: Refresh consensus, actual and official central-bank fallback
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
@@ -42,12 +53,13 @@ jobs:
           set -euo pipefail
           python -m py_compile tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py
           python tools/enrich_economic_calendar.py
-          python tools/refresh_official_central_bank_actuals.py
+          python tools/refresh_official_central_bank_actuals.py --health-only
+          python tools/archive_calendar_actuals.py
           python - <<'PY'
           import json
           c=json.load(open('market-observatory/data/economic-calendar.json'))
           assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
-          assert c.get('official_actual_contract')=='OFFICIAL_PRIMARY_FOMC_PLUS_MARKET_FEEDS_V1'
+          assert c.get('official_actual_contract')=='OFFICIAL_REGISTRY_BACKFILL_V2'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics']) for e in c.get('events',[]))
           freshness=c.get('actual_freshness') or {}
           assert freshness.get('status') in ['LIVE','PENDING','DEGRADED'],freshness
@@ -59,7 +71,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/economic-calendar.json
+          git add market-observatory/data/economic-calendar.json market-observatory/data/calendar-manual-overrides.json
           if git diff --cached --quiet; then
             echo ECON_CAL_NO_CHANGE
           else
@@ -76,4 +88,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python tools/refresh_official_central_bank_actuals.py --strict
+          python tools/refresh_official_central_bank_actuals.py --health-only --strict
+

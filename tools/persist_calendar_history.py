@@ -6,6 +6,10 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 KST=ZoneInfo('Asia/Seoul')
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+
 ROOT=Path(__file__).resolve().parents[1]
 CURRENT=ROOT/'market-observatory'/'data'/'economic-calendar.json'
 
@@ -46,38 +50,14 @@ def main():
 
     cur=json.loads(CURRENT.read_text(encoding='utf-8'))
     prev=json.loads(prev_path.read_text(encoding='utf-8'))
-    old={key(e):e for e in (prev.get('events') or [])}
+    retain_calendar(cur, prev)
     kept_fields=kept_metrics=0
-
-    for e in cur.get('events') or []:
-        p=old.get(key(e))
-        if not p:continue
-        for field in ['previous','consensus','actual','te_forecast','surprise','market_data_source']:
-            if clean(e.get(field)) is None and clean(p.get(field)) is not None:
-                e[field]=p.get(field);kept_fields+=1
-
-        pm={metric_key(m):m for m in (p.get('market_metrics') or []) if metric_key(m)}
-        cms=e.get('market_metrics') or []
-        seen=set()
-        for m in cms:
-            mk=metric_key(m)
-            if not mk:continue
-            seen.add(mk);op=pm.get(mk)
-            if not op:continue
-            for field in metric_fields(m):
-                if clean(m.get(field)) is None and clean(op.get(field)) is not None:
-                    m[field]=op.get(field);kept_metrics+=1
-        for mk,op in pm.items():
-            retained_value_fields=['previous','consensus'] if op.get('metric_type')=='market_probability_snapshot' else ['previous','consensus','actual']
-            if mk not in seen and any(clean(op.get(f)) is not None for f in retained_value_fields):
-                cms.append(dict(op));kept_metrics+=1
-        e['market_metrics']=cms
-
     cur['retention_contract']='PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1'
-    cur['retention_note']='Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; newer non-null observations always win.'
+    cur['retention_note']='Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.'
     cur['retention_preserved']={'event_fields':kept_fields,'metric_fields_or_rows':kept_metrics}
     cur['retention_kst']=datetime.now(KST).isoformat(timespec='seconds')
     CURRENT.write_text(json.dumps(cur,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('CALENDAR_RETENTION=PASS event_fields=',kept_fields,'metric_fields_or_rows=',kept_metrics)
 
 if __name__=='__main__':main()
+

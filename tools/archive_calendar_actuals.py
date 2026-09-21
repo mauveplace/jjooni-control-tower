@@ -5,6 +5,10 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+
 ROOT=Path(__file__).resolve().parents[1]
 CAL=ROOT/'market-observatory'/'data'/'economic-calendar.json'
 OVR=ROOT/'market-observatory'/'data'/'calendar-manual-overrides.json'
@@ -37,7 +41,7 @@ def main():
         for m in e.get('market_metrics') or []:
             if isinstance(m,dict) and m.get('metric_type')=='market_probability_snapshot':continue
             if not isinstance(m,dict) or clean(m.get('actual')) is None:continue
-            metrics.append({k:m.get(k) for k in ['key','label','previous','consensus','actual','source'] if m.get(k) is not None})
+            metrics.append({k:m.get(k) for k in ['key','label','previous','consensus','actual','source',*PROVENANCE] if m.get(k) is not None})
         if not metrics and clean(e.get('actual')) is None:continue
         title=str(e.get('title') or '').strip()
         country=str(e.get('country') or '').strip()
@@ -51,24 +55,14 @@ def main():
         if existing_index is not None:
             key=match_key(rows[existing_index])
         payload={'match':{'date':day,'country':country,'title_contains':title},'source':str(e.get('market_data_source') or e.get('source') or 'captured market calendar')}
+        payload.update({k:e[k] for k in PROVENANCE if k in e})
+        payload['event']={k:v for k,v in e.items() if k not in ('market_metrics','actual_status')}
         if metrics:payload['market_metrics']=metrics
         for k in ['previous','consensus','actual']:
             if clean(e.get(k)) is not None:payload[k]=e.get(k)
         if key in idx:
-            old=rows[idx[key]]
-            # Existing curated seed wins unless an incoming field is newly available.
-            if metrics:
-                om={str(m.get('key') or m.get('label')):m for m in old.get('market_metrics') or []}
-                for m in metrics:
-                    mk=str(m.get('key') or m.get('label'))
-                    base=dict(om.get(mk) or {})
-                    for f,v in m.items():
-                        if clean(v) is not None:base[f]=v
-                    om[mk]=base
-                old['market_metrics']=list(om.values())
-            for f in ['previous','consensus','actual']:
-                if clean(payload.get(f)) is not None:old[f]=payload[f]
-            old['source']=payload['source']
+            payload['match']=rows[idx[key]]['match']
+            rows[idx[key]]=merge_observation(rows[idx[key]],payload)
         else:
             idx[key]=len(rows);rows.append(payload)
         archived+=1
@@ -80,3 +74,4 @@ def main():
     print('CALENDAR_ACTUAL_ARCHIVE=PASS events=',archived,'overrides=',len(rows))
 
 if __name__=='__main__':main()
+

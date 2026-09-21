@@ -17,7 +17,9 @@ KST = ZoneInfo('Asia/Seoul')
 ET = ZoneInfo('America/New_York')
 UA = 'Mozilla/5.0 JJOONI-Market-Observatory-Official-Actual/1.0'
 GRACE_MINUTES = 45
-PENDING_WINDOW_HOURS = 8
+# Unresolved actuals have no expiry.
+from calendar_actual_contract import build_freshness
+from official_calendar_collectors import apply_official_actuals
 
 
 def clean(v):
@@ -101,7 +103,7 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
         if not dt:
             continue
         age = now - dt.astimezone(KST)
-        if age < timedelta(minutes=-5) or age > timedelta(days=7):
+        if age < timedelta(minutes=-5) or age > timedelta(days=14):
             continue
 
         release_day = dt.astimezone(ET).strftime('%Y%m%d')
@@ -117,6 +119,8 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
             actual = f'{upper:.2f}%'
             before = clean(event.get('actual'))
             event['actual'] = actual
+            provenance = {'source_tier': 'OFFICIAL', 'source_url': url, 'official_url': url, 'checked_kst': now.isoformat(timespec='seconds'), 'verification_status': 'VERIFIED_OFFICIAL'}
+            event.update(provenance)
             event['official_actual_source'] = 'Federal Reserve official FOMC statement'
             event['official_actual_url'] = url
             event['official_actual_checked_kst'] = now.isoformat(timespec='seconds')
@@ -124,6 +128,7 @@ def apply_fomc_official_actual(calendar: dict, now: datetime) -> tuple[int, list
             for metric in event.get('market_metrics') or []:
                 if metric.get('key') == 'fed_rate':
                     metric['actual'] = actual
+                    metric.update(provenance)
                     metric['source'] = 'Federal Reserve official FOMC statement'
                     metric['official_url'] = url
             if before != actual:
@@ -152,59 +157,27 @@ def expected_actual_metrics(event: dict) -> list[dict]:
 
 
 def build_actual_freshness(calendar: dict, now: datetime, official_checks: list[dict]) -> dict:
-    pending = []
-    overdue = []
-    for event in calendar.get('events') or []:
-        if int(event.get('importance') or 0) < 3:
-            continue
-        dt = event_dt(event)
-        if not dt:
-            continue
-        dt = dt.astimezone(KST)
-        age = now - dt
-        if age < timedelta(0) or age > timedelta(hours=PENDING_WINDOW_HOURS):
-            continue
-        metrics = expected_actual_metrics(event)
-        if not metrics:
-            continue
-        missing = [m.get('key') or m.get('label') or 'metric' for m in metrics if clean(m.get('actual')) is None]
-        if not missing and clean(event.get('actual')) is not None:
-            continue
-        row = {
-            'datetime_kst': dt.isoformat(),
-            'title': event.get('title'),
-            'country': event.get('country'),
-            'age_minutes': max(0, int(age.total_seconds() // 60)),
-            'missing_metrics': missing,
-        }
-        pending.append(row)
-        if age > timedelta(minutes=GRACE_MINUTES):
-            overdue.append(row)
-
-    status = 'DEGRADED' if overdue else ('PENDING' if pending else 'LIVE')
-    return {
-        'status': status,
-        'checked_kst': now.isoformat(timespec='seconds'),
-        'grace_minutes': GRACE_MINUTES,
-        'pending_window_hours': PENDING_WINDOW_HOURS,
-        'pending_count': len(pending),
-        'overdue_count': len(overdue),
-        'pending_events': pending,
-        'official_checks': official_checks,
-    }
+    return build_freshness(calendar, now, official_checks)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument('--health-only', action='store_true')
     parser.add_argument('--strict', action='store_true', help='exit non-zero when a major actual is overdue')
     args = parser.parse_args()
 
     calendar = json.loads(CAL.read_text(encoding='utf-8'))
     now = datetime.now(KST)
-    updates, official_checks = apply_fomc_official_actual(calendar, now)
+    updates, official_checks = (0, []) if args.health_only else apply_fomc_official_actual(calendar, now)
+    extra, checks = (0, []) if args.health_only else apply_official_actuals(calendar, now)
+    updates += extra
+    official_checks += checks
+    if args.health_only:
+        official_checks = (calendar.get('actual_freshness') or {}).get('official_checks', [])
     freshness = build_actual_freshness(calendar, now, official_checks)
     calendar['actual_freshness'] = freshness
-    calendar['official_actual_contract'] = 'OFFICIAL_PRIMARY_FOMC_PLUS_MARKET_FEEDS_V1'
+    calendar['generated_kst'] = now.isoformat(timespec='seconds')
+    calendar['official_actual_contract'] = 'OFFICIAL_REGISTRY_BACKFILL_V2'
     calendar['official_actual_updated_kst'] = now.isoformat(timespec='seconds')
     CAL.write_text(json.dumps(calendar, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
@@ -222,3 +195,4 @@ def main() -> int:
 
 if __name__ == '__main__':
     raise SystemExit(main())
+
