@@ -76,4 +76,17 @@ class CalendarActualRegression(unittest.TestCase):
             with patch('calendar_market_events.OVR',p): apply_overrides(c)
         self.assertEqual(c['events'][0]['actual'],'196K'); self.assertEqual(c['events'][0]['source_tier'],'OFFICIAL')
 
+    def test_repeated_archive_merge_deduplicates_source_tokens(self):
+        from calendar_market_events import apply_overrides
+        import tempfile,json
+        event=self.event(actual='196K',market_data_source='Agency + Feed')
+        c={'events':[event]}
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'archive.json'
+            p.write_text(json.dumps({'overrides':[{'match':{'date':event['datetime_kst'][:10],'country':'US','title_contains':'Release'},'actual':'196K','source':'Agency + Verified + Feed + Agency'}]}))
+            with patch('calendar_market_events.OVR',p):
+                for _ in range(3): apply_overrides(c)
+        self.assertEqual(c['events'][0]['market_data_source'],'Agency + Feed + Verified')
+        self.assertEqual(c['events'][0]['actual'],'196K')
+
 if __name__=='__main__': unittest.main()

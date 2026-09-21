@@ -335,12 +335,7 @@ def apply_overrides(c):
         patch = {k:override[k] for k in ['previous','consensus','actual',*PROVENANCE] if k in override}
         target.update(merge_observation(target, patch))
         src = clean(override.get('source'))
-        if src:
-            existing = clean(target.get('market_data_source'))
-            if existing and src not in existing:
-                target['market_data_source'] = existing + ' + ' + src
-            elif not existing:
-                target['market_data_source'] = src
+        target['market_data_source'] = merge_sources(target.get('market_data_source'), src)
         # Compact clients get the first populated metric as representative.
         primary = next((x for x in target.get('market_metrics') or [] if
                         x.get('metric_type') != 'market_probability_snapshot' and
@@ -400,4 +395,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
