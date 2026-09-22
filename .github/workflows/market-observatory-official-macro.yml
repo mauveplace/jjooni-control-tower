@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - tools/build_official_macro.py
+      - tools/official_macro_*.py
+      - tests/test_macro_releases.py
+      - tests/fixtures/macro-sources.json
       - tests/test_macro_collection_bounds.py
       - tests/test_official_macro_units.py
       - market-observatory/official-macro-v1.js
@@ -14,6 +17,9 @@ on:
   schedule:
     # Korea 08:00 releases + buffer
     - cron: '10 23 * * 0-4'
+    # Korea customs 09:00 / BOK outlook afternoon publications + buffer
+    - cron: '15 0 * * 1-5'
+    - cron: '45 4 * * 1-5'
     # US 08:30 ET releases during daylight / standard time + buffer
     - cron: '45 12 * * 1-5'
     - cron: '45 13 * * 1-5'
@@ -40,8 +46,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install official release parsers
+        run: python -m pip install -r tools/requirements-observatory.txt
+
       - name: Test macro collection contracts
-        run: python -m unittest discover -s tests -p 'test*macro*.py' -v
+        run: python -m unittest discover -s tests -p 'test*.py' -v
 
       - name: Build official macro dataset
         env:

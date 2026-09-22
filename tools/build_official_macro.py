@@ -15,6 +15,8 @@ import urllib.request
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from official_macro_releases import collect_releases
+from official_macro_registry import KR_SERIES, lookup, series_id, validate_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "market-observatory" / "data"
@@ -247,6 +249,11 @@ def metric_history(kind: str, rows: list[dict]) -> list[dict]:
         return quarterly_index_history(rows)
     if kind == "monthly_change":
         return monthly_change_history(rows)
+    if kind == "monthly_mom":
+        hist = monthly_index_history(rows)
+        for point in hist:
+            point["value"] = point["mom"]
+        return hist
     if kind == "level":
         return level_history(rows)
     return direct_history(rows)
@@ -427,13 +434,6 @@ def build_us(calendar: dict):
     except Exception as e:
         errors["US_FED_FUNDS"] = str(e)
 
-    metrics["US_SEP_DOT_PLOT"] = {
-        "key": "US_SEP_DOT_PLOT", "name": "SEP / Dot Plot", "country": "US", "group": "fed",
-        "frequency": "quarterly FOMC", "status": "SOURCE_PENDING",
-        "primary_source": {"institution": "FED", "name": "Federal Reserve"},
-        "note": "Fed SEP/Dot Plot is retained as an explicit official-source slot. Structured extraction is not fabricated; latest official values require a dedicated SEP parser.",
-        "history": [],
-    }
     return metrics, errors
 
 
@@ -443,9 +443,12 @@ def ecos_url(key: str, service: str, *parts) -> str:
 
 
 def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: str, item2: str | None = None):
-    metric_key = {('722Y001','0101000'): 'KR_BASE_RATE', ('901Y009','0'): 'KR_CPI',
-                  ('200Y002','10111'): 'KR_GDP'}.get((stat, item1))
+    metric_key, cfg = lookup(stat, item1, item2)
     old = (load_json(OUT, {}).get('metrics') or {}).get(metric_key, {})
+    # Legacy base-rate/headline identities are known; every other series must
+    # match its fingerprint before historical observations can be merged.
+    if cfg and old.get('series_identity') != series_id(cfg) and metric_key not in ('KR_BASE_RATE', 'KR_CPI'):
+        old = {}
     retained = [{'date': p['period'], 'value': p['raw']} for p in old.get('history', [])
                 if p.get('period') and p.get('raw') is not None]
     if retained and cycle in ('M', 'Q'):
@@ -476,6 +479,8 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
                 total = int(block.get("list_total_count") or len(rows))
             except Exception:
                 total = len(rows)
+        if cfg:
+            validate_rows(rows, cfg)
         raw_rows.extend(rows)
         if not rows or len(rows) < page_size:
             break
@@ -593,79 +598,27 @@ def build_kr(calendar: dict):
             "status": "LIVE" if latest else "DEGRADED",
         }
 
-    try:
-        rows = ecos_search(key, "722Y001", "M", start_m, end_m, "0101000")
-        metrics["KR_BASE_RATE"] = make_metric("KR_BASE_RATE", "한국 기준금리", "policy", "BOK", rows, "level", "%")
-    except Exception as e:
-        errors["KR_BASE_RATE"] = str(e)
-
-    try:
-        rows = ecos_search(key, "901Y009", "M", start_m, end_m, "0")
-        metrics["KR_CPI"] = make_metric("KR_CPI", "CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", 2.0, "KOSTAT series republished through BOK ECOS")
-    except Exception as e:
-        errors["KR_CPI"] = str(e)
-
-    try:
-        rows = ecos_search(key, "200Y002", "Q", start_q, end_q, "10111")
-        metrics["KR_GDP"] = make_metric("KR_GDP", "Real GDP Growth", "growth", "BOK", rows, "direct", "% QoQ SA")
-    except Exception as e:
-        errors["KR_GDP"] = str(e)
-
-    core_item = find_ecos_item(key, "901Y009", ["식료품", "에너지", "제외"])
-    if not core_item:
-        core_item = find_ecos_item(key, "901Y009", ["농산물", "석유류", "제외"])
-    if core_item:
+    for metric_key, cfg in KR_SERIES.items():
+        identity = series_id(cfg)
         try:
-            rows = ecos_search(key, "901Y009", "M", start_m, end_m, core_item)
-            # Both headline and core CPI are 2020=100 index series. Reject a discovered item
-            # whose level is structurally incompatible instead of publishing a fabricated core CPI.
-            candidate_hist = metric_history("monthly_index", rows)
-            candidate_latest = latest_non_null(candidate_hist)
-            headline_latest = (metrics.get("KR_CPI") or {}).get("latest") or {}
-            core_raw = num((candidate_latest or {}).get("raw"))
-            headline_raw = num(headline_latest.get("raw"))
-            ratio = None if core_raw is None or headline_raw in (None, 0) else core_raw / headline_raw
-            if ratio is None or not (0.80 <= ratio <= 1.20):
-                raise RuntimeError(f"KR_CORE_CPI_SERIES_MISMATCH:item={core_item}:ratio={ratio}")
-            metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", None, f"ECOS item {core_item}; level-ratio validated vs headline CPI")
+            quarterly = cfg.get('cycle') == 'Q'
+            rows = ecos_search(key, cfg['stat'], cfg.get('cycle', 'M'),
+                               start_q if quarterly else start_m, end_q if quarterly else end_m,
+                               cfg['item'], cfg.get('item2'))
+            metric = make_metric(metric_key, cfg['name'], cfg['group'], cfg['institution'], rows,
+                                 cfg['kind'], cfg['unit'], cfg.get('target'))
+            metric['series_identity'] = identity
+            metric['raw_unit'] = cfg['raw_unit']
+            metric['source_tier'] = 'OFFICIAL'
+            metric['verification_status'] = 'OFFICIAL_SERIES_IDENTITY_VERIFIED'
+            metric['transport_source'].update(series_id=identity, url='https://ecos.bok.or.kr/#/SearchStat')
+            metric['release'].update(source_tier='OFFICIAL', checked_kst=now_kst().isoformat(timespec='seconds'),
+                                     reference_period=(metric.get('latest') or {}).get('period'))
+            metrics[metric_key] = metric
         except Exception as e:
-            errors["KR_CORE_CPI"] = str(e)
-
-    ca_item = find_ecos_item(key, "301Y017", ["경상수지"])
-    if ca_item:
-        try:
-            rows = ecos_search(key, "301Y017", "M", start_m, end_m, ca_item)
-            metrics["KR_CURRENT_ACCOUNT"] = make_metric("KR_CURRENT_ACCOUNT", "경상수지", "external", "BOK", rows, "level", "USD million", None, f"ECOS item {ca_item}")
-        except Exception as e:
-            errors["KR_CURRENT_ACCOUNT"] = str(e)
-
-    # A transport failure must retain the metric contract with an explicit
-    # degraded state; omitting the key breaks consumers and hides the outage.
-    for metric_key, name, group, institution, kind, unit in [
-        ("KR_BASE_RATE", "한국 기준금리", "policy", "BOK", "level", "%"),
-        ("KR_CPI", "CPI", "inflation", "KOSTAT", "monthly_index", "%"),
-        ("KR_GDP", "Real GDP Growth", "growth", "BOK", "direct", "% QoQ SA"),
-    ]:
-        if metric_key not in metrics:
-            metrics[metric_key] = make_metric(metric_key, name, group, institution, [], kind, unit)
-            metrics[metric_key]["error"] = errors.get(metric_key, "Official source returned no observations")
-
-    pending = {
-        "KR_CORE_CPI": ("Core CPI", "inflation", "KOSTAT", "KOSTAT core CPI ECOS item discovery pending"),
-        "KR_CURRENT_ACCOUNT": ("경상수지", "external", "BOK", "BOK ECOS 301Y017 item mapping pending"),
-        "KR_BOK_OUTLOOK": ("한국은행 경제전망", "growth", "BOK", "Structured forecast table parser pending"),
-        "KR_EXPORT_YOY": ("수출 YoY", "exports", "KCS/MOTIE", "Official customs/industry structured series connector pending"),
-        "KR_SEMICON_EXPORT_YOY": ("반도체 수출 YoY", "exports", "KCS/MOTIE", "Official semiconductor export structured series connector pending"),
-        "KR_EXPORT_1_20": ("1~20일 수출", "exports", "KCS", "Official early-month customs series connector pending"),
-        "KR_EMPLOYMENT": ("고용", "labor", "KOSTAT", "KOSTAT official structured series connector pending"),
-        "KR_INDUSTRIAL_PRODUCTION": ("산업생산", "growth", "KOSTAT", "KOSTAT official structured series connector pending"),
-    }
-    for k, (name, group, institution, note) in pending.items():
-        if k not in metrics:
-            metrics[k] = {
-                "key": k, "name": name, "country": "KR", "group": group, "status": "SOURCE_PENDING",
-                "primary_source": {"institution": institution}, "history": [], "latest": None, "note": note,
-            }
+            errors[metric_key] = str(e)
+            metrics[metric_key] = make_metric(metric_key, cfg['name'], cfg['group'], cfg['institution'], [], cfg['kind'], cfg['unit'])
+            metrics[metric_key].update(error=str(e), series_identity=identity)
     return metrics, errors
 
 
@@ -798,7 +751,33 @@ def main():
     print('OFFICIAL_MACRO_STAGE=KR budget_sec=120', flush=True)
     kr, kr_errors = build_kr(calendar)
     metrics = {**us, **kr}
-    retain_failed_metrics(metrics, load_json(OUT, {}))
+    previous = load_json(OUT, {})
+    print('OFFICIAL_MACRO_STAGE=RELEASES', flush=True)
+    releases, release_errors = collect_releases(previous)
+    for key, metric in releases.items():
+        if key == 'KR_EXPORT_YOY' and metrics.get(key, {}).get('latest'):
+            ecos = metrics[key]
+            # Release publication is primary; ECOS is the historical transport.
+            # Preserve raw observations so future incremental ECOS requests can
+            # revise them without treating a growth rate as an export amount.
+            if metric.get('latest'):
+                merged = {p['period']: p for p in ecos.get('history', [])}
+                for point in metric['history']:
+                    merged[point['period']] = {**merged.get(point['period'], {}), **point}
+                metric['history'] = [merged[p] for p in sorted(merged)]
+                metric['latest'] = metric['history'][-1]
+                metric['series_identity'] = ecos.get('series_identity')
+                metric['raw_unit'] = ecos.get('raw_unit')
+            else:
+                # A current official API series may serve as fallback, but a
+                # known newer release failure must remain visible.
+                ecos['release_source_error'] = metric.get('error')
+                ecos['status'] = 'DEGRADED'
+                continue
+        metrics[key] = metric
+    for key, error in release_errors.items():
+        (us_errors if key.startswith('US_') else kr_errors)[key] = error
+    retain_failed_metrics(metrics, previous)
     vintages = update_vintages(metrics)
     regimes = group_regimes(metrics)
 
@@ -862,6 +841,10 @@ def retain_failed_metrics(metrics, previous):
             metric['last_success_kst'] = metric['checked_kst']
             continue
         old = (previous.get('metrics') or {}).get(key, {})
+        if metric.get('latest') and metric.get('history'):
+            continue
+        if metric.get('series_identity') and old.get('series_identity') != metric['series_identity'] and key not in ('KR_BASE_RATE', 'KR_CPI'):
+            continue
         if 'SERIES_MISMATCH' in str(metric.get('error') or ''):
             continue
         if key == 'KR_CORE_CPI':

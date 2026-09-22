@@ -42,7 +42,7 @@ jobs:
           python-version: '3.12'
       - name: Install official document parser and run regression tests
         run: |
-          python -m pip install 'pypdf>=5,<7'
+          python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test*.py' -v
       - name: Seed and merge verified key events
         shell: bash

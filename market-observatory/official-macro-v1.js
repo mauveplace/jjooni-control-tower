@@ -7,7 +7,7 @@ let DATA=null;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qa=(s,r=document)=>{try{return [...r.querySelectorAll(s)]}catch(_){return[]}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
+const n=v=>{if(v==null||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const fmt=(v,d=2)=>n(v)==null?'—':Number(v).toLocaleString('ko-KR',{maximumFractionDigits:d});
 const signed=(v,d=2)=>n(v)==null?'—':(Number(v)>0?'+':'')+fmt(v,d);
 const COLORS={GREEN:'🟢',ORANGE:'🟠',RED:'🔴',GRAY:'⚪'};
@@ -49,6 +49,7 @@ function releaseFmt(v,measure){
  return fmt(v)+(s.includes('%')?'%':'');
 }
 function surpriseRead(key,m){
+ if(m?.value_role==='official_forecast')return '공식기관 전망입니다. 실제 발표치·시장 예상치와 surprise를 비교하지 않습니다.';
  const r=m?.release||{},a=n(r.actual),cns=n(r.consensus),g=guideFor(key,m);
  if(a==null||cns==null)return '예상치 또는 실제치가 없어 surprise 비교는 대기 중입니다.';
  const d=a-cns;
@@ -99,10 +100,10 @@ function rowHtml(k){
  const pending=m.status==='SOURCE_PENDING';
  const src=m.primary_source?.institution||m.primary_source?.name||'';
  const r=m.release||{};
- const cls=pending?'pending':'live';
+ const cls=m.status==='LIVE'?'live':'pending';
  return '<div class="obsMacroRow" data-macro-key="'+esc(k)+'">'+
   '<div class="obsMacroName">'+esc(m.name||k)+' <span class="obsMacroBadge '+cls+'">'+esc(src)+'</span><small>'+esc(m.status||'')+'</small><button type="button" class="obsMacroOpen">📈 그래프 · 의미</button></div>'+
-  '<div class="obsMacroCell"><span>현재</span><b>'+esc(currentValue(m))+'</b></div>'+
+  '<div class="obsMacroCell"><span>'+ (m.value_role==='official_forecast'?'공식 전망 · '+esc(m.forecast_horizon):'실제 · '+esc((m.latest?.period||'').slice(0,7))) +'</span><b>'+esc(currentValue(m))+'</b></div>'+
   '<div class="obsMacroCell"><span>이전</span><b>'+esc(r.previous==null?'—':fmt(r.previous))+'</b></div>'+
   '<div class="obsMacroCell"><span>예상</span><b>'+esc(r.consensus==null?'—':fmt(r.consensus))+'</b></div>'+
   '<div class="obsMacroCell"><span>Surprise</span><b>'+esc(r.surprise==null?'—':signed(r.surprise))+'</b></div>'+
@@ -121,10 +122,10 @@ function render(){
  '<div class="obsMacroInfo"><b>사용법:</b> 각 지표의 <b>📈 그래프 · 의미</b>를 누르면 해당 지표 바로 아래에 장기 그래프와 발표수치 해설이 열립니다. Actual=실제 발표치, Previous=이전 발표치, Consensus=시장 예상치, Surprise=실제치-예상치입니다.</div>'+
  '<div class="obsMacroSection">'+GROUPS.us.map(x=>groupHtml('us',x[0],'US · '+x[1])).join('')+GROUPS.kr.map(x=>groupHtml('kr',x[0],'KR · '+x[1])).join('')+'</div>'+
  '<div class="obsMacroDetail" id="officialMacroDetail"><div class="meta">지표를 누르면 10년 히스토리 · 추세 · 출처 · revision/vintage를 표시합니다.</div></div>'+
- '<div class="obsMacroQuality">generated '+esc(DATA.generated_kst||'—')+' · live '+esc(DATA.quality?.live_metrics??0)+' · pending '+esc((DATA.quality?.pending_metrics||[]).length)+' · vintage keys '+esc(DATA.quality?.vintage_keys??0)+'</div>';
+ '<div class="obsMacroQuality">generated '+esc(DATA.generated_kst||'—')+' · live '+esc(DATA.quality?.live_metrics??0)+' · pending '+esc((DATA.quality?.pending_metrics||[]).length)+' · degraded '+esc((DATA.quality?.degraded_metrics||[]).length)+' · vintage keys '+esc(DATA.quality?.vintage_keys??0)+'</div>';
  qa('.obsMacroRow',panel).forEach(r=>r.onclick=()=>showDetail(r.dataset.macroKey));
  STATE.loaded=true;STATE.status='ACTIVE';
- const first='US_CORE_PCE';if(metric(first))showDetail(first);
+ const first=STATE.selected||'US_CORE_PCE';if(metric(first))showDetail(first);
 }
 function primarySeries(m){
  const hist=m?.history||[];
@@ -155,14 +156,15 @@ function showDetail(key){
  const src=[m.primary_source?.name||m.primary_source?.institution,m.transport_source?.provider,m.transport_source?.series_id].filter(Boolean);
  const row=q('.obsMacroRow[data-macro-key="'+key+'"]');
  if(row){row.insertAdjacentElement('afterend',box);qa('.obsMacroRow',q('#official-macro')).forEach(x=>x.classList.toggle('selected',x===row));}
- box.innerHTML='<div class="obsMacroDetailHead"><div><div class="obsMacroTitle">'+esc(m.name||key)+'</div><div class="obsMacroSub">'+esc(key)+' · '+esc(m.frequency||'')+' · '+esc(m.status||'')+'</div><div class="obsMacroSource">'+src.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><span class="obsMacroBadge '+(m.status==='SOURCE_PENDING'?'pending':'live')+'">'+esc(m.primary_source?.institution||'OFFICIAL')+'</span></div>'+
+ box.innerHTML='<div class="obsMacroDetailHead"><div><div class="obsMacroTitle">'+esc(m.name||key)+'</div><div class="obsMacroSub">'+esc(key)+' · '+esc(m.frequency||'')+' · '+esc(m.status||'')+'</div><div class="obsMacroSource">'+src.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><span class="obsMacroBadge '+(m.status==='LIVE'?'live':'pending')+'">'+esc(m.primary_source?.institution||'OFFICIAL')+'</span></div>'+
  '<div class="obsMacroKpis">'+
-  kpi('현재 추세값',currentValue(m))+kpi('발표 Actual',releaseFmt(r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise))+kpi('발표 기준',r.measure||m.unit||'—')+
+  kpi('현재 추세값',currentValue(m))+kpi(m.value_role==='official_forecast'?'공식 전망 ('+m.forecast_horizon+')':'발표 Actual',releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise))+kpi('발표 기준',r.measure||m.unit||'—')+
   kpi('3M annualized / avg',l.ann_3m!=null?fmt(l.ann_3m)+'%':(l.avg_3m!=null?fmt(l.avg_3m):'—'))+kpi('6M annualized / avg',l.ann_6m!=null?fmt(l.ann_6m)+'%':(l.avg_6m!=null?fmt(l.avg_6m):'—'))+
   kpi('1Y 평균',m.historical_position?.avg_1y==null?'—':fmt(m.historical_position.avg_1y))+
   kpi('5Y 평균',m.historical_position?.avg_5y==null?'—':fmt(m.historical_position.avg_5y))+
   kpi('코로나 전 평균',m.historical_position?.pre_covid_avg==null?'—':fmt(m.historical_position.pre_covid_avg))+
   kpi('목표 / 기준',m.target==null?'—':fmt(m.target)+(m.unit&&String(m.unit).includes('%')?'%':''))+'</div>'+
+ (m.projections?'<div class="obsMacroNotes"><b>연도별 공식 전망</b><br>'+Object.entries(m.projections).map(([label,years])=>esc(label)+': '+Object.entries(years).map(([year,value])=>esc(year)+' '+fmt(value)+'%').join(' · ')).join('<br>')+'</div>':'')+
  '<div class="obsMacroExplain"><div><b>이 지표는 무엇?</b>'+esc(g.meaning)+'</div><div><b>높게 나오면</b>'+esc(g.high)+'</div><div><b>낮게 나오면</b>'+esc(g.low)+'</div><div><b>투자할 때 보는 포인트</b>'+esc(g.market)+'</div></div>'+
  '<div class="obsMacroSurprise"><b>이번 발표 읽는 법</b><br>'+esc(surpriseRead(key,m))+'</div>'+
  '<div class="obsMacroChartHead"><b>📈 '+esc(m.name||key)+' 장기 추이</b><span>선택한 지표 1개만 표시 · 기간 선택 가능</span></div>'+
@@ -170,6 +172,9 @@ function showDetail(key){
  '<div class="obsMacroChart"><canvas id="officialMacroChart"></canvas></div>'+
  '<div class="obsMacroNotes"><b>Actual SSOT:</b> '+esc(m.primary_source?.name||m.primary_source?.institution||'—')+' · <b>Consensus:</b> '+esc(r.consensus_source?.provider||'별도 시장데이터')+'<br>'+
  (m.note?esc(m.note)+'<br>':'')+
+ (m.source_url||m.transport_source?.url?'<a target="_blank" rel="noopener" href="'+esc(m.source_url||m.transport_source.url)+'">공식 원문</a> · ':'')+
+ '확인 '+esc(m.checked_kst||'—')+'<br>'+
+ (m.error?'수집 지연: '+esc(m.error)+'<br>':'')+
  '<b>Vintage:</b> '+(vint.length?vint.map(x=>esc(x.version)+' '+esc(x.value)).join(' → '):'기록 대기')+'</div>';
  qa('button[data-macro-range]',box).forEach(b=>b.onclick=()=>{STATE.range=b.dataset.macroRange;qa('button[data-macro-range]',box).forEach(x=>x.classList.toggle('on',x===b));drawDetailChart(m)});
  drawDetailChart(m);
@@ -179,8 +184,9 @@ async function load(){
   const r=await fetch('./data/official-macro.json?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('official-macro '+r.status);
   DATA=await r.json();if(DATA?.schema!=='JJOONI_OFFICIAL_MACRO_V1')throw new Error('official-macro schema');
   render();
- }catch(e){STATE.status='ACTIVE_DEGRADED';STATE.error=String(e);const p=q('#official-macro');if(p)p.innerHTML='<div class="card"><h3>Macro Official Data</h3><div class="meta">공식 거시데이터 생성 대기 · '+esc(String(e))+'</div></div>';console.warn(e)}
+ }catch(e){STATE.status='ACTIVE_DEGRADED';STATE.error=String(e);const p=q('#official-macro');if(p&&!DATA)p.innerHTML='<div class="card"><h3>Macro Official Data</h3><div class="meta">공식 거시데이터 생성 대기 · '+esc(String(e))+'</div></div>';console.warn(e)}
 }
 function boot(){if(!inject()){setTimeout(boot,200);return}load()}
 boot();
+setInterval(()=>{if(!document.hidden)load()},120000);
 })();

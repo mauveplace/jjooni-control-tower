@@ -28,7 +28,7 @@ jobs:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
         run: |
           set -euo pipefail
-          python -m pip install 'pypdf>=5,<7'
+          python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test*.py' -v
           python tools/refresh_calendar_pipeline.py
       - name: Publish

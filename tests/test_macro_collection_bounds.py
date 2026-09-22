@@ -27,10 +27,12 @@ class CollectionBoundsTests(unittest.TestCase):
             calls.append(args[1])
             return []
         def discover(*args):
-            self.assertIn('200Y002', calls)
+            self.assertIn('200Y102', calls)
             return None
         with patch.object(macro, 'ecos_search', side_effect=collect), patch.object(macro, 'find_ecos_item', side_effect=discover):
             macro.build_kr({'events': []})
+        self.assertIn('200Y102', calls)
+        self.assertIn('901Y010', calls)
 
     def test_budget_stops_requests(self):
         with patch.object(macro, 'ECOS_DEADLINE', 10), patch.object(macro.time, 'monotonic', return_value=11), patch.object(macro, 'req_json') as request:
