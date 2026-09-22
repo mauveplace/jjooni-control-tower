@@ -1,6 +1,7 @@
 """Date-bound official adapters. Failed requests are observable, never empty success."""
 import html
 import os
+import time
 import io
 import re
 import urllib.request
@@ -168,7 +169,11 @@ def collect(e,kind,checks):
 def apply_official_actuals(calendar,now):
     checks=[]; updates=0; candidates=[]; historical_attempts=0
     historical_limit=int(os.getenv('CALENDAR_HISTORICAL_BATCH','12'))
-    for e in sorted(calendar.get('events',[]),key=lambda e:e.get('actual_backfill_checked_kst','')):
+    stop_at=time.monotonic()+float(os.getenv('CALENDAR_OFFICIAL_BUDGET_SECONDS','120'))
+    def priority(event):
+        dt=release_time(event)
+        return (bool(dt and now-dt>timedelta(days=14)),event.get('actual_backfill_checked_kst',''))
+    for e in sorted(calendar.get('events',[]),key=priority):
         kind=adapter_id(e); dt=release_time(e)
         if not dt or not actual_expected(e): continue
         if kind=='BOK_RATE':
@@ -218,9 +223,16 @@ def apply_official_actuals(calendar,now):
                                'fallback_tiers':['SECONDARY','MARKET_FEED']})
         if not kind: continue
         if not incomplete and e.get('source_tier')=='OFFICIAL': continue
+        if not cached and time.monotonic()>=stop_at:
+            checks.append(dict(adapter=kind,title=e['title'],result='BUDGET_DEFERRED'))
+            continue
         if historical and not cached: historical_attempts+=1
         e['actual_backfill_checked_kst']=now.isoformat(timespec='seconds')
-        result=collect(e,kind,checks)
+        try:
+            result=collect(e,kind,checks)
+        except Exception as exc:
+            checks.append(dict(adapter=kind,title=e['title'],result='ADAPTER_FAILED',error=str(exc)[:200]))
+            continue
         if not result: continue
         rows,url=result
         provenance={'source_tier':'OFFICIAL','source_url':url,'official_url':url,'checked_kst':now.isoformat(timespec='seconds'),'verification_status':'VERIFIED_OFFICIAL','source':kind+' official release'}

@@ -271,7 +271,8 @@ def main():
         if r:
             before_a=e.get('actual');before_c=e.get('consensus')
             e.update(merge_observation(e,{'previous':r.get('Previous'),'consensus':r.get('Forecast'),'actual':r.get('Actual'),'source_tier':'SECONDARY','actual_source':'Trading Economics','source_url':r.get('URL') or 'https://tradingeconomics.com/calendar','checked_kst':now.isoformat(timespec='seconds'),'verification_status':'MARKET_REPORTED'}));set_if_present(e,'te_forecast',r.get('TEForecast'))
-            e['market_data_source']='Trading Economics';e['market_match_score']=score;matched_te+=1
+            from calendar_market_events import merge_sources
+            e['market_data_source']=merge_sources(e.get('market_data_source'),'Trading Economics');e['market_match_score']=score;matched_te+=1
             actual_updates+=int(before_a!=e.get('actual') and e.get('actual') is not None);forecast_updates+=int(before_c!=e.get('consensus') and e.get('consensus') is not None)
 
         f,score=best_match(e,ff,score_ff)

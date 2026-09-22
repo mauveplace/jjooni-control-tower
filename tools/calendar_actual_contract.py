@@ -79,14 +79,18 @@ def release_time(e):
     raw = e.get('datetime_kst') or e.get('date')
     if not raw:
         return None
-    dt = datetime.fromisoformat(raw)
+    try:
+        dt = datetime.fromisoformat(raw)
+    except (TypeError, ValueError):
+        return None
     return (dt if dt.tzinfo else dt.replace(tzinfo=KST)).astimezone(KST)
 
 def deadline(e):
     dt = release_time(e)
     if not dt:
         return None
-    if e.get('actual_due_kst'):
+    computed_policies = ('RELEASE_PLUS_GRACE', 'MEETING_DAY_END_KST')
+    if e.get('actual_due_kst') and e.get('actual_due_policy') not in computed_policies:
         due = datetime.fromisoformat(e['actual_due_kst'])
         return due if due.tzinfo else due.replace(tzinfo=KST)
     if e.get('time_status') == 'TBD':
@@ -107,9 +111,13 @@ def build_freshness(calendar, now, checks):
         if not dt:
             e['actual_status'] = 'OVERDUE'
             overdue.append({'title': e.get('title'), 'reason': 'RELEASE_TIME_MISSING'}); continue
+        explicit_due = bool(e.get('actual_due_kst')) and not e.get('actual_due_policy')
         due = deadline(e)
         e['actual_due_kst'] = due.isoformat()
-        e['actual_due_policy'] = 'MEETING_DAY_END_KST' if e.get('time_status') == 'TBD' else 'RELEASE_PLUS_GRACE'
+        if explicit_due:
+            e['actual_due_policy'] = 'EXPLICIT'
+        elif not e.get('actual_due_policy') or e.get('actual_due_policy') in ('RELEASE_PLUS_GRACE', 'MEETING_DAY_END_KST'):
+            e['actual_due_policy'] = 'MEETING_DAY_END_KST' if e.get('time_status') == 'TBD' else 'RELEASE_PLUS_GRACE'
         metrics = [m for m in e.get('market_metrics', []) if actual_expected(m)]
         missing = [m.get('key') or m.get('label') or 'metric' for m in metrics if clean(m.get('actual')) is None]
         if clean(e.get('actual')) is None:

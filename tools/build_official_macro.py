@@ -79,9 +79,9 @@ def market_num(metric_key: str, value):
         return None
     s = str(value or "").strip().upper().replace(",", "")
     if metric_key in {"US_NFP", "US_JOLTS"}:
-        if re.search(r"M\\s*$", s):
+        if re.search(r"M\s*$", s):
             return x * 1000.0
-        if re.search(r"K\\s*$", s):
+        if re.search(r"K\s*$", s):
             return x
     return x
 
@@ -272,8 +272,8 @@ def calendar_consensus(metric_key: str, calendar: dict):
     if not candidates:
         return None
     candidates.sort(key=lambda x: x[0])
-    non_empty = [x for x in candidates if x[1].get("consensus") not in (None, "")]
-    return (non_empty or candidates)[-1][1]
+    # A previous month's forecast is not the latest release's consensus.
+    return candidates[-1][1]
 
 
 def release_value(metric_key: str, latest: dict):

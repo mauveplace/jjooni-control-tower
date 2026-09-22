@@ -16,6 +16,46 @@ from publish_observatory_data import merge_generated
 
 
 class PipelineRegressionTests(unittest.TestCase):
+    def test_computed_deadline_tracks_corrected_tbd_schedule(self):
+        event=dict(country='JP',title='BOJ',importance=3,time_status='TBD',
+                   datetime_kst='2026-09-18T12:00+09:00',actual=None,
+                   actual_due_kst='2026-09-18T12:45+09:00',actual_due_policy='RELEASE_PLUS_GRACE')
+        health=build_freshness({'events':[event]},datetime(2026,9,18,13,tzinfo=KST),[])
+        self.assertEqual(health['status'],'PENDING')
+        self.assertEqual(event['actual_due_kst'],'2026-09-19T00:00:00+09:00')
+
+    def test_explicit_deadline_survives_repeated_health_checks(self):
+        event=dict(country='US',title='Release',importance=2,datetime_kst='2026-09-18T12:00+09:00',
+                   actual=None,actual_due_kst='2026-09-19T06:00+09:00')
+        for _ in range(2):
+            health=build_freshness({'events':[event]},datetime(2026,9,18,23,tzinfo=KST),[])
+            self.assertEqual(health['status'],'PENDING')
+            self.assertEqual(event['actual_due_policy'],'EXPLICIT')
+
+    def test_invalid_release_time_is_visible_not_a_pipeline_crash(self):
+        event=dict(title='Broken release',importance=2,datetime_kst='invalid',actual=None)
+        self.assertEqual(build_freshness({'events':[event]},datetime.now(KST),[])['status'],'DEGRADED')
+
+    def test_network_budget_preserves_unresolved_health(self):
+        from official_calendar_collectors import apply_official_actuals
+        event=dict(title='U.S. Initial Jobless Claims',country='US',importance=2,
+                   datetime_kst='2026-09-17T21:30+09:00',actual=None)
+        with patch.dict('os.environ',{'CALENDAR_OFFICIAL_BUDGET_SECONDS':'0'}), patch('official_calendar_collectors.collect') as collect:
+            _,checks=apply_official_actuals({'events':[event]},datetime(2026,9,18,tzinfo=KST))
+            collect.assert_not_called()
+        self.assertTrue(any(c['result']=='BUDGET_DEFERRED' for c in checks))
+        self.assertEqual(build_freshness({'events':[event]},datetime(2026,9,18,tzinfo=KST),checks)['status'],'DEGRADED')
+
+    def test_recent_first_and_adapter_failure_isolated(self):
+        from official_calendar_collectors import apply_official_actuals
+        old=dict(title='U.S. Initial Jobless Claims',country='US',importance=2,datetime_kst='2026-06-18T21:30+09:00',actual=None)
+        recent={**old,'datetime_kst':'2026-09-17T21:30+09:00'}
+        with patch('official_calendar_collectors.collect',side_effect=[ValueError('bad document'),None]) as collect:
+            _,checks=apply_official_actuals({'events':[old,recent]},datetime(2026,9,18,tzinfo=KST))
+        self.assertEqual(collect.call_count,2)
+        self.assertEqual(collect.call_args_list[0].args[0]['datetime_kst'],recent['datetime_kst'])
+        self.assertTrue(any(c['result']=='ADAPTER_FAILED' for c in checks))
+
     def test_all_preserved_official_documents_parse(self):
         for url in release_documents():
             code, date = url.rsplit('/', 1)[-1].split('.')[0].split('_')
