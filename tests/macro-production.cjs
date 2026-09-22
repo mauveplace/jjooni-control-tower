@@ -2,7 +2,8 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const base='https://mauveplace.github.io/jjooni-control-tower/market-observatory/';
-const keys=['KR_GDP','KR_CORE_CPI','KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_EXPORT_1_20','KR_EMPLOYMENT','KR_INDUSTRIAL_PRODUCTION','KR_BOK_OUTLOOK','US_SEP_DOT_PLOT'];
+const expectedGenerated=JSON.parse(fs.readFileSync('market-observatory/data/official-macro.json','utf8')).generated_kst;
+const keys=['KR_BASE_RATE','KR_GDP','KR_CORE_CPI','KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_EXPORT_1_20','KR_EMPLOYMENT','KR_INDUSTRIAL_PRODUCTION','KR_BOK_OUTLOOK','US_SEP_DOT_PLOT'];
 (async()=>{
  const browser=await chromium.launch({headless:true});
  const report=[];
@@ -12,7 +13,7 @@ const keys=['KR_GDP','KR_CORE_CPI','KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_E
    const response=await probe.request.get(base+'data/official-macro.json?qa='+Date.now());
    if(response.ok()){
     const d=await response.json();
-    if(keys.every(k=>d.metrics[k]?.status==='LIVE'&&d.metrics[k]?.latest?.value!=null)&&d.metrics.KR_GDP.series_identity==='200Y102/Q/10111'){data=d;break;}
+    if(Date.parse(d.generated_kst)>=Date.parse(expectedGenerated)&&d.quality.status==='LIVE'&&d.quality.degraded_metrics.length===0&&keys.every(k=>d.metrics[k]?.status==='LIVE'&&d.metrics[k]?.latest?.value!=null)&&d.metrics.KR_GDP.series_identity==='200Y102/Q/10111'){data=d;break;}
    }
    if(attempt<16)await new Promise(r=>setTimeout(r,15000));
   }
@@ -24,6 +25,7 @@ const keys=['KR_GDP','KR_CORE_CPI','KR_EXPORT_YOY','KR_SEMICON_EXPORT_YOY','KR_E
    await page.goto(base,{waitUntil:'networkidle',timeout:90000});
    await page.click('button[data-tab="official-macro"]');
    await page.waitForSelector('.obsMacroQuality');
+   assert((await page.locator('.obsMacroQuality').innerText()).includes(data.generated_kst),'UI and JSON generations differ');
    for(const key of keys){
     const metric=data.metrics[key];
     const row=page.locator('.obsMacroRow[data-macro-key="'+key+'"]');
