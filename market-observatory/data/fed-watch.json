@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-21T23:06:21+09:00",
+  "generated_kst": "2026-09-22T09:55:47+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -9,9 +9,9 @@
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
   "market_data_as_of": "2026-09-18",
-  "expected_market_data_date": "2026-09-18",
-  "observed_at": "2026-09-21T23:06:21+09:00",
-  "freshness": "LIVE",
+  "expected_market_data_date": "2026-09-21",
+  "observed_at": "2026-09-22T09:55:47+09:00",
+  "freshness": "STALE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
   "current_target_upper": 4.0,
@@ -90,8 +90,8 @@
     "days_after": 3
   },
   "quality": {
-    "state": "PASS",
-    "cme_trade_date_gap_days": 0,
+    "state": "DEGRADED",
+    "cme_trade_date_gap_days": 3,
     "fred_target_dates": {
       "lower": "2026-09-21",
       "upper": "2026-09-21",
@@ -105,7 +105,7 @@
     "fred": "https://fred.stlouisfed.org/graph/fredgraph.csv"
   },
   "usage_contract": {
-    "strategy_usable": true,
+    "strategy_usable": false,
     "stale_rule": "If freshness != LIVE, do not use probability as a strategy fact; refresh CME source or web-verify CME FedWatch.",
     "attribution": "CME FedWatch-compatible probability derived from CME 30-Day Fed Funds settlements; not the paid CME FedWatch API payload."
   }
