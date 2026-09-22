@@ -116,3 +116,17 @@ class MacroReleaseTests(unittest.TestCase):
         macro.retain_failed_metrics(metrics,old)
         self.assertEqual(metrics['KR_GDP']['latest']['value'],.6)
         self.assertEqual(metrics['KR_GDP']['status'],'DEGRADED')
+
+    def test_source_rolls_back_to_older_publication_retains_newer_value(self):
+        old_metric = release.payload('KR_EMPLOYMENT','employment','labor','KOSTAT','2026-08-01',184,'https://mods.go.kr/new','2026-09-09')
+        old_metric['verification_status'] = 'OFFICIAL_RELEASE_PARSED'
+        previous = {'metrics':{'KR_EMPLOYMENT':old_metric}}
+        def backward():
+            return [release.payload('KR_EMPLOYMENT','employment','labor','KOSTAT','2026-07-01',10,'https://mods.go.kr/old','2026-08-12')]
+        with patch.object(release,'RELEASE_ADAPTERS',{'employment':(backward,[('KR_EMPLOYMENT','employment','KOSTAT')])}):
+            metrics, errors = release.collect_releases(previous,date(2026,9,22))
+        macro.retain_failed_metrics(metrics,previous)
+        self.assertEqual(metrics['KR_EMPLOYMENT']['latest']['value'],184)
+        self.assertEqual(metrics['KR_EMPLOYMENT']['release']['actual'],184)
+        self.assertEqual(metrics['KR_EMPLOYMENT']['status'],'DEGRADED')
+        self.assertEqual(errors['KR_EMPLOYMENT'],'OFFICIAL_SOURCE_REGRESSED')

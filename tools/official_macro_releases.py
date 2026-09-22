@@ -305,6 +305,11 @@ def collect_releases(previous, today=None):
                         print(f'OFFICIAL_RELEASE_FAILED metric={key} error={errors[key]}', flush=True)
                         continue
                     old = (previous.get('metrics') or {}).get(key, {})
+                    if (old.get('latest') or {}).get('period', '') > metric['latest']['period']:
+                        metric.update(status='DEGRADED', error='OFFICIAL_SOURCE_REGRESSED', history=[], latest=None)
+                        errors[key] = metric['error']
+                        metrics[key] = metric
+                        continue
                     # Only the same release contract can extend a history. ECOS
                     # export raw amounts are handled separately by the caller.
                     history = old.get('history', []) if old.get('verification_status') == 'OFFICIAL_RELEASE_PARSED' else []

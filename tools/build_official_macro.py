@@ -662,12 +662,12 @@ def revision_scalar(metric: dict, point: dict):
     return point.get("value")
 
 
-def vintage_key(metric, period):
+def vintage_key(metric, period, point=None):
     # Keep old ledger entries intact, but never call a different statistical
     # series or forecast horizon a revision of the preceding identity.
     identity = metric.get('series_identity')
     if metric.get('value_role') == 'official_forecast':
-        identity = 'official_forecast:' + str(metric.get('forecast_horizon'))
+        identity = 'official_forecast:' + str((point or {}).get('forecast_horizon') or metric.get('forecast_horizon'))
     return '|'.join(x for x in (metric['key'], identity, period) if x)
 
 
@@ -686,7 +686,7 @@ def update_vintages(metrics: dict):
             value = revision_scalar(metric, point)
             if not period or value is None:
                 continue
-            lk = vintage_key(metric, period)
+            lk = vintage_key(metric, period, point)
             entries = vintages.setdefault(lk, [])
             if not entries:
                 entries.append({"version": "baseline_import", "value": r4(value), "captured_kst": detected, "series_identity": metric.get("series_identity"), "source_url": metric.get("source_url") or (metric.get("transport_source") or {}).get("url")})
@@ -695,7 +695,7 @@ def update_vintages(metrics: dict):
                 entries.append({"version": f"revision_{rev_no}", "value": r4(value), "captured_kst": detected, "series_identity": metric.get("series_identity"), "source_url": metric.get("source_url") or (metric.get("transport_source") or {}).get("url")})
         latest = metric.get("latest") or {}
         if latest.get("period"):
-            lk = vintage_key(metric, str(latest["period"]))
+            lk = vintage_key(metric, str(latest["period"]), latest)
             metric.setdefault("release", {})["vintage"] = (vintages.get(lk) or [])[-1] if vintages.get(lk) else None
             metric["release"]["vintage_history"] = vintages.get(lk) or []
     ledger["updated_kst"] = detected
