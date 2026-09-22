@@ -862,6 +862,14 @@ def retain_failed_metrics(metrics, previous):
             metric['last_success_kst'] = metric['checked_kst']
             continue
         old = (previous.get('metrics') or {}).get(key, {})
+        if 'SERIES_MISMATCH' in str(metric.get('error') or ''):
+            continue
+        if key == 'KR_CORE_CPI':
+            headline = num(((metrics.get('KR_CPI') or {}).get('latest') or {}).get('raw'))
+            core = num((old.get('latest') or {}).get('raw'))
+            if headline in (None, 0) or core is None or not 0.80 <= core / headline <= 1.20:
+                metric['error'] = 'KR_CORE_CPI_RETAINED_SERIES_MISMATCH'
+                continue
         if old.get('history') and old.get('latest'):
             saved = copy.deepcopy(old)
             saved.update(status='DEGRADED', checked_kst=metric['checked_kst'],

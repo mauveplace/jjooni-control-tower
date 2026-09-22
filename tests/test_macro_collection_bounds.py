@@ -7,6 +7,13 @@ import build_official_macro as macro
 
 
 class CollectionBoundsTests(unittest.TestCase):
+    def test_invalid_old_core_series_is_not_restored(self):
+        old = {'metrics': {'KR_CORE_CPI': {'history':[{'raw':179.9}], 'latest':{'raw':179.9, 'value':9.24}}}}
+        metrics = {'KR_CORE_CPI': {'status':'SOURCE_PENDING'}, 'KR_CPI': {'status':'LIVE','latest':{'raw':120.05}}}
+        macro.retain_failed_metrics(metrics, old)
+        self.assertNotIn('latest', metrics['KR_CORE_CPI'])
+        self.assertIn('MISMATCH', metrics['KR_CORE_CPI']['error'])
+
     def test_discovery_has_separate_budget(self):
         macro.ecos_items.cache_clear()
         with patch.object(macro.time, 'monotonic', side_effect=[0, 21]), patch.object(macro, 'ecos_request') as request:
