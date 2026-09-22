@@ -1,6 +1,6 @@
 """Explicit ECOS series identities. Never select a statistical series by fuzzy title."""
 KR_SERIES = {
-    'KR_BASE_RATE': dict(stat='722Y001', item='0101000', name='한국 기준금리', group='policy', institution='BOK', kind='level', unit='%', raw_unit='%'),
+    'KR_BASE_RATE': dict(stat='722Y001', item='0101000', name='한국 기준금리', group='policy', institution='BOK', kind='level', unit='%', raw_unit='연%'),
     'KR_CPI': dict(stat='901Y009', item='0', name='CPI', group='inflation', institution='KOSTAT', kind='monthly_index', unit='%', raw_unit='2020=100', target=2.0),
     'KR_GDP': dict(stat='200Y102', item='10111', cycle='Q', name='실질 GDP 전기비', group='growth', institution='BOK', kind='direct', unit='% QoQ SA', raw_unit='%'),
     'KR_CORE_CPI': dict(stat='901Y010', item='DB', name='Core CPI (식료품·에너지 제외)', group='inflation', institution='KOSTAT', kind='monthly_index', unit='%', raw_unit='2020=100'),
@@ -28,4 +28,4 @@ def validate_rows(rows, cfg):
         if (row.get('STAT_CODE'), row.get('ITEM_CODE1'), row.get('ITEM_CODE2')) != (cfg['stat'], cfg['item'], cfg.get('item2')):
             raise ValueError('ECOS_SERIES_MISMATCH:identity')
         if str(row.get('UNIT_NAME', '')).replace(' ', '') != cfg['raw_unit'].replace(' ', ''):
-            raise ValueError('ECOS_SERIES_MISMATCH:unit')
+            raise ValueError('ECOS_SERIES_MISMATCH:unit:' + str(row.get('UNIT_NAME')))

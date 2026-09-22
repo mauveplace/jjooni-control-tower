@@ -73,6 +73,8 @@ def period_from_title(title):
 def payload(key, name, group, institution, period, value, url, published, unit='%', forecast=False, **extra):
     checked = datetime.now(KST).isoformat(timespec='seconds')
     point = dict(period=period, value=value, source_url=url, published_date=published, source_tier='OFFICIAL', checked_kst=checked)
+    if forecast:
+        point.update(forecast_horizon=extra.get('forecast_horizon'), projections=extra.get('projections'))
     return dict(key=key, name=name, country='US' if key.startswith('US_') else 'KR', group=group,
                 frequency='publication' if forecast else 'monthly', unit=unit, status='LIVE',
                 value_role='official_forecast' if forecast else 'released_actual', actual_expected=not forecast,
@@ -254,9 +256,15 @@ def collect_customs():
             break
     results = []
     for kind in ['monthly', 'early']:
-        if kind not in found:
-            raise ValueError('OFFICIAL_DISCOVERY_EMPTY:customs ' + kind)
-        results.extend(parse_customs(client.html(found[kind]), found[kind], early=kind == 'early'))
+        try:
+            if kind not in found:
+                raise ValueError('OFFICIAL_DISCOVERY_EMPTY:customs ' + kind)
+            results.extend(parse_customs(client.html(found[kind]), found[kind], early=kind == 'early'))
+        except Exception as exc:
+            keys = ['KR_EXPORT_1_20'] if kind == 'early' else ['KR_EXPORT_YOY', 'KR_SEMICON_EXPORT_YOY']
+            for key in keys:
+                results.append(dict(key=key, name=key, country='KR', group='exports', status='DEGRADED', history=[], latest=None,
+                                    primary_source=dict(institution='KCS'), error=f'{type(exc).__name__}:{exc}'))
     return results
 
 
@@ -291,6 +299,11 @@ def collect_releases(previous, today=None):
             try:
                 for metric in future.result():
                     key = metric['key']
+                    if not metric.get('latest'):
+                        errors[key] = metric.get('error', 'OFFICIAL_RELEASE_EMPTY')
+                        metrics[key] = metric
+                        print(f'OFFICIAL_RELEASE_FAILED metric={key} error={errors[key]}', flush=True)
+                        continue
                     old = (previous.get('metrics') or {}).get(key, {})
                     # Only the same release contract can extend a history. ECOS
                     # export raw amounts are handled separately by the caller.
@@ -298,7 +311,8 @@ def collect_releases(previous, today=None):
                     points = {p['period']: p for p in history + metric['history'] if p.get('value') is not None}
                     metric['history'] = [points[p] for p in sorted(points)]
                     metric['latest'] = metric['history'][-1]
-                    earlier = [p for p in metric['history'] if p['period'] < metric['latest']['period']]
+                    earlier = [p for p in metric['history'] if p['period'] < metric['latest']['period']
+                               and (metric.get('value_role') != 'official_forecast' or p.get('forecast_horizon') == metric.get('forecast_horizon'))]
                     metric['release']['previous'] = earlier[-1]['value'] if earlier else None
                     stale = freshness_error(metric, today)
                     if stale:

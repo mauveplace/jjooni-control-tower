@@ -611,7 +611,12 @@ def build_kr(calendar: dict):
             metric['raw_unit'] = cfg['raw_unit']
             metric['source_tier'] = 'OFFICIAL'
             metric['verification_status'] = 'OFFICIAL_SERIES_IDENTITY_VERIFIED'
-            metric['transport_source'].update(series_id=identity, url='https://ecos.bok.or.kr/#/SearchStat')
+            observed = (metric.get('latest') or {}).get('period')
+            period = (observed[:4] + 'Q' + str((int(observed[5:7])-1)//3+1)) if observed and quarterly else ((observed or '')[:7].replace('-', ''))
+            public_url = ecos_url('sample', 'StatisticSearch', '1', '10', cfg['stat'], cfg.get('cycle', 'M'), period, period, cfg['item'], *([cfg['item2']] if cfg.get('item2') else []))
+            metric['source_url'] = public_url
+            metric['transport_source'].update(series_id=identity, url=public_url)
+            metric['release']['source_url'] = public_url
             metric['release'].update(source_tier='OFFICIAL', checked_kst=now_kst().isoformat(timespec='seconds'),
                                      reference_period=(metric.get('latest') or {}).get('period'))
             metrics[metric_key] = metric
@@ -772,6 +777,7 @@ def main():
                 # A current official API series may serve as fallback, but a
                 # known newer release failure must remain visible.
                 ecos['release_source_error'] = metric.get('error')
+                ecos['error'] = metric.get('error')
                 ecos['status'] = 'DEGRADED'
                 continue
         metrics[key] = metric
@@ -845,8 +851,6 @@ def retain_failed_metrics(metrics, previous):
         if metric.get('latest') and metric.get('history'):
             continue
         if metric.get('series_identity') and old.get('series_identity') != metric['series_identity'] and key not in ('KR_BASE_RATE', 'KR_CPI'):
-            continue
-        if 'SERIES_MISMATCH' in str(metric.get('error') or ''):
             continue
         if key == 'KR_CORE_CPI':
             headline = num(((metrics.get('KR_CPI') or {}).get('latest') or {}).get('raw'))
