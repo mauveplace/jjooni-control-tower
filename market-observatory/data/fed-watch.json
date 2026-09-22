@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-22T10:36:17+09:00",
+  "generated_kst": "2026-09-22T21:36:23+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -8,10 +8,10 @@
   "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_METHODOLOGY_NEAREST_NODE_V1",
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
-  "market_data_as_of": "2026-09-18",
+  "market_data_as_of": "2026-09-21",
   "expected_market_data_date": "2026-09-21",
-  "observed_at": "2026-09-22T10:36:17+09:00",
-  "freshness": "STALE",
+  "observed_at": "2026-09-22T21:36:23+09:00",
+  "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
   "current_target_upper": 4.0,
@@ -36,17 +36,9 @@
   "hike_25bp_probability": 0.575714,
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
-  "change_1d_pctpt": 2.21,
+  "change_1d_pctpt": 0.0,
   "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-14",
-      "hold_probability": 0.535,
-      "hike_any_probability": 0.465,
-      "hike_25bp_probability": 0.465,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-15",
       "hold_probability": 0.535,
@@ -78,6 +70,14 @@
       "hike_25bp_probability": 0.575714,
       "cut_any_probability": 0,
       "cut_25bp_probability": 0
+    },
+    {
+      "trade_date": "2026-09-21",
+      "hold_probability": 0.424286,
+      "hike_any_probability": 0.575714,
+      "hike_25bp_probability": 0.575714,
+      "cut_any_probability": 0,
+      "cut_25bp_probability": 0
     }
   ],
   "calculation": {
@@ -90,11 +90,11 @@
     "days_after": 3
   },
   "quality": {
-    "state": "DEGRADED",
-    "cme_trade_date_gap_days": 3,
+    "state": "PASS",
+    "cme_trade_date_gap_days": 0,
     "fred_target_dates": {
-      "lower": "2026-09-21",
-      "upper": "2026-09-21",
+      "lower": "2026-09-22",
+      "upper": "2026-09-22",
       "effr": "2026-09-18"
     },
     "history_points": 5
@@ -105,7 +105,7 @@
     "fred": "https://fred.stlouisfed.org/graph/fredgraph.csv"
   },
   "usage_contract": {
-    "strategy_usable": false,
+    "strategy_usable": true,
     "stale_rule": "If freshness != LIVE, do not use probability as a strategy fact; refresh CME source or web-verify CME FedWatch.",
     "attribution": "CME FedWatch-compatible probability derived from CME 30-Day Fed Funds settlements; not the paid CME FedWatch API payload."
   }
