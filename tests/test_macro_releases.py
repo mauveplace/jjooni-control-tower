@@ -101,3 +101,18 @@ class MacroReleaseTests(unittest.TestCase):
         old = {'metrics':{'KR_EMPLOYMENT':{'history':[{'period':'2026-07-01','value':10}], 'latest':{'period':'2026-07-01','value':10}}}}
         macro.retain_failed_metrics(metrics,old)
         self.assertEqual(metrics['KR_EMPLOYMENT']['latest']['value'],184)
+
+    def test_vintages_separate_series_migration_and_forecast_horizons(self):
+        before = macro.vintage_key({'key':'KR_CURRENT_ACCOUNT'},'2026-07-01')
+        after = macro.vintage_key({'key':'KR_CURRENT_ACCOUNT','series_identity':'301Y013/M/000000'},'2026-07-01')
+        self.assertNotEqual(before,after)
+        a = {'key':'US_SEP_DOT_PLOT','value_role':'official_forecast','forecast_horizon':'2026'}
+        b = dict(a,forecast_horizon='2027')
+        self.assertNotEqual(macro.vintage_key(a,'2026-09-16'),macro.vintage_key(b,'2026-09-16'))
+
+    def test_verified_identity_is_retained_if_new_unit_changes(self):
+        old = {'metrics':{'KR_GDP':{'series_identity':'200Y102/Q/10111','history':[{'period':'2026-04-01','value':.6}], 'latest':{'period':'2026-04-01','value':.6}}}}
+        metrics = {'KR_GDP':{'series_identity':'200Y102/Q/10111','status':'DEGRADED','error':'ECOS_SERIES_MISMATCH:unit'}}
+        macro.retain_failed_metrics(metrics,old)
+        self.assertEqual(metrics['KR_GDP']['latest']['value'],.6)
+        self.assertEqual(metrics['KR_GDP']['status'],'DEGRADED')

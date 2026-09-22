@@ -9,7 +9,7 @@ from build_official_macro import market_num, calendar_consensus, build_kr
 
 class OfficialMacroUnitTests(unittest.TestCase):
     def test_ecos_outage_retains_explicit_degraded_metric_contracts(self):
-        with patch('build_official_macro.ecos_search', side_effect=RuntimeError('HTTP 503')), patch('build_official_macro.find_ecos_item', return_value=None):
+        with patch('build_official_macro.ecos_search', side_effect=RuntimeError('HTTP 503')):
             metrics, errors = build_kr({'events': []})
         for key in ('KR_BASE_RATE', 'KR_CPI', 'KR_GDP'):
             self.assertEqual(metrics[key]['status'], 'DEGRADED')

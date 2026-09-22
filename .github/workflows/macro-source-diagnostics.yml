@@ -1,9 +1,6 @@
 name: Macro Source Diagnostics
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [tools/probe_macro_sources.py]
 permissions:
   contents: read
 jobs:
@@ -15,5 +12,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install beautifulsoup4 pypdf
+      - run: python -m pip install -r tools/requirements-observatory.txt
       - run: python -u tools/probe_macro_sources.py

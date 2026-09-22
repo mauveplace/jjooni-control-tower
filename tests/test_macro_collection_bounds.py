@@ -14,25 +14,16 @@ class CollectionBoundsTests(unittest.TestCase):
         self.assertNotIn('latest', metrics['KR_CORE_CPI'])
         self.assertIn('MISMATCH', metrics['KR_CORE_CPI']['error'])
 
-    def test_discovery_has_separate_budget(self):
-        macro.ecos_items.cache_clear()
-        with patch.object(macro.time, 'monotonic', side_effect=[0, 21]), patch.object(macro, 'ecos_request') as request:
-            with self.assertRaisesRegex(TimeoutError, 'DISCOVERY_BUDGET'):
-                macro.ecos_items('sample', '901Y009')
-            request.assert_not_called()
-
-    def test_gdp_collected_before_optional_discovery(self):
+    def test_exact_registry_needs_no_fuzzy_discovery(self):
         calls = []
         def collect(*args):
-            calls.append(args[1])
+            calls.append((args[1], args[5]))
             return []
-        def discover(*args):
-            self.assertIn('200Y102', calls)
-            return None
-        with patch.object(macro, 'ecos_search', side_effect=collect), patch.object(macro, 'find_ecos_item', side_effect=discover):
+        with patch.object(macro, 'ecos_search', side_effect=collect):
             macro.build_kr({'events': []})
-        self.assertIn('200Y102', calls)
-        self.assertIn('901Y010', calls)
+        self.assertIn(('200Y102','10111'), calls)
+        self.assertIn(('901Y010','DB'), calls)
+        self.assertEqual(len(calls), 7)
 
     def test_budget_stops_requests(self):
         with patch.object(macro, 'ECOS_DEADLINE', 10), patch.object(macro.time, 'monotonic', return_value=11), patch.object(macro, 'req_json') as request:

@@ -86,7 +86,7 @@ function currentValue(m){
  if(m?.key==='US_FED_FUNDS'&&x.lower!=null&&x.upper!=null)return fmt(x.lower)+'–'+fmt(x.upper)+'%';
  if(x.yoy!=null&&['US_CPI','US_CORE_CPI','US_PCE','US_CORE_PCE','KR_CPI','KR_CORE_CPI'].includes(m?.key))return fmt(x.yoy)+'%';
  if(x.value==null)return '—';
- return fmt(x.value)+(m?.unit&&String(m.unit).includes('%')?'%':'');
+ return fmt(x.value)+(m?.unit&&String(m.unit).includes('%')?'%':(String(m?.unit||'').startsWith('K')?'천 명':(m?.unit==='USD million'?'백만 USD':'')));
 }
 function trendValue(m){
  const x=m?.latest||{};
@@ -97,7 +97,6 @@ function trendValue(m){
 }
 function rowHtml(k){
  const m=metric(k);if(!m)return'';
- const pending=m.status==='SOURCE_PENDING';
  const src=m.primary_source?.institution||m.primary_source?.name||'';
  const r=m.release||{};
  const cls=m.status==='LIVE'?'live':'pending';
@@ -147,7 +146,7 @@ function drawDetailChart(m){
  const c=q('#officialMacroChart');if(!c||typeof Chart==='undefined')return;
  if(STATE.chart){STATE.chart.destroy();STATE.chart=null}
  const ps=primarySeries(m),pts=cutoff(ps.points,STATE.range);
- STATE.chart=new Chart(c,{type:'line',data:{labels:pts.map(x=>x.date),datasets:[{label:ps.label,data:pts.map(x=>x.value),borderWidth:2,pointRadius:0,tension:.12,spanGaps:true}]},plugins:[markerPlugin],options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},officialMacroMarkers:{markers:DATA?.historical_markers||[]}},scales:{x:{ticks:{maxTicksLimit:7,font:{size:9},callback:function(v){const s=this.getLabelForValue(v);return String(s).slice(0,7)}},grid:{color:'#eef2f6'}},y:{ticks:{maxTicksLimit:6,font:{size:9}},grid:{color:'#e8edf3'}}}}});
+ STATE.chart=new Chart(c,{type:'line',data:{labels:pts.map(x=>x.date),datasets:[{label:ps.label,data:pts.map(x=>x.value),borderWidth:2,pointRadius:pts.length<2?3:0,tension:.12,spanGaps:true}]},plugins:[markerPlugin],options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},officialMacroMarkers:{markers:DATA?.historical_markers||[]}},scales:{x:{ticks:{maxTicksLimit:7,font:{size:9},callback:function(v){const s=this.getLabelForValue(v);return String(s).slice(0,7)}},grid:{color:'#eef2f6'}},y:{ticks:{maxTicksLimit:6,font:{size:9}},grid:{color:'#e8edf3'}}}}});
 }
 function kpi(label,val){return '<div class="obsMacroKpi"><small>'+esc(label)+'</small><b>'+esc(val==null?'—':val)+'</b></div>'}
 function showDetail(key){
@@ -167,13 +166,14 @@ function showDetail(key){
  (m.projections?'<div class="obsMacroNotes"><b>연도별 공식 전망</b><br>'+Object.entries(m.projections).map(([label,years])=>esc(label)+': '+Object.entries(years).map(([year,value])=>esc(year)+' '+fmt(value)+'%').join(' · ')).join('<br>')+'</div>':'')+
  '<div class="obsMacroExplain"><div><b>이 지표는 무엇?</b>'+esc(g.meaning)+'</div><div><b>높게 나오면</b>'+esc(g.high)+'</div><div><b>낮게 나오면</b>'+esc(g.low)+'</div><div><b>투자할 때 보는 포인트</b>'+esc(g.market)+'</div></div>'+
  '<div class="obsMacroSurprise"><b>이번 발표 읽는 법</b><br>'+esc(surpriseRead(key,m))+'</div>'+
- '<div class="obsMacroChartHead"><b>📈 '+esc(m.name||key)+' 장기 추이</b><span>선택한 지표 1개만 표시 · 기간 선택 가능</span></div>'+
+ '<div class="obsMacroChartHead"><b>📈 '+esc(m.name||key)+(m.value_role==='official_forecast'?' 발표별 전망 기록':' 장기 추이')+'</b><span>확보 기간 '+esc((m.history?.[0]?.period||'—'))+' ~ '+esc(m.latest?.period||'—')+'</span></div>'+
  '<div class="obsMacroRange">'+['3Y','5Y','10Y','ALL'].map(x=>'<button data-macro-range="'+x+'" class="'+(STATE.range===x?'on':'')+'">'+x+'</button>').join('')+'</div>'+
  '<div class="obsMacroChart"><canvas id="officialMacroChart"></canvas></div>'+
  '<div class="obsMacroNotes"><b>Actual SSOT:</b> '+esc(m.primary_source?.name||m.primary_source?.institution||'—')+' · <b>Consensus:</b> '+esc(r.consensus_source?.provider||'별도 시장데이터')+'<br>'+
  (m.note?esc(m.note)+'<br>':'')+
  (m.source_url||m.transport_source?.url?'<a target="_blank" rel="noopener" href="'+esc(m.source_url||m.transport_source.url)+'">공식 원문</a> · ':'')+
  '확인 '+esc(m.checked_kst||'—')+'<br>'+
+ (m.value_role==='official_forecast'?'전망 발표별 기록이며, 10년 시계열 확보 여부는 표시된 확보 기간을 따릅니다.<br>':'')+
  (m.error?'수집 지연: '+esc(m.error)+'<br>':'')+
  '<b>Vintage:</b> '+(vint.length?vint.map(x=>esc(x.version)+' '+esc(x.value)).join(' → '):'기록 대기')+'</div>';
  qa('button[data-macro-range]',box).forEach(b=>b.onclick=()=>{STATE.range=b.dataset.macroRange;qa('button[data-macro-range]',box).forEach(x=>x.classList.toggle('on',x===b));drawDetailChart(m)});

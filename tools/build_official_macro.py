@@ -9,7 +9,6 @@ import os
 import re
 import time
 import copy
-from functools import lru_cache
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta
@@ -508,64 +507,12 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
     return [ded[k] for k in sorted(ded)]
 
 
-@lru_cache(maxsize=16)
-def ecos_items(key: str, stat: str):
-    discovery_deadline = time.monotonic() + 20
-    page_size = 10 if str(key).strip().lower() == "sample" else 1000
-    out = []
-    begin = 1
-    total = None
-    seen = set()
-    while total is None or begin <= total:
-        if time.monotonic() >= discovery_deadline:
-            raise TimeoutError('ECOS_DISCOVERY_BUDGET_EXCEEDED')
-        if begin > 2000:
-            raise RuntimeError('ECOS_PAGE_LIMIT')
-        finish = begin + page_size - 1
-        obj = ecos_request(key, "StatisticItemList", str(begin), str(finish), stat)
-        block = obj.get("StatisticItemList") or {}
-        rows = block.get("row") or []
-        signature = json.dumps(rows, sort_keys=True)
-        if rows and signature in seen:
-            raise RuntimeError('ECOS_REPEATED_PAGE')
-        seen.add(signature)
-        if total is None:
-            try:
-                total = int(block.get("list_total_count") or len(rows))
-            except Exception:
-                total = len(rows)
-        out.extend(rows)
-        if not rows or len(rows) < page_size:
-            break
-        begin += page_size
-    return out
-
-
-def find_ecos_item(key: str, stat: str, terms: list[str]):
-    try:
-        rows = ecos_items(key, stat)
-    except Exception:
-        return None
-    scored = []
-    for r in rows:
-        name = " ".join(str(r.get(k) or "") for k in ["ITEM_NAME", "ITEM_NAME1", "ITEM_NAME2", "STAT_NAME"]).lower()
-        score = sum(1 for term in terms if term.lower() in name)
-        code = r.get("ITEM_CODE") or r.get("ITEM_CODE1")
-        if score and code:
-            scored.append((score, str(code), name))
-    scored.sort(reverse=True)
-    return scored[0][1] if scored else None
-
-
 def build_kr(calendar: dict):
     global ECOS_DEADLINE
     ECOS_DEADLINE = time.monotonic() + 120
-    ecos_items.cache_clear()
     key = os.getenv("BOK_ECOS_API_KEY", "sample")
     start_m = f"{date.today().year - 11}01"
     end_m = now_kst().strftime("%Y%m")
-    start_d = f"{date.today().year - 11}0101"
-    end_d = now_kst().strftime("%Y%m%d")
     start_q = f"{date.today().year - 11}Q1"
     end_q = f"{date.today().year}Q4"
     metrics = {}
@@ -715,9 +662,17 @@ def revision_scalar(metric: dict, point: dict):
     return point.get("value")
 
 
+def vintage_key(metric, period):
+    # Keep old ledger entries intact, but never call a different statistical
+    # series or forecast horizon a revision of the preceding identity.
+    identity = metric.get('series_identity')
+    if metric.get('value_role') == 'official_forecast':
+        identity = 'official_forecast:' + str(metric.get('forecast_horizon'))
+    return '|'.join(x for x in (metric['key'], identity, period) if x)
+
+
 def update_vintages(metrics: dict):
     ledger = load_json(VINT, {"schema": "JJOONI_OFFICIAL_MACRO_VINTAGES_V1", "created_kst": now_kst().isoformat(timespec="seconds"), "vintages": {}})
-    bootstrap = not VINT.exists()
     vintages = ledger.setdefault("vintages", {})
     detected = now_kst().isoformat(timespec="seconds")
     for key, metric in metrics.items():
@@ -731,16 +686,16 @@ def update_vintages(metrics: dict):
             value = revision_scalar(metric, point)
             if not period or value is None:
                 continue
-            lk = key + "|" + period
+            lk = vintage_key(metric, period)
             entries = vintages.setdefault(lk, [])
             if not entries:
-                entries.append({"version": "baseline_import" if bootstrap else "initial_release", "value": r4(value), "captured_kst": detected})
+                entries.append({"version": "baseline_import", "value": r4(value), "captured_kst": detected, "series_identity": metric.get("series_identity"), "source_url": metric.get("source_url") or (metric.get("transport_source") or {}).get("url")})
             elif abs(float(entries[-1]["value"]) - float(value)) > 1e-9:
                 rev_no = sum(1 for x in entries if str(x.get("version", "")).startswith("revision_")) + 1
-                entries.append({"version": f"revision_{rev_no}", "value": r4(value), "captured_kst": detected})
+                entries.append({"version": f"revision_{rev_no}", "value": r4(value), "captured_kst": detected, "series_identity": metric.get("series_identity"), "source_url": metric.get("source_url") or (metric.get("transport_source") or {}).get("url")})
         latest = metric.get("latest") or {}
         if latest.get("period"):
-            lk = key + "|" + str(latest["period"])
+            lk = vintage_key(metric, str(latest["period"]))
             metric.setdefault("release", {})["vintage"] = (vintages.get(lk) or [])[-1] if vintages.get(lk) else None
             metric["release"]["vintage_history"] = vintages.get(lk) or []
     ledger["updated_kst"] = detected
