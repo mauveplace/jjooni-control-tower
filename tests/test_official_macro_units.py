@@ -1,12 +1,23 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from build_official_macro import market_num, calendar_consensus
+from build_official_macro import market_num, calendar_consensus, build_kr
 
 
 class OfficialMacroUnitTests(unittest.TestCase):
+    def test_ecos_outage_retains_explicit_degraded_metric_contracts(self):
+        with patch('build_official_macro.ecos_search', side_effect=RuntimeError('HTTP 503')), patch('build_official_macro.find_ecos_item', return_value=None):
+            metrics, errors = build_kr({'events': []})
+        for key in ('KR_BASE_RATE', 'KR_CPI', 'KR_GDP'):
+            self.assertEqual(metrics[key]['status'], 'DEGRADED')
+            self.assertIsNone(metrics[key]['release']['actual'])
+            self.assertEqual(metrics[key]['error'], 'HTTP 503')
+            self.assertIn(key, errors)
+        self.assertEqual(metrics['KR_CPI']['release']['measure'], 'YoY %')
+
     def test_market_headcounts_normalized_to_thousands(self):
         for raw, expected in [('7.33M',7330),('7.33m ',7330),('7,330K',7330),('196K',196),('-0.092M',-92)]:
             for key in ('US_JOLTS','US_NFP'):

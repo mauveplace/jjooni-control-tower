@@ -590,6 +590,17 @@ def build_kr(calendar: dict):
         except Exception as e:
             errors["KR_CURRENT_ACCOUNT"] = str(e)
 
+    # A transport failure must retain the metric contract with an explicit
+    # degraded state; omitting the key breaks consumers and hides the outage.
+    for metric_key, name, group, institution, kind, unit in [
+        ("KR_BASE_RATE", "한국 기준금리", "policy", "BOK", "level", "%"),
+        ("KR_CPI", "CPI", "inflation", "KOSTAT", "monthly_index", "%"),
+        ("KR_GDP", "Real GDP Growth", "growth", "BOK", "direct", "% QoQ SA"),
+    ]:
+        if metric_key not in metrics:
+            metrics[metric_key] = make_metric(metric_key, name, group, institution, [], kind, unit)
+            metrics[metric_key]["error"] = errors.get(metric_key, "Official source returned no observations")
+
     pending = {
         "KR_CORE_CPI": ("Core CPI", "inflation", "KOSTAT", "KOSTAT core CPI ECOS item discovery pending"),
         "KR_CURRENT_ACCOUNT": ("경상수지", "external", "BOK", "BOK ECOS 301Y017 item mapping pending"),
