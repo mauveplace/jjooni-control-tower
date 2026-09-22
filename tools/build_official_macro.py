@@ -7,6 +7,9 @@ import json
 import math
 import os
 import re
+import time
+import copy
+from functools import lru_cache
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta
@@ -25,6 +28,20 @@ UA = "Mozilla/5.0 JJOONI-Official-Macro/1.0"
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv"
 FRED_SOURCE = "Federal Reserve Bank of St. Louis FRED transport"
+ECOS_DEADLINE = None
+
+
+def ecos_request(key, service, *parts):
+    remaining = 120 if ECOS_DEADLINE is None else ECOS_DEADLINE - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("ECOS_TOTAL_BUDGET_EXCEEDED")
+    # Never log the credential embedded in ECOS URLs.
+    print(f"ECOS_REQUEST service={service} page={parts[0]} remaining_sec={remaining:.0f}", flush=True)
+    obj = req_json(ecos_url(key, service, *parts), timeout=min(12, remaining))
+    if service not in obj:
+        code = (obj.get('RESULT') or {}).get('CODE', 'EMPTY_RESPONSE')
+        raise RuntimeError(f"ECOS_RESPONSE_ERROR:{code}")
+    return obj
 
 US_DEF = {
     "US_CPI": {"series": "CPIAUCSL", "institution": "BLS", "name": "CPI", "group": "inflation", "kind": "monthly_index"},
@@ -426,18 +443,34 @@ def ecos_url(key: str, service: str, *parts) -> str:
 
 
 def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: str, item2: str | None = None):
+    metric_key = {('722Y001','0101000'): 'KR_BASE_RATE', ('901Y009','0'): 'KR_CPI',
+                  ('200Y002','10111'): 'KR_GDP'}.get((stat, item1))
+    old = (load_json(OUT, {}).get('metrics') or {}).get(metric_key, {})
+    retained = [{'date': p['period'], 'value': p['raw']} for p in old.get('history', [])
+                if p.get('period') and p.get('raw') is not None]
+    if retained and cycle in ('M', 'Q'):
+        # Re-fetch two years for revisions while retaining the earlier series.
+        recent = f"{now_kst().year - 2}01" if cycle == 'M' else f"{now_kst().year - 2}Q1"
+        start = max(start, recent)
     page_size = 10 if str(key).strip().lower() == "sample" else 1000
     raw_rows = []
     begin = 1
     total = None
+    seen = set()
     while total is None or begin <= total:
+        if begin > 2000:
+            raise RuntimeError('ECOS_PAGE_LIMIT')
         finish = begin + page_size - 1
         parts = [str(begin), str(finish), stat, cycle, start, end, item1]
         if item2:
             parts.append(item2)
-        obj = req_json(ecos_url(key, "StatisticSearch", *parts))
+        obj = ecos_request(key, "StatisticSearch", *parts)
         block = obj.get("StatisticSearch") or {}
         rows = block.get("row") or []
+        signature = json.dumps(rows, sort_keys=True)
+        if rows and signature in seen:
+            raise RuntimeError('ECOS_REPEATED_PAGE')
+        seen.add(signature)
         if total is None:
             try:
                 total = int(block.get("list_total_count") or len(rows))
@@ -464,20 +497,30 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
         else:
             p = t
         out.append({"date": p, "value": v})
-    ded = {x["date"]: x for x in out}
+    if not out:
+        raise RuntimeError('ECOS_NO_OBSERVATIONS')
+    ded = {x["date"]: x for x in retained + out}
     return [ded[k] for k in sorted(ded)]
 
 
+@lru_cache(maxsize=16)
 def ecos_items(key: str, stat: str):
     page_size = 10 if str(key).strip().lower() == "sample" else 1000
     out = []
     begin = 1
     total = None
+    seen = set()
     while total is None or begin <= total:
+        if begin > 2000:
+            raise RuntimeError('ECOS_PAGE_LIMIT')
         finish = begin + page_size - 1
-        obj = req_json(ecos_url(key, "StatisticItemList", str(begin), str(finish), stat))
+        obj = ecos_request(key, "StatisticItemList", str(begin), str(finish), stat)
         block = obj.get("StatisticItemList") or {}
         rows = block.get("row") or []
+        signature = json.dumps(rows, sort_keys=True)
+        if rows and signature in seen:
+            raise RuntimeError('ECOS_REPEATED_PAGE')
+        seen.add(signature)
         if total is None:
             try:
                 total = int(block.get("list_total_count") or len(rows))
@@ -507,6 +550,9 @@ def find_ecos_item(key: str, stat: str, terms: list[str]):
 
 
 def build_kr(calendar: dict):
+    global ECOS_DEADLINE
+    ECOS_DEADLINE = time.monotonic() + 120
+    ecos_items.cache_clear()
     key = os.getenv("BOK_ECOS_API_KEY", "sample")
     start_m = f"{date.today().year - 11}01"
     end_m = now_kst().strftime("%Y%m")
@@ -622,6 +668,8 @@ def build_kr(calendar: dict):
 
 def group_regimes(metrics: dict):
     def m(key, field="value"):
+        if (metrics.get(key) or {}).get('status') != 'LIVE':
+            return None
         x = (metrics.get(key) or {}).get("latest") or {}
         return num(x.get(field))
 
@@ -712,6 +760,8 @@ def update_vintages(metrics: dict):
     vintages = ledger.setdefault("vintages", {})
     detected = now_kst().isoformat(timespec="seconds")
     for key, metric in metrics.items():
+        if metric.get('status') != 'LIVE':
+            continue
         hist = metric.get("history") or []
         if not hist:
             continue
@@ -740,9 +790,12 @@ def update_vintages(metrics: dict):
 def main():
     calendar = load_json(CAL, {})
     fedwatch = load_json(FEDWATCH, {})
+    print('OFFICIAL_MACRO_STAGE=US', flush=True)
     us, us_errors = build_us(calendar)
+    print('OFFICIAL_MACRO_STAGE=KR budget_sec=120', flush=True)
     kr, kr_errors = build_kr(calendar)
     metrics = {**us, **kr}
+    retain_failed_metrics(metrics, load_json(OUT, {}))
     vintages = update_vintages(metrics)
     regimes = group_regimes(metrics)
 
@@ -788,6 +841,7 @@ def main():
             "kr_errors": kr_errors,
             "live_metrics": sum(1 for x in metrics.values() if x.get("status") == "LIVE"),
             "pending_metrics": [k for k, x in metrics.items() if x.get("status") == "SOURCE_PENDING"],
+            "degraded_metrics": [k for k, x in metrics.items() if x.get("status") == "DEGRADED"],
             "vintage_keys": len(vintages.get("vintages", {})),
         },
     }
@@ -796,6 +850,22 @@ def main():
     print("generated_kst=" + out["generated_kst"])
     print("live_metrics=" + str(out["quality"]["live_metrics"]))
     print("pending=" + ",".join(out["quality"]["pending_metrics"]))
+
+
+def retain_failed_metrics(metrics, previous):
+    for key, metric in list(metrics.items()):
+        metric['checked_kst'] = now_kst().isoformat(timespec='seconds')
+        if metric.get('status') == 'LIVE':
+            metric['last_success_kst'] = metric['checked_kst']
+            continue
+        old = (previous.get('metrics') or {}).get(key, {})
+        if old.get('history') and old.get('latest'):
+            saved = copy.deepcopy(old)
+            saved.update(status='DEGRADED', checked_kst=metric['checked_kst'],
+                         error=metric.get('error') or metric.get('note') or 'SOURCE_UNAVAILABLE',
+                         last_success_kst=old.get('last_success_kst') or previous.get('generated_kst'),
+                         retained_previous_observation=True)
+            metrics[key] = saved
 
 
 if __name__ == "__main__":

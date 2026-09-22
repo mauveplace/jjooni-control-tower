@@ -1,0 +1,43 @@
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+import build_official_macro as macro
+
+
+class CollectionBoundsTests(unittest.TestCase):
+    def test_budget_stops_requests(self):
+        with patch.object(macro, 'ECOS_DEADLINE', 10), patch.object(macro.time, 'monotonic', return_value=11), patch.object(macro, 'req_json') as request:
+            with self.assertRaisesRegex(TimeoutError, 'BUDGET'):
+                macro.ecos_request('sample', 'StatisticSearch', '1')
+            request.assert_not_called()
+
+    def test_repeated_page_stops_instead_of_looping(self):
+        rows = [{'TIME': f'2025{i:02d}', 'DATA_VALUE': str(i)} for i in range(1, 11)]
+        with patch.object(macro, 'load_json', return_value={}), patch.object(macro, 'ecos_request', return_value={'StatisticSearch': {'list_total_count': 10000, 'row': rows}}) as request:
+            with self.assertRaisesRegex(RuntimeError, 'REPEATED_PAGE'):
+                macro.ecos_search('sample', '722Y001', 'M', '201501', '202609', '0101000')
+            self.assertEqual(request.call_count, 2)
+
+    def test_incremental_refresh_preserves_history_and_revises_recent_value(self):
+        old = {'metrics': {'KR_BASE_RATE': {'history': [{'period':'2015-01-01','raw':2}, {'period':'2026-08-01','raw':2.5}]}}}
+        reply = {'StatisticSearch': {'list_total_count':1, 'row':[{'TIME':'202608','DATA_VALUE':'2.75'}]}}
+        with patch.object(macro, 'load_json', return_value=old), patch.object(macro, 'ecos_request', return_value=reply) as request:
+            result = macro.ecos_search('sample','722Y001','M','201501','202609','0101000')
+        self.assertEqual(result, [{'date':'2015-01-01','value':2}, {'date':'2026-08-01','value':2.75}])
+        self.assertGreater(request.call_args.args[6], '201501')
+
+    def test_outage_preserves_values_without_claiming_live(self):
+        old = {'generated_kst':'2026-09-21T00:00:00+09:00', 'metrics': {'KR_CPI': {'status':'LIVE','history':[{'period':'2026-08-01','raw':120}], 'latest':{'value':2.1}, 'release':{'actual':2.1}}}}
+        metrics = {'KR_CPI': {'status':'DEGRADED', 'error':'HTTP 503'}}
+        macro.retain_failed_metrics(metrics, old)
+        self.assertEqual(metrics['KR_CPI']['release']['actual'],2.1)
+        self.assertEqual(metrics['KR_CPI']['status'],'DEGRADED')
+        self.assertEqual(macro.group_regimes(metrics)['kr']['inflation']['regime'],'DATA_PENDING')
+        self.assertEqual(old['metrics']['KR_CPI']['status'],'LIVE')
+
+    def test_api_error_not_empty_success(self):
+        with patch.object(macro,'ECOS_DEADLINE',None), patch.object(macro,'req_json',return_value={'RESULT':{'CODE':'ERROR-100'}}):
+            with self.assertRaisesRegex(RuntimeError,'ERROR-100'):
+                macro.ecos_request('sample','StatisticSearch','1')

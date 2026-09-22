@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - tools/build_official_macro.py
+      - tests/test_macro_collection_bounds.py
+      - tests/test_official_macro_units.py
       - market-observatory/official-macro-v1.js
       - market-observatory/observatory-v2.js
       - market-observatory/data/ai-read-contract.json
@@ -22,7 +24,7 @@ permissions:
 
 concurrency:
   group: market-observatory-official-macro
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -31,11 +33,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Test macro collection contracts
+        run: python -m unittest discover -s tests -p 'test*macro*.py' -v
 
       - name: Build official macro dataset
         env:
@@ -44,7 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/build_official_macro.py
-          python tools/build_official_macro.py
+          python -u tools/build_official_macro.py
 
       - name: Official macro acceptance
         shell: bash
@@ -158,7 +164,7 @@ jobs:
           git commit -m 'data(observatory): refresh official macro data'
           for attempt in 1 2 3; do
             git fetch origin main
-            git rebase -X theirs origin/main
+            git rebase origin/main
             if git push origin HEAD:main; then exit 0; fi
             echo OFFICIAL_MACRO_PUSH_RETRY=$attempt
           done
