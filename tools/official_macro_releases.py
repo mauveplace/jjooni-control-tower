@@ -10,6 +10,7 @@ import re
 import time
 import urllib.parse
 import urllib.request
+import urllib.error
 import xml.etree.ElementTree as ET
 from zoneinfo import ZoneInfo
 from bs4 import BeautifulSoup
@@ -27,15 +28,21 @@ class SourceClient:
         self.deadline = time.monotonic() + budget
 
     def read(self, url):
-        remaining = self.deadline - time.monotonic()
-        if remaining <= 0:
-            raise TimeoutError('OFFICIAL_RELEASE_BUDGET_EXCEEDED')
-        request = urllib.request.Request(urllib.parse.quote(url, safe=':/?&=%'), headers={'User-Agent': 'Mozilla/5.0 JJOONI-Official-Macro/2.0'})
-        with urllib.request.urlopen(request, timeout=min(12, remaining)) as response:
-            data = response.read(20_000_001)
-        if len(data) > 20_000_000:
-            raise ValueError('OFFICIAL_RELEASE_SIZE_LIMIT')
-        return data
+        for attempt in range(2):
+            remaining = self.deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('OFFICIAL_RELEASE_BUDGET_EXCEEDED')
+            request = urllib.request.Request(urllib.parse.quote(url, safe=':/?&=%'), headers={'User-Agent': 'Mozilla/5.0'})
+            try:
+                with urllib.request.urlopen(request, timeout=min(18, remaining)) as response:
+                    data = response.read(20_000_001)
+                if len(data) > 20_000_000:
+                    raise ValueError('OFFICIAL_RELEASE_SIZE_LIMIT')
+                return data
+            except (urllib.error.URLError, TimeoutError) as exc:
+                print(f'OFFICIAL_SOURCE_ATTEMPT url={url} attempt={attempt+1} error={exc}', flush=True)
+                if attempt or (isinstance(exc, urllib.error.HTTPError) and exc.code < 500):
+                    raise
 
     def html(self, url):
         return BeautifulSoup(self.read(url).decode('utf-8-sig', 'replace'), 'html.parser')
@@ -171,6 +178,7 @@ def collect_bok_outlook():
     if not candidates:
         raise ValueError('OFFICIAL_DISCOVERY_EMPTY:BOK outlook RSS')
     url = max(candidates)[1]
+    url = re.sub(r'menuNo=(?:&|$)', 'menuNo=200066&', url).rstrip('&')
     soup = client.html(url)
     text = (soup.select_one('#content') or soup).get_text(' ', strip=True)
     published = publication_date(text)

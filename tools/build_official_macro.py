@@ -790,7 +790,7 @@ def main():
         },
         "kr": {
             "inflation": {"regime": regimes["kr"]["inflation"], "metrics": ["KR_CPI", "KR_CORE_CPI"]},
-            "growth": {"regime": regimes["kr"]["growth"], "metrics": ["KR_GDP", "KR_BOK_OUTLOOK", "KR_INDUSTRIAL_PRODUCTION"]},
+            "growth": {"regime": regimes["kr"]["growth"], "metrics": ["KR_GDP", "KR_BOK_OUTLOOK", "KR_INDUSTRIAL_PRODUCTION", "KR_EMPLOYMENT", "KR_BASE_RATE"]},
             "exports": {"regime": regimes["kr"]["exports"], "metrics": ["KR_EXPORT_YOY", "KR_EXPORT_1_20", "KR_CURRENT_ACCOUNT"]},
             "semiconductor": {"regime": regimes["kr"]["semiconductor"], "metrics": ["KR_SEMICON_EXPORT_YOY"]},
         },
@@ -819,6 +819,7 @@ def main():
             {"date": "2026-01-01", "label": "2026 reacceleration check"},
         ],
         "quality": {
+            "status": "DEGRADED" if any(m.get("status") != "LIVE" for m in metrics.values()) else "LIVE",
             "us_errors": us_errors,
             "kr_errors": kr_errors,
             "live_metrics": sum(1 for x in metrics.values() if x.get("status") == "LIVE"),

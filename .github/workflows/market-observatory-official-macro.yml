@@ -6,6 +6,9 @@ on:
     paths:
       - tools/build_official_macro.py
       - tools/official_macro_*.py
+      - tools/requirements-observatory.txt
+      - tests/macro-production.cjs
+      - tests/macro-ui-contract.test.cjs
       - tests/test_macro_releases.py
       - tests/fixtures/macro-sources.json
       - tests/test_macro_collection_bounds.py
@@ -178,3 +181,30 @@ jobs:
             echo OFFICIAL_MACRO_PUSH_RETRY=$attempt
           done
           exit 1
+
+  production-qa:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test frontend contracts
+        run: node --test tests/*.test.cjs
+      - name: Install Chromium test runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify deployed macro JSON and desktop/mobile UI
+        run: node tests/macro-production.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macro-production-verification
+          path: |
+            macro-production-*.png
+            macro-production-qa.json
