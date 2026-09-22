@@ -505,12 +505,15 @@ def ecos_search(key: str, stat: str, cycle: str, start: str, end: str, item1: st
 
 @lru_cache(maxsize=16)
 def ecos_items(key: str, stat: str):
+    discovery_deadline = time.monotonic() + 20
     page_size = 10 if str(key).strip().lower() == "sample" else 1000
     out = []
     begin = 1
     total = None
     seen = set()
     while total is None or begin <= total:
+        if time.monotonic() >= discovery_deadline:
+            raise TimeoutError('ECOS_DISCOVERY_BUDGET_EXCEEDED')
         if begin > 2000:
             raise RuntimeError('ECOS_PAGE_LIMIT')
         finish = begin + page_size - 1
@@ -602,6 +605,12 @@ def build_kr(calendar: dict):
     except Exception as e:
         errors["KR_CPI"] = str(e)
 
+    try:
+        rows = ecos_search(key, "200Y002", "Q", start_q, end_q, "10111")
+        metrics["KR_GDP"] = make_metric("KR_GDP", "Real GDP Growth", "growth", "BOK", rows, "direct", "% QoQ SA")
+    except Exception as e:
+        errors["KR_GDP"] = str(e)
+
     core_item = find_ecos_item(key, "901Y009", ["식료품", "에너지", "제외"])
     if not core_item:
         core_item = find_ecos_item(key, "901Y009", ["농산물", "석유류", "제외"])
@@ -621,12 +630,6 @@ def build_kr(calendar: dict):
             metrics["KR_CORE_CPI"] = make_metric("KR_CORE_CPI", "Core CPI", "inflation", "KOSTAT", rows, "monthly_index", "%", None, f"ECOS item {core_item}; level-ratio validated vs headline CPI")
         except Exception as e:
             errors["KR_CORE_CPI"] = str(e)
-
-    try:
-        rows = ecos_search(key, "200Y002", "Q", start_q, end_q, "10111")
-        metrics["KR_GDP"] = make_metric("KR_GDP", "Real GDP Growth", "growth", "BOK", rows, "direct", "% QoQ SA")
-    except Exception as e:
-        errors["KR_GDP"] = str(e)
 
     ca_item = find_ecos_item(key, "301Y017", ["경상수지"])
     if ca_item:
