@@ -50,3 +50,10 @@ test('UI module optimization preloads downloads but preserves sequential executi
   assert.ok(sequential>preload,'required modules must still execute sequentially after preload starts');
   assert.match(loader,/s\.src=bootUrl\(src\)/);
 });
+
+
+test('verified UI loader cache-busts the NAV race-fixed mobile runtime',()=>{
+  const loader=read('trade-review-loader.js');
+  assert.match(loader,/mobile-stability-v4\.js\?v=4\.3/);
+  assert.match(loader,/version:'14\.31'/);
+});
