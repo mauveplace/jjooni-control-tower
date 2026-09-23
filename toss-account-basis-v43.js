@@ -58,7 +58,7 @@ function patchCurrentCard(card,nav){
  });
  let note=q('.ctTossBasisNoteV43',card);
  if(!note){note=document.createElement('div');note.className='ctTossBasisNoteV43';card.appendChild(note)}
- note.innerHTML='<b>현재 총자산</b> · CT Overview Canonical NAV 기준';
+ note.innerHTML='<b>Toss 현재 NAV</b> · CT Overview 계좌별 Canonical NAV 기준';
  S.patched_current++;
 }
 
@@ -105,7 +105,7 @@ function patchHistoryCard(card,nav){
  if(!note){note=document.createElement('div');note.className='ctTossHistoryNoteV43';const head=q('h1,h2,h3,h4',card)||card.firstElementChild;head?.insertAdjacentElement('afterend',note)}
  if(note){
   if(hist!=null)note.dataset.historyNav=String(hist);
-  note.innerHTML='<b>현재 총자산 '+won(nav)+'</b> · CT Overview Canonical NAV<br>Historical 성과 계산 기준 NAV '+(hist!=null?won(hist):'확인 중')+' · 현재 총자산과 별도';
+  note.innerHTML='<b>Toss 현재 NAV '+won(nav)+'</b> · CT Overview 계좌별 Canonical NAV<br>Historical 성과 계산 기준 NAV '+(hist!=null?won(hist):'확인 중')+' · 현재 총자산과 별도';
  }
  S.patched_history++;
 }
