@@ -1,5 +1,6 @@
 """Date-bound official adapters. Failed requests are observable, never empty success."""
 import html
+import json
 import os
 import time
 import io
@@ -100,9 +101,14 @@ def parse_ccsi(text,year,month):
     compact=re.sub(r'\s+','',text)
     if not re.search(rf'{year}년{month}월소비자동향조사',compact):
         raise ValueError('REFERENCE_PERIOD_MISMATCH')
-    m=re.search(rf'{month}월(?:중)?소비자심리지수(?:\(CCSI\))?는([0-9]+(?:\.[0-9]+)?)',compact)
+    m=re.search(rf'{month}월(?:중)?소비자심리지수(?:\(CCSI[^)]*\))?는([0-9]+(?:\.[0-9]+)?)',compact)
     if not m: raise ValueError('BOK_CCSI_HEADLINE_PARSE_MISS')
-    return [metric('kr_ccsi','소비자심리지수 (CCSI)',m[1])]
+    row=metric('kr_ccsi','소비자심리지수 (CCSI)',m[1])
+    delta=re.search(r'전월대비([0-9.]+)(?:p|포인트)(상승|하락)',compact[m.end():m.end()+100])
+    if delta:
+        change=float(delta[1]) * (1 if delta[2]=='상승' else -1)
+        row['previous']=f'{float(m[1])-change:.1f}'
+    return [row]
 
 
 def collect_ccsi(e,checks):
@@ -126,6 +132,22 @@ def collect_ccsi(e,checks):
                 checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=url,result=type(exc).__name__,error=str(exc)[:200]))
     except Exception as exc:
         checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=index,result=type(exc).__name__,error=str(exc)[:200]))
+    # Official ECOS series is a separate fallback when the release board is
+    # unavailable. Accept only this exact reference period and CCSI identity.
+    period=f'{year}{month:02d}'
+    api=f'https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/511Y002/M/{period}/{period}/FME'
+    try:
+        obj=json.loads(raw_fetch(api))
+        rows=(obj.get('StatisticSearch') or {}).get('row',[])
+        row=next((r for r in rows if r.get('TIME')==period and r.get('ITEM_CODE1')=='FME'
+                  and re.fullmatch(r'소비자심리지수(?:\(CCSI\))?',re.sub(r'\s+','',r.get('ITEM_NAME1','')))),None)
+        if row is None: raise ValueError('BOK_CCSI_ECOS_IDENTITY_OR_PERIOD_MISSING')
+        value=float(row['DATA_VALUE'])
+        if not 0<value<300: raise ValueError('BOK_CCSI_ECOS_VALUE_INVALID')
+        checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=api,result='PARSED'))
+        return [metric('kr_ccsi','소비자심리지수 (CCSI)',f'{value:g}')],api
+    except Exception as exc:
+        checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=api,result=type(exc).__name__,error=str(exc)[:200]))
     return None
 
 def adapter_id(e):
