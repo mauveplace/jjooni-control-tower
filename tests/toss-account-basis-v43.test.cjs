@@ -59,3 +59,13 @@ test('Historical Toss discovery cannot climb into whole tab panels',()=>{
  const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
  assert.match(src,/String\(e\.id\|\|''\)\.startsWith\('panel-'\)/);
 });
+
+
+test('Toss historical discovery rejects aggregate multi-account containers',()=>{
+ const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
+ assert.match(src,/전체\\s\*6계좌\\s\*NAV/);
+ assert.match(src,/6계좌\\s\*통합\\s\*Current\\s\*Snapshot/);
+ assert.match(src,/\\bISA\\b/);
+ assert.match(src,/연금저축/);
+ assert.match(src,/\\bIRP\\b/);
+});
