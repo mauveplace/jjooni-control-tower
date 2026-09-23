@@ -223,6 +223,59 @@ function installCanonicalFunctions(){
  if(ORIGINAL.openTradePerformanceDetail&&!window.__ctTradeDetailWrapped){window.openTradePerformanceDetail=function(t,acct,currentPrice,perf,rankLabel){let cp=n(currentPrice);if((cp==null||cp<=0)&&CANON){const id=String(acct||t&&t.account||'').toUpperCase(),p=((CANON.accounts[id]||{}).positions||[]).find(x=>sym(x.ticker)===sym(t&&t.ticker));cp=n(p&&p.current_price)||n(p&&p.price)||cp;}return ORIGINAL.openTradePerformanceDetail(t,acct,cp,perf,rankLabel)};window.__ctTradeDetailWrapped=true;}
 }
 
+function authoritativeSixAccountNav(){
+ const live=LAST_LIVE||window.__JJOONI_LIVE_PAYLOAD||{};
+ const producer=n(live.total_nav??live.total_nav_krw);
+ if(producer!=null&&isSixAccountNavSource(live.total_nav_source,live))return {nav:producer,source:String(live.total_nav_source||''),kind:'PRODUCER'};
+ const canonical=n(CANON?.total?.nav);
+ return canonical!=null?{nav:canonical,source:String(CANON?.total?.nav_source||'CANONICAL'),kind:'CANONICAL'}:null;
+}
+
+function replaceWonAfterLabel(el,label,nav){
+ if(!el)return false;
+ const txt=String(el.textContent||'');
+ if(!txt.includes(label))return false;
+ const next=txt.replace(/₩\s*[\d,]+(?:\.\d+)?/,won(nav));
+ if(next===txt)return false;
+ el.textContent=next;el.dataset.ctSixAccountNav='1';return true;
+}
+
+function patchAllSixAccountTotalSurfaces(){
+ const truth=authoritativeSixAccountNav();if(!truth)return 0;
+ const nav=truth.nav,fmt=won(nav);let patched=0;
+ const mobile=document.querySelector('#ctMobileNetSummaryV4 .ctNetValue');
+ if(mobile&&String(mobile.textContent||'').trim()!==fmt){mobile.textContent=fmt;mobile.dataset.ctSixAccountNav='1';patched++}
+ const mobileBox=document.getElementById('ctMobileNetSummaryV4');
+ if(mobileBox){mobileBox.dataset.navAuthority='PRODUCER_'+truth.source;mobileBox.dataset.sixAccountNav='1'}
+
+ for(const sel of ['.ctP8Total','.ctA8Total']){
+  document.querySelectorAll(sel).forEach(el=>{if(replaceWonAfterLabel(el,'총자산',nav))patched++});
+ }
+ const roots=[document.getElementById('panel-overview'),document.getElementById('panel-accounts'),document.getElementById('panel-performance'),document.getElementById('panel-compare')].filter(Boolean);
+ for(const root of roots){
+  const labels=[...root.querySelectorAll('.ctOvLabel,.label,div,span,small,b,strong')].filter(e=>{
+   if(e.children&&e.children.length)return false;
+   if(e.closest&&e.closest('.ctAcct'))return false;
+   const t=String(e.textContent||'').trim().replace(/\s+/g,' ');
+   return /^(?:총자산\s*[·•]\s*6계좌|전체\s*6계좌\s*NAV|현재\s*총자산\s*\(6계좌\s*NAV\))$/i.test(t);
+  });
+  labels.forEach(label=>{
+   let box=label.parentElement;
+   for(let i=0;box&&i<5;i++,box=box.parentElement){
+    if(box.classList&&box.classList.contains('ctAcct'))break;
+    const vals=[...box.querySelectorAll('div,span,b,strong')].filter(e=>e.children.length===0&&e!==label&&/^[-+]?₩\s*[\d,]+(?:\.\d+)?(?:원)?$/.test(String(e.textContent||'').trim()));
+    if(vals.length){
+     vals.sort((a,b)=>(parseFloat(getComputedStyle(b).fontSize)||0)-(parseFloat(getComputedStyle(a).fontSize)||0));
+     const v=vals[0];if(String(v.textContent||'').trim()!==fmt){v.textContent=fmt;v.dataset.ctSixAccountNav='1';patched++}
+     break;
+    }
+   }
+  });
+ }
+ window.__JJOONI_SIX_ACCOUNT_NAV_V46={state:'ACTIVE',version:'46.0',nav,source:truth.source,kind:truth.kind,patched,updated_at:new Date().toISOString()};
+ return patched;
+}
+
 function updateOverviewTotalNav(){
  if(!CANON||!CANON.total||n(CANON.total.nav)==null)return;
  const root=document.getElementById('panel-overview')||document;
@@ -292,11 +345,11 @@ let OVERVIEW_NAV_PATCH_QUEUED=false;
 function queueOverviewTotalNav(){
  if(OVERVIEW_NAV_PATCH_QUEUED)return;
  OVERVIEW_NAV_PATCH_QUEUED=true;
- setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav()},35);
+ setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav();patchAllSixAccountTotalSurfaces()},35);
 }
 try{new MutationObserver(muts=>{if(!CANON)return;for(const m of muts){const t=m.target&&m.target.nodeType===3?m.target.parentElement:m.target;if(t&&t.closest&&t.closest('#panel-overview')){queueOverviewTotalNav();break}}}).observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
 
-function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}
+function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();patchAllSixAccountTotalSurfaces();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();setTimeout(patchAllSixAccountTotalSurfaces,60);setTimeout(patchAllSixAccountTotalSurfaces,220);}
 
 function applyLive(live){
  if(!live||!['JJOONI_CT_LIVE_V3','JJOONI_CT_LIVE_V4','JJOONI_CT_LIVE_V5'].includes(String(live.schema||'')))throw new Error('LIVE_SCHEMA_MISMATCH');if(typeof D==='undefined')throw new Error('CONTROL_TOWER_DATA_MISSING');
