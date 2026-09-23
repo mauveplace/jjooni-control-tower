@@ -31,3 +31,19 @@ test('canonical browser bridge still sums all registry accounts before rendering
 test('account detail cards remain separate from overview total patch',()=>{
   assert.match(src,/if\(e\.closest&&e\.closest\('\.ctAcct'\)\)return false/);
 });
+
+
+test('six-account guard directly patches mobile and performance aggregate surfaces',()=>{
+  assert.match(src,/function patchAllSixAccountTotalSurfaces\(/);
+  assert.match(src,/#ctMobileNetSummaryV4 \.ctNetValue/);
+  assert.match(src,/\.ctP8Total/);
+  assert.match(src,/\.ctA8Total/);
+  assert.match(src,/총자산\\s\*\[·•\]\\s\*6계좌/);
+  assert.match(src,/전체\\s\*6계좌\\s\*NAV/);
+});
+
+test('FAST effective source is an accepted six-account authority',()=>{
+  assert.match(src,/FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV/);
+  assert.match(src,/total_nav_component_count/);
+  assert.match(src,/total_nav_missing_accounts/);
+});
