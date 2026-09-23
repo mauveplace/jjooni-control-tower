@@ -9,11 +9,11 @@ test('Toss basis runtime parses and formats KRW safely',()=>{
  assert.equal(won(74257726),'₩74,257,726');
 });
 
-test('Toss current total asset authority is canonical overview NAV',()=>{
+test('Toss current account NAV authority is separate from six-account total',()=>{
  const s=fs.readFileSync('toss-account-basis-v43.js','utf8');
  assert.match(s,/CT_OVERVIEW_CANONICAL_TOSS_NAV/);
  assert.match(s,/\(canon\(\)\.accounts\|\|\{\}\)\.TOSS/);
- assert.match(s,/현재 총자산/);
+ assert.match(s,/Toss 현재 NAV/);
 });
 
 test('Historical NAV is preserved as a basis, not presented as current total asset',()=>{
