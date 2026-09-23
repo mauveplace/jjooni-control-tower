@@ -55,6 +55,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
 ['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.7','trade-outcomes'],
+['ctAutobotAuditBoardV1Script','autobot-audit-board-v1.js?v=1.0','autobot-audit-board'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.3','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],
