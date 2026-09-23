@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_MOBILE_STABILITY_V4)return;
-window.__JJOONI_MOBILE_STABILITY_V4={state:'BOOTING',version:'4.2'};
+window.__JJOONI_MOBILE_STABILITY_V4={state:'BOOTING',version:'4.3'};
 
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -48,18 +48,30 @@ function trustKind(raw){
  return 'reference';
 }
 
+const SIX_NAV_SOURCES_V43=new Set(['ACCOUNT_SUM_6','FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV']);
+function trustedSixNavV43(L){
+ const source=String(L?.total_nav_source||''),value=n(L?.total_nav??L?.total_nav_krw);
+ if(value==null||!SIX_NAV_SOURCES_V43.has(source))return null;
+ if(source==='FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV'){
+  const count=n(L?.total_nav_component_count),missing=Array.isArray(L?.total_nav_missing_accounts)?L.total_nav_missing_accounts:[];
+  if(count!=null&&count!==6)return null;
+  if(missing.length)return null;
+ }
+ return value;
+}
+
 function updateNetSummary(){
  if(!mobile())return;
  const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD||{},h=qs('.ctOvPrimary');if(!C||!h)return;
  let box=qs('#ctMobileNetSummaryV4',h);
  if(!box){box=document.createElement('div');box.id='ctMobileNetSummaryV4';h.insertBefore(box,h.firstChild)}
- const producerNav=n(L.total_nav??L.total_nav_krw),producerSource=String(L.total_nav_source||'');
+ const producerNav=trustedSixNavV43(L),producerSource=String(L.total_nav_source||'');
  const canonicalNav=n(C.total&&C.total.nav);
- const nav=producerNav!=null&&producerSource==='ACCOUNT_SUM_6'?producerNav:canonicalNav;
+ const nav=producerNav!=null?producerNav:canonicalNav;
  const pnl=n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
  const html=`<div class="ctNetLabel">총자산${count!=null?' · '+count+'계좌':''}</div><div class="ctNetValue">${nav==null?'—':won(nav)}</div><div class="ctNetMeta">오늘 투자손익 ${pnl==null?'—':signed(pnl)}</div>`;
  if(box.innerHTML!==html)box.innerHTML=html;
- box.dataset.navAuthority=producerNav!=null&&producerSource==='ACCOUNT_SUM_6'?'PRODUCER_ACCOUNT_SUM_6':'CANONICAL_FALLBACK';
+ box.dataset.navAuthority=producerNav!=null?'PRODUCER_'+producerSource:'CANONICAL_FALLBACK';
 }
 
 function updateTrustStrip(){
