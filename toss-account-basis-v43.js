@@ -66,6 +66,8 @@ function historicalCards(){
  const labels=qa('h1,h2,h3,h4,div,span,b,strong').filter(e=>leaf(e)&&/^Toss$/i.test(norm(e.textContent)));
  const out=[];
  for(const label of labels){
+  // Historical Toss correction must never touch the Overview hero/6-account total.
+  if(label.closest&&label.closest('#panel-overview'))continue;
   let e=label.parentElement;
   for(let i=0;e&&i<10;i++,e=e.parentElement){
    const t=norm(e.textContent);

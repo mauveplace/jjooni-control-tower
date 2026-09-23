@@ -203,6 +203,48 @@ function installCanonicalFunctions(){
  if(ORIGINAL.openTradePerformanceDetail&&!window.__ctTradeDetailWrapped){window.openTradePerformanceDetail=function(t,acct,currentPrice,perf,rankLabel){let cp=n(currentPrice);if((cp==null||cp<=0)&&CANON){const id=String(acct||t&&t.account||'').toUpperCase(),p=((CANON.accounts[id]||{}).positions||[]).find(x=>sym(x.ticker)===sym(t&&t.ticker));cp=n(p&&p.current_price)||n(p&&p.price)||cp;}return ORIGINAL.openTradePerformanceDetail(t,acct,cp,perf,rankLabel)};window.__ctTradeDetailWrapped=true;}
 }
 
+function updateOverviewTotalNav(){
+ if(!CANON||!CANON.total||n(CANON.total.nav)==null)return;
+ const root=document.getElementById('panel-overview')||document;
+ const total=n(CANON.total.nav),fmt=won(total);
+ const labels=[...root.querySelectorAll('.ctOvLabel,.label,div,span,small,b,strong')].filter(e=>{
+   if(e.children&&e.children.length)return false;
+   if(e.closest&&e.closest('.ctAcct'))return false;
+   const t=String(e.textContent||'').trim().replace(/\s+/g,' ');
+   return /^(현재\s*총자산(?:\s*\(NAV\))?|현재\s*총자산\s*\(6계좌\s*NAV\)|전체\s*6계좌\s*NAV|총\s*자산(?:\s*\(NAV\))?|총자산(?:\s*\(NAV\))?)$/i.test(t);
+ });
+ let patched=0;
+ labels.forEach(label=>{
+   let box=label;
+   for(let i=0;box&&i<6;i++,box=box.parentElement){
+     if(box.classList&&box.classList.contains('ctAcct'))break;
+     const direct=box.querySelector&&box.querySelector('.ctOvValue,.value,.v2Value,[class*="Value"],[class*="value"]');
+     if(direct&&direct!==label){
+       if(String(direct.textContent||'').trim()!==fmt)direct.textContent=fmt;
+       label.textContent='현재 총자산 (6계좌 NAV)';
+       direct.dataset.ctSixAccountNav='1';
+       patched++;break;
+     }
+     const leaves=box.querySelectorAll?[...box.querySelectorAll('div,span,b,strong')].filter(e=>e.children.length===0&&e!==label&&/^[-+]?₩?[\d,]+(?:\.\d+)?원?$/.test(String(e.textContent||'').trim())):[];
+     if(leaves.length){
+       leaves.sort((a,b)=>(parseFloat(getComputedStyle(b).fontSize)||0)-(parseFloat(getComputedStyle(a).fontSize)||0));
+       const v=leaves[0];
+       if(String(v.textContent||'').trim()!==fmt)v.textContent=fmt;
+       label.textContent='현재 총자산 (6계좌 NAV)';
+       v.dataset.ctSixAccountNav='1';
+       patched++;break;
+     }
+   }
+ });
+ const strip=document.getElementById('ctTodayNetStrip');
+ if(strip){
+   const parts=REGISTRY.map(r=>r.label+' '+won((CANON.accounts[r.id]||{}).nav));
+   strip.dataset.ctSixAccountNav='1';
+   strip.title='6계좌 합산: '+parts.join(' · ');
+ }
+ window.__JJOONI_OVERVIEW_6NAV_V44={state:patched?'ACTIVE':'WAITING_TARGET',version:'44.0',nav:total,account_count:REGISTRY.length,accounts:Object.fromEntries(REGISTRY.map(r=>[r.id,n((CANON.accounts[r.id]||{}).nav)])),patched,updated_at:new Date().toISOString()};
+}
+
 function updateCards(){
  if(!CANON)return;const byName=name=>[...document.querySelectorAll('.ctAcct')].find(c=>String((c.querySelector('.ctAcctName')||{}).textContent||'').toLowerCase().includes(name.toLowerCase())),line=(card,id,html)=>{if(!card)return;let e=card.querySelector('#'+id);if(!e){e=document.createElement('div');e.id=id;e.style.cssText='grid-column:1/-1;font:800 9px/1.4 system-ui;margin-top:4px;padding-top:4px;border-top:1px dashed #e7ebf0;text-align:right;white-space:normal';card.appendChild(e)}if(e.innerHTML!==html)e.innerHTML=html};
  REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{},card=byName(r.label==='AI BOT'?'ai bot':r.label==='TRI-POD'?'tri-pod':r.label.toLowerCase());if(!card)return;const nav=card.querySelector('.ctAcctNav'),navText=n(c.nav)!=null?won(c.nav):null;if(nav&&navText!=null&&nav.textContent!==navText)nav.textContent=navText;const day=card.querySelector('.ctAcctTodayValue'),dayText=n(c.today_pnl)==null?'당일손익 —':signed(c.today_pnl)+' '+pct(c.today_return);if(day&&day.textContent!==dayText)day.textContent=dayText;let extra='';if(r.id==='TOSS')extra=`예수금 KRW ${won(c.cash_krw)} · USD ${usd(c.cash_usd)} · <b style="color:#b45309">REF</b> · 오늘손익 ${n(c.today_pnl)==null?'—':signed(c.today_pnl)}`;else if(r.id==='AI')extra=`예수금 KRW ${won(c.cash_krw)} · USD ${usd(c.cash_usd)} · <b style="color:#087443">BROKER LIVE</b> · 당일P&L ${n(c.today_pnl)==null?'—':signed(c.today_pnl)} (${c.quality})`;else if(['ISA','PENSION','IRP'].includes(r.id))extra=`예수금 ${won(c.cash_krw)} · <b style="color:#175cd3">MODEL LIVE</b> · 오늘손익 ${n(c.today_pnl)==null?'—':signed(c.today_pnl)} · 순입출금 ${n(c.net_flow)==null?'—':signed(c.net_flow)}`;else if(r.id==='TRIPOD')extra=`TQQQ ${z(((LAST_LIVE.accounts||{}).TRIPOD||{}).qty).toLocaleString()}주 · ${usd(c.current_price)} · ${pct(c.today_return)} · ${(c.signal||{}).regime||'—'} / ${(c.signal||{}).target||'—'}`;if(extra)line(card,'ctCanonical'+r.id,extra)});
@@ -226,7 +268,15 @@ function renderWatchlist(){
  panel.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{window.__ctWlMarket=b.dataset.wm;renderWatchlist()});panel.querySelectorAll('[data-ws]').forEach(b=>b.onclick=()=>{window.__ctWlSort=b.dataset.ws;renderWatchlist()});
 }
 
-function renderAll(){ensureWatchlistUi();updateCards();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}
+let OVERVIEW_NAV_PATCH_QUEUED=false;
+function queueOverviewTotalNav(){
+ if(OVERVIEW_NAV_PATCH_QUEUED)return;
+ OVERVIEW_NAV_PATCH_QUEUED=true;
+ setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav()},35);
+}
+try{new MutationObserver(muts=>{if(!CANON)return;for(const m of muts){const t=m.target&&m.target.nodeType===3?m.target.parentElement:m.target;if(t&&t.closest&&t.closest('#panel-overview')){queueOverviewTotalNav();break}}}).observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+
+function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}
 
 function applyLive(live){
  if(!live||!['JJOONI_CT_LIVE_V3','JJOONI_CT_LIVE_V4','JJOONI_CT_LIVE_V5'].includes(String(live.schema||'')))throw new Error('LIVE_SCHEMA_MISMATCH');if(typeof D==='undefined')throw new Error('CONTROL_TOWER_DATA_MISSING');

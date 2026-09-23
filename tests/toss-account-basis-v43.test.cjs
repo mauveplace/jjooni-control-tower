@@ -37,3 +37,9 @@ test('canonical bootstrap loads Toss basis authority and encrypted shell cache-b
  assert.match(canonical,/toss-account-basis-v43\.js\?v=43\.0/);
  assert.match(index,/canonical-metrics\.js\?v=33\.3/);
 });
+
+
+test('Toss historical patch is explicitly isolated from the Overview panel',()=>{
+ const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
+ assert.match(src,/label\.closest&&label\.closest\('#panel-overview'\)/);
+});
