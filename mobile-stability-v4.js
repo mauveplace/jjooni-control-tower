@@ -50,12 +50,16 @@ function trustKind(raw){
 
 function updateNetSummary(){
  if(!mobile())return;
- const C=window.__JJOONI_CANONICAL_SSOT,h=qs('.ctOvPrimary');if(!C||!h)return;
+ const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD||{},h=qs('.ctOvPrimary');if(!C||!h)return;
  let box=qs('#ctMobileNetSummaryV4',h);
  if(!box){box=document.createElement('div');box.id='ctMobileNetSummaryV4';h.insertBefore(box,h.firstChild)}
- const nav=n(C.total&&C.total.nav),pnl=n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
+ const producerNav=n(L.total_nav??L.total_nav_krw),producerSource=String(L.total_nav_source||'');
+ const canonicalNav=n(C.total&&C.total.nav);
+ const nav=producerNav!=null&&producerSource==='ACCOUNT_SUM_6'?producerNav:canonicalNav;
+ const pnl=n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
  const html=`<div class="ctNetLabel">총자산${count!=null?' · '+count+'계좌':''}</div><div class="ctNetValue">${nav==null?'—':won(nav)}</div><div class="ctNetMeta">오늘 투자손익 ${pnl==null?'—':signed(pnl)}</div>`;
  if(box.innerHTML!==html)box.innerHTML=html;
+ box.dataset.navAuthority=producerNav!=null&&producerSource==='ACCOUNT_SUM_6'?'PRODUCER_ACCOUNT_SUM_6':'CANONICAL_FALLBACK';
 }
 
 function updateTrustStrip(){
