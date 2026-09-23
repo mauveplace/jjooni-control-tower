@@ -137,7 +137,14 @@ function makeCanonical(live){
   out[id].nav_change=day!=null&&flow!=null?day+flow:null;
  }
  const t=M.aggregate(out),rows=REGISTRY.map(r=>out[r.id]);
- return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total:{nav:t.nav,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
+ // Producer canonical owns total NAV. The browser must not silently replace the
+ // six-account ACCOUNT_SUM_6 total with a partial client-side recomputation.
+ const producerTotal=n(live.total_nav??live.total_nav_krw);
+ const producerTotalSource=String(live.total_nav_source||'');
+ const accountSum=t.nav;
+ const authoritativeTotal=producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?producerTotal:accountSum;
+ const totalGap=producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
+ return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?'PRODUCER_ACCOUNT_SUM_6':'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
