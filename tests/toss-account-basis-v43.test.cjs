@@ -11,7 +11,7 @@ test('Toss basis runtime parses and formats KRW safely',()=>{
 
 test('Toss current account NAV authority is separate from six-account total',()=>{
  const s=fs.readFileSync('toss-account-basis-v43.js','utf8');
- assert.match(s,/CT_OVERVIEW_CANONICAL_TOSS_NAV/);
+ assert.match(s,/TOSS_ACCOUNT_CANONICAL_NAV_ONLY/);
  assert.match(s,/\(canon\(\)\.accounts\|\|\{\}\)\.TOSS/);
  assert.match(s,/Toss 현재 NAV/);
 });
@@ -42,4 +42,20 @@ test('canonical bootstrap loads Toss basis authority and encrypted shell cache-b
 test('Toss historical patch is explicitly isolated from the Overview panel',()=>{
  const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
  assert.match(src,/label\.closest&&label\.closest\('#panel-overview'\)/);
+});
+
+
+test('Historical Toss annotation never mutates an existing amount into current Toss NAV',()=>{
+ const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
+ const start=src.indexOf('function patchHistoryCard');
+ const end=src.indexOf('function patchTossModal');
+ const body=src.slice(start,end);
+ assert.ok(start>=0&&end>start);
+ assert.doesNotMatch(body,/hit\.e\.textContent\s*=\s*won\(nav\)/);
+ assert.match(body,/Historical surfaces are read-only evidence/);
+});
+
+test('Historical Toss discovery cannot climb into whole tab panels',()=>{
+ const src=fs.readFileSync('toss-account-basis-v43.js','utf8');
+ assert.match(src,/String\(e\.id\|\|''\)\.startsWith\('panel-'\)/);
 });
