@@ -69,7 +69,8 @@ function historicalCards(){
   // Historical Toss correction must never touch the Overview hero/6-account total.
   if(label.closest&&label.closest('#panel-overview'))continue;
   let e=label.parentElement;
-  for(let i=0;e&&i<10;i++,e=e.parentElement){
+  for(let i=0;e&&i<8;i++,e=e.parentElement){
+   if(!e||e===document.body||String(e.id||'').startsWith('panel-'))break;
    const t=norm(e.textContent);
    if(/정규장\s*P&L/i.test(t)&&/누적수익률/i.test(t)&&(/환율효과/i.test(t)||/NAV\s*정합성/i.test(t))){
     out.push(e);break;
