@@ -3,7 +3,7 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.30',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.31',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
@@ -50,7 +50,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
 ['ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3.2','trade-readable'],
-['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4','mobile-stability'],
+['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4.3','mobile-stability'],
 ['ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2','decision-impact'],
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
