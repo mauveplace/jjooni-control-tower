@@ -28,6 +28,18 @@ const signed=v=>n(v)==null?'—':(z(v)>=0?'+':'-')+won(v);
 const pct=v=>n(v)==null?'—':(z(v)>=0?'+':'')+z(v).toFixed(2)+'%';
 const usd=v=>n(v)==null?'—':'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const clone=x=>JSON.parse(JSON.stringify(x));
+const SIX_ACCOUNT_NAV_SOURCES=new Set(['ACCOUNT_SUM_6','FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV']);
+function isSixAccountNavSource(source,live){
+ const s=String(source||'');
+ if(!SIX_ACCOUNT_NAV_SOURCES.has(s))return false;
+ if(s==='FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV'){
+  const count=n(live?.total_nav_component_count);
+  const missing=Array.isArray(live?.total_nav_missing_accounts)?live.total_nav_missing_accounts:[];
+  if(count!=null&&count!==REGISTRY.length)return false;
+  if(missing.length)return false;
+ }
+ return true;
+}
 let LAST_LIVE=null;
 let CANON=null;
 let TRADE_QUOTES={};
@@ -142,9 +154,10 @@ function makeCanonical(live){
  const producerTotal=n(live.total_nav??live.total_nav_krw);
  const producerTotalSource=String(live.total_nav_source||'');
  const accountSum=t.nav;
- const authoritativeTotal=producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?producerTotal:accountSum;
+ const producerTotalTrusted=producerTotal!=null&&isSixAccountNavSource(producerTotalSource,live);
+ const authoritativeTotal=producerTotalTrusted?producerTotal:accountSum;
  const totalGap=producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
- return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?'PRODUCER_ACCOUNT_SUM_6':'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
+ return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
@@ -208,6 +221,59 @@ function installCanonicalFunctions(){
  window.buildUnifiedPortfolioPositions=function(){if(!CANON)return [];return REGISTRY.flatMap(r=>((CANON.accounts[r.id]||{}).positions||[]).map(p=>({...p,account:r.id,account_type:r.id,current_price:z(p.current_price||p.price),market_value:z(p.market_value||p.value_krw||p.value),data_state:p.data_state||((CANON.accounts[r.id]||{}).quality),price_source:p.price_source||((CANON.accounts[r.id]||{}).source)})));};
  window.buildRegularSessionMetrics=function(){const accounts={},positions=[];REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{};let priced=0,total=0;(c.positions||[]).forEach(p=>{if(String(p.record_type||'POSITION').toUpperCase()!=='POSITION')return;total++;const cur=z(p.current_price||p.price),prev=z(p.prev_close),qty=z(p.qty),fx=String(p.currency||'KRW').toUpperCase()==='USD'?(z(p.fx)||z(c.fx)||z(((LAST_LIVE.accounts||{}).AI||{}).fx_krw_per_usd)||1):1,ok=cur>0&&prev>0&&qty>0;if(ok)priced++;positions.push({account:r.id,ticker:p.ticker,name:p.name,qty,baseline_price:prev,regular_mark:cur,regular_pnl:ok?qty*(cur-prev)*fx:0,extended_pnl:0,session_pnl:ok?qty*(cur-prev)*fx:0,quality:ok?'FULL':'REFERENCE',quote_timestamp:p.live_price_timestamp||CANON.observed_at,quote_source:p.price_source||c.source,base_fx:fx})});let q=['MODELED_LIVE','MODEL_LIVE','USER_VERIFIED_CURRENT','LIVE'].includes(c.quality)?'FULL':c.quality;accounts[r.id]={regular_pnl:n(c.today_pnl),extended_pnl:0,session_pnl:n(c.today_pnl),quality:q,priced,positions:total,session_label:c.source};});return {accounts,positions,context:{source:'CANONICAL_V5',observed_at:CANON.observed_at}};};
  if(ORIGINAL.openTradePerformanceDetail&&!window.__ctTradeDetailWrapped){window.openTradePerformanceDetail=function(t,acct,currentPrice,perf,rankLabel){let cp=n(currentPrice);if((cp==null||cp<=0)&&CANON){const id=String(acct||t&&t.account||'').toUpperCase(),p=((CANON.accounts[id]||{}).positions||[]).find(x=>sym(x.ticker)===sym(t&&t.ticker));cp=n(p&&p.current_price)||n(p&&p.price)||cp;}return ORIGINAL.openTradePerformanceDetail(t,acct,cp,perf,rankLabel)};window.__ctTradeDetailWrapped=true;}
+}
+
+function authoritativeSixAccountNav(){
+ const live=LAST_LIVE||window.__JJOONI_LIVE_PAYLOAD||{};
+ const producer=n(live.total_nav??live.total_nav_krw);
+ if(producer!=null&&isSixAccountNavSource(live.total_nav_source,live))return {nav:producer,source:String(live.total_nav_source||''),kind:'PRODUCER'};
+ const canonical=n(CANON?.total?.nav);
+ return canonical!=null?{nav:canonical,source:String(CANON?.total?.nav_source||'CANONICAL'),kind:'CANONICAL'}:null;
+}
+
+function replaceWonAfterLabel(el,label,nav){
+ if(!el)return false;
+ const txt=String(el.textContent||'');
+ if(!txt.includes(label))return false;
+ const next=txt.replace(/₩\s*[\d,]+(?:\.\d+)?/,won(nav));
+ if(next===txt)return false;
+ el.textContent=next;el.dataset.ctSixAccountNav='1';return true;
+}
+
+function patchAllSixAccountTotalSurfaces(){
+ const truth=authoritativeSixAccountNav();if(!truth)return 0;
+ const nav=truth.nav,fmt=won(nav);let patched=0;
+ const mobile=document.querySelector('#ctMobileNetSummaryV4 .ctNetValue');
+ if(mobile&&String(mobile.textContent||'').trim()!==fmt){mobile.textContent=fmt;mobile.dataset.ctSixAccountNav='1';patched++}
+ const mobileBox=document.getElementById('ctMobileNetSummaryV4');
+ if(mobileBox){mobileBox.dataset.navAuthority='PRODUCER_'+truth.source;mobileBox.dataset.sixAccountNav='1'}
+
+ for(const sel of ['.ctP8Total','.ctA8Total']){
+  document.querySelectorAll(sel).forEach(el=>{if(replaceWonAfterLabel(el,'총자산',nav))patched++});
+ }
+ const roots=[document.getElementById('panel-overview'),document.getElementById('panel-accounts'),document.getElementById('panel-performance'),document.getElementById('panel-compare')].filter(Boolean);
+ for(const root of roots){
+  const labels=[...root.querySelectorAll('.ctOvLabel,.label,div,span,small,b,strong')].filter(e=>{
+   if(e.children&&e.children.length)return false;
+   if(e.closest&&e.closest('.ctAcct'))return false;
+   const t=String(e.textContent||'').trim().replace(/\s+/g,' ');
+   return /^(?:총자산\s*[·•]\s*6계좌|전체\s*6계좌\s*NAV|현재\s*총자산\s*\(6계좌\s*NAV\))$/i.test(t);
+  });
+  labels.forEach(label=>{
+   let box=label.parentElement;
+   for(let i=0;box&&i<5;i++,box=box.parentElement){
+    if(box.classList&&box.classList.contains('ctAcct'))break;
+    const vals=[...box.querySelectorAll('div,span,b,strong')].filter(e=>e.children.length===0&&e!==label&&/^[-+]?₩\s*[\d,]+(?:\.\d+)?(?:원)?$/.test(String(e.textContent||'').trim()));
+    if(vals.length){
+     vals.sort((a,b)=>(parseFloat(getComputedStyle(b).fontSize)||0)-(parseFloat(getComputedStyle(a).fontSize)||0));
+     const v=vals[0];if(String(v.textContent||'').trim()!==fmt){v.textContent=fmt;v.dataset.ctSixAccountNav='1';patched++}
+     break;
+    }
+   }
+  });
+ }
+ window.__JJOONI_SIX_ACCOUNT_NAV_V46={state:'ACTIVE',version:'46.0',nav,source:truth.source,kind:truth.kind,patched,updated_at:new Date().toISOString()};
+ return patched;
 }
 
 function updateOverviewTotalNav(){
@@ -279,11 +345,11 @@ let OVERVIEW_NAV_PATCH_QUEUED=false;
 function queueOverviewTotalNav(){
  if(OVERVIEW_NAV_PATCH_QUEUED)return;
  OVERVIEW_NAV_PATCH_QUEUED=true;
- setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav()},35);
+ setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav();patchAllSixAccountTotalSurfaces()},35);
 }
 try{new MutationObserver(muts=>{if(!CANON)return;for(const m of muts){const t=m.target&&m.target.nodeType===3?m.target.parentElement:m.target;if(t&&t.closest&&t.closest('#panel-overview')){queueOverviewTotalNav();break}}}).observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
 
-function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}
+function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();patchAllSixAccountTotalSurfaces();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();setTimeout(patchAllSixAccountTotalSurfaces,60);setTimeout(patchAllSixAccountTotalSurfaces,220);}
 
 function applyLive(live){
  if(!live||!['JJOONI_CT_LIVE_V3','JJOONI_CT_LIVE_V4','JJOONI_CT_LIVE_V5'].includes(String(live.schema||'')))throw new Error('LIVE_SCHEMA_MISMATCH');if(typeof D==='undefined')throw new Error('CONTROL_TOWER_DATA_MISSING');

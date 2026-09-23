@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 
-const VERSION='43.0';
+const VERSION='43.1';
 const num=v=>{
  if(v===null||v===undefined||v===''||typeof v==='boolean'||typeof v==='object')return null;
  const x=Number(String(v).replace(/,/g,'').replace(/₩/g,'').replace(/원/g,'').trim());
@@ -69,7 +69,8 @@ function historicalCards(){
   // Historical Toss correction must never touch the Overview hero/6-account total.
   if(label.closest&&label.closest('#panel-overview'))continue;
   let e=label.parentElement;
-  for(let i=0;e&&i<10;i++,e=e.parentElement){
+  for(let i=0;e&&i<8;i++,e=e.parentElement){
+   if(!e||e===document.body||String(e.id||'').startsWith('panel-'))break;
    const t=norm(e.textContent);
    if(/정규장\s*P&L/i.test(t)&&/누적수익률/i.test(t)&&(/환율효과/i.test(t)||/NAV\s*정합성/i.test(t))){
     out.push(e);break;
@@ -99,7 +100,8 @@ function patchHistoryCard(card,nav){
    if(saved!=null)hist=saved;
   }else card.dataset.tossHistoricalNavV43=String(hist);
  }
- if(hit&&Math.abs(hit.v-nav)>0.5){hit.e.textContent=won(nav);hit.e.dataset.tossCanonicalNavV43='1'}
+ // Historical surfaces are read-only evidence. Never replace an existing
+ // amount with the current Toss NAV: an ancestor may also contain portfolio totals.
  relabelHistory(card);
  let note=existing;
  if(!note){note=document.createElement('div');note.className='ctTossHistoryNoteV43';const head=q('h1,h2,h3,h4',card)||card.firstElementChild;head?.insertAdjacentElement('afterend',note)}
@@ -122,7 +124,7 @@ function patchTossModal(nav){
  if(touched){
   let note=q('.ctTossBasisNoteV43',m);
   if(!note){note=document.createElement('div');note.className='ctTossBasisNoteV43';const hero=q('.accountHeroPrimary',m)||m.firstElementChild;hero?.insertAdjacentElement('afterend',note)}
-  if(note)note.innerHTML='<b>현재 총자산</b> · CT Overview Canonical NAV와 동일 기준';
+  if(note)note.innerHTML='<b>Toss 현재 NAV</b> · CT 계좌별 Canonical NAV 기준';
   S.patched_modal++;
  }
 }
@@ -135,7 +137,7 @@ function apply(){
  tossCurrentCards().forEach(c=>patchCurrentCard(c,nav));
  historicalCards().forEach(c=>patchHistoryCard(c,nav));
  patchTossModal(nav);
- S.state='ACTIVE';S.canonical_nav=nav;S.authority='CT_OVERVIEW_CANONICAL_TOSS_NAV';S.updated_at=new Date().toISOString();
+ S.state='ACTIVE';S.canonical_nav=nav;S.authority='TOSS_ACCOUNT_CANONICAL_NAV_ONLY';S.updated_at=new Date().toISOString();
 }
 
 let queued=false;
