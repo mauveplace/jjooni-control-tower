@@ -72,6 +72,9 @@ function historicalCards(){
   for(let i=0;e&&i<8;i++,e=e.parentElement){
    if(!e||e===document.body||String(e.id||'').startsWith('panel-'))break;
    const t=norm(e.textContent);
+   // Never treat a multi-account/aggregate container as the Toss historical card.
+   if(/전체\s*6계좌\s*NAV|6계좌\s*통합\s*Current\s*Snapshot/i.test(t))break;
+   if(/\bISA\b/i.test(t)&&/연금저축/i.test(t)&&/\bIRP\b/i.test(t))break;
    if(/정규장\s*P&L/i.test(t)&&/누적수익률/i.test(t)&&(/환율효과/i.test(t)||/NAV\s*정합성/i.test(t))){
     out.push(e);break;
    }
