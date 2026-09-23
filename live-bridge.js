@@ -268,6 +268,14 @@ function renderWatchlist(){
  panel.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{window.__ctWlMarket=b.dataset.wm;renderWatchlist()});panel.querySelectorAll('[data-ws]').forEach(b=>b.onclick=()=>{window.__ctWlSort=b.dataset.ws;renderWatchlist()});
 }
 
+let OVERVIEW_NAV_PATCH_QUEUED=false;
+function queueOverviewTotalNav(){
+ if(OVERVIEW_NAV_PATCH_QUEUED)return;
+ OVERVIEW_NAV_PATCH_QUEUED=true;
+ setTimeout(()=>{OVERVIEW_NAV_PATCH_QUEUED=false;updateOverviewTotalNav()},35);
+}
+try{new MutationObserver(muts=>{if(!CANON)return;for(const m of muts){const t=m.target&&m.target.nodeType===3?m.target.parentElement:m.target;if(t&&t.closest&&t.closest('#panel-overview')){queueOverviewTotalNav();break}}}).observe(document.documentElement,{subtree:true,childList:true,characterData:true})}catch(_){}
+
 function renderAll(){ensureWatchlistUi();updateCards();updateOverviewTotalNav();updateHero();fixLegacyBadges();injectResponsiveCss();const wp=document.getElementById('panel-watchlist');if(wp&&wp.classList.contains('on'))renderWatchlist();}
 
 function applyLive(live){
