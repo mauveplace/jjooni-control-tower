@@ -96,6 +96,38 @@ def parse_bok(text,year,month):
     if not out: raise ValueError('BOK_HEADLINE_PARSE_MISS')
     return out
 
+def parse_ccsi(text,year,month):
+    compact=re.sub(r'\s+','',text)
+    if not re.search(rf'{year}년{month}월소비자동향조사',compact):
+        raise ValueError('REFERENCE_PERIOD_MISMATCH')
+    m=re.search(rf'{month}월(?:중)?소비자심리지수(?:\(CCSI\))?는([0-9]+(?:\.[0-9]+)?)',compact)
+    if not m: raise ValueError('BOK_CCSI_HEADLINE_PARSE_MISS')
+    return [metric('kr_ccsi','소비자심리지수 (CCSI)',m[1])]
+
+
+def collect_ccsi(e,checks):
+    period=re.search(r'(\d{4})년\s*(\d+)월',e['title'])
+    year,month=map(int,period.groups())
+    query=f'{year}년 {month}월 소비자동향조사'
+    index='https://www.bok.or.kr/portal/bbs/P0000559/list.do?menuNo=200690&searchCnd=1&searchKwd='+urllib.parse.quote(query)
+    try:
+        raw=raw_fetch(index).decode('utf-8',errors='replace')
+        link=next((u for u,t in Links(raw).rows if re.search(rf'{year}년\s*{month}월\s*소비자동향조사',t)),None)
+        if not link: raise ValueError('BOK_CCSI_RELEASE_NOT_FOUND')
+        page=urllib.parse.urljoin(index,html.unescape(link))
+        raw=raw_fetch(page).decode('utf-8',errors='replace')
+        urls=[urllib.parse.urljoin(page,html.unescape(u)) for u,t in Links(raw).rows if '.pdf' in t.lower()]
+        for url in urls+[page]:
+            try:
+                rows=parse_ccsi(text_fetch(url),year,month)
+                checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=url,result='PARSED'))
+                return rows,url
+            except Exception as exc:
+                checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=url,result=type(exc).__name__,error=str(exc)[:200]))
+    except Exception as exc:
+        checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=index,result=type(exc).__name__,error=str(exc)[:200]))
+    return None
+
 def adapter_id(e):
     t=e.get('title',''); c=e.get('country')
     from official_bls_actuals import DEFS
@@ -103,6 +135,7 @@ def adapter_id(e):
     if c=='US' and 'Initial Jobless Claims' in t: return 'DOL'
     if c=='KR' and t=='한국은행 통화정책방향 결정회의': return 'BOK_RATE'
     if c=='KR' and '생산자물가' in t: return 'BOK'
+    if c=='KR' and '소비자동향조사' in t: return 'BOK_CCSI'
     if c=='JP' and ('BOJ' in t or 'Bank of Japan' in t): return 'BOJ'
     if c=='GB' and 'Bank of England' in t: return 'BOE'
     return None
@@ -112,6 +145,7 @@ REGISTRY={'DOL':('initial_claims',),'BOK':('kr_ppi_mom','kr_ppi_yoy'),'BOJ':('bo
 from official_bls_actuals import DEFS as BLS_DEFS
 REGISTRY.update({'BLS_'+code:keys for code,keys in BLS_DEFS.values()})
 REGISTRY['BOK_RATE']=('bok_base_rate',)
+REGISTRY['BOK_CCSI']=('kr_ccsi',)
 
 def discover_bok(e):
     period=re.search(r'(\d{4})년\s*(\d+)월',e['title'])
@@ -126,6 +160,8 @@ def discover_bok(e):
 
 def collect(e,kind,checks):
     dt=release_time(e)
+    if kind=='BOK_CCSI':
+        return collect_ccsi(e,checks)
     if kind=='BOK_RATE':
         from official_bok_policy import collect_policy
         return collect_policy(e,checks)

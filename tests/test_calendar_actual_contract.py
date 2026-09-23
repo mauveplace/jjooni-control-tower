@@ -103,3 +103,19 @@ class CalendarActualRegression(unittest.TestCase):
         self.assertEqual(c['events'][0]['actual'],'196K')
 
 if __name__=='__main__': unittest.main()
+
+class ConsumerSurveyRegression(unittest.TestCase):
+    def test_low_importance_consumer_survey_is_explicitly_watched(self):
+        from calendar_actual_contract import build_freshness, KST
+        from datetime import datetime
+        event={'country':'KR','title':'2026년 9월 소비자동향조사 결과','datetime_kst':'2026-09-23T06:00+09:00','importance':1,'actual':None,'market_metrics':[]}
+        result=build_freshness({'events':[event]},datetime(2026,9,23,10,tzinfo=KST),[])
+        self.assertEqual(result['status'],'DEGRADED')
+        self.assertEqual(event['actual_status'],'OVERDUE')
+
+    def test_consumer_survey_parser_checks_reference_month(self):
+        from official_calendar_collectors import parse_ccsi
+        text='2026년 9월 소비자동향조사 결과 9월중 소비자심리지수(CCSI)는 104.5로 전월대비 하락'
+        self.assertEqual(parse_ccsi(text,2026,9)[0]['actual'],'104.5')
+        with self.assertRaises(ValueError):
+            parse_ccsi(text,2026,8)

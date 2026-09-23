@@ -290,6 +290,7 @@ def main():
         if e.get('actual') is not None and e.get('consensus') is not None:e['surprise']='actual_vs_consensus'
 
     c['enrichment_errors']=SOURCE_ERRORS
+    c['collection_health']={'status':'DEGRADED' if SOURCE_ERRORS else 'LIVE', 'checked_kst':now.isoformat(timespec='seconds'), 'failed_sources':SOURCE_ERRORS, 'contract':'SOURCE_AVAILABILITY_SEPARATE_FROM_ACTUAL_COMPLETENESS'}
     c['actual_freshness']=build_freshness(c,now,fed_checks+checks)
     c['official_actual_contract']='OFFICIAL_REGISTRY_BACKFILL_V2'
     c['enrichment_contract']='OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL_V2'

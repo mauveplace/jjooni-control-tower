@@ -105,7 +105,8 @@ def build_freshness(calendar, now, checks):
         e.pop('actual_status', None)
         if not actual_expected(e):
             e['actual_status'] = 'NOT_APPLICABLE'; continue
-        if int(e.get('importance') or 0) < 2 and not e.get('actual_watch'):
+        explicit_watch = e.get('actual_watch') or (e.get('country')=='KR' and '소비자동향조사' in e.get('title',''))
+        if int(e.get('importance') or 0) < 2 and not explicit_watch:
             continue
         dt = release_time(e)
         if not dt:
