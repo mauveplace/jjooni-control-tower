@@ -98,7 +98,7 @@ if(!window.__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED){
 if(!window.__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED){
  window.__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED=true;
  const t=document.createElement('script');
- t.src='toss-account-basis-v43.js?v=43.0&_='+Date.now();
+ t.src='toss-account-basis-v43.js?v=43.1&_='+Date.now();
  t.async=false;
  t.onerror=()=>console.warn('CT Toss account-basis authority load failed');
  (document.head||document.documentElement).appendChild(t);
