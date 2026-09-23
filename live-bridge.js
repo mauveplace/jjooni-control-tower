@@ -28,6 +28,18 @@ const signed=v=>n(v)==null?'—':(z(v)>=0?'+':'-')+won(v);
 const pct=v=>n(v)==null?'—':(z(v)>=0?'+':'')+z(v).toFixed(2)+'%';
 const usd=v=>n(v)==null?'—':'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const clone=x=>JSON.parse(JSON.stringify(x));
+const SIX_ACCOUNT_NAV_SOURCES=new Set(['ACCOUNT_SUM_6','FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV']);
+function isSixAccountNavSource(source,live){
+ const s=String(source||'');
+ if(!SIX_ACCOUNT_NAV_SOURCES.has(s))return false;
+ if(s==='FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV'){
+  const count=n(live?.total_nav_component_count);
+  const missing=Array.isArray(live?.total_nav_missing_accounts)?live.total_nav_missing_accounts:[];
+  if(count!=null&&count!==REGISTRY.length)return false;
+  if(missing.length)return false;
+ }
+ return true;
+}
 let LAST_LIVE=null;
 let CANON=null;
 let TRADE_QUOTES={};
@@ -142,9 +154,10 @@ function makeCanonical(live){
  const producerTotal=n(live.total_nav??live.total_nav_krw);
  const producerTotalSource=String(live.total_nav_source||'');
  const accountSum=t.nav;
- const authoritativeTotal=producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?producerTotal:accountSum;
+ const producerTotalTrusted=producerTotal!=null&&isSixAccountNavSource(producerTotalSource,live);
+ const authoritativeTotal=producerTotalTrusted?producerTotal:accountSum;
  const totalGap=producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
- return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotal!=null&&producerTotalSource==='ACCOUNT_SUM_6'?'PRODUCER_ACCOUNT_SUM_6':'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
+ return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
