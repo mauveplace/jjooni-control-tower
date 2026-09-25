@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-24T21:44:14+09:00",
+  "generated_kst": "2026-09-25T09:40:16+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -9,14 +9,14 @@
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
   "market_data_as_of": "2026-09-23",
-  "expected_market_data_date": "2026-09-23",
-  "observed_at": "2026-09-24T21:44:14+09:00",
+  "expected_market_data_date": "2026-09-24",
+  "observed_at": "2026-09-25T09:40:16+09:00",
   "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
   "current_target_upper": 4.0,
   "effr": 3.88,
-  "effr_date": "2026-09-22",
+  "effr_date": "2026-09-23",
   "outcomes": [
     {
       "action": "HOLD",
@@ -37,16 +37,8 @@
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
   "change_1d_pctpt": 15.5,
-  "change_1w_pctpt": 22.14,
+  "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-16",
-      "hold_probability": 0.512857,
-      "hike_any_probability": 0.487143,
-      "hike_25bp_probability": 0.487143,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-17",
       "hold_probability": 0.446429,
@@ -99,13 +91,13 @@
   },
   "quality": {
     "state": "PASS",
-    "cme_trade_date_gap_days": 0,
+    "cme_trade_date_gap_days": 1,
     "fred_target_dates": {
       "lower": "2026-09-24",
       "upper": "2026-09-24",
-      "effr": "2026-09-22"
+      "effr": "2026-09-23"
     },
-    "history_points": 6
+    "history_points": 5
   },
   "provenance": {
     "cme_settlements": "https://www.cmegroup.com/CmeWS/mvc/Settlements/Futures/Settlements/305/FUT",

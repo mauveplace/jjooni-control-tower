@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-09-25T08:54:42+09:00",
+  "generated_kst": "2026-09-25T09:40:16+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -9,15 +9,15 @@
     "NASDAQ100": 30478.85546875,
     "SP500": 7704.12988281,
     "VIX": 15.67000008,
-    "DXY": 101.2480011,
-    "USDKRW": 1366.34997559,
-    "USDJPY": 158.78999329,
-    "JPYKRW": 8.5909996,
-    "WTI": 93.94000244,
-    "BRENT": 106.12999725,
-    "NATGAS": 3.27600002,
-    "GOLD": 4309.20019531,
-    "COPPER": 6.77799988,
+    "DXY": 101.29299927,
+    "USDKRW": 1367.89001465,
+    "USDJPY": 158.7250061,
+    "JPYKRW": 8.59700012,
+    "WTI": 93.81999969,
+    "BRENT": 105.95999908,
+    "NATGAS": 3.26600003,
+    "GOLD": 4304.29980469,
+    "COPPER": 6.76049995,
     "US3M": 4.24,
     "US5Y": 5.0250001,
     "US10Y": 5.1619997,
@@ -44,7 +44,7 @@
     "RUSSELL2000": 2835.57421875,
     "DOW": 51349.98046875,
     "NASDAQCOMPOSITE": 26939.37304688,
-    "SILVER": 64.20999908,
+    "SILVER": 64.06999969,
     "FEAR_GREED": 36.1
   },
   "series": {
@@ -12101,7 +12101,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 101.2480011
+        "value": 101.29299927
       }
     ],
     "USDKRW": [
@@ -15223,7 +15223,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 1366.34997559
+        "value": 1367.89001465
       }
     ],
     "USDJPY": [
@@ -18345,7 +18345,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 158.78999329
+        "value": 158.7250061
       }
     ],
     "JPYKRW": [
@@ -21467,7 +21467,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 8.5909996
+        "value": 8.59700012
       }
     ],
     "WTI": [
@@ -24489,7 +24489,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 93.94000244
+        "value": 93.81999969
       }
     ],
     "BRENT": [
@@ -27515,7 +27515,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 106.12999725
+        "value": 105.95999908
       }
     ],
     "NATGAS": [
@@ -30541,7 +30541,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 3.27600002
+        "value": 3.26600003
       }
     ],
     "GOLD": [
@@ -33567,7 +33567,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 4309.20019531
+        "value": 4304.29980469
       }
     ],
     "COPPER": [
@@ -36593,7 +36593,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 6.77799988
+        "value": 6.76049995
       }
     ],
     "US3M": [
@@ -302585,7 +302585,7 @@
       },
       {
         "date": "2026-09-24",
-        "value": 64.20999908
+        "value": 64.06999969
       }
     ],
     "FEAR_GREED": [
@@ -308878,26 +308878,26 @@
   "tripod_latest": {
     "action": "HOLD_NO_TRADE",
     "data_alignment": "NDX_VIX_SAME_COMPLETED_SESSION",
-    "date": "2026-09-23",
-    "drawdown_52w_pct": -0.6206879286431488,
-    "ma250": 26836.7434765625,
-    "ndx": 30470.29296875,
-    "observed_at": "2026-09-24T09:26:42+09:00",
+    "date": "2026-09-24",
+    "drawdown_52w_pct": -0.5927612080013911,
+    "ma250": 26860.6446015625,
+    "ndx": 30478.85546875,
+    "observed_at": "2026-09-25T09:30:52+09:00",
     "ok": true,
-    "previous_drawdown_52w_pct": -0.5813650165716111,
-    "previous_ma250": 26813.182984375,
+    "previous_drawdown_52w_pct": -0.6207006689354144,
+    "previous_ma250": 26836.7434609375,
     "previous_regime": "상승",
     "previous_target": "TQQQ 100%",
-    "previous_vix10": 16.298999977111816,
+    "previous_vix10": 16.244999980926515,
     "regime": "상승",
-    "session_date": "2026-09-23",
+    "session_date": "2026-09-24",
     "signal_changed": false,
     "source": "PUBLIC_MARKET_DAILY_V1",
     "target": "TQQQ 100%",
     "target_changed": false,
-    "vix10": 16.244999980926515,
+    "vix10": 16.166000080108642,
     "vix_basis": "LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN",
-    "vix_latest_close": 15.180000305175781,
+    "vix_latest_close": 15.670000076293945,
     "vix_window_count": 10
   },
   "tripod_history": [
@@ -314022,7 +314022,13 @@
       "state": "PASS",
       "source": "BOK_ECOS",
       "window": "1Y_BACKFILL_THEN_45D_INCREMENT",
-      "errors": {}
+      "errors": {
+        "KR3Y": "URLError",
+        "KR5Y": "URLError",
+        "KR10Y": "URLError",
+        "KR20Y": "URLError",
+        "KR30Y": "URLError"
+      }
     }
   },
   "history_contract": "IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT",
@@ -314031,5 +314037,5 @@
   "history_base_path": "./data/history-30y.json",
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "market_supplement_contract": "GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2",
-  "equity_enriched_kst": "2026-09-25T08:54:45+09:00"
+  "equity_enriched_kst": "2026-09-25T09:40:26+09:00"
 }
