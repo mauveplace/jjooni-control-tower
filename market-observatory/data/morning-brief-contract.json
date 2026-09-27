@@ -1,0 +1,174 @@
+{
+  "schema": "JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1",
+  "generated_kst": "2026-09-27T11:00:00+09:00",
+  "read_only": true,
+  "contains_account_data": false,
+  "purpose": "Daily morning market brief specification consumed by PB-AI/ChatGPT from the Observatory market SSOT.",
+  "source_priority": [
+    {
+      "priority": 1,
+      "key": "finviz_sp500_map",
+      "name": "Finviz S&P 500 Map",
+      "url": "https://finviz.com/map?t=sec",
+      "required_for": [
+        "sp500_breadth",
+        "sector_flow",
+        "stock_dispersion"
+      ],
+      "periods": [
+        "1D",
+        "1W",
+        "1M"
+      ],
+      "fallback": "If unavailable, do not invent breadth. Use the Observatory sector-ETF breadth proxy only when explicitly labeled as a proxy."
+    },
+    {
+      "priority": 1,
+      "key": "finviz_calendar",
+      "name": "Finviz Calendar",
+      "url": "https://finviz.com/calendar.ashx",
+      "required_for": [
+        "earnings_calendar",
+        "economic_calendar"
+      ],
+      "fallback": "Use Observatory economic-calendar.json for canonical schedule/actuals and retain the Finviz link as the preferred web cross-check."
+    },
+    {
+      "priority": 2,
+      "key": "tradingview",
+      "name": "TradingView",
+      "url": "https://kr.tradingview.com/",
+      "required_for": [
+        "NDX",
+        "DXY",
+        "USDKRW",
+        "US10Y"
+      ],
+      "fallback": "Use canonical Observatory market series when TradingView cannot be verified; preserve the observed source and timestamp."
+    },
+    {
+      "priority": 3,
+      "key": "slickcharts_nasdaq100",
+      "name": "Slickcharts Nasdaq 100 Components",
+      "url": "https://www.slickcharts.com/nasdaq100",
+      "required_for": [
+        "nasdaq100_top10",
+        "nasdaq100_top10_weight"
+      ],
+      "fallback": "If unavailable, leave concentration values null and mark DEGRADED."
+    },
+    {
+      "priority": 4,
+      "key": "cnn_fear_greed",
+      "name": "CNN Fear & Greed Index",
+      "url": "https://edition.cnn.com/markets/fear-and-greed",
+      "required_for": [
+        "fear_greed_score",
+        "fear_greed_label"
+      ],
+      "fallback": "If unavailable, leave values null and mark DEGRADED."
+    }
+  ],
+  "freshness_policy": {
+    "timezone": "Asia/Seoul",
+    "preferred_capture": "US regular-session close +20 minutes",
+    "finality_check": "US regular-session close +35 minutes",
+    "daylight_saving": "DST-aware; 05:20/05:35 KST in US daylight time and 06:20/06:35 KST in US standard time.",
+    "closed_market_rule": "When the US market is closed or a source has not rolled forward, use the latest completed trading session and explicitly state the market date. Never estimate missing values."
+  },
+  "fact_boundary": {
+    "raw": "Observed numbers, source, market date, observed timestamp and source status only.",
+    "derived": "Deterministic rule outputs calculated from raw fields only.",
+    "commentary": "Natural-language explanation generated downstream; never stored as a raw fact.",
+    "no_fabrication": true
+  },
+  "required_sections": [
+    {
+      "order": 1,
+      "key": "three_line_conclusion",
+      "title": "한눈에 보는 결론 3줄"
+    },
+    {
+      "order": 2,
+      "key": "sp500_breadth_sector",
+      "title": "S&P500 시장 폭·섹터 흐름",
+      "source_keys": [
+        "finviz_sp500_map"
+      ]
+    },
+    {
+      "order": 3,
+      "key": "cross_asset_table",
+      "title": "NDX/DXY/USD-KRW/US10Y",
+      "source_keys": [
+        "tradingview"
+      ]
+    },
+    {
+      "order": 4,
+      "key": "nasdaq100_concentration",
+      "title": "Nasdaq100 상위 10개 집중도",
+      "source_keys": [
+        "slickcharts_nasdaq100"
+      ]
+    },
+    {
+      "order": 5,
+      "key": "fear_greed",
+      "title": "Fear & Greed",
+      "source_keys": [
+        "cnn_fear_greed"
+      ]
+    },
+    {
+      "order": 6,
+      "key": "today_calendar",
+      "title": "오늘 예정된 주요 경제지표·실적발표",
+      "source_keys": [
+        "finviz_calendar"
+      ]
+    },
+    {
+      "order": 7,
+      "key": "synthesis",
+      "title": "종합 해석",
+      "must_cover": [
+        "risk_on_off",
+        "mega_cap_concentration",
+        "usd_rates_environment",
+        "korea_session_watchpoints",
+        "us_session_watchpoints"
+      ]
+    },
+    {
+      "order": 8,
+      "key": "quick_links",
+      "title": "바로가기 링크 모음",
+      "source_keys": [
+        "finviz_sp500_map",
+        "finviz_calendar",
+        "tradingview",
+        "slickcharts_nasdaq100",
+        "cnn_fear_greed"
+      ]
+    }
+  ],
+  "display_policy": {
+    "language": "ko-KR",
+    "every_number_requires": [
+      "market_date_or_reference_date",
+      "observed_at_or_generated_at",
+      "source_key"
+    ],
+    "clickable_source_link_near_section": true,
+    "repeat_all_primary_links_in_quick_links": true,
+    "closed_market_disclosure_required": true
+  },
+  "usage_contract": {
+    "ssot_path": "./daily-market-pulse.json",
+    "contract_path": "./morning-brief-contract.json",
+    "pb_ai_required_read": true,
+    "autobot_direct_trade_trigger": false,
+    "rollout_stage": "READ_ONLY"
+  }
+}
