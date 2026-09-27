@@ -20,6 +20,22 @@ def run(script, *args):
     subprocess.run([sys.executable, str(ROOT / script), *map(str, args)], cwd=ROOT, check=True)
 
 
+def normalize_calendar_contract():
+    """Guarantee the published event schema after every retention merge."""
+    data = json.loads(CAL.read_text(encoding='utf-8'))
+    normalized = 0
+    for event in data.get('events', []):
+        for key in ['previous', 'consensus', 'actual', 'te_forecast', 'surprise', 'market_data_source']:
+            if key not in event:
+                event[key] = None
+                normalized += 1
+        if 'market_metrics' not in event or not isinstance(event.get('market_metrics'), list):
+            event['market_metrics'] = []
+            normalized += 1
+    CAL.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    print(f'CALENDAR_CONTRACT_NORMALIZE=PASS fields={normalized}')
+
+
 def refresh(previous=None, seed=False):
     with TemporaryDirectory(prefix='calendar-refresh-') as directory:
         snapshot = Path(directory) / 'before.json'
@@ -34,6 +50,7 @@ def refresh(previous=None, seed=False):
         run('tools/enrich_economic_calendar.py')
         run('tools/calendar_market_events.py', 'refresh')
         run('tools/persist_calendar_history.py', snapshot)
+        normalize_calendar_contract()
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
         run('tests/test_calendar_data_quality.py')
