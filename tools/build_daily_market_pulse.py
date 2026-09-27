@@ -288,9 +288,8 @@ def main():
     if not market_date:
         market_date = series_fact(obs, "SP500").get("market_date")
 
-    phase = str(os.environ.get("PULSE_PHASE") or "FINAL").upper()
-    if phase not in {"PROVISIONAL", "FINAL"}:
-        phase = "FINAL"
+    # Production contract is FINAL-only: one snapshot at US close +35 minutes.
+    phase = "FINAL"
 
     sectors, breadth = sector_proxy(sec)
     cross = {
