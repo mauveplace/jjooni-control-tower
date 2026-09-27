@@ -125,7 +125,7 @@ jobs:
           PY
 
       - name: Publish Daily Market Pulse
-        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[force-market-pulse-refresh]')))
         shell: bash
         run: |
           set -euo pipefail
