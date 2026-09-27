@@ -17,11 +17,11 @@ on:
       - market-observatory/data/ai-read-contract.json
       - .github/workflows/market-observatory-daily-pulse.yml
   schedule:
-    # Single FINAL capture only.
-    # US DST: 16:35 ET = 05:35 KST next day.
-    - cron: '35 20 * * 1-5'
-    # US standard time: 16:35 ET = 06:35 KST next day.
-    - cron: '35 21 * * 1-5'
+    # Single FINAL capture at US regular-session close +10m.
+    # US DST: 16:10 ET = 05:10 KST next day.
+    - cron: '10 20 * * 1-5'
+    # US standard time: 16:10 ET = 06:10 KST next day.
+    - cron: '10 21 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -69,7 +69,7 @@ jobs:
           parts=sched.split()
           minute=int(parts[0]) if parts else -1
           hour=int(parts[1]) if len(parts)>1 else -1
-          ok=(hour==expected_hour and minute==35)
+          ok=(hour==expected_hour and minute==10)
           print("run="+("true" if ok else "false"))
           print("phase=FINAL")
           print("ny_now="+now_et.isoformat())
