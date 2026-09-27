@@ -17,22 +17,12 @@ on:
       - market-observatory/data/ai-read-contract.json
       - .github/workflows/market-observatory-daily-pulse.yml
   schedule:
-    # US DST: 16:20 / 16:35 ET = 05:20 / 05:35 KST next day.
-    - cron: '20 20 * * 1-5'
+    # Single FINAL capture only.
+    # US DST: 16:35 ET = 05:35 KST next day.
     - cron: '35 20 * * 1-5'
-    # US standard time: 16:20 / 16:35 ET = 06:20 / 06:35 KST next day.
-    - cron: '20 21 * * 1-5'
+    # US standard time: 16:35 ET = 06:35 KST next day.
     - cron: '35 21 * * 1-5'
   workflow_dispatch:
-    inputs:
-      phase:
-        description: Snapshot phase
-        required: false
-        default: FINAL
-        type: choice
-        options:
-          - PROVISIONAL
-          - FINAL
 
 permissions:
   contents: write
@@ -60,7 +50,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
-          MANUAL_PHASE: ${{ inputs.phase }}
+
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import os
@@ -71,7 +61,7 @@ jobs:
           sched=os.environ.get("SCHEDULE","")
           if event in {"push","pull_request","workflow_dispatch"}:
               print("run=true")
-              print("phase="+((os.environ.get("MANUAL_PHASE") or "FINAL").upper()))
+              print("phase=FINAL")
               raise SystemExit
 
           now_et=datetime.now(timezone.utc).astimezone(ZoneInfo("America/New_York"))
@@ -79,9 +69,9 @@ jobs:
           parts=sched.split()
           minute=int(parts[0]) if parts else -1
           hour=int(parts[1]) if len(parts)>1 else -1
-          ok=(hour==expected_hour and minute in {20,35})
+          ok=(hour==expected_hour and minute==35)
           print("run="+("true" if ok else "false"))
-          print("phase="+("PROVISIONAL" if minute==20 else "FINAL"))
+          print("phase=FINAL")
           print("ny_now="+now_et.isoformat())
           PY
 
@@ -107,7 +97,7 @@ jobs:
 
           assert p["schema"]=="JJOONI_DAILY_MARKET_PULSE_V1"
           assert p["read_only"] is True and p["contains_account_data"] is False
-          assert p["snapshot_status"] in {"PROVISIONAL","FINAL"}
+          assert p["snapshot_status"]=="FINAL"
           assert p["quality"]["missing_value_policy"]=="NULL_NOT_ESTIMATE"
           assert p["usage_contract"]["autobot_direct_trade_trigger"] is False
           assert p["usage_contract"]["morning_brief_required_web_verification"] is True
@@ -133,7 +123,7 @@ jobs:
           PY
 
       - name: Publish Daily Market Pulse
-        if: steps.gate.outputs.run == 'true' && github.event_name != 'pull_request'
+        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
           set -euo pipefail
