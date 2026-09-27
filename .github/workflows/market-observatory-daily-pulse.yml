@@ -18,6 +18,7 @@ on:
       - .github/workflows/market-observatory-daily-pulse.yml
   schedule:
     # Single FINAL capture at US regular-session close +10m.
+    # Sunday ET refresh uses the last completed US trading session for Monday KST briefing.
     # US DST: 16:10 ET = 05:10 KST next day.
     # Sunday ET candidate intentionally supplies Monday KST brief from the last completed Friday session.
     - cron: '10 20 * * 0-5'
