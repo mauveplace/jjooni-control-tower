@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1",
-  "generated_kst": "2026-09-27T11:30:00+09:00",
+  "generated_kst": "2026-09-27T11:28:00+09:00",
   "read_only": true,
   "contains_account_data": false,
   "purpose": "Daily morning market brief specification consumed by PB-AI/ChatGPT from the Observatory market SSOT.",
@@ -71,8 +71,8 @@
   ],
   "freshness_policy": {
     "timezone": "Asia/Seoul",
-    "preferred_capture": "US regular-session close +35 minutes; single FINAL capture only",
-    "finality_check": "The +35 minute capture is the production FINAL snapshot; no +20 minute provisional production snapshot.",
+    "preferred_capture": "US regular-session close +35 minutes",
+    "finality_check": "Single FINAL capture only; no provisional 20-minute snapshot.",
     "daylight_saving": "DST-aware; 05:35 KST in US daylight time and 06:35 KST in US standard time.",
     "closed_market_rule": "When the US market is closed or a source has not rolled forward, use the latest completed trading session and explicitly state the market date. Never estimate missing values.",
     "production_write_policy": "Scheduled production data is written once per completed US session at the FINAL capture. Code push/PR validation must not publish a new market snapshot."
@@ -170,6 +170,7 @@
     "contract_path": "./morning-brief-contract.json",
     "pb_ai_required_read": true,
     "autobot_direct_trade_trigger": false,
-    "rollout_stage": "READ_ONLY"
+    "rollout_stage": "READ_ONLY",
+    "update_mode": "SINGLE_FINAL_CAPTURE"
   }
 }
