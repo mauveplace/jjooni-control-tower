@@ -223,7 +223,12 @@ def tripod_history(series):
 def add_event(events,dt,title,country,category,importance=2,source='',ref='',**extra):
     key=(dt,title,country)
     if any((e['datetime_kst'],e['title'],e['country'])==key for e in events):return
-    payload={'datetime_kst':dt,'title':title,'country':country,'category':category,'importance':importance,'source':source,'reference_period':ref}
+    payload={
+        'datetime_kst':dt,'title':title,'country':country,'category':category,'importance':importance,
+        'source':source,'reference_period':ref,
+        'previous':None,'consensus':None,'actual':None,'te_forecast':None,'surprise':None,
+        'market_data_source':None,'market_metrics':[],
+    }
     payload.update(extra)
     events.append(payload)
 
