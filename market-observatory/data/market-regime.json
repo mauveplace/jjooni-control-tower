@@ -1,0 +1,233 @@
+{
+  "schema": "JJOONI_MARKET_REGIME_V1",
+  "status": "ACTIVE",
+  "authority": "ANALYST_CONSENSUS_WEEKLY_SSOT",
+  "read_only": true,
+  "account_authority": false,
+  "order_authority": false,
+  "source": {
+    "title": "[W] 260928 주간시황 v11.4.2 (쭈니·로이 최종합의 v1.2·정오표)",
+    "version": "v11.4.2",
+    "generated_kst": "2026-09-27T23:30:00+09:00",
+    "consensus_status": "CLOSED",
+    "unresolved_issues": 0
+  },
+  "effective_window": {
+    "start_kst": "2026-09-28T00:00:00+09:00",
+    "end_kst": "2026-10-02T23:59:59+09:00",
+    "kr_lag_event_date": "2026-10-06",
+    "note": "10/2 NFP is reflected into the Korean market after the 10/3~10/5 holiday gap."
+  },
+  "regime": {
+    "code": "AI_LED_NARROW_RISK_ON_MACRO_STRESS_OVERLAY",
+    "label_ko": "AI 주도 좁은 위험선호 + 매크로 스트레스 오버레이",
+    "broad_risk_on": false,
+    "primary_risk": "LONG_REAL_RATE_AND_TERM_PREMIUM",
+    "summary_ko": "AI·반도체 이익성장이 지수를 지지하지만 시장 폭은 약하다. 이번 주 핵심 위험은 원유 자체보다 장기 실질금리와 기간프리미엄이다."
+  },
+  "weekly_ev": {
+    "nasdaq": {
+      "bull_pct": 26,
+      "base_pct": 42,
+      "bear_pct": 32,
+      "bull_return_pct": 2.5,
+      "base_return_pct": 0.3,
+      "bear_return_pct": -3.5,
+      "ev_pct": -0.344,
+      "band": "NEUTRAL"
+    },
+    "kospi": {
+      "bull_pct": 33,
+      "base_pct": 35,
+      "bear_pct": 32,
+      "bull_return_pct": 4,
+      "base_return_pct": 0.5,
+      "bear_return_pct": -4.5,
+      "ev_pct": 0.055,
+      "band": "NEUTRAL"
+    },
+    "one_month": {
+      "bull_pct": 28,
+      "base_pct": 35,
+      "bear_pct": 37,
+      "ev_pct": -0.65
+    },
+    "six_month": {
+      "bull_pct": 28,
+      "base_pct": 40,
+      "bear_pct": 32,
+      "ev_pct": 3.64,
+      "conservative_ev_pct": -0.66
+    }
+  },
+  "actions": {
+    "dca": "MAINTAIN",
+    "irregular_additional_buy": "NO_EV_ADVANTAGE",
+    "irregular_leverage_add": "ZERO",
+    "regular_dca": "UNCHANGED",
+    "tripod_rule_trading": "UNCHANGED",
+    "monday_open": "NO_CHASE_BUY_OR_SELL",
+    "semiconductor_core": "MAINTAIN"
+  },
+  "triggers": {
+    "bond_stress": {
+      "confirmation_source": "FED_H15",
+      "on_if_any": [
+        {
+          "metric": "US10Y",
+          "operator": ">=",
+          "value": 5.25,
+          "unit": "%"
+        },
+        {
+          "metric": "US30Y",
+          "operator": ">=",
+          "value": 5.5,
+          "unit": "%"
+        }
+      ],
+      "deep_if_all": true,
+      "deep_label": "BOND_STRESS_DEEP",
+      "deep_extra_probability_shift_pct": 0,
+      "current_state": "PROVISIONAL_ON",
+      "current_reference": {
+        "us10y_market_pct": 5.167,
+        "us30y_market_pct": 5.502,
+        "confirmed": false
+      }
+    },
+    "macro_stress": {
+      "conditions": [
+        "BOND_STRESS_CONFIRMED",
+        "CORE_PCE_YOY>=3.5",
+        "NFP>=200000"
+      ],
+      "activate_if_count_gte": 2,
+      "nasdaq_shift": {
+        "bull_pct": 25,
+        "base_pct": 40,
+        "bear_pct": 35,
+        "ev_pct": -0.48
+      },
+      "kospi_shift": {
+        "bull_pct": 32,
+        "base_pct": 33,
+        "bear_pct": 35,
+        "ev_pct": -0.13
+      }
+    },
+    "oil_watch": {
+      "activate_if_any": [
+        "WTI_DEC_2027>=75_USD_FOR_3_TRADING_DAYS",
+        "BRENT_FRONT_MONTH_CLOSE>=110_USD"
+      ],
+      "nasdaq_probability_shift": "BASE_TO_BEAR_3PP",
+      "kospi_probability_shift": "BASE_TO_BEAR_3PP_PROVISIONAL"
+    },
+    "oil_structural": {
+      "activate_if_all": [
+        "WTI_DEC_2027>=77_USD_WEEKLY_CLOSE_FOR_2_CONSECUTIVE_WEEKS",
+        "BRENT_DEC_2027_RISING_SAME_WINDOW"
+      ],
+      "horizon": "1M_6M",
+      "probability_shift": "BASE_TO_BEAR_5PP"
+    },
+    "us_volatility_shock": {
+      "metric": "VIX",
+      "activate_if_any": [
+        "CLOSE>20",
+        "DAILY_CHANGE_PCT>=30"
+      ],
+      "nasdaq_probability_shift": "BASE_TO_BEAR_5PP",
+      "combine_with_oil_rule": "MAX_NOT_SUM",
+      "total_bear_adjustment_ceiling_pp": 8
+    },
+    "kr_volatility": {
+      "metric": "VKOSPI",
+      "existing_regime_rule": true,
+      "bear_zone": "60_TO_75",
+      "tail_zone": "75_PLUS",
+      "separate_vix_overlay": false
+    }
+  },
+  "semiconductor": {
+    "current_grade": "S",
+    "downgrade_conditions": [
+      {
+        "id": "DRAM_SLOWDOWN",
+        "definition": "범용 DRAM QoQ 상승률 +5% 미만 2개 분기 연속"
+      },
+      {
+        "id": "BOND_STRESS",
+        "definition": "Bond Stress CONFIRMED"
+      },
+      {
+        "id": "MU_MISS",
+        "definition": "Micron 실적이 매출 50.45B USD 미만 또는 EPS 31.16 USD 미만"
+      }
+    ],
+    "grade_rule": {
+      "0_1_conditions": "S",
+      "2_conditions": "S-",
+      "3_conditions": "A"
+    },
+    "semantics": {
+      "S": "강한 구조·추세 유지",
+      "S-": "강한 구조 유지 + 단기 경고",
+      "A": "정상 조정",
+      "C_or_below": "구조 추세 훼손"
+    }
+  },
+  "middle_east": {
+    "label": "DIPLOMATIC_TAIL_UP_PHYSICAL_SUPPLY_MIXED",
+    "summary_ko": "외교 리스크는 재상승했지만 실제 공급경로는 복구와 병목이 혼재한다. 장기 공급충격 고착은 OIL-STRUCTURAL 확인 전 기본 시나리오로 두지 않는다."
+  },
+  "checkpoints": [
+    {
+      "order": 1,
+      "label": "Fed H.15 30Y 확인",
+      "market": "US",
+      "purpose": "Bond Stress CONFIRMED 여부"
+    },
+    {
+      "order": 2,
+      "label": "Core PCE",
+      "market": "US",
+      "purpose": "Macro Stress"
+    },
+    {
+      "order": 3,
+      "label": "Micron 실적",
+      "market": "US",
+      "purpose": "반도체 S/S- 판정"
+    },
+    {
+      "order": 4,
+      "label": "한국 9월 수출",
+      "market": "KR",
+      "purpose": "반도체 사이클 확인"
+    },
+    {
+      "order": 5,
+      "label": "ISM 제조업",
+      "market": "US",
+      "purpose": "성장·물가"
+    },
+    {
+      "order": 6,
+      "label": "NFP",
+      "market": "US",
+      "purpose": "Macro Stress 및 10/6 KRX Lag Trap"
+    }
+  ],
+  "ui": {
+    "headline_ko": "DCA 유지 · 나스닥/코스피 NEUTRAL · 반도체 S",
+    "primary_watch_ko": "장기 실질금리와 30년물",
+    "true_decision_day_ko": "10월 1일 한국장"
+  },
+  "consumer_contract": {
+    "precedence": "MARKET_REGIME_GUIDANCE_ONLY",
+    "rule": "계좌·주문·체결 SSOT를 절대 대체하지 않는다. PB는 이 레짐을 시장판단 참고값으로 사용하고 실제 집행은 계좌 SSOT·전략규칙·실행안전장치를 우선한다.",
+    "stale_rule": "effective_window.end_kst 이후 새 주간 합의본이 없으면 EXPIRED로 취급한다."
+  }
+}
