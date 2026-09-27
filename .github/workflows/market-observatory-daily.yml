@@ -34,6 +34,7 @@ on:
     # so check four off-peak minutes per hour and rebuild only when data is stale.
     - cron: '7,22,37,52 * * * *'
     # US regular-session close +10m, DST-safe candidate slots.
+    # Sunday ET candidate refreshes the last completed US session for Monday KST.
     # 20:10 UTC = 05:10 KST while New York is on EDT; 21:10 UTC = 06:10 KST while on EST.
     # Sunday UTC candidate intentionally refreshes Monday KST using the last completed Friday US session.
     # us_close_gate below allows only the slot where America/New_York local time is 16:10.
