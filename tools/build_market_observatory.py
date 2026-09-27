@@ -366,7 +366,7 @@ def spglobal_pmi_events(events,today=None,months_ahead=6):
 def calendar_build():
     ev=[];bls_events(ev);fixed_policy_events(ev);korea_core_events(ev);bea_events(ev);us_claims_events(ev);spglobal_pmi_events(ev)
     ev.sort(key=lambda x:x['datetime_kst'])
-    return {'schema':'JJOONI_ECONOMIC_CALENDAR_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'timezone':'Asia/Seoul','events':ev,'sources':['Federal Reserve','BLS','BEA','BOK','KOSTAT','U.S. Department of Labor','S&P Global Market Intelligence'],'note':'All displayed times are KST. Official schedules may change; builder refreshes automatically.'}
+    return {'schema':'JJOONI_ECONOMIC_CALENDAR_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'timezone':'Asia/Seoul','events':ev,'sources':['Federal Reserve','BLS','BEA','BOK','KOSTAT','U.S. Department of Labor','S&P Global Market Intelligence'],'schedule_contract':'US_RECURRING_CLAIMS_SP_GLOBAL_PMI_V1','note':'All displayed times are KST. Official schedules may change; builder refreshes automatically.'}
 
 def main():
     series=series_map();us,jp=add_official_yields(series)
