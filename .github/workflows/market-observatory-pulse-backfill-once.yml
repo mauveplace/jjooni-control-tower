@@ -1,0 +1,66 @@
+name: Market Observatory Pulse Backfill Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/market-observatory-pulse-backfill-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-pulse-backfill-once
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build missed Monday KST Daily Market Pulse
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_daily_market_pulse.py
+          python tools/build_daily_market_pulse.py
+      - name: Validate backfill
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("market-observatory/data/daily-market-pulse.json").read_text(encoding="utf-8"))
+          assert p["schema"]=="JJOONI_DAILY_MARKET_PULSE_V1"
+          assert p["snapshot_status"]=="FINAL"
+          assert p["market_date_us"]
+          print("MONDAY_KST_PULSE_BACKFILL=PASS")
+          print("generated_kst=",p.get("generated_kst"))
+          print("market_date_us=",p.get("market_date_us"))
+          print("quality=",p.get("quality",{}).get("status"))
+          PY
+      - name: Publish backfill
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/daily-market-pulse.json
+          if git diff --cached --quiet; then
+            echo DAILY_MARKET_PULSE_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): backfill Monday KST daily market pulse'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo BACKFILL_PUSH_RETRY=$attempt
+          done
+          exit 1
