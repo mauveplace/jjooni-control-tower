@@ -1,8 +1,8 @@
 {
   "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
-  "generated_kst": null,
-  "market_date_us": null,
-  "snapshot_status": "BOOTSTRAP",
+  "generated_kst": "2026-09-27T11:23:21+09:00",
+  "market_date_us": "2026-09-25",
+  "snapshot_status": "FINAL",
   "read_only": true,
   "contains_account_data": false,
   "contract": {
@@ -16,94 +16,331 @@
       "finviz_unchanged": null,
       "finviz_breadth_ratio": null,
       "proxy_basis": "S&P500_11_SECTOR_ETF_ABOVE_MA20",
-      "proxy_above_ma20": null,
-      "proxy_count": null,
-      "proxy_ratio": null,
-      "source_status": "PENDING"
+      "proxy_above_ma20": 3,
+      "proxy_count": 11,
+      "proxy_ratio": 0.2727272727272727,
+      "source_status": "WEB_VERIFICATION_REQUIRED",
+      "note": "Finviz constituent breadth is intentionally null until web-verified. The sector MA20 ratio is a labeled proxy only."
     },
-    "sector_flow": [],
+    "sector_flow": [
+      {
+        "ticker": "XLK",
+        "name": "Technology",
+        "d1_pct": 0.8012,
+        "w1_pct": 3.5179,
+        "m1_pct": 7.3452,
+        "above_ma20": true,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLC",
+        "name": "Communication Services",
+        "d1_pct": -0.9036,
+        "w1_pct": 1.9403,
+        "m1_pct": 0.3108,
+        "above_ma20": true,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLY",
+        "name": "Consumer Discretionary",
+        "d1_pct": 0.2175,
+        "w1_pct": -0.4233,
+        "m1_pct": -5.6333,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLF",
+        "name": "Financials",
+        "d1_pct": 0.5685,
+        "w1_pct": -1.826,
+        "m1_pct": -5.8702,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLI",
+        "name": "Industrials",
+        "d1_pct": 0.9477,
+        "w1_pct": 0.4006,
+        "m1_pct": -5.4952,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLE",
+        "name": "Energy",
+        "d1_pct": -0.8946,
+        "w1_pct": -3.5298,
+        "m1_pct": -0.6247,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLB",
+        "name": "Materials",
+        "d1_pct": 0.2415,
+        "w1_pct": -0.3801,
+        "m1_pct": -7.2107,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLV",
+        "name": "Health Care",
+        "d1_pct": 0.4886,
+        "w1_pct": 1.3718,
+        "m1_pct": -1.6365,
+        "above_ma20": true,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLP",
+        "name": "Consumer Staples",
+        "d1_pct": 0.4406,
+        "w1_pct": -0.8937,
+        "m1_pct": -4.88,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLU",
+        "name": "Utilities",
+        "d1_pct": 0.3811,
+        "w1_pct": -3.8686,
+        "m1_pct": -9.1933,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      },
+      {
+        "ticker": "XLRE",
+        "name": "Real Estate",
+        "d1_pct": -0.2161,
+        "w1_pct": -2.2807,
+        "m1_pct": -7.8288,
+        "above_ma20": false,
+        "observed_date": "2026-09-25",
+        "source": "Yahoo public daily"
+      }
+    ],
     "tradingview_cross_asset": {
       "ndx": {
-        "value": null
+        "value": 30608.13085938,
+        "market_date": "2026-09-25",
+        "change_pct": 0.4241349152522167,
+        "change_bp": null,
+        "source": "OBSERVATORY_CANONICAL"
       },
       "dxy": {
-        "value": null
+        "value": 100.97000122,
+        "market_date": "2026-09-25",
+        "change_pct": -0.3159242739594115,
+        "change_bp": null,
+        "source": "OBSERVATORY_CANONICAL"
       },
       "usdkrw": {
-        "value": null
+        "value": 1354.40002441,
+        "market_date": "2026-09-25",
+        "change_pct": -0.9478089953526503,
+        "change_bp": null,
+        "source": "OBSERVATORY_CANONICAL"
       },
       "us10y": {
-        "value": null
+        "value": 5.17,
+        "market_date": "2026-09-25",
+        "change_pct": null,
+        "change_bp": -0.9999999999999787,
+        "source": "OBSERVATORY_CANONICAL"
       },
       "preferred_web_source": "tradingview",
-      "web_verification_status": "PENDING"
+      "web_verification_status": "REQUIRED_FOR_MORNING_BRIEF"
     },
     "nasdaq100_concentration": {
-      "top10": [],
-      "top3_weight_pct": null,
-      "top10_weight_pct": null,
+      "top10": [
+        {
+          "rank": 1,
+          "ticker": "NVDA",
+          "name": "Nvidia Corp",
+          "weight_pct": 12.62
+        },
+        {
+          "rank": 2,
+          "ticker": "AAPL",
+          "name": "Apple Inc.",
+          "weight_pct": 11.56
+        },
+        {
+          "rank": 3,
+          "ticker": "MSFT",
+          "name": "Microsoft Corp",
+          "weight_pct": 8.9
+        },
+        {
+          "rank": 4,
+          "ticker": "AMZN",
+          "name": "Amazon.Com Inc",
+          "weight_pct": 6.25
+        },
+        {
+          "rank": 5,
+          "ticker": "GOOGL",
+          "name": "Alphabet Inc. Class A Common Stock",
+          "weight_pct": 5.03
+        },
+        {
+          "rank": 6,
+          "ticker": "GOOG",
+          "name": "Alphabet Inc. Class C Capital Stock",
+          "weight_pct": 4.7
+        },
+        {
+          "rank": 7,
+          "ticker": "SPCX",
+          "name": "Space Exploration Technologies Corp. Class A Common Stock",
+          "weight_pct": 4.55
+        },
+        {
+          "rank": 8,
+          "ticker": "META",
+          "name": "Meta Platforms, Inc. Class A Common Stock",
+          "weight_pct": 4.45
+        },
+        {
+          "rank": 9,
+          "ticker": "AVGO",
+          "name": "Broadcom Inc. Common Stock",
+          "weight_pct": 3.91
+        },
+        {
+          "rank": 10,
+          "ticker": "TSLA",
+          "name": "Tesla, Inc. Common Stock",
+          "weight_pct": 3.41
+        }
+      ],
+      "top3_weight_pct": 33.08,
+      "top10_weight_pct": 65.38,
       "source": "slickcharts_nasdaq100",
-      "status": "PENDING"
+      "status": "LIVE"
     },
     "fear_greed": {
       "score": null,
       "label": null,
       "provider_label": null,
       "source": "cnn_fear_greed",
-      "status": "PENDING"
+      "status": "DEGRADED",
+      "error": "HTTPError"
     },
     "calendar": [],
     "canonical_context": {
       "sp500": {
-        "value": null
+        "value": 7743.41015625,
+        "market_date": "2026-09-25",
+        "change_pct": 0.5098599587170183,
+        "change_bp": null,
+        "source": "OBSERVATORY_CANONICAL"
       },
       "vix": {
-        "value": null
+        "value": 14.86999989,
+        "market_date": "2026-09-25",
+        "change_pct": -5.105297931817232,
+        "change_bp": null,
+        "source": "OBSERVATORY_CANONICAL"
       }
     }
   },
   "derived": {
     "rule_version": "DAILY_MARKET_PULSE_REGIME_V1",
-    "risk": "PENDING",
-    "breadth": "PENDING",
-    "breadth_basis": null,
-    "rates_pressure": "PENDING",
-    "usd_pressure": "PENDING",
-    "score": 0,
-    "inputs_used": [],
+    "risk": "NEUTRAL",
+    "breadth": "NARROW",
+    "breadth_basis": "SECTOR_MA20_PROXY",
+    "rates_pressure": "STABLE",
+    "usd_pressure": "EASING",
+    "score": 1,
+    "inputs_used": [
+      "NDX_D1",
+      "VIX_D1",
+      "SECTOR_MA20_PROXY",
+      "US10Y_D1"
+    ],
     "autobot_direct_trade_trigger": false
   },
-  "history": [],
+  "history": [
+    {
+      "market_date_us": "2026-09-25",
+      "generated_kst": "2026-09-27T11:23:21+09:00",
+      "snapshot_status": "FINAL",
+      "ndx": 30608.13085938,
+      "dxy": 100.97000122,
+      "usdkrw": 1354.40002441,
+      "us10y": 5.17,
+      "sp500": 7743.41015625,
+      "vix": 14.86999989,
+      "breadth_ratio": null,
+      "breadth_proxy_ratio": 0.2727272727272727,
+      "top10_weight_pct": 65.38,
+      "fear_greed": null,
+      "risk": "NEUTRAL"
+    }
+  ],
   "quality": {
-    "status": "BOOTSTRAP",
-    "required_values": {},
-    "source_status": {},
+    "status": "LIVE",
+    "required_values": {
+      "ndx": true,
+      "dxy": true,
+      "usdkrw": true,
+      "us10y": true,
+      "market_date_us": true
+    },
+    "source_status": {
+      "finviz_sp500_map": "WEB_VERIFICATION_REQUIRED",
+      "finviz_calendar": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
+      "tradingview": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
+      "slickcharts_nasdaq100": "LIVE",
+      "cnn_fear_greed": "DEGRADED"
+    },
     "missing_value_policy": "NULL_NOT_ESTIMATE"
   },
   "sources": {
     "finviz_sp500_map": {
       "url": "https://finviz.com/map?t=sec",
-      "status": "PENDING"
+      "status": "WEB_VERIFICATION_REQUIRED",
+      "observed_at_kst": "2026-09-27T11:23:21+09:00"
     },
     "finviz_calendar": {
       "url": "https://finviz.com/calendar.ashx",
-      "status": "PENDING"
+      "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
+      "observed_at_kst": "2026-09-27T11:23:21+09:00"
     },
     "tradingview": {
       "url": "https://kr.tradingview.com/",
-      "status": "PENDING"
+      "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
+      "observed_at_kst": "2026-09-27T11:23:21+09:00"
     },
     "slickcharts_nasdaq100": {
       "url": "https://www.slickcharts.com/nasdaq100",
-      "status": "PENDING"
+      "status": "LIVE",
+      "observed_at_kst": "2026-09-27T11:23:21+09:00"
     },
     "cnn_fear_greed": {
       "url": "https://edition.cnn.com/markets/fear-and-greed",
-      "status": "PENDING"
+      "status": "DEGRADED",
+      "observed_at_kst": "2026-09-27T11:23:21+09:00"
     }
   },
   "usage_contract": {
-    "pb_ai_usable": false,
+    "pb_ai_usable": true,
     "morning_brief_required_web_verification": true,
     "autobot_direct_trade_trigger": false,
     "rollout_stage": "READ_ONLY"
