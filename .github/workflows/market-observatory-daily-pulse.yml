@@ -1,0 +1,156 @@
+name: Market Observatory Daily Pulse
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_daily_market_pulse.py
+      - market-observatory/data/daily-market-pulse.json
+      - market-observatory/data/morning-brief-contract.json
+      - market-observatory/data/ai-read-contract.json
+      - .github/workflows/market-observatory-daily-pulse.yml
+  pull_request:
+    paths:
+      - tools/build_daily_market_pulse.py
+      - market-observatory/data/daily-market-pulse.json
+      - market-observatory/data/morning-brief-contract.json
+      - market-observatory/data/ai-read-contract.json
+      - .github/workflows/market-observatory-daily-pulse.yml
+  schedule:
+    # US DST: 16:20 / 16:35 ET = 05:20 / 05:35 KST next day.
+    - cron: '20 20 * * 1-5'
+    - cron: '35 20 * * 1-5'
+    # US standard time: 16:20 / 16:35 ET = 06:20 / 06:35 KST next day.
+    - cron: '20 21 * * 1-5'
+    - cron: '35 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Snapshot phase
+        required: false
+        default: FINAL
+        type: choice
+        options:
+          - PROVISIONAL
+          - FINAL
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-daily-pulse
+  cancel-in-progress: false
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - id: gate
+        name: Resolve DST-aware US-close phase
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_PHASE: ${{ inputs.phase }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          from datetime import datetime, timezone
+          from zoneinfo import ZoneInfo
+
+          event=os.environ.get("EVENT_NAME","")
+          sched=os.environ.get("SCHEDULE","")
+          if event in {"push","pull_request","workflow_dispatch"}:
+              print("run=true")
+              print("phase="+((os.environ.get("MANUAL_PHASE") or "FINAL").upper()))
+              raise SystemExit
+
+          now_et=datetime.now(timezone.utc).astimezone(ZoneInfo("America/New_York"))
+          expected_hour=20 if now_et.utcoffset().total_seconds()==-4*3600 else 21
+          parts=sched.split()
+          minute=int(parts[0]) if parts else -1
+          hour=int(parts[1]) if len(parts)>1 else -1
+          ok=(hour==expected_hour and minute in {20,35})
+          print("run="+("true" if ok else "false"))
+          print("phase="+("PROVISIONAL" if minute==20 else "FINAL"))
+          print("ny_now="+now_et.isoformat())
+          PY
+
+      - name: Build Daily Market Pulse
+        if: steps.gate.outputs.run == 'true'
+        env:
+          PULSE_PHASE: ${{ steps.gate.outputs.phase }}
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_daily_market_pulse.py
+          python tools/build_daily_market_pulse.py
+
+      - name: Acceptance contract
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=json.loads(Path("market-observatory/data/daily-market-pulse.json").read_text(encoding="utf-8"))
+          c=json.loads(Path("market-observatory/data/morning-brief-contract.json").read_text(encoding="utf-8"))
+          a=json.loads(Path("market-observatory/data/ai-read-contract.json").read_text(encoding="utf-8"))
+
+          assert p["schema"]=="JJOONI_DAILY_MARKET_PULSE_V1"
+          assert p["read_only"] is True and p["contains_account_data"] is False
+          assert p["snapshot_status"] in {"PROVISIONAL","FINAL"}
+          assert p["quality"]["missing_value_policy"]=="NULL_NOT_ESTIMATE"
+          assert p["usage_contract"]["autobot_direct_trade_trigger"] is False
+          assert p["usage_contract"]["morning_brief_required_web_verification"] is True
+
+          assert c["schema"]=="JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1"
+          assert len(c["required_sections"])==8
+          assert [x["order"] for x in c["required_sections"]]==list(range(1,9))
+          assert c["freshness_policy"]["closed_market_rule"]
+          assert c["fact_boundary"]["no_fabrication"] is True
+          source_keys=[x["key"] for x in c["source_priority"]]
+          for key in ["finviz_sp500_map","finviz_calendar","tradingview","slickcharts_nasdaq100","cnn_fear_greed"]:
+              assert key in source_keys
+              assert key in p["sources"]
+              assert p["sources"][key]["url"].startswith("http")
+
+          reads={x.get("path"):x for x in a.get("required_reads",[])}
+          assert "./daily-market-pulse.json" in reads and reads["./daily-market-pulse.json"].get("required") is True
+          assert "./morning-brief-contract.json" in reads and reads["./morning-brief-contract.json"].get("required") is True
+
+          print("DAILY_MARKET_PULSE_ACCEPTANCE=PASS")
+          print("market_date_us=",p.get("market_date_us"))
+          print("source_status=",p["quality"]["source_status"])
+          PY
+
+      - name: Publish Daily Market Pulse
+        if: steps.gate.outputs.run == 'true' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/data/daily-market-pulse.json
+          if git diff --cached --quiet; then
+            echo DAILY_MARKET_PULSE_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'data(observatory): refresh daily market pulse'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase -X theirs origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo DAILY_MARKET_PULSE_PUSH_RETRY=$attempt
+          done
+          exit 1

@@ -3,6 +3,20 @@
   "purpose": "Mandatory market inputs for Roy and other PB/strategy agents before producing an investment strategy.",
   "required_reads": [
     {
+      "path": "./morning-brief-contract.json",
+      "role": "mandatory Korean morning market brief structure, source priority, freshness and link policy",
+      "required": true,
+      "usable_rule": "schema == JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1 and required_sections contains exactly 8 ordered sections",
+      "fallback": "Do not silently drop source links, basis timestamps, closed-market disclosures or the no-estimate rule."
+    },
+    {
+      "path": "./daily-market-pulse.json",
+      "role": "post-close market facts and deterministic Daily Market Pulse features for the morning brief",
+      "required": true,
+      "usable_rule": "schema == JJOONI_DAILY_MARKET_PULSE_V1; raw values are facts, derived values are rule outputs, and missing web enrichments remain null/DEGRADED",
+      "fallback": "If a preferred web source is unavailable, use only the explicitly labeled canonical fallback fields and state the limitation."
+    },
+    {
       "path": "./official-macro.json",
       "role": "official US/KR macro actuals, history, revisions and macro regimes",
       "required": true,
@@ -50,7 +64,7 @@
     "stale_behavior": "Never quote a stale probability as a current fact. Refresh/verify first.",
     "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale."
   },
-  "agent_instruction": "Before strategy generation, read all required sources including official-macro.json. Distinguish official actuals, market consensus, observed market facts and interpretation. Do not infer a FedWatch probability from Treasury yields alone, and do not fabricate official macro values when a source is pending.",
+  "agent_instruction": "Before strategy or morning-brief generation, read all required sources including morning-brief-contract.json, daily-market-pulse.json and official-macro.json. For the morning brief, verify the preferred public web sources, state each number's reference date/time and source, preserve raw/derived/commentary separation, and never estimate a value that did not update. For investment strategy, do not infer missing FedWatch or official macro values.",
   "official_macro_policy": {
     "scope": "Official macro only. Keep real yields, HY spreads, breadth, SOXX/QQQ and other market-price indicators outside this contract until the separate market-indicator phase.",
     "actual_ssot": "Fed/BLS/BEA/BOK/KOSTAT/KCS/MOTIE as applicable; transport layers must be identified separately.",
@@ -58,5 +72,19 @@
     "revisions": "Never overwrite revisions silently. Read vintage_history for release revisions.",
     "consensus": "Consensus is market data, never an official-source actual.",
     "regime": "Regime labels are informational features and must not be used as a standalone AUTOBOT trade trigger."
+  },
+  "morning_market_brief_policy": {
+    "source_priority": [
+      "Finviz S&P 500 Map + Calendar",
+      "TradingView",
+      "Slickcharts Nasdaq 100",
+      "CNN Fear & Greed"
+    ],
+    "web_verification": "Required for every daily brief even when SSOT canonical fallback values exist.",
+    "basis_time": "State market/reference date and observation time next to numerical claims.",
+    "closed_market": "Use latest completed trading session and disclose it; never estimate missing values.",
+    "report_sections": 8,
+    "link_policy": "Show clickable primary source link next to the relevant section and repeat all links in the final 바로가기 section.",
+    "fact_boundary": "raw observations != deterministic derived labels != AI commentary"
   }
 }

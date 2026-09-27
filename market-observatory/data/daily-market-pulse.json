@@ -1,0 +1,111 @@
+{
+  "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
+  "generated_kst": null,
+  "market_date_us": null,
+  "snapshot_status": "BOOTSTRAP",
+  "read_only": true,
+  "contains_account_data": false,
+  "contract": {
+    "schema": "JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1",
+    "path": "./morning-brief-contract.json"
+  },
+  "raw": {
+    "sp500_breadth": {
+      "finviz_advancers": null,
+      "finviz_decliners": null,
+      "finviz_unchanged": null,
+      "finviz_breadth_ratio": null,
+      "proxy_basis": "S&P500_11_SECTOR_ETF_ABOVE_MA20",
+      "proxy_above_ma20": null,
+      "proxy_count": null,
+      "proxy_ratio": null,
+      "source_status": "PENDING"
+    },
+    "sector_flow": [],
+    "tradingview_cross_asset": {
+      "ndx": {
+        "value": null
+      },
+      "dxy": {
+        "value": null
+      },
+      "usdkrw": {
+        "value": null
+      },
+      "us10y": {
+        "value": null
+      },
+      "preferred_web_source": "tradingview",
+      "web_verification_status": "PENDING"
+    },
+    "nasdaq100_concentration": {
+      "top10": [],
+      "top3_weight_pct": null,
+      "top10_weight_pct": null,
+      "source": "slickcharts_nasdaq100",
+      "status": "PENDING"
+    },
+    "fear_greed": {
+      "score": null,
+      "label": null,
+      "provider_label": null,
+      "source": "cnn_fear_greed",
+      "status": "PENDING"
+    },
+    "calendar": [],
+    "canonical_context": {
+      "sp500": {
+        "value": null
+      },
+      "vix": {
+        "value": null
+      }
+    }
+  },
+  "derived": {
+    "rule_version": "DAILY_MARKET_PULSE_REGIME_V1",
+    "risk": "PENDING",
+    "breadth": "PENDING",
+    "breadth_basis": null,
+    "rates_pressure": "PENDING",
+    "usd_pressure": "PENDING",
+    "score": 0,
+    "inputs_used": [],
+    "autobot_direct_trade_trigger": false
+  },
+  "history": [],
+  "quality": {
+    "status": "BOOTSTRAP",
+    "required_values": {},
+    "source_status": {},
+    "missing_value_policy": "NULL_NOT_ESTIMATE"
+  },
+  "sources": {
+    "finviz_sp500_map": {
+      "url": "https://finviz.com/map?t=sec",
+      "status": "PENDING"
+    },
+    "finviz_calendar": {
+      "url": "https://finviz.com/calendar.ashx",
+      "status": "PENDING"
+    },
+    "tradingview": {
+      "url": "https://kr.tradingview.com/",
+      "status": "PENDING"
+    },
+    "slickcharts_nasdaq100": {
+      "url": "https://www.slickcharts.com/nasdaq100",
+      "status": "PENDING"
+    },
+    "cnn_fear_greed": {
+      "url": "https://edition.cnn.com/markets/fear-and-greed",
+      "status": "PENDING"
+    }
+  },
+  "usage_contract": {
+    "pb_ai_usable": false,
+    "morning_brief_required_web_verification": true,
+    "autobot_direct_trade_trigger": false,
+    "rollout_stage": "READ_ONLY"
+  }
+}
