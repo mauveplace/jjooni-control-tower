@@ -220,10 +220,12 @@ def tripod_history(series):
     return out,log
 
 # ---- Calendar ----
-def add_event(events,dt,title,country,category,importance=2,source='',ref=''):
+def add_event(events,dt,title,country,category,importance=2,source='',ref='',**extra):
     key=(dt,title,country)
     if any((e['datetime_kst'],e['title'],e['country'])==key for e in events):return
-    events.append({'datetime_kst':dt,'title':title,'country':country,'category':category,'importance':importance,'source':source,'reference_period':ref})
+    payload={'datetime_kst':dt,'title':title,'country':country,'category':category,'importance':importance,'source':source,'reference_period':ref}
+    payload.update(extra)
+    events.append(payload)
 
 def parse_ics_dt(v):
     v=v.strip();
@@ -283,10 +285,83 @@ def bea_events(events):
         imp=3 if ('GDP' in title or 'Personal Income and Outlays' in title) else 2
         add_event(events,d.isoformat(timespec='minutes'),title,'US','GDP/PCE/무역',imp,'BEA')
 
+def _observed_fixed_holiday(day):
+    if day.weekday()==5:return day-timedelta(days=1)
+    if day.weekday()==6:return day+timedelta(days=1)
+    return day
+
+def _nth_weekday(year,month,weekday,n):
+    d=date(year,month,1)
+    d+=timedelta(days=(weekday-d.weekday())%7+7*(n-1))
+    return d
+
+def _us_schedule_holidays(year):
+    return {
+        _observed_fixed_holiday(date(year,1,1)),
+        _observed_fixed_holiday(date(year,7,4)),
+        _nth_weekday(year,9,0,1),
+        _nth_weekday(year,11,3,4),
+        _observed_fixed_holiday(date(year,12,25)),
+    }
+
+def _nth_us_working_day(year,month,n):
+    holidays=_us_schedule_holidays(year)
+    d=date(year,month,1);seen=0
+    while True:
+        if d.weekday()<5 and d not in holidays:
+            seen+=1
+            if seen==n:return d
+        d+=timedelta(days=1)
+
+def _shift_month(year,month,offset):
+    idx=year*12+(month-1)+offset
+    return idx//12,idx%12+1
+
+def us_claims_events(events,today=None,horizon_days=180):
+    """Seed the recurring DOL weekly Initial Jobless Claims release schedule."""
+    today=today or datetime.now(KST).date()
+    start=today-timedelta(days=35);end=today+timedelta(days=horizon_days)
+    d=start+timedelta(days=(3-start.weekday())%7)
+    while d<=end:
+        release=d
+        if d in _us_schedule_holidays(d.year):
+            release=d-timedelta(days=1)
+        dt=datetime(release.year,release.month,release.day,8,30,tzinfo=ET).astimezone(KST)
+        add_event(
+            events,dt.isoformat(timespec='minutes'),'U.S. Initial Jobless Claims','US','고용',2,
+            'U.S. Department of Labor','weekly',
+            schedule_source_url='https://www.dol.gov/ui/data.pdf',
+            schedule_rule='WEEKLY_THURSDAY_0830_ET_HOLIDAY_ADJUSTED',
+            actual_watch=True,
+        )
+        d+=timedelta(days=7)
+
+def spglobal_pmi_events(events,today=None,months_ahead=6):
+    """Seed S&P Global final U.S. PMI releases from its published working-day rule."""
+    today=today or datetime.now(KST).date()
+    source_url='https://pmi.spglobal.com/Public/Release/ReleaseDates?language=en'
+    for offset in range(-1,months_ahead+1):
+        year,month=_shift_month(today.year,today.month,offset)
+        survey_end=date(year,month,1)-timedelta(days=1)
+        ref=survey_end.strftime('%B %Y final')
+        for workday,title,importance,rule in [
+            (1,'S&P Global US Manufacturing PMI',2,'FIRST_WORKING_DAY_0945_ET'),
+            (3,'S&P Global US Services & Composite PMI',3,'THIRD_WORKING_DAY_0945_ET'),
+        ]:
+            release=_nth_us_working_day(year,month,workday)
+            dt=datetime(release.year,release.month,release.day,9,45,tzinfo=ET).astimezone(KST)
+            add_event(
+                events,dt.isoformat(timespec='minutes'),title,'US','경기/PMI',importance,
+                'S&P Global Market Intelligence',ref,
+                schedule_source_url=source_url,
+                schedule_rule=rule,
+                actual_watch=True,
+            )
+
 def calendar_build():
-    ev=[];bls_events(ev);fixed_policy_events(ev);korea_core_events(ev);bea_events(ev)
+    ev=[];bls_events(ev);fixed_policy_events(ev);korea_core_events(ev);bea_events(ev);us_claims_events(ev);spglobal_pmi_events(ev)
     ev.sort(key=lambda x:x['datetime_kst'])
-    return {'schema':'JJOONI_ECONOMIC_CALENDAR_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'timezone':'Asia/Seoul','events':ev,'sources':['Federal Reserve','BLS','BEA','BOK','KOSTAT'],'note':'All displayed times are KST. Official schedules may change; builder refreshes automatically.'}
+    return {'schema':'JJOONI_ECONOMIC_CALENDAR_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'timezone':'Asia/Seoul','events':ev,'sources':['Federal Reserve','BLS','BEA','BOK','KOSTAT','U.S. Department of Labor','S&P Global Market Intelligence'],'note':'All displayed times are KST. Official schedules may change; builder refreshes automatically.'}
 
 def main():
     series=series_map();us,jp=add_official_yields(series)

@@ -26,6 +26,8 @@ PREF={
  'Personal Income and Outlays':['core pce price index m/m','core pce price index mom','pce price index y/y','personal income','personal spending'],
  'GDP':['advance gdp q/q','prelim gdp q/q','final gdp q/q','gdp growth rate qoq','gdp growth rate'],
  'U.S. Initial Jobless Claims':['initial jobless claims','unemployment claims'],
+ 'S&P Global US Manufacturing PMI':['final manufacturing pmi','manufacturing pmi','s&p global manufacturing pmi'],
+ 'S&P Global US Services & Composite PMI':['final services pmi','services pmi','composite pmi','s&p global composite pmi'],
  'BOJ':['boj policy rate','interest rate decision'],
  'FOMC':['federal funds rate','fed interest rate decision'],
  'Import and Export Price Indexes':['import prices m/m','export prices m/m'],
@@ -61,6 +63,13 @@ DETAIL_GROUPS={
  ],
  'Job Openings and Labor Turnover':[
    {'key':'jolts','label':'JOLTS Job Openings','aliases':['jolts job openings','job openings']},
+ ],
+ 'S&P Global US Manufacturing PMI':[
+   {'key':'sp_us_manufacturing_pmi','label':'S&P Global US Manufacturing PMI','aliases':['final manufacturing pmi','manufacturing pmi','s&p global manufacturing pmi']},
+ ],
+ 'S&P Global US Services & Composite PMI':[
+   {'key':'sp_us_services_pmi','label':'S&P Global US Services PMI','aliases':['final services pmi','services pmi','s&p global services pmi']},
+   {'key':'sp_us_composite_pmi','label':'S&P Global US Composite PMI','aliases':['composite pmi','s&p global composite pmi','us composite pmi']},
  ],
  'Employment Cost Index':[
    {'key':'eci','label':'Employment Cost Index','aliases':['employment cost index']},

@@ -30,3 +30,26 @@ assert metric['value_role']=='market_forecast',metric
 assert event.get('actual') is None,event
 assert MOD.merge_sources('A + B','B + C','A')=='A + B + C'
 print('CALENDAR_MARKET_SEMANTICS_TEST=PASS')
+
+
+# Recurring US macro schedule regression: claims + S&P Global PMI.
+from datetime import date
+BSPEC=spec_from_file_location('build_market_observatory',ROOT/'tools'/'build_market_observatory.py')
+BUILD=module_from_spec(BSPEC);BSPEC.loader.exec_module(BUILD)
+rows=[]
+BUILD.us_claims_events(rows,today=date(2026,9,27),horizon_days=90)
+BUILD.spglobal_pmi_events(rows,today=date(2026,9,27),months_ahead=2)
+by={(e['datetime_kst'],e['title']):e for e in rows}
+assert ('2026-10-01T21:30+09:00','U.S. Initial Jobless Claims') in by,sorted(by)[:8]
+assert ('2026-11-25T22:30+09:00','U.S. Initial Jobless Claims') in by,'Thanksgiving holiday adjustment missing'
+assert ('2026-10-01T22:45+09:00','S&P Global US Manufacturing PMI') in by
+assert ('2026-10-05T22:45+09:00','S&P Global US Services & Composite PMI') in by
+assert by[('2026-10-05T22:45+09:00','S&P Global US Services & Composite PMI')]['schedule_rule']=='THIRD_WORKING_DAY_0945_ET'
+
+ESPEC=spec_from_file_location('enrich_economic_calendar',ROOT/'tools'/'enrich_economic_calendar.py')
+ENRICH=module_from_spec(ESPEC);ESPEC.loader.exec_module(ENRICH)
+pmi_keys={x['key'] for x in ENRICH.detail_specs('S&P Global US Services & Composite PMI')}
+assert pmi_keys=={'sp_us_services_pmi','sp_us_composite_pmi'},pmi_keys
+nfp_keys={x['key'] for x in ENRICH.detail_specs('Employment Situation')}
+assert {'nfp','unemployment','avg_hourly_mom','avg_hourly_yoy'}<=nfp_keys,nfp_keys
+print('CALENDAR_RECURRING_CORE_EVENTS_TEST=PASS')
