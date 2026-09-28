@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35)return;
-const STATE={state:'ACTIVE',version:'35.1-public-daily',renders:0,last:null};
+const STATE={state:'ACTIVE',version:'35.2-freshest-completed-session',renders:0,last:null};
 window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35=STATE;
 const SOURCES=new Set(['YAHOO_RULE_ENGINE_FAST_V31','PUBLIC_MARKET_DAILY_V1']);
 const BASIS='LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN';
@@ -15,10 +15,17 @@ function signal(){
  const p=((P.accounts||{}).TRIPOD||{}).signal||P.tripod_signal||{};
  const u=U.tripod_signal||{};
  const c=((C.accounts||{}).TRIPOD||{}).signal||C.tripod_signal||{};
- // Prefer the isolated public daily signal because it is independently scheduled
- // after each completed US session and cannot mutate accounts or orders.
- if(String(u.source||'')==='PUBLIC_MARKET_DAILY_V1')return u;
+ // Never prefer a source merely by lineage. Pick the newest completed-session
+ // signal first, then use source authority only as a same-date tie breaker.
+ const rank=x=>String(x||'')==='PUBLIC_MARKET_DAILY_V1'?3:String(x||'')==='YAHOO_RULE_ENGINE_FAST_V31'?2:SOURCES.has(String(x||''))?1:0;
+ const dated=[u,p,c].filter(x=>x&&Object.keys(x).length&&SOURCES.has(String(x.source||''))&&ymd(x.date||x.session_date||x.as_of_date));
+ dated.sort((a,b)=>{
+  const da=ymd(a.date||a.session_date||a.as_of_date),db=ymd(b.date||b.session_date||b.as_of_date);
+  return db.localeCompare(da)||rank(b.source)-rank(a.source);
+ });
+ if(dated.length)return dated[0];
  if(String(p.source||'')==='YAHOO_RULE_ENGINE_FAST_V31')return p;
+ if(String(u.source||'')==='PUBLIC_MARKET_DAILY_V1')return u;
  if(SOURCES.has(String(c.source||'')))return c;
  return p&&Object.keys(p).length?p:c;
 }
@@ -31,16 +38,19 @@ function daysFromTodayKst(date){
 }
 function marketSessionDate(){
  const P=window.__JJOONI_LIVE_PAYLOAD||{},C=window.__JJOONI_CANONICAL_SSOT||{},U=window.__JJOONI_PUBLIC_MARKET_DAILY||{};
- const pools=[U.market_context,P.market_context,C.market_context];
- for(const pool of pools){
+ const dates=[];
+ // Use every independent market context and require the TRI-POD signal to match
+ // the newest completed US session. This prevents a stale sidecar from
+ // validating itself by being checked against its own stale market date.
+ for(const pool of [P.market_context,C.market_context,U.market_context]){
   const items=(pool||{}).items||{};
   for(const key of ['VIX','NASDAQ100','SP500']){
    const r=items[key]||{};
    const d=ymd(r.session_date||r.as_of_date||r.as_of_kst||r.observed_at);
-   if(d&&n(r.value)!=null)return d;
+   if(d&&n(r.value)!=null)dates.push(d);
   }
  }
- return '';
+ return dates.length?dates.sort().at(-1):'';
 }
 function trust(sig){
  const date=ymd(sig.date||sig.session_date||sig.as_of_date);
