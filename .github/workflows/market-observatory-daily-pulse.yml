@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - tools/build_daily_market_pulse.py
+      - tools/build_public_market_daily.py
       - market-observatory/data/daily-market-pulse.json
       - market-observatory/data/morning-brief-contract.json
       - market-observatory/data/ai-read-contract.json
@@ -88,14 +89,18 @@ jobs:
           print("ny_now="+now_et.isoformat())
           PY
 
-      - name: Build Daily Market Pulse
+      - name: Build Daily Market Pulse + TRI-POD
         if: steps.gate.outputs.run == 'true'
         env:
           PULSE_PHASE: ${{ steps.gate.outputs.phase }}
         run: |
           set -euo pipefail
-          python -m py_compile tools/build_daily_market_pulse.py
+          python -m py_compile tools/build_daily_market_pulse.py tools/build_public_market_daily.py
           python tools/build_daily_market_pulse.py
+          # TRI-POD must be generated in the same US-close cycle as the Market Pulse.
+          # This removes reliance on the separately scheduled sidecar job, which can
+          # be delayed by GitHub Actions scheduling.
+          python tools/build_public_market_daily.py
 
       - name: Acceptance contract
         if: steps.gate.outputs.run == 'true'
@@ -105,6 +110,7 @@ jobs:
           from pathlib import Path
 
           p=json.loads(Path("market-observatory/data/daily-market-pulse.json").read_text(encoding="utf-8"))
+          t=json.loads(Path("public-market-daily.json").read_text(encoding="utf-8"))
           c=json.loads(Path("market-observatory/data/morning-brief-contract.json").read_text(encoding="utf-8"))
           a=json.loads(Path("market-observatory/data/ai-read-contract.json").read_text(encoding="utf-8"))
 
@@ -114,6 +120,17 @@ jobs:
           assert p["quality"]["missing_value_policy"]=="NULL_NOT_ESTIMATE"
           assert p["usage_contract"]["autobot_direct_trade_trigger"] is False
           assert p["usage_contract"]["morning_brief_required_web_verification"] is True
+
+          # TRI-POD and Observatory must describe the same latest completed US session.
+          assert t["schema"]=="JJOONI_PUBLIC_MARKET_DAILY_V1"
+          assert t["read_only"] is True and t["contains_account_data"] is False
+          sig=t.get("tripod_signal") or {}
+          assert sig.get("ok") is True, sig
+          assert sig.get("source")=="PUBLIC_MARKET_DAILY_V1", sig
+          assert sig.get("vix_basis")=="LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN", sig
+          assert int(sig.get("vix_window_count") or 0)==10, sig
+          assert sig.get("data_alignment")=="NDX_VIX_SAME_COMPLETED_SESSION", sig
+          assert sig.get("date")==p.get("market_date_us"), (sig.get("date"),p.get("market_date_us"))
 
           assert c["schema"]=="JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1"
           assert len(c["required_sections"])==8
@@ -132,6 +149,7 @@ jobs:
 
           print("DAILY_MARKET_PULSE_ACCEPTANCE=PASS")
           print("market_date_us=",p.get("market_date_us"))
+          print("tripod_date=",sig.get("date"),"target=",sig.get("target"),"vix10=",sig.get("vix10"))
           print("source_status=",p["quality"]["source_status"])
           PY
 
@@ -142,12 +160,12 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/daily-market-pulse.json
+          git add market-observatory/data/daily-market-pulse.json public-market-daily.json
           if git diff --cached --quiet; then
             echo DAILY_MARKET_PULSE_NO_CHANGE
             exit 0
           fi
-          git commit -m 'data(observatory): refresh daily market pulse'
+          git commit -m 'data(observatory): refresh daily market pulse and TRI-POD'
           for attempt in 1 2 3; do
             git fetch origin main
             git rebase -X theirs origin/main
