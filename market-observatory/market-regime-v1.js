@@ -69,6 +69,28 @@ function render(d){
       (d.checkpoints||[]).map(x=>'<div><b>'+esc(x.order)+'. '+esc(x.label)+'</b><span>'+esc(x.purpose||'')+'</span></div>').join('')+
     '</div></div>'+
     '<div class="mrNote"><b>'+esc(d.regime?.label_ko||'')+'</b><br>'+esc(d.regime?.summary_ko||'')+'<br><br><b>PB 경계:</b> '+esc(d.consumer_contract?.rule||'')+'</div>';
+  const rateRoot=el('#rateDriverRoot');
+  if(rateRoot){
+    if(r.status){
+      const cr=r.credit_modifier?.current_reference||{};
+      rateRoot.innerHTML=
+        '<div class="mrGrid mrResearchGrid">'+
+          '<div class="mrBox"><small>주식 레짐</small><b>'+esc(r.equity_regime?.label_ko||'—')+'</b><span>'+esc(r.equity_regime?.interpretation_ko||'')+'</span></div>'+
+          '<div class="mrBox"><small>금리 Primary</small><b>'+esc(r.rate_regime?.primary_label_ko||'—')+'</b><span>Secondary: '+esc(r.rate_regime?.secondary_label_ko||'—')+'</span></div>'+
+          '<div class="mrBox"><small>Credit Modifier</small><b>'+esc(r.credit_modifier?.label_ko||'—')+'</b><span>HY OAS '+esc(cr.hy_oas_pct??'—')+'% · 5D '+esc(cr.five_day_change_bp??'—')+'bp · 수준 '+esc(cr.three_year_level_percentile??'—')+'백분위</span></div>'+
+          '<div class="mrBox"><small>공식판 영향</small><b>'+(r.weekly_ssot_unchanged?'없음':'확인 필요')+'</b><span>'+esc(r.weekly_ssot_version||'')+' 유지 · RESEARCH ONLY</span></div>'+
+        '</div>'+
+        '<div class="mrRule"><b>현재 해석</b><span><strong>'+esc(r.rate_regime?.display_label_ko||'—')+'</strong> · '+esc(r.rate_regime?.interpretation_ko||'')+'</span></div>'+
+        '<div class="mrRule"><b>Credit 판정</b><span>'+esc(r.credit_modifier?.interpretation_ko||'')+'</span></div>'+
+        '<div class="mrRule"><b>Driver 원칙</b><span>'+esc(r.driver_framework?.overlap_rule_ko||'')+'</span></div>'+
+        '<div class="mrRule"><b>Bond Stress</b><span>'+esc(r.bond_stress_design?.alarm_rule_ko||'')+'</span></div>'+
+        '<div class="mrNote"><b>중요:</b> '+esc(r.note_ko||'')+'<br><b>v11.5 후보:</b> '+esc(r.bond_stress_design?.v115_candidate_ko||'')+'</div>';
+      const rm=el('.obsRateRegimeLoading');
+      if(rm) rm.textContent='금리 Driver/신용 심각도 연구 레이어 · 이번 주 공식 SSOT 판정은 변경하지 않음';
+    }else{
+      rateRoot.innerHTML='<div class="mrNote">금리 레짐 연구 오버레이가 아직 없습니다.</div>';
+    }
+  }
   const meta=el('.obsRegimeLoading');
   if(meta) meta.textContent='시장판단 SSOT · 계좌/주문 SSOT와 분리 · PB는 읽기 전용 참고';
 }
