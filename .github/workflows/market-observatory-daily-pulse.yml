@@ -16,6 +16,10 @@ on:
       - market-observatory/data/morning-brief-contract.json
       - market-observatory/data/ai-read-contract.json
       - .github/workflows/market-observatory-daily-pulse.yml
+  workflow_run:
+    workflows:
+      - "Market Observatory Daily + Calendar"
+    types: [completed]
   schedule:
     # Single FINAL capture at US regular-session close +10m.
     # Sunday ET refresh uses the last completed US trading session for Monday KST briefing.
@@ -52,6 +56,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
 
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
@@ -67,6 +72,12 @@ jobs:
               raise SystemExit
 
           now_et=datetime.now(timezone.utc).astimezone(ZoneInfo("America/New_York"))
+          if event == "workflow_run":
+              ok=(os.environ.get("WORKFLOW_RUN_CONCLUSION","")=="success" and ((now_et.hour==16 and now_et.minute>=10) or now_et.hour==17))
+              print("run="+("true" if ok else "false"))
+              print("phase=FINAL")
+              print("ny_now="+now_et.isoformat())
+              raise SystemExit
           expected_hour=20 if now_et.utcoffset().total_seconds()==-4*3600 else 21
           parts=sched.split()
           minute=int(parts[0]) if parts else -1
@@ -125,7 +136,7 @@ jobs:
           PY
 
       - name: Publish Daily Market Pulse
-        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[force-market-pulse-refresh]')))
+        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[force-market-pulse-refresh]')))
         shell: bash
         run: |
           set -euo pipefail
