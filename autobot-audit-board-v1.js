@@ -47,6 +47,37 @@ function ensureRoot(){
 
 function verdictCount(summary,key){return Number((summary?.verdicts||{})[key]||0)}
 
+function performanceCards(performance){
+ const score=performance?.official_score||{},risk=performance?.risk_observations||{};
+ const available=score.status==='AVAILABLE';
+ const fmt=(value,suffix='%p')=>value!=null&&Number.isFinite(Number(value))?Number(value).toFixed(2)+suffix:'미확인';
+ const card=(label,value)=>'<div class="ctAaCard"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
+ return '<div class="ctAaSection"><h4>누적 운용 성적 · 기존 시작점 유지</h4>'+
+ '<div class="ctAaGrid">'+
+ card('공식 점수 · 사후 승자 대비',available?fmt(score.score_pp):'산출 대기')+
+ card('사후 승자와 동일 기준 50:50 격차',available?fmt(score.winner_vs_50_50_gap_pp):'미확인')+
+ card('입출금 조정 계좌 누적수익률',available?fmt(score.account_return_pct,'%'):'미확인')+
+ card('동일 기준 50:50 대비',available?fmt(score.aligned_50_50_excess_pp):'미확인')+
+ card('KOSPI200 ETF 누적',available?fmt(score.kospi200_return_pct,'%'):'미확인')+
+ card('NASDAQ-100 ETF 누적 · 원화',available?fmt(score.ndx100_krw_return_pct,'%'):'미확인')+
+ card('입출금 제외 원화 순손익',fmt(score.net_investment_pnl_krw,'원'))+
+ card('최대 낙폭',fmt(risk.max_drawdown_pct,'%'))+
+ '</div><div class="ctAaMuted">기준 시작 '+esc(score.start_kst||'미확인')+' · 평가 '+esc(score.evaluation_asof_kst||'미확인')+
+ ' · '+(score.account_return_is_estimate?'실제 입출금 시각 기준 Modified Dietz 근사 포함':'정확 TWR 또는 산출 대기')+
+ ' · 기존 069500·133690 50:50 대비 '+esc(fmt(performance?.legacy_50_50_excess_pp))+
+ ' · 누적 승자를 마지막에 비교하며 일별 승자를 연결하지 않습니다.</div>'+behaviorTable(performance?.behavior_observations)+'</div>';
+}
+
+function behaviorTable(observations){
+ const sessions=observations?.sessions||{};
+ const fmt=v=>v!=null&&Number.isFinite(Number(v))?Number(v).toFixed(1)+'%':'미확인';
+ const rows=['KR','US'].flatMap(session=>['before_presented','after_presented'].map(phase=>{
+  const r=sessions[session]?.[phase]||{};
+  return '<tr><td>'+esc(session+' '+(phase==='before_presented'?'제공 전':'제공 후'))+'</td><td>'+esc(r.observations??0)+'</td><td>'+esc(fmt(r.max_position_weight_pct))+'</td><td>'+esc(fmt(r.planned_one_way_turnover_pct))+'</td><td>'+esc(fmt(r.cash_weight_pct))+'</td></tr>';
+ })).join('');
+ return '<h4 style="margin-top:12px">성적표 제공 전후 · 목표 행동 관측</h4><div style="overflow-x:auto"><table style="width:100%;font-size:10px;text-align:left"><thead><tr><th>구간</th><th>건수</th><th>최대 종목 비중</th><th>계획 회전율</th><th>목표 현금 비중</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="ctAaMuted">실제 입력 제공 여부로 분류합니다. 계획 회전율은 실제 체결 회전율과 다르며, 전후 차이가 인과관계를 증명하지는 않습니다.</div>';
+}
+
 function render(det,ai){
  ensureStyle();const root=ensureRoot();if(!root)return false;
  const summary=det?.summary||{},learning=det?.learning||{},safety=det?.safety||{};
@@ -79,6 +110,7 @@ function render(det,ai){
    '<div class="ctAaCard"><span>PASS / WARN / FAIL</span><b>'+verdictCount(summary,'PASS')+' / '+verdictCount(summary,'WARN')+' / '+verdictCount(summary,'FAIL')+'</b></div>'+
    '<div class="ctAaCard"><span>Learning Candidate</span><b>'+esc(learning.candidate_count??0)+'</b></div>'+
   '</div>'+
+  performanceCards(det?.performance)+
   '<div class="ctAaSection"><h4>JJOONI AI Auditor</h4><div class="ctAaText">'+esc(overall||'AI 감사 결과 생성 대기')+'</div>'+(aiRows||'<div class="ctAaMuted">AI 세부 리뷰 대기</div>')+'</div>'+
   '<div class="ctAaSection"><h4>최근 판단 감사</h4>'+(auditRows||'<div class="ctAaMuted">감사 데이터 대기</div>')+'</div>'+
   '<div class="ctAaSection"><h4>Shadow Learning Candidates</h4>'+(candidateRows||'<div class="ctAaMuted">아직 통계 임계치를 충족한 학습후보가 없습니다.</div>')+
