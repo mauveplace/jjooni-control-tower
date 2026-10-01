@@ -49,6 +49,7 @@ function verdictCount(summary,key){return Number((summary?.verdicts||{})[key]||0
 
 function performanceCards(performance){
  const score=performance?.official_score||{},risk=performance?.risk_observations||{};
+ const diagnostic=score.sampling_diagnostics||{},stats=diagnostic.selected_leg_statistics||{};
  const available=score.status==='AVAILABLE';
  const fmt=(value,suffix='%p')=>value!=null&&Number.isFinite(Number(value))?Number(value).toFixed(2)+suffix:'미확인';
  const card=(label,value)=>'<div class="ctAaCard"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
@@ -62,10 +63,24 @@ function performanceCards(performance){
  card('NASDAQ-100 ETF 누적 · 원화',available?fmt(score.ndx100_krw_return_pct,'%'):'미확인')+
  card('입출금 제외 원화 순손익',fmt(score.net_investment_pnl_krw,'원'))+
  card('최대 낙폭',fmt(risk.max_drawdown_pct,'%'))+
+ card('경과 거래일 / 유효 일간 구간',(diagnostic.elapsed_trading_days??'미확인')+' / '+(diagnostic.paired_intervals??0))+
+ card('일간 초과수익 표준편차',fmt(stats.sample_stddev_daily_excess_pp))+
+ card('일간 평균 표준오차 · IID 참고',fmt(stats.iid_reference_standard_error_mean_pp))+
  '</div><div class="ctAaMuted">기준 시작 '+esc(score.start_kst||'미확인')+' · 평가 '+esc(score.evaluation_asof_kst||'미확인')+
  ' · '+(score.account_return_is_estimate?'실제 입출금 시각 기준 Modified Dietz 근사 포함':'정확 TWR 또는 산출 대기')+
  ' · 기존 069500·133690 50:50 대비 '+esc(fmt(performance?.legacy_50_50_excess_pp))+
- ' · 누적 승자를 마지막에 비교하며 일별 승자를 연결하지 않습니다.</div>'+behaviorTable(performance?.behavior_observations)+'</div>';
+ ' · 누적 승자를 마지막에 비교하며 일별 승자를 연결하지 않습니다.</div>'+
+ '<div class="ctAaMuted">'+esc(diagnostic.warning||'일간 표본 진단 대기')+'</div>'+
+ horizonTable(performance?.target_change_horizons)+behaviorTable(performance?.behavior_observations)+'</div>';
+}
+
+function horizonTable(sessions){
+ const fmt=v=>v!=null&&Number.isFinite(Number(v))?Number(v).toFixed(2)+'%p':'표본 부족';
+ const rows=['KR','US'].flatMap(session=>['T+1','T+3','T+5'].map(h=>{
+  const r=sessions?.[session]?.[h]||{};
+  return '<tr><td>'+esc(session+' '+h)+'</td><td>'+esc(r.eligible_events??0)+'</td><td>'+esc(fmt(r.mean_decision_alpha_pct))+'</td><td>'+esc((r.wins??'—')+' / '+(r.losses??'—')+' / '+(r.ties??'—'))+'</td></tr>';
+ })).join('');
+ return '<h4 style="margin-top:12px">교체 판단 · 비용 차감 순효과</h4><div style="overflow-x:auto"><table style="width:100%;font-size:10px;text-align:left"><thead><tr><th>지평</th><th>유효 판단</th><th>평균 순효과</th><th>승 / 패 / 동일</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="ctAaMuted">단기는 잡음이 큽니다. 같은 판단의 지평별 결과를 독립 표본으로 합산하지 않으며, 비용 미확인·미완성 기간은 제외합니다.</div>';
 }
 
 function behaviorTable(observations){
