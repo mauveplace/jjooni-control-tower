@@ -6,7 +6,7 @@ import math
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -23,6 +23,22 @@ BENCHMARKS = {
 }
 
 GROUPS = [
+    # Account-independent registry: broad KR indices and KRX sector-index ETF
+    # families. Fixed membership is versioned, never derived from account holdings
+    # or today's turnover. Names below describe exposure, not a buy ranking.
+    ('kr_index', '한국 대표 지수', [
+        ('069500', 'KOSPI 200'), ('229200', 'KOSDAQ 150'),
+        ('133690', 'TIGER 미국나스닥100'),
+    ]),
+    ('kr_sector', '한국 KRX 섹터 지수', [
+        ('091160', '반도체'), ('091170', '은행'), ('091180', '자동차'),
+        ('102960', 'KODEX 기계장비'),
+        ('117460', '에너지·화학'), ('117680', '철강'), ('117700', '건설'),
+        ('140700', '보험'), ('266360', '미디어·엔터테인먼트'),
+        ('266410', '필수소비재'),
+    ]),
+    # Benchmark exposure must be investable in the default catalog.
+    ('benchmark', '미국 벤치마크 노출', [('QQQ', BENCHMARKS['QQQ'])]),
     ('classic', 'S&P 500 섹터', [
         ('XLK', 'Technology'),
         ('XLC', 'Communication Services'),
@@ -76,13 +92,36 @@ GROUPS = [
 HORIZONS = (1, 5, 10, 20, 50, 100)
 
 
+def market_of(ticker):
+    return 'KR' if str(ticker).isdigit() and len(str(ticker)) == 6 else 'US'
+
+
+def completed_cutoff(market, now=None):
+    zone = KST if market == 'KR' else ET
+    local = (now or datetime.now(KST)).astimezone(zone)
+    # Conservative normal close +10m. Early US closes are delayed, never
+    # promoted before completion. Nontrading dates have no Yahoo daily bar.
+    close = (15, 40) if market == 'KR' else (16, 10)
+    day = local.date()
+    if (local.hour, local.minute) < close:
+        day -= timedelta(days=1)
+    while day.weekday() > 4:
+        day -= timedelta(days=1)
+    return day.isoformat()
+
+
+def completed_points(points, market, now=None):
+    cutoff = completed_cutoff(market, now)
+    return [p for p in points if str(p.get('date') or '')[:10] <= cutoff]
+
+
 def request_json(url: str, timeout: int = 20):
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/json'})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode('utf-8'))
 
 
-def yahoo_series(symbol: str, range_: str = '1y'):
+def yahoo_series(symbol: str, range_: str = '1y', now=None):
     qs = urllib.parse.urlencode({
         'interval': '1d',
         'range': range_,
@@ -110,10 +149,12 @@ def yahoo_series(symbol: str, range_: str = '1y'):
                     continue
                 if not math.isfinite(v):
                     continue
-                d = datetime.fromtimestamp(int(t), ET).date().isoformat()
+                zone = KST if symbol.endswith(('.KS', '.KQ')) else ET
+                d = datetime.fromtimestamp(int(t), zone).date().isoformat()
                 out.append({'date': d, 'value': round(v, 8)})
             dedup = {x['date']: x for x in out}
-            rows = [dedup[k] for k in sorted(dedup)]
+            rows = completed_points([dedup[k] for k in sorted(dedup)],
+                                    'KR' if symbol.endswith(('.KS', '.KQ')) else 'US', now)
             if len(rows) < 101:
                 raise RuntimeError(f'insufficient points for 100d horizon: {len(rows)}')
             return rows
@@ -195,7 +236,8 @@ def relative(row, bench, key):
     return rounded(a - b) if a is not None and b is not None else None
 
 
-def build():
+def build(now=None):
+    now = now or datetime.now(KST)
     previous = load_previous()
     prev_series = previous.get('series') or {}
     series = {}
@@ -207,10 +249,21 @@ def build():
 
     for ticker in dict.fromkeys(tickers):
         try:
-            series[ticker] = yahoo_series(ticker, '1y')
+            symbol = ticker + '.KS' if market_of(ticker) == 'KR' else ticker
+            series[ticker] = yahoo_series(symbol, '1y', now)
             time.sleep(0.12)
         except Exception as exc:
-            fallback = prev_series.get(ticker) or []
+            # Legacy fallback may itself contain a provisional bar. Filter by
+            # its generation time as well as today's cutoff; do not turn an
+            # old provisional bar into a completed close merely by waiting.
+            try:
+                prior_at = datetime.fromisoformat(previous['generated_kst'])
+                if prior_at.tzinfo is None or prior_at > now:
+                    raise ValueError('PRIOR_TIMESTAMP_INVALID')
+                fallback = completed_points(prev_series.get(ticker) or [], market_of(ticker), prior_at)
+                fallback = completed_points(fallback, market_of(ticker), now)
+            except (KeyError, TypeError, ValueError):
+                fallback = []
             if fallback:
                 series[ticker] = fallback
             else:
@@ -234,16 +287,20 @@ def build():
                     'group': label,
                     'group_key': key,
                     'source': 'Yahoo public daily',
+                    'market': market_of(ticker), 'asset_class': 'ETF',
+                    'bar_status': 'COMPLETED_DAILY',
+                    'completed_cutoff': completed_cutoff(market_of(ticker), now),
                 })
                 for d in HORIZONS:
                     key_name = f'ret_{d}d_pct'
-                    m[f'rs_spy_{d}d_pct'] = relative(m, spy, key_name)
-                    m[f'rs_qqq_{d}d_pct'] = relative(m, qqq, key_name)
+                    m[f'rs_spy_{d}d_pct'] = relative(m, spy, key_name) if market_of(ticker) == 'US' else None
+                    m[f'rs_qqq_{d}d_pct'] = relative(m, qqq, key_name) if market_of(ticker) == 'US' else None
                 # Legacy fields retained for existing consumers/QA.
-                m['rs_spy_1m_pct'] = relative(m, spy, 'ret_1m_pct')
-                m['rs_qqq_1m_pct'] = relative(m, qqq, 'ret_1m_pct')
+                m['rs_spy_1m_pct'] = relative(m, spy, 'ret_1m_pct') if market_of(ticker) == 'US' else None
+                m['rs_qqq_1m_pct'] = relative(m, qqq, 'ret_1m_pct') if market_of(ticker) == 'US' else None
             else:
-                m = {'ticker': ticker, 'name': name, 'group': label, 'group_key': key, 'source': 'UNAVAILABLE'}
+                m = {'ticker': ticker, 'name': name, 'group': label, 'group_key': key,
+                     'market': market_of(ticker), 'asset_class': 'ETF', 'source': 'UNAVAILABLE'}
             rows.append(m)
             all_rows.append(m)
         group_payload.append({'key': key, 'label': label, 'rows': rows})
@@ -271,11 +328,15 @@ def build():
 
     out = {
         'schema': 'JJOONI_OBSERVATORY_SECTOR_ETF_V1',
-        'generated_kst': datetime.now(KST).isoformat(timespec='seconds'),
+        'generated_kst': now.isoformat(timespec='seconds'),
         'as_of_date': as_of_date,
         'read_only': True,
         'contains_account_data': False,
         'universe_version': 'SONG_SECTOR_UNIVERSE_V2_COUNTRY',
+        'catalog_revision': 'KR_INDEX_SECTOR_BENCHMARK_V2_US_V3',
+        'membership_policy': 'VERSIONED_INDEX_SECTOR_REGISTRY_NO_RANKING_NO_ACCOUNT_INPUT',
+        'daily_bar_contract': 'PER_MARKET_COMPLETED_CUTOFF_V1',
+        'completed_cutoffs': {m: completed_cutoff(m, now) for m in ('KR', 'US')},
         'source_contract': 'YAHOO_PUBLIC_COMPLETED_DAILY_REFERENCE',
         'horizons_sessions': list(HORIZONS),
         'benchmarks': {
