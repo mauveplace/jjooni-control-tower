@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-09-30T22:41:06+09:00",
+  "generated_kst": "2026-10-01T17:38:19+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -8,9 +8,9 @@
   "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_METHODOLOGY_NEAREST_NODE_V1",
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
-  "market_data_as_of": "2026-09-29",
-  "expected_market_data_date": "2026-09-29",
-  "observed_at": "2026-09-30T22:41:06+09:00",
+  "market_data_as_of": "2026-09-30",
+  "expected_market_data_date": "2026-09-30",
+  "observed_at": "2026-10-01T17:38:19+09:00",
   "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
@@ -22,31 +22,23 @@
       "action": "HOLD",
       "move_bp": 0,
       "target": "3.75-4.00",
-      "probability": 0.490714
+      "probability": 0.623571
     },
     {
       "action": "HIKE_25BP",
       "move_bp": 25,
       "target": "4.00-4.25",
-      "probability": 0.509286
+      "probability": 0.376429
     }
   ],
-  "hold_probability": 0.490714,
-  "hike_any_probability": 0.509286,
-  "hike_25bp_probability": 0.509286,
+  "hold_probability": 0.623571,
+  "hike_any_probability": 0.376429,
+  "hike_25bp_probability": 0.376429,
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
-  "change_1d_pctpt": -19.93,
+  "change_1d_pctpt": -13.29,
   "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-23",
-      "hold_probability": 0.291429,
-      "hike_any_probability": 0.708571,
-      "hike_25bp_probability": 0.708571,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-24",
       "hold_probability": 0.313571,
@@ -78,13 +70,21 @@
       "hike_25bp_probability": 0.509286,
       "cut_any_probability": 0,
       "cut_25bp_probability": 0
+    },
+    {
+      "trade_date": "2026-09-30",
+      "hold_probability": 0.623571,
+      "hike_any_probability": 0.376429,
+      "hike_25bp_probability": 0.376429,
+      "cut_any_probability": 0,
+      "cut_25bp_probability": 0
     }
   ],
   "calculation": {
-    "start_effr_implied": 3.877679,
-    "end_effr_implied": 4.005,
+    "start_effr_implied": 3.880893,
+    "end_effr_implied": 3.975,
     "meeting_month_avg_effr": 3.89,
-    "expected_change_bp": 12.732,
+    "expected_change_bp": 9.411,
     "anchor_month": "2026-11",
     "days_before_including_meeting": 28,
     "days_after": 3
