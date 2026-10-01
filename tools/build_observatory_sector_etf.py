@@ -28,14 +28,17 @@ GROUPS = [
     # or today's turnover. Names below describe exposure, not a buy ranking.
     ('kr_index', '한국 대표 지수', [
         ('069500', 'KOSPI 200'), ('229200', 'KOSDAQ 150'),
+        ('133690', 'TIGER 미국나스닥100'),
     ]),
     ('kr_sector', '한국 KRX 섹터 지수', [
         ('091160', '반도체'), ('091170', '은행'), ('091180', '자동차'),
-        ('102960', '조선'),
+        ('102960', 'KODEX 기계장비'),
         ('117460', '에너지·화학'), ('117680', '철강'), ('117700', '건설'),
         ('140700', '보험'), ('266360', '미디어·엔터테인먼트'),
         ('266410', '필수소비재'),
     ]),
+    # Benchmark exposure must be investable in the default catalog.
+    ('benchmark', '미국 벤치마크 노출', [('QQQ', BENCHMARKS['QQQ'])]),
     ('classic', 'S&P 500 섹터', [
         ('XLK', 'Technology'),
         ('XLC', 'Communication Services'),
@@ -330,7 +333,7 @@ def build(now=None):
         'read_only': True,
         'contains_account_data': False,
         'universe_version': 'SONG_SECTOR_UNIVERSE_V2_COUNTRY',
-        'catalog_revision': 'KR_INDEX_SECTOR_V1_US_V2',
+        'catalog_revision': 'KR_INDEX_SECTOR_BENCHMARK_V2_US_V3',
         'membership_policy': 'VERSIONED_INDEX_SECTOR_REGISTRY_NO_RANKING_NO_ACCOUNT_INPUT',
         'daily_bar_contract': 'PER_MARKET_COMPLETED_CUTOFF_V1',
         'completed_cutoffs': {m: completed_cutoff(m, now) for m in ('KR', 'US')},

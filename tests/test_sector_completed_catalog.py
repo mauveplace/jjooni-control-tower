@@ -7,11 +7,14 @@ from tools import build_observatory_sector_etf as sector
 class SectorContractTests(unittest.TestCase):
     def test_kr_registry_account_independent_and_unranked(self):
         codes = [t for key, _, members in sector.GROUPS if key.startswith('kr_') for t, _ in members]
-        self.assertEqual(len(codes), 12)
-        self.assertEqual(len(set(codes)), 12)
+        self.assertEqual(len(codes), 13)
+        self.assertEqual(len(set(codes)), 13)
         self.assertTrue(all(sector.market_of(t) == 'KR' for t in codes))
         self.assertIn('069500', codes)
         self.assertIn('229200', codes)
+        self.assertIn('133690', codes)
+        all_codes = {t for _, _, members in sector.GROUPS for t, _ in members}
+        self.assertIn('QQQ', all_codes)
 
     def test_us_dst_preclose_and_postclose(self):
         rows = [{'date': '2026-09-30', 'value': 100}, {'date': '2026-10-01', 'value': 999}]
@@ -43,7 +46,7 @@ class SectorContractTests(unittest.TestCase):
         self.assertEqual(result['series']['XLK'], previous['series']['XLK'][:1])
         self.assertEqual(result['daily_bar_contract'], 'PER_MARKET_COMPLETED_CUTOFF_V1')
         kr = [r for g in result['groups'] for r in g['rows'] if r['market'] == 'KR']
-        self.assertEqual(len(kr), 12)  # Missing quotes do not erase membership.
+        self.assertEqual(len(kr), 13)  # Missing quotes do not erase membership.
 
 
 if __name__ == '__main__':
