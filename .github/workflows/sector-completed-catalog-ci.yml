@@ -1,0 +1,23 @@
+name: Sector ETF completed bars and KR catalog
+on:
+  pull_request:
+    paths:
+      - tools/build_observatory_sector_etf.py
+      - tests/test_sector_completed_catalog.py
+      - market-observatory/sector-etf-v1.js
+      - .github/workflows/sector-completed-catalog-ci.yml
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Completed-bar and account-independent catalog tests
+        run: |
+          python -m unittest discover -s tests -p test_sector_completed_catalog.py -v
+          python -m py_compile tools/build_observatory_sector_etf.py
+          node --check market-observatory/sector-etf-v1.js
