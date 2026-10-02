@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-10-02T14:47:48+09:00",
+  "generated_kst": "2026-10-02T16:32:40+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -9,15 +9,15 @@
     "NASDAQ100": 30501.56054688,
     "SP500": 7666.45019531,
     "VIX": 16.38999939,
-    "DXY": 101.9509964,
-    "USDKRW": 1353.97998047,
-    "USDJPY": 157.85499573,
-    "JPYKRW": 8.5539999,
-    "WTI": 92.54000092,
-    "BRENT": 102.02999878,
+    "DXY": 101.87200165,
+    "USDKRW": 1349.5300293,
+    "USDJPY": 157.88800049,
+    "JPYKRW": 8.52499962,
+    "WTI": 91.26999664,
+    "BRENT": 101.16000366,
     "NATGAS": 2.91899991,
-    "GOLD": 4218.39990234,
-    "COPPER": 6.58449984,
+    "GOLD": 4215.29980469,
+    "COPPER": 6.58249998,
     "US3M": 4.17,
     "US5Y": 5.00500011,
     "US10Y": 5.23699999,
@@ -39,12 +39,12 @@
     "JP30Y": 4.098,
     "JP_2S10S": 1.105,
     "KR_US_10Y": -0.804,
-    "KOSPI": 6981.70996094,
-    "KOSDAQ": 891.5300293,
+    "KOSPI": 7003.74023438,
+    "KOSDAQ": 893.28997803,
     "RUSSELL2000": 2806.62988281,
     "DOW": 50926.55859375,
     "NASDAQCOMPOSITE": 26871.59960938,
-    "SILVER": 61.68000031,
+    "SILVER": 61.50999832,
     "FEAR_GREED": 28.0
   },
   "series": {
@@ -12121,7 +12121,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 101.9509964
+        "value": 101.87200165
       }
     ],
     "USDKRW": [
@@ -15243,7 +15243,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 1353.97998047
+        "value": 1349.5300293
       }
     ],
     "USDJPY": [
@@ -18365,7 +18365,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 157.85499573
+        "value": 157.88800049
       }
     ],
     "JPYKRW": [
@@ -21487,7 +21487,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 8.5539999
+        "value": 8.52499962
       }
     ],
     "WTI": [
@@ -24513,7 +24513,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 92.54000092
+        "value": 91.26999664
       }
     ],
     "BRENT": [
@@ -27543,7 +27543,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 102.02999878
+        "value": 101.16000366
       }
     ],
     "NATGAS": [
@@ -33603,7 +33603,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 4218.39990234
+        "value": 4215.29980469
       }
     ],
     "COPPER": [
@@ -36633,7 +36633,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 6.58449984
+        "value": 6.58249998
       }
     ],
     "US3M": [
@@ -287503,7 +287503,7 @@
       },
       {
         "date": "2026-10-01",
-        "value": 6981.70996094
+        "value": 7003.74023438
       }
     ],
     "KOSDAQ": [
@@ -290425,7 +290425,7 @@
       },
       {
         "date": "2026-10-01",
-        "value": 891.5300293
+        "value": 893.28997803
       }
     ],
     "RUSSELL2000": [
@@ -302493,7 +302493,7 @@
       },
       {
         "date": "2026-10-02",
-        "value": 61.68000031
+        "value": 61.50999832
       }
     ],
     "FEAR_GREED": [
@@ -313964,7 +313964,13 @@
       "state": "PASS",
       "source": "BOK_ECOS",
       "window": "1Y_BACKFILL_THEN_45D_INCREMENT",
-      "errors": {}
+      "errors": {
+        "KR3Y": "URLError",
+        "KR5Y": "URLError",
+        "KR10Y": "URLError",
+        "KR20Y": "URLError",
+        "KR30Y": "URLError"
+      }
     }
   },
   "history_contract": "IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT",
@@ -313973,5 +313979,5 @@
   "history_base_path": "./data/history-30y.json",
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "market_supplement_contract": "GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2",
-  "equity_enriched_kst": "2026-10-02T14:47:50+09:00"
+  "equity_enriched_kst": "2026-10-02T16:32:41+09:00"
 }
