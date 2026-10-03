@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-10-03T08:04:10+09:00",
+  "generated_kst": "2026-10-03T10:25:45+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -309538,26 +309538,26 @@
   "tripod_latest": {
     "action": "HOLD_NO_TRADE",
     "data_alignment": "NDX_VIX_SAME_COMPLETED_SESSION",
-    "date": "2026-10-01",
-    "drawdown_52w_pct": -0.7511285835662185,
-    "ma250": 27000.5670703125,
-    "ndx": 30501.560546875,
-    "observed_at": "2026-10-02T10:38:13+09:00",
+    "date": "2026-10-02",
+    "drawdown_52w_pct": 0.0,
+    "ma250": 27024.65671875,
+    "ndx": 30807.931640625,
+    "observed_at": "2026-10-03T10:07:59+09:00",
     "ok": true,
-    "previous_drawdown_52w_pct": -1.0539378197213845,
-    "previous_ma250": 26978.1318671875,
+    "previous_drawdown_52w_pct": -0.7511285835662185,
+    "previous_ma250": 27000.5670703125,
     "previous_regime": "상승",
     "previous_target": "TQQQ 100%",
-    "previous_vix10": 15.350000095367431,
+    "previous_vix10": 15.445000076293946,
     "regime": "상승",
-    "session_date": "2026-10-01",
+    "session_date": "2026-10-02",
     "signal_changed": false,
     "source": "PUBLIC_MARKET_DAILY_V1",
     "target": "TQQQ 100%",
     "target_changed": false,
-    "vix10": 15.445000076293946,
+    "vix10": 15.495000076293945,
     "vix_basis": "LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN",
-    "vix_latest_close": 16.389999389648438,
+    "vix_latest_close": 15.3100004196167,
     "vix_window_count": 10
   },
   "tripod_history": [
@@ -314701,5 +314701,5 @@
   "history_base_path": "./data/history-30y.json",
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "market_supplement_contract": "GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2",
-  "equity_enriched_kst": "2026-10-03T08:04:13+09:00"
+  "equity_enriched_kst": "2026-10-03T10:25:47+09:00"
 }
