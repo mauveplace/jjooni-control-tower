@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
-  "generated_kst": "2026-10-03T08:44:12+09:00",
+  "generated_kst": "2026-10-05T08:01:04+09:00",
   "market_date_us": "2026-10-02",
   "snapshot_status": "FINAL",
   "read_only": true,
@@ -136,23 +136,23 @@
     ],
     "tradingview_cross_asset": {
       "ndx": {
-        "value": 30807.93164062,
+        "value": 30807.9296875,
         "market_date": "2026-10-02",
-        "change_pct": 1.0044439964608243,
+        "change_pct": 1.0044375931163252,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
       "dxy": {
-        "value": 101.9240036,
+        "value": 101.93000031,
         "market_date": "2026-10-02",
-        "change_pct": -0.17237499768593123,
+        "change_pct": -0.16650162835208926,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
       "usdkrw": {
-        "value": 1342.51000977,
-        "market_date": "2026-10-02",
-        "change_pct": -1.328832087858578,
+        "value": 1342.66003418,
+        "market_date": "2026-10-04",
+        "change_pct": -1.3178056644857161,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
@@ -172,19 +172,19 @@
           "rank": 1,
           "ticker": "NVDA",
           "name": "Nvidia Corp",
-          "weight_pct": 13.03
+          "weight_pct": 13.02
         },
         {
           "rank": 2,
           "ticker": "AAPL",
           "name": "Apple Inc.",
-          "weight_pct": 11.21
+          "weight_pct": 11.22
         },
         {
           "rank": 3,
           "ticker": "MSFT",
           "name": "Microsoft Corp",
-          "weight_pct": 8.84
+          "weight_pct": 8.85
         },
         {
           "rank": 4,
@@ -202,7 +202,7 @@
           "rank": 6,
           "ticker": "SPCX",
           "name": "Space Exploration Technologies Corp. Class A Common Stock",
-          "weight_pct": 4.84
+          "weight_pct": 4.83
         },
         {
           "rank": 7,
@@ -226,11 +226,11 @@
           "rank": 10,
           "ticker": "TSLA",
           "name": "Tesla, Inc. Common Stock",
-          "weight_pct": 3.38
+          "weight_pct": 3.37
         }
       ],
-      "top3_weight_pct": 33.08,
-      "top10_weight_pct": 65.36,
+      "top3_weight_pct": 33.09,
+      "top10_weight_pct": 65.35,
       "source": "slickcharts_nasdaq100",
       "status": "LIVE"
     },
@@ -242,7 +242,30 @@
       "status": "DEGRADED",
       "error": "HTTPError"
     },
-    "calendar": [],
+    "calendar": [
+      {
+        "datetime_kst": "2026-10-05T22:45+09:00",
+        "country": "US",
+        "title": "S&P Global US Services & Composite PMI",
+        "importance": 3,
+        "previous": "58.7",
+        "consensus": "58.7",
+        "actual": null,
+        "source": "S&P Global Market Intelligence",
+        "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+      },
+      {
+        "datetime_kst": "2026-10-06T21:30+09:00",
+        "country": "US",
+        "title": "U.S. International Trade in Goods and Services, August 2026",
+        "importance": 2,
+        "previous": null,
+        "consensus": null,
+        "actual": null,
+        "source": "BEA",
+        "source_url": null
+      }
+    ],
     "canonical_context": {
       "sp500": {
         "value": 7722.72021484,
@@ -343,17 +366,17 @@
     },
     {
       "market_date_us": "2026-10-02",
-      "generated_kst": "2026-10-03T08:44:12+09:00",
+      "generated_kst": "2026-10-05T08:01:04+09:00",
       "snapshot_status": "FINAL",
-      "ndx": 30807.93164062,
-      "dxy": 101.9240036,
-      "usdkrw": 1342.51000977,
+      "ndx": 30807.9296875,
+      "dxy": 101.93000031,
+      "usdkrw": 1342.66003418,
       "us10y": 5.28,
       "sp500": 7722.72021484,
       "vix": 15.31000042,
       "breadth_ratio": null,
       "breadth_proxy_ratio": 0.09090909090909091,
-      "top10_weight_pct": 65.36,
+      "top10_weight_pct": 65.35,
       "fear_greed": null,
       "risk": "NEUTRAL"
     }
@@ -380,27 +403,27 @@
     "finviz_sp500_map": {
       "url": "https://finviz.com/map?t=sec",
       "status": "WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-03T08:44:12+09:00"
+      "observed_at_kst": "2026-10-05T08:01:04+09:00"
     },
     "finviz_calendar": {
       "url": "https://finviz.com/calendar.ashx",
       "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
-      "observed_at_kst": "2026-10-03T08:44:12+09:00"
+      "observed_at_kst": "2026-10-05T08:01:04+09:00"
     },
     "tradingview": {
       "url": "https://kr.tradingview.com/",
       "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-03T08:44:12+09:00"
+      "observed_at_kst": "2026-10-05T08:01:04+09:00"
     },
     "slickcharts_nasdaq100": {
       "url": "https://www.slickcharts.com/nasdaq100",
       "status": "LIVE",
-      "observed_at_kst": "2026-10-03T08:44:12+09:00"
+      "observed_at_kst": "2026-10-05T08:01:04+09:00"
     },
     "cnn_fear_greed": {
       "url": "https://edition.cnn.com/markets/fear-and-greed",
       "status": "DEGRADED",
-      "observed_at_kst": "2026-10-03T08:44:12+09:00"
+      "observed_at_kst": "2026-10-05T08:01:04+09:00"
     }
   },
   "usage_contract": {
