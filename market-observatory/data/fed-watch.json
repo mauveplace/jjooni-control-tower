@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_FED_WATCH_V1",
-  "generated_kst": "2026-10-06T00:59:30+09:00",
+  "generated_kst": "2026-10-06T23:13:07+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch probability",
@@ -8,15 +8,15 @@
   "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_METHODOLOGY_NEAREST_NODE_V1",
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
-  "market_data_as_of": "2026-10-02",
-  "expected_market_data_date": "2026-10-02",
-  "observed_at": "2026-10-06T00:59:30+09:00",
+  "market_data_as_of": "2026-10-05",
+  "expected_market_data_date": "2026-10-05",
+  "observed_at": "2026-10-06T23:13:07+09:00",
   "freshness": "LIVE",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
   "current_target_upper": 4.0,
   "effr": 3.88,
-  "effr_date": "2026-10-02",
+  "effr_date": "2026-10-05",
   "outcomes": [
     {
       "action": "HOLD",
@@ -36,17 +36,9 @@
   "hike_25bp_probability": 0.221429,
   "cut_any_probability": 0,
   "cut_25bp_probability": 0,
-  "change_1d_pctpt": -2.21,
+  "change_1d_pctpt": 0.0,
   "change_1w_pctpt": null,
   "history": [
-    {
-      "trade_date": "2026-09-28",
-      "hold_probability": 0.291429,
-      "hike_any_probability": 0.708571,
-      "hike_25bp_probability": 0.708571,
-      "cut_any_probability": 0,
-      "cut_25bp_probability": 0
-    },
     {
       "trade_date": "2026-09-29",
       "hold_probability": 0.490714,
@@ -78,12 +70,20 @@
       "hike_25bp_probability": 0.221429,
       "cut_any_probability": 0,
       "cut_25bp_probability": 0
+    },
+    {
+      "trade_date": "2026-10-05",
+      "hold_probability": 0.778571,
+      "hike_any_probability": 0.221429,
+      "hike_25bp_probability": 0.221429,
+      "cut_any_probability": 0,
+      "cut_25bp_probability": 0
     }
   ],
   "calculation": {
-    "start_effr_implied": 3.874643,
-    "end_effr_implied": 3.93,
-    "meeting_month_avg_effr": 3.88,
+    "start_effr_implied": 3.879643,
+    "end_effr_implied": 3.935,
+    "meeting_month_avg_effr": 3.885,
     "expected_change_bp": 5.536,
     "anchor_month": "2026-11",
     "days_before_including_meeting": 28,
@@ -93,9 +93,9 @@
     "state": "PASS",
     "cme_trade_date_gap_days": 0,
     "fred_target_dates": {
-      "lower": "2026-10-05",
-      "upper": "2026-10-05",
-      "effr": "2026-10-02"
+      "lower": "2026-10-06",
+      "upper": "2026-10-06",
+      "effr": "2026-10-05"
     },
     "history_points": 5
   },
