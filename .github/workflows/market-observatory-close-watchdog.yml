@@ -48,7 +48,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          python - <<'PY' >> "$GITHUB_OUTPUT"
+          python - <<'PY'
           import json
           import os
           from datetime import datetime, time
@@ -109,13 +109,19 @@ jobs:
           healthy=obs_fresh and pulse_fresh and public_fresh and aligned
           should_repair=eligible and not healthy
 
-          print('eligible=' + ('true' if eligible else 'false'))
-          print('should_repair=' + ('true' if should_repair else 'false'))
-          print('ny_now=' + now.isoformat())
-          print('obs_fresh=' + str(obs_fresh).lower())
-          print('pulse_fresh=' + str(pulse_fresh).lower())
-          print('public_fresh=' + str(public_fresh).lower())
-          print('aligned=' + str(aligned).lower())
+          outputs={
+              'eligible': 'true' if eligible else 'false',
+              'should_repair': 'true' if should_repair else 'false',
+              'ny_now': now.isoformat(),
+              'obs_fresh': str(obs_fresh).lower(),
+              'pulse_fresh': str(pulse_fresh).lower(),
+              'public_fresh': str(public_fresh).lower(),
+              'aligned': str(aligned).lower(),
+          }
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh:
+              for key,value in outputs.items():
+                  fh.write(f'{key}={value}\n')
+
           print('WATCHDOG_STATE', json.dumps({
               'event': event,
               'ny_now': now.isoformat(),
