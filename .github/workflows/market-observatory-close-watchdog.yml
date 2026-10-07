@@ -1,0 +1,249 @@
+name: Market Observatory Close Freshness Watchdog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/market-observatory-close-watchdog.yml
+  workflow_run:
+    workflows:
+      - "Market Observatory Daily + Calendar"
+    types: [completed]
+  schedule:
+    # Independent close candidates. GitHub cron can start late, so the runtime gate
+    # intentionally accepts a broad 16:10-17:05 America/New_York recovery window.
+    # Both UTC hours are registered for DST/standard-time safety; the runtime gate
+    # rejects the wrong local-hour candidate.
+    - cron: '10,20,35,50 20,21 * * 0-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Share the writer lock with the canonical Observatory workflow. If the primary
+# close build is still running, this watchdog waits, checks main again, and exits
+# without duplicate publication when everything is already fresh.
+concurrency:
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - id: gate
+        name: Delay-tolerant close freshness gate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          from datetime import datetime, time
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          ET=ZoneInfo('America/New_York')
+          event=os.environ.get('EVENT_NAME','')
+          now=datetime.now(ET)
+
+          # A delayed cron must still run. The old exact-16:10 wall-clock gate could
+          # silently skip a valid scheduled run when GitHub assigned a runner late.
+          in_close_window = time(16,10) <= now.time().replace(tzinfo=None) <= time(17,5)
+          if event == 'workflow_dispatch':
+              eligible=True
+          elif event == 'push':
+              eligible=True
+          else:
+              eligible=in_close_window
+
+          obs_path=Path('market-observatory/data/observatory.json')
+          pulse_path=Path('market-observatory/data/daily-market-pulse.json')
+          public_path=Path('public-market-daily.json')
+
+          def load(path):
+              try:
+                  return json.loads(path.read_text(encoding='utf-8'))
+              except Exception:
+                  return {}
+
+          def parsed(value):
+              try:
+                  dt=datetime.fromisoformat(str(value or ''))
+                  if dt.tzinfo is None:
+                      dt=dt.replace(tzinfo=ET)
+                  return dt.astimezone(ET)
+              except Exception:
+                  return None
+
+          obs=load(obs_path)
+          pulse=load(pulse_path)
+          public=load(public_path)
+          obs_dt=parsed(obs.get('generated_kst'))
+          pulse_dt=parsed(pulse.get('generated_kst'))
+          public_dt=parsed(public.get('generated_kst'))
+          anchor=datetime.combine(now.date(), time(16,10), ET)
+
+          # Freshness is event-cycle based rather than market-date==today so US
+          # holidays and Sunday-ET Monday-KST briefs remain valid.
+          obs_fresh=bool(obs_dt and obs_dt >= anchor)
+          pulse_fresh=bool(pulse_dt and pulse_dt >= anchor)
+          public_fresh=bool(public_dt and public_dt >= anchor)
+          aligned=bool(
+              obs.get('us_completed_session_date') and
+              pulse.get('market_date_us') == obs.get('us_completed_session_date') and
+              ((public.get('tripod_signal') or {}).get('date') == obs.get('us_completed_session_date'))
+          )
+          healthy=obs_fresh and pulse_fresh and public_fresh and aligned
+          should_repair=eligible and not healthy
+
+          print('eligible=' + ('true' if eligible else 'false'))
+          print('should_repair=' + ('true' if should_repair else 'false'))
+          print('ny_now=' + now.isoformat())
+          print('obs_fresh=' + str(obs_fresh).lower())
+          print('pulse_fresh=' + str(pulse_fresh).lower())
+          print('public_fresh=' + str(public_fresh).lower())
+          print('aligned=' + str(aligned).lower())
+          print('WATCHDOG_STATE', json.dumps({
+              'event': event,
+              'ny_now': now.isoformat(),
+              'eligible': eligible,
+              'anchor': anchor.isoformat(),
+              'obs_generated': obs.get('generated_kst'),
+              'pulse_generated': pulse.get('generated_kst'),
+              'public_generated': public.get('generated_kst'),
+              'obs_session': obs.get('us_completed_session_date'),
+              'pulse_session': pulse.get('market_date_us'),
+              'tripod_session': (public.get('tripod_signal') or {}).get('date'),
+              'healthy': healthy,
+              'should_repair': should_repair,
+          }, ensure_ascii=False))
+          PY
+
+      - name: Install Observatory runtime
+        if: steps.gate.outputs.should_repair == 'true'
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet -r tools/requirements-observatory.txt
+
+      - name: Rebuild canonical Observatory + Daily Pulse + TRI-POD
+        if: steps.gate.outputs.should_repair == 'true'
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp market-observatory/data/economic-calendar.json /tmp/economic-calendar.json
+          python -m py_compile \
+            tools/build_market_observatory.py \
+            tools/postprocess_market_observatory.py \
+            tools/backfill_market_history_30y.py \
+            tools/add_observatory_equities.py \
+            tools/build_observatory_sector_etf.py \
+            tools/build_daily_market_pulse.py \
+            tools/build_public_market_daily.py
+          python tools/build_market_observatory.py
+          python tools/postprocess_market_observatory.py
+          cp /tmp/economic-calendar.json market-observatory/data/economic-calendar.json
+          python tools/backfill_market_history_30y.py
+          python tools/add_observatory_equities.py
+          python tools/build_observatory_sector_etf.py
+          python tools/build_daily_market_pulse.py
+          python tools/build_public_market_daily.py
+
+      - name: Recovery acceptance contract
+        if: steps.gate.outputs.should_repair == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+
+          o=json.load(open('market-observatory/data/observatory.json'))
+          p=json.load(open('market-observatory/data/daily-market-pulse.json'))
+          t=json.load(open('public-market-daily.json'))
+
+          for obj,name in [(o,'observatory'),(p,'pulse'),(t,'public')]:
+              dt=datetime.fromisoformat(obj['generated_kst'])
+              age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
+              assert age < 12,(name,age,obj.get('generated_kst'))
+
+          assert o['schema']=='JJOONI_MARKET_OBSERVATORY_V1'
+          assert o.get('us_completed_session_date')
+          us_dates={k:str((o.get('series',{}).get(k) or [{}])[-1].get('date',''))[:10] for k in ['NASDAQ100','SP500','VIX']}
+          assert all(us_dates.values()),us_dates
+          assert len(set(us_dates.values()))==1,us_dates
+          assert o.get('us_completed_session_date')==next(iter(set(us_dates.values()))),us_dates
+
+          assert p['schema']=='JJOONI_DAILY_MARKET_PULSE_V1'
+          assert p.get('snapshot_status')=='FINAL'
+          assert p.get('market_date_us')==o.get('us_completed_session_date'),(p.get('market_date_us'),o.get('us_completed_session_date'))
+
+          sig=t.get('tripod_signal') or {}
+          assert t['schema']=='JJOONI_PUBLIC_MARKET_DAILY_V1'
+          assert sig.get('ok') is True,sig
+          assert sig.get('date')==o.get('us_completed_session_date'),(sig.get('date'),o.get('us_completed_session_date'))
+          assert sig.get('vix_basis')=='LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN',sig
+          assert int(sig.get('vix_window_count') or 0)==10,sig
+
+          print('OBSERVATORY_CLOSE_WATCHDOG_ACCEPTANCE=PASS')
+          print('session=',o.get('us_completed_session_date'))
+          print('generated=',o.get('generated_kst'),p.get('generated_kst'),t.get('generated_kst'))
+          PY
+
+      - name: Publish repaired SSOT atomically
+        if: steps.gate.outputs.should_repair == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py \
+            --message 'data(observatory): close watchdog self-heal' \
+            market-observatory/data/observatory.json \
+            market-observatory/data/history-30y.json \
+            market-observatory/data/sector-etf.json \
+            market-observatory/data/daily-market-pulse.json \
+            public-market-daily.json
+
+      - name: Verify published main SSOT
+        if: steps.gate.outputs.should_repair == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          python - <<'PY'
+          import json, subprocess
+
+          def from_main(path):
+              raw=subprocess.check_output(['git','show','origin/main:'+path],text=True)
+              return json.loads(raw)
+
+          o=from_main('market-observatory/data/observatory.json')
+          p=from_main('market-observatory/data/daily-market-pulse.json')
+          t=from_main('public-market-daily.json')
+          assert p.get('market_date_us')==o.get('us_completed_session_date')
+          assert (t.get('tripod_signal') or {}).get('date')==o.get('us_completed_session_date')
+          print('OBSERVATORY_CLOSE_WATCHDOG_PUBLISH_VERIFY=PASS session='+str(o.get('us_completed_session_date')))
+          PY
+
+      - name: Healthy no-op
+        if: steps.gate.outputs.should_repair != 'true'
+        run: |
+          echo "OBSERVATORY_CLOSE_WATCHDOG=NOOP"
+          echo "eligible=${{ steps.gate.outputs.eligible }}"
+          echo "ny_now=${{ steps.gate.outputs.ny_now }}"
+          echo "obs_fresh=${{ steps.gate.outputs.obs_fresh }} pulse_fresh=${{ steps.gate.outputs.pulse_fresh }} public_fresh=${{ steps.gate.outputs.public_fresh }} aligned=${{ steps.gate.outputs.aligned }}"
