@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-10-08T05:58:20+09:00",
+  "generated_kst": "2026-10-08T08:23:16+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -9,15 +9,15 @@
     "NASDAQ100": 31160.07617188,
     "SP500": 7801.77001953,
     "VIX": 15.07999992,
-    "DXY": 102.28800201,
-    "USDKRW": 1339.26000977,
-    "USDJPY": 158.08200073,
-    "JPYKRW": 8.44900036,
-    "WTI": 89.05000305,
-    "BRENT": 101.02999878,
-    "NATGAS": 3.21099997,
-    "GOLD": 4135.39990234,
-    "COPPER": 6.63600016,
+    "DXY": 102.25,
+    "USDKRW": 1339.5300293,
+    "USDJPY": 157.9980011,
+    "JPYKRW": 8.45499992,
+    "WTI": 88.88999939,
+    "BRENT": 100.91999817,
+    "NATGAS": 3.26399994,
+    "GOLD": 4134.5,
+    "COPPER": 6.64249992,
     "US3M": 4.22,
     "US5Y": 5.02099991,
     "US10Y": 5.27699995,
@@ -44,8 +44,8 @@
     "RUSSELL2000": 2793.20410156,
     "DOW": 51179.87109375,
     "NASDAQCOMPOSITE": 27538.69140625,
-    "SILVER": 60.03499985,
-    "FEAR_GREED": 44.7
+    "SILVER": 60.06000137,
+    "FEAR_GREED": 44.6
   },
   "series": {
     "NASDAQ100": [
@@ -12101,7 +12101,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 102.28800201
+        "value": 102.25
       }
     ],
     "USDKRW": [
@@ -15219,7 +15219,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 1339.26000977
+        "value": 1339.5300293
       }
     ],
     "USDJPY": [
@@ -18337,7 +18337,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 158.08200073
+        "value": 157.9980011
       }
     ],
     "JPYKRW": [
@@ -21455,7 +21455,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 8.44900036
+        "value": 8.45499992
       }
     ],
     "WTI": [
@@ -24473,7 +24473,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 89.05000305
+        "value": 88.88999939
       }
     ],
     "BRENT": [
@@ -27495,7 +27495,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 101.02999878
+        "value": 100.91999817
       }
     ],
     "NATGAS": [
@@ -30517,7 +30517,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 3.21099997
+        "value": 3.26399994
       }
     ],
     "GOLD": [
@@ -33539,7 +33539,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 4135.39990234
+        "value": 4134.5
       }
     ],
     "COPPER": [
@@ -36561,7 +36561,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 6.63600016
+        "value": 6.64249992
       }
     ],
     "US3M": [
@@ -303105,7 +303105,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 60.03499985
+        "value": 60.06000137
       }
     ],
     "FEAR_GREED": [
@@ -309315,7 +309315,7 @@
       },
       {
         "date": "2026-10-07",
-        "value": 44.7
+        "value": 44.6
       }
     ]
   },
@@ -309434,26 +309434,26 @@
   "tripod_latest": {
     "action": "HOLD_NO_TRADE",
     "data_alignment": "NDX_VIX_SAME_COMPLETED_SESSION",
-    "date": "2026-10-06",
-    "drawdown_52w_pct": 0.0,
-    "ma250": 27074.586046875,
-    "ndx": 31224.685546875,
-    "observed_at": "2026-10-07T10:28:36+09:00",
+    "date": "2026-10-07",
+    "drawdown_52w_pct": -0.20623097781944377,
+    "ma250": 27098.679015625,
+    "ndx": 31160.076171875,
+    "observed_at": "2026-10-08T05:58:36+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": 0.0,
-    "previous_ma250": 27049.0482265625,
+    "previous_ma250": 27074.5851875,
     "previous_regime": "상승",
     "previous_target": "TQQQ 100%",
-    "previous_vix10": 15.560000133514404,
+    "previous_vix10": 15.640000152587891,
     "regime": "상승",
-    "session_date": "2026-10-06",
+    "session_date": "2026-10-07",
     "signal_changed": false,
     "source": "PUBLIC_MARKET_DAILY_V1",
     "target": "TQQQ 100%",
     "target_changed": false,
-    "vix10": 15.640000152587891,
+    "vix10": 15.630000114440918,
     "vix_basis": "LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN",
-    "vix_latest_close": 15.010000228881836,
+    "vix_latest_close": 15.079999923706055,
     "vix_window_count": 10
   },
   "tripod_history": [
@@ -314578,13 +314578,7 @@
       "state": "PASS",
       "source": "BOK_ECOS",
       "window": "1Y_BACKFILL_THEN_45D_INCREMENT",
-      "errors": {
-        "KR3Y": "URLError",
-        "KR5Y": "URLError",
-        "KR10Y": "URLError",
-        "KR20Y": "URLError",
-        "KR30Y": "URLError"
-      }
+      "errors": {}
     }
   },
   "history_contract": "IMMUTABLE_30Y_BASE_PLUS_RECENT_INCREMENT",
@@ -314593,5 +314587,5 @@
   "history_base_path": "./data/history-30y.json",
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "market_supplement_contract": "GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2",
-  "equity_enriched_kst": "2026-10-08T05:58:23+09:00"
+  "equity_enriched_kst": "2026-10-08T08:23:18+09:00"
 }
