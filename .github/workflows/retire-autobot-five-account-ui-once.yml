@@ -23,8 +23,7 @@ jobs:
           p=Path('live-bridge.js')
           s=p.read_text(encoding='utf-8')
           ai_line=" {id:'AI',label:'AI BOT',type:'AI',broker:'한국투자증권'},\n"
-          if ai_line not in s:
-              raise SystemExit('AI_REGISTRY_LINE_NOT_FOUND')
+          if ai_line not in s: raise SystemExit('AI_REGISTRY_LINE_NOT_FOUND')
           s=s.replace(ai_line,'')
           replacements={
               "SIX_ACCOUNT_NAV_SOURCES":"FIVE_ACCOUNT_NAV_SOURCES",
@@ -34,56 +33,42 @@ jobs:
               "patchAllSixAccountTotalSurfaces":"patchAllFiveAccountTotalSurfaces",
               "ctSixAccountNav":"ctFiveAccountNav",
               "__JJOONI_OVERVIEW_6NAV_V44":"__JJOONI_OVERVIEW_5NAV_V45",
-              "SixAccount":"FiveAccount",
-              "sixAccount":"fiveAccount",
-              "6계좌":"5계좌",
+              "SixAccount":"FiveAccount","sixAccount":"fiveAccount","6계좌":"5계좌",
           }
-          for a,b in replacements.items():
-              s=s.replace(a,b)
+          for a,b in replacements.items(): s=s.replace(a,b)
           s=re.sub(r"r\.label==='AI BOT'\?'ai bot':",'',s)
           s=re.sub(r";else if\(r\.id==='AI'\)extra=`[^`]*`",'',s)
           marker='function ensureWatchlistUi(){'
-          if marker not in s:
-              raise SystemExit('WATCHLIST_MARKER_NOT_FOUND')
+          if marker not in s: raise SystemExit('WATCHLIST_MARKER_NOT_FOUND')
           guard=(
               "function removeRetiredAccountUi(){\n"
+              " const oldAi='AI'+' BOT',oldAuto='AUTO'+'BOT';\n"
               " document.querySelectorAll('[data-account=\"AI\"],[data-account-id=\"AI\"],[data-account-code=\"AI\"]').forEach(e=>e.remove());\n"
-              " [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim();if(/^AI\\s*BOT$/i.test(name))card.remove()});\n"
-              " [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim();if(/AUTOBOT|AI\\s*BOT/i.test(text)){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});\n"
+              " [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim();if(name.toUpperCase()===oldAi)card.remove()});\n"
+              " [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim().toUpperCase();if(text.includes(oldAuto)||text===oldAi){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});\n"
               "}\n\n"
           )
           s=s.replace(marker,guard+marker,1)
           old='function updateCards(){\n if(!CANON)return;'
           new='function updateCards(){\n removeRetiredAccountUi();\n if(!CANON)return;'
-          if old not in s:
-              raise SystemExit('UPDATE_CARDS_MARKER_NOT_FOUND')
+          if old not in s: raise SystemExit('UPDATE_CARDS_MARKER_NOT_FOUND')
           s=s.replace(old,new,1)
           p.write_text(s,encoding='utf-8')
-          old_test=Path('tests/overview-6nav-v44.test.cjs')
-          new_test=Path('tests/overview-5nav-v45.test.cjs')
-          if not old_test.exists():
-              raise SystemExit('SIX_ACCOUNT_TEST_NOT_FOUND')
+          old_test=Path('tests/overview-6nav-v44.test.cjs'); new_test=Path('tests/overview-5nav-v45.test.cjs')
+          if not old_test.exists(): raise SystemExit('SIX_ACCOUNT_TEST_NOT_FOUND')
           t=old_test.read_text(encoding='utf-8')
-          for a,b in replacements.items():
-              t=t.replace(a,b)
+          for a,b in replacements.items(): t=t.replace(a,b)
           t=t.replace('six-account','five-account').replace('Six-account','Five-account')
-          new_test.write_text(t,encoding='utf-8')
-          old_test.unlink()
+          new_test.write_text(t,encoding='utf-8'); old_test.unlink()
           retired=Path('autobot-audit-board-v1.js')
-          if retired.exists():
-              retired.unlink()
+          if retired.exists(): retired.unlink()
           final=p.read_text(encoding='utf-8')
           assert "{id:'AI'," not in final
-          assert 'AI BOT' not in final
-          assert 'AUTOBOT' not in final.upper()
-          assert '6계좌' not in final
-          assert 'ACCOUNT_SUM_6' not in final
-          assert 'ACCOUNT_SUM_5' in final
-          registry_match=re.search(r"const REGISTRY=\[(.*?)\];\nconst ORIGINAL=",final,re.S)
-          assert registry_match, 'REGISTRY_BLOCK_NOT_FOUND'
-          registry_ids=re.findall(r"\{id:'([^']+)'",registry_match.group(1))
-          assert registry_ids==['TOSS','ISA','PENSION','IRP','TRIPOD'], registry_ids
-          print('CT_UI_ACTIVE_UNIVERSE=PASS accounts='+','.join(registry_ids)+' count=5')
+          assert 'AI BOT' not in final and 'AUTOBOT' not in final.upper()
+          assert '6계좌' not in final and 'ACCOUNT_SUM_6' not in final and 'ACCOUNT_SUM_5' in final
+          m=re.search(r"const REGISTRY=\[(.*?)\];\nconst ORIGINAL=",final,re.S); assert m
+          ids=re.findall(r"\{id:'([^']+)'",m.group(1)); assert ids==['TOSS','ISA','PENSION','IRP','TRIPOD'],ids
+          print('CT_UI_ACTIVE_UNIVERSE=PASS accounts='+','.join(ids)+' count=5')
           PY
           node --check live-bridge.js
           node --test tests/overview-5nav-v45.test.cjs
