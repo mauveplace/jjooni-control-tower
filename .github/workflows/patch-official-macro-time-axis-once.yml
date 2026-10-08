@@ -1,0 +1,82 @@
+name: Patch Official Macro Real Time Axis Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-official-macro-time-axis-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch official macro detail chart to real time axis
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('market-observatory/official-macro-v1.js')
+          s = p.read_text(encoding='utf-8')
+          start = s.index("const markerPlugin={id:'officialMacroMarkers'")
+          end = s.index("\nfunction kpi(", start)
+          replacement = r'''function macroDateEpoch(raw){
+ const s=String(raw??'').trim();if(!/^\d{4}-\d{2}-\d{2}/.test(s))return null;
+ const t=Date.parse(s.slice(0,10)+'T00:00:00Z');return Number.isFinite(t)?t:null;
+}
+function macroTick(raw){const t=Number(raw);return Number.isFinite(t)?new Date(t).toISOString().slice(0,7):String(raw??'')}
+const markerPlugin={id:'officialMacroMarkers',afterDatasetsDraw(chart,args,opts){
+ const marks=opts?.markers||[];const x=chart.scales.x;if(!x)return;const ctx=chart.ctx;
+ ctx.save();ctx.font='9px system-ui';ctx.fillStyle='#667085';ctx.strokeStyle='#c9d3df';ctx.lineWidth=1;
+ for(const m of marks){const t=macroDateEpoch(m.date);if(t==null)continue;const px=x.getPixelForValue(t);if(px<chart.chartArea.left||px>chart.chartArea.right)continue;ctx.beginPath();ctx.moveTo(px,chart.chartArea.top);ctx.lineTo(px,chart.chartArea.bottom);ctx.stroke();ctx.save();ctx.translate(px+3,chart.chartArea.top+10);ctx.rotate(-Math.PI/2);ctx.fillText(m.label,0,0);ctx.restore();}
+ ctx.restore();
+}};
+function drawDetailChart(m){
+ const c=q('#officialMacroChart');if(!c||typeof Chart==='undefined')return;
+ if(STATE.chart){STATE.chart.destroy();STATE.chart=null}
+ const ps=primarySeries(m),pts=cutoff(ps.points,STATE.range);
+ const data=pts.map(x=>({x:macroDateEpoch(x.date),y:x.value})).filter(x=>x.x!=null);
+ STATE.chart=new Chart(c,{type:'line',data:{datasets:[{label:ps.label,data,borderWidth:2,pointRadius:pts.length<2?3:0,tension:.12,spanGaps:true,parsing:false,normalized:true}]},plugins:[markerPlugin],options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},tooltip:{callbacks:{title:items=>items?.length?new Date(Number(items[0].parsed.x)).toISOString().slice(0,10):''}},officialMacroMarkers:{markers:DATA?.historical_markers||[]}},scales:{x:{type:'linear',bounds:'data',ticks:{maxTicksLimit:7,font:{size:9},callback:v=>macroTick(v)},grid:{color:'#eef2f6'}},y:{ticks:{maxTicksLimit:6,font:{size:9}},grid:{color:'#e8edf3'}}}}});
+}'''
+          s = s[:start] + replacement + s[end:]
+          s = s.replace("const STATE={version:'1.1'", "const STATE={version:'1.2'", 1)
+          p.write_text(s, encoding='utf-8')
+
+          index = Path('market-observatory/index.html')
+          html = index.read_text(encoding='utf-8')
+          old_src = './official-macro-v1.js?v=1.4'
+          if old_src not in html:
+              raise SystemExit('official macro cache key not found; refuse blind patch')
+          html = html.replace(old_src, './official-macro-v1.js?v=1.5', 1)
+          index.write_text(html, encoding='utf-8')
+
+      - name: Validate macro chart time-axis contract
+        run: |
+          node --check market-observatory/official-macro-v1.js
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('market-observatory/official-macro-v1.js').read_text(encoding='utf-8')
+          html=Path('market-observatory/index.html').read_text(encoding='utf-8')
+          for token in ["function macroDateEpoch(raw)","type:'linear',bounds:'data'","getPixelForValue(t)","const STATE={version:'1.2'"]:
+              if token not in s: raise SystemExit('missing '+token)
+          if './official-macro-v1.js?v=1.5' not in html: raise SystemExit('macro cache key not updated')
+          if "const labels=chart.data.labels||[]" in s: raise SystemExit('legacy marker category-axis dependency remains')
+          print('OFFICIAL_MACRO_REAL_TIME_AXIS_ACCEPTANCE=PASS')
+          PY
+
+      - name: Commit patch
+        run: |
+          if git diff --quiet -- market-observatory/official-macro-v1.js market-observatory/index.html; then
+            echo 'No patch required'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add market-observatory/official-macro-v1.js market-observatory/index.html
+          git commit -m 'fix(observatory): use real time axis for macro history charts'
+          git push origin HEAD:main
