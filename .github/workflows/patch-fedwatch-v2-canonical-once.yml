@@ -1,0 +1,157 @@
+name: Patch FedWatch V2 Canonical Writer Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/patch-fedwatch-v2-canonical-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: patch-fedwatch-v2-canonical-once
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Make Daily Observatory use FedWatch V2 as the canonical writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          daily_path=Path('.github/workflows/market-observatory-daily.yml')
+          fedflow_path=Path('.github/workflows/market-observatory-fedwatch-matrix-v2.yml')
+          index_path=Path('market-observatory/index.html')
+
+          daily=daily_path.read_text(encoding='utf-8')
+          fedflow=fedflow_path.read_text(encoding='utf-8')
+          index=index_path.read_text(encoding='utf-8')
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'PATCH_PATTERN_MISSING:{label}')
+              return text.replace(old,new,1)
+
+          # Daily owns the canonical Observatory publication. Make V2 the only
+          # FedWatch builder used by that writer so a later Daily run cannot
+          # downgrade fed-watch.json back to the legacy next-meeting schema.
+          if '      - tools/build_fed_watch_v2.py\n' not in daily:
+              daily=replace_once(
+                  daily,
+                  '      - tools/build_fed_watch.py\n',
+                  '      - tools/build_fed_watch.py\n      - tools/build_fed_watch_v2.py\n',
+                  'daily_push_path_v2',
+              )
+          daily=replace_once(
+              daily,
+              'tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py',
+              'tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/build_fed_watch_v2.py tools/postprocess_market_observatory.py',
+              'daily_pycompile_v2',
+          )
+          daily=replace_once(
+              daily,
+              '          python tools/build_fed_watch.py\n',
+              '          python tools/build_fed_watch_v2.py\n',
+              'daily_builder_v2',
+          )
+
+          # V2 has a distinct browser contract. Bump the cache key both in the
+          # bootstrap repair code and in the currently published HTML.
+          daily=replace_once(
+              daily,
+              "fedwatch='<script src=\"./fed-watch-v1.js?v=1.0\"></script>'",
+              "fedwatch='<script src=\"./fed-watch-v1.js?v=2.0\"></script>'",
+              'daily_fedwatch_bootstrap_cache',
+          )
+          daily=daily.replace("'fed-watch-v1.js?v=1.2' in html","'fed-watch-v1.js?v=2.0' in html")
+          if 'fed-watch-v1.js?v=2.0' not in daily:
+              raise SystemExit('PATCH_ASSERTION_MISSING:daily_fedwatch_v2_cache_contract')
+          if 'fed-watch-v1.js?v=1.2' in index:
+              index=index.replace('fed-watch-v1.js?v=1.2','fed-watch-v1.js?v=2.0')
+          elif 'fed-watch-v1.js?v=2.0' not in index:
+              raise SystemExit('PATCH_PATTERN_MISSING:index_fedwatch_cache_key')
+
+          # Strengthen Daily acceptance so any future schema downgrade fails
+          # before publication rather than silently replacing the matrix.
+          marker="          assert f.get('schema')=='JJOONI_FED_WATCH_V1'\n"
+          v2_contract=(
+              marker+
+              "          assert f.get('schema_revision')=='2.0'\n"
+              "          assert f.get('matrix_contract')=='CME_FEDWATCH_CONDITIONAL_MEETING_PROBABILITY_MATRIX_V2'\n"
+              "          assert int(f.get('meeting_count') or 0)>=2\n"
+              "          assert len(f.get('meeting_probability_matrix') or [])==int(f.get('meeting_count') or 0)\n"
+              "          assert (f.get('path_summary') or {}).get('terminal_meeting_date')==(f.get('meeting_probability_matrix') or [{}])[-1].get('meeting_date')\n"
+          )
+          if "assert f.get('schema_revision')=='2.0'" not in daily:
+              daily=replace_once(daily,marker,v2_contract,'daily_v2_acceptance')
+          daily=daily.replace(
+              "          assert f.get('freshness') in ['LIVE','STALE']\n",
+              "          assert f.get('freshness') in ['LIVE','LAGGING','STALE']\n",
+          )
+
+          # Once Daily itself writes V2 there must not be a second writer that
+          # republishes the same file after Daily. Keep the standalone workflow
+          # only for its post-CME-settlement refresh schedule / code-change runs.
+          workflow_run_block=(
+              '  workflow_run:\n'
+              '    workflows:\n'
+              '      - "Market Observatory Daily + Calendar"\n'
+              '    types: [completed]\n'
+          )
+          if workflow_run_block in fedflow:
+              fedflow=fedflow.replace(workflow_run_block,'',1)
+          fedflow=fedflow.replace(
+              "    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}\n",
+              '',
+              1,
+          )
+
+          # Deterministic post-patch guards.
+          assert 'python tools/build_fed_watch_v2.py' in daily
+          assert 'python tools/build_fed_watch.py\n' not in daily
+          assert "assert f.get('schema_revision')=='2.0'" in daily
+          assert "assert f.get('freshness') in ['LIVE','LAGGING','STALE']" in daily
+          assert 'fed-watch-v1.js?v=2.0' in daily
+          assert 'fed-watch-v1.js?v=2.0' in index
+          assert 'workflow_run:' not in fedflow
+
+          daily_path.write_text(daily,encoding='utf-8')
+          fedflow_path.write_text(fedflow,encoding='utf-8')
+          index_path.write_text(index,encoding='utf-8')
+          print('FEDWATCH_V2_CANONICAL_PATCH=PASS')
+          PY
+
+      - name: Commit canonical-writer hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/market-observatory-daily.yml .github/workflows/market-observatory-fedwatch-matrix-v2.yml market-observatory/index.html
+          if git diff --cached --quiet; then
+            echo FEDWATCH_V2_CANONICAL_PATCH_NO_CHANGE
+            exit 0
+          fi
+          git commit -m 'fix(observatory): make FedWatch V2 canonical in Daily writer'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo FEDWATCH_V2_CANONICAL_PATCH_PUSH=PASS
+              exit 0
+            fi
+            echo FEDWATCH_V2_CANONICAL_PATCH_PUSH_RETRY=$attempt
+          done
+          exit 1
