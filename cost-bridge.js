@@ -14,14 +14,35 @@ function hide(el){
   try{el.style.setProperty('display','none','important')}catch(_){}
 }
 
-function visibleAccountLabel(){
-  document.querySelectorAll('.ctAcctName').forEach(el=>{
-    const text=String(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
-    if(!text.includes('AI BOT'))return;
-    // Keep a hidden alias so legacy live-bridge card matching continues to work,
-    // while the user-facing account is presented as a normal brokerage account.
-    el.innerHTML='한국투자<span data-ct-autobot-alias="1" style="display:none!important"> AI BOT</span>';
-    el.dataset.ctAutobotRetiredLabel='1';
+function ensureRetirementStyle(){
+  if(document.getElementById('ctAutobotRetirementStyleV2'))return;
+  const st=document.createElement('style');
+  st.id='ctAutobotRetirementStyleV2';
+  st.textContent=`
+html body .tabs .tab[data-tab="ai"],
+html body .tabs .tab[data-tab="cost"],
+html body #panel-ai,
+html body #panel-cost,
+html body #ctAutobotAuditBoardV1{display:none!important}`;
+  (document.head||document.documentElement).appendChild(st);
+}
+
+function isRetiredAccountCard(card){
+  if(!card)return false;
+  const attrs=[
+    card.getAttribute('data-account'),
+    card.getAttribute('data-account-id'),
+    card.getAttribute('data-ct-account')
+  ].filter(Boolean).join(' ').toUpperCase();
+  if(/(^|\s)(AI|AUTOBOT)(\s|$)/.test(attrs))return true;
+  const name=card.querySelector('.ctAcctName,.v2AccountName,[data-account-name]');
+  const text=String((name||card).textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
+  return text.includes('AI BOT')||text.includes('AUTOBOT');
+}
+
+function hideRetiredAccountCards(){
+  document.querySelectorAll('.ctAcct,.v2Account,[data-account],[data-account-id],[data-ct-account]').forEach(card=>{
+    if(isRetiredAccountCard(card))hide(card);
   });
 }
 
@@ -31,6 +52,7 @@ function retireUi(){
     if(active==='ai'||active==='cost')sessionStorage.setItem(KEY,'overview');
   }catch(_){}
 
+  ensureRetirementStyle();
   hide(document.querySelector('.tab[data-tab="ai"]'));
   hide(document.getElementById('panel-ai'));
   hide(document.querySelector('.tab[data-tab="cost"]'));
@@ -41,15 +63,19 @@ function retireUi(){
   const auditStyle=document.getElementById('ctAutobotAuditStyleV1');
   if(auditStyle)hide(auditStyle);
 
-  visibleAccountLabel();
+  // Do not show the retired AUTOBOT / AI account as a card on the overview.
+  // The underlying brokerage account remains in canonical NAV/account math so
+  // removing the card cannot understate total assets or alter broker data.
+  hideRetiredAccountCards();
 
   window.__JJOONI_AUTOBOT_RETIRED_V1={
     state:'RETIRED',
-    version:'1.0',
+    version:'2.0',
     retired_at:RETIRED_AT,
     operational_ui:false,
     audit_polling:false,
     cost_dashboard:false,
+    overview_account_card:false,
     account_asset_reporting:true,
     updated_at:new Date().toISOString()
   };
@@ -73,7 +99,7 @@ try{
     childList:true,
     characterData:true,
     attributes:true,
-    attributeFilter:['class','style','hidden']
+    attributeFilter:['class','style','hidden','data-account','data-account-id','data-ct-account']
   });
 }catch(_){}
 document.addEventListener('jjooni:live-applied',queue);
