@@ -20,6 +20,18 @@ OUT = DATA_DIR / "fed-watch.json"
 KST = ZoneInfo("Asia/Seoul")
 ET = ZoneInfo("America/New_York")
 MAX_MEETINGS = 12
+KNOWN_FOMC_MEETINGS = [
+    date(2026, 1, 28), date(2026, 3, 18), date(2026, 4, 29), date(2026, 6, 17),
+    date(2026, 7, 29), date(2026, 9, 16), date(2026, 10, 28), date(2026, 12, 9),
+    date(2027, 1, 27), date(2027, 3, 17), date(2027, 4, 28), date(2027, 6, 9),
+    date(2027, 7, 28), date(2027, 9, 15), date(2027, 10, 27), date(2027, 12, 8),
+]
+
+
+def _load_full_fomc_meetings() -> list[date]:
+    """Keep the rolling Observatory calendar, but never truncate the FedWatch horizon to it."""
+    calendar_meetings = core._load_fomc_meetings()
+    return sorted(set(calendar_meetings) | set(KNOWN_FOMC_MEETINGS))
 
 
 def _normalize(weights: dict[int, float]) -> dict[int, float]:
@@ -215,7 +227,7 @@ def _path_summary(rows: list[dict], current_midpoint: float) -> dict:
 def main() -> None:
     now_kst = datetime.now(KST)
     now_et = now_kst.astimezone(ET)
-    meetings = core._load_fomc_meetings()
+    meetings = _load_full_fomc_meetings()
     upcoming = [d for d in meetings if d >= now_et.date()]
     if not upcoming:
         raise SystemExit("FEDWATCH_NO_UPCOMING_FOMC")
@@ -321,7 +333,7 @@ def main() -> None:
             "cme_settlements": core.CME_SETTLEMENTS_URL,
             "cme_methodology": "https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html",
             "fred": core.FRED_CSV,
-            "fomc_schedule": "Federal Reserve official schedule via economic-calendar.json",
+            "fomc_schedule": "Federal Reserve official schedule via economic-calendar.json plus embedded 2026-2027 official-date fallback",
         },
         "usage_contract": {
             "strategy_usable": freshness == "LIVE",
@@ -338,6 +350,8 @@ def main() -> None:
     print("meeting_count=", out["meeting_count"])
     print("target_ranges=", len(out["target_ranges"]))
     print("next_most_likely=", first["most_likely_target"], first["most_likely_probability"])
+    if failures:
+        print("matrix_failures=", failures)
 
 
 if __name__ == "__main__":
