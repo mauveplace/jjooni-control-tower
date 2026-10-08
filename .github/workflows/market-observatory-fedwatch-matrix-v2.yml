@@ -91,17 +91,35 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          from datetime import date, datetime
           from pathlib import Path
+          from zoneinfo import ZoneInfo
+
           d=json.loads(Path('market-observatory/data/fed-watch.json').read_text(encoding='utf-8'))
           assert d.get('schema')=='JJOONI_FED_WATCH_V1'
           assert d.get('schema_revision')=='2.0'
           assert d.get('matrix_contract')=='CME_FEDWATCH_CONDITIONAL_MEETING_PROBABILITY_MATRIX_V2'
           assert d.get('read_only') is True and d.get('contains_account_data') is False
           assert d.get('freshness') in ['LIVE','LAGGING','STALE']
-          assert int(d.get('meeting_count') or 0) >= 2,d.get('meeting_count')
           assert len(d.get('target_ranges') or []) >= 2
           rows=d.get('meeting_probability_matrix') or []
           assert len(rows)==d['meeting_count']
+
+          # Full-horizon guard: every still-upcoming known 2026-2027 official FOMC date
+          # must be represented, so a rolling calendar cannot silently truncate the matrix.
+          known=[
+              date(2026,1,28),date(2026,3,18),date(2026,4,29),date(2026,6,17),
+              date(2026,7,29),date(2026,9,16),date(2026,10,28),date(2026,12,9),
+              date(2027,1,27),date(2027,3,17),date(2027,4,28),date(2027,6,9),
+              date(2027,7,28),date(2027,9,15),date(2027,10,27),date(2027,12,8),
+          ]
+          today=datetime.now(ZoneInfo('America/New_York')).date()
+          expected={x.isoformat() for x in known if x>=today}
+          actual={str(x.get('meeting_date')) for x in rows}
+          if expected:
+              missing=sorted(expected-actual)
+              assert not missing,('MISSING_FOMC_HORIZON',missing,sorted(actual))
+
           for row in rows:
               probs=row.get('probabilities') or {}
               assert probs,row
@@ -118,6 +136,7 @@ jobs:
           print('market_data_as_of=',d['market_data_as_of'])
           print('meetings=',d['meeting_count'])
           print('ranges=',len(d['target_ranges']))
+          print('horizon_end=',rows[-1]['meeting_date'])
           PY
 
       - name: Publish FedWatch matrix
