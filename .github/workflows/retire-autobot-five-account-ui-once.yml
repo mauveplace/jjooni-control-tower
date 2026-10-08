@@ -20,7 +20,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-
           p=Path('live-bridge.js')
           s=p.read_text(encoding='utf-8')
           ai_line=" {id:'AI',label:'AI BOT',type:'AI',broker:'한국투자증권'},\n"
@@ -39,20 +38,20 @@ jobs:
               "sixAccount":"fiveAccount",
               "6계좌":"5계좌",
           }
-          for a,b in replacements.items(): s=s.replace(a,b)
+          for a,b in replacements.items():
+              s=s.replace(a,b)
           s=re.sub(r"r\.label==='AI BOT'\?'ai bot':",'',s)
           s=re.sub(r";else if\(r\.id==='AI'\)extra=`[^`]*`",'',s)
-
           marker='function ensureWatchlistUi(){'
           if marker not in s:
               raise SystemExit('WATCHLIST_MARKER_NOT_FOUND')
-          guard=r'''function removeRetiredAccountUi(){
- document.querySelectorAll('[data-account="AI"],[data-account-id="AI"],[data-account-code="AI"]').forEach(e=>e.remove());
- [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim();if(/^AI\s*BOT$/i.test(name))card.remove()});
- [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim();if(/AUTOBOT|AI\s*BOT/i.test(text)){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});
-}
-
-'''
+          guard=(
+              "function removeRetiredAccountUi(){\n"
+              " document.querySelectorAll('[data-account=\"AI\"],[data-account-id=\"AI\"],[data-account-code=\"AI\"]').forEach(e=>e.remove());\n"
+              " [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim();if(/^AI\\s*BOT$/i.test(name))card.remove()});\n"
+              " [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim();if(/AUTOBOT|AI\\s*BOT/i.test(text)){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});\n"
+              "}\n\n"
+          )
           s=s.replace(marker,guard+marker,1)
           old='function updateCards(){\n if(!CANON)return;'
           new='function updateCards(){\n removeRetiredAccountUi();\n if(!CANON)return;'
@@ -60,26 +59,26 @@ jobs:
               raise SystemExit('UPDATE_CARDS_MARKER_NOT_FOUND')
           s=s.replace(old,new,1)
           p.write_text(s,encoding='utf-8')
-
           old_test=Path('tests/overview-6nav-v44.test.cjs')
           new_test=Path('tests/overview-5nav-v45.test.cjs')
-          if not old_test.exists(): raise SystemExit('SIX_ACCOUNT_TEST_NOT_FOUND')
+          if not old_test.exists():
+              raise SystemExit('SIX_ACCOUNT_TEST_NOT_FOUND')
           t=old_test.read_text(encoding='utf-8')
-          for a,b in replacements.items(): t=t.replace(a,b)
+          for a,b in replacements.items():
+              t=t.replace(a,b)
           t=t.replace('six-account','five-account').replace('Six-account','Five-account')
           new_test.write_text(t,encoding='utf-8')
           old_test.unlink()
-
           retired=Path('autobot-audit-board-v1.js')
-          if retired.exists(): retired.unlink()
-
+          if retired.exists():
+              retired.unlink()
           final=p.read_text(encoding='utf-8')
           assert "{id:'AI'," not in final
           assert 'AI BOT' not in final
           assert 'AUTOBOT' not in final.upper()
           assert '6계좌' not in final
           assert 'ACCOUNT_SUM_6' not in final
-          assert "ACCOUNT_SUM_5" in final
+          assert 'ACCOUNT_SUM_5' in final
           assert final.count("{id:'")==5
           print('CT_UI_ACTIVE_UNIVERSE=PASS accounts=TOSS,ISA,PENSION,IRP,TRIPOD count=5')
           PY
@@ -93,7 +92,7 @@ jobs:
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add live-bridge.js tests/overview-5nav-v45.test.cjs tests/overview-6nav-v44.test.cjs autobot-audit-board-v1.js || true
+          git add -A live-bridge.js tests/overview-5nav-v45.test.cjs tests/overview-6nav-v44.test.cjs autobot-audit-board-v1.js
           git diff --cached --check
           git commit -m 'ui: enforce five-account Control Tower after AUTOBOT retirement'
           git push origin HEAD:main
