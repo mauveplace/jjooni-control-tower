@@ -7,7 +7,14 @@ settlement helpers are re-exported so existing imports continue to work.
 """
 from __future__ import annotations
 
-from fedwatch_core import *  # noqa: F401,F403
+import fedwatch_core as _core
+
+# `from module import *` intentionally omits underscore-prefixed helpers, while
+# the V2 builder consumes the legacy private helper surface. Re-export the full
+# non-dunder module contract explicitly for compatibility.
+for _name in dir(_core):
+    if not _name.startswith("__"):
+        globals()[_name] = getattr(_core, _name)
 
 
 def main() -> None:
