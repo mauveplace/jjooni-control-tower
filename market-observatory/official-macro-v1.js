@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(window.__JJOONI_OFFICIAL_MACRO_V1)return;
-const STATE={version:'1.1',status:'BOOTING',loaded:false,error:null,selected:null,range:'10Y',chart:null};
+const STATE={version:'1.2',status:'BOOTING',loaded:false,error:null,selected:null,range:'10Y',chart:null};
 window.__JJOONI_OFFICIAL_MACRO_V1=STATE;
 let DATA=null;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
@@ -136,17 +136,23 @@ function cutoff(points,range){
  const last=new Date(points[points.length-1].date+'T00:00:00Z');const days={'3Y':1096,'5Y':1827,'10Y':3653}[range]||3653;
  last.setUTCDate(last.getUTCDate()-days);const cut=last.toISOString().slice(0,10);return points.filter(x=>x.date>=cut);
 }
+function macroDateEpoch(raw){
+const s=String(raw??'').trim();if(!/^\d{4}-\d{2}-\d{2}/.test(s))return null;
+const t=Date.parse(s.slice(0,10)+'T00:00:00Z');return Number.isFinite(t)?t:null;
+}
+function macroTick(raw){const t=Number(raw);return Number.isFinite(t)?new Date(t).toISOString().slice(0,7):String(raw??'')}
 const markerPlugin={id:'officialMacroMarkers',afterDatasetsDraw(chart,args,opts){
- const marks=opts?.markers||[];const x=chart.scales.x;if(!x)return;const labels=chart.data.labels||[];const ctx=chart.ctx;
- ctx.save();ctx.font='9px system-ui';ctx.fillStyle='#667085';ctx.strokeStyle='#c9d3df';ctx.lineWidth=1;
- for(const m of marks){let i=labels.findIndex(d=>String(d)>=m.date);if(i<0)continue;const px=x.getPixelForValue(i);ctx.beginPath();ctx.moveTo(px,chart.chartArea.top);ctx.lineTo(px,chart.chartArea.bottom);ctx.stroke();ctx.save();ctx.translate(px+3,chart.chartArea.top+10);ctx.rotate(-Math.PI/2);ctx.fillText(m.label,0,0);ctx.restore();}
- ctx.restore();
+const marks=opts?.markers||[];const x=chart.scales.x;if(!x)return;const ctx=chart.ctx;
+ctx.save();ctx.font='9px system-ui';ctx.fillStyle='#667085';ctx.strokeStyle='#c9d3df';ctx.lineWidth=1;
+for(const m of marks){const t=macroDateEpoch(m.date);if(t==null)continue;const px=x.getPixelForValue(t);if(px<chart.chartArea.left||px>chart.chartArea.right)continue;ctx.beginPath();ctx.moveTo(px,chart.chartArea.top);ctx.lineTo(px,chart.chartArea.bottom);ctx.stroke();ctx.save();ctx.translate(px+3,chart.chartArea.top+10);ctx.rotate(-Math.PI/2);ctx.fillText(m.label,0,0);ctx.restore();}
+ctx.restore();
 }};
 function drawDetailChart(m){
- const c=q('#officialMacroChart');if(!c||typeof Chart==='undefined')return;
- if(STATE.chart){STATE.chart.destroy();STATE.chart=null}
- const ps=primarySeries(m),pts=cutoff(ps.points,STATE.range);
- STATE.chart=new Chart(c,{type:'line',data:{labels:pts.map(x=>x.date),datasets:[{label:ps.label,data:pts.map(x=>x.value),borderWidth:2,pointRadius:pts.length<2?3:0,tension:.12,spanGaps:true}]},plugins:[markerPlugin],options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},officialMacroMarkers:{markers:DATA?.historical_markers||[]}},scales:{x:{ticks:{maxTicksLimit:7,font:{size:9},callback:function(v){const s=this.getLabelForValue(v);return String(s).slice(0,7)}},grid:{color:'#eef2f6'}},y:{ticks:{maxTicksLimit:6,font:{size:9}},grid:{color:'#e8edf3'}}}}});
+const c=q('#officialMacroChart');if(!c||typeof Chart==='undefined')return;
+if(STATE.chart){STATE.chart.destroy();STATE.chart=null}
+const ps=primarySeries(m),pts=cutoff(ps.points,STATE.range);
+const data=pts.map(x=>({x:macroDateEpoch(x.date),y:x.value})).filter(x=>x.x!=null);
+STATE.chart=new Chart(c,{type:'line',data:{datasets:[{label:ps.label,data,borderWidth:2,pointRadius:pts.length<2?3:0,tension:.12,spanGaps:true,parsing:false,normalized:true}]},plugins:[markerPlugin],options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom'},tooltip:{callbacks:{title:items=>items?.length?new Date(Number(items[0].parsed.x)).toISOString().slice(0,10):''}},officialMacroMarkers:{markers:DATA?.historical_markers||[]}},scales:{x:{type:'linear',bounds:'data',ticks:{maxTicksLimit:7,font:{size:9},callback:v=>macroTick(v)},grid:{color:'#eef2f6'}},y:{ticks:{maxTicksLimit:6,font:{size:9}},grid:{color:'#e8edf3'}}}}});
 }
 function kpi(label,val){return '<div class="obsMacroKpi"><small>'+esc(label)+'</small><b>'+esc(val==null?'—':val)+'</b></div>'}
 function showDetail(key){
