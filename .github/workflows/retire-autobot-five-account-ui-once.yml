@@ -79,8 +79,11 @@ jobs:
           assert '6계좌' not in final
           assert 'ACCOUNT_SUM_6' not in final
           assert 'ACCOUNT_SUM_5' in final
-          assert final.count("{id:'")==5
-          print('CT_UI_ACTIVE_UNIVERSE=PASS accounts=TOSS,ISA,PENSION,IRP,TRIPOD count=5')
+          registry_match=re.search(r"const REGISTRY=\[(.*?)\];\nconst ORIGINAL=",final,re.S)
+          assert registry_match, 'REGISTRY_BLOCK_NOT_FOUND'
+          registry_ids=re.findall(r"\{id:'([^']+)'",registry_match.group(1))
+          assert registry_ids==['TOSS','ISA','PENSION','IRP','TRIPOD'], registry_ids
+          print('CT_UI_ACTIVE_UNIVERSE=PASS accounts='+','.join(registry_ids)+' count=5')
           PY
           node --check live-bridge.js
           node --test tests/overview-5nav-v45.test.cjs
