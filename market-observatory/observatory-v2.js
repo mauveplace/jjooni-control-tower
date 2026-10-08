@@ -43,32 +43,55 @@ function filtered(labels,sets,range){
   if(i<0)i=0;
   return{labels:labels.slice(i),sets:sets.map(s=>({...s,data:(s.data||[]).slice(i)}))};
 }
+function dateEpoch(raw){
+  const s=String(raw??'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}/.test(s))return null;
+  const t=Date.parse(s.slice(0,10)+'T00:00:00Z');
+  return Number.isFinite(t)?t:null;
+}
 function tickLabel(raw,range){
-  const s=String(raw??'');
-  if(!/^\d{4}-\d{2}-\d{2}/.test(s))return s;
+  const t=Number(raw);
+  if(!Number.isFinite(t))return String(raw??'');
+  const s=new Date(t).toISOString().slice(0,10);
   if(['1M','3M','6M'].includes(range))return s.slice(5,10);
   if(['1Y','3Y'].includes(range))return s.slice(0,7).replace('-','.');
   return s.slice(0,4);
+}
+function tooltipDate(raw){
+  const t=Number(raw);
+  return Number.isFinite(t)?new Date(t).toISOString().slice(0,10):String(raw??'');
 }
 function tickLimit(range){
   if(['1M','3M','6M'].includes(range))return 6;
   if(['1Y','3Y'].includes(range))return 7;
   return 6;
 }
+function timeDatasets(labels,sets){
+  return (sets||[]).map(series=>({
+    label:series.label,
+    data:(labels||[]).map((label,i)=>{
+      const x=dateEpoch(label);
+      return x==null?null:{x,y:(series.data||[])[i]??null};
+    }).filter(Boolean),
+    borderWidth:2,pointRadius:0,tension:.12,spanGaps:true,parsing:false,normalized:true
+  }));
+}
 function chartConfig(labels,sets,range='5Y'){
   return{
     type:'line',
-    data:{labels,datasets:sets.map(x=>({label:x.label,data:x.data,borderWidth:2,pointRadius:0,tension:.12,spanGaps:true}))},
+    data:{datasets:timeDatasets(labels,sets)},
     options:{
       responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:false,
       layout:{padding:{bottom:2}},
       plugins:{
         legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+        tooltip:{callbacks:{title:items=>items?.length?tooltipDate(items[0].parsed.x):''}},
         zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}
       },
       scales:{
         x:{
-          ticks:{display:true,color:'#667085',padding:6,maxTicksLimit:tickLimit(range),maxRotation:0,minRotation:0,font:{size:9},callback:function(v){return tickLabel(this.getLabelForValue(v),range)}},
+          type:'linear',bounds:'data',
+          ticks:{display:true,color:'#667085',padding:6,maxTicksLimit:tickLimit(range),maxRotation:0,minRotation:0,font:{size:9},callback:v=>tickLabel(v,range)},
           grid:{color:'#eef2f6',drawTicks:true},border:{color:'#cfd8e3'}
         },
         y:{ticks:{maxTicksLimit:6,font:{size:9},color:'#667085'},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
@@ -334,5 +357,5 @@ window.addEventListener('load',()=>{
     const s=document.createElement('script');s.dataset.officialMacroRuntime='1';s.src='./official-macro-v1.js?v=1.0';document.body.appendChild(s);
   }
 });
-window.__JJOONI_OBSERVATORY_UI={version:'2.11-calendar-refresh',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true,calendar_refresh_ms:CALENDAR_REFRESH_MS,refresh_calendar:refreshCalendarData};
+window.__JJOONI_OBSERVATORY_UI={version:'2.12-real-time-axis',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true,x_axis_contract:'LINEAR_UTC_EPOCH_REAL_ELAPSED_TIME',calendar_refresh_ms:CALENDAR_REFRESH_MS,refresh_calendar:refreshCalendarData};
 })();
