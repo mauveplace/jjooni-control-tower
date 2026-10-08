@@ -20,40 +20,31 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          p=Path('live-bridge.js')
-          s=p.read_text(encoding='utf-8')
+          p=Path('live-bridge.js'); s=p.read_text(encoding='utf-8')
           ai_line=" {id:'AI',label:'AI BOT',type:'AI',broker:'한국투자증권'},\n"
           if ai_line not in s: raise SystemExit('AI_REGISTRY_LINE_NOT_FOUND')
           s=s.replace(ai_line,'')
           replacements={
-              "SIX_ACCOUNT_NAV_SOURCES":"FIVE_ACCOUNT_NAV_SOURCES",
-              "isSixAccountNavSource":"isFiveAccountNavSource",
-              "ACCOUNT_SUM_6":"ACCOUNT_SUM_5",
-              "FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV":"FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV",
-              "patchAllSixAccountTotalSurfaces":"patchAllFiveAccountTotalSurfaces",
-              "ctSixAccountNav":"ctFiveAccountNav",
-              "__JJOONI_OVERVIEW_6NAV_V44":"__JJOONI_OVERVIEW_5NAV_V45",
-              "SixAccount":"FiveAccount","sixAccount":"fiveAccount","6계좌":"5계좌",
+              "SIX_ACCOUNT_NAV_SOURCES":"FIVE_ACCOUNT_NAV_SOURCES","isSixAccountNavSource":"isFiveAccountNavSource",
+              "ACCOUNT_SUM_6":"ACCOUNT_SUM_5","FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV":"FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV",
+              "patchAllSixAccountTotalSurfaces":"patchAllFiveAccountTotalSurfaces","ctSixAccountNav":"ctFiveAccountNav",
+              "__JJOONI_OVERVIEW_6NAV_V44":"__JJOONI_OVERVIEW_5NAV_V45","SixAccount":"FiveAccount","sixAccount":"fiveAccount","6계좌":"5계좌",
           }
           for a,b in replacements.items(): s=s.replace(a,b)
+          s=s.replace(",ai:'AI BOT'","")
           s=re.sub(r"r\.label==='AI BOT'\?'ai bot':",'',s)
           s=re.sub(r";else if\(r\.id==='AI'\)extra=`[^`]*`",'',s)
           marker='function ensureWatchlistUi(){'
           if marker not in s: raise SystemExit('WATCHLIST_MARKER_NOT_FOUND')
-          guard=(
-              "function removeRetiredAccountUi(){\n"
-              " const oldAi='AI'+' BOT',oldAuto='AUTO'+'BOT';\n"
-              " document.querySelectorAll('[data-account=\"AI\"],[data-account-id=\"AI\"],[data-account-code=\"AI\"]').forEach(e=>e.remove());\n"
-              " [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim();if(name.toUpperCase()===oldAi)card.remove()});\n"
-              " [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim().toUpperCase();if(text.includes(oldAuto)||text===oldAi){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});\n"
-              "}\n\n"
-          )
+          guard=("function removeRetiredAccountUi(){\n"
+                 " const oldAi='AI'+' BOT',oldAuto='AUTO'+'BOT';\n"
+                 " document.querySelectorAll('[data-account=\"AI\"],[data-account-id=\"AI\"],[data-account-code=\"AI\"]').forEach(e=>e.remove());\n"
+                 " [...document.querySelectorAll('.ctAcct')].forEach(card=>{const name=String((card.querySelector('.ctAcctName')||{}).textContent||'').trim().toUpperCase();if(name===oldAi)card.remove()});\n"
+                 " [...document.querySelectorAll('.tab')].forEach(tab=>{const text=String(tab.textContent||'').trim().toUpperCase();if(text.includes(oldAuto)||text===oldAi){const id=tab.dataset&&tab.dataset.tab;tab.remove();if(id){const panel=document.getElementById('panel-'+id);if(panel)panel.remove()}}});\n}\n\n")
           s=s.replace(marker,guard+marker,1)
-          old='function updateCards(){\n if(!CANON)return;'
-          new='function updateCards(){\n removeRetiredAccountUi();\n if(!CANON)return;'
+          old='function updateCards(){\n if(!CANON)return;'; new='function updateCards(){\n removeRetiredAccountUi();\n if(!CANON)return;'
           if old not in s: raise SystemExit('UPDATE_CARDS_MARKER_NOT_FOUND')
-          s=s.replace(old,new,1)
-          p.write_text(s,encoding='utf-8')
+          s=s.replace(old,new,1); p.write_text(s,encoding='utf-8')
           old_test=Path('tests/overview-6nav-v44.test.cjs'); new_test=Path('tests/overview-5nav-v45.test.cjs')
           if not old_test.exists(): raise SystemExit('SIX_ACCOUNT_TEST_NOT_FOUND')
           t=old_test.read_text(encoding='utf-8')
