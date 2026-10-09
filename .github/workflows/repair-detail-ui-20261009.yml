@@ -1,0 +1,62 @@
+name: Repair Detail UI 20261009
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-detail-ui-20261009.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore full mobile detail navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('ui-refactor.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("const PRIMARY_TABS=['overview','trades','portfolio','accounts'];","const PRIMARY_TABS=['overview','portfolio','trades','accounts','compare','tripod','decisions','quality','watchlist','cost'];")
+          s=s.replace("const SECONDARY_TABS=['compare','ai','tripod','decisions','quality','watchlist','cost'];","const SECONDARY_TABS=[];")
+          old=''' .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important;height:56px!important;padding:4px 6px!important}\n .tabs>.tab[data-tab]{display:none!important;min-width:0!important;width:auto!important;height:48px!important;font-size:11px!important;line-height:1.15!important;padding:4px 3px!important;white-space:nowrap!important}\n .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="trades"],.tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="accounts"]{display:flex!important}\n #ctMoreTab{display:flex!important;align-items:center;justify-content:center;min-width:0;width:auto;height:48px;border:0;border-radius:8px;background:transparent;color:#c3d1e2;font:800 11px/1.15 system-ui;cursor:pointer}\n #ctMoreTab.on{background:rgba(255,255,255,.1);color:#fff}\n #ctMoreMenu{position:fixed;left:10px;right:10px;bottom:66px;z-index:100050;background:#071a33;border:1px solid #244363;border-radius:14px;padding:8px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:none;grid-template-columns:1fr 1fr;gap:6px}\n #ctMoreMenu.open{display:grid}\n #ctMoreMenu button{min-height:44px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#0c294f;color:#eef6ff;font:800 12px/1.2 system-ui;text-align:left;padding:10px 12px}\n #ctMoreMenu button.active{background:#174a87}\n'''
+          new=''' .tabs{display:flex!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;height:56px!important;padding:4px 7px!important;scrollbar-width:none!important}\n .tabs::-webkit-scrollbar{display:none!important}\n .tabs>.tab[data-tab]{display:flex!important;flex:0 0 auto!important;min-width:82px!important;width:auto!important;height:48px!important;font-size:10px!important;line-height:1.15!important;padding:4px 9px!important;white-space:nowrap!important;align-items:center!important;justify-content:center!important}\n .tabs>.tab[data-tab="ai"]{display:none!important}\n #ctMoreTab,#ctMoreMenu{display:none!important}\n'''
+          if old not in s:
+              raise SystemExit('mobile nav css block not found')
+          s=s.replace(old,new,1)
+          pattern=r"function ensureMobileNav\(\)\{.*?\n\}\n\nfunction syncMoreState\(\)\{.*?\n\}\n"
+          repl="""function ensureMobileNav(){\n const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.remove();if(menu)menu.remove();\n const tabs=qs('.tabs');if(!tabs)return;\n qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase(),txt=String(t.textContent||'').trim().toUpperCase();if(id==='ai'||txt==='AI BOT'||txt.includes('AUTOBOT'))t.style.setProperty('display','none','important');else if(mobile())t.style.removeProperty('display')});\n}\n\nfunction syncMoreState(){}\n"""
+          s,n=re.subn(pattern,repl,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'nav function block matches={n}')
+          marker="function compactLeafCodes(){"
+          insert="""function normalizeFiveAccountLabels(){\n qsa('h1,h2,h3,h4,div,span,p,small,b,strong').forEach(e=>{if(e.children.length)return;const raw=String(e.textContent||'');if(raw.includes('6계좌'))e.textContent=raw.replaceAll('6계좌','5계좌')});\n}\n\n"""
+          if insert not in s:
+              s=s.replace(marker,insert+marker,1)
+          s=s.replace("compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.5',mobile_nav:'4_PLUS_MORE'","compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.6',mobile_nav:'FULL_SCROLL'")
+          p.write_text(s,encoding='utf-8')
+          PY
+          node --check ui-refactor.js
+          grep -q "mobile_nav:'FULL_SCROLL'" ui-refactor.js
+          ! grep -q "4_PLUS_MORE" ui-refactor.js
+          ! grep -q "SECONDARY_TABS=\['compare','ai'" ui-refactor.js
+
+      - name: Commit and publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ui-refactor.js
+          git diff --cached --check
+          git commit -m 'fix: restore full mobile detail navigation'
+          git push origin HEAD:main
