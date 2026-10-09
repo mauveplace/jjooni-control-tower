@@ -103,22 +103,41 @@ jobs:
           obs=load(obs_path)
           pulse=load(pulse_path)
           public=load(public_path)
+          sig=public.get('tripod_signal') or {}
           obs_dt=parsed(obs.get('generated_kst'))
           pulse_dt=parsed(pulse.get('generated_kst'))
           public_dt=parsed(public.get('generated_kst'))
           anchor=datetime.combine(now.date(), time(16,10), ET)
 
-          # Freshness is event-cycle based rather than market-date==today so US
-          # holidays and Sunday-ET Monday-KST briefs remain valid.
-          obs_fresh=bool(obs_dt and obs_dt >= anchor)
-          pulse_fresh=bool(pulse_dt and pulse_dt >= anchor)
-          public_fresh=bool(public_dt and public_dt >= anchor)
           aligned=bool(
               obs.get('us_completed_session_date') and
               pulse.get('market_date_us') == obs.get('us_completed_session_date') and
-              ((public.get('tripod_signal') or {}).get('date') == obs.get('us_completed_session_date'))
+              sig.get('date') == obs.get('us_completed_session_date')
           )
-          healthy=obs_fresh and pulse_fresh and public_fresh and aligned
+          structural_obs=bool(obs_dt and obs.get('us_completed_session_date'))
+          structural_pulse=bool(pulse_dt and pulse.get('snapshot_status') == 'FINAL')
+          structural_public=bool(public_dt and sig.get('ok') is True)
+          structural_healthy=structural_obs and structural_pulse and structural_public and aligned
+
+          # Scheduled/heartbeat repair is tied to the current completed-close cycle.
+          # Manual dispatch is different: before today's U.S. close, the 16:10 ET
+          # anchor is intentionally in the future, so using it would falsely mark a
+          # perfectly aligned prior completed session stale. Manual health-check mode
+          # therefore validates canonical session alignment + FINAL/valid contracts;
+          # force_repair=true still guarantees a rebuild on demand.
+          if event in {'workflow_dispatch', 'push'}:
+              obs_fresh=structural_obs
+              pulse_fresh=structural_pulse
+              public_fresh=structural_public
+              healthy=structural_healthy
+              health_mode='STRUCTURAL_SESSION'
+          else:
+              obs_fresh=bool(obs_dt and obs_dt >= anchor)
+              pulse_fresh=bool(pulse_dt and pulse_dt >= anchor and pulse.get('snapshot_status') == 'FINAL')
+              public_fresh=bool(public_dt and public_dt >= anchor and sig.get('ok') is True)
+              healthy=obs_fresh and pulse_fresh and public_fresh and aligned
+              health_mode='CLOSE_CYCLE'
+
           should_repair=eligible and (force_repair or not healthy)
 
           outputs={
@@ -130,6 +149,7 @@ jobs:
               'pulse_fresh': str(pulse_fresh).lower(),
               'public_fresh': str(public_fresh).lower(),
               'aligned': str(aligned).lower(),
+              'health_mode': health_mode,
           }
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh:
               for key,value in outputs.items():
@@ -140,13 +160,14 @@ jobs:
               'ny_now': now.isoformat(),
               'eligible': eligible,
               'force_repair': force_repair,
+              'health_mode': health_mode,
               'anchor': anchor.isoformat(),
               'obs_generated': obs.get('generated_kst'),
               'pulse_generated': pulse.get('generated_kst'),
               'public_generated': public.get('generated_kst'),
               'obs_session': obs.get('us_completed_session_date'),
               'pulse_session': pulse.get('market_date_us'),
-              'tripod_session': (public.get('tripod_signal') or {}).get('date'),
+              'tripod_session': sig.get('date'),
               'healthy': healthy,
               'should_repair': should_repair,
           }, ensure_ascii=False))
@@ -281,6 +302,7 @@ jobs:
           echo "OBSERVATORY_CLOSE_WATCHDOG=NOOP"
           echo "eligible=${{ steps.gate.outputs.eligible }}"
           echo "force_repair=${{ steps.gate.outputs.force_repair }}"
+          echo "health_mode=${{ steps.gate.outputs.health_mode }}"
           echo "ny_now=${{ steps.gate.outputs.ny_now }}"
           echo "obs_fresh=${{ steps.gate.outputs.obs_fresh }} pulse_fresh=${{ steps.gate.outputs.pulse_fresh }} public_fresh=${{ steps.gate.outputs.public_fresh }} aligned=${{ steps.gate.outputs.aligned }}"
 
