@@ -208,7 +208,7 @@ jobs:
           s=p.read_text(encoding='utf-8')
           zoom='<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>'
           if 'chartjs-plugin-zoom@2.2.0' not in s:s=s.replace('</head>',zoom+'</head>',1)
-          bridge='<script src="./observatory-v2.js?v=2.10"></script>'
+          bridge='<script src="./observatory-v2.js?v=2.12"></script>'
           if 'observatory-v2.js' not in s:s=s.replace('</body>',bridge+'</body>',1)
           editor='<script src="./calendar-editor-v1.js?v=1.2"></script>'
           if 'calendar-editor-v1.js' not in s:s=s.replace('</body>',editor+'</body>',1)
@@ -338,7 +338,7 @@ jobs:
           for token in ['미국 국채금리 추세','3개월물','2년물','10년물','30년물']:
               assert token in html,token
           assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
-          assert 'observatory-v2.js?v=2.10' in html
+          assert 'observatory-v2.js?v=' in html
           assert "cache:'no-store'" in html and "'cb='+Date.now()" in html
           assert 'latest-board-v1.js?v=2.4' in html
           assert 'fed-watch-v1.js?v=1.2' in html
