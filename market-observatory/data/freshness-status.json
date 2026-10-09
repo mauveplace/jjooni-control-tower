@@ -1,26 +1,24 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-09T18:57:25+09:00",
-  "overall": "DEGRADED",
-  "critical_bad": [
-    "tripod"
-  ],
+  "generated_kst": "2026-10-09T18:59:28+09:00",
+  "overall": "LIVE_WITH_WARNINGS",
+  "critical_bad": [],
   "warnings": [
     "fedwatch",
     "calendar"
   ],
-  "watchdog_required": true,
+  "watchdog_required": false,
   "session_alignment": {
     "observatory": "2026-10-08",
-    "daily_market_pulse": "2026-10-07",
+    "daily_market_pulse": "2026-10-08",
     "tripod": "2026-10-08",
-    "aligned": false
+    "aligned": true
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T12:06:56+09:00",
+      "generated_kst": "2026-10-09T18:59:13+09:00",
       "as_of": "2026-10-08",
       "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
       "source": "observatory.json",
@@ -29,8 +27,8 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T12:06:56+09:00",
-      "as_of": "2026-10-08T23:59:44+00:00",
+      "generated_kst": "2026-10-09T18:59:13+09:00",
+      "as_of": "2026-10-09T09:43:16+00:00",
       "detail": "38.1/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
@@ -46,8 +44,8 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "MISALIGNED",
-      "generated_kst": "2026-10-09T11:04:36+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-10-09T18:59:28+09:00",
       "as_of": "2026-10-08",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -65,7 +63,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T12:07:06+09:00",
+      "generated_kst": "2026-10-09T18:59:16+09:00",
       "as_of": "2026-10-08",
       "detail": "priced=46",
       "source": "sector-etf.json",
