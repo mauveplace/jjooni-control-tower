@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-10-09T18:59:13+09:00",
+  "generated_kst": "2026-10-09T19:04:46+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -9,15 +9,15 @@
     "NASDAQ100": 30725.81054688,
     "SP500": 7765.35986328,
     "VIX": 15.40999985,
-    "DXY": 102.08000183,
+    "DXY": 102.09200287,
     "USDKRW": 1341.40002441,
-    "USDJPY": 158.29699707,
-    "JPYKRW": 8.45499992,
-    "WTI": 90.91000366,
-    "BRENT": 103.33000183,
-    "NATGAS": 3.12599993,
-    "GOLD": 4209.39990234,
-    "COPPER": 6.66349983,
+    "USDJPY": 158.30599976,
+    "JPYKRW": 8.45199966,
+    "WTI": 90.52999878,
+    "BRENT": 102.90000153,
+    "NATGAS": 3.12100005,
+    "GOLD": 4211.29980469,
+    "COPPER": 6.66650009,
     "US3M": 4.23,
     "US5Y": 4.99100018,
     "US10Y": 5.23099995,
@@ -46,7 +46,7 @@
     "RUSSELL2000": 2794.12988281,
     "DOW": 51231.640625,
     "NASDAQCOMPOSITE": 27193.33984375,
-    "SILVER": 60.61999893
+    "SILVER": 60.65999985
   },
   "series": {
     "NASDAQ100": [
@@ -12122,7 +12122,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 102.08000183
+        "value": 102.09200287
       }
     ],
     "USDKRW": [
@@ -18366,7 +18366,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 158.29699707
+        "value": 158.30599976
       }
     ],
     "JPYKRW": [
@@ -21488,7 +21488,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 8.45499992
+        "value": 8.45199966
       }
     ],
     "WTI": [
@@ -24514,7 +24514,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 90.91000366
+        "value": 90.52999878
       }
     ],
     "BRENT": [
@@ -27544,7 +27544,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 103.33000183
+        "value": 102.90000153
       }
     ],
     "NATGAS": [
@@ -30574,7 +30574,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 3.12599993
+        "value": 3.12100005
       }
     ],
     "GOLD": [
@@ -33604,7 +33604,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 4209.39990234
+        "value": 4211.29980469
       }
     ],
     "COPPER": [
@@ -36634,7 +36634,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 6.66349983
+        "value": 6.66650009
       }
     ],
     "US3M": [
@@ -309492,7 +309492,7 @@
       },
       {
         "date": "2026-10-09",
-        "value": 60.61999893
+        "value": 60.65999985
       }
     ]
   },
@@ -309612,10 +309612,10 @@
     "action": "HOLD_NO_TRADE",
     "data_alignment": "NDX_VIX_SAME_COMPLETED_SESSION",
     "date": "2026-10-08",
-    "drawdown_52w_pct": -1.5970234183187992,
-    "ma250": 27121.189546875,
-    "ndx": 30725.80859375,
-    "observed_at": "2026-10-09T11:04:36+09:00",
+    "drawdown_52w_pct": -1.5970171632087693,
+    "ma250": 27121.1895546875,
+    "ndx": 30725.810546875,
+    "observed_at": "2026-10-09T18:59:28+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -0.2062184675993728,
     "previous_ma250": 27098.67903125,
@@ -314778,7 +314778,7 @@
     "fear_greed": {
       "state": "LIVE",
       "source": "CNN_FEAR_GREED_PUBLIC",
-      "observed_at": "2026-10-09T09:43:16+00:00",
+      "observed_at": "2026-10-09T09:48:16+00:00",
       "rating": "FEAR",
       "error": null,
       "history_source": "DAILY_MARKET_PULSE_HISTORY",
@@ -314800,12 +314800,12 @@
       "target": "TQQQ 100%",
       "vix10": 15.604000091552734,
       "vix10_risk_on_limit": 28.0,
-      "drawdown_52w_pct": -1.5970234183187992,
+      "drawdown_52w_pct": -1.5970171632087693,
       "risk_on_drawdown_limit_pct": -9.0,
       "fear_greed": 38.057143,
-      "market_pulse_risk": null
+      "market_pulse_risk": "NEUTRAL"
     },
-    "pulse_aligned": false,
+    "pulse_aligned": true,
     "read_only": true,
     "autobot_direct_trade_trigger": false,
     "source_contract": "TRIPOD_CANONICAL_PLUS_ALIGNED_MARKET_PULSE_V1"
@@ -314813,7 +314813,7 @@
   "today_strategy_contract": "TRIPOD_CANONICAL_DECISION_SUPPORT_V1",
   "freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-10-09T18:59:12+09:00",
+    "checked_kst": "2026-10-09T19:04:46+09:00",
     "market_date_us": "2026-10-08",
     "us_close_refresh_contract": "US_REGULAR_CLOSE_PLUS_10M_DST_AWARE",
     "scheduled_kst": "05:10_OR_06:10_DST_DEPENDENT",
@@ -314827,5 +314827,5 @@
   "history_base_path": "./data/history-30y.json",
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "market_supplement_contract": "GLOBAL_INDEX_SILVER_SENTIMENT_DAILY_REFERENCE_V2",
-  "equity_enriched_kst": "2026-10-09T18:59:16+09:00"
+  "equity_enriched_kst": "2026-10-09T19:04:49+09:00"
 }
