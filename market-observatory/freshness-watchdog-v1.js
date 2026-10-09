@@ -2,7 +2,7 @@
 'use strict';
 const FRESH='./data/freshness-status.json';
 const WATCH='./data/watchdog-status.json';
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const tone=s=>{s=String(s||'').toUpperCase();if(['LIVE','HEALTHY','HEALTHY_NOOP','REPAIRED','PASS','FINAL'].includes(s))return'good';if(['DEGRADED','FAILED','ERROR','MISALIGNED','REPAIR_FAILED','UNAVAILABLE'].includes(s))return'bad';return'warn'};
 const short=v=>String(v||'—').replace('T',' ').slice(0,16);
 const age=v=>{if(!v)return'—';const ms=Date.now()-Date.parse(v);if(!Number.isFinite(ms))return'—';const min=Math.max(0,Math.round(ms/60000));if(min<60)return`${min}분 전`;const h=Math.floor(min/60);if(h<48)return`${h}시간 전`;return`${Math.floor(h/24)}일 전`};
