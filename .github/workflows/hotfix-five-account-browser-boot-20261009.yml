@@ -18,124 +18,77 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Patch five-account browser boot
+      - name: Apply deterministic five-account browser patch
+        run: python3 ops/hotfix_five_account_browser_20261009.py
+
+      - name: Validate active JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
+          files=(
+            canonical-metrics.js live-bridge.js mobile-stability-v4.js trade-review-loader.js
+            ui-refactor.js trade-review-v2.js human-ui-v6.js tablet-runtime-v8.js tablet-accounts-v8.js
+            recent-trade-metric-drilldown-v9.js fx-attribution-v16.js metric-drilldown-router-v12.js
+            daily-performance-alias-v23.js account-source-truth-v22.js account-integrity-v17.js
+            source-authority-guard-v24.js position-completeness-v25.js
+          )
+          for f in "${files[@]}"; do node --check "$f"; done
 
-          def exact(path, old, new, expected=1):
-              p=Path(path); s=p.read_text(encoding='utf-8'); n=s.count(old)
-              if n != expected: raise SystemExit(f'{path}: expected {expected} x {old!r}, found {n}')
-              p.write_text(s.replace(old,new), encoding='utf-8')
-
-          exact('canonical-metrics.js', "const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];", "const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];")
-          exact('index.html', 'canonical-metrics.js?v=33.3', 'canonical-metrics.js?v=33.4')
-
-          p=Path('mobile-stability-v4.js'); s=p.read_text(encoding='utf-8')
-          pairs=[
-              ("version:'4.3'","version:'4.4'"),
-              ("const SIX_NAV_SOURCES_V43=new Set(['ACCOUNT_SUM_6','FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV']);","const FIVE_NAV_SOURCES_V44=new Set(['ACCOUNT_SUM_5','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV']);"),
-              ('function trustedSixNavV43(L){','function trustedFiveNavV44(L){'),
-              ('!SIX_NAV_SOURCES_V43.has(source)','!FIVE_NAV_SOURCES_V44.has(source)'),
-              ("source==='FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV'","source==='FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'"),
-              ('count!==6','count!==5'),
-              ('trustedSixNavV43(L)','trustedFiveNavV44(L)'),
-              ("const ids=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];","const ids=['TOSS','ISA','PENSION','IRP','TRIPOD'];"),
-              ("version:'4.2'","version:'4.4'"),
-          ]
-          for old,new in pairs:
-              if old not in s: raise SystemExit(f'mobile-stability-v4.js missing {old!r}')
-              s=s.replace(old,new)
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('trade-review-loader.js'); s=p.read_text(encoding='utf-8')
-          for old,new in [
-              ("version:'14.31'","version:'14.32'"),
-              ("portfolio:'보유분석',ai:'AI BOT',compare:'성과분석'","portfolio:'보유분석',compare:'성과분석'"),
-              ('mobile-stability-v4.js?v=4.3','mobile-stability-v4.js?v=4.4'),
-          ]:
-              if old not in s: raise SystemExit(f'trade-review-loader.js missing {old!r}')
-              s=s.replace(old,new)
-          lines=s.splitlines(True)
-          if not any('ctAutobotAuditBoardV1Script' in line for line in lines): raise SystemExit('retired AUTOBOT module row not found')
-          s=''.join(line for line in lines if 'ctAutobotAuditBoardV1Script' not in line)
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('live-bridge.js'); s=p.read_text(encoding='utf-8'); lines=s.splitlines(True)
-          if not any("if(id==='AI')ps=" in line for line in lines): raise SystemExit('retired AI position branch not found')
-          if not any('D.ai=D.ai||{}' in line for line in lines): raise SystemExit('retired AI legacy mirror init not found')
-          if not any('CANON.accounts.AI' in line for line in lines): raise SystemExit('retired AI legacy mirror update not found')
-          drop=("if(id==='AI')ps=",'D.ai=D.ai||{}','CANON.accounts.AI')
-          s=''.join(line for line in lines if not any(marker in line for marker in drop))
-          s=s.replace('six-account ACCOUNT_SUM_5 total','five-account ACCOUNT_SUM_5 total')
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('tests/browser-authoritative-total-nav-v45.test.cjs'); s=p.read_text(encoding='utf-8')
-          for old,new in [
-              ('six-account','five-account'),('SIX_ACCOUNT_NAV_SOURCES','FIVE_ACCOUNT_NAV_SOURCES'),
-              ('ACCOUNT_SUM_6','ACCOUNT_SUM_5'),('FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'),
-              ('isSixAccountNavSource','isFiveAccountNavSource'),('SIX_NAV_SOURCES_V43','FIVE_NAV_SOURCES_V44'),
-              ('trustedSixNavV43','trustedFiveNavV44')]: s=s.replace(old,new)
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('tests/runtime-loader-contract.test.cjs'); s=p.read_text(encoding='utf-8')
-          s=s.replace("mobile-stability-v4\\.js\\?v=4\\.3","mobile-stability-v4\\.js\\?v=4\\.4").replace("version:'14\\.31'","version:'14\\.32'")
-          s += "\ntest('retired AUTOBOT module is absent from verified loader',()=>{const loader=read('trade-review-loader.js');assert.doesNotMatch(loader,/AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script/);});\n"
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('tests/canonical-contract.test.cjs'); s=p.read_text(encoding='utf-8')
-          old="assert.equal(C.total.nav,600);assert.equal(c.D.human.total_asset,400);"
-          if old not in s: raise SystemExit('six-account canonical assertion not found')
-          s=s.replace(old,"assert.equal(C.total.nav,500);assert.equal(c.D.human.total_asset,400);")
-          s += "\ntest('default canonical account universe excludes retired AI account',()=>{assert.deepEqual(M.IDS,['TOSS','ISA','PENSION','IRP','TRIPOD']);const a=Object.fromEntries(M.IDS.map(id=>[id,acct()]));assert.equal(M.aggregate(a).nav,500);assert.equal(M.aggregate(a).account_count,5);});\n"
-          p.write_text(s,encoding='utf-8')
-          PY
-
-      - name: Validate focused runtime contracts
+      - name: Run focused five-account regression contracts
         shell: bash
         run: |
           set -euo pipefail
-          node --check canonical-metrics.js
-          node --check live-bridge.js
-          node --check mobile-stability-v4.js
-          node --check trade-review-loader.js
           node --test tests/canonical-contract.test.cjs
           node --test tests/browser-authoritative-total-nav-v45.test.cjs
           node --test tests/runtime-loader-contract.test.cjs
           node --test tests/overview-5nav-v45.test.cjs
           echo 'FIVE_ACCOUNT_BROWSER_BOOT=PASS'
 
-      - name: Audit active runtime for retired-account dependencies
+      - name: Audit loaded runtime for retired account residues
         shell: bash
         run: |
           set -euo pipefail
-          files=(
-            canonical-metrics.js live-bridge.js mobile-stability-v4.js trade-review-loader.js
-            fast-refresh-v32.js market-state-bridge.js ui-refactor.js data-integrity-v4.js
-            trade-review-v2.js trade-review-readable-v3.js decision-impact-v5.js realized-ledger-v7.js
-            trade-money-v6.js trade-review-outcomes-v26.js account-source-truth-v22.js human-ui-v6.js
-            viewport-bottom-guard-v5.js tablet-runtime-v8.js tablet-accounts-v8.js recent-trade-metric-drilldown-v9.js
-            canonical-valuation-fix-v13.js fx-attribution-v16.js metric-drilldown-router-v12.js daily-performance-alias-v23.js
-            runtime-integrity-v15.js account-integrity-v17.js irp-trade-unit-guard-v18.js drilldown-readability-v19.js
-            market-context-v20.js overview-consistency-v21.js source-authority-guard-v24.js position-completeness-v25.js
-            tablet-stability-v37.js
-          )
-          pattern='CANON\.accounts\.AI|accounts\.AI|id===.AI|ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES|AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script'
-          if grep -nE "$pattern" "${files[@]}"; then
-            echo 'ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=FAIL'
-            exit 1
-          fi
-          echo 'ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=PASS'
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          files=[
+            'canonical-metrics.js','live-bridge.js','mobile-stability-v4.js','trade-review-loader.js',
+            'fast-refresh-v32.js','market-state-bridge.js','ui-refactor.js','data-integrity-v4.js',
+            'trade-review-v2.js','trade-review-readable-v3.js','decision-impact-v5.js','realized-ledger-v7.js',
+            'trade-money-v6.js','trade-review-outcomes-v26.js','account-source-truth-v22.js','human-ui-v6.js',
+            'viewport-bottom-guard-v5.js','tablet-runtime-v8.js','tablet-accounts-v8.js','recent-trade-metric-drilldown-v9.js',
+            'canonical-valuation-fix-v13.js','fx-attribution-v16.js','metric-drilldown-router-v12.js','daily-performance-alias-v23.js',
+            'runtime-integrity-v15.js','account-integrity-v17.js','irp-trade-unit-guard-v18.js','drilldown-readability-v19.js',
+            'market-context-v20.js','overview-consistency-v21.js','source-authority-guard-v24.js','position-completeness-v25.js',
+            'tablet-stability-v37.js'
+          ]
+          pats={
+            'AI BOT':re.compile(r'AI BOT',re.I),
+            'retired account object':re.compile(r'(?:CANON\.)?accounts\.AI|D\.ai'),
+            'retired account token':re.compile(r"['\"]AI['\"]"),
+            'six-account NAV contract':re.compile(r'ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES|6계좌'),
+            'retired audit module':re.compile(r'autobot-audit-board-v1|ctAutobotAuditBoardV1Script',re.I),
+          }
+          bad=[]
+          for f in files:
+            text=Path(f).read_text(encoding='utf-8')
+            for label,pat in pats.items():
+              for m in pat.finditer(text):
+                line=text.count('\n',0,m.start())+1
+                bad.append(f'{f}:{line}: {label}: {m.group(0)}')
+          if bad:
+            print('\n'.join(bad[:200]))
+            raise SystemExit(f'ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=FAIL count={len(bad)}')
+          print('ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=PASS')
+          PY
 
-      - name: Commit hotfix
+      - name: Commit browser hotfix
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add canonical-metrics.js index.html live-bridge.js mobile-stability-v4.js trade-review-loader.js tests/browser-authoritative-total-nav-v45.test.cjs tests/runtime-loader-contract.test.cjs tests/canonical-contract.test.cjs
+          git add -u
           git diff --cached --check
           git commit -m 'fix: restore five-account verified browser boot'
           git push origin HEAD:main
