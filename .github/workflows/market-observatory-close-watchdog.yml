@@ -75,7 +75,12 @@ jobs:
           if event == 'workflow_dispatch':
               eligible=True
           elif event == 'push':
-              eligible=True
+              # Code pushes validate/report the watchdog contract but must never
+              # launch a heavy market-data repair merely because today's 16:10 ET
+              # close anchor is still in the future. Real repair authority belongs
+              # to manual dispatch, the close schedule, and the canonical Daily
+              # workflow completion heartbeat.
+              eligible=False
           else:
               eligible=in_close_window
 
