@@ -21,7 +21,7 @@ jobs:
       - name: Apply deterministic five-account browser patch
         run: |
           python3 ops/hotfix_five_account_browser_20261009.py
-          python3 ops/cleanup_retired_account_runtime_20261009.py
+          python3 ops/cleanup_retired_account_runtime_v2_20261009.py
 
       - name: Validate active JavaScript syntax
         shell: bash
