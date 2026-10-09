@@ -64,8 +64,11 @@ jobs:
           p.write_text(s,encoding='utf-8')
 
           p=Path('live-bridge.js'); s=p.read_text(encoding='utf-8'); lines=s.splitlines(True)
-          if not any("if(id==='AI')ps=" in line for line in lines): raise SystemExit('retired AI branch not found')
-          s=''.join(line for line in lines if "if(id==='AI')ps=" not in line)
+          if not any("if(id==='AI')ps=" in line for line in lines): raise SystemExit('retired AI position branch not found')
+          if not any('D.ai=D.ai||{}' in line for line in lines): raise SystemExit('retired AI legacy mirror init not found')
+          if not any('CANON.accounts.AI' in line for line in lines): raise SystemExit('retired AI legacy mirror update not found')
+          drop=("if(id==='AI')ps=",'D.ai=D.ai||{}','CANON.accounts.AI')
+          s=''.join(line for line in lines if not any(marker in line for marker in drop))
           s=s.replace('six-account ACCOUNT_SUM_5 total','five-account ACCOUNT_SUM_5 total')
           p.write_text(s,encoding='utf-8')
 
@@ -102,8 +105,29 @@ jobs:
           node --test tests/browser-authoritative-total-nav-v45.test.cjs
           node --test tests/runtime-loader-contract.test.cjs
           node --test tests/overview-5nav-v45.test.cjs
-          ! grep -nE 'ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES|AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script' canonical-metrics.js live-bridge.js mobile-stability-v4.js trade-review-loader.js
           echo 'FIVE_ACCOUNT_BROWSER_BOOT=PASS'
+
+      - name: Audit active runtime for retired-account dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            canonical-metrics.js live-bridge.js mobile-stability-v4.js trade-review-loader.js
+            fast-refresh-v32.js market-state-bridge.js ui-refactor.js data-integrity-v4.js
+            trade-review-v2.js trade-review-readable-v3.js decision-impact-v5.js realized-ledger-v7.js
+            trade-money-v6.js trade-review-outcomes-v26.js account-source-truth-v22.js human-ui-v6.js
+            viewport-bottom-guard-v5.js tablet-runtime-v8.js tablet-accounts-v8.js recent-trade-metric-drilldown-v9.js
+            canonical-valuation-fix-v13.js fx-attribution-v16.js metric-drilldown-router-v12.js daily-performance-alias-v23.js
+            runtime-integrity-v15.js account-integrity-v17.js irp-trade-unit-guard-v18.js drilldown-readability-v19.js
+            market-context-v20.js overview-consistency-v21.js source-authority-guard-v24.js position-completeness-v25.js
+            tablet-stability-v37.js
+          )
+          pattern='CANON\.accounts\.AI|accounts\.AI|id===.AI|ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES|AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script'
+          if grep -nE "$pattern" "${files[@]}"; then
+            echo 'ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=FAIL'
+            exit 1
+          fi
+          echo 'ACTIVE_RUNTIME_RETIRED_ACCOUNT_RESIDUE=PASS'
 
       - name: Commit hotfix
         shell: bash
