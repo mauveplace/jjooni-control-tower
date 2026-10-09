@@ -56,7 +56,7 @@ jobs:
 
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="./freshness-watchdog-v1.js?v=1.0"></script>'
+          tag='<script src="./freshness-watchdog-v1.js?v=1.1"></script>'
           if 'freshness-watchdog-v1.js' not in s:
               s=s.replace('</body>',tag+'</body>',1)
           else:
@@ -80,12 +80,14 @@ jobs:
 
           assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
           assert f.get('read_only') is True
-          assert set(['market','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
-          assert (f.get('session_alignment') or {}).get('observatory')
+          assert set(['market','pulse','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
+          align=f.get('session_alignment') or {}
+          assert align.get('observatory')
+          assert 'pulse_aligned' in align and 'tripod_aligned' in align,align
           assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
-          assert 'freshness-watchdog-v1.js?v=1.0' in html
+          assert 'freshness-watchdog-v1.js?v=1.1' in html
           for token in ['DATA FRESHNESS','Watchdog 열기','force_repair_supported','SOURCE_ASOF_STATE_PLUS_WATCHDOG_CONTROL_LINKS_V1']:
               assert token in js,token
           print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' watchdog='+str(w.get('result')))
