@@ -1,34 +1,34 @@
 {
   "schema": "JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1",
-  "checked_kst": null,
-  "checked_ny": null,
-  "event": null,
-  "eligible": false,
+  "checked_kst": "2026-10-09T18:59:31+09:00",
+  "checked_ny": "2026-10-09T05:57:39.046857-04:00",
+  "event": "push",
+  "eligible": true,
   "force_repair": false,
-  "decision": "NOOP",
-  "result": "PENDING_FIRST_RUN",
+  "decision": "REPAIR",
+  "result": "REPAIRED",
   "before": {
-    "observatory_fresh": null,
-    "daily_market_pulse_fresh": null,
-    "public_market_daily_fresh": null,
-    "session_aligned": null
+    "observatory_fresh": false,
+    "daily_market_pulse_fresh": false,
+    "public_market_daily_fresh": false,
+    "session_aligned": false
   },
   "steps": {
-    "rebuild": "skipped",
-    "acceptance": "skipped",
-    "publish": "skipped",
-    "verify": "skipped"
+    "rebuild": "success",
+    "acceptance": "success",
+    "publish": "success",
+    "verify": "success"
   },
   "current": {
-    "observatory_generated_kst": null,
-    "observatory_session": null,
-    "pulse_generated_kst": null,
-    "pulse_session": null,
-    "public_generated_kst": null,
-    "tripod_session": null
+    "observatory_generated_kst": "2026-10-09T18:59:13+09:00",
+    "observatory_session": "2026-10-08",
+    "pulse_generated_kst": "2026-10-09T18:59:26+09:00",
+    "pulse_session": "2026-10-08",
+    "public_generated_kst": "2026-10-09T18:59:28+09:00",
+    "tripod_session": "2026-10-08"
   },
   "workflow_url": "https://github.com/mauveplace/jjooni-control-tower/actions/workflows/market-observatory-close-watchdog.yml",
-  "run_url": null,
+  "run_url": "https://github.com/mauveplace/jjooni-control-tower/actions/runs/37914558806",
   "manual_dispatch_supported": true,
   "force_repair_supported": true,
   "repair_contract": "CLOSE_WINDOW_SELF_HEAL_PLUS_MANUAL_FORCE_REPAIR_V1",
