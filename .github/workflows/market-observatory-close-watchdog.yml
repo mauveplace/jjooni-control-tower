@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - .github/workflows/market-observatory-close-watchdog.yml
+      - tools/write_observatory_watchdog_status.py
+      - tools/build_observatory_freshness.py
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
@@ -16,6 +18,12 @@ on:
     # rejects the wrong local-hour candidate.
     - cron: '10,20,35,50 20,21 * * 0-5'
   workflow_dispatch:
+    inputs:
+      force_repair:
+        description: 'Force one canonical rebuild even when the freshness gate is healthy'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -46,6 +54,7 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
+          FORCE_REPAIR: ${{ github.event.inputs.force_repair || 'false' }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -57,6 +66,7 @@ jobs:
 
           ET=ZoneInfo('America/New_York')
           event=os.environ.get('EVENT_NAME','')
+          force_repair=str(os.environ.get('FORCE_REPAIR','false')).lower()=='true'
           now=datetime.now(ET)
 
           # A delayed cron must still run. The old exact-16:10 wall-clock gate could
@@ -107,10 +117,11 @@ jobs:
               ((public.get('tripod_signal') or {}).get('date') == obs.get('us_completed_session_date'))
           )
           healthy=obs_fresh and pulse_fresh and public_fresh and aligned
-          should_repair=eligible and not healthy
+          should_repair=eligible and (force_repair or not healthy)
 
           outputs={
               'eligible': 'true' if eligible else 'false',
+              'force_repair': 'true' if force_repair else 'false',
               'should_repair': 'true' if should_repair else 'false',
               'ny_now': now.isoformat(),
               'obs_fresh': str(obs_fresh).lower(),
@@ -126,6 +137,7 @@ jobs:
               'event': event,
               'ny_now': now.isoformat(),
               'eligible': eligible,
+              'force_repair': force_repair,
               'anchor': anchor.isoformat(),
               'obs_generated': obs.get('generated_kst'),
               'pulse_generated': pulse.get('generated_kst'),
@@ -144,7 +156,8 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet -r tools/requirements-observatory.txt
 
-      - name: Rebuild canonical Observatory + Daily Pulse + TRI-POD
+      - id: rebuild
+        name: Rebuild canonical Observatory + Daily Pulse + TRI-POD
         if: steps.gate.outputs.should_repair == 'true'
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
@@ -159,7 +172,8 @@ jobs:
             tools/add_observatory_equities.py \
             tools/build_observatory_sector_etf.py \
             tools/build_daily_market_pulse.py \
-            tools/build_public_market_daily.py
+            tools/build_public_market_daily.py \
+            tools/build_observatory_freshness.py
           python tools/build_market_observatory.py
           python tools/postprocess_market_observatory.py
           cp /tmp/economic-calendar.json market-observatory/data/economic-calendar.json
@@ -168,8 +182,10 @@ jobs:
           python tools/build_observatory_sector_etf.py
           python tools/build_daily_market_pulse.py
           python tools/build_public_market_daily.py
+          python tools/build_observatory_freshness.py
 
-      - name: Recovery acceptance contract
+      - id: recovery_acceptance
+        name: Recovery acceptance contract
         if: steps.gate.outputs.should_repair == 'true'
         shell: bash
         run: |
@@ -181,8 +197,9 @@ jobs:
           o=json.load(open('market-observatory/data/observatory.json'))
           p=json.load(open('market-observatory/data/daily-market-pulse.json'))
           t=json.load(open('public-market-daily.json'))
+          f=json.load(open('market-observatory/data/freshness-status.json'))
 
-          for obj,name in [(o,'observatory'),(p,'pulse'),(t,'public')]:
+          for obj,name in [(o,'observatory'),(p,'pulse'),(t,'public'),(f,'freshness')]:
               dt=datetime.fromisoformat(obj['generated_kst'])
               age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
               assert age < 12,(name,age,obj.get('generated_kst'))
@@ -205,12 +222,18 @@ jobs:
           assert sig.get('vix_basis')=='LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN',sig
           assert int(sig.get('vix_window_count') or 0)==10,sig
 
+          assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
+          assert (f.get('session_alignment') or {}).get('aligned') is True,f
+          assert (f.get('groups') or {}).get('tripod',{}).get('state')=='LIVE',f
+
           print('OBSERVATORY_CLOSE_WATCHDOG_ACCEPTANCE=PASS')
           print('session=',o.get('us_completed_session_date'))
           print('generated=',o.get('generated_kst'),p.get('generated_kst'),t.get('generated_kst'))
+          print('freshness=',f.get('overall'))
           PY
 
-      - name: Publish repaired SSOT atomically
+      - id: publish_repair
+        name: Publish repaired SSOT atomically
         if: steps.gate.outputs.should_repair == 'true'
         shell: bash
         run: |
@@ -223,9 +246,11 @@ jobs:
             market-observatory/data/history-30y.json \
             market-observatory/data/sector-etf.json \
             market-observatory/data/daily-market-pulse.json \
+            market-observatory/data/freshness-status.json \
             public-market-daily.json
 
-      - name: Verify published main SSOT
+      - id: verify_repair
+        name: Verify published main SSOT
         if: steps.gate.outputs.should_repair == 'true'
         shell: bash
         run: |
@@ -241,8 +266,10 @@ jobs:
           o=from_main('market-observatory/data/observatory.json')
           p=from_main('market-observatory/data/daily-market-pulse.json')
           t=from_main('public-market-daily.json')
+          f=from_main('market-observatory/data/freshness-status.json')
           assert p.get('market_date_us')==o.get('us_completed_session_date')
           assert (t.get('tripod_signal') or {}).get('date')==o.get('us_completed_session_date')
+          assert (f.get('session_alignment') or {}).get('aligned') is True
           print('OBSERVATORY_CLOSE_WATCHDOG_PUBLISH_VERIFY=PASS session='+str(o.get('us_completed_session_date')))
           PY
 
@@ -251,5 +278,42 @@ jobs:
         run: |
           echo "OBSERVATORY_CLOSE_WATCHDOG=NOOP"
           echo "eligible=${{ steps.gate.outputs.eligible }}"
+          echo "force_repair=${{ steps.gate.outputs.force_repair }}"
           echo "ny_now=${{ steps.gate.outputs.ny_now }}"
           echo "obs_fresh=${{ steps.gate.outputs.obs_fresh }} pulse_fresh=${{ steps.gate.outputs.pulse_fresh }} public_fresh=${{ steps.gate.outputs.public_fresh }} aligned=${{ steps.gate.outputs.aligned }}"
+
+      - name: Write observable watchdog status
+        if: always()
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ELIGIBLE: ${{ steps.gate.outputs.eligible }}
+          FORCE_REPAIR: ${{ steps.gate.outputs.force_repair }}
+          SHOULD_REPAIR: ${{ steps.gate.outputs.should_repair }}
+          NY_NOW: ${{ steps.gate.outputs.ny_now }}
+          OBS_FRESH: ${{ steps.gate.outputs.obs_fresh }}
+          PULSE_FRESH: ${{ steps.gate.outputs.pulse_fresh }}
+          PUBLIC_FRESH: ${{ steps.gate.outputs.public_fresh }}
+          ALIGNED: ${{ steps.gate.outputs.aligned }}
+          JOB_STATUS: ${{ job.status }}
+          REBUILD_OUTCOME: ${{ steps.rebuild.outcome }}
+          ACCEPTANCE_OUTCOME: ${{ steps.recovery_acceptance.outcome }}
+          PUBLISH_OUTCOME: ${{ steps.publish_repair.outcome }}
+          VERIFY_OUTCOME: ${{ steps.verify_repair.outcome }}
+        run: |
+          set -euo pipefail
+          # Failed repair steps may leave generated files dirty. The status commit must
+          # report the failure without accidentally publishing those partial snapshots.
+          git reset --hard HEAD
+          python tools/write_observatory_watchdog_status.py
+
+      - name: Publish watchdog status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py \
+            --message 'data(observatory): watchdog status' \
+            market-observatory/data/watchdog-status.json
