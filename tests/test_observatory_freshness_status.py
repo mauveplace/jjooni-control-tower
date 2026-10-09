@@ -33,6 +33,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'generated_kst': '2026-10-09T06:11:00+09:00',
                 'market_date_us': '2026-10-08',
+                'snapshot_status': 'FINAL',
             })
             self.write(root, 'public-market-daily.json', {
                 'generated_kst': '2026-10-09T06:12:00+09:00',
@@ -50,8 +51,36 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
 
             self.assertEqual(out['overall'], 'LIVE')
             self.assertTrue(out['session_alignment']['aligned'])
+            self.assertTrue(out['session_alignment']['pulse_aligned'])
+            self.assertTrue(out['session_alignment']['tripod_aligned'])
+            self.assertEqual(out['groups']['pulse']['state'], 'LIVE')
             self.assertEqual(out['groups']['tripod']['state'], 'LIVE')
             self.assertFalse(out['watchdog_required'])
+
+    def test_pulse_misalignment_is_critical_without_blaming_tripod(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.write(root, 'market-observatory/data/observatory.json', {
+                'generated_kst': '2026-10-09T06:10:00+09:00',
+                'us_completed_session_date': '2026-10-08',
+                'freshness': {'status': 'LIVE'},
+                'latest': {'FEAR_GREED': 38.1},
+                'tripod_latest': {'date': '2026-10-08'},
+            })
+            self.write(root, 'market-observatory/data/daily-market-pulse.json', {
+                'market_date_us': '2026-10-07', 'snapshot_status': 'FINAL'
+            })
+            self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-08'}})
+
+            out = freshness.build_status(root)
+
+            self.assertEqual(out['overall'], 'DEGRADED')
+            self.assertEqual(out['groups']['pulse']['state'], 'MISALIGNED')
+            self.assertEqual(out['groups']['tripod']['state'], 'LIVE')
+            self.assertIn('pulse', out['critical_bad'])
+            self.assertNotIn('tripod', out['critical_bad'])
+            self.assertFalse(out['session_alignment']['pulse_aligned'])
+            self.assertTrue(out['session_alignment']['tripod_aligned'])
 
     def test_tripod_misalignment_is_critical(self):
         with tempfile.TemporaryDirectory() as td:
@@ -63,13 +92,18 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'latest': {'FEAR_GREED': 38.1},
                 'tripod_latest': {'date': '2026-10-08'},
             })
-            self.write(root, 'market-observatory/data/daily-market-pulse.json', {'market_date_us': '2026-10-08'})
+            self.write(root, 'market-observatory/data/daily-market-pulse.json', {
+                'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL'
+            })
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-07'}})
 
             out = freshness.build_status(root)
 
             self.assertEqual(out['overall'], 'DEGRADED')
             self.assertFalse(out['session_alignment']['aligned'])
+            self.assertTrue(out['session_alignment']['pulse_aligned'])
+            self.assertFalse(out['session_alignment']['tripod_aligned'])
+            self.assertEqual(out['groups']['pulse']['state'], 'LIVE')
             self.assertEqual(out['groups']['tripod']['state'], 'MISALIGNED')
             self.assertTrue(out['watchdog_required'])
 
@@ -83,7 +117,9 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'latest': {'FEAR_GREED': 38.1},
                 'tripod_latest': {'date': '2026-10-08'},
             })
-            self.write(root, 'market-observatory/data/daily-market-pulse.json', {'market_date_us': '2026-10-08'})
+            self.write(root, 'market-observatory/data/daily-market-pulse.json', {
+                'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL'
+            })
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-08'}})
             self.write(root, 'market-observatory/data/fed-watch.json', {'freshness': 'LAGGING', 'market_data_as_of': '2026-10-07'})
 
