@@ -254,8 +254,11 @@ jobs:
           assert isinstance(o.get('series'),dict) and len(o['series'])>=10
           for k in ['KOSPI','KOSDAQ','NASDAQ100','SP500','VIX','USDKRW','WTI','BRENT','DXY','US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','JP2Y','JP5Y','JP10Y','JP30Y']:
               assert len(o['series'].get(k) or [])>5,(k,len(o['series'].get(k) or []))
-          for k in ['KOSPI','KOSDAQ','US_2S10S','JP_2S10S','KR10Y']:
+          for k in ['KOSPI','KOSDAQ','US_2S10S','JP_2S10S','KR10Y','FEAR_GREED']:
               assert o.get('latest',{}).get(k) is not None,(k,o.get('latest',{}).get(k))
+          assert len(o.get('series',{}).get('FEAR_GREED') or [])>1
+          today=o.get('today_strategy') or {}
+          assert today.get('read_only') is True and today.get('autobot_direct_trade_trigger') is False,today
           us_dates={k:str((o['series'].get(k) or [{}])[-1].get('date',''))[:10] for k in ['NASDAQ100','SP500','VIX']}
           assert all(us_dates.values()),us_dates
           assert len(set(us_dates.values()))==1,us_dates
@@ -283,7 +286,7 @@ jobs:
           assert f.get('schema')=='JJOONI_FED_WATCH_V1'
           assert f.get('read_only') is True and f.get('contains_account_data') is False
           assert f.get('meeting_date') and f.get('market_data_as_of')
-          assert f.get('freshness') in ['LIVE','STALE']
+          assert f.get('freshness') in ['LIVE','STALE','LAGGING']
           assert 0 <= float(f.get('hold_probability',0)) <= 1
           assert 0 <= float(f.get('hike_any_probability',0)) <= 1
           assert 0 <= float(f.get('cut_any_probability',0)) <= 1
