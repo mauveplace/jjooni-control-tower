@@ -57,7 +57,7 @@ function ensureMobileNav(){
  if(!menu){
   menu=document.createElement('div');menu.id='ctMoreMenu';menu.setAttribute('role','menu');document.body.appendChild(menu);
  }
- const labels={compare:'성과분석',ai:'AI BOT',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
+ const labels={compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
  if(!menu.dataset.ready){
   SECONDARY_TABS.forEach(name=>{const b=document.createElement('button');b.type='button';b.dataset.tab=name;b.textContent=labels[name]||name;b.setAttribute('role','menuitem');b.onclick=()=>{activateTab(name);menu.classList.remove('open');more.setAttribute('aria-expanded','false');syncMoreState()};menu.appendChild(b)});
   menu.dataset.ready='1';

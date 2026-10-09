@@ -32,12 +32,8 @@ function normalize(){
   try{
     if(typeof D!=='undefined'){
       const h=D.human||{};
-      (h.trades||[]).forEach(x=>{normalizeRecord(x);trades++});
-      (h.positions||[]).forEach(x=>{normalizeRecord(x);positions++});
-      const ai=D.ai?.latest||{};
-      (ai.trades||[]).forEach(x=>{normalizeRecord(x,'AI');trades++});
-      (ai.holdings_kr||[]).forEach(x=>{x.currency='KRW';x.market='KR';positions++});
-      (ai.holdings_us||[]).forEach(x=>{x.currency='USD';x.market='US';positions++});
+      (h.trades||[]).filter(x=>!['AI','AIBOT','AI_BOT'].includes(accountOf(x))).forEach(x=>{normalizeRecord(x);trades++});
+      (h.positions||[]).filter(x=>!['AI','AIBOT','AI_BOT'].includes(accountOf(x))).forEach(x=>{normalizeRecord(x);positions++});
     }
   }catch(_){}
   try{

@@ -2,7 +2,7 @@
 'use strict';
 // Shared display contract. No trading decisions; browser may load the separate
 // read-only FAST refresh client after the pure metrics API is installed.
-const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
 const number=v=>{if(v==null||typeof v==='boolean'||typeof v==='object'||String(v).trim()==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const first=(o,keys)=>{for(const k of keys){const x=number(o?.[k]);if(x!=null)return x}return null};
 const sum=xs=>xs.length&&xs.every(x=>number(x)!=null)?xs.reduce((s,x)=>s+Number(x),0):null;

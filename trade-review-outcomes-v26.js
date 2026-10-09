@@ -99,8 +99,7 @@ function collectTrades(){
  const out=[];
  let d=null;
  try{d=(typeof D!=='undefined'&&D)?D:window.D}catch(_){d=window.D||null}
- try{if(d?.human&&Array.isArray(d.human.trades))out.push(...d.human.trades)}catch(_){}
- try{if(d?.ai?.latest&&Array.isArray(d.ai.latest.trades))out.push(...d.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
+ try{if(d?.human&&Array.isArray(d.human.trades))out.push(...d.human.trades.filter(t=>!['AI','AIBOT','AI_BOT'].includes(acct(t))))}catch(_){}
  const seen=new Set(),dedup=[];
  out.forEach((t,i)=>{
   const oid=String(t?.order_id||t?.order_no||'').trim();
@@ -185,7 +184,7 @@ function currentPriceMap(trades){
  const set=(a,s,v)=>{const x=n(v);if(x!==null&&x>0&&s)m.set(String(a||'')+'|'+sym(s),x)};
  trades.forEach(t=>set(acct(t),ticker(t),t.current_price??t.last_price));
  try{Object.entries(window.__JJOONI_CANONICAL_SSOT?.accounts||{}).forEach(([a,o])=>(o.positions||[]).forEach(p=>set(a,p.ticker||p.symbol,p.current_price||p.price||p.last_price)))}catch(_){}
- try{const w=D?.human?.watchlist||{};[...(w.kr||[]),...(w.us||[])].forEach(x=>{const s=sym(x.ticker||x.symbol),v=x.current_price||x.price;for(const a of ['TOSS','ISA','PENSION','IRP','AI','TRIPOD'])set(a,s,v)})}catch(_){}
+ try{const w=D?.human?.watchlist||{};[...(w.kr||[]),...(w.us||[])].forEach(x=>{const s=sym(x.ticker||x.symbol),v=x.current_price||x.price;for(const a of ['TOSS','ISA','PENSION','IRP','TRIPOD'])set(a,s,v)})}catch(_){}
  return m;
 }
 

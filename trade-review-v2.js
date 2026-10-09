@@ -3,7 +3,7 @@
 
 const CFG={
   primary:['overview','trades','portfolio','accounts'],
-  secondary:['compare','ai','tripod','decisions','quality','watchlist','cost'],
+  secondary:['compare','tripod','decisions','quality','watchlist','cost'],
   recentDays:90,
   pendingDays:7
 };
@@ -38,7 +38,7 @@ function sleeve(t){
   if(explicit)return explicit;
   const a=account(t);
   if(a==='TRIPOD')return 'TRI-POD';
-  if(a==='AI')return 'AI BOT';
+
   return a;
 }
 function labelTicker(t){const ticker=sym(t.ticker||t.symbol),raw=String(t.name||t.stock_name||t.security_name||t.display_name||t.product_name||t.prdt_name||t.prdt_abrv_name||t.hts_kor_isnm||t.kor_name||t.korean_name||t.english_name||t.eng_name||'').trim();if(raw&&sym(raw)!==ticker)return raw;const names=window.__JJOONI_SECURITY_NAMES||{},k=/^\d{1,6}$/.test(ticker)?ticker.padStart(6,'0'):ticker,mapped=String(names[k]||names[ticker]||'').trim();return mapped||ticker||raw||'UNKNOWN'}
@@ -68,8 +68,7 @@ function unrealPnlInfo(pos,g){
 
 function collectTrades(){
   const out=[];
-  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
-  try{if(typeof D!=='undefined'&&D.ai&&D.ai.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
+  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades.filter(t=>!['AI','AIBOT','AI_BOT'].includes(account(t))))}catch(_){}
   const seen=new Set(),dedup=[];
   out.forEach(t=>{
     const k=[account(t),parseTs(t),sym(t.ticker||t.symbol),side(t),qty(t),tradePx(t)].join('|');
@@ -245,7 +244,7 @@ function ensureNav(){
   const menuOk=menuIds.length===CFG.secondary.length&&new Set(menuIds).size===CFG.secondary.length&&CFG.secondary.every(id=>menuIds.includes(id));
   if(menu.dataset.tradeReviewMenu!=='v2'||!menuOk){
     menu.innerHTML='';
-    const labels={compare:'성과분석',ai:'AI BOT',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
+    const labels={compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
     CFG.secondary.forEach(id=>{
       const src=qs('.tab[data-tab="'+id+'"]');if(!src)return;
       const b=document.createElement('button');b.type='button';b.dataset.tab=id;b.textContent=labels[id]||src.textContent.trim()||id;

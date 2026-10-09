@@ -6,7 +6,7 @@ const STATE={activeAccount:null,wrapped:null,bound:0,last:null};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const normTicker=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
-const normAcct=v=>{const s=String(v||'').trim().toUpperCase();if(['AIBOT','AI_BOT'].includes(s))return'AI';if(s==='PENSION'||s==='연금저축')return'PENSION';return s};
+const normAcct=v=>{const s=String(v||'').trim().toUpperCase();if(s==='PENSION'||s==='연금저축')return'PENSION';return s};
 const side=t=>{const s=String(t&&t.side||'').toUpperCase();return s.includes('SELL')||s.includes('매도')?'SELL':s.includes('BUY')||s.includes('매수')?'BUY':'OTHER'};
 const qty=t=>Math.abs(z(t&&(t.qty||t.quantity||t.filled_qty)));
 const price=t=>n(t&&(t.price||t.filled_price||t.avg_price));
@@ -21,7 +21,7 @@ function modal(){return document.getElementById('accountDrillModal')}
 function inferAccount(){
  if(STATE.activeAccount)return STATE.activeAccount;
  const m=modal();if(!m)return null;const h=String((m.querySelector('h2')||{}).textContent||'').trim().toUpperCase();
- if(h.includes('AI BOT'))return'AI';if(h==='ISA')return'ISA';if(h.includes('연금저축'))return'PENSION';if(h==='IRP')return'IRP';if(h.includes('TOSS'))return'TOSS';return null;
+ if(h==='ISA')return'ISA';if(h.includes('연금저축'))return'PENSION';if(h==='IRP')return'IRP';if(h.includes('TOSS'))return'TOSS';return null;
 }
 function humanPositions(acct){
  try{return [...(D.human?.positions||[])].filter(x=>normAcct(x.account||x.account_type)===acct)}catch(_){return []}
@@ -29,16 +29,10 @@ function humanPositions(acct){
 function humanTrades(acct){
  try{return [...(D.human?.trades||[])].filter(t=>normAcct(t.account||t.account_type)===acct).sort((a,b)=>when(b).localeCompare(when(a)))}catch(_){return []}
 }
-function aiTrades(){
- try{const a=Array.isArray(D.ai?.trades_31d)&&D.ai.trades_31d.length?D.ai.trades_31d:(D.ai?.latest?.trades||[]);return [...a].map(t=>({...t,account:'AI'})).sort((x,y)=>when(y).localeCompare(when(x)))}catch(_){return []}
-}
-function aiPositions(){
- try{const L=D.ai?.latest||{};return [...(L.holdings_kr||[]).map(x=>({...x,account:'AI',currency:'KRW',market:'KR',current_price:n(x.current_price??x.price)})),...(L.holdings_us||[]).map(x=>({...x,account:'AI',currency:'USD',market:'US',current_price:n(x.current_price??x.price)}))]}catch(_){return []}
-}
 function quotePrice(t,acct,positions){
  const nt=normTicker(t.ticker||t.symbol);
  const p=(positions||[]).find(x=>normTicker(x.ticker||x.symbol)===nt),pp=n(p&&(p.current_price??p.price));if(pp!=null&&pp>0)return pp;
- if(acct==='AI')return null;
+
  try{
   const q=D.human?.trade_quotes||{},direct=q[t.ticker]||q[nt]||Object.entries(q).find(([k])=>normTicker(k)===nt)?.[1],v=n(direct&&direct.price);if(v!=null&&v>0)return v;
  }catch(_){}
@@ -59,7 +53,7 @@ function incompatibleUnits(t,entry,cur,positions){
  return null;
 }
 function build(acct){
- acct=normAcct(acct);const trades=acct==='AI'?aiTrades():humanTrades(acct),positions=acct==='AI'?aiPositions():humanPositions(acct),excluded=[];
+ acct=normAcct(acct);const trades=humanTrades(acct),positions=humanPositions(acct),excluded=[];
  const scored=[];
  trades.forEach(t=>{const entry=price(t),cur=quotePrice(t,acct,positions),sd=side(t),reason=incompatibleUnits(t,entry,cur,positions);if(reason){excluded.push({...t,_excludeReason:reason,_current:cur,_side:sd});return}let perf=null;if(entry>0&&cur>0){if(sd==='BUY')perf=(cur/entry-1)*100;else if(sd==='SELL')perf=(entry/cur-1)*100}if(perf!=null)scored.push({...t,_perf:perf,_current:cur,_side:sd})});
  const favorable=scored.filter(t=>t._perf>0),unfavorable=scored.filter(t=>!(t._perf>0)),avg=scored.length?scored.reduce((s,t)=>s+t._perf,0)/scored.length:null,sum=scored.reduce((s,t)=>s+t._perf,0);

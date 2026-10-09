@@ -15,7 +15,7 @@ const side=o=>{const s=String(o&&o.side||'').toUpperCase();return s.includes('SE
 const qty=o=>Math.abs(z(o&&(o.qty||o.quantity||o.filled_qty)));
 const parseTs=o=>{const raw=String(o&&(o.filled_at_kst||o.trade_date||o.date)||'').trim();if(!raw)return 0;const x=Date.parse(raw.length<=10?raw+'T00:00:00+09:00':raw);return Number.isFinite(x)?x:0};
 const esc=s=>String(s||'').replace(/'/g,"''");
-function recentTrades(){const out=[];try{if(typeof D!=='undefined'&&Array.isArray(D.human?.trades))out.push(...D.human.trades)}catch(_){}try{if(typeof D!=='undefined'&&Array.isArray(D.ai?.latest?.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}return out}
+function recentTrades(){const out=[];try{if(typeof D!=='undefined'&&Array.isArray(D.human?.trades))out.push(...D.human.trades.filter(t=>!['AI','AIBOT','AI_BOT'].includes(acct(t))))}catch(_){}return out}
 function targetGroups(){const cutoff=Date.now()-RECENT_DAYS*86400000,map=new Map();recentTrades().forEach(t=>{if(side(t)!=='SELL'||parseTs(t)<cutoff)return;const a=acct(t),ticker=sym(t.ticker||t.symbol);if(!ticker)return;const k=a+'|'+ticker;if(!map.has(k))map.set(k,{account:a,ticker})});return [...map.values()]}
 function gviz(groups,tag,timeout=12000){
  return new Promise((resolve,reject)=>{

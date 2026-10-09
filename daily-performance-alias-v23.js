@@ -9,7 +9,7 @@ const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
 function accountId(){
  const m=q('#accountDrillModal');if(!m)return null;
  const t=norm(q('h1,h2,h3,.modalTitle,.title',m)?.textContent).toUpperCase();
- if(t.includes('AI BOT'))return'AI';if(t.includes('TRI-POD')||t.includes('TRIPOD'))return'TRIPOD';if(t.includes('연금'))return'PENSION';if(/\bISA\b/.test(t))return'ISA';if(/\bIRP\b/.test(t))return'IRP';if(t.includes('TOSS'))return'TOSS';
+ if(t.includes('TRI-POD')||t.includes('TRIPOD'))return'TRIPOD';if(t.includes('연금'))return'PENSION';if(/\bISA\b/.test(t))return'ISA';if(/\bIRP\b/.test(t))return'IRP';if(t.includes('TOSS'))return'TOSS';
  return null;
 }
 function bind(){

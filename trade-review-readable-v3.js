@@ -17,8 +17,7 @@ function parseTs(t){
 }
 function allTrades(){
   const out=[];
-  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades)}catch(_){}
-  try{if(typeof D!=='undefined'&&D.ai&&D.ai.latest&&Array.isArray(D.ai.latest.trades))out.push(...D.ai.latest.trades)}catch(_){}
+  try{if(typeof D!=='undefined'&&D.human&&Array.isArray(D.human.trades))out.push(...D.human.trades.filter(t=>!['AI','AIBOT','AI_BOT'].includes(String(t.account||t.account_type||'').trim().toUpperCase())))}catch(_){}
   return out;
 }
 function latestTradeLabel(card){

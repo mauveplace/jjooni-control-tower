@@ -30,8 +30,7 @@ function toKrw(value,curr){
 function firstNum(o,keys){for(const k of keys){const x=n(o&&o[k]);if(x!=null)return x}return null}
 function collectTrades(){
  const out=[];
- try{if(typeof D!=='undefined'&&Array.isArray(D.human?.trades))out.push(...D.human.trades)}catch(_){}
- try{if(typeof D!=='undefined'&&Array.isArray(D.ai?.latest?.trades))out.push(...D.ai.latest.trades.map(x=>({...x,account:x.account||'AI'})))}catch(_){}
+ try{if(typeof D!=='undefined'&&Array.isArray(D.human?.trades))out.push(...D.human.trades.filter(t=>!['AI','AIBOT','AI_BOT'].includes(acct(t))))}catch(_){}
  const seen=new Set(),dedup=[];
  out.forEach(t=>{const k=[acct(t),parseTs(t),sym(t.ticker||t.symbol),side(t),qty(t),px(t)].join('|');if(!seen.has(k)){seen.add(k);dedup.push(t)}});
  return dedup;

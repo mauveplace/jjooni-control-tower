@@ -3,10 +3,10 @@
 if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.31',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.32',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
-const LABELS={overview:'Overview',portfolio:'보유분석',ai:'AI BOT',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
+const LABELS={overview:'Overview',portfolio:'보유분석',compare:'성과분석',accounts:'계좌성과',performance:'계좌성과',tripod:'TRI-POD',decision:'의사결정',decisions:'의사결정',trades:'거래내역',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
 function ensureBootShield(){let s=document.getElementById('ctUiBootShieldV14');if(s)return s;s=document.createElement('div');s.id='ctUiBootShieldV14';s.style.cssText='position:fixed;inset:0;z-index:100200;display:grid;place-items:center;padding:24px;background:rgba(244,247,251,.97);backdrop-filter:blur(4px);font-family:system-ui,-apple-system,sans-serif;color:#10233d;text-align:center';s.innerHTML='<div style="width:min(92vw,430px);padding:24px;border:1px solid #d7e1ec;border-radius:18px;background:#fff;box-shadow:0 18px 60px #10233d22"><div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:#60758d">CONTROL TOWER · VERIFIED BOOT</div><div id="ctUiBootTitleV14" style="margin-top:8px;font-size:20px;font-weight:900">검증된 화면 구성 중</div><div id="ctUiBootTextV14" style="margin-top:8px;font-size:13px;line-height:1.55;color:#66788b">SSOT와 필수 UI 모듈을 순서대로 확인합니다.</div><button id="ctUiBootReloadV14" type="button" style="display:none;margin:16px auto 0;padding:10px 14px;border:0;border-radius:10px;background:#0b3b70;color:#fff;font-weight:850;cursor:pointer">새로고침</button></div>';document.body.appendChild(s);const b=s.querySelector('#ctUiBootReloadV14');if(b)b.onclick=()=>location.reload();return s}
 function bootText(t){const s=ensureBootShield(),e=s.querySelector('#ctUiBootTextV14');if(e)e.textContent=t}
 function fail(reason){BOOT.state='BLOCKED';BOOT.failed=String(reason||'UNKNOWN');BOOT.failed_at=new Date().toISOString();document.documentElement.dataset.ctBoot='blocked';const s=ensureBootShield(),t=s.querySelector('#ctUiBootTitleV14'),x=s.querySelector('#ctUiBootTextV14'),b=s.querySelector('#ctUiBootReloadV14');if(t)t.textContent='화면 구성을 차단했습니다';if(x)x.textContent='필수 모듈이 완전하게 로드되지 않아 혼합 버전 화면을 표시하지 않습니다. '+BOOT.failed;if(b)b.style.display='inline-block';console.error('CT UI BOOT BLOCKED',BOOT.failed)}
@@ -50,12 +50,11 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
 ['ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3.2','trade-readable'],
-['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4.3','mobile-stability'],
+['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4.4','mobile-stability'],
 ['ctDecisionImpactV5Script','decision-impact-v5.js?v=5.2','decision-impact'],
 ['ctRealizedLedgerV7Script','realized-ledger-v7.js?v=7.3','realized-ledger'],
 ['ctTradeMoneyV6Script','trade-money-v6.js?v=6.2','trade-money'],
 ['ctTradeOutcomeV26Script','trade-review-outcomes-v26.js?v=26.7','trade-outcomes'],
-['ctAutobotAuditBoardV1Script','autobot-audit-board-v1.js?v=1.0','autobot-audit-board'],
 ['ctAccountSourceTruthV22Script','account-source-truth-v22.js?v=22.1','account-source-truth'],
 ['ctHumanUiV6Script','human-ui-v6.js?v=6.3','human-ui'],
 ['ctViewportBottomGuardV5Script','viewport-bottom-guard-v5.js?v=5','viewport-guard'],

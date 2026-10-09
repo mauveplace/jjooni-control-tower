@@ -54,6 +54,8 @@ test('UI module optimization preloads downloads but preserves sequential executi
 
 test('verified UI loader cache-busts the NAV race-fixed mobile runtime',()=>{
   const loader=read('trade-review-loader.js');
-  assert.match(loader,/mobile-stability-v4\.js\?v=4\.3/);
-  assert.match(loader,/version:'14\.31'/);
+  assert.match(loader,/mobile-stability-v4\.js\?v=4\.4/);
+  assert.match(loader,/version:'14\.32'/);
 });
+
+test('retired AUTOBOT module is absent from verified loader',()=>{const loader=read('trade-review-loader.js');assert.doesNotMatch(loader,/AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script/);});
