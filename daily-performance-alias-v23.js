@@ -89,3 +89,14 @@ s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31?.state||'LOADED
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_TAB_HOTFIX_V31_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
 })();
+
+(function(){
+'use strict';
+if(window.__JJOONI_ACCOUNT_RETURN_30D_V46||document.getElementById('ctAccountReturn30dV46Script'))return;
+const st={state:'LOADING',version:'46.0',started_at:new Date().toISOString()};
+window.__JJOONI_ACCOUNT_RETURN_30D_LOADER_V46=st;
+const s=document.createElement('script');s.id='ctAccountReturn30dV46Script';s.src='account-return-30d-v46.js?v=46.0&_='+Date.now();s.async=false;
+s.onload=()=>{st.state=window.__JJOONI_ACCOUNT_RETURN_30D_V46?.state||'LOADED';st.loaded_at=new Date().toISOString()};
+s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('ACCOUNT_RETURN_30D_V46_LOAD_FAILED')};
+(document.head||document.documentElement).appendChild(s);
+})();
