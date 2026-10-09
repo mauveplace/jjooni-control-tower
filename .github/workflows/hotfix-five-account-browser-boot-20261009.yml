@@ -1,0 +1,165 @@
+name: Hotfix Five Account Browser Boot 20261009
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hotfix-five-account-browser-boot-20261009.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  hotfix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch browser runtime to five-account contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace(path, old, new, count=None):
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              n=s.count(old)
+              if count is not None and n != count:
+                  raise SystemExit(f'{path}: expected {count} matches for {old!r}, found {n}')
+              if n == 0:
+                  raise SystemExit(f'{path}: missing expected text {old!r}')
+              p.write_text(s.replace(old,new),encoding='utf-8')
+
+          # Root cause: shared metrics still aggregated the retired AI account by default.
+          replace('canonical-metrics.js',
+                  "const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];",
+                  "const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];",1)
+
+          # Force browsers to fetch the corrected canonical metrics immediately.
+          replace('index.html','canonical-metrics.js?v=33.3','canonical-metrics.js?v=33.4',1)
+
+          # Mobile total-NAV and trust strip must use the same five-account universe.
+          p=Path('mobile-stability-v4.js'); s=p.read_text(encoding='utf-8')
+          replacements=[
+            ("version:'4.3'","version:'4.4'"),
+            ("const SIX_NAV_SOURCES_V43=new Set(['ACCOUNT_SUM_6','FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV']);","const FIVE_NAV_SOURCES_V44=new Set(['ACCOUNT_SUM_5','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV']);"),
+            ('function trustedSixNavV43(L){','function trustedFiveNavV44(L){'),
+            ('!SIX_NAV_SOURCES_V43.has(source)','!FIVE_NAV_SOURCES_V44.has(source)'),
+            ("source==='FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV'","source==='FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'"),
+            ('count!==6','count!==5'),
+            ('trustedSixNavV43(L)','trustedFiveNavV44(L)'),
+            ("const ids=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];","const ids=['TOSS','ISA','PENSION','IRP','TRIPOD'];"),
+            ("version:'4.2'","version:'4.4'"),
+          ]
+          for old,new in replacements:
+              if old not in s: raise SystemExit(f'mobile-stability-v4.js missing {old!r}')
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+
+          # Verified UI loader must not load any retired AUTOBOT module and must cache-bust mobile v4.4.
+          p=Path('trade-review-loader.js'); s=p.read_text(encoding='utf-8')
+          for old,new in [
+            ("version:'14.31'","version:'14.32'"),
+            ("portfolio:'보유분석',ai:'AI BOT',compare:'성과분석'","portfolio:'보유분석',compare:'성과분석'"),
+            ("mobile-stability-v4.js?v=4.3","mobile-stability-v4.js?v=4.4"),
+          ]:
+              if old not in s: raise SystemExit(f'trade-review-loader.js missing {old!r}')
+              s=s.replace(old,new)
+          old="['ctAutobotAuditBoardV1Script','autobot-audit-board-v1.js?v=1.0','autobot-audit-board'],\n"
+          if old not in s: raise SystemExit('trade-review-loader.js missing retired AUTOBOT module row')
+          s=s.replace(old,'')
+          p.write_text(s,encoding='utf-8')
+
+          # Remove dead retired-account branch from the live bridge.
+          p=Path('live-bridge.js'); s=p.read_text(encoding='utf-8')
+          s2,n=re.subn(r"\n  if\(id==='AI'\)ps=\[\.\.\.\(a\.holdings_kr\|\|\[\]\),\.\.\.\(a\.holdings_us\|\|\[\]\)\]\.map\(p=>\(\{\.\.\.p,avg_price:n\(p\.avg_price\?\?p\.avg\),current_price:n\(p\.current_price\?\?p\.price\),market_value_krw:M\.valueKrw\(p,a\),record_type:p\.record_type\|\|'POSITION'\}\)\);",'',s,count=1)
+          if n!=1: raise SystemExit(f'live-bridge.js retired AI branch matches={n}')
+          s2=s2.replace('six-account ACCOUNT_SUM_5 total','five-account ACCOUNT_SUM_5 total')
+          p.write_text(s2,encoding='utf-8')
+
+          # Update regression contracts that were still certifying the obsolete six-account runtime.
+          p=Path('tests/browser-authoritative-total-nav-v45.test.cjs'); s=p.read_text(encoding='utf-8')
+          for old,new in [
+            ('both DEEP and FAST six-account','both DEEP and FAST five-account'),
+            ('SIX_ACCOUNT_NAV_SOURCES','FIVE_ACCOUNT_NAV_SOURCES'),
+            ('ACCOUNT_SUM_6','ACCOUNT_SUM_5'),
+            ('FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'),
+            ('isSixAccountNavSource','isFiveAccountNavSource'),
+            ('producer six-account NAV','producer five-account NAV'),
+            ('SIX_NAV_SOURCES_V43','FIVE_NAV_SOURCES_V44'),
+            ('trustedSixNavV43','trustedFiveNavV44'),
+          ]: s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('tests/runtime-loader-contract.test.cjs'); s=p.read_text(encoding='utf-8')
+          s=s.replace("mobile-stability-v4\\.js\\?v=4\\.3","mobile-stability-v4\\.js\\?v=4\\.4")
+          s=s.replace("version:'14\\.31'","version:'14\\.32'")
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('tests/canonical-contract.test.cjs'); s=p.read_text(encoding='utf-8')
+          old="assert.equal(C.total.nav,600);assert.equal(c.D.human.total_asset,400);"
+          new="assert.equal(C.total.nav,500);assert.equal(c.D.human.total_asset,400);"
+          if old not in s: raise SystemExit('canonical-contract expected six-account total assertion not found')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+
+          Path('tests/five-account-browser-boot-regression.test.cjs').write_text(r'''const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const M=require('../canonical-metrics.js');
+
+test('shared canonical metrics owns exactly five active accounts',()=>{
+  assert.deepEqual(M.IDS,['TOSS','ISA','PENSION','IRP','TRIPOD']);
+  const accounts=Object.fromEntries(M.IDS.map(id=>[id,{nav:100,today_pnl:1,net_flow:0,pnl:10,principal:90}]));
+  assert.equal(M.aggregate(accounts).nav,500);
+  assert.equal(M.aggregate(accounts).account_count,5);
+});
+
+test('verified browser boot has no retired account or AUTOBOT module dependency',()=>{
+  const canonical=fs.readFileSync('canonical-metrics.js','utf8');
+  const bridge=fs.readFileSync('live-bridge.js','utf8');
+  const mobile=fs.readFileSync('mobile-stability-v4.js','utf8');
+  const loader=fs.readFileSync('trade-review-loader.js','utf8');
+  assert.doesNotMatch(canonical,/['\"]AI['\"]/);
+  assert.doesNotMatch(bridge,/id==='AI'/);
+  assert.match(bridge,/ACCOUNT_SUM_5/);
+  assert.match(bridge,/FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV/);
+  assert.doesNotMatch(mobile,/ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES/);
+  assert.match(mobile,/FIVE_NAV_SOURCES_V44/);
+  assert.doesNotMatch(loader,/AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script/);
+  assert.match(loader,/mobile-stability-v4\.js\?v=4\.4/);
+});
+''',encoding='utf-8')
+          PY
+
+      - name: Validate JavaScript and focused contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check canonical-metrics.js
+          node --check live-bridge.js
+          node --check mobile-stability-v4.js
+          node --check trade-review-loader.js
+          node --test tests/five-account-browser-boot-regression.test.cjs
+          node --test tests/canonical-contract.test.cjs
+          node --test tests/browser-authoritative-total-nav-v45.test.cjs
+          node --test tests/runtime-loader-contract.test.cjs
+          node --test tests/overview-5nav-v45.test.cjs
+          ! grep -nE 'ACCOUNT_SUM_6|FAST_EFFECTIVE_SUM_6_ACCOUNT_NAV|SIX_NAV_SOURCES|AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script' canonical-metrics.js live-bridge.js mobile-stability-v4.js trade-review-loader.js
+          echo 'FIVE_ACCOUNT_BROWSER_BOOT=PASS'
+
+      - name: Commit hotfix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add canonical-metrics.js index.html live-bridge.js mobile-stability-v4.js trade-review-loader.js tests/browser-authoritative-total-nav-v45.test.cjs tests/runtime-loader-contract.test.cjs tests/canonical-contract.test.cjs tests/five-account-browser-boot-regression.test.cjs
+          git diff --cached --check
+          git commit -m 'fix: restore five-account verified browser boot'
+          git push origin HEAD:main
