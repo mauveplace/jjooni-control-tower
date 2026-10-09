@@ -1,8 +1,8 @@
 (function(){
 'use strict';
 
-const PRIMARY_TABS=['overview','trades','portfolio','accounts'];
-const SECONDARY_TABS=['compare','ai','tripod','decisions','quality','watchlist','cost'];
+const PRIMARY_TABS=['overview','portfolio','trades','accounts','compare','tripod','decisions','quality','watchlist','cost'];
+const SECONDARY_TABS=[];
 const PAGE_SIZE=30;
 const STATE={tradeParent:null,tradeNodes:[],shown:PAGE_SIZE,tradeControls:null,tradeAnchor:null};
 
@@ -18,15 +18,11 @@ function ensureStyle(){
  st.textContent=`
 @media(min-width:768px){#ctMoreTab,#ctMoreMenu{display:none!important}}
 @media(max-width:767px){
- .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important;height:56px!important;padding:4px 6px!important}
- .tabs>.tab[data-tab]{display:none!important;min-width:0!important;width:auto!important;height:48px!important;font-size:11px!important;line-height:1.15!important;padding:4px 3px!important;white-space:nowrap!important}
- .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="trades"],.tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="accounts"]{display:flex!important}
- #ctMoreTab{display:flex!important;align-items:center;justify-content:center;min-width:0;width:auto;height:48px;border:0;border-radius:8px;background:transparent;color:#c3d1e2;font:800 11px/1.15 system-ui;cursor:pointer}
- #ctMoreTab.on{background:rgba(255,255,255,.1);color:#fff}
- #ctMoreMenu{position:fixed;left:10px;right:10px;bottom:66px;z-index:100050;background:#071a33;border:1px solid #244363;border-radius:14px;padding:8px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:none;grid-template-columns:1fr 1fr;gap:6px}
- #ctMoreMenu.open{display:grid}
- #ctMoreMenu button{min-height:44px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#0c294f;color:#eef6ff;font:800 12px/1.2 system-ui;text-align:left;padding:10px 12px}
- #ctMoreMenu button.active{background:#174a87}
+ .tabs{display:flex!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;height:56px!important;padding:4px 7px!important;scrollbar-width:none!important}
+ .tabs::-webkit-scrollbar{display:none!important}
+ .tabs>.tab[data-tab]{display:flex!important;flex:0 0 auto!important;min-width:82px!important;width:auto!important;height:48px!important;font-size:10px!important;line-height:1.15!important;padding:4px 9px!important;white-space:nowrap!important;align-items:center!important;justify-content:center!important}
+ .tabs>.tab[data-tab="ai"]{display:none!important}
+ #ctMoreTab,#ctMoreMenu{display:none!important}
  .ctTrustBadge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 7px;margin:1px 3px 1px 0;font:800 11px/1.15 system-ui;white-space:nowrap;background:rgba(127,127,127,.10);color:inherit;border:1px solid rgba(127,127,127,.28)}
  .ctTrustBadge.measured,.ctTrustBadge.modeled,.ctTrustBadge.reference{background:rgba(127,127,127,.10);color:inherit;border-color:rgba(127,127,127,.28)}
  #ctHeroScopeWarning{font-size:11px!important;line-height:1.6!important}
@@ -47,32 +43,12 @@ function activateTab(name){
 }
 
 function ensureMobileNav(){
- if(!mobile()){const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.style.display='none';if(menu){menu.classList.remove('open');menu.style.display='none'};return}
+ const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.remove();if(menu)menu.remove();
  const tabs=qs('.tabs');if(!tabs)return;
- let more=qs('#ctMoreTab');
- if(!more){
-  more=document.createElement('button');more.type='button';more.id='ctMoreTab';more.textContent='더보기';more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');tabs.appendChild(more);
- }
- let menu=qs('#ctMoreMenu');
- if(!menu){
-  menu=document.createElement('div');menu.id='ctMoreMenu';menu.setAttribute('role','menu');document.body.appendChild(menu);
- }
- const labels={compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
- if(!menu.dataset.ready){
-  SECONDARY_TABS.forEach(name=>{const b=document.createElement('button');b.type='button';b.dataset.tab=name;b.textContent=labels[name]||name;b.setAttribute('role','menuitem');b.onclick=()=>{activateTab(name);menu.classList.remove('open');more.setAttribute('aria-expanded','false');syncMoreState()};menu.appendChild(b)});
-  menu.dataset.ready='1';
- }
- more.onclick=()=>{const open=!menu.classList.contains('open');menu.classList.toggle('open',open);more.setAttribute('aria-expanded',String(open))};
- document.addEventListener('click',e=>{if(!menu.contains(e.target)&&e.target!==more){menu.classList.remove('open');more.setAttribute('aria-expanded','false')}},{capture:true,once:false});
- syncMoreState();
+ qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase(),txt=String(t.textContent||'').trim().toUpperCase();if(id==='ai'||txt==='AI BOT'||txt.includes('AUTOBOT'))t.style.setProperty('display','none','important');else if(mobile())t.style.removeProperty('display')});
 }
 
-function syncMoreState(){
- const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(!more||!menu)return;
- const active=qs('.tab.on[data-tab]');const name=active&&active.dataset.tab||'';const secondary=SECONDARY_TABS.includes(name);
- more.classList.toggle('on',secondary);
- qsa('button[data-tab]',menu).forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
-}
+function syncMoreState(){}
 
 function trustKind(raw){
  const s=String(raw||'').toUpperCase();
@@ -100,6 +76,10 @@ function compactAttribution(){
 const DISPLAY_MAP=[
  ['YAHOO_FALLBACK_NONLIVE','○ 참고'],['ACCOUNTING_MARKET_PNL','◐ 추정'],['MTM · KIS_MARKET_QUOTE','◐ 추정'],['BROKER_LIVE_FULL','● 실측'],['MODELED_LIVE','◐ 추정'],['MODEL_LIVE','◐ 추정'],['NO_DATA','○ 미검증']
 ];
+function normalizeFiveAccountLabels(){
+ qsa('h1,h2,h3,h4,div,span,p,small,b,strong').forEach(e=>{if(e.children.length)return;const raw=String(e.textContent||'');if(raw.includes('6계좌'))e.textContent=raw.replaceAll('6계좌','5계좌')});
+}
+
 function compactLeafCodes(){
  qsa('body *').forEach(e=>{
   if(e.childElementCount||!visible(e))return;
@@ -155,7 +135,7 @@ function paginateTrades(){
 }
 
 let busy=false;
-function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.5',mobile_nav:'4_PLUS_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
+function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.6',mobile_nav:'FULL_SCROLL',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 document.addEventListener('jjooni:live-applied',enforce);
