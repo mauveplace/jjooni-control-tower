@@ -75,11 +75,8 @@ jobs:
           if event == 'workflow_dispatch':
               eligible=True
           elif event == 'push':
-              # Code pushes validate/report the watchdog contract but must never
-              # launch a heavy market-data repair merely because today's 16:10 ET
-              # close anchor is still in the future. Real repair authority belongs
-              # to manual dispatch, the close schedule, and the canonical Daily
-              # workflow completion heartbeat.
+              # A config/code push validates the gate only. It must not trigger a
+              # heavy close rebuild while today's 16:10 ET anchor is still ahead.
               eligible=False
           else:
               eligible=in_close_window
@@ -288,7 +285,7 @@ jobs:
           echo "obs_fresh=${{ steps.gate.outputs.obs_fresh }} pulse_fresh=${{ steps.gate.outputs.pulse_fresh }} public_fresh=${{ steps.gate.outputs.public_fresh }} aligned=${{ steps.gate.outputs.aligned }}"
 
       - name: Write observable watchdog status
-        if: always()
+        if: ${{ always() && github.event_name != 'push' }}
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -313,7 +310,7 @@ jobs:
           python tools/write_observatory_watchdog_status.py
 
       - name: Publish watchdog status
-        if: always()
+        if: ${{ always() && github.event_name != 'push' }}
         shell: bash
         run: |
           set -euo pipefail
