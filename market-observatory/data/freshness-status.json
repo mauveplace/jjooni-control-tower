@@ -1,0 +1,77 @@
+{
+  "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
+  "generated_kst": "2026-10-09T18:57:25+09:00",
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "tripod"
+  ],
+  "warnings": [
+    "fedwatch",
+    "calendar"
+  ],
+  "watchdog_required": true,
+  "session_alignment": {
+    "observatory": "2026-10-08",
+    "daily_market_pulse": "2026-10-07",
+    "tripod": "2026-10-08",
+    "aligned": false
+  },
+  "groups": {
+    "market": {
+      "label": "Market SSOT",
+      "state": "LIVE",
+      "generated_kst": "2026-10-09T12:06:56+09:00",
+      "as_of": "2026-10-08",
+      "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
+      "source": "observatory.json",
+      "critical": true
+    },
+    "fear_greed": {
+      "label": "Fear & Greed",
+      "state": "LIVE",
+      "generated_kst": "2026-10-09T12:06:56+09:00",
+      "as_of": "2026-10-08T23:59:44+00:00",
+      "detail": "38.1/100 · FEAR",
+      "source": "CNN_FEAR_GREED_PUBLIC",
+      "critical": false
+    },
+    "fedwatch": {
+      "label": "FedWatch",
+      "state": "LAGGING",
+      "generated_kst": "2026-10-09T12:06:57+09:00",
+      "as_of": "2026-10-07",
+      "detail": "FOMC 2026-10-28",
+      "source": "fed-watch.json",
+      "critical": false
+    },
+    "tripod": {
+      "label": "TRI-POD",
+      "state": "MISALIGNED",
+      "generated_kst": "2026-10-09T11:04:36+09:00",
+      "as_of": "2026-10-08",
+      "detail": "상승 · TQQQ 100%",
+      "source": "public-market-daily.json + observatory.json",
+      "critical": true
+    },
+    "calendar": {
+      "label": "Economic Calendar",
+      "state": "DEGRADED",
+      "generated_kst": "2026-10-09T12:07:04+09:00",
+      "as_of": "2026-10-09T12:07:04+09:00",
+      "detail": "events=183",
+      "source": "economic-calendar.json",
+      "critical": false
+    },
+    "sector": {
+      "label": "Sector ETF",
+      "state": "LIVE",
+      "generated_kst": "2026-10-09T12:07:06+09:00",
+      "as_of": "2026-10-08",
+      "detail": "priced=46",
+      "source": "sector-etf.json",
+      "critical": false
+    }
+  },
+  "contract": "DISPLAY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V1",
+  "read_only": true
+}
