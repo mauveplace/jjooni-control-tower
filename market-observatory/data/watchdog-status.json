@@ -1,0 +1,36 @@
+{
+  "schema": "JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1",
+  "checked_kst": null,
+  "checked_ny": null,
+  "event": null,
+  "eligible": false,
+  "force_repair": false,
+  "decision": "NOOP",
+  "result": "PENDING_FIRST_RUN",
+  "before": {
+    "observatory_fresh": null,
+    "daily_market_pulse_fresh": null,
+    "public_market_daily_fresh": null,
+    "session_aligned": null
+  },
+  "steps": {
+    "rebuild": "skipped",
+    "acceptance": "skipped",
+    "publish": "skipped",
+    "verify": "skipped"
+  },
+  "current": {
+    "observatory_generated_kst": null,
+    "observatory_session": null,
+    "pulse_generated_kst": null,
+    "pulse_session": null,
+    "public_generated_kst": null,
+    "tripod_session": null
+  },
+  "workflow_url": "https://github.com/mauveplace/jjooni-control-tower/actions/workflows/market-observatory-close-watchdog.yml",
+  "run_url": null,
+  "manual_dispatch_supported": true,
+  "force_repair_supported": true,
+  "repair_contract": "CLOSE_WINDOW_SELF_HEAL_PLUS_MANUAL_FORCE_REPAIR_V1",
+  "read_only_status": true
+}
