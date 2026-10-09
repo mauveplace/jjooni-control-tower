@@ -1,0 +1,103 @@
+name: Market Observatory Freshness Panel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_observatory_freshness.py
+      - market-observatory/freshness-watchdog-v1.js
+      - market-observatory/data/watchdog-status.json
+      - .github/workflows/market-observatory-freshness-ui.yml
+  workflow_run:
+    workflows:
+      - "Market Observatory Daily + Calendar"
+      - "Market Observatory Close Freshness Watchdog"
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Use the same writer lock as the canonical Observatory publishers. The panel is
+# lightweight, but its generated JSON and index bootstrap must never race them.
+concurrency:
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build consolidated freshness SSOT
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_observatory_freshness.py
+          python tools/build_observatory_freshness.py
+
+      - name: Install freshness/watchdog UI runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          p=Path('market-observatory/index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./freshness-watchdog-v1.js?v=1.0"></script>'
+          if 'freshness-watchdog-v1.js' not in s:
+              s=s.replace('</body>',tag+'</body>',1)
+          else:
+              s=re.sub(r'<script src="\./freshness-watchdog-v1\.js\?v=[^"]+"></script>',tag,s)
+          p.write_text(s,encoding='utf-8')
+          print('OBSERVATORY_FRESHNESS_RUNTIME_INSTALL=PASS')
+          PY
+
+      - name: Freshness panel acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          f=json.load(open('market-observatory/data/freshness-status.json'))
+          w=json.load(open('market-observatory/data/watchdog-status.json'))
+          html=Path('market-observatory/index.html').read_text(encoding='utf-8')
+          js=Path('market-observatory/freshness-watchdog-v1.js').read_text(encoding='utf-8')
+
+          assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
+          assert f.get('read_only') is True
+          assert set(['market','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
+          assert (f.get('session_alignment') or {}).get('observatory')
+          assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
+          assert w.get('manual_dispatch_supported') is True
+          assert w.get('force_repair_supported') is True
+          assert 'freshness-watchdog-v1.js?v=1.0' in html
+          for token in ['DATA FRESHNESS','Watchdog 열기','force_repair_supported','SOURCE_ASOF_STATE_PLUS_WATCHDOG_CONTROL_LINKS_V1']:
+              assert token in js,token
+          print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' watchdog='+str(w.get('result')))
+          PY
+
+      - name: Publish freshness SSOT and UI bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py \
+            --message 'data(observatory): refresh freshness panel' \
+            market-observatory/data/freshness-status.json \
+            market-observatory/index.html
