@@ -1,10 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-09T19:10:45+09:00",
+  "generated_kst": "2026-10-10T08:58:45+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "fedwatch",
     "calendar"
   ],
   "watchdog_required": false,
@@ -20,7 +19,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T19:04:46+09:00",
+      "generated_kst": "2026-10-09T23:22:22+09:00",
       "as_of": "2026-10-08",
       "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
       "source": "observatory.json",
@@ -38,17 +37,17 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T19:04:46+09:00",
-      "as_of": "2026-10-09T09:48:16+00:00",
-      "detail": "38.1/100 · FEAR",
+      "generated_kst": "2026-10-09T23:22:22+09:00",
+      "as_of": "2026-10-09T14:18:55+00:00",
+      "detail": "42.4/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-09T12:06:57+09:00",
-      "as_of": "2026-10-07",
+      "state": "LIVE",
+      "generated_kst": "2026-10-09T23:22:23+09:00",
+      "as_of": "2026-10-08",
       "detail": "FOMC 2026-10-28",
       "source": "fed-watch.json",
       "critical": false
@@ -65,8 +64,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-09T12:07:04+09:00",
-      "as_of": "2026-10-09T12:07:04+09:00",
+      "generated_kst": "2026-10-09T23:22:28+09:00",
+      "as_of": "2026-10-09T23:22:28+09:00",
       "detail": "events=183",
       "source": "economic-calendar.json",
       "critical": false
@@ -74,7 +73,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-09T19:04:49+09:00",
+      "generated_kst": "2026-10-09T23:22:30+09:00",
       "as_of": "2026-10-08",
       "detail": "priced=46",
       "source": "sector-etf.json",
