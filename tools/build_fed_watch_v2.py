@@ -227,6 +227,14 @@ def _path_summary(rows: list[dict], current_midpoint: float) -> dict:
 def main() -> None:
     now_kst = datetime.now(KST)
     now_et = now_kst.astimezone(ET)
+    expected = core._expected_latest_trade_date(now_et).isoformat()
+    if OUT.exists():
+        existing = json.loads(OUT.read_text(encoding="utf-8"))
+        if existing.get("market_data_as_of") == expected and existing.get("freshness") == "LIVE":
+            from archive_fedwatch import archive_snapshot
+            archive_snapshot(existing)
+            print("FEDWATCH_DAILY=SKIP_ALREADY_CURRENT", expected)
+            return
     meetings = _load_full_fomc_meetings()
     upcoming = [d for d in meetings if d >= now_et.date()]
     if not upcoming:
@@ -329,6 +337,7 @@ def main() -> None:
             "prior_1d_available": bool(prior_1d_rows),
             "prior_1w_available": bool(prior_1w_rows),
         },
+        "settlement_observations": settlements,
         "provenance": {
             "cme_settlements": core.CME_SETTLEMENTS_URL,
             "cme_methodology": "https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html",
@@ -343,6 +352,8 @@ def main() -> None:
     }
 
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    from archive_fedwatch import archive_snapshot
+    archive_snapshot(out)
     print("FED_WATCH_MATRIX_V2_BUILD=PASS")
     print("market_data_as_of=", out["market_data_as_of"])
     print("expected_market_data_date=", out["expected_market_data_date"])

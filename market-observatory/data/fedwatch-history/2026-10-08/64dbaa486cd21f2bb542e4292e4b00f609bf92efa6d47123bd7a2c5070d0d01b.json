@@ -1,0 +1,532 @@
+{
+  "calculation": {
+    "anchor_month": "2026-11",
+    "matrix_method": "Convolve each meeting's CME settlement-implied conditional 25bp move distribution into cumulative target-rate ranges.",
+    "next_meeting_conditional_expected_change_bp": 4.429
+  },
+  "calculation_contract": "CME_FEDWATCH_ANCHOR_MONTH_PLUS_CONDITIONAL_CONVOLUTION_V2",
+  "change_1d_pctpt": 0.0,
+  "change_1w_pctpt": null,
+  "comparison_dates": {
+    "current": "2026-10-08",
+    "prior_1d": "2026-10-07",
+    "prior_1w": null
+  },
+  "contains_account_data": false,
+  "current_target": "3.75-4.00",
+  "current_target_lower": 3.75,
+  "current_target_upper": 4.0,
+  "cut_25bp_probability": 0,
+  "cut_any_probability": 0,
+  "effr": 3.88,
+  "effr_date": "2026-10-08",
+  "expected_market_data_date": "2026-10-09",
+  "freshness": "LAGGING",
+  "freshness_reason": "CME settlement lags expected date by 1 business day(s)",
+  "generated_kst": "2026-10-10T12:28:27+09:00",
+  "hike_25bp_probability": 0.177143,
+  "hike_any_probability": 0.177143,
+  "history": [
+    {
+      "cut_25bp_probability": 0,
+      "cut_any_probability": 0,
+      "hike_25bp_probability": 0.177143,
+      "hike_any_probability": 0.177143,
+      "hold_probability": 0.822857,
+      "trade_date": "2026-10-07"
+    },
+    {
+      "cut_25bp_probability": 0,
+      "cut_any_probability": 0,
+      "hike_25bp_probability": 0.177143,
+      "hike_any_probability": 0.177143,
+      "hold_probability": 0.822857,
+      "trade_date": "2026-10-08"
+    }
+  ],
+  "hold_probability": 0.822857,
+  "market_data_as_of": "2026-10-08",
+  "matrix_contract": "CME_FEDWATCH_CONDITIONAL_MEETING_PROBABILITY_MATRIX_V2",
+  "meeting_count": 10,
+  "meeting_date": "2026-10-28",
+  "meeting_probability_matrix": [
+    {
+      "anchor_month": "2026-11",
+      "change_1d_pp": {
+        "3.75-4.00": 0.0,
+        "4.00-4.25": 0.0
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 4.429,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.822857
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.177143
+        }
+      ],
+      "expected_target_midpoint": 3.919286,
+      "meeting_date": "2026-10-28",
+      "most_likely_probability": 0.822857,
+      "most_likely_target": "3.75-4.00",
+      "probabilities": {
+        "3.75-4.00": 0.822857,
+        "4.00-4.25": 0.177143
+      },
+      "probability_above_current": 0.177143,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.822857
+    },
+    {
+      "anchor_month": "2027-02",
+      "change_1d_pp": {
+        "3.75-4.00": -5.67,
+        "4.00-4.25": 4.45,
+        "4.25-4.50": 1.22
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 18.307,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.267737
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.732263
+        }
+      ],
+      "expected_target_midpoint": 4.102352,
+      "meeting_date": "2026-12-09",
+      "most_likely_probability": 0.64997548,
+      "most_likely_target": "4.00-4.25",
+      "probabilities": {
+        "3.75-4.00": 0.22030926,
+        "4.00-4.25": 0.64997548,
+        "4.25-4.50": 0.12971526
+      },
+      "probability_above_current": 0.77969074,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.22030926
+    },
+    {
+      "anchor_month": "2027-02",
+      "change_1d_pp": {
+        "3.75-4.00": -3.59,
+        "4.00-4.25": 0.73,
+        "4.25-4.50": 2.41,
+        "4.50-4.75": 0.45
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 9.185,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.632593
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.367407
+        }
+      ],
+      "expected_target_midpoint": 4.194203,
+      "meeting_date": "2027-01-27",
+      "most_likely_probability": 0.4921131,
+      "most_likely_target": "4.00-4.25",
+      "probabilities": {
+        "3.75-4.00": 0.1393661,
+        "4.00-4.25": 0.4921131,
+        "4.25-4.50": 0.32086251,
+        "4.50-4.75": 0.0476583
+      },
+      "probability_above_current": 0.8606339,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.1393661
+    },
+    {
+      "anchor_month": "2027-05",
+      "change_1d_pp": {
+        "3.75-4.00": -1.8,
+        "4.00-4.25": -3.45,
+        "4.25-4.50": 1.99,
+        "4.50-4.75": 2.79,
+        "4.75-5.00": 0.48
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 17.193,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.312269
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.687731
+        }
+      ],
+      "expected_target_midpoint": 4.366136,
+      "meeting_date": "2027-03-17",
+      "most_likely_probability": 0.43863685,
+      "most_likely_target": "4.25-4.50",
+      "probabilities": {
+        "3.75-4.00": 0.04351971,
+        "4.00-4.25": 0.24951805,
+        "4.25-4.50": 0.43863685,
+        "4.50-4.75": 0.2355493,
+        "4.75-5.00": 0.03277609
+      },
+      "probability_above_current": 0.95648029,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.04351971
+    },
+    {
+      "anchor_month": "2027-05",
+      "change_1d_pp": {
+        "3.75-4.00": -1.05,
+        "4.00-4.25": -2.41,
+        "4.25-4.50": 0.41,
+        "4.50-4.75": 2.06,
+        "4.75-5.00": 0.88,
+        "5.00-5.25": 0.1
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 8.571,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.657143
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.342857
+        }
+      ],
+      "expected_target_midpoint": 4.45185,
+      "meeting_date": "2027-04-28",
+      "most_likely_probability": 0.37379614,
+      "most_likely_target": "4.25-4.50",
+      "probabilities": {
+        "3.75-4.00": 0.02859867,
+        "4.00-4.25": 0.17889008,
+        "4.25-4.50": 0.37379614,
+        "4.50-4.75": 0.30517929,
+        "4.75-5.00": 0.1022983,
+        "5.00-5.25": 0.01123751
+      },
+      "probability_above_current": 0.97140133,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.02859867
+    },
+    {
+      "anchor_month": "2027-08",
+      "change_1d_pp": {
+        "3.75-4.00": -0.64,
+        "4.00-4.25": -1.95,
+        "4.25-4.50": -0.9,
+        "4.50-4.75": 1.42,
+        "4.75-5.00": 1.52,
+        "5.00-5.25": 0.49,
+        "5.25-5.50": 0.05
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 10.595,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.57619
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.42381
+        }
+      ],
+      "expected_target_midpoint": 4.557803,
+      "meeting_date": "2027-06-09",
+      "most_likely_probability": 0.3342598,
+      "most_likely_target": "4.50-4.75",
+      "probabilities": {
+        "3.75-4.00": 0.01647827,
+        "4.00-4.25": 0.11519508,
+        "4.25-4.50": 0.291193,
+        "4.50-4.75": 0.3342598,
+        "4.75-5.00": 0.18828129,
+        "5.00-5.25": 0.04982999,
+        "5.25-5.50": 0.00476257
+      },
+      "probability_above_current": 0.98352173,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.01647827
+    },
+    {
+      "anchor_month": "2027-08",
+      "change_1d_pp": {
+        "3.75-4.00": -0.5,
+        "4.00-4.25": -1.53,
+        "4.25-4.50": -0.67,
+        "4.50-4.75": 1.16,
+        "4.75-5.00": 1.18,
+        "5.00-5.25": 0.35,
+        "5.25-5.50": 0.02,
+        "5.50-5.75": -0.0
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 3.321,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.867143
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.132857
+        }
+      ],
+      "expected_target_midpoint": 4.591017,
+      "meeting_date": "2027-07-28",
+      "most_likely_probability": 0.32853807,
+      "most_likely_target": "4.50-4.75",
+      "probabilities": {
+        "3.75-4.00": 0.01428902,
+        "4.00-4.25": 0.10207986,
+        "4.25-4.50": 0.26781045,
+        "4.50-4.75": 0.32853807,
+        "4.75-5.00": 0.20767556,
+        "5.00-5.25": 0.06822421,
+        "5.25-5.50": 0.01075009,
+        "5.50-5.75": 0.00063274
+      },
+      "probability_above_current": 0.98571098,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.01428902
+    },
+    {
+      "anchor_month": "2027-11",
+      "change_1d_pp": {
+        "3.75-4.00": -0.43,
+        "4.00-4.25": -1.38,
+        "4.25-4.50": -0.8,
+        "4.50-4.75": 0.89,
+        "4.75-5.00": 1.18,
+        "5.00-5.25": 0.47,
+        "5.25-5.50": 0.07,
+        "5.50-5.75": 0.0,
+        "5.75-6.00": -0.0
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 3.704,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.851852
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.148148
+        }
+      ],
+      "expected_target_midpoint": 4.628054,
+      "meeting_date": "2027-09-15",
+      "most_likely_probability": 0.3195414,
+      "most_likely_target": "4.50-4.75",
+      "probabilities": {
+        "3.75-4.00": 0.01217213,
+        "4.00-4.25": 0.08907382,
+        "4.25-4.50": 0.24325779,
+        "4.50-4.75": 0.3195414,
+        "4.75-5.00": 0.2255811,
+        "5.00-5.25": 0.08888365,
+        "5.25-5.50": 0.01926477,
+        "5.50-5.75": 0.00213161,
+        "5.75-6.00": 9.374e-05
+      },
+      "probability_above_current": 0.98782787,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.01217213
+    },
+    {
+      "anchor_month": "2027-11",
+      "change_1d_pp": {
+        "3.75-4.00": -0.41,
+        "4.00-4.25": -1.33,
+        "4.25-4.50": -0.83,
+        "4.50-4.75": 0.81,
+        "4.75-5.00": 1.16,
+        "5.00-5.25": 0.5,
+        "5.25-5.50": 0.09,
+        "5.50-5.75": 0.0,
+        "5.75-6.00": -0.0,
+        "6.00-6.25": -0.0
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 1.148,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.954074
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.045926
+        }
+      ],
+      "expected_target_midpoint": 4.639535,
+      "meeting_date": "2027-10-27",
+      "most_likely_probability": 0.316038,
+      "most_likely_target": "4.50-4.75",
+      "probabilities": {
+        "3.75-4.00": 0.01161311,
+        "4.00-4.25": 0.08554203,
+        "4.25-4.50": 0.23617674,
+        "4.50-4.75": 0.316038,
+        "4.75-5.00": 0.22989632,
+        "5.00-5.25": 0.09516162,
+        "5.25-5.50": 0.02246208,
+        "5.50-5.75": 0.00291846,
+        "5.75-6.00": 0.00018733,
+        "6.00-6.25": 4.31e-06
+      },
+      "probability_above_current": 0.98838689,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.01161311
+    },
+    {
+      "anchor_month": "2028-01",
+      "change_1d_pp": {
+        "3.75-4.00": -0.38,
+        "4.00-4.25": -1.26,
+        "4.25-4.50": -0.87,
+        "4.50-4.75": 0.68,
+        "4.75-5.00": 1.14,
+        "5.00-5.25": 0.55,
+        "5.25-5.50": 0.12,
+        "5.50-5.75": 0.01,
+        "5.75-6.00": -0.0,
+        "6.00-6.25": -0.0,
+        "6.25-6.50": -0.0
+      },
+      "change_1w_pp": {},
+      "conditional_expected_change_bp": 1.937,
+      "conditional_move_distribution": [
+        {
+          "move_bp": 0,
+          "move_count_25bp": 0,
+          "probability": 0.9225
+        },
+        {
+          "move_bp": 25,
+          "move_count_25bp": 1,
+          "probability": 0.0775
+        }
+      ],
+      "expected_target_midpoint": 4.658911,
+      "meeting_date": "2027-12-08",
+      "most_likely_probability": 0.30984875,
+      "most_likely_target": "4.50-4.75",
+      "probabilities": {
+        "3.75-4.00": 0.01071309,
+        "4.00-4.25": 0.07981254,
+        "4.25-4.50": 0.22450255,
+        "4.50-4.75": 0.30984875,
+        "4.75-5.00": 0.2365723,
+        "5.00-5.25": 0.10560356,
+        "5.25-5.50": 0.0280963,
+        "5.50-5.75": 0.00443309,
+        "5.75-6.00": 0.00039899,
+        "6.00-6.25": 1.849e-05,
+        "6.25-6.50": 3.3e-07
+      },
+      "probability_above_current": 0.98928691,
+      "probability_below_current": 0,
+      "probability_same_as_current": 0.01071309
+    }
+  ],
+  "observed_at": "2026-10-10T12:28:27+09:00",
+  "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
+  "outcomes": [
+    {
+      "action": "HOLD",
+      "move_bp": 0,
+      "probability": 0.822857,
+      "target": "3.75-4.00"
+    },
+    {
+      "action": "HIKE_25BP",
+      "move_bp": 25,
+      "probability": 0.177143,
+      "target": "4.00-4.25"
+    }
+  ],
+  "path_summary": {
+    "current_target_midpoint": 3.875,
+    "first_majority_above_current": "2026-12-09",
+    "first_majority_below_current": null,
+    "peak_expected_target_midpoint": 4.6589,
+    "terminal_expected_target_midpoint": 4.6589,
+    "terminal_meeting_date": "2027-12-08",
+    "terminal_most_likely_target": "4.50-4.75",
+    "trough_expected_target_midpoint": 3.9193
+  },
+  "provenance": {
+    "cme_methodology": "https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html",
+    "cme_settlements": "https://www.cmegroup.com/CmeWS/mvc/Settlements/Futures/Settlements/305/FUT",
+    "fomc_schedule": "Federal Reserve official schedule via economic-calendar.json plus embedded 2026-2027 official-date fallback",
+    "fred": "https://fred.stlouisfed.org/graph/fredgraph.csv"
+  },
+  "quality": {
+    "cme_trade_date_gap_business_days": 1,
+    "fred_target_dates": {
+      "effr": "2026-10-08",
+      "lower": "2026-10-09",
+      "upper": "2026-10-09"
+    },
+    "matrix_failures": [],
+    "matrix_meetings": 10,
+    "prior_1d_available": true,
+    "prior_1w_available": false,
+    "state": "DEGRADED"
+  },
+  "read_only": true,
+  "schema": "JJOONI_FED_WATCH_V1",
+  "schema_revision": "2.0",
+  "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
+  "source_priority": "CME_PRIMARY",
+  "target_ranges": [
+    "3.75-4.00",
+    "4.00-4.25",
+    "4.25-4.50",
+    "4.50-4.75",
+    "4.75-5.00",
+    "5.00-5.25",
+    "5.25-5.50",
+    "5.50-5.75",
+    "5.75-6.00",
+    "6.00-6.25",
+    "6.25-6.50"
+  ],
+  "usage_contract": {
+    "attribution": "CME FedWatch-compatible conditional meeting probabilities derived from CME 30-Day Fed Funds settlements; not the paid CME FedWatch API payload.",
+    "stale_rule": "Use the matrix as a strategy fact only when freshness=LIVE. LAGGING/STALE must be refreshed or independently verified.",
+    "strategy_usable": false
+  }
+}

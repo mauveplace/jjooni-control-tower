@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-let DATA=null,PROMISE=null;
+let DATA=null,PROMISE=null,CURRENT=null,HISTORY=null,SELECTION='latest',historyRequest=0;
 const $=s=>document.querySelector(s);
 const pct=v=>v==null||!Number.isFinite(Number(v))?'—':`${(Number(v)*100).toFixed(1)}%`;
 const pp=v=>v==null||!Number.isFinite(Number(v))?'—':`${Number(v)>=0?'+':''}${Number(v).toFixed(1)}%p`;
@@ -11,10 +11,45 @@ function load(){
   if(PROMISE)return PROMISE;
   PROMISE=fetch('./data/fed-watch.json?cb='+Date.now(),{cache:'no-store'})
     .then(r=>{if(!r.ok)throw new Error(`fed-watch ${r.status}`);return r.json()})
-    .then(d=>{if(d?.schema!=='JJOONI_FED_WATCH_V1')throw new Error('fed-watch schema');DATA=d;return d})
+    .then(d=>{if(d?.schema!=='JJOONI_FED_WATCH_V1')throw new Error('fed-watch schema');DATA=d;CURRENT=d;return d})
     .finally(()=>{PROMISE=null});
   return PROMISE;
 }
+
+async function loadHistory(){
+  if(!HISTORY){
+    const r=await fetch('./data/fedwatch-history/index.json?cb='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw Error('history '+r.status);
+    const d=await r.json();
+    if(d.schema!=='JJOONI_FEDWATCH_HISTORY_INDEX_V1')throw Error('history schema');
+    HISTORY=d;
+  }
+  return HISTORY;
+}
+async function selectHistory(value){
+  const id=++historyRequest,previous=SELECTION;
+  try{
+    if(value==='latest'){SELECTION=value;DATA=CURRENT;render();return;}
+    const entry=(HISTORY?.entries||[]).find(e=>e.market_data_as_of===value);
+    if(!entry||!/^fedwatch-history\/\d{4}-\d{2}-\d{2}\/[a-f0-9]{64}\.json$/.test(entry.path))throw Error('invalid archive path');
+    const r=await fetch('./data/'+entry.path,{cache:'no-store'});
+    if(!r.ok)throw Error('archive '+r.status);
+    const d=await r.json();
+    if(d.schema!=='JJOONI_FED_WATCH_V1'||d.market_data_as_of!==value)throw Error('archive schema');
+    if(id!==historyRequest)return;
+    SELECTION=value;DATA=d;render();
+  }catch(err){
+    if(id!==historyRequest)return;
+    SELECTION=previous;render();
+    const notice=document.getElementById('fedWatchArchiveNotice');
+    if(notice)notice.textContent='과거 자료 로딩 실패 · 마지막 표시 자료를 유지합니다.';
+  }
+}
+function historyToolbar(){
+  const options=(HISTORY?.entries||[]).map(e=>'<option value="'+esc(e.market_data_as_of)+'" '+(SELECTION===e.market_data_as_of?'selected':'')+'>'+esc(e.market_data_as_of)+'</option>').join('');
+  return '<div class="fedWatchArchive"><label>정산 기준일 <select id="fedWatchArchiveDate" aria-label="FedWatch 정산 기준일"><option value="latest" '+(SELECTION==='latest'?'selected':'')+'>최신 관측</option>'+options+'</select></label><a href="./data/fedwatch-history/brief.md" target="_blank" rel="noopener">PB 읽기 안내</a><a href="./data/fedwatch-history/index.json" target="_blank" rel="noopener">이력 JSON</a><a href="./data/fedwatch-history/probabilities.csv" download>확률 CSV</a><div id="fedWatchArchiveNotice">'+(SELECTION==='latest'?'하루 한 번 정산자료 갱신 · 기준일별 원문 보존':'과거 관측 자료 · 아래 상태는 수집 당시 판정입니다. 현재 투자판단에는 최신 자료를 확인하세요.')+'</div></div>';
+}
+
 function ensureCard(){
   const grid=document.querySelector('#rates .grid');
   if(!grid)return null;
@@ -81,6 +116,7 @@ function render(){
   const expectedTerminal=path.terminal_expected_target_midpoint==null?'—':`${Number(path.terminal_expected_target_midpoint).toFixed(3)}%`;
   const peak=path.peak_expected_target_midpoint==null?'—':`${Number(path.peak_expected_target_midpoint).toFixed(3)}%`;
   card.querySelector('#fedWatchBody').innerHTML=`
+    ${historyToolbar()}
     <div class="fedWatchKpis">${cards.map(([a,b,c])=>`<div class="fedWatchKpi"><small>${esc(a)}</small><b>${esc(b)}</b><span>${esc(c)}</span></div>`).join('')}</div>
     <div class="fedWatchPath"><span>기대 Terminal midpoint <b>${esc(expectedTerminal)}</b></span><span>기대 Peak midpoint <b>${esc(peak)}</b></span><span>상방확률 50% 최초 <b>${esc(path.first_majority_above_current||'—')}</b></span><span>하방확률 50% 최초 <b>${esc(path.first_majority_below_current||'—')}</b></span></div>
     ${matrixHtml(d)}
@@ -90,10 +126,11 @@ function render(){
     </div>
     <div class="fedWatchMeta"><span>CME 기준 ${esc(d.market_data_as_of||'—')}</span><span>기대 기준일 ${esc(d.expected_market_data_date||'—')}</span><span>회의 ${esc(d.meeting_count??1)}개</span><span>산출 revision ${esc(d.schema_revision||'1.x')}</span><span>lag ${esc(q.cme_trade_date_gap_business_days??q.cme_trade_date_gap_days??'—')}영업일</span><span>다음회의 조건부 변화 ${calc.next_meeting_conditional_expected_change_bp==null?(calc.expected_change_bp==null?'—':esc(Number(calc.expected_change_bp).toFixed(1)+'bp')):esc(Number(calc.next_meeting_conditional_expected_change_bp).toFixed(1)+'bp')}</span></div>
     <div class="fedWatchSource">${esc(src)}</div>`;
+  card.querySelector('#fedWatchArchiveDate')?.addEventListener('change',e=>selectHistory(e.target.value));
 }
-function run(){ensureCard();render();load().then(()=>{if(active()==='rates')render()}).catch(err=>{console.error('fed-watch',err);const c=ensureCard();if(c){c.querySelector('#fedWatchFresh').textContent='ERROR';c.querySelector('#fedWatchFresh').className='fedWatchBadge stale';c.querySelector('#fedWatchBody').innerHTML='<div class="meta">FedWatch 데이터 로딩 실패 · 전략 근거로 사용 금지</div>'}})}
+function run(){ensureCard();render();load().then(async()=>{try{await loadHistory()}catch(err){console.warn('fedwatch history',err)}if(active()==='rates')render()}).catch(err=>{console.error('fed-watch',err);const c=ensureCard();if(c){c.querySelector('#fedWatchFresh').textContent='ERROR';c.querySelector('#fedWatchFresh').className='fedWatchBadge stale';c.querySelector('#fedWatchBody').innerHTML='<div class="meta">FedWatch 데이터 로딩 실패 · 전략 근거로 사용 금지</div>'}})}
 const st=document.createElement('style');st.textContent=`
-.fedWatchCard{grid-column:1/-1}.fedWatchHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.fedWatchHead h3{margin:0 0 4px}.fedWatchBadge{border-radius:999px;padding:4px 8px;font-size:9px;font-weight:950;background:#f2f4f7;color:#667085}.fedWatchBadge.live{background:#eafbf3;color:#087443}.fedWatchBadge.lagging{background:#fff7e6;color:#b54708}.fedWatchBadge.stale{background:#fff0ed;color:#b42318}.fedWatchKpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;margin-top:10px}.fedWatchKpi{border:1px solid #e7edf4;background:#f8fafc;border-radius:11px;padding:9px;min-width:0}.fedWatchKpi small,.fedWatchKpi span{display:block;font-size:8px;color:#7d8b9d}.fedWatchKpi b{display:block;font-size:14px;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fedWatchPath{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0}.fedWatchPath span{background:#f8fafc;border:1px solid #e7edf4;border-radius:999px;padding:6px 9px;font-size:9px;color:#667085}.fedWatchPath b{color:#13243a}.fedWatchMatrixTitle{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:10px 0 6px}.fedWatchMatrixTitle b{font-size:11px}.fedWatchMatrixTitle span{font-size:8px;color:#7d8b9d;text-align:right}.fedWatchMatrixWrap{overflow:auto;border:1px solid #e7edf4;border-radius:12px}.fedWatchMatrix{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:9px}.fedWatchMatrix th,.fedWatchMatrix td{border-right:1px solid #edf1f5;border-bottom:1px solid #edf1f5;padding:7px 8px;text-align:center;white-space:nowrap;min-width:78px}.fedWatchMatrix tr:last-child th,.fedWatchMatrix tr:last-child td{border-bottom:0}.fedWatchMatrix th:last-child,.fedWatchMatrix td:last-child{border-right:0}.fedWatchMatrix thead th{position:sticky;top:0;background:#f8fafc;z-index:2;color:#425466}.fedWatchMatrix th span{display:block;font-size:7px;color:#98a2b3}.fedWatchMatrix .dateCol{position:sticky;left:0;z-index:3;background:#fff;min-width:100px;text-align:left;font-weight:900}.fedWatchMatrix thead .dateCol{background:#f8fafc;z-index:4}.fedWatchMatrix .dateCol small{display:block;font-size:7px;color:#7d8b9d;margin-top:2px}.fedWatchMatrix td.mode{outline:2px solid #175cd3;outline-offset:-2px}.fedWatchMatrix td b{display:block;font-size:10px}.fedWatchDelta{display:block;font-size:7px;margin-top:2px}.fedWatchDelta.up{color:#175cd3}.fedWatchDelta.down{color:#b42318}.fedWatchDetailGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:9px;margin-top:9px}.fedWatchBox{border:1px solid #e7edf4;border-radius:12px;padding:10px}.fedWatchBoxTitle{font-size:10px;font-weight:900;margin-bottom:7px;color:#425466}.fedWatchOutcome{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;margin:7px 0}.fedWatchOutcome>div:first-child{display:flex;gap:6px;align-items:baseline}.fedWatchOutcome b{font-size:11px}.fedWatchOutcome span{font-size:8px;color:#7d8b9d}.fedWatchOutcome strong{font-size:12px}.fedWatchBar{grid-column:1/-1;height:6px;background:#eef2f6;border-radius:999px;overflow:hidden}.fedWatchBar i{display:block;height:100%;background:#0b3b70;border-radius:999px}.fedWatchHistory{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.fedWatchHist{background:#f8fafc;border-radius:8px;padding:7px;text-align:center}.fedWatchHist span{display:block;font-size:8px;color:#7d8b9d}.fedWatchHist b{display:block;font-size:11px;margin-top:2px}.fedWatchMeta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:8px;color:#718096}.fedWatchSource{font-size:8px;color:#98a2b3;margin-top:5px}
+.fedWatchArchive{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;font-size:11px}.fedWatchArchive select{padding:6px;border:1px solid #d0d5dd;border-radius:6px;background:white}.fedWatchArchive a{color:#175cd3}.fedWatchArchive #fedWatchArchiveNotice{width:100%;color:#667085}.fedWatchCard{grid-column:1/-1}.fedWatchHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.fedWatchHead h3{margin:0 0 4px}.fedWatchBadge{border-radius:999px;padding:4px 8px;font-size:9px;font-weight:950;background:#f2f4f7;color:#667085}.fedWatchBadge.live{background:#eafbf3;color:#087443}.fedWatchBadge.lagging{background:#fff7e6;color:#b54708}.fedWatchBadge.stale{background:#fff0ed;color:#b42318}.fedWatchKpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;margin-top:10px}.fedWatchKpi{border:1px solid #e7edf4;background:#f8fafc;border-radius:11px;padding:9px;min-width:0}.fedWatchKpi small,.fedWatchKpi span{display:block;font-size:8px;color:#7d8b9d}.fedWatchKpi b{display:block;font-size:14px;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fedWatchPath{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0}.fedWatchPath span{background:#f8fafc;border:1px solid #e7edf4;border-radius:999px;padding:6px 9px;font-size:9px;color:#667085}.fedWatchPath b{color:#13243a}.fedWatchMatrixTitle{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:10px 0 6px}.fedWatchMatrixTitle b{font-size:11px}.fedWatchMatrixTitle span{font-size:8px;color:#7d8b9d;text-align:right}.fedWatchMatrixWrap{overflow:auto;border:1px solid #e7edf4;border-radius:12px}.fedWatchMatrix{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:9px}.fedWatchMatrix th,.fedWatchMatrix td{border-right:1px solid #edf1f5;border-bottom:1px solid #edf1f5;padding:7px 8px;text-align:center;white-space:nowrap;min-width:78px}.fedWatchMatrix tr:last-child th,.fedWatchMatrix tr:last-child td{border-bottom:0}.fedWatchMatrix th:last-child,.fedWatchMatrix td:last-child{border-right:0}.fedWatchMatrix thead th{position:sticky;top:0;background:#f8fafc;z-index:2;color:#425466}.fedWatchMatrix th span{display:block;font-size:7px;color:#98a2b3}.fedWatchMatrix .dateCol{position:sticky;left:0;z-index:3;background:#fff;min-width:100px;text-align:left;font-weight:900}.fedWatchMatrix thead .dateCol{background:#f8fafc;z-index:4}.fedWatchMatrix .dateCol small{display:block;font-size:7px;color:#7d8b9d;margin-top:2px}.fedWatchMatrix td.mode{outline:2px solid #175cd3;outline-offset:-2px}.fedWatchMatrix td b{display:block;font-size:10px}.fedWatchDelta{display:block;font-size:7px;margin-top:2px}.fedWatchDelta.up{color:#175cd3}.fedWatchDelta.down{color:#b42318}.fedWatchDetailGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:9px;margin-top:9px}.fedWatchBox{border:1px solid #e7edf4;border-radius:12px;padding:10px}.fedWatchBoxTitle{font-size:10px;font-weight:900;margin-bottom:7px;color:#425466}.fedWatchOutcome{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;margin:7px 0}.fedWatchOutcome>div:first-child{display:flex;gap:6px;align-items:baseline}.fedWatchOutcome b{font-size:11px}.fedWatchOutcome span{font-size:8px;color:#7d8b9d}.fedWatchOutcome strong{font-size:12px}.fedWatchBar{grid-column:1/-1;height:6px;background:#eef2f6;border-radius:999px;overflow:hidden}.fedWatchBar i{display:block;height:100%;background:#0b3b70;border-radius:999px}.fedWatchHistory{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.fedWatchHist{background:#f8fafc;border-radius:8px;padding:7px;text-align:center}.fedWatchHist span{display:block;font-size:8px;color:#7d8b9d}.fedWatchHist b{display:block;font-size:11px;margin-top:2px}.fedWatchMeta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:8px;color:#718096}.fedWatchSource{font-size:8px;color:#98a2b3;margin-top:5px}
 @media(max-width:980px){.fedWatchKpis{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.fedWatchKpis{grid-template-columns:repeat(2,minmax(0,1fr))}.fedWatchDetailGrid{grid-template-columns:1fr}.fedWatchHistory{grid-template-columns:repeat(3,minmax(0,1fr))}.fedWatchHead{align-items:flex-start}.fedWatchMatrixTitle{display:block}.fedWatchMatrixTitle span{display:block;text-align:left;margin-top:3px}}
 `;document.head.appendChild(st);
 const tabs=document.getElementById('tabs');if(tabs)tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b?.dataset.tab==='rates')setTimeout(run,0)});

@@ -44,6 +44,12 @@
       "path": "./sector-etf.json",
       "role": "sector rotation and ETF relative strength",
       "required": true
+    },
+    {
+      "path": "./fedwatch-history/index.json",
+      "role": "Immutable FedWatch observation history for PB and analyst comparison",
+      "required": false,
+      "usable_rule": "Match meeting_date, target range and current_target across snapshots; never interpret historical LIVE as current freshness"
     }
   ],
   "fed_watch_policy": {
@@ -62,7 +68,16 @@
       "freshness"
     ],
     "stale_behavior": "Never quote a stale probability as a current fact. Refresh/verify first.",
-    "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale."
+    "material_change_rule": "A 5 percentage-point or larger 1-day change in hike/cut probability must be explicitly surfaced in strategy rationale.",
+    "history": {
+      "index": "./fedwatch-history/index.json",
+      "brief": "./fedwatch-history/brief.md",
+      "csv": "./fedwatch-history/probabilities.csv",
+      "date_basis": "CME settlement trade date",
+      "immutable_revisions": true,
+      "missing_days": "Do not interpolate or fabricate",
+      "comparison": "Compare same FOMC meeting and target range; observe current_target changes and methodology revision"
+    }
   },
   "agent_instruction": "Before strategy or morning-brief generation, read all required sources including morning-brief-contract.json, daily-market-pulse.json and official-macro.json. For the morning brief, verify the preferred public web sources, state each number's reference date/time and source, preserve raw/derived/commentary separation, and never estimate a value that did not update. For investment strategy, do not infer missing FedWatch or official macro values.",
   "official_macro_policy": {

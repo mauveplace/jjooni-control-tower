@@ -20,6 +20,12 @@ for _name in dir(_core):
 def main() -> None:
     from build_fed_watch_v2 import main as build_v2
 
+    # The general market pipeline consumes the last published daily observation.
+    from pathlib import Path
+    existing = Path(__file__).resolve().parents[1] / "market-observatory/data/fed-watch.json"
+    if existing.exists():
+        print("FEDWATCH=REUSE_DAILY_SNAPSHOT")
+        return
     build_v2()
 
 
