@@ -1,28 +1,28 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-10T11:36:00+09:00",
-  "overall": "DEGRADED",
-  "critical_bad": [
-    "pulse"
-  ],
+  "generated_kst": "2026-10-10T17:20:32+09:00",
+  "overall": "LIVE_WITH_WARNINGS",
+  "critical_bad": [],
   "warnings": [
     "fedwatch",
     "calendar"
   ],
-  "watchdog_required": true,
+  "watchdog_required": false,
   "session_alignment": {
+    "source_session": "2026-10-09",
+    "market_aligned": true,
     "observatory": "2026-10-09",
-    "daily_market_pulse": "2026-10-08",
+    "daily_market_pulse": "2026-10-09",
     "tripod": "2026-10-09",
-    "pulse_aligned": false,
+    "pulse_aligned": true,
     "tripod_aligned": true,
-    "aligned": false
+    "aligned": true
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T11:35:24+09:00",
+      "generated_kst": "2026-10-10T12:28:26+09:00",
       "as_of": "2026-10-09",
       "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
       "source": "observatory.json",
@@ -30,9 +30,9 @@
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "MISALIGNED",
-      "generated_kst": "2026-10-09T19:05:05+09:00",
-      "as_of": "2026-10-08",
+      "state": "LIVE",
+      "generated_kst": "2026-10-10T17:20:14+09:00",
+      "as_of": "2026-10-09",
       "detail": "snapshot=FINAL · Observatory session=2026-10-09",
       "source": "daily-market-pulse.json",
       "critical": true
@@ -40,7 +40,7 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T11:35:24+09:00",
+      "generated_kst": "2026-10-10T12:28:26+09:00",
       "as_of": "2026-10-09T23:59:54+00:00",
       "detail": "45.0/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
@@ -49,7 +49,7 @@
     "fedwatch": {
       "label": "FedWatch",
       "state": "LAGGING",
-      "generated_kst": "2026-10-10T11:35:24+09:00",
+      "generated_kst": "2026-10-10T12:28:27+09:00",
       "as_of": "2026-10-08",
       "detail": "FOMC 2026-10-28",
       "source": "fed-watch.json",
@@ -58,7 +58,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T10:43:20+09:00",
+      "generated_kst": "2026-10-10T17:20:19+09:00",
       "as_of": "2026-10-09",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -67,8 +67,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-10T11:35:31+09:00",
-      "as_of": "2026-10-10T11:35:31+09:00",
+      "generated_kst": "2026-10-10T12:28:33+09:00",
+      "as_of": "2026-10-10T12:28:33+09:00",
       "detail": "events=184",
       "source": "economic-calendar.json",
       "critical": false
@@ -76,7 +76,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T11:35:33+09:00",
+      "generated_kst": "2026-10-10T12:28:35+09:00",
       "as_of": "2026-10-09",
       "detail": "priced=46",
       "source": "sector-etf.json",
