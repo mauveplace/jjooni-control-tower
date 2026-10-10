@@ -11,6 +11,10 @@ on:
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
+      - "Market Observatory Daily Pulse"
+      - "Public Market + TRI-POD Daily Sidecar"
+      - "Market Observatory Verified Calendar"
+      - "Economic Calendar Light Refresh"
       - "Market Observatory Close Freshness Watchdog"
     types: [completed]
   workflow_dispatch:

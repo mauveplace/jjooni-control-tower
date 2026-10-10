@@ -20,6 +20,7 @@ on:
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
+      - "Public Market + TRI-POD Daily Sidecar"
     types: [completed]
   schedule:
     # Single FINAL capture at US regular-session close +10m.
@@ -35,7 +36,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: market-observatory-daily-pulse
+  group: economic-calendar-canonical-writer
   cancel-in-progress: false
 
 jobs:
@@ -46,6 +47,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -61,7 +63,8 @@ jobs:
 
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
-          import os
+          import os, json
+          from pathlib import Path
           from datetime import datetime, timezone
           from zoneinfo import ZoneInfo
 
@@ -74,7 +77,18 @@ jobs:
 
           now_et=datetime.now(timezone.utc).astimezone(ZoneInfo("America/New_York"))
           if event == "workflow_run":
-              ok=(os.environ.get("WORKFLOW_RUN_CONCLUSION","")=="success" and ((now_et.hour==16 and now_et.minute>=10) or now_et.hour==17))
+              def read(path):
+                  try: return json.loads(Path(path).read_text(encoding="utf-8"))
+                  except (OSError, ValueError): return {}
+              obs=read("market-observatory/data/observatory.json")
+              pulse=read("market-observatory/data/daily-market-pulse.json")
+              public=read("public-market-daily.json")
+              session=obs.get("us_completed_session_date")
+              source_session=(public.get("tripod_signal") or {}).get("date")
+              # Catch delayed close jobs after 17 ET without creating a publish loop.
+              ok=(os.environ.get("WORKFLOW_RUN_CONCLUSION","")=="success"
+                  and bool(session) and (not source_session or session >= source_session)
+                  and (pulse.get("market_date_us") != session or pulse.get("snapshot_status") != "FINAL"))
               print("run="+("true" if ok else "false"))
               print("phase=FINAL")
               print("ny_now="+now_et.isoformat())

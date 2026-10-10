@@ -53,9 +53,13 @@ def build_status(root: Path = ROOT) -> dict:
     tripod_session = text(public_tripod.get('date') or tripod.get('date'))
     pulse_aligned = bool(session and pulse_session == session and pulse.get('snapshot_status') == 'FINAL')
     tripod_aligned = bool(session and tripod_session == session and public_tripod.get('ok') is True)
-    aligned = bool(pulse_aligned and tripod_aligned)
+    source_session = text(public_tripod.get('date'))
+    market_aligned = bool(session and (not source_session or session >= source_session))
+    aligned = bool(market_aligned and pulse_aligned and tripod_aligned)
 
     market_state = text(obs_fresh.get('status')) or ('LIVE' if obs.get('generated_kst') else 'UNAVAILABLE')
+    if not market_aligned:
+        market_state = 'MISALIGNED' if session and source_session else 'UNAVAILABLE'
     pulse_state = 'LIVE' if pulse_aligned else ('MISALIGNED' if session and pulse_session else 'UNAVAILABLE')
     fg_state = text(fgq.get('state')) or ('LIVE' if (obs.get('latest') or {}).get('FEAR_GREED') is not None else 'UNAVAILABLE')
     fed_state = text(fed.get('freshness')) or ('LIVE' if fed.get('market_data_as_of') else 'UNAVAILABLE')
@@ -117,6 +121,8 @@ def build_status(root: Path = ROOT) -> dict:
         'warnings': warnings,
         'watchdog_required': bool(critical_bad),
         'session_alignment': {
+            'source_session': source_session,
+            'market_aligned': market_aligned,
             'observatory': session,
             'daily_market_pulse': pulse_session,
             'tripod': tripod_session,

@@ -14,6 +14,28 @@ import build_observatory_freshness as freshness  # noqa: E402
 
 
 class ObservatoryFreshnessStatusTest(unittest.TestCase):
+    def test_old_downstream_cannot_be_live_against_new_source(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.write(root, 'market-observatory/data/observatory.json', {
+                'generated_kst': '2026-10-10T06:00:00+09:00',
+                'us_completed_session_date': '2026-10-08',
+                'freshness': {'status': 'LIVE'},
+            })
+            self.write(root, 'market-observatory/data/daily-market-pulse.json', {
+                'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL',
+            })
+            self.write(root, 'public-market-daily.json', {
+                'tripod_signal': {'ok': True, 'date': '2026-10-09'},
+            })
+            out = freshness.build_status(root)
+            self.assertEqual(out['overall'], 'DEGRADED')
+            self.assertEqual(out['groups']['market']['state'], 'MISALIGNED')
+            self.assertIn('market', out['critical_bad'])
+            self.assertFalse(out['session_alignment']['market_aligned'])
+            self.assertFalse(out['session_alignment']['aligned'])
+            self.assertTrue(out['watchdog_required'])
+
     def write(self, root: Path, rel: str, obj: dict):
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -132,3 +154,4 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

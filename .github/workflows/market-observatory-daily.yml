@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - tools/requirements-observatory.txt
       - tools/build_market_observatory.py
       - tools/build_observatory_sector_etf.py
       - tools/build_fed_watch.py
@@ -99,7 +100,9 @@ jobs:
               if dt.tzinfo is None:
                   dt=dt.replace(tzinfo=timezone.utc)
               age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
-              refresh=age >= 45
+              public=json.loads(Path('public-market-daily.json').read_text(encoding='utf-8'))
+              source_session=(public.get('tripod_signal') or {}).get('date')
+              refresh=age >= 45 or bool(source_session and source_session > str(o.get('us_completed_session_date') or ''))
           except Exception:
               refresh=True
           print(f"should_refresh={'true' if refresh else 'false'}")
