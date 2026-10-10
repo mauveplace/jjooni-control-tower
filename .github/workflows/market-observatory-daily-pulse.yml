@@ -36,7 +36,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: economic-calendar-canonical-writer
+  group: market-observatory-daily-pulse
   cancel-in-progress: false
 
 jobs:
@@ -174,18 +174,4 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add market-observatory/data/daily-market-pulse.json public-market-daily.json
-          if git diff --cached --quiet; then
-            echo DAILY_MARKET_PULSE_NO_CHANGE
-            exit 0
-          fi
-          git commit -m 'data(observatory): refresh daily market pulse and TRI-POD'
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase -X theirs origin/main
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            echo DAILY_MARKET_PULSE_PUSH_RETRY=$attempt
-          done
-          exit 1
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh daily market pulse and TRI-POD' market-observatory/data/daily-market-pulse.json public-market-daily.json

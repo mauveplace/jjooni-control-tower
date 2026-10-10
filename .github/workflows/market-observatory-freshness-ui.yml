@@ -22,10 +22,10 @@ on:
 permissions:
   contents: write
 
-# Use the same writer lock as the canonical Observatory publishers. The panel is
-# lightweight, but its generated JSON and index bootstrap must never race them.
+# A separate lock prevents lightweight status jobs cancelling a pending recovery.
+# Publication merges concurrent data and rejects conflicting UI changes.
 concurrency:
-  group: economic-calendar-canonical-writer
+  group: observatory-freshness-panel
   cancel-in-progress: false
 
 jobs:
