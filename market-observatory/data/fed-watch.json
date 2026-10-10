@@ -2,7 +2,7 @@
   "schema": "JJOONI_FED_WATCH_V1",
   "schema_revision": "2.0",
   "matrix_contract": "CME_FEDWATCH_CONDITIONAL_MEETING_PROBABILITY_MATRIX_V2",
-  "generated_kst": "2026-10-09T23:22:23+09:00",
+  "generated_kst": "2026-10-10T11:35:24+09:00",
   "read_only": true,
   "contains_account_data": false,
   "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
@@ -11,10 +11,10 @@
   "official_api_status": "NOT_CONFIGURED_SETTLEMENT_DERIVED",
   "meeting_date": "2026-10-28",
   "market_data_as_of": "2026-10-08",
-  "expected_market_data_date": "2026-10-08",
-  "observed_at": "2026-10-09T23:22:23+09:00",
-  "freshness": "LIVE",
-  "freshness_reason": "CME settlement matches expected trade date",
+  "expected_market_data_date": "2026-10-09",
+  "observed_at": "2026-10-10T11:35:24+09:00",
+  "freshness": "LAGGING",
+  "freshness_reason": "CME settlement lags expected date by 1 business day(s)",
   "current_target": "3.75-4.00",
   "current_target_lower": 3.75,
   "current_target_upper": 4.0,
@@ -506,8 +506,8 @@
     "matrix_method": "Convolve each meeting's CME settlement-implied conditional 25bp move distribution into cumulative target-rate ranges."
   },
   "quality": {
-    "state": "PASS",
-    "cme_trade_date_gap_business_days": 0,
+    "state": "DEGRADED",
+    "cme_trade_date_gap_business_days": 1,
     "fred_target_dates": {
       "lower": "2026-10-09",
       "upper": "2026-10-09",
@@ -525,7 +525,7 @@
     "fomc_schedule": "Federal Reserve official schedule via economic-calendar.json plus embedded 2026-2027 official-date fallback"
   },
   "usage_contract": {
-    "strategy_usable": true,
+    "strategy_usable": false,
     "stale_rule": "Use the matrix as a strategy fact only when freshness=LIVE. LAGGING/STALE must be refreshed or independently verified.",
     "attribution": "CME FedWatch-compatible conditional meeting probabilities derived from CME 30-Day Fed Funds settlements; not the paid CME FedWatch API payload."
   }
