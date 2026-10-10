@@ -1,0 +1,37 @@
+name: Morning Brief Publication Contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/morning-brief-v1.js
+      - market-observatory/data/morning-brief/**
+      - tools/validate_morning_brief.py
+      - .github/workflows/morning-brief-contract.yml
+  pull_request:
+    paths:
+      - market-observatory/morning-brief-v1.js
+      - market-observatory/data/morning-brief/**
+      - tools/validate_morning_brief.py
+      - .github/workflows/morning-brief-contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate full text, dates, latest and archives
+        run: python tools/validate_morning_brief.py
+      - name: Validate reader runtime
+        run: node --check market-observatory/morning-brief-v1.js
