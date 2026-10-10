@@ -1,10 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-10T17:21:17+09:00",
+  "generated_kst": "2026-10-10T17:56:49+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "fedwatch",
     "calendar"
   ],
   "watchdog_required": false,
@@ -22,7 +21,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T12:28:26+09:00",
+      "generated_kst": "2026-10-10T17:25:37+09:00",
       "as_of": "2026-10-09",
       "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
       "source": "observatory.json",
@@ -40,7 +39,7 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T12:28:26+09:00",
+      "generated_kst": "2026-10-10T17:25:37+09:00",
       "as_of": "2026-10-09T23:59:54+00:00",
       "detail": "45.0/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
@@ -48,9 +47,9 @@
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-10T12:28:27+09:00",
-      "as_of": "2026-10-08",
+      "state": "LIVE",
+      "generated_kst": "2026-10-10T17:56:37+09:00",
+      "as_of": "2026-10-09",
       "detail": "FOMC 2026-10-28",
       "source": "fed-watch.json",
       "critical": false
