@@ -8,7 +8,8 @@ sys.path.insert(0,str(ROOT/'tools'))
 from enrich_calendar_all_events import text_score
 from build_calendar_history import canonical_title
 from sync_calendar_representative_values import primary_metric
-from backfill_calendar_history_forexfactory import parse_page, best_catalog_match
+from backfill_calendar_history_forexfactory import best_catalog_match
+from backfill_calendar_history_forexfactory_v2 import parse_page
 
 
 class CalendarAllEventsHistoryTest(unittest.TestCase):
@@ -65,8 +66,35 @@ class CalendarAllEventsHistoryTest(unittest.TestCase):
         self.assertEqual(rows[0]['consensus'],'3.1%')
         self.assertEqual(rows[1]['source_date'],'2025-10-15')
         self.assertEqual(rows[1]['source_time'],'1:30pm')
-        # 13:30 London in October 2025 is 21:30 KST.
         self.assertTrue(rows[0]['datetime_kst'].startswith('2025-10-15T21:30'))
+
+    def test_historical_ff_parser_accepts_responsive_div_rows(self):
+        html='''<div>Calendar Time Zone: Europe/London</div>
+        <div class="calendar__table">
+          <div data-eventid="x1" class="calendar_row--responsive">
+            <span class="calendar-date">Wed Oct 15</span>
+            <span class="calendar-time">1:30pm</span>
+            <span class="calendar-currency">USD</span>
+            <span class="calendar-event">Core CPI y/y</span>
+            <span class="calendar-actual">3.0%</span>
+            <span class="calendar-forecast">3.1%</span>
+            <span class="calendar-previous">3.2%</span>
+          </div>
+          <div data-eventid="x2" class="calendar_row--responsive">
+            <span class="calendar-date"></span>
+            <span class="calendar-time"></span>
+            <span class="calendar-currency">USD</span>
+            <span class="calendar-event">CPI m/m</span>
+            <span class="calendar-actual">0.2%</span>
+            <span class="calendar-forecast">0.3%</span>
+            <span class="calendar-previous">0.4%</span>
+          </div>
+        </div>'''
+        rows=parse_page(html,2025)
+        self.assertEqual(len(rows),2)
+        self.assertEqual(rows[0]['title'],'Core CPI y/y')
+        self.assertEqual(rows[1]['previous'],'0.4%')
+        self.assertTrue(rows[1]['datetime_kst'].startswith('2025-10-15T21:30'))
 
     def test_historical_metric_match_prefers_granular_family(self):
         catalog={
