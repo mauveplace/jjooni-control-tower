@@ -1,0 +1,38 @@
+name: Research TRI-POD Bond Backtest
+
+on:
+  push:
+    branches:
+      - research/tripod-bond-backtest-261011
+    paths:
+      - 'research/tripod_bond_backtest.py'
+      - '.github/workflows/research-tripod-bond-backtest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/tripod-bond-backtest-261011
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run backtest
+        run: python research/tripod_bond_backtest.py
+      - name: Commit reproducible output
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research-output/tripod_bond_backtest.json research-output/tripod_bond_backtest.md
+          if git diff --cached --quiet; then
+            echo 'No output changes'
+          else
+            git commit -m 'research: TRI-POD bond backtest results [skip ci]'
+            git push origin HEAD:research/tripod-bond-backtest-261011
+          fi
