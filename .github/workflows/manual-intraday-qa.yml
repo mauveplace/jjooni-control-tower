@@ -1,0 +1,35 @@
+name: Manual Intraday UI QA
+on:
+  pull_request:
+    paths:
+      - manual-intraday-v1.js
+      - tests/manual-intraday*
+      - trade-review-loader.js
+      - .github/workflows/manual-intraday-qa.yml
+  push:
+    branches: [main]
+    paths:
+      - manual-intraday-v1.js
+      - tests/manual-intraday*
+      - trade-review-loader.js
+      - .github/workflows/manual-intraday-qa.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check manual-intraday-v1.js && node --test tests/manual-intraday.test.cjs
+      - run: npm install --no-save --package-lock=false playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/manual-intraday-e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manual-intraday-ui
+          path: intraday-*.png
