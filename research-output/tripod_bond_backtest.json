@@ -1,0 +1,671 @@
+{
+  "generated_utc": "2026-10-11T10:01:12Z",
+  "methodology": {
+    "tripod_rules": "NDX MA250 hysteresis 1.01/0.95; VIX10 thresholds 28/18; 52w drawdown 9%; close signal, next-close execution (2-bar return lag)",
+    "cash": "US3M yield / 252",
+    "bond10_proxy": "constant-duration Treasury proxy: carry y/252 - 8*delta_y + 0.5*75*delta_y^2",
+    "bond30_proxy": "constant-duration Treasury proxy: carry y/252 - 15.5*delta_y + 0.5*260*delta_y^2",
+    "rate_trend": "DGS10 below 100-trading-day MA AND below its level 20 trading days earlier",
+    "dual_filter": "rate_trend AND US3M below its level 20 trading days earlier",
+    "bond_turnover_cost_one_way": 0.0005,
+    "note": "Absolute reconstructed TRI-POD Max is a proxy; overlay-vs-cash deltas are the primary inference. Synthetic bond proxies are not actual ETF total returns."
+  },
+  "diagnostics": {
+    "history_schema": "JJOONI_MARKET_HISTORY_30Y_V1",
+    "history_generated_kst": "2026-09-13T00:12:30+09:00",
+    "series": {
+      "NASDAQ100": {
+        "count": 865,
+        "oldest": "1996-10-01",
+        "latest": "2026-09-11"
+      },
+      "VIX": {
+        "count": 1095,
+        "oldest": "1996-10-01",
+        "latest": "2026-09-11"
+      },
+      "US3M": {
+        "count": 866,
+        "oldest": "1996-10-01",
+        "latest": "2026-09-11"
+      },
+      "US10Y_OFFICIAL": {
+        "count": 7505,
+        "oldest": "1996-09-10",
+        "latest": "2026-09-11"
+      },
+      "US30Y_OFFICIAL": {
+        "count": 6511,
+        "oldest": "1996-09-10",
+        "latest": "2026-09-11"
+      }
+    },
+    "test_start": "2024-04-08",
+    "test_end": "2026-09-11",
+    "nopod_days": 26,
+    "nopod_episodes": 1,
+    "nopod_share": 0.042483660130718956,
+    "trend_on_nopod_days": 9,
+    "dual_on_nopod_days": 5
+  },
+  "full_period": {
+    "CASH": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.3405215466528577,
+      "cagr": 0.1282539389125832,
+      "mdd": -0.5039976104090633,
+      "ann_vol": 0.6028788022467382,
+      "sortino": 0.45210230317049555,
+      "calmar": 0.25447330753907244,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.06587956956816055
+      }
+    },
+    "10Y_50_ALWAYS": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.314629140467826,
+      "cagr": 0.1192290844026418,
+      "mdd": -0.5135779825948757,
+      "ann_vol": 0.6029578964018932,
+      "sortino": 0.45120444150318695,
+      "calmar": 0.23215380807454306,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.08392226770372502
+      }
+    },
+    "10Y_100_ALWAYS": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.2889783291950725,
+      "cagr": 0.11018474036079673,
+      "mdd": -0.5230689629659107,
+      "ann_vol": 0.6031731496364622,
+      "sortino": 0.4388335894318244,
+      "calmar": 0.21065050339830174,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.10179661439129528
+      }
+    },
+    "10Y_50_TREND": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.3178882105957976,
+      "cagr": 0.12037075862304669,
+      "mdd": -0.5123721037521566,
+      "ann_vol": 0.602918853372816,
+      "sortino": 0.44852342270643086,
+      "calmar": 0.23492840016378438,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.08165123819409159
+      }
+    },
+    "10Y_100_TREND": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.2955189118579802,
+      "cagr": 0.11250089897947713,
+      "mdd": -0.5206489014322349,
+      "ann_vol": 0.6030204690407933,
+      "sortino": 0.43785817700972623,
+      "calmar": 0.21607824134460352,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.0972389167492066
+      }
+    },
+    "10Y_50_DUAL": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.3143105956473409,
+      "cagr": 0.11911740673050275,
+      "mdd": -0.5136958464162725,
+      "ann_vol": 0.6029202773557727,
+      "sortino": 0.4459880598192166,
+      "calmar": 0.23188314167129973,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.0841442404318532
+      }
+    },
+    "10Y_100_DUAL": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.2885070992577041,
+      "cagr": 0.11001760115515458,
+      "mdd": -0.5232433213531863,
+      "ann_vol": 0.6030165858023686,
+      "sortino": 0.4336604245928835,
+      "calmar": 0.2102608799107697,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.10212498323626307
+      }
+    },
+    "30Y_25_TREND": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.31413853549076,
+      "cagr": 0.11905707805412002,
+      "mdd": -0.5137595098829506,
+      "ann_vol": 0.6029319264547938,
+      "sortino": 0.4459030992562245,
+      "calmar": 0.23173698153294467,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.08426413772699604
+      }
+    },
+    "30Y_50_TREND": {
+      "start": "2024-04-08",
+      "end": "2026-09-11",
+      "trading_days": 612,
+      "years": 2.4285714285714284,
+      "terminal_multiple": 1.2881202231643742,
+      "cagr": 0.1098803542947433,
+      "mdd": -0.5233864682255697,
+      "ann_vol": 0.6030658728372127,
+      "sortino": 0.4351073779895742,
+      "calmar": 0.2099411447668283,
+      "worst_year": {
+        "year": "2025",
+        "return": -0.10239457148997211
+      }
+    }
+  },
+  "comparisons": {
+    "CASH": {
+      "terminal_ratio_vs_cash": 1.0,
+      "annualized_increment_vs_cash": 0.0,
+      "cagr_diff_pp": 0.0,
+      "mdd_diff_pp": 0.0
+    },
+    "10Y_50_ALWAYS": {
+      "terminal_ratio_vs_cash": 0.9806848265515148,
+      "annualized_increment_vs_cash": -0.00799895679392848,
+      "cagr_diff_pp": -0.9024854509941393,
+      "mdd_diff_pp": -0.9580372185812425
+    },
+    "10Y_100_ALWAYS": {
+      "terminal_ratio_vs_cash": 0.9615498776677754,
+      "annualized_increment_vs_cash": -0.016015187652880347,
+      "cagr_diff_pp": -1.8069198551786458,
+      "mdd_diff_pp": -1.9071352556847332
+    },
+    "10Y_50_TREND": {
+      "terminal_ratio_vs_cash": 0.9831160221828786,
+      "annualized_increment_vs_cash": -0.006987062059038207,
+      "cagr_diff_pp": -0.7883180289536496,
+      "mdd_diff_pp": -0.8374493343093259
+    },
+    "10Y_100_TREND": {
+      "terminal_ratio_vs_cash": 0.9664290104793583,
+      "annualized_increment_vs_cash": -0.013962317692672088,
+      "cagr_diff_pp": -1.575303993310606,
+      "mdd_diff_pp": -1.6651291023171533
+    },
+    "10Y_50_DUAL": {
+      "terminal_ratio_vs_cash": 0.9804471990241688,
+      "annualized_increment_vs_cash": -0.008097939539113308,
+      "cagr_diff_pp": -0.9136532182080437,
+      "mdd_diff_pp": -0.9698236007209204
+    },
+    "10Y_100_DUAL": {
+      "terminal_ratio_vs_cash": 0.9611983503547346,
+      "annualized_increment_vs_cash": -0.016163327357850865,
+      "cagr_diff_pp": -1.8236337757428611,
+      "mdd_diff_pp": -1.9245710944122973
+    },
+    "30Y_25_TREND": {
+      "terminal_ratio_vs_cash": 0.9803188458790735,
+      "annualized_increment_vs_cash": -0.008151410370724754,
+      "cagr_diff_pp": -0.9196860858463163,
+      "mdd_diff_pp": -0.9761899473887281
+    },
+    "30Y_50_TREND": {
+      "terminal_ratio_vs_cash": 0.9609097491798442,
+      "annualized_increment_vs_cash": -0.016284972721254953,
+      "cagr_diff_pp": -1.8373584617839889,
+      "mdd_diff_pp": -1.9388857816506344
+    }
+  },
+  "splits": {
+    "EARLY": {
+      "CASH": {},
+      "10Y_50_ALWAYS": {},
+      "10Y_100_ALWAYS": {},
+      "10Y_50_TREND": {},
+      "10Y_100_TREND": {},
+      "10Y_50_DUAL": {},
+      "10Y_100_DUAL": {},
+      "30Y_25_TREND": {},
+      "30Y_50_TREND": {}
+    },
+    "LATE": {
+      "CASH": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3405215466528577,
+        "cagr": 0.1282539389125832,
+        "mdd": -0.5039976104090633,
+        "ann_vol": 0.6028788022467382,
+        "sortino": 0.45210230317049555,
+        "calmar": 0.25447330753907244,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.06587956956816055
+        }
+      },
+      "10Y_50_ALWAYS": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.314629140467826,
+        "cagr": 0.1192290844026418,
+        "mdd": -0.5135779825948757,
+        "ann_vol": 0.6029578964018932,
+        "sortino": 0.45120444150318695,
+        "calmar": 0.23215380807454306,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08392226770372502
+        }
+      },
+      "10Y_100_ALWAYS": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2889783291950725,
+        "cagr": 0.11018474036079673,
+        "mdd": -0.5230689629659107,
+        "ann_vol": 0.6031731496364622,
+        "sortino": 0.4388335894318244,
+        "calmar": 0.21065050339830174,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10179661439129528
+        }
+      },
+      "10Y_50_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3178882105957976,
+        "cagr": 0.12037075862304669,
+        "mdd": -0.5123721037521566,
+        "ann_vol": 0.602918853372816,
+        "sortino": 0.44852342270643086,
+        "calmar": 0.23492840016378438,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08165123819409159
+        }
+      },
+      "10Y_100_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2955189118579802,
+        "cagr": 0.11250089897947713,
+        "mdd": -0.5206489014322349,
+        "ann_vol": 0.6030204690407933,
+        "sortino": 0.43785817700972623,
+        "calmar": 0.21607824134460352,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.0972389167492066
+        }
+      },
+      "10Y_50_DUAL": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3143105956473409,
+        "cagr": 0.11911740673050275,
+        "mdd": -0.5136958464162725,
+        "ann_vol": 0.6029202773557727,
+        "sortino": 0.4459880598192166,
+        "calmar": 0.23188314167129973,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.0841442404318532
+        }
+      },
+      "10Y_100_DUAL": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2885070992577041,
+        "cagr": 0.11001760115515458,
+        "mdd": -0.5232433213531863,
+        "ann_vol": 0.6030165858023686,
+        "sortino": 0.4336604245928835,
+        "calmar": 0.2102608799107697,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10212498323626307
+        }
+      },
+      "30Y_25_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.31413853549076,
+        "cagr": 0.11905707805412002,
+        "mdd": -0.5137595098829506,
+        "ann_vol": 0.6029319264547938,
+        "sortino": 0.4459030992562245,
+        "calmar": 0.23173698153294467,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08426413772699604
+        }
+      },
+      "30Y_50_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2881202231643742,
+        "cagr": 0.1098803542947433,
+        "mdd": -0.5233864682255697,
+        "ann_vol": 0.6030658728372127,
+        "sortino": 0.4351073779895742,
+        "calmar": 0.2099411447668283,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10239457148997211
+        }
+      }
+    },
+    "POST2020": {
+      "CASH": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3405215466528577,
+        "cagr": 0.1282539389125832,
+        "mdd": -0.5039976104090633,
+        "ann_vol": 0.6028788022467382,
+        "sortino": 0.45210230317049555,
+        "calmar": 0.25447330753907244,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.06587956956816055
+        }
+      },
+      "10Y_50_ALWAYS": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.314629140467826,
+        "cagr": 0.1192290844026418,
+        "mdd": -0.5135779825948757,
+        "ann_vol": 0.6029578964018932,
+        "sortino": 0.45120444150318695,
+        "calmar": 0.23215380807454306,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08392226770372502
+        }
+      },
+      "10Y_100_ALWAYS": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2889783291950725,
+        "cagr": 0.11018474036079673,
+        "mdd": -0.5230689629659107,
+        "ann_vol": 0.6031731496364622,
+        "sortino": 0.4388335894318244,
+        "calmar": 0.21065050339830174,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10179661439129528
+        }
+      },
+      "10Y_50_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3178882105957976,
+        "cagr": 0.12037075862304669,
+        "mdd": -0.5123721037521566,
+        "ann_vol": 0.602918853372816,
+        "sortino": 0.44852342270643086,
+        "calmar": 0.23492840016378438,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08165123819409159
+        }
+      },
+      "10Y_100_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2955189118579802,
+        "cagr": 0.11250089897947713,
+        "mdd": -0.5206489014322349,
+        "ann_vol": 0.6030204690407933,
+        "sortino": 0.43785817700972623,
+        "calmar": 0.21607824134460352,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.0972389167492066
+        }
+      },
+      "10Y_50_DUAL": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.3143105956473409,
+        "cagr": 0.11911740673050275,
+        "mdd": -0.5136958464162725,
+        "ann_vol": 0.6029202773557727,
+        "sortino": 0.4459880598192166,
+        "calmar": 0.23188314167129973,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.0841442404318532
+        }
+      },
+      "10Y_100_DUAL": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2885070992577041,
+        "cagr": 0.11001760115515458,
+        "mdd": -0.5232433213531863,
+        "ann_vol": 0.6030165858023686,
+        "sortino": 0.4336604245928835,
+        "calmar": 0.2102608799107697,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10212498323626307
+        }
+      },
+      "30Y_25_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.31413853549076,
+        "cagr": 0.11905707805412002,
+        "mdd": -0.5137595098829506,
+        "ann_vol": 0.6029319264547938,
+        "sortino": 0.4459030992562245,
+        "calmar": 0.23173698153294467,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.08426413772699604
+        }
+      },
+      "30Y_50_TREND": {
+        "start": "2024-04-08",
+        "end": "2026-09-11",
+        "trading_days": 612,
+        "years": 2.4285714285714284,
+        "terminal_multiple": 1.2881202231643742,
+        "cagr": 0.1098803542947433,
+        "mdd": -0.5233864682255697,
+        "ann_vol": 0.6030658728372127,
+        "sortino": 0.4351073779895742,
+        "calmar": 0.2099411447668283,
+        "worst_year": {
+          "year": "2025",
+          "return": -0.10239457148997211
+        }
+      }
+    }
+  },
+  "actual_tlt": {
+    "available": true,
+    "source": "https://raw.githubusercontent.com/revred/TradeSmart.Tracker/refs/heads/main/market/us/tlt.csv",
+    "start": "2024-04-08",
+    "end": "2026-01-06",
+    "variants": {
+      "TLT_50_ALWAYS": {
+        "start": "2024-04-09",
+        "end": "2026-01-06",
+        "trading_days": 438,
+        "years": 1.7380952380952381,
+        "terminal_multiple": 1.7947204449446288,
+        "cagr": 0.4000229375128048,
+        "mdd": -0.47657918269664823,
+        "ann_vol": 0.5569938536608925,
+        "sortino": 0.8414467328174376,
+        "calmar": 0.8393630104641543,
+        "worst_year": {
+          "year": "2025",
+          "return": 0.19410141206229392
+        },
+        "annualized_increment_vs_cash": -0.02238289144381178,
+        "cagr_diff_pp": -3.2054023149692634,
+        "mdd_diff_pp": -2.1004815911173425
+      },
+      "TLT_100_ALWAYS": {
+        "start": "2024-04-09",
+        "end": "2026-01-06",
+        "trading_days": 438,
+        "years": 1.7380952380952381,
+        "terminal_multiple": 1.7239305810380081,
+        "cagr": 0.36798038371886,
+        "mdd": -0.4972246757187887,
+        "ann_vol": 0.558425095104876,
+        "sortino": 0.7994212826983617,
+        "calmar": 0.7400686283055181,
+        "worst_year": {
+          "year": "2025",
+          "return": 0.14700200073686998
+        },
+        "annualized_increment_vs_cash": -0.04475777399141001,
+        "cagr_diff_pp": -6.409657694363746,
+        "mdd_diff_pp": -4.165030893331389
+      },
+      "TLT_50_TREND": {
+        "start": "2024-04-09",
+        "end": "2026-01-06",
+        "trading_days": 438,
+        "years": 1.7380952380952381,
+        "terminal_multiple": 1.7950536602554754,
+        "cagr": 0.40017248275489625,
+        "mdd": -0.47648200219656967,
+        "ann_vol": 0.556839760341393,
+        "sortino": 0.832588521487563,
+        "calmar": 0.8398480549320048,
+        "worst_year": {
+          "year": "2025",
+          "return": 0.19432311392919055
+        },
+        "annualized_increment_vs_cash": -0.02227846602101735,
+        "cagr_diff_pp": -3.1904477907601203,
+        "mdd_diff_pp": -2.090763541109486
+      },
+      "TLT_100_TREND": {
+        "start": "2024-04-09",
+        "end": "2026-01-06",
+        "trading_days": 438,
+        "years": 1.7380952380952381,
+        "terminal_multiple": 1.7250866910560858,
+        "cagr": 0.36850812840090263,
+        "mdd": -0.49688750228753986,
+        "ann_vol": 0.5578101916592756,
+        "sortino": 0.7919291122630622,
+        "calmar": 0.7416329183253508,
+        "worst_year": {
+          "year": "2025",
+          "return": 0.1477712083362901
+        },
+        "annualized_increment_vs_cash": -0.044389257007659166,
+        "cagr_diff_pp": -6.356883226159482,
+        "mdd_diff_pp": -4.131313550206506
+      },
+      "CASH": {
+        "start": "2024-04-09",
+        "end": "2026-01-06",
+        "trading_days": 438,
+        "years": 1.7380952380952381,
+        "terminal_multiple": 1.8667423655711335,
+        "cagr": 0.43207696066249746,
+        "mdd": -0.4555743667854748,
+        "ann_vol": 0.5564686897928297,
+        "sortino": 0.8519865362484563,
+        "calmar": 0.9484224578112798,
+        "worst_year": {
+          "year": "2024",
+          "return": 0.22001076505440964
+        }
+      }
+    }
+  },
+  "episodes": [
+    {
+      "start": "2025-04-07",
+      "end": "2025-05-13",
+      "trading_days": 26,
+      "CASH": 0.004344724245256337,
+      "10Y_50_TREND": -0.012369786328931265,
+      "10Y_100_TREND": -0.028894600765316025,
+      "10Y_50_ALWAYS": -0.014812145324920811,
+      "30Y_25_TREND": -0.015300887655067763,
+      "30Y_50_TREND": -0.034678024274365504
+    }
+  ]
+}
