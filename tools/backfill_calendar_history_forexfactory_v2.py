@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Current-DOM adapter for ForexFactory historical calendar backfill.
+"""Current-DOM adapter for long-horizon ForexFactory calendar backfill.
 
 ForexFactory serves more than one calendar markup variant depending on request
-profile.  The original backfill parser required `tr.calendar__row`, while the
-production runner received a valid `calendar__table` whose event rows used a
-different row wrapper.  This adapter accepts table-row, div-row, data-eventid,
-and class-token variants, then delegates all matching/merge/fail-closed logic
-to the existing backfill module.
+profile. This adapter accepts table-row, responsive div-row, data-eventid, and
+class-token variants. Weekly requests are retried with bounded backoff; matching,
+source precedence, resumable progress and coverage state remain owned by the
+legacy backfill module.
 """
 from __future__ import annotations
 
-from datetime import datetime
+import time
 from bs4 import BeautifulSoup
 from curl_cffi import requests
 
@@ -26,7 +25,6 @@ def _text(tag):
 
 
 def flexible_cell(row, name):
-    """Find one logical calendar field across known FF DOM variants."""
     selectors = [
         f'.calendar__{name}',
         f'.calendar-{name}',
@@ -43,9 +41,6 @@ def flexible_cell(row, name):
         value = _text(cell)
         if value is not None:
             return value
-
-    # Some current responsive rows preserve semantic class names only on a
-    # nested span while the outer cell is generic.
     for node in row.find_all(True):
         cls = ' '.join(node.get('class') or []).lower()
         if name.lower() in cls:
@@ -78,10 +73,6 @@ def candidate_rows(soup):
                 continue
             seen.add(ident)
             out.append(row)
-
-    # Last-resort structural discovery: a row-like node containing both a
-    # currency and an event field.  This handles responsive wrappers without
-    # relying on the row class at all.
     if not out:
         for row in table.find_all(['tr', 'div', 'li'], recursive=True):
             currency = flexible_cell(row, 'currency')
@@ -103,7 +94,6 @@ def parse_page(html: str, year: int):
     out = []
     current_day = None
     current_clock = None
-
     for row in rows:
         classes = _classes(row)
         if any('expand' in c.lower() for c in classes):
@@ -147,7 +137,7 @@ def parse_page(html: str, year: int):
     return out
 
 
-def fetch_week(start):
+def _once(start):
     url = f'https://www.forexfactory.com/calendar?week={legacy.week_token(start)}'
     response = requests.get(
         url,
@@ -180,9 +170,21 @@ def fetch_week(start):
     return url, rows
 
 
+def fetch_week(start):
+    last = None
+    for attempt, delay in enumerate((0, 2, 6), 1):
+        if delay:
+            time.sleep(delay)
+        try:
+            return _once(start)
+        except Exception as exc:
+            last = exc
+            if attempt == 3:
+                break
+    raise RuntimeError(f'ForexFactory week fetch failed after 3 attempts week={start}: {last}')
+
+
 def main():
-    # Keep one source of truth for matching, provenance, bounded-window logic,
-    # and fail-closed publication.  Only swap in the resilient DOM adapter.
     legacy.parse_page = parse_page
     legacy.fetch_week = fetch_week
     legacy.main()
