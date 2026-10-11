@@ -37,6 +37,15 @@ class CryptoObservationTest(unittest.TestCase):
         self.assertEqual(data['crypto_market']['BTCUSD']['status'], 'STALE')
         self.assertEqual(data['crypto_market']['ETHUSD']['status'], 'UNAVAILABLE')
 
+    def test_full_rebuild_retains_weekend_observation_until_refresh(self):
+        previous={'series':{'BTCUSD':[{'date':'2026-10-11','value':101}]},'crypto_market':{'BTCUSD':{'status':'LIVE','quote_as_of_kst':'2026-10-12T08:15:00+09:00'}}}
+        current={'series':{'SP500':[{'date':'2026-10-09','value':100}]}}
+        equities.retain_crypto_observations(current,previous)
+        self.assertEqual(current['series']['BTCUSD'][0]['date'],'2026-10-11')
+        self.assertEqual(current['latest']['BTCUSD'],101)
+        self.assertEqual(current['crypto_market']['BTCUSD']['status'],'STALE')
+        self.assertEqual(previous['crypto_market']['BTCUSD']['status'],'LIVE')
+
     def test_quote_without_provider_timestamp_is_rejected(self):
         with patch.object(equities, 'get_json', return_value={'chart': {'result': [{'meta': {'regularMarketPrice': 101}}]}}):
             with self.assertRaisesRegex(ValueError, 'METADATA_MISSING'):

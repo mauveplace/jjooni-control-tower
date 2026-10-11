@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json, math, urllib.parse, urllib.request
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -45,10 +46,10 @@ def series(symbol):
 CRYPTO_SYMBOLS={'BTCUSD':'BTC-USD','ETHUSD':'ETH-USD'}
 
 def crypto_observation(symbol, now=None):
-    now=now or datetime.now(UTC)
     qs=urllib.parse.urlencode({'interval':'1d','range':'3y','includePrePost':'false'})
     url=YAHOO+urllib.parse.quote(symbol,safe='')+'?'+qs
     obj=get_json(url)
+    now=now or datetime.now(UTC)
     rs=((obj.get('chart') or {}).get('result') or [])
     if not rs:raise ValueError('CRYPTO_SOURCE_EMPTY')
     result=rs[0];meta=result.get('meta') or {}
@@ -73,6 +74,19 @@ def crypto_observation(symbol, now=None):
     rows[day]={'date':day,'value':round(price,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC','observed_kst':observed.astimezone(KST).isoformat(timespec='seconds')}
     snapshot={'symbol':symbol,'source':'Yahoo Finance spot crypto quote + UTC daily candles','source_url':url,'price':price,'quote_as_of_kst':observed.astimezone(KST).isoformat(timespec='seconds'),'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),'status':'LIVE' if age<=3600 else 'STALE','quote_age_seconds':max(0,int(age)),'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H','market_hours':'24/7'}
     return [rows[d] for d in sorted(rows)],snapshot
+
+
+def retain_crypto_observations(current, previous):
+    # A full market rebuild must not erase last-good crypto before refresh.
+    for key in CRYPTO_SYMBOLS:
+        rows=(previous.get('series') or {}).get(key)
+        if rows and not (current.get('series') or {}).get(key):
+            current.setdefault('series',{})[key]=deepcopy(rows)
+            current.setdefault('latest',{})[key]=rows[-1]['value']
+            old=deepcopy((previous.get('crypto_market') or {}).get(key) or {})
+            old.update(status='STALE',refresh_state='AWAITING_REFRESH')
+            current.setdefault('crypto_market',{})[key]=old
+    return current
 
 
 def enrich_crypto(data):
