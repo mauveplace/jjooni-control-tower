@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 ROOT=Path(__file__).resolve().parents[1]
 OBS=ROOT/'market-observatory'/'data'/'observatory.json'
-KST=ZoneInfo('Asia/Seoul');ET=ZoneInfo('America/New_York')
+KST=ZoneInfo('Asia/Seoul');ET=ZoneInfo('America/New_York');UTC=ZoneInfo('UTC')
 YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
 FEAR_GREED='https://fearandgreedgraph.com/api/fear-greed'
 UA='Mozilla/5.0 JJOONI-Market-Observatory/1.0'
@@ -42,6 +42,56 @@ def series(symbol):
     ded={x['date']:x for x in out}
     return [ded[k] for k in sorted(ded)]
 
+CRYPTO_SYMBOLS={'BTCUSD':'BTC-USD','ETHUSD':'ETH-USD'}
+
+def crypto_observation(symbol, now=None):
+    now=now or datetime.now(UTC)
+    qs=urllib.parse.urlencode({'interval':'1d','range':'3y','includePrePost':'false'})
+    url=YAHOO+urllib.parse.quote(symbol,safe='')+'?'+qs
+    obj=get_json(url)
+    rs=((obj.get('chart') or {}).get('result') or [])
+    if not rs:raise ValueError('CRYPTO_SOURCE_EMPTY')
+    result=rs[0];meta=result.get('meta') or {}
+    closes=(((result.get('indicators') or {}).get('quote') or [{}])[0]).get('close') or []
+    rows={}
+    today=now.astimezone(UTC).date().isoformat()
+    for stamp, value in zip(result.get('timestamp') or [],closes):
+        if value is None:continue
+        value=float(value)
+        if not math.isfinite(value) or value<=0:continue
+        day=datetime.fromtimestamp(int(stamp),UTC).date().isoformat()
+        if day>today:continue
+        rows[day]={'date':day,'value':round(value,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC'}
+    price=meta.get('regularMarketPrice');stamp=meta.get('regularMarketTime')
+    if price is None or stamp is None:raise ValueError('CRYPTO_QUOTE_METADATA_MISSING')
+    price=float(price)
+    if not math.isfinite(price) or price<=0:raise ValueError('CRYPTO_QUOTE_INVALID')
+    observed=datetime.fromtimestamp(int(stamp),UTC)
+    age=(now.astimezone(UTC)-observed).total_seconds()
+    if age < -300:raise ValueError('CRYPTO_QUOTE_FUTURE_TIMESTAMP')
+    day=observed.date().isoformat()
+    rows[day]={'date':day,'value':round(price,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC','observed_kst':observed.astimezone(KST).isoformat(timespec='seconds')}
+    snapshot={'symbol':symbol,'source':'Yahoo Finance spot crypto quote + UTC daily candles','source_url':url,'price':price,'quote_as_of_kst':observed.astimezone(KST).isoformat(timespec='seconds'),'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),'status':'LIVE' if age<=3600 else 'STALE','quote_age_seconds':max(0,int(age)),'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H','market_hours':'24/7'}
+    return [rows[d] for d in sorted(rows)],snapshot
+
+
+def enrich_crypto(data):
+    series_map=data.setdefault('series',{});latest=data.setdefault('latest',{});snapshots=data.setdefault('crypto_market',{})
+    for key,symbol in CRYPTO_SYMBOLS.items():
+        try:
+            rows,snapshot=crypto_observation(symbol)
+            series_map[key]=rows;latest[key]=rows[-1]['value']
+            snapshots[key]=snapshot
+            print('CRYPTO_QUOTE=PASS',key,snapshot['status'],'price=',snapshot['price'],'as_of=',snapshot['quote_as_of_kst'])
+        except Exception as exc:
+            old=dict(snapshots.get(key) or {})
+            old.update(status='STALE' if series_map.get(key) else 'UNAVAILABLE',fetch_error=f'{type(exc).__name__}: {exc}',last_attempt_kst=datetime.now(KST).isoformat(timespec='seconds'))
+            snapshots[key]=old
+            print('CRYPTO_QUOTE=WARN',key,old['status'],old['fetch_error'])
+    data.setdefault('sources',{})['CRYPTO_SPOT']='Yahoo Finance BTC-USD / ETH-USD; UTC daily candles; quote observation timestamp preserved'
+    data['crypto_contract']='SPOT_QUOTE_WITH_UTC_DAILY_COMPARISON_V1'
+
+
 def fear_greed_series():
     obj=get_json(FEAR_GREED)
     dates=obj.get('dates') or []
@@ -66,6 +116,7 @@ def main():
             print(f'{key}_FETCH_WARN={e}');xs=prev.get(key,[])
         sm[key]=xs
         latest[key]=xs[-1]['value'] if xs else None
+    enrich_crypto(data)
     try:fg=fear_greed_series()
     except Exception as e:
         print(f'FEAR_GREED_FETCH_WARN={e}');fg=prev.get('FEAR_GREED',[])
@@ -89,3 +140,4 @@ def main():
           'FEAR_GREED=',latest.get('FEAR_GREED'))
 
 if __name__=='__main__':main()
+

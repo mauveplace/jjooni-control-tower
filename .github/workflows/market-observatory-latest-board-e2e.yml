@@ -76,7 +76,7 @@ jobs:
               const errors=[];page.on('pageerror',e=>errors.push(String(e)));
               try{
                 await page.goto(process.env.URL+`?latest_board_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                await page.waitForFunction(()=>window.__JJOONI_LATEST_BOARD?.version==='2.5.0',{timeout:15000});
+                await page.waitForFunction(()=>window.__JJOONI_LATEST_BOARD?.version==='2.5.1',{timeout:15000});
                 await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile').length>=21,{timeout:15000});
                 let x=await snapshot(page);
                 const overviewOrder=await page.locator('#latestBoardGrid [data-overview-group]').evaluateAll(xs=>xs.map(x=>x.dataset.overviewGroup));
@@ -88,7 +88,7 @@ jobs:
                 for(const k of ['KOSPI','KOSDAQ','S&P 500','NASDAQ 100','VIX','Fear & Greed','USD/KRW','미국 10Y','한국 10Y','WTI','Gold'])assert(x.labels.includes(k),`overview missing ${k}`);
                 assert(x.title==='시장 한눈에 보기',`overview title ${x.title}`);
                 assert(x.contract==='GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',`contract ${x.contract}`);
-                assert(x.version==='2.5.0',`version ${x.version}`);
+                assert(x.version==='2.5.1',`version ${x.version}`);
 
                 for(const [tab,cfg] of Object.entries(expected)){
                   x=await clickTab(page,tab,cfg.title);
@@ -108,5 +108,6 @@ jobs:
             assert(passed,`public tab-scoped latest board verification failed: ${last}`);
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
+
 
 
