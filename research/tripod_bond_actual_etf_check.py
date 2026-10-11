@@ -1,33 +1,29 @@
 #!/usr/bin/env python3
-import csv,io,json,math,urllib.parse,urllib.request
+import csv,io,json,math,urllib.request
 from datetime import datetime,timezone
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'research-output';OUT.mkdir(exist_ok=True)
-UA='Mozilla/5.0 JJOONI-TRIPOD-BACKTEST/3.0';COST=.0005
+UA='Mozilla/5.0 JJOONI-TRIPOD-BACKTEST/3.1';COST=.0005
 
 def text(url):
- r=urllib.request.Request(url,headers={'User-Agent':UA});
+ r=urllib.request.Request(url,headers={'User-Agent':UA})
  with urllib.request.urlopen(r,timeout=40) as x:return x.read().decode('utf-8-sig','ignore')
 def fred(s):
  out={}
  for r in csv.DictReader(io.StringIO(text('https://fred.stlouisfed.org/graph/fredgraph.csv?id='+s))):
-  d=r.get('observation_date') or r.get('DATE');
+  d=r.get('observation_date') or r.get('DATE')
   try:v=float(r.get(s))
   except:continue
   if d and math.isfinite(v):out[d]=v
  return out
-def yahoo(sym):
- q=urllib.parse.urlencode({'interval':'1d','range':'max','includePrePost':'false','events':'div,splits'})
- obj=json.loads(text('https://query1.finance.yahoo.com/v8/finance/chart/'+urllib.parse.quote(sym)+'?'+q));b=obj['chart']['result'][0];ts=b['timestamp'];
- adj=(((b.get('indicators') or {}).get('adjclose') or [{}])[0]).get('adjclose')
- if not adj:adj=(((b.get('indicators') or {}).get('quote') or [{}])[0]).get('close')
+def github_etf(sym):
+ url=f'https://raw.githubusercontent.com/tomlupo/ai-playground/main/data/samples/{sym}.csv'
  out={}
- for t,v in zip(ts,adj):
-  if v is None:continue
-  d=datetime.fromtimestamp(t,timezone.utc).date().isoformat();out[d]=float(v)
- return out
-
+ for r in csv.DictReader(io.StringIO(text(url))):
+  try:out[r['Date']]=float(r['Close'])
+  except:pass
+ return out,url
 def ff(ds,m):
  z=[];last=None
  for d in ds:
@@ -41,7 +37,7 @@ def comp(rs):
  return w-1
 
 def main():
- nd=fred('NASDAQ100');vx=fred('VIXCLS');y10m=fred('DGS10');y3m=fred('DGS3MO');ief=yahoo('IEF');tlt=yahoo('TLT')
+ nd=fred('NASDAQ100');vx=fred('VIXCLS');y10m=fred('DGS10');y3m=fred('DGS3MO');ief,ief_url=github_etf('IEF');tlt,tlt_url=github_etf('TLT')
  ds=sorted(set(nd)&set(vx));n=[nd[d] for d in ds];v=[vx[d] for d in ds];y10=ff(ds,y10m);y3=ff(ds,y3m)
  st=[];prev=None
  for i,d in enumerate(ds):
@@ -55,11 +51,11 @@ def main():
   st.append(('TRIPOD' if v10<28 and dd>=-.09 else 'BIPOD') if r=='UP' else ('MONOPOD' if v10<18 else 'NOPOD'))
  f20=[];ftrend=[]
  for i in range(len(ds)):
-  slope=bool(i>=20 and y10[i]!=None and y10[i-20]!=None and y10[i]<y10[i-20]);f20.append(slope)
+  slope=bool(i>=20 and y10[i] is not None and y10[i-20] is not None and y10[i]<y10[i-20]);f20.append(slope)
   ftrend.append(bool(slope and i>=99 and all(x is not None for x in y10[i-99:i+1]) and y10[i]<mean(y10[i-99:i+1])))
  es=[st[i-2] if i>=2 else None for i in range(len(ds))];e20=[f20[i-2] if i>=2 else False for i in range(len(ds))];etr=[ftrend[i-2] if i>=2 else False for i in range(len(ds))]
  idx={d:i for i,d in enumerate(ds)}
- result={'generated_utc':datetime.now(timezone.utc).isoformat(),'method':'Actual adjusted-close IEF/TLT; compare only NOPOD sleeve to DGS3MO cash. 5bp one-way bond turnover. Same TRI-POD signals and next-close execution.','sources':{'NDX':'FRED NASDAQ100','VIX':'FRED VIXCLS','10Y':'FRED DGS10','cash':'FRED DGS3MO','IEF':'Yahoo chart adjusted close','TLT':'Yahoo chart adjusted close'},'etfs':{}}
+ result={'generated_utc':datetime.now(timezone.utc).isoformat(),'method':'Actual adjusted-close-like IEF/TLT sample series; compare NOPOD sleeve to DGS3MO cash. 5bp one-way bond turnover. Same TRI-POD signals and next-close execution.','sources':{'NDX':'FRED NASDAQ100','VIX':'FRED VIXCLS','10Y':'FRED DGS10','cash':'FRED DGS3MO','IEF':ief_url,'TLT':tlt_url},'etfs':{}}
  for sym,px in [('IEF',ief),('TLT',tlt)]:
   common=[d for d in ds if d in px and es[idx[d]]]
   prs={}
@@ -76,7 +72,7 @@ def main():
      ro=(1-w)*cash_daily[d]+w*prs[d]-COST*abs(w-pw);rc=cash_daily[d]
      overlay.append(ro);cashs.append(rc);ratio*=((1+ro)/(1+rc));bond_days+=int(w>0)
     else:
-     if pw>0: ratio*=max(1e-12,1-COST*pw)
+     if pw>0:ratio*=max(1e-12,1-COST*pw)
      w=0
     pw=w
    if pw>0:ratio*=max(1e-12,1-COST*pw)
