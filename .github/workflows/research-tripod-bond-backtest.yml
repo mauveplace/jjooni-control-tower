@@ -6,7 +6,6 @@ on:
       - research/tripod-bond-backtest-261011
     paths:
       - 'research/tripod_bond_backtest_v2.py'
-      - 'research/tripod_bond_actual_etf_check.py'
       - 'research/tripod_nopod_alternatives.py'
       - '.github/workflows/research-tripod-bond-backtest.yml'
   workflow_dispatch:
@@ -29,16 +28,11 @@ jobs:
         run: python research/tripod_bond_backtest_v2.py
       - name: Run NOPOD alternative sleeve study
         run: python research/tripod_nopod_alternatives.py
-      - name: Run actual IEF and TLT validation
-        continue-on-error: true
-        run: python research/tripod_bond_actual_etf_check.py
       - name: Commit reproducible output
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '4189826+github-actions[bot]@users.noreply.github.com'
           git add research-output/tripod_bond_backtest_v2.json research-output/tripod_bond_backtest_v2.md research-output/tripod_nopod_alternatives.json research-output/tripod_nopod_alternatives.md
-          if [ -f research-output/tripod_bond_actual_etf_check.json ]; then git add research-output/tripod_bond_actual_etf_check.json; fi
-          if [ -f research-output/tripod_bond_actual_etf_check.md ]; then git add research-output/tripod_bond_actual_etf_check.md; fi
           if git diff --cached --quiet; then
             echo 'No output changes'
           else
