@@ -1,0 +1,97 @@
+name: Economic Calendar 10Y History Backfill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_calendar_history.py
+      - tools/backfill_calendar_history_forexfactory.py
+      - tools/backfill_calendar_history_forexfactory_v2.py
+      - tests/test_calendar_all_events_history.py
+      - .github/workflows/economic-calendar-history-10y-backfill.yml
+  schedule:
+    # Weekly retry/repair. Once coverage is FULL the job becomes a cheap no-op.
+    - cron: '40 18 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install parser dependencies and regression-test history adapter
+        run: |
+          set -euo pipefail
+          python -m pip install -r tools/requirements-observatory.txt
+          python -m unittest discover -s tests -p 'test_calendar_all_events_history.py' -v
+          python -m py_compile \
+            tools/build_calendar_history.py \
+            tools/backfill_calendar_history_forexfactory.py \
+            tools/backfill_calendar_history_forexfactory_v2.py
+
+      - name: Expand archive envelope to ten years
+        run: |
+          set -euo pipefail
+          python tools/build_calendar_history.py
+
+      - name: Backfill historical Previous Forecast Actual
+        env:
+          HISTORY_WINDOW_DAYS: '3650'
+          HISTORY_BACKFILL_SLEEP_SECONDS: '0.75'
+          HISTORY_BACKFILL_MAX_WEEKS: '0'
+        run: |
+          set -euo pipefail
+          python tools/backfill_calendar_history_forexfactory_v2.py
+
+      - name: Validate resumable ten-year archive
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import date, timedelta
+          p='market-observatory/data/economic-calendar-history.json'
+          h=json.load(open(p))
+          assert h.get('schema')=='JJOONI_ECONOMIC_CALENDAR_HISTORY_V1'
+          assert h.get('window_days')==3650,h.get('window_days')
+          assert h.get('window_years')==10,h.get('window_years')
+          assert h.get('contract')=='ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2'
+          assert h.get('backfill_contract')=='FOREXFACTORY_HISTORICAL_10Y_RESUMABLE_V2'
+          assert h.get('backfill_status') in ['COMPLETE','PARTIAL_GAPS','IN_PROGRESS','NOOP_NO_TARGET_WEEKS']
+          assert isinstance(h.get('series'),dict) and h.get('row_count',0)>0
+          b=h.get('backfill') or {}
+          if h.get('coverage_status')=='FULL':
+              expected=(date.today()-timedelta(days=3650)+timedelta(days=14)).isoformat()
+              assert h.get('available_from') and h.get('available_from')<=expected,(h.get('available_from'),expected)
+              assert not (b.get('failed_weeks') or []),b.get('failed_weeks')
+          print('CALENDAR_HISTORY_10Y_ACCEPTANCE=PASS',
+                'coverage=',h.get('coverage_status'),
+                'available_from=',h.get('available_from'),
+                'available_to=',h.get('available_to'),
+                'series=',h.get('series_count'),
+                'rows=',h.get('row_count'),
+                'failed_weeks=',len(b.get('failed_weeks') or []))
+          PY
+
+      - name: Publish historical archive atomically
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py \
+            --message 'data(observatory): extend economic calendar history toward 10y' \
+            market-observatory/data/economic-calendar-history.json

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""One ordered calendar pipeline shared by every publishing workflow.
+"""One ordered calendar pipeline shared by routine publishing workflows.
 
 Schedule seed -> restore observations -> collect official/secondary/feed once ->
 merge curated forecasts + generic all-event fallback -> retain -> representative
-sync -> compute health -> archive -> rolling 1Y history -> bounded historical
-backfill -> previous-value fallback -> representative sync -> validate.
+sync -> compute health -> archive -> rolling 10Y history -> previous-value fallback
+-> representative sync -> validate.
 
-Event-level compact values must never be overwritten by auxiliary probability
-metrics such as FedWatch after retention/history merges.
+The expensive 10-year source crawl is intentionally decoupled into its own
+resumable workflow. Routine calendar refreshes preserve and extend the 10-year
+SSOT without re-downloading hundreds of historical weekly pages.
 """
 import argparse
 import json
@@ -25,7 +26,6 @@ def run(script, *args):
 
 
 def normalize_calendar_contract():
-    """Guarantee the published event schema after every retention merge."""
     data = json.loads(CAL.read_text(encoding='utf-8'))
     normalized = 0
     for event in data.get('events', []):
@@ -49,29 +49,18 @@ def refresh(previous=None, seed=False):
         run('tools/persist_calendar_history.py', snapshot)
         if previous:
             run('tools/persist_calendar_history.py', previous)
-        # One network fetch feeds both curated mappings and generic long-tail matching.
         run('tools/enrich_calendar_with_all_events.py')
         run('tools/calendar_market_events.py', 'refresh')
         run('tools/persist_calendar_history.py', snapshot)
         normalize_calendar_contract()
-        # Retention can restore an old compact event-level value after the metric
-        # rows were refreshed. Reassert the semantic representative before health
-        # and archival so probability overlays can never become policy-card values.
         run('tools/sync_calendar_representative_values.py')
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
-        # Build from captured canonical observations first, then backfill only the
-        # portion of the 365-day window that predates our archive. The v2 adapter
-        # accepts current FF table/div/data-eventid DOM variants while the legacy
-        # module remains the authority for matching, provenance and fail-closed rules.
+        # Preserve/extend the 10-year SSOT from all observations already captured.
+        # Deep historical source crawling is handled by the dedicated backfill job.
         run('tools/build_calendar_history.py')
-        run('tools/backfill_calendar_history_forexfactory_v2.py')
         run('tools/fill_calendar_previous_from_history.py')
-        # History fallback may add a metric-level Previous; sync again so the compact
-        # event card mirrors its primary non-probability metric before validation.
         run('tools/sync_calendar_representative_values.py')
-        # Rebuild preserves the historical backfill while folding in any newly
-        # derived Previous values and recalculating rolling-window metadata.
         run('tools/build_calendar_history.py')
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))
