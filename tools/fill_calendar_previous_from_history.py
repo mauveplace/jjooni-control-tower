@@ -25,6 +25,10 @@ def latest_actual(bucket,before_day):
     return rows[-1] if rows else None
 
 
+def history_source(row):
+    return clean((row or {}).get('source')) or 'Calendar history / captured prior actual'
+
+
 def main():
     if not CAL.exists() or not HIST.exists():
         print('CALENDAR_PREVIOUS_FROM_HISTORY=SKIP missing file')
@@ -42,25 +46,40 @@ def main():
             ref=m.get('history_ref')
             row=latest_actual(series.get(ref),day) if ref else None
             if row:
+                src=history_source(row)
                 m['previous']=row['actual']
                 m['previous_source']='CALENDAR_HISTORY_LAST_ACTUAL'
+                m['previous_value_source']=src
                 m['previous_observed_date']=row.get('date')
+                m.setdefault('market_value_source',src)
+                m.setdefault('source',src)
                 if m.get('market_value_status')=='NOT_PUBLISHED':m['market_value_status']='PREVIOUS_ONLY'
                 filled_metric+=1
         if clean(e.get('previous')) is None:
             primary=next((m for m in (e.get('market_metrics') or []) if isinstance(m,dict) and clean(m.get('previous')) is not None),None)
             if primary:
-                e['previous']=primary['previous'];e['previous_source']=primary.get('previous_source') or 'METRIC_REPRESENTATIVE';e['previous_observed_date']=primary.get('previous_observed_date');filled_event+=1
+                e['previous']=primary['previous']
+                e['previous_source']=primary.get('previous_source') or 'METRIC_REPRESENTATIVE'
+                e['previous_observed_date']=primary.get('previous_observed_date')
+                src=clean(primary.get('previous_value_source')) or clean(primary.get('market_value_source')) or clean(primary.get('actual_source')) or clean(primary.get('source'))
+                if src and clean(e.get('market_data_source')) is None:e['market_data_source']=src
+                filled_event+=1
             else:
                 ref=e.get('history_ref');row=latest_actual(series.get(ref),day) if ref else None
                 if row:
-                    e['previous']=row['actual'];e['previous_source']='CALENDAR_HISTORY_LAST_ACTUAL';e['previous_observed_date']=row.get('date');filled_event+=1
+                    src=history_source(row)
+                    e['previous']=row['actual']
+                    e['previous_source']='CALENDAR_HISTORY_LAST_ACTUAL'
+                    e['previous_value_source']=src
+                    e['previous_observed_date']=row.get('date')
+                    if clean(e.get('market_data_source')) is None:e['market_data_source']=src
+                    filled_event+=1
         if clean(e.get('actual')) is not None:e['market_value_status']='ACTUAL_AVAILABLE'
         elif clean(e.get('consensus')) is not None:e['market_value_status']='CONSENSUS_AVAILABLE'
         elif clean(e.get('previous')) is not None:e['market_value_status']='PREVIOUS_ONLY'
         else:e['market_value_status']='NOT_PUBLISHED'
     cal['previous_value_contract']='LATEST_PRIOR_VERIFIED_ACTUAL_AS_PREVIOUS_FALLBACK_V1'
-    cal['previous_value_fill']={'event_rows':filled_event,'metric_rows':filled_metric}
+    cal['previous_value_fill']={'event_rows':filled_event,'metric_rows':filled_metric,'provenance':'SOURCE_OF_PRIOR_ACTUAL_PROPAGATED'}
     CAL.write_text(json.dumps(cal,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('CALENDAR_PREVIOUS_FROM_HISTORY=PASS event=',filled_event,'metric=',filled_metric)
 

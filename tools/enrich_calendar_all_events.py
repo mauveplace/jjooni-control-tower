@@ -6,12 +6,13 @@ import re
 from difflib import SequenceMatcher
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from calendar_actual_contract import PROVENANCE, merge_observation
-from enrich_economic_calendar import KST, clean, date_delta, ff_rows, norm, row_kst_date, te_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
+KST = ZoneInfo('Asia/Seoul')
 
 COUNTRY_NAME = {
     'US': 'united states',
@@ -23,7 +24,7 @@ CURRENCY = {'US': 'USD', 'KR': 'KRW', 'JP': 'JPY', 'GB': 'GBP'}
 
 STOP = {
     'the','and','of','for','in','on','at','to','a','an','report','release','survey','index','indexes',
-    'united','states','us','u','s','korea','south','japan','uk','united','kingdom','preliminary','final',
+    'united','states','us','u','s','korea','south','japan','uk','kingdom','preliminary','final',
     'advance','revised','revision','estimate','estimates','monthly','quarterly','annual','data'
 }
 
@@ -46,6 +47,31 @@ REPLACEMENTS = [
     (r'quarter[ -]?over[ -]?quarter', ' qoq '),
     (r'q\s*/\s*q', ' qoq '),
 ]
+
+
+def norm(value):
+    return re.sub(r'[^a-z0-9가-힣]+',' ',str(value or '').lower()).strip()
+
+
+def clean(value):
+    if value is None:
+        return None
+    s = str(value).strip()
+    return None if s in ('','None','null','nan','N/A','-','—') else s
+
+
+def date_delta(a, b):
+    try:
+        return abs((datetime.fromisoformat(str(a)[:10]).date() - datetime.fromisoformat(str(b)[:10]).date()).days)
+    except Exception:
+        return 999
+
+
+def row_kst_date(row):
+    try:
+        return datetime.fromisoformat(str(row.get('date'))).astimezone(KST).date().isoformat()
+    except Exception:
+        return ''
 
 
 def canonical(text):
@@ -74,8 +100,6 @@ def text_score(query, candidate):
     coverage = len(common) / max(1, len(qt))
     seq = SequenceMatcher(None, q, c).ratio()
     contains = 1.0 if (q in c or c in q) else 0.0
-    # Strongly reward the direction/frequency qualifiers which distinguish
-    # CPI/PPI/PCE YoY from MoM rows on the same release date.
     qualifier = 0.0
     for key in ('yoy','mom','qoq','core','headline','manufacturing','services','composite'):
         q_has = key in qt
@@ -95,9 +119,15 @@ def te_country(row):
     return None
 
 
-def normalized_rows():
+def normalized_rows(te=None, ff=None):
+    """Normalize rows already fetched by the canonical enricher.
+
+    The all-event pass must not make a second network request in the same
+    refresh. Reusing the first fetch makes enrichment deterministic when public
+    feeds are transiently unavailable on a subsequent call.
+    """
     rows = []
-    for r in te_rows():
+    for r in te or []:
         code = te_country(r)
         day = str(r.get('Date') or '')[:10]
         if not code or not day:
@@ -109,7 +139,7 @@ def normalized_rows():
             'consensus': clean(r.get('Forecast')), 'actual': clean(r.get('Actual')),
             'te_forecast': clean(r.get('TEForecast')), 'source_url': r.get('URL') or 'https://tradingeconomics.com/calendar',
         })
-    for r in ff_rows():
+    for r in ff or []:
         currency = str(r.get('country') or '').upper()
         code = next((k for k,v in CURRENCY.items() if v == currency), None)
         day = row_kst_date(r)
@@ -162,8 +192,7 @@ def patch_observation(target, row, now):
         'source_url': row.get('source_url'), 'checked_kst': now,
         'verification_status': 'MARKET_REPORTED',
     }
-    merged = merge_observation(target, patch)
-    target.update(merged)
+    target.update(merge_observation(target, patch))
     if row.get('provider'):
         target['market_value_source'] = row['provider']
     after = {k: clean(target.get(k)) for k in ('previous','consensus','actual')}
@@ -180,6 +209,9 @@ def sync_event_from_metrics(event):
             event[key] = primary[key]
     if clean(primary.get('actual')) is not None:
         event.update(merge_observation(event, {k: primary[k] for k in ('actual', *PROVENANCE) if k in primary}))
+    source = clean(primary.get('market_value_source')) or clean(primary.get('actual_source')) or clean(primary.get('source'))
+    if source and not clean(event.get('market_data_source')):
+        event['market_data_source'] = source
 
 
 def value_status(obj):
@@ -192,15 +224,13 @@ def value_status(obj):
     return 'NOT_PUBLISHED'
 
 
-def main():
-    calendar = json.loads(CAL.read_text(encoding='utf-8'))
-    rows = normalized_rows()
-    now = datetime.now(KST).isoformat(timespec='seconds')
+def apply_all_event_enrichment(calendar, te, ff, now=None):
+    rows = normalized_rows(te, ff)
+    checked = now.isoformat(timespec='seconds') if isinstance(now, datetime) else str(now or datetime.now(KST).isoformat(timespec='seconds'))
     eligible = matched_events = matched_metrics = updates = 0
 
     for event in calendar.get('events') or []:
-        country = event.get('country')
-        if country not in COUNTRY_NAME:
+        if event.get('country') not in COUNTRY_NAME:
             continue
         eligible += 1
         metrics = [m for m in (event.get('market_metrics') or []) if isinstance(m, dict)]
@@ -212,11 +242,9 @@ def main():
             query = f"{label} {event.get('title') or ''}"
             row, score = best_row(query, event, rows, threshold=57.0)
             if not row:
-                # Metric titles such as CPI YoY often match more accurately without
-                # the parent release title appended.
                 row, score = best_row(label, event, rows, threshold=57.0)
             if row:
-                updates += patch_observation(metric, row, now)
+                updates += patch_observation(metric, row, checked)
                 metric['generic_match_score'] = score
                 metric['market_value_status'] = value_status(metric)
                 metric_hits += 1
@@ -227,29 +255,43 @@ def main():
         else:
             row, score = best_row(event.get('title') or '', event, rows, threshold=60.0)
             if row:
-                updates += patch_observation(event, row, now)
+                updates += patch_observation(event, row, checked)
                 event['generic_match_score'] = score
                 if row.get('te_forecast') and clean(event.get('te_forecast')) is None:
                     event['te_forecast'] = row['te_forecast']
+                if row.get('provider') and not clean(event.get('market_data_source')):
+                    event['market_data_source'] = row['provider']
                 matched_events += 1
 
         event['market_value_status'] = value_status(event)
         for metric in metrics:
             metric.setdefault('market_value_status', value_status(metric))
 
-    calendar['all_event_enrichment_contract'] = 'ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1'
-    calendar['all_event_enrichment'] = {
+    stats = {
         'eligible_events': eligible,
         'matched_events': matched_events,
         'matched_metric_rows': matched_metrics,
         'field_updates': updates,
         'vendor_rows': len(rows),
-        'checked_kst': now,
+        'checked_kst': checked,
         'missing_policy': 'NEVER_INVENT_VALUES; NOT_PUBLISHED means source has not supplied a usable value',
+        'row_reuse_contract': 'REUSE_PRIMARY_ENRICHER_FETCH_V1',
     }
+    calendar['all_event_enrichment_contract'] = 'ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1'
+    calendar['all_event_enrichment'] = stats
+    return stats
+
+
+def main():
+    # Standalone/debug entrypoint. Production calls apply_all_event_enrichment
+    # from enrich_economic_calendar.py with the rows it already fetched.
+    from enrich_economic_calendar import ff_rows, te_rows
+    calendar = json.loads(CAL.read_text(encoding='utf-8'))
+    te = te_rows()
+    ff = ff_rows()
+    stats = apply_all_event_enrichment(calendar, te, ff, datetime.now(KST))
     CAL.write_text(json.dumps(calendar, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print('CALENDAR_ALL_EVENTS_ENRICH=PASS eligible=', eligible, 'matched_events=', matched_events,
-          'matched_metrics=', matched_metrics, 'vendor_rows=', len(rows), 'updates=', updates)
+    print('CALENDAR_ALL_EVENTS_ENRICH=PASS', stats)
 
 
 if __name__ == '__main__':
