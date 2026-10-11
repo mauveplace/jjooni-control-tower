@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Backfill the missing rolling-365d calendar window from Forex Factory HTML.
 
-This is a bounded catch-up job, not a new calendar authority.  It only fills
+This is a bounded catch-up job, not a new calendar authority. It only fills
 historical Previous/Consensus/Actual fields for event/metric families already
 present in the canonical JJOONI calendar and never overwrites a captured
-OFFICIAL actual.  Once the requested window is covered, subsequent runs no-op.
+OFFICIAL actual. Once the requested window is covered, subsequent runs no-op.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 HIST = ROOT / 'market-observatory' / 'data' / 'economic-calendar-history.json'
 KST = ZoneInfo('Asia/Seoul')
-LONDON = ZoneInfo('Europe/London')
+DEFAULT_SOURCE_TZ = ZoneInfo('Europe/London')
 WINDOW_DAYS = 365
 UA = 'Mozilla/5.0 JJOONI-Market-Observatory-History/1.0'
 COUNTRY_BY_CCY = {'USD': 'US', 'JPY': 'JP', 'GBP': 'GB'}
@@ -40,7 +40,6 @@ def clean(v):
 
 
 def sunday_on_or_before(d: date) -> date:
-    # Python Monday=0 ... Sunday=6.
     return d - timedelta(days=(d.weekday() + 1) % 7)
 
 
@@ -56,20 +55,42 @@ def parse_source_day(text: str, year: int, fallback: date | None) -> date | None
     month = MONTH.get(m.group(1).lower())
     if not month:
         return fallback
-    return date(year, month, int(m.group(2)))
+    resolved_year = year
+    # A week beginning in late December can contain early-January rows from the
+    # next year. Likewise retain the fallback year when the date cell is blank.
+    if fallback is not None:
+        if fallback.month >= 11 and month <= 2:
+            resolved_year = fallback.year + 1
+        elif fallback.month <= 2 and month >= 11:
+            resolved_year = fallback.year - 1
+        else:
+            resolved_year = fallback.year
+    return date(resolved_year, month, int(m.group(2)))
 
 
-def parse_kst_datetime(day: date, clock: str, fallback_clock: str | None = None):
+def detect_source_zone(soup):
+    text = soup.get_text(' ', strip=True)
+    match = re.search(r'Calendar\s+Time\s+Zone:\s*([A-Za-z_]+/[A-Za-z_]+)', text, re.I)
+    if match:
+        try:
+            return ZoneInfo(match.group(1))
+        except Exception:
+            pass
+    return DEFAULT_SOURCE_TZ
+
+
+def parse_kst_datetime(day: date, clock: str, fallback_clock: str | None = None,
+                       source_zone: ZoneInfo = DEFAULT_SOURCE_TZ):
     raw = ' '.join(str(clock or '').split()).lower()
     if not raw:
         raw = str(fallback_clock or '').strip().lower()
     if not raw or raw in ('all day', 'tentative') or raw.startswith('day '):
-        return datetime.combine(day, time(12, 0), LONDON).astimezone(KST), raw
+        return datetime.combine(day, time(12, 0), source_zone).astimezone(KST), raw
     try:
         t = datetime.strptime(raw.replace(' ', ''), '%I:%M%p').time()
     except ValueError:
-        return datetime.combine(day, time(12, 0), LONDON).astimezone(KST), raw
-    return datetime.combine(day, t, LONDON).astimezone(KST), raw
+        return datetime.combine(day, time(12, 0), source_zone).astimezone(KST), raw
+    return datetime.combine(day, t, source_zone).astimezone(KST), raw
 
 
 def cell_text(row, name):
@@ -82,12 +103,12 @@ def parse_page(html: str, year: int):
     table = soup.select_one('table.calendar__table')
     if table is None:
         raise ValueError('ForexFactory calendar table missing')
+    source_zone = detect_source_zone(soup)
     rows = table.select('tr.calendar__row')
     out = []
     current_day = None
     current_clock = None
     for row in rows:
-        # Exclude expandable detail rows which use the same base class.
         if 'calendar__expand' in (row.get('class') or []):
             continue
         date_text = cell_text(row, 'date')
@@ -109,10 +130,12 @@ def parse_page(html: str, year: int):
         previous = cell_text(row, 'previous')
         if not any((actual, forecast, previous)):
             continue
-        kst_dt, source_clock = parse_kst_datetime(current_day, clock or '', current_clock)
+        kst_dt, source_clock = parse_kst_datetime(
+            current_day, clock or '', current_clock, source_zone=source_zone)
         out.append({
             'source_date': current_day.isoformat(),
             'source_time': source_clock,
+            'source_timezone': str(source_zone),
             'datetime_kst': kst_dt.isoformat(timespec='minutes'),
             'date': kst_dt.date().isoformat(),
             'country': country,
@@ -178,7 +201,6 @@ def best_catalog_match(row, catalog):
             if item['country'] != row['country']:
                 continue
             score = text_score(row['title'], item['label'])
-            # Metric rows are preferred because they preserve granular history.
             if kind == 'metric':
                 score += 5.0
             candidates.append((score, kind, item))
@@ -189,9 +211,6 @@ def best_catalog_match(row, catalog):
     threshold = 56.0 if kind == 'metric' else 62.0
     if score < threshold:
         return None
-    # Reject ambiguous matches when the runner-up is almost identical and points
-    # to another family. This is safer than forcing historical data into a wrong
-    # metric simply to increase coverage.
     if len(candidates) > 1:
         runner = candidates[1]
         if runner[2]['ref'] != item['ref'] and runner[0] >= score - 2.0:
@@ -209,8 +228,6 @@ def merge_history_row(bucket, incoming):
         return 'insert'
     old = rows[idx]
     merged = dict(old)
-    # Historical market feed is useful for Previous/Consensus.  It may fill an
-    # Actual only when no captured actual exists; an OFFICIAL actual is immutable.
     for field in ('previous','consensus'):
         if clean(merged.get(field)) is None and clean(incoming.get(field)) is not None:
             merged[field] = incoming[field]
@@ -274,8 +291,6 @@ def main():
             parsed += len(rows)
             sources.append(url)
             for row in rows:
-                # Keep only the requested rolling window and only the currently
-                # missing segment. The current production archive owns later dates.
                 row_day = datetime.fromisoformat(row['date']).date()
                 if row_day < window_start:
                     continue
@@ -313,6 +328,7 @@ def main():
                     'label': match.get('label'),
                     'source_date': row.get('source_date'),
                     'source_time': row.get('source_time'),
+                    'source_timezone': row.get('source_timezone'),
                     'match_score': match['score'],
                 }
                 action = merge_history_row(bucket, payload)
@@ -323,8 +339,14 @@ def main():
         if i + 1 < len(weeks):
             sleep_time.sleep(1.0)
 
-    if fetched == 0:
-        raise SystemExit(f'CALENDAR_HISTORY_FF_BACKFILL=FAIL no historical week fetched errors={errors}')
+    # A historical catch-up that fetched only a small fraction of requested
+    # weeks must not be published as a full-year archive. Allow at most two
+    # transient weekly failures; otherwise fail closed and retry on a later run.
+    minimum = max(1, len(weeks) - 2)
+    if fetched < minimum:
+        raise SystemExit(
+            f'CALENDAR_HISTORY_FF_BACKFILL=FAIL weeks={fetched}/{len(weeks)} '
+            f'minimum={minimum} errors={errors}')
 
     earliest = None
     latest = None
