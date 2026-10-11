@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Backfill the missing rolling-365d calendar window from Forex Factory HTML.
+"""Backfill up to ten years of economic-calendar history from Forex Factory.
 
-This is a bounded catch-up job, not a new calendar authority. It only fills
-historical Previous/Consensus/Actual fields for event/metric families already
-present in the canonical JJOONI calendar and never overwrites a captured
-OFFICIAL actual. Once the requested window is covered, subsequent runs no-op.
+This is a historical market-data supplement, not the calendar authority. It
+never overwrites a captured OFFICIAL actual. Canonical event/metric families are
+matched first; unmatched market rows are retained in generic history buckets so
+PB/analyst consumers can inspect the full source history. Backfill progress is
+published even when a small number of weeks fail, and failed weeks are retried
+on subsequent runs until coverage becomes FULL.
 """
 from __future__ import annotations
 
 import json
+import os
 import re
 import time as sleep_time
 from datetime import date, datetime, time, timedelta
@@ -25,9 +28,15 @@ CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 HIST = ROOT / 'market-observatory' / 'data' / 'economic-calendar-history.json'
 KST = ZoneInfo('Asia/Seoul')
 DEFAULT_SOURCE_TZ = ZoneInfo('Europe/London')
-WINDOW_DAYS = 365
-UA = 'Mozilla/5.0 JJOONI-Market-Observatory-History/1.0'
-COUNTRY_BY_CCY = {'USD': 'US', 'JPY': 'JP', 'GBP': 'GB'}
+WINDOW_DAYS = int(os.getenv('HISTORY_WINDOW_DAYS', '3650'))
+SLEEP_SECONDS = float(os.getenv('HISTORY_BACKFILL_SLEEP_SECONDS', '0.75'))
+MAX_WEEKS = int(os.getenv('HISTORY_BACKFILL_MAX_WEEKS', '0'))
+UA = 'Mozilla/5.0 JJOONI-Market-Observatory-History/2.0'
+COUNTRY_BY_CCY = {
+    'USD': 'US', 'JPY': 'JP', 'GBP': 'GB', 'EUR': 'EU', 'CAD': 'CA',
+    'AUD': 'AU', 'NZD': 'NZ', 'CHF': 'CH', 'CNY': 'CN', 'RMB': 'CN',
+    'KRW': 'KR',
+}
 MONTH = {m.lower(): i for i, m in enumerate(
     ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], 1)}
 
@@ -37,6 +46,12 @@ def clean(v):
         return None
     s = str(v).replace('\xa0', ' ').strip()
     return None if s in ('', '-', '—', 'None', 'null', 'N/A') else s
+
+
+def slug(text):
+    s = str(text or '').lower()
+    s = re.sub(r'[^a-z0-9가-힣]+', '-', s).strip('-')
+    return s[:160] or 'event'
 
 
 def sunday_on_or_before(d: date) -> date:
@@ -56,8 +71,6 @@ def parse_source_day(text: str, year: int, fallback: date | None) -> date | None
     if not month:
         return fallback
     resolved_year = year
-    # A week beginning in late December can contain early-January rows from the
-    # next year. Likewise retain the fallback year when the date cell is blank.
     if fallback is not None:
         if fallback.month >= 11 and month <= 2:
             resolved_year = fallback.year + 1
@@ -171,7 +184,7 @@ def build_catalog(calendar):
     for e in calendar.get('events') or []:
         country = e.get('country')
         eref = clean(e.get('history_ref'))
-        if country not in ('US','JP','GB') or not eref:
+        if not country or not eref:
             continue
         for m in e.get('market_metrics') or []:
             if not isinstance(m, dict) or m.get('metric_type') == 'market_probability_snapshot':
@@ -215,7 +228,22 @@ def best_catalog_match(row, catalog):
         runner = candidates[1]
         if runner[2]['ref'] != item['ref'] and runner[0] >= score - 2.0:
             return None
-    return {'score': round(score, 2), 'kind': kind, **item}
+    return {'score': round(score, 2), 'kind': kind, 'canonical': True, **item}
+
+
+def generic_match(row):
+    label = clean(row.get('title')) or 'Economic event'
+    country = row.get('country') or 'XX'
+    return {
+        'score': None,
+        'kind': 'event',
+        'canonical': False,
+        'ref': f"FF::{country}::{slug(label)}",
+        'country': country,
+        'label': label,
+        'event_title': label,
+        'metric_key': None,
+    }
 
 
 def merge_history_row(bucket, incoming):
@@ -244,7 +272,13 @@ def merge_history_row(bucket, incoming):
     return 'merge'
 
 
-def target_weeks(window_start: date, available_from: str | None):
+def target_weeks(window_start: date, available_from: str | None, failed_weeks=None):
+    retries = []
+    for raw in failed_weeks or []:
+        try:
+            retries.append(datetime.fromisoformat(str(raw)[:10]).date())
+        except ValueError:
+            pass
     if available_from:
         try:
             stop = datetime.fromisoformat(str(available_from)[:10]).date() - timedelta(days=1)
@@ -252,15 +286,22 @@ def target_weeks(window_start: date, available_from: str | None):
             stop = date.today()
     else:
         stop = date.today()
-    if stop < window_start:
-        return []
-    start = sunday_on_or_before(window_start)
-    last = sunday_on_or_before(stop)
     weeks = []
-    cursor = start
-    while cursor <= last:
-        weeks.append(cursor)
-        cursor += timedelta(days=7)
+    if stop >= window_start:
+        cursor = sunday_on_or_before(window_start)
+        last = sunday_on_or_before(stop)
+        while cursor <= last:
+            weeks.append(cursor)
+            cursor += timedelta(days=7)
+    for week in retries:
+        week = sunday_on_or_before(week)
+        if window_start <= week <= date.today() and week not in weeks:
+            weeks.append(week)
+    weeks = sorted(set(weeks))
+    if MAX_WEEKS > 0:
+        # Prefer the newest missing segment so usable coverage expands backward
+        # contiguously from the existing archive.
+        weeks = weeks[-MAX_WEEKS:]
     return weeks
 
 
@@ -270,17 +311,19 @@ def main():
     today = datetime.now(KST).date()
     window_start = today - timedelta(days=WINDOW_DAYS)
     available_from = history.get('available_from')
-    weeks = target_weeks(window_start, available_from)
+    old_backfill = history.get('backfill') or {}
+    weeks = target_weeks(window_start, available_from, old_backfill.get('failed_weeks'))
     if not weeks:
-        history['backfill_status'] = 'NOOP_WINDOW_ALREADY_COVERED'
+        history['backfill_status'] = 'COMPLETE' if history.get('coverage_status') == 'FULL' else 'NOOP_NO_TARGET_WEEKS'
         history['backfill_checked_kst'] = datetime.now(KST).isoformat(timespec='seconds')
         HIST.write_text(json.dumps(history, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        print('CALENDAR_HISTORY_FF_BACKFILL=NOOP available_from=', available_from)
+        print('CALENDAR_HISTORY_FF_BACKFILL=NOOP available_from=', available_from,
+              'coverage=', history.get('coverage_status'))
         return
 
     catalog = build_catalog(calendar)
     series = history.setdefault('series', {})
-    fetched = parsed = matched = inserted = merged = rejected = 0
+    fetched = parsed = canonical_matched = generic_retained = inserted = merged = 0
     sources = []
     errors = []
 
@@ -294,13 +337,14 @@ def main():
                 row_day = datetime.fromisoformat(row['date']).date()
                 if row_day < window_start:
                     continue
-                if available_from and row['date'] >= str(available_from)[:10]:
+                if available_from and row['date'] >= str(available_from)[:10] and week.isoformat() not in (old_backfill.get('failed_weeks') or []):
                     continue
                 match = best_catalog_match(row, catalog)
-                if not match:
-                    rejected += 1
-                    continue
-                matched += 1
+                if match:
+                    canonical_matched += 1
+                else:
+                    match = generic_match(row)
+                    generic_retained += 1
                 ref = match['ref']
                 bucket = series.setdefault(ref, {
                     'ref': ref,
@@ -310,6 +354,7 @@ def main():
                     'metric_key': match.get('metric_key'),
                     'kind': match['kind'],
                     'category': None,
+                    'canonical': bool(match.get('canonical')),
                     'rows': [],
                 })
                 payload = {
@@ -329,24 +374,16 @@ def main():
                     'source_date': row.get('source_date'),
                     'source_time': row.get('source_time'),
                     'source_timezone': row.get('source_timezone'),
-                    'match_score': match['score'],
+                    'match_score': match.get('score'),
+                    'canonical_match': bool(match.get('canonical')),
                 }
                 action = merge_history_row(bucket, payload)
                 inserted += int(action == 'insert')
                 merged += int(action == 'merge')
         except Exception as exc:
             errors.append({'week': week.isoformat(), 'error': f'{type(exc).__name__}: {exc}'})
-        if i + 1 < len(weeks):
-            sleep_time.sleep(1.0)
-
-    # A historical catch-up that fetched only a small fraction of requested
-    # weeks must not be published as a full-year archive. Allow at most two
-    # transient weekly failures; otherwise fail closed and retry on a later run.
-    minimum = max(1, len(weeks) - 2)
-    if fetched < minimum:
-        raise SystemExit(
-            f'CALENDAR_HISTORY_FF_BACKFILL=FAIL weeks={fetched}/{len(weeks)} '
-            f'minimum={minimum} errors={errors}')
+        if i + 1 < len(weeks) and SLEEP_SECONDS > 0:
+            sleep_time.sleep(SLEEP_SECONDS)
 
     earliest = None
     latest = None
@@ -362,34 +399,46 @@ def main():
         if bucket['available_to']:
             latest = max(latest, bucket['available_to']) if latest else bucket['available_to']
 
+    failed_weeks = [x['week'] for x in errors]
+    early_enough = bool(earliest and earliest <= (window_start + timedelta(days=14)).isoformat())
+    coverage = 'FULL' if early_enough and not failed_weeks else ('PARTIAL_GAPS' if early_enough else 'PARTIAL')
     history['generated_kst'] = datetime.now(KST).isoformat(timespec='seconds')
+    history['window_days'] = WINDOW_DAYS
+    history['window_years'] = 10
+    history['window_start'] = window_start.isoformat()
+    history['window_end'] = today.isoformat()
+    history['contract'] = 'ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2'
     history['available_from'] = earliest
     history['available_to'] = latest
     history['series_count'] = len(series)
     history['row_count'] = total_rows
-    history['coverage_status'] = 'FULL' if earliest and earliest <= (window_start + timedelta(days=14)).isoformat() else 'PARTIAL'
-    history['backfill_status'] = 'PASS_WITH_WARNINGS' if errors else 'PASS'
-    history['backfill_contract'] = 'FOREXFACTORY_HISTORICAL_MISSING_WINDOW_ONLY_V1'
+    history['coverage_status'] = coverage
+    history['backfill_status'] = 'COMPLETE' if coverage == 'FULL' else ('PARTIAL_GAPS' if failed_weeks else 'IN_PROGRESS')
+    history['backfill_contract'] = 'FOREXFACTORY_HISTORICAL_10Y_RESUMABLE_V2'
     history['backfill'] = {
         'requested_window_start': window_start.isoformat(),
         'previous_available_from': available_from,
         'weeks_requested': len(weeks),
         'weeks_fetched': fetched,
         'rows_parsed': parsed,
-        'rows_matched': matched,
+        'canonical_rows_matched': canonical_matched,
+        'generic_rows_retained': generic_retained,
         'rows_inserted': inserted,
         'rows_merged': merged,
-        'rows_rejected': rejected,
+        'failed_weeks': failed_weeks,
         'errors': errors,
         'source_count': len(sources),
         'source_pattern': 'https://www.forexfactory.com/calendar?week=<week>',
         'checked_kst': datetime.now(KST).isoformat(timespec='seconds'),
+        'resumable': True,
     }
     HIST.write_text(json.dumps(history, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('CALENDAR_HISTORY_FF_BACKFILL=PASS weeks=', fetched, '/', len(weeks),
-          'parsed=', parsed, 'matched=', matched, 'inserted=', inserted,
-          'merged=', merged, 'rejected=', rejected, 'coverage=', history['coverage_status'],
-          'available_from=', earliest, 'errors=', len(errors))
+          'parsed=', parsed, 'canonical=', canonical_matched, 'generic=', generic_retained,
+          'inserted=', inserted, 'merged=', merged, 'coverage=', coverage,
+          'available_from=', earliest, 'failed_weeks=', len(failed_weeks))
+    if fetched == 0 and weeks:
+        raise SystemExit('CALENDAR_HISTORY_FF_BACKFILL=FAIL no weekly page could be fetched')
 
 
 if __name__ == '__main__':
