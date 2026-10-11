@@ -3,8 +3,8 @@
 
 Schedule seed -> restore observations -> collect official/secondary/feed once ->
 merge curated forecasts + generic all-event fallback -> retain -> representative
-sync -> compute health -> archive -> rolling 1Y history -> previous-value fallback
--> representative sync -> validate.
+sync -> compute health -> archive -> rolling 1Y history -> bounded historical
+backfill -> previous-value fallback -> representative sync -> validate.
 
 Event-level compact values must never be overwritten by auxiliary probability
 metrics such as FedWatch after retention/history merges.
@@ -60,12 +60,17 @@ def refresh(previous=None, seed=False):
         run('tools/sync_calendar_representative_values.py')
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
-        # Persist a rolling 365-day view for every event and every granular metric.
+        # Build from captured canonical observations first, then backfill only the
+        # portion of the 365-day window that predates our archive. Once covered,
+        # the backfill script becomes a cheap no-op on later refreshes.
         run('tools/build_calendar_history.py')
+        run('tools/backfill_calendar_history_forexfactory.py')
         run('tools/fill_calendar_previous_from_history.py')
         # History fallback may add a metric-level Previous; sync again so the compact
         # event card mirrors its primary non-probability metric before validation.
         run('tools/sync_calendar_representative_values.py')
+        # Rebuild preserves the historical backfill while folding in any newly
+        # derived Previous values and recalculating rolling-window metadata.
         run('tools/build_calendar_history.py')
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))
