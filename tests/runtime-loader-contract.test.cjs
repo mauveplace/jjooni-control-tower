@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 test('encrypted shell keeps canonical metrics before the legacy loader',()=>{
   const index=read('index.html');
   const canonical=index.search(/canonical-metrics\.js\?v=33\.(?:[2-9]|[1-9]\d+)/);
-  const legacy=index.indexOf('trade-review-loader.js?v=14.22');
+  const legacy=index.indexOf('trade-review-loader.js?v=14.33');
   assert.ok(canonical>=0,'canonical-metrics.js missing from decrypted postfix');
   assert.ok(legacy>=0,'trade-review-loader.js missing from decrypted postfix');
   assert.ok(canonical<legacy,'canonical metrics must install the deferred boot hold before legacy loader');
@@ -55,7 +55,7 @@ test('UI module optimization preloads downloads but preserves sequential executi
 test('verified UI loader cache-busts the NAV race-fixed mobile runtime',()=>{
   const loader=read('trade-review-loader.js');
   assert.match(loader,/mobile-stability-v4\.js\?v=4\.4/);
-  assert.match(loader,/version:'14\.32'/);
+  assert.match(loader,/version:'14\.33'/);
 });
 
 test('retired AUTOBOT module is absent from verified loader',()=>{const loader=read('trade-review-loader.js');assert.doesNotMatch(loader,/AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script/);});
