@@ -8,6 +8,8 @@ const badge=(label,tone='neutral')=>'<span class="mrBadge '+tone+'">'+esc(label)
 function freshness(d){
   const end=Date.parse(d?.effective_window?.end_kst||'');
   if(!Number.isFinite(end)) return 'UNKNOWN';
+  const start=Date.parse(d?.effective_window?.start_kst||'');
+  if(Number.isFinite(start) && Date.now()<start) return 'PENDING';
   return Date.now()<=end?'ACTIVE':'EXPIRED';
 }
 function render(d){
@@ -29,7 +31,7 @@ function render(d){
     '<div class="mrGrid">'+
       '<div class="mrBox"><small>NASDAQ 1주 EV</small><b>'+pct(n.ev_pct)+'</b><span>'+esc(n.band||'—')+'</span></div>'+
       '<div class="mrBox"><small>KOSPI 1주 EV</small><b>'+pct(k.ev_pct)+'</b><span>'+esc(k.band||'—')+'</span></div>'+
-      '<div class="mrBox"><small>반도체 등급</small><b>'+esc(s.current_grade||'—')+'</b><span>2개 점등→S− · 3개→A</span></div>'+
+      '<div class="mrBox"><small>반도체 구조 등급</small><b>'+esc(s.current_grade||'—')+'</b><span>'+esc(s.price_trend?.label_ko||'2개 점등→S− · 3개→A')+'</span></div>'+
       '<div class="mrBox"><small>Bond Stress</small><b>'+esc(bond.current_state||'—')+'</b><span>10Y 5.25% OR 30Y 5.50%</span></div>'+
     '</div>'+
     (r.status?(
