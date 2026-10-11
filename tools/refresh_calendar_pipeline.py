@@ -2,9 +2,12 @@
 """One ordered calendar pipeline shared by every publishing workflow.
 
 Schedule seed -> restore observations -> collect official/secondary/feed once ->
-merge curated forecasts + generic all-event fallback -> retain -> compute health ->
-archive -> rolling 1Y history -> previous-value fallback -> validate.
-Health must describe the final merged payload, never an intermediate build.
+merge curated forecasts + generic all-event fallback -> retain -> representative
+sync -> compute health -> archive -> rolling 1Y history -> previous-value fallback
+-> representative sync -> validate.
+
+Event-level compact values must never be overwritten by auxiliary probability
+metrics such as FedWatch after retention/history merges.
 """
 import argparse
 import json
@@ -43,24 +46,26 @@ def refresh(previous=None, seed=False):
         snapshot.write_bytes(CAL.read_bytes())
         if seed:
             run('tools/calendar_market_events.py', 'seed')
-        # Restore before collecting, so rebuilding schedules cannot hide backlog
-        # or repeatedly fetch values already confirmed by an official source.
         run('tools/persist_calendar_history.py', snapshot)
         if previous:
             run('tools/persist_calendar_history.py', previous)
-        # One network fetch feeds both the curated high-precision mappings and
-        # the conservative generic long-tail matcher.
+        # One network fetch feeds both curated mappings and generic long-tail matching.
         run('tools/enrich_calendar_with_all_events.py')
         run('tools/calendar_market_events.py', 'refresh')
         run('tools/persist_calendar_history.py', snapshot)
         normalize_calendar_contract()
+        # Retention can restore an old compact event-level value after the metric
+        # rows were refreshed. Reassert the semantic representative before health
+        # and archival so probability overlays can never become policy-card values.
+        run('tools/sync_calendar_representative_values.py')
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
-        # Persist a rolling 365-day view for every event and every granular
-        # market metric. Then use the latest prior verified actual as a fallback
-        # Previous value when the current market feed has not supplied one.
+        # Persist a rolling 365-day view for every event and every granular metric.
         run('tools/build_calendar_history.py')
         run('tools/fill_calendar_previous_from_history.py')
+        # History fallback may add a metric-level Previous; sync again so the compact
+        # event card mirrors its primary non-probability metric before validation.
+        run('tools/sync_calendar_representative_values.py')
         run('tools/build_calendar_history.py')
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))

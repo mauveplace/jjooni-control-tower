@@ -7,6 +7,7 @@ sys.path.insert(0,str(ROOT/'tools'))
 
 from enrich_calendar_all_events import text_score
 from build_calendar_history import canonical_title
+from sync_calendar_representative_values import primary_metric
 
 
 class CalendarAllEventsHistoryTest(unittest.TestCase):
@@ -27,6 +28,15 @@ class CalendarAllEventsHistoryTest(unittest.TestCase):
         c=canonical_title('2026년 8월 소비자물가동향')
         d=canonical_title('2026년 9월 소비자물가동향')
         self.assertEqual(c,d)
+
+    def test_probability_overlay_cannot_be_representative(self):
+        event={'market_metrics':[
+            {'key':'fedwatch_hike_25bp','previous':'17.7%','consensus':'22.1%',
+             'metric_type':'market_probability_snapshot'},
+            {'key':'policy_rate','previous':'4.00%','consensus':'4.00%','actual':None,
+             'source':'Federal Reserve'},
+        ]}
+        self.assertEqual(primary_metric(event)['key'],'policy_rate')
 
 
 if __name__=='__main__':

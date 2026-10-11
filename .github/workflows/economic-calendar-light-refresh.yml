@@ -9,6 +9,7 @@ on:
       - tools/enrich_calendar_with_all_events.py
       - tools/build_calendar_history.py
       - tools/fill_calendar_previous_from_history.py
+      - tools/sync_calendar_representative_values.py
       - tools/calendar_actual_contract.py
       - tools/official_calendar_collectors.py
       - tools/official_bls_actuals.py
@@ -69,6 +70,7 @@ jobs:
             tools/enrich_calendar_with_all_events.py \
             tools/build_calendar_history.py \
             tools/fill_calendar_previous_from_history.py \
+            tools/sync_calendar_representative_values.py \
             tools/refresh_official_central_bank_actuals.py
           python tools/refresh_calendar_pipeline.py
           python - <<'PY'
@@ -79,12 +81,23 @@ jobs:
           assert c.get('all_event_enrichment_contract')=='ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1'
           assert (c.get('all_event_enrichment') or {}).get('row_reuse_contract')=='REUSE_PRIMARY_ENRICHER_FETCH_V1'
           assert c.get('previous_value_contract')=='LATEST_PRIOR_VERIFIED_ACTUAL_AS_PREVIOUS_FALLBACK_V1'
+          assert c.get('representative_value_contract')=='PRIMARY_NON_PROBABILITY_METRIC_AFTER_MERGE_V1'
           assert c.get('official_actual_contract')=='OFFICIAL_REGISTRY_BACKFILL_V2'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics','history_ref']) for e in c.get('events',[]))
           for e in c.get('events',[]):
-              for m in e.get('market_metrics',[]):
-                  if isinstance(m,dict) and m.get('metric_type')!='market_probability_snapshot':
+              metrics=[m for m in e.get('market_metrics',[]) if isinstance(m,dict)]
+              for m in metrics:
+                  if m.get('metric_type')!='market_probability_snapshot':
                       assert m.get('history_ref'),(e.get('title'),m)
+              primary=next((m for m in metrics if m.get('metric_type')!='market_probability_snapshot' and
+                            any(str(m.get(k) or '').strip() not in ('','-','—','None','null','N/A') for k in ['previous','consensus','actual'])),None)
+              if primary:
+                  for k in ['previous','consensus','actual']:
+                      pv=str(primary.get(k) or '').strip()
+                      if pv not in ('','-','—','None','null','N/A'):
+                          assert str(e.get(k) or '').strip()==pv,(e.get('title'),k,e.get(k),primary.get(k))
+              if any(m.get('metric_type')=='market_probability_snapshot' for m in metrics) and primary:
+                  assert e.get('representative_value_contract')=='PRIMARY_NON_PROBABILITY_METRIC_V1',e
           assert h.get('schema')=='JJOONI_ECONOMIC_CALENDAR_HISTORY_V1',h.get('schema')
           assert h.get('window_days')==365,h.get('window_days')
           assert h.get('contract')=='ROLLING_365D_EVENT_AND_METRIC_HISTORY_PRESERVE_V1'
@@ -103,7 +116,7 @@ jobs:
               simulated['actual']=None
               health=build_freshness({'events':[simulated]},datetime.now(KST),[])
               assert health['status'] != 'LIVE',event['title']
-          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),freshness,'history_rows=',h.get('row_count'))
+          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'history_rows=',h.get('row_count'))
           PY
       - name: Install calendar history UI runtime
         shell: bash
