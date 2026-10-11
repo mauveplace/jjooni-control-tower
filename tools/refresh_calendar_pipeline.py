@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """One ordered calendar pipeline shared by every publishing workflow.
 
-Schedule seed -> restore observations -> collect official/secondary/feed ->
-merge curated forecasts -> generic all-event market match -> retain -> compute
-health -> archive -> rolling 1Y history -> previous-value fallback -> validate.
+Schedule seed -> restore observations -> collect official/secondary/feed once ->
+merge curated forecasts + generic all-event fallback -> retain -> compute health ->
+archive -> rolling 1Y history -> previous-value fallback -> validate.
 Health must describe the final merged payload, never an intermediate build.
 """
 import argparse
@@ -48,12 +48,10 @@ def refresh(previous=None, seed=False):
         run('tools/persist_calendar_history.py', snapshot)
         if previous:
             run('tools/persist_calendar_history.py', previous)
-        run('tools/enrich_economic_calendar.py')
+        # One network fetch feeds both the curated high-precision mappings and
+        # the conservative generic long-tail matcher.
+        run('tools/enrich_calendar_with_all_events.py')
         run('tools/calendar_market_events.py', 'refresh')
-        # The legacy enricher intentionally has curated mappings for complex
-        # releases. This second pass covers every remaining calendar event with
-        # conservative date/country/title matching instead of a fixed allowlist.
-        run('tools/enrich_calendar_all_events.py')
         run('tools/persist_calendar_history.py', snapshot)
         normalize_calendar_contract()
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
