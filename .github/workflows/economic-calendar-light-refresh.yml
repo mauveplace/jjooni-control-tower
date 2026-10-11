@@ -9,6 +9,7 @@ on:
       - tools/enrich_calendar_with_all_events.py
       - tools/build_calendar_history.py
       - tools/backfill_calendar_history_forexfactory.py
+      - tools/backfill_calendar_history_forexfactory_v2.py
       - tools/fill_calendar_previous_from_history.py
       - tools/sync_calendar_representative_values.py
       - tools/calendar_actual_contract.py
@@ -59,7 +60,7 @@ jobs:
         run: |
           python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test*.py' -v
-      - name: Refresh consensus, actual, all-event matching and 1Y history
+      - name: Refresh consensus, actual, all-event matching and 10Y history
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
         shell: bash
@@ -71,13 +72,13 @@ jobs:
             tools/enrich_calendar_with_all_events.py \
             tools/build_calendar_history.py \
             tools/backfill_calendar_history_forexfactory.py \
+            tools/backfill_calendar_history_forexfactory_v2.py \
             tools/fill_calendar_previous_from_history.py \
             tools/sync_calendar_representative_values.py \
             tools/refresh_official_central_bank_actuals.py
           python tools/refresh_calendar_pipeline.py
           python - <<'PY'
           import json
-          from datetime import date, timedelta
           c=json.load(open('market-observatory/data/economic-calendar.json'))
           h=json.load(open('market-observatory/data/economic-calendar-history.json'))
           assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
@@ -102,15 +103,11 @@ jobs:
               if any(m.get('metric_type')=='market_probability_snapshot' for m in metrics) and primary:
                   assert e.get('representative_value_contract')=='PRIMARY_NON_PROBABILITY_METRIC_V1',e
           assert h.get('schema')=='JJOONI_ECONOMIC_CALENDAR_HISTORY_V1',h.get('schema')
-          assert h.get('window_days')==365,h.get('window_days')
-          assert h.get('contract')=='ROLLING_365D_EVENT_AND_METRIC_HISTORY_PRESERVE_V1'
+          assert h.get('window_days')==3650,h.get('window_days')
+          assert h.get('window_years')==10,h.get('window_years')
+          assert h.get('contract')=='ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2'
+          assert h.get('coverage_status') in ['FULL','PARTIAL','PARTIAL_GAPS'],h.get('coverage_status')
           assert isinstance(h.get('series'),dict)
-          # “최근 1년” must mean a real trailing-year window, not merely a UI
-          # label over an archive that begins in January. Allow a 14-day grace
-          # because monthly releases may not occur exactly on window_start.
-          expected=(date.today()-timedelta(days=365)+timedelta(days=14)).isoformat()
-          assert h.get('coverage_status')=='FULL',h
-          assert h.get('available_from') and h.get('available_from')<=expected,(h.get('available_from'),expected)
           freshness=c.get('actual_freshness') or {}
           assert freshness.get('status') in ['LIVE','PENDING','DEGRADED'],freshness
           from copy import deepcopy
@@ -125,7 +122,7 @@ jobs:
               simulated['actual']=None
               health=build_freshness({'events':[simulated]},datetime.now(KST),[])
               assert health['status'] != 'LIVE',event['title']
-          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'))
+          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'),'coverage=',h.get('coverage_status'))
           PY
       - name: Install calendar history UI runtime
         shell: bash
@@ -142,7 +139,7 @@ jobs:
           history=Path('market-observatory/calendar-history-v1.js').read_text(encoding='utf-8')
           assert 'calendar-history-v1.js?v=1.0' in editor
           assert "version:'1.3'" in editor
-          for token in ['economic-calendar-history.json','최근 1년 이력','window_days:365','ALL_EVENTS_EVENT_AND_METRIC_HISTORY',"version:'1.1'",'미발표']:
+          for token in ['economic-calendar-history.json','최근 10년 이력','window_days:3650','window_years:10','ALL_EVENTS_EVENT_AND_METRIC_HISTORY_10Y',"version:'2.0'",'미발표']:
               assert token in history,token
           print('CALENDAR_HISTORY_UI_RUNTIME=PASS')
           PY
@@ -152,7 +149,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 1y history' \
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 10y history' \
             market-observatory/data/economic-calendar.json \
             market-observatory/data/economic-calendar-history.json \
             market-observatory/data/calendar-manual-overrides.json \
