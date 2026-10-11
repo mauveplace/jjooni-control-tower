@@ -1,11 +1,12 @@
 {
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
-  "generated_kst": "2026-10-11T17:17:06+09:00",
+  "generated_kst": "2026-10-11T17:31:24+09:00",
   "timezone": "Asia/Seoul",
-  "window_days": 365,
-  "window_start": "2025-10-11",
+  "window_days": 3650,
+  "window_years": 10,
+  "window_start": "2016-10-13",
   "window_end": "2026-10-11",
-  "coverage_status": "FULL",
+  "coverage_status": "PARTIAL",
   "available_from": "2025-10-24",
   "available_to": "2026-10-08",
   "series_count": 83,
@@ -7176,6 +7177,6 @@
       "available_to": null
     }
   },
-  "contract": "ROLLING_365D_EVENT_AND_METRIC_HISTORY_PRESERVE_V1",
+  "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized."
 }
