@@ -18,6 +18,8 @@ on:
       - tools/refresh_calendar_pipeline.py
       - tools/persist_calendar_history.py
       - tools/archive_calendar_actuals.py
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/calendar-history-v1.js
       - tests/test_calendar_actual_contract.py
       - tests/test_official_historical_actuals.py
       - tests/test_calendar_pipeline.py
@@ -107,6 +109,25 @@ jobs:
               assert health['status'] != 'LIVE',event['title']
           print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),freshness,'history_rows=',h.get('row_count'))
           PY
+      - name: Install calendar history UI runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          index=Path('market-observatory/index.html')
+          html=index.read_text(encoding='utf-8')
+          html=html.replace('calendar-editor-v1.js?v=1.2','calendar-editor-v1.js?v=1.3')
+          index.write_text(html,encoding='utf-8')
+          assert 'calendar-editor-v1.js?v=1.3' in html
+          editor=Path('market-observatory/calendar-editor-v1.js').read_text(encoding='utf-8')
+          history=Path('market-observatory/calendar-history-v1.js').read_text(encoding='utf-8')
+          for token in ['calendar-history-v1.js?v=1.0',"version:'1.3'"]:
+              assert token in editor,token
+          for token in ['economic-calendar-history.json','최근 1년 이력','window_days:365','ALL_EVENTS_EVENT_AND_METRIC_HISTORY']:
+              assert token in history,token
+          print('CALENDAR_HISTORY_UI_RUNTIME=PASS')
+          PY
       - name: Publish calendar and rolling history
         shell: bash
         run: |
@@ -117,7 +138,8 @@ jobs:
             market-observatory/data/economic-calendar.json \
             market-observatory/data/economic-calendar-history.json \
             market-observatory/data/calendar-manual-overrides.json \
-            market-observatory/data/calendar-official-release-cache.json
+            market-observatory/data/calendar-official-release-cache.json \
+            market-observatory/index.html
 
       - name: Signal overdue major actuals
         shell: bash
