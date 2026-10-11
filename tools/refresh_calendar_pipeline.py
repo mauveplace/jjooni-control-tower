@@ -61,10 +61,11 @@ def refresh(previous=None, seed=False):
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
         # Build from captured canonical observations first, then backfill only the
-        # portion of the 365-day window that predates our archive. Once covered,
-        # the backfill script becomes a cheap no-op on later refreshes.
+        # portion of the 365-day window that predates our archive. The v2 adapter
+        # accepts current FF table/div/data-eventid DOM variants while the legacy
+        # module remains the authority for matching, provenance and fail-closed rules.
         run('tools/build_calendar_history.py')
-        run('tools/backfill_calendar_history_forexfactory.py')
+        run('tools/backfill_calendar_history_forexfactory_v2.py')
         run('tools/fill_calendar_previous_from_history.py')
         # History fallback may add a metric-level Previous; sync again so the compact
         # event card mirrors its primary non-probability metric before validation.
