@@ -25,7 +25,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: economic-calendar-canonical-writer
+  # Collection owns an isolated checkout; ranked atomic publication unions remote rows.
+  # A shared workflow lock has only one pending slot and routine refresh evicts backfill.
+  group: economic-calendar-history-backfill
   cancel-in-progress: false
 
 jobs:
