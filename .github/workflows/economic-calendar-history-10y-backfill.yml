@@ -4,13 +4,17 @@ on:
   push:
     branches: [main]
     paths:
+      - tools/calendar_history_integrity.py
+      - tools/calendar_actual_contract.py
+      - tests/test_calendar_history_integrity.py
+      - tests/test_calendar_history_10y_contract.py
       - tools/build_calendar_history.py
       - tools/backfill_calendar_history_forexfactory.py
       - tools/backfill_calendar_history_forexfactory_v2.py
       - tests/test_calendar_all_events_history.py
       - .github/workflows/economic-calendar-history-10y-backfill.yml
   schedule:
-    # Weekly retry/repair. Once coverage is FULL the job becomes a cheap no-op.
+    # Weekly repair of old gaps and broad-universe recent weeks.
     - cron: '40 18 * * 0'
   workflow_dispatch:
 
@@ -39,6 +43,7 @@ jobs:
           set -euo pipefail
           python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test_calendar_all_events_history.py' -v
+          python -m unittest discover -s tests -p 'test_calendar_history*.py' -v
           python -m py_compile \
             tools/build_calendar_history.py \
             tools/backfill_calendar_history_forexfactory.py \
@@ -95,3 +100,4 @@ jobs:
           python tools/publish_observatory_data.py \
             --message 'data(observatory): extend economic calendar history toward 10y' \
             market-observatory/data/economic-calendar-history.json
+

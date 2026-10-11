@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
+from calendar_history_integrity import merge_history_documents
 from calendar_actual_contract import KST, build_freshness, merge_observation, retain_calendar
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +23,8 @@ def git(*args, check=True):
 
 
 def merge_generated(path, local, remote):
+    if path.endswith('/economic-calendar-history.json'):
+        return merge_history_documents(local, remote)
     if path.endswith('/economic-calendar.json'):
         result = retain_calendar(deepcopy(local), remote)
         checks = result.get('actual_freshness', {}).get('official_checks', [])
@@ -97,3 +100,4 @@ if __name__ == '__main__':
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     publish(args.paths, args.message)
+
