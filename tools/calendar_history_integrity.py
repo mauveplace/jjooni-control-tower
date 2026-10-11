@@ -1,5 +1,6 @@
 """Shared history merge: actual provenance is atomic; expectations stay separate."""
 from copy import deepcopy
+from datetime import date
 from calendar_actual_contract import merge_observation, rank, clean
 
 
@@ -47,6 +48,7 @@ def merge_history_documents(local, remote):
     series = deepcopy(remote.get('series') or {})
     for ref, bucket in (local.get('series') or {}).items():
         target = series.setdefault(ref, {**bucket, 'rows': []})
+        target.update({k: deepcopy(v) for k, v in bucket.items() if k != 'rows'})
         rows = {(r.get('date'), r.get('metric_key')): deepcopy(r) for r in target['rows']}
         for row in bucket.get('rows') or []:
             key = (row.get('date'), row.get('metric_key'))
@@ -56,6 +58,18 @@ def merge_history_documents(local, remote):
         target['count'] = len(target['rows'])
         target['available_from'] = target['rows'][0]['date'] if target['rows'] else None
         target['available_to'] = target['rows'][-1]['date'] if target['rows'] else None
+    for bucket in series.values():
+        rows = bucket.get('rows') or []
+        days = sorted(set(r['date'] for r in rows if r.get('date')))
+        bucket['quality'] = {
+            'status': 'OBSERVED_ONLY_NOT_VALIDATED_COMPLETE',
+            'actual_count': sum(clean(r.get('actual')) is not None for r in rows),
+            'consensus_count': sum(clean(r.get('consensus')) is not None for r in rows),
+            'rows_by_year': {y: sum(str(r.get('date', '')).startswith(y) for r in rows) for y in sorted(set(d[:4] for d in days))},
+            'max_observed_gap_days': max(((date.fromisoformat(b) - date.fromisoformat(a)).days for a, b in zip(days, days[1:])), default=0),
+            'frequency_validation': 'NOT_VALIDATED',
+            'backtest_policy': 'AS_RELEASED_VINTAGE_REQUIRED',
+        }
     result['series'] = series
     result['series_count'] = len(series)
     result['row_count'] = sum(len(b.get('rows') or []) for b in series.values())
