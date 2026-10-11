@@ -346,7 +346,11 @@ jobs:
           assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
           assert 'observatory-v2.js?v=' in html
           assert "cache:'no-store'" in html and "'cb='+Date.now()" in html
-          assert 'latest-board-v1.js?v=2.4' in html
+          import re
+          board_url_version=re.search(r'latest-board-v1\.js\?v=([0-9.]+)',html)
+          board_runtime_version=re.search(r"version:'([0-9.]+)'",board)
+          assert board_url_version and board_runtime_version,'latest board runtime/cache version missing'
+          assert board_url_version[1]==board_runtime_version[1],(board_url_version[1],board_runtime_version[1])
           assert 'fed-watch-v1.js?v=1.2' in html
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
@@ -361,4 +365,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html
+
 

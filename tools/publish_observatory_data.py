@@ -24,6 +24,26 @@ def git(*args, check=True):
 
 
 def merge_generated(path, local, remote):
+    if path.endswith('/observatory.json'):
+        result = deepcopy(remote if str(remote.get('generated_kst', '')) > str(local.get('generated_kst', '')) else local)
+        for key in ('BTCUSD', 'ETHUSD'):
+            candidates = [doc for doc in (remote, local) if (doc.get('crypto_market') or {}).get(key) and (doc.get('series') or {}).get(key)]
+            if not candidates:
+                continue
+            def quote_key(doc):
+                q = doc['crypto_market'][key]
+                return str(q.get('quote_as_of_kst') or ''), str(q.get('last_attempt_kst') or q.get('captured_kst') or '')
+            winner = max(candidates, key=quote_key)
+            result.setdefault('crypto_market', {})[key] = deepcopy(winner['crypto_market'][key])
+            result.setdefault('series', {})[key] = deepcopy(winner['series'][key])
+            result.setdefault('latest', {})[key] = result['series'][key][-1]['value']
+            if (winner.get('sources') or {}).get('CRYPTO_SPOT'):
+                result.setdefault('sources', {})['CRYPTO_SPOT'] = winner['sources']['CRYPTO_SPOT']
+            if winner.get('crypto_contract'):
+                result['crypto_contract'] = winner['crypto_contract']
+        if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
+            result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
+        return result
     if path.endswith('/economic-calendar-history.json'):
         return merge_history_documents(local, remote)
     if path.endswith('/economic-calendar.json'):
@@ -110,4 +130,5 @@ if __name__ == '__main__':
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     publish(args.paths, args.message)
+
 
