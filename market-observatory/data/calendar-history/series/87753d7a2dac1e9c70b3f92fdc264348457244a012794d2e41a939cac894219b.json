@@ -1,0 +1,50 @@
+{
+  "bucket": {
+    "available_from": "2026-09-17",
+    "available_to": "2026-09-17",
+    "category": "중앙은행",
+    "count": 1,
+    "country": "GB",
+    "event_title": "Bank of England 금리 결정",
+    "kind": "event",
+    "label": "Bank of England 금리 결정",
+    "quality": {
+      "actual_count": 1,
+      "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+      "consensus_count": 1,
+      "frequency_validation": "NOT_VALIDATED",
+      "max_observed_gap_days": 0,
+      "rows_by_year": {
+        "2026": 1
+      },
+      "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+    },
+    "ref": "GB::bank-of-england-금리-결정",
+    "rows": [
+      {
+        "actual": "3.75%",
+        "checked_kst": "2026-09-21T18:32:56+09:00",
+        "consensus": "3.75%",
+        "consensus_source": "BOE official release",
+        "consensus_source_tier": "OFFICIAL",
+        "date": "2026-09-17",
+        "datetime_kst": "2026-09-17T20:00+09:00",
+        "label": "Bank of England 금리 결정",
+        "metric_key": null,
+        "official_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+        "previous": "3.75%",
+        "previous_source": "BOE official release",
+        "previous_source_tier": "OFFICIAL",
+        "reference_period": "September 2026 MPC",
+        "source": "BOE official release",
+        "source_tier": "OFFICIAL",
+        "source_url": "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/2026/september-2026",
+        "surprise": "actual_vs_consensus",
+        "te_forecast": null,
+        "verification_status": "VERIFIED_OFFICIAL"
+      }
+    ]
+  },
+  "ref": "GB::bank-of-england-금리-결정",
+  "schema": "JJOONI_CALENDAR_HISTORY_SERIES_V1"
+}

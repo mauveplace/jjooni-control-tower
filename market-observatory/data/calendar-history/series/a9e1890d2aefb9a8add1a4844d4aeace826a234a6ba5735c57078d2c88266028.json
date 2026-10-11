@@ -1,0 +1,64 @@
+{
+  "bucket": {
+    "available_from": "2026-09-11",
+    "available_to": "2026-09-25",
+    "category": "심리/기대인플레",
+    "count": 2,
+    "country": "US",
+    "event_title": "University of Michigan Consumer Sentiment (Preliminary)",
+    "kind": "event",
+    "label": "University of Michigan Consumer Sentiment (Preliminary)",
+    "quality": {
+      "actual_count": 1,
+      "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+      "consensus_count": 2,
+      "frequency_validation": "NOT_VALIDATED",
+      "max_observed_gap_days": 14,
+      "rows_by_year": {
+        "2026": 2
+      },
+      "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+    },
+    "ref": "US::university-of-michigan-consumer-sentiment",
+    "rows": [
+      {
+        "actual": "47.8",
+        "consensus": "51.0",
+        "consensus_source": "University of Michigan",
+        "consensus_source_tier": null,
+        "date": "2026-09-11",
+        "datetime_kst": "2026-09-11T23:00+09:00",
+        "label": "University of Michigan Consumer Sentiment (Preliminary)",
+        "metric_key": null,
+        "previous": "51.7",
+        "previous_source": "University of Michigan",
+        "previous_source_tier": null,
+        "reference_period": "2026-09 preliminary",
+        "source": "University of Michigan",
+        "surprise": "actual_vs_consensus",
+        "te_forecast": null
+      },
+      {
+        "actual": null,
+        "consensus": "47.4",
+        "consensus_source": "University of Michigan",
+        "consensus_source_tier": null,
+        "date": "2026-09-25",
+        "datetime_kst": "2026-09-25T23:00+09:00",
+        "label": "University of Michigan Consumer Sentiment (Final)",
+        "metric_key": null,
+        "previous": "47.8",
+        "previous_source": "University of Michigan",
+        "previous_source_tier": null,
+        "reference_period": "2026-09 final",
+        "source": "University of Michigan",
+        "source_tier": null,
+        "surprise": null,
+        "te_forecast": null,
+        "verification_status": null
+      }
+    ]
+  },
+  "ref": "US::university-of-michigan-consumer-sentiment",
+  "schema": "JJOONI_CALENDAR_HISTORY_SERIES_V1"
+}
