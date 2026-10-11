@@ -6,6 +6,7 @@ on:
     paths:
       - tools/enrich_economic_calendar.py
       - tools/enrich_calendar_all_events.py
+      - tools/enrich_calendar_with_all_events.py
       - tools/build_calendar_history.py
       - tools/fill_calendar_previous_from_history.py
       - tools/calendar_actual_contract.py
@@ -26,15 +27,10 @@ on:
       - tests/test_calendar_all_events_history.py
       - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
-    # 06:05/06:15 KST weekdays = previous UTC day 21:05/21:15.
     - cron: '5,15 21 * * 0-4'
-    # BOJ decision window 11:05-16:35 KST, bounded to weekdays.
     - cron: '5,35 2-7 * * 1-5'
-    # Baseline refreshes: 07:05 / 13:05 KST.
     - cron: '5 22,4 * * *'
-    # Macro release window: 19:00-23:45 KST, every 15 minutes on weekdays.
     - cron: '*/15 10-14 * * 1-5'
-    # FOMC/late-US release window: 02:00-04:45 KST, every 15 minutes.
     - cron: '*/15 17-19 * * 1-5'
   workflow_dispatch:
 
@@ -70,6 +66,7 @@ jobs:
           python -m py_compile \
             tools/enrich_economic_calendar.py \
             tools/enrich_calendar_all_events.py \
+            tools/enrich_calendar_with_all_events.py \
             tools/build_calendar_history.py \
             tools/fill_calendar_previous_from_history.py \
             tools/refresh_official_central_bank_actuals.py
@@ -80,6 +77,7 @@ jobs:
           h=json.load(open('market-observatory/data/economic-calendar-history.json'))
           assert str(c.get('enrichment_contract','')).startswith('OFFICIAL_SCHEDULE_PLUS_MARKET_CONSENSUS_ACTUAL')
           assert c.get('all_event_enrichment_contract')=='ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1'
+          assert (c.get('all_event_enrichment') or {}).get('row_reuse_contract')=='REUSE_PRIMARY_ENRICHER_FETCH_V1'
           assert c.get('previous_value_contract')=='LATEST_PRIOR_VERIFIED_ACTUAL_AS_PREVIOUS_FALLBACK_V1'
           assert c.get('official_actual_contract')=='OFFICIAL_REGISTRY_BACKFILL_V2'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics','history_ref']) for e in c.get('events',[]))
@@ -93,8 +91,6 @@ jobs:
           assert isinstance(h.get('series'),dict)
           freshness=c.get('actual_freshness') or {}
           assert freshness.get('status') in ['LIVE','PENDING','DEGRADED'],freshness
-          # Exercise the health contract against recovered production records,
-          # without writing the simulated missing values back to the calendar.
           from copy import deepcopy
           from datetime import datetime
           import sys
