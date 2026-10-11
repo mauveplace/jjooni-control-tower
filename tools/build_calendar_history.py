@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from calendar_history_integrity import merge_history_observation
+
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 OVR = ROOT / 'market-observatory' / 'data' / 'calendar-manual-overrides.json'
@@ -67,13 +69,14 @@ def row_payload(e, obj, label, metric_key=None):
     return {
         'date': event_date(e),
         'datetime_kst': e.get('datetime_kst') or e.get('date'),
-        'reference_period': e.get('reference_period'),
+        'reference_period': obj.get('reference_period') or e.get('reference_period'),
+        **{k: obj.get(k) or e.get(k) for k in ('checked_kst', 'observed_kst', 'value_vintage', 'series_id', 'source_url', 'official_url')},
         'previous': clean(obj.get('previous')),
         'consensus': clean(obj.get('consensus')),
         'actual': clean(obj.get('actual')),
         'te_forecast': clean(obj.get('te_forecast')),
         'surprise': clean(obj.get('surprise')),
-        'source': obj.get('market_value_source') or obj.get('actual_source') or obj.get('source') or e.get('market_data_source') or e.get('source'),
+        'source': obj.get('actual_source') or obj.get('market_value_source') or obj.get('source') or e.get('market_data_source') or e.get('source'),
         'source_tier': obj.get('source_tier') or e.get('source_tier'),
         'verification_status': obj.get('verification_status') or e.get('verification_status'),
         'metric_key': metric_key,
@@ -93,11 +96,7 @@ def add_series(series, ref, meta, row):
     existing = {(x.get('date'), x.get('metric_key')): i for i, x in enumerate(bucket['rows'])}
     if key in existing:
         old = bucket['rows'][existing[key]]
-        merged = dict(old)
-        for k, v in row.items():
-            if v is not None:
-                merged[k] = v
-        bucket['rows'][existing[key]] = merged
+        bucket['rows'][existing[key]] = merge_history_observation(old, row)
     else:
         bucket['rows'].append(row)
 
@@ -142,6 +141,20 @@ def main():
             day = str(row.get('date') or '')[:10]
             if start.isoformat() <= day <= today.isoformat():
                 add_series(series, ref, meta, dict(row))
+
+    # Preserve original generic buckets, while explicitly connecting NFP aliases.
+    nfp_refs = {metric_ref(e, m) for e in calendar.get('events') or []
+                for m in e.get('market_metrics') or []
+                if e.get('country') == 'US' and m.get('key') == 'nfp'}
+    if len(nfp_refs) == 1:
+        nfp_ref = next(iter(nfp_refs))
+        for ref, bucket in list(series.items()):
+            title = re.sub(r'[^a-z0-9]+', ' ', str(bucket.get('label') or bucket.get('event_title') or '').lower()).strip()
+            if ref.startswith('FF::US::') and title in ('non farm employment change', 'nonfarm payrolls', 'non farm payrolls'):
+                bucket['canonical_ref'] = nfp_ref
+                for row in bucket.get('rows') or []:
+                    linked = {**row, 'metric_key': 'nfp', 'linked_from_ref': ref}
+                    add_series(series, nfp_ref, {'country': 'US', 'label': 'Nonfarm Payrolls', 'metric_key': 'nfp', 'kind': 'metric'}, linked)
 
     event_count = metric_count = 0
     for e in source_events(calendar, overrides):
@@ -188,6 +201,17 @@ def main():
         bucket['count'] = len(bucket['rows'])
         bucket['available_from'] = bucket['rows'][0]['date'] if bucket['rows'] else None
         bucket['available_to'] = bucket['rows'][-1]['date'] if bucket['rows'] else None
+        rows = bucket['rows']
+        days = sorted(set(r['date'] for r in rows))
+        bucket['quality'] = {
+            'status': 'OBSERVED_ONLY_NOT_VALIDATED_COMPLETE',
+            'actual_count': sum(clean(r.get('actual')) is not None for r in rows),
+            'consensus_count': sum(clean(r.get('consensus')) is not None for r in rows),
+            'rows_by_year': {year: sum(str(r.get('date', '')).startswith(year) for r in rows) for year in sorted(set(d[:4] for d in days))},
+            'max_observed_gap_days': max(((datetime.fromisoformat(b) - datetime.fromisoformat(a)).days for a, b in zip(days, days[1:])), default=0),
+            'frequency_validation': 'NOT_VALIDATED',
+            'backtest_policy': 'AS_RELEASED_VINTAGE_REQUIRED',
+        }
         total_rows += bucket['count']
         if bucket['available_from']:
             earliest = min(earliest, bucket['available_from']) if earliest else bucket['available_from']
@@ -206,6 +230,8 @@ def main():
         'window_start': start.isoformat(),
         'window_end': today.isoformat(),
         'coverage_status': coverage,
+        'coverage_scope': 'ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY',
+        'series_completeness_status': 'NOT_VALIDATED',
         'available_from': earliest,
         'available_to': latest,
         'series_count': len(series),
@@ -226,3 +252,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

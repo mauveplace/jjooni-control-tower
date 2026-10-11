@@ -22,6 +22,7 @@ from bs4 import BeautifulSoup
 from curl_cffi import requests
 
 from enrich_calendar_all_events import text_score
+from calendar_history_integrity import merge_history_observation
 
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
@@ -208,6 +209,12 @@ def build_catalog(calendar):
 
 
 def best_catalog_match(row, catalog):
+    # Exact, country-scoped aliases; never fuzzy-match ADP or payroll levels.
+    normalized = re.sub(r'[^a-z0-9]+', ' ', row['title'].lower()).strip()
+    if row['country'] == 'US' and normalized in ('non farm employment change', 'nonfarm payrolls', 'non farm payrolls'):
+        matches = [item for item in catalog['metric'] if item['country'] == 'US' and item.get('metric_key') == 'nfp']
+        if len(matches) == 1:
+            return {'score': 100.0, 'kind': 'metric', 'canonical': True, **matches[0]}
     candidates = []
     for kind in ('metric', 'event'):
         for item in catalog[kind]:
@@ -255,24 +262,18 @@ def merge_history_row(bucket, incoming):
         rows.append(incoming)
         return 'insert'
     old = rows[idx]
-    merged = dict(old)
-    for field in ('previous','consensus'):
-        if clean(merged.get(field)) is None and clean(incoming.get(field)) is not None:
-            merged[field] = incoming[field]
-            merged[f'{field}_source'] = incoming.get('source')
-    if clean(merged.get('actual')) is None and clean(incoming.get('actual')) is not None:
-        merged['actual'] = incoming['actual']
-        merged['actual_source'] = incoming.get('source')
-        if clean(merged.get('source')) is None:
-            merged['source'] = incoming.get('source')
-            merged['source_tier'] = incoming.get('source_tier')
+    supplement = {k: v for k, v in incoming.items() if k not in ('actual', 'previous', 'consensus')}
+    for field in ('actual', 'previous', 'consensus'):
+        if clean(old.get(field)) is None:
+            supplement[field] = incoming.get(field)
+    merged = merge_history_observation(old, supplement)
     merged.setdefault('historical_market_source', incoming.get('source'))
     merged.setdefault('historical_source_date', incoming.get('source_date'))
     rows[idx] = merged
     return 'merge'
 
 
-def target_weeks(window_start: date, available_from: str | None, failed_weeks=None):
+def target_weeks(window_start: date, available_from: str | None, failed_weeks=None, recent_completed=None):
     retries = []
     for raw in failed_weeks or []:
         try:
@@ -297,6 +298,16 @@ def target_weeks(window_start: date, available_from: str | None, failed_weeks=No
         week = sunday_on_or_before(week)
         if window_start <= week <= date.today() and week not in weeks:
             weeks.append(week)
+    # Repair the broad-universe recent segment separately from the old boundary.
+    # Exclude current week from permanent completion: its actuals are not final.
+    completed = set(recent_completed or [])
+    today = datetime.now(KST).date()
+    cursor = sunday_on_or_before(max(window_start, today - timedelta(days=385)))
+    last = sunday_on_or_before(today)
+    while cursor <= last:
+        if cursor.isoformat() not in completed:
+            weeks.append(cursor)
+        cursor += timedelta(days=7)
     weeks = sorted(set(weeks))
     if MAX_WEEKS > 0:
         # Prefer the newest missing segment so usable coverage expands backward
@@ -312,7 +323,7 @@ def main():
     window_start = today - timedelta(days=WINDOW_DAYS)
     available_from = history.get('available_from')
     old_backfill = history.get('backfill') or {}
-    weeks = target_weeks(window_start, available_from, old_backfill.get('failed_weeks'))
+    weeks = target_weeks(window_start, available_from, old_backfill.get('failed_weeks'), old_backfill.get('recent_completed_weeks'))
     if not weeks:
         history['backfill_status'] = 'COMPLETE' if history.get('coverage_status') == 'FULL' else 'NOOP_NO_TARGET_WEEKS'
         history['backfill_checked_kst'] = datetime.now(KST).isoformat(timespec='seconds')
@@ -325,19 +336,22 @@ def main():
     series = history.setdefault('series', {})
     fetched = parsed = canonical_matched = generic_retained = inserted = merged = 0
     sources = []
+    fetched_week_ids = set()
     errors = []
+    completed = set(old_backfill.get('recent_completed_weeks') or [])
 
     for i, week in enumerate(weeks):
         try:
             url, rows = fetch_week(week)
             fetched += 1
+            fetched_week_ids.add(week.isoformat())
             parsed += len(rows)
             sources.append(url)
+            if week < sunday_on_or_before(today):
+                completed.add(week.isoformat())
             for row in rows:
                 row_day = datetime.fromisoformat(row['date']).date()
-                if row_day < window_start:
-                    continue
-                if available_from and row['date'] >= str(available_from)[:10] and week.isoformat() not in (old_backfill.get('failed_weeks') or []):
+                if row_day < window_start or row_day > today:
                     continue
                 match = best_catalog_match(row, catalog)
                 if match:
@@ -369,6 +383,7 @@ def main():
                     'source': row.get('source'),
                     'source_tier': 'MARKET_FEED',
                     'verification_status': 'HISTORICAL_MARKET_REPORTED',
+                    'value_vintage': 'BACKFILLED_VINTAGE_UNVERIFIED',
                     'metric_key': match.get('metric_key'),
                     'label': match.get('label'),
                     'source_date': row.get('source_date'),
@@ -399,7 +414,7 @@ def main():
         if bucket['available_to']:
             latest = max(latest, bucket['available_to']) if latest else bucket['available_to']
 
-    failed_weeks = [x['week'] for x in errors]
+    failed_weeks = sorted((set(old_backfill.get('failed_weeks') or []) - fetched_week_ids) | {x['week'] for x in errors})
     early_enough = bool(earliest and earliest <= (window_start + timedelta(days=14)).isoformat())
     coverage = 'FULL' if early_enough and not failed_weeks else ('PARTIAL_GAPS' if early_enough else 'PARTIAL')
     history['generated_kst'] = datetime.now(KST).isoformat(timespec='seconds')
@@ -416,6 +431,8 @@ def main():
     history['backfill_status'] = 'COMPLETE' if coverage == 'FULL' else ('PARTIAL_GAPS' if failed_weeks else 'IN_PROGRESS')
     history['backfill_contract'] = 'FOREXFACTORY_HISTORICAL_10Y_RESUMABLE_V2'
     history['backfill'] = {
+        'recent_completed_weeks': sorted(completed),
+        'coverage_scope': 'FETCHED_WEEKS_NOT_PER_SERIES_COMPLETENESS',
         'requested_window_start': window_start.isoformat(),
         'previous_available_from': available_from,
         'weeks_requested': len(weeks),
@@ -443,3 +460,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
