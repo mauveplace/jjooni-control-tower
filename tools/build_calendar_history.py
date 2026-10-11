@@ -12,7 +12,7 @@ CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
 OVR = ROOT / 'market-observatory' / 'data' / 'calendar-manual-overrides.json'
 OUT = ROOT / 'market-observatory' / 'data' / 'economic-calendar-history.json'
 KST = ZoneInfo('Asia/Seoul')
-WINDOW_DAYS = 365
+WINDOW_DAYS = 3650
 
 MONTHS = 'january february march april may june july august september october november december jan feb mar apr jun jul aug sep sept oct nov dec'.split()
 STOP = {'release','report','survey','preliminary','final','advance','revised','revision','estimate','estimates','data'}
@@ -134,8 +134,8 @@ def main():
     old = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else {'series': {}}
     series = {}
 
-    # Preserve prior archived rows first. This makes the file a rolling SSOT
-    # instead of rebuilding only from whatever the current schedule still carries.
+    # Preserve prior archived rows first. The archive is intentionally ten years:
+    # PB/analyst consumers need cycle-to-cycle comparisons, not only the latest year.
     for ref, bucket in (old.get('series') or {}).items():
         meta = {k: v for k, v in bucket.items() if k not in ('rows', 'count', 'available_from', 'available_to')}
         for row in bucket.get('rows') or []:
@@ -173,7 +173,7 @@ def main():
                 metric_count += 1
 
     # Add refs to every current event, including future events, so the UI can
-    # resolve their prior one-year records immediately.
+    # resolve their historical records immediately.
     for e in calendar.get('events') or []:
         e['history_ref'] = event_ref(e)
         for m in e.get('market_metrics') or []:
@@ -194,12 +194,15 @@ def main():
         if bucket['available_to']:
             latest = max(latest, bucket['available_to']) if latest else bucket['available_to']
 
-    coverage = 'FULL' if earliest and earliest <= (start + timedelta(days=14)).isoformat() else 'PARTIAL'
+    failed_weeks = ((old.get('backfill') or {}).get('failed_weeks') or [])
+    early_enough = bool(earliest and earliest <= (start + timedelta(days=14)).isoformat())
+    coverage = 'FULL' if early_enough and not failed_weeks else ('PARTIAL_GAPS' if early_enough else 'PARTIAL')
     out = {
         'schema': 'JJOONI_ECONOMIC_CALENDAR_HISTORY_V1',
         'generated_kst': now.isoformat(timespec='seconds'),
         'timezone': 'Asia/Seoul',
         'window_days': WINDOW_DAYS,
+        'window_years': 10,
         'window_start': start.isoformat(),
         'window_end': today.isoformat(),
         'coverage_status': coverage,
@@ -208,12 +211,16 @@ def main():
         'series_count': len(series),
         'row_count': total_rows,
         'series': series,
-        'contract': 'ROLLING_365D_EVENT_AND_METRIC_HISTORY_PRESERVE_V1',
+        'contract': 'ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2',
         'missing_policy': 'Historical consensus/actual is shown only when captured or verified; values are never synthesized.',
     }
+    # Keep resumable backfill state across routine calendar refreshes.
+    for key in ('backfill_status', 'backfill_contract', 'backfill_checked_kst', 'backfill'):
+        if key in old:
+            out[key] = old[key]
     CAL.write_text(json.dumps(calendar, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print('CALENDAR_HISTORY_1Y=PASS series=', len(series), 'rows=', total_rows,
+    print('CALENDAR_HISTORY_10Y=PASS series=', len(series), 'rows=', total_rows,
           'coverage=', coverage, 'available_from=', earliest, 'event_rows=', event_count, 'metric_rows=', metric_count)
 
 
