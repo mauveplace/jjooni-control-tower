@@ -11,6 +11,7 @@ on:
       - tools/postprocess_market_observatory.py
       - tools/backfill_market_history_30y.py
       - tools/add_observatory_equities.py
+      - tests/test_observatory_crypto.py
       - market-observatory/index.html
       - market-observatory/observatory-v2.js
       - market-observatory/calendar-editor-v1.js
@@ -138,6 +139,7 @@ jobs:
           python tools/postprocess_market_observatory.py
           cp /tmp/economic-calendar.json market-observatory/data/economic-calendar.json
           python tools/backfill_market_history_30y.py
+          python -m unittest discover -s tests -p 'test_observatory_crypto.py'
           python tools/add_observatory_equities.py
       - name: Hourly acceptance
         shell: bash
@@ -199,6 +201,7 @@ jobs:
           python tools/backfill_market_history_30y.py
           python tools/build_fed_watch.py
           python tools/refresh_calendar_pipeline.py --seed --previous /tmp/economic-calendar-prev.json
+          python -m unittest discover -s tests -p 'test_observatory_crypto.py'
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
       - name: Install Observatory UI runtimes and optimize bootstrap
@@ -358,3 +361,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html
+
