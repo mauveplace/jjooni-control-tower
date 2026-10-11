@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
+from observatory_history_views import materialize
 from calendar_history_integrity import merge_history_documents
 from calendar_actual_contract import KST, build_freshness, merge_observation, retain_calendar
 
@@ -46,6 +47,12 @@ def merge_generated(path, local, remote):
         return result
     if path.endswith('/calendar-official-release-cache.json'):
         return {**local, 'documents': {**remote.get('documents', {}), **local.get('documents', {})}}
+    if path.endswith('/pulse-history/index.json'):
+        result = deepcopy(local)
+        rows = {r['snapshot_id']: r for r in remote.get('observations', [])}
+        rows.update({r['snapshot_id']: r for r in local.get('observations', [])})
+        result['observations'] = sorted(rows.values(), key=lambda r: (str(r.get('market_date_us')), str(r.get('generated_kst')), r['snapshot_id']))
+        return result
     # Other generated JSON snapshots use the newer complete generation.
     if str(remote.get('generated_kst', '')) > str(local.get('generated_kst', '')):
         return remote
@@ -53,6 +60,8 @@ def merge_generated(path, local, remote):
 
 
 def publish(paths, message):
+    paths = list(paths)
+    paths.extend(materialize(ROOT, paths))
     for path in paths:
         if not (ROOT / path).is_file():
             raise ValueError(f'Publish path missing: {path}')
@@ -84,7 +93,8 @@ def publish(paths, message):
             result = git('-c', 'core.editor=true', 'rebase', '--continue', check=False)
         for path, payload in payloads.items():
             (ROOT / path).write_text(payload, encoding='utf-8')
-        git('add', '--', *payloads)
+        refreshed = materialize(ROOT, paths)
+        git('add', '--', *payloads, *refreshed)
         if git('diff', '--cached', '--quiet', check=False).returncode:
             git('commit', '-m', 'data(observatory): preserve concurrent official observations')
         if git('push', 'origin', 'HEAD:main', check=False).returncode == 0:

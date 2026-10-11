@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - tools/observatory_history_views.py
+      - tools/publish_observatory_data.py
+      - tests/test_observatory_history_views.py
       - tools/calendar_history_integrity.py
       - tools/calendar_actual_contract.py
       - tests/test_calendar_history_integrity.py
@@ -44,6 +47,7 @@ jobs:
           python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test_calendar_all_events_history.py' -v
           python -m unittest discover -s tests -p 'test_calendar_history*.py' -v
+          python -m unittest discover -s tests -p 'test_observatory_history_views.py' -v
           python -m py_compile \
             tools/build_calendar_history.py \
             tools/backfill_calendar_history_forexfactory.py \
@@ -62,6 +66,9 @@ jobs:
         run: |
           set -euo pipefail
           python tools/backfill_calendar_history_forexfactory_v2.py
+
+      - name: Refresh per-series quality after backfill
+        run: python tools/build_calendar_history.py
 
       - name: Validate resumable ten-year archive
         run: |
