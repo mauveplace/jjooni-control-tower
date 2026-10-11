@@ -33,7 +33,14 @@ Historical market data must never overwrite an OFFICIAL actual.
 
 ## Operation
 Routine calendar refreshes preserve/extend the 10Y archive but do not crawl hundreds of historical pages.
-`Economic Calendar 10Y History Backfill` performs the deep crawl under the same canonical-writer lock. Failed weeks are recorded and retried by later runs. Once coverage is FULL, scheduled runs become no-op health checks.
+`Economic Calendar 10Y History Backfill` performs the deep crawl under the same canonical-writer lock. Failed weeks are recorded and retried by later runs. Closed recent weeks are tracked; the current week is revisited. FULL is an archive-boundary/fetch-error status, never a guarantee that every series has ten complete years.
 
 ## Consumer UI
-Each current calendar event exposes `최근 10년 이력`. Metric-level history is preferred; event-level history is used as fallback. PB/analyst consumers may read `market-observatory/data/economic-calendar-history.json` directly.
+Each current calendar event exposes `최근 10년 이력`. Metric-level history is preferred; event-level history is used as fallback. The UI reads `calendar-history-index.json` and downloads content-addressed, checksum-validated per-series files only when requested. PB/analyst consumers may still read `economic-calendar-history.json` directly.
+
+## Observation archive
+Every published Daily Pulse is stored as an immutable content-addressed full observation under `pulse-history/observations/`. The index keeps all same-day revisions without the latest summary’s 400-row expiry. Facts and deterministic rules remain distinct from AI commentary. Commentary must reference the observation snapshot ID. Earlier unavailable full observations cannot be reconstructed from summary rows.
+
+## Quality and source handling
+Routine refresh, backfill and concurrent publication protect official actuals using the same ranked merge. Rejected conflicting actuals are retained as revisions. Per-field expectation sources remain distinct. Backfilled values are marked `BACKFILLED_VINTAGE_UNVERIFIED`; release-surprise backtests require `AS_RELEASED`. Per-series quality records observed yearly rows, actual/consensus counts and largest observed gap, with frequency completeness explicitly unvalidated.
+

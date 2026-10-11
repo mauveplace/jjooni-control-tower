@@ -50,6 +50,18 @@
       "role": "Immutable FedWatch observation history for PB and analyst comparison",
       "required": false,
       "usable_rule": "Match meeting_date, target range and current_target across snapshots; never interpret historical LIVE as current freshness"
+    },
+    {
+      "path": "./calendar-history-index.json",
+      "role": "Per-series historical coverage and source-checked history shards",
+      "required": false,
+      "usable_rule": "Check snapshot_id, field provenance, quality and value_vintage; FULL validates archive boundary only; only AS_RELEASED actuals are eligible for release-surprise backtests."
+    },
+    {
+      "path": "./pulse-history/index.json",
+      "role": "Immutable full Daily Pulse observations and same-day revisions",
+      "required": false,
+      "usable_rule": "Select market_date_us and generated_kst; historical LIVE does not mean current freshness; AI commentary must reference snapshot_id."
     }
   ],
   "fed_watch_policy": {
@@ -86,7 +98,7 @@
     "history": "Use 10-year history where available and preserve YoY/MoM/3M annualized/6M annualized features for inflation indices.",
     "revisions": "Never overwrite revisions silently. Read vintage_history for release revisions.",
     "consensus": "Consensus is market data, never an official-source actual.",
-    "regime": "Regime labels are informational features and must not be used as a standalone AUTOBOT trade trigger."
+    "regime": "Regime labels are informational features and must not be used as a standalone trade trigger."
   },
   "morning_market_brief_policy": {
     "source_priority": [
@@ -103,5 +115,13 @@
     "fact_boundary": "raw observations != deterministic derived labels != AI commentary",
     "collection_timing": "Single production FINAL snapshot at US regular-session close +10 minutes; 05:10 KST during US DST and 06:10 KST during US standard time.",
     "provisional_snapshot": "Disabled for production."
+  },
+  "calendar_history_policy": {
+    "index": "./calendar-history-index.json",
+    "bulk": "./economic-calendar-history.json",
+    "completeness": "Use per-series observed quality; release-frequency completeness is not yet validated.",
+    "alias": "US NFP exact aliases connect to canonical nfp; originals remain preserved.",
+    "vintage": "BACKFILLED_VINTAGE_UNVERIFIED is historical market data, not necessarily first-release actual.",
+    "source_precedence": "OFFICIAL > SECONDARY > MARKET_FEED; consensus provenance is separate."
   }
 }
