@@ -2,7 +2,8 @@
 """One ordered calendar pipeline shared by every publishing workflow.
 
 Schedule seed -> restore observations -> collect official/secondary/feed ->
-merge curated forecasts -> retain -> compute health -> archive -> validate.
+merge curated forecasts -> generic all-event market match -> retain -> compute
+health -> archive -> rolling 1Y history -> previous-value fallback -> validate.
 Health must describe the final merged payload, never an intermediate build.
 """
 import argparse
@@ -49,10 +50,20 @@ def refresh(previous=None, seed=False):
             run('tools/persist_calendar_history.py', previous)
         run('tools/enrich_economic_calendar.py')
         run('tools/calendar_market_events.py', 'refresh')
+        # The legacy enricher intentionally has curated mappings for complex
+        # releases. This second pass covers every remaining calendar event with
+        # conservative date/country/title matching instead of a fixed allowlist.
+        run('tools/enrich_calendar_all_events.py')
         run('tools/persist_calendar_history.py', snapshot)
         normalize_calendar_contract()
         run('tools/refresh_official_central_bank_actuals.py', '--health-only')
         run('tools/archive_calendar_actuals.py')
+        # Persist a rolling 365-day view for every event and every granular
+        # market metric. Then use the latest prior verified actual as a fallback
+        # Previous value when the current market feed has not supplied one.
+        run('tools/build_calendar_history.py')
+        run('tools/fill_calendar_previous_from_history.py')
+        run('tools/build_calendar_history.py')
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))
     health = data['actual_freshness']
