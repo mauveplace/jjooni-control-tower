@@ -369,6 +369,7 @@ def calendar_build():
     return {'schema':'JJOONI_ECONOMIC_CALENDAR_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'timezone':'Asia/Seoul','events':ev,'sources':['Federal Reserve','BLS','BEA','BOK','KOSTAT','U.S. Department of Labor','S&P Global Market Intelligence'],'schedule_contract':'US_RECURRING_CLAIMS_SP_GLOBAL_PMI_V1','schedule_sources':{'US_JOBLESS_CLAIMS':'https://www.dol.gov/ui/data.pdf','SP_GLOBAL_PMI':'https://pmi.spglobal.com/Public/Release/ReleaseDates?language=en','US_EMPLOYMENT_SITUATION':'https://www.bls.gov/schedule/news_release/empsit.htm'},'note':'All displayed times are KST. Official schedules may change; builder refreshes automatically.'}
 
 def main():
+    previous_observations=json.loads(OBS.read_text(encoding='utf-8')) if OBS.exists() else {}
     series=series_map();us,jp=add_official_yields(series)
     th,log=tripod_history(series)
     latest={k:(v[-1]['value'] if v else None) for k,v in series.items()}
@@ -380,9 +381,12 @@ def main():
     us_session_dates={k:(series.get(k) or [{}])[-1].get('date') for k in US_COMPLETED_SESSION_KEYS}
     us_completed_session_date=next(iter(set(us_session_dates.values()))) if len(set(us_session_dates.values()))==1 else None
     out={'schema':'JJOONI_MARKET_OBSERVATORY_V1','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'read_only':True,'contains_account_data':False,'us_market_session_contract':'COMMON_LAST_COMPLETED_US_SESSION_V1','us_completed_session_date':us_completed_session_date,'latest':latest,'series':series,'curves':{'US_CURVE':curve_payload(us,['3 Mo','2 Yr','5 Yr','10 Yr','30 Yr']),'JP_CURVE':curve_payload(jp,['2Y','5Y','10Y','20Y','30Y'])},'tripod_latest':sig,'tripod_history':th[-800:],'signal_log':log[-100:],'sources':{'US_TREASURY':'US Treasury','JP_JGB':'Japan MOF','KR_RATES':'BOK ECOS','MARKETS':'Yahoo public daily','TRIPOD':'derived completed-session daily'}}
+    from add_observatory_equities import retain_crypto_observations
+    retain_crypto_observations(out,previous_observations)
     OBS.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     old_calendar=json.loads(CAL.read_text(encoding='utf-8')) if CAL.exists() else {'events':[]}
     calendar=retain_calendar(calendar_build(),old_calendar)
     CAL.write_text(json.dumps(calendar,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('MARKET_OBSERVATORY_BUILD=PASS');print('generated_kst='+out['generated_kst']);print('series='+str(len(series)));print('calendar_events='+str(len(json.loads(CAL.read_text())['events'])))
 if __name__=='__main__':main()
+
