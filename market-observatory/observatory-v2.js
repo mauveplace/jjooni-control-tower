@@ -76,7 +76,7 @@ function timeDatasets(labels,sets){
     borderWidth:2,pointRadius:0,tension:.12,spanGaps:true,parsing:false,normalized:true
   }));
 }
-function chartConfig(labels,sets,range='5Y'){
+function chartConfig(labels,sets,range='5Y',id=''){
   return{
     type:'line',
     data:{datasets:timeDatasets(labels,sets)},
@@ -85,7 +85,7 @@ function chartConfig(labels,sets,range='5Y'){
       layout:{padding:{bottom:2}},
       plugins:{
         legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}},
-        tooltip:{callbacks:{title:items=>items?.length?tooltipDate(items[0].parsed.x):''}},
+        tooltip:{callbacks:{title:items=>items?.length?tooltipDate(items[0].parsed.x):'',label:ctx=>id==='usCurve'?`${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(3)}%`:`${ctx.dataset.label}: ${ctx.formattedValue}`}},
         zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}
       },
       scales:{
@@ -94,7 +94,7 @@ function chartConfig(labels,sets,range='5Y'){
           ticks:{display:true,color:'#667085',padding:6,maxTicksLimit:tickLimit(range),maxRotation:0,minRotation:0,font:{size:9},callback:v=>tickLabel(v,range)},
           grid:{color:'#eef2f6',drawTicks:true},border:{color:'#cfd8e3'}
         },
-        y:{ticks:{maxTicksLimit:6,font:{size:9},color:'#667085'},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
+        y:{ticks:{maxTicksLimit:6,font:{size:9},color:'#667085',...(id==='usCurve'?{callback:v=>Number(v).toFixed(3)+'%'}:{})},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
       }
     }
   };
@@ -113,7 +113,7 @@ function curveFiltered(id){
   const target=sets.find(s=>String(s.label||'').includes(targetLabel));
   return{labels:r.labels||[],sets:[current,target].filter(Boolean)};
 }
-function curveChartConfig(labels,sets){
+function curveChartConfig(labels,sets,id=''){
   return{
     type:'line',
     data:{labels,datasets:sets.map((x,i)=>({
@@ -123,11 +123,11 @@ function curveChartConfig(labels,sets){
       responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:false,
       plugins:{
         legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}},
-        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(2)}%`}}
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(id==='usCurve'?3:2)}%`}}
       },
       scales:{
         x:{title:{display:true,text:'만기'},ticks:{color:'#667085',font:{size:10}},grid:{color:'#eef2f6'},border:{color:'#cfd8e3'}},
-        y:{title:{display:true,text:'금리 (%)'},ticks:{maxTicksLimit:6,font:{size:9},color:'#667085',callback:v=>Number(v).toFixed(2)+'%'},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
+        y:{title:{display:true,text:'금리 (%)'},ticks:{maxTicksLimit:6,font:{size:9},color:'#667085',callback:v=>Number(v).toFixed(id==='usCurve'?3:2)+'%'},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
       }
     }
   };
@@ -174,11 +174,11 @@ function openFullscreen(id){
   if(CURVE_IDS.has(id)){
     const f=curveFiltered(id),mode=curveActive[id]||'ALL';
     o.querySelector('#obsFullTitle').textContent=title+' · '+curveModeLabel(mode);
-    fullChart=new Chart(o.querySelector('#obsFullCanvas'),curveChartConfig(f.labels,f.sets));
+    fullChart=new Chart(o.querySelector('#obsFullCanvas'),curveChartConfig(f.labels,f.sets,id));
   }else{
     const range=active[id]||'5Y',f=filtered(r.labels,r.sets,range);
     o.querySelector('#obsFullTitle').textContent=title+' · '+range;
-    fullChart=new Chart(o.querySelector('#obsFullCanvas'),chartConfig(f.labels,f.sets,range));
+    fullChart=new Chart(o.querySelector('#obsFullCanvas'),chartConfig(f.labels,f.sets,range,id));
   }
 }
 function closeFullscreen(){
@@ -241,11 +241,11 @@ function draw(id,labels,sets){
   const c=document.getElementById(id);if(!c)return;
   if(CURVE_IDS.has(id)){
     const f=curveFiltered(id);
-    charts[id]=new Chart(c,curveChartConfig(f.labels,f.sets));
+    charts[id]=new Chart(c,curveChartConfig(f.labels,f.sets,id));
     ensureToolbar(id);refreshCoverage(id);return;
   }
   const range=active[id]||'5Y',f=filtered(labels,sets,range);
-  charts[id]=new Chart(c,chartConfig(f.labels,f.sets,range));
+  charts[id]=new Chart(c,chartConfig(f.labels,f.sets,range,id));
   ensureToolbar(id);refreshCoverage(id);
 }
 function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
@@ -359,3 +359,4 @@ window.addEventListener('load',()=>{
 });
 window.__JJOONI_OBSERVATORY_UI={version:'2.12-real-time-axis',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true,x_axis_contract:'LINEAR_UTC_EPOCH_REAL_ELAPSED_TIME',calendar_refresh_ms:CALENDAR_REFRESH_MS,refresh_calendar:refreshCalendarData};
 })();
+
