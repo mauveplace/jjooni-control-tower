@@ -7,6 +7,7 @@ on:
       - tools/enrich_economic_calendar.py
       - tools/enrich_calendar_all_events.py
       - tools/enrich_calendar_with_all_events.py
+      - tools/refresh_calendar_recent_forexfactory.py
       - tools/build_calendar_history.py
       - tools/backfill_calendar_history_forexfactory.py
       - tools/backfill_calendar_history_forexfactory_v2.py
@@ -28,6 +29,7 @@ on:
       - tests/test_official_historical_actuals.py
       - tests/test_calendar_pipeline.py
       - tests/test_calendar_all_events_history.py
+      - tests/test_calendar_recent_forexfactory.py
       - .github/workflows/economic-calendar-light-refresh.yml
   schedule:
     - cron: '5,15 21 * * 0-4'
@@ -70,6 +72,7 @@ jobs:
             tools/enrich_economic_calendar.py \
             tools/enrich_calendar_all_events.py \
             tools/enrich_calendar_with_all_events.py \
+            tools/refresh_calendar_recent_forexfactory.py \
             tools/build_calendar_history.py \
             tools/backfill_calendar_history_forexfactory.py \
             tools/backfill_calendar_history_forexfactory_v2.py \
@@ -87,6 +90,10 @@ jobs:
           assert c.get('previous_value_contract')=='LATEST_PRIOR_VERIFIED_ACTUAL_AS_PREVIOUS_FALLBACK_V1'
           assert c.get('representative_value_contract')=='PRIMARY_NON_PROBABILITY_METRIC_AFTER_MERGE_V1'
           assert c.get('official_actual_contract')=='OFFICIAL_REGISTRY_BACKFILL_V2'
+          recovery=c.get('recent_historical_recovery') or {}
+          assert recovery.get('schema')=='JJOONI_CALENDAR_RECENT_FF_RECOVERY_V1',recovery
+          assert int(recovery.get('overdue_after') or 0)<=int(recovery.get('overdue_before') or 0),recovery
+          assert recovery.get('contract')=='MARKET_FEED_RECOVERY_NEVER_OVERRIDES_HIGHER_TIER_ACTUALS'
           assert all(all(k in e for k in ['previous','consensus','actual','market_metrics','history_ref']) for e in c.get('events',[]))
           for e in c.get('events',[]):
               metrics=[m for m in e.get('market_metrics',[]) if isinstance(m,dict)]
@@ -122,7 +129,7 @@ jobs:
               simulated['actual']=None
               health=build_freshness({'events':[simulated]},datetime.now(KST),[])
               assert health['status'] != 'LIVE',event['title']
-          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'),'coverage=',h.get('coverage_status'))
+          print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'recent_recovery=',recovery,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'),'coverage=',h.get('coverage_status'))
           PY
       - name: Install calendar history UI runtime
         shell: bash
