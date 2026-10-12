@@ -33,6 +33,9 @@ REPLACEMENTS = [
     (r'producer price index', ' ppi '),
     (r'personal consumption expenditures', ' pce '),
     (r'gross domestic product', ' gdp '),
+    # BEA's formal schedule title and market calendars describe the same release
+    # differently.  Keep this explicit rather than weakening fuzzy thresholds.
+    (r'(?:u\.?s\.?\s+)?international trade in goods and services', ' trade balance '),
     (r'non farm', ' nonfarm '),
     (r'non-farm', ' nonfarm '),
     (r'job openings and labor turnover survey', ' jolts '),
