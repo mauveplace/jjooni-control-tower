@@ -7,8 +7,9 @@ code/UI files stop publication; they are never resolved with `-X theirs`.
 A producer can legitimately refresh additional generated JSON files that are
 owned by another publishing workflow (for example the 10Y calendar-history
 archive while the Market Observatory writer only publishes the live board).
-Those *unselected generated JSON* changes are discarded before rebase. Code,
-UI, workflow, and other non-generated dirty files still fail closed.
+Those *unselected generated JSON* changes are discarded before rebase. Python
+cache artifacts created by tests/compilation are also disposable. Code, UI,
+workflow, and other non-generated dirty files still fail closed.
 """
 import argparse
 import json
@@ -79,7 +80,6 @@ def merge_generated(path, local, remote):
         rows.update({r['snapshot_id']: r for r in local.get('observations', [])})
         result['observations'] = sorted(rows.values(), key=lambda r: (str(r.get('market_date_us')), str(r.get('generated_kst')), r['snapshot_id']))
         return result
-    # Other generated JSON snapshots use the newer complete generation.
     if str(remote.get('generated_kst', '')) > str(local.get('generated_kst', '')):
         return remote
     return local
@@ -99,31 +99,38 @@ def parse_porcelain(output):
     return out
 
 
-def clean_unselected_generated(selected_paths):
-    """Make the worktree rebase-safe without hiding code/UI changes.
+def is_ephemeral_build_artifact(path):
+    """Artifacts created by Python test/compile steps that are safe to drop."""
+    p = str(path or '').replace('\\', '/')
+    return (
+        '/__pycache__/' in '/' + p
+        or p.endswith(('.pyc', '.pyo', '.pyd'))
+        or '/.pytest_cache/' in '/' + p
+        or p.startswith('.pytest_cache/')
+    )
 
-    Files under market-observatory/data/*.json that are not part of this
-    caller's publication contract belong to another canonical writer. Their
-    local by-products may be discarded. Everything else is fail-closed.
-    """
+
+def clean_unselected_generated(selected_paths):
+    """Make the worktree rebase-safe without hiding source/UI changes."""
     selected = set(selected_paths)
     entries = parse_porcelain(git('status', '--porcelain=v1', '--untracked-files=all').stdout)
     discard = []
+    ephemeral = []
     unsafe = []
     for status, path in entries:
         if path in selected:
-            # Selected files should already be committed; if one is still dirty,
-            # treating it as unsafe prevents a silent loss of the intended payload.
             unsafe.append((status, path))
         elif path.startswith(DATA) and path.endswith('.json'):
             discard.append((status, path))
+        elif status == '??' and is_ephemeral_build_artifact(path):
+            ephemeral.append((status, path))
         else:
             unsafe.append((status, path))
     if unsafe:
         details = ', '.join(f'{status}:{path}' for status, path in unsafe)
         raise RuntimeError('Uncommitted non-selected/non-generated change requires review: ' + details)
     tracked = [path for status, path in discard if status != '??']
-    untracked = [path for status, path in discard if status == '??']
+    untracked = [path for status, path in discard + ephemeral if status == '??']
     if tracked:
         git('restore', '--worktree', '--', *tracked)
     for path in untracked:
@@ -132,7 +139,9 @@ def clean_unselected_generated(selected_paths):
             p.unlink()
     if discard:
         print('OBSERVATORY_PUBLISH_DISCARD_UNSELECTED_GENERATED=' + ','.join(path for _, path in discard))
-    return [path for _, path in discard]
+    if ephemeral:
+        print('OBSERVATORY_PUBLISH_DISCARD_EPHEMERAL=' + str(len(ephemeral)))
+    return [path for _, path in discard + ephemeral]
 
 
 def publish(paths, message):
@@ -146,10 +155,6 @@ def publish(paths, message):
         print('OBSERVATORY_PUBLISH=NO_CHANGE')
         return
     git('commit', '-m', message)
-
-    # Producers sometimes touch generated snapshots that this workflow does not
-    # own. A dirty worktree makes `git rebase` fail with no merge conflicts, which
-    # previously surfaced misleadingly as an empty "Concurrent non-data" error.
     clean_unselected_generated(paths)
 
     for attempt in range(3):
@@ -162,7 +167,6 @@ def publish(paths, message):
             local = json.loads((ROOT / path).read_text(encoding='utf-8'))
             merged = merge_generated(path, local, json.loads(remote.stdout)) if remote.returncode == 0 else local
             payloads[path] = json.dumps(merged, ensure_ascii=False, indent=2) + '\n'
-        # Resolve only generated JSON conflicts, with previously merged payloads.
         result = git('rebase', 'origin/main', check=False)
         while result.returncode:
             conflicts = git('diff', '--name-only', '--diff-filter=U').stdout.splitlines()
