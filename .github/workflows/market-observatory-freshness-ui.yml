@@ -7,6 +7,7 @@ on:
       - tools/build_observatory_freshness.py
       - tools/audit_observatory_data.py
       - market-observatory/freshness-watchdog-v1.js
+      - market-observatory/freshness-all-groups-v1.js
       - market-observatory/data/watchdog-status.json
       - market-observatory/data/observatory.json
       - market-observatory/data/daily-market-pulse.json
@@ -67,7 +68,7 @@ jobs:
           python -m py_compile tools/build_observatory_freshness.py
           python tools/build_observatory_freshness.py
 
-      - name: Install freshness/watchdog UI runtime
+      - name: Install freshness/watchdog UI runtimes
         shell: bash
         run: |
           set -euo pipefail
@@ -76,11 +77,18 @@ jobs:
           from pathlib import Path
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="./freshness-watchdog-v1.js?v=1.3"></script>'
+          tags=[
+              '<script src="./freshness-watchdog-v1.js?v=1.3"></script>',
+              '<script src="./freshness-all-groups-v1.js?v=1.0"></script>',
+          ]
           if 'freshness-watchdog-v1.js' not in s:
-              s=s.replace('</body>',tag+'</body>',1)
+              s=s.replace('</body>',tags[0]+'</body>',1)
           else:
-              s=re.sub(r'<script src="\./freshness-watchdog-v1\.js\?v=[^"]+"></script>',tag,s)
+              s=re.sub(r'<script src="\./freshness-watchdog-v1\.js\?v=[^"]+"></script>',tags[0],s)
+          if 'freshness-all-groups-v1.js' not in s:
+              s=s.replace('</body>',tags[1]+'</body>',1)
+          else:
+              s=re.sub(r'<script src="\./freshness-all-groups-v1\.js\?v=[^"]+"></script>',tags[1],s)
           p.write_text(s,encoding='utf-8')
           print('OBSERVATORY_FRESHNESS_RUNTIME_INSTALL=PASS')
           PY
@@ -97,6 +105,7 @@ jobs:
           w=json.load(open('market-observatory/data/watchdog-status.json'))
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
           js=Path('market-observatory/freshness-watchdog-v1.js').read_text(encoding='utf-8')
+          alljs=Path('market-observatory/freshness-all-groups-v1.js').read_text(encoding='utf-8')
           assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2',f.get('schema')
           assert f.get('read_only') is True
           required=['market','kr_equity','us_supplement','energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','pulse','fear_greed','fedwatch','tripod','sector','official_macro','calendar','audit']
@@ -113,8 +122,11 @@ jobs:
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
           assert 'freshness-watchdog-v1.js?v=1.3' in html
-          for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2','energy','crypto','jp_rates']:
+          assert 'freshness-all-groups-v1.js?v=1.0' in html
+          for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2']:
               assert token in js,token
+          for token in ['energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','official_macro','ALL_MARKET_FAMILY_FRESHNESS_GRID_V1']:
+              assert token in alljs,token
           print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' audit='+str(a.get('overall'))+' watchdog='+str(w.get('result')))
           PY
 
