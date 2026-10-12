@@ -1,27 +1,24 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-13T06:37:02+09:00",
-  "overall": "DEGRADED",
-  "critical_bad": [
-    "pulse",
-    "tripod"
-  ],
+  "generated_kst": "2026-10-13T06:37:20+09:00",
+  "overall": "LIVE_WITH_WARNINGS",
+  "critical_bad": [],
   "warnings": [
     "calendar"
   ],
-  "watchdog_required": true,
+  "watchdog_required": false,
   "session_alignment": {
-    "source_session": "2026-10-09",
+    "source_session": "2026-10-12",
     "market_aligned": true,
     "observatory": "2026-10-12",
-    "daily_market_pulse": "2026-10-09",
-    "tripod": "2026-10-09",
-    "pulse_aligned": false,
-    "tripod_aligned": false,
+    "daily_market_pulse": "2026-10-12",
+    "tripod": "2026-10-12",
+    "pulse_aligned": true,
+    "tripod_aligned": true,
     "us_supplement_aligned": true,
     "kr_kospi": "2026-10-12",
     "kr_kosdaq": "2026-10-12",
-    "aligned": false
+    "aligned": true
   },
   "groups": {
     "market": {
@@ -53,9 +50,9 @@
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "MISALIGNED",
-      "generated_kst": "2026-10-12T08:37:15+09:00",
-      "as_of": "2026-10-09",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:36:51+09:00",
+      "as_of": "2026-10-12",
       "detail": "snapshot=FINAL · Observatory session=2026-10-12",
       "source": "daily-market-pulse.json",
       "critical": true
@@ -80,9 +77,9 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "MISALIGNED",
-      "generated_kst": "2026-10-12T08:37:17+09:00",
-      "as_of": "2026-10-09",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:36:53+09:00",
+      "as_of": "2026-10-12",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
       "critical": true
