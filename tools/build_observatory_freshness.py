@@ -38,6 +38,12 @@ def _audit_asof(audit_group):
     dates=[str(v.get('last_date') or '')[:10] for v in (audit_group.get('items') or {}).values() if v.get('last_date')]
     return min(dates) if dates else None
 
+def _count_field(obj,count_key,list_key):
+    value=obj.get(count_key)
+    if value is None:value=len(obj.get(list_key) or [])
+    try:return int(value or 0)
+    except Exception:return len(obj.get(list_key) or [])
+
 def build_status(root: Path = ROOT) -> dict:
     data=root/'market-observatory'/'data'
     obs=load(data/'observatory.json');pulse=load(data/'daily-market-pulse.json');fed=load(data/'fed-watch.json');cal=load(data/'economic-calendar.json');sector=load(data/'sector-etf.json');public=load(root/'public-market-daily.json');audit=load(data/'data-audit.json');macro=load(data/'official-macro.json')
@@ -57,7 +63,8 @@ def build_status(root: Path = ROOT) -> dict:
     fg_state=(ag.get('sentiment') or {}).get('state') or text(fgq.get('state')) or ('LIVE' if (obs.get('latest') or {}).get('FEAR_GREED') is not None else 'UNAVAILABLE')
     fed_state=(ag.get('fedwatch') or {}).get('state') or text(fed.get('freshness')) or ('LIVE' if fed.get('market_data_as_of') else 'UNAVAILABLE')
     tripod_state='LIVE' if tripod_aligned else ('MISALIGNED' if session and tripod_session else 'UNAVAILABLE')
-    cal_fresh=cal.get('actual_freshness') or {};cal_state=text(cal_fresh.get('status')) or ('LIVE' if cal.get('generated_kst') else 'UNAVAILABLE');sector_state='LIVE' if sector.get('as_of_date') else 'UNAVAILABLE'
+    cal_fresh=cal.get('actual_freshness') or {};cal_collection=cal.get('collection_health') or {};cal_state=text(cal_fresh.get('status')) or ('LIVE' if cal.get('generated_kst') else 'UNAVAILABLE');sector_state='LIVE' if sector.get('as_of_date') else 'UNAVAILABLE'
+    cal_overdue=_count_field(cal_fresh,'overdue_count','overdue_events');cal_pending=_count_field(cal_fresh,'pending_count','pending_events');cal_failed_sources=len(cal_collection.get('failed_sources') or [])
 
     groups={
         'market':group('Market SSOT',market_state,obs.get('generated_kst'),session,'미국 핵심 완료세션 NDX/SPX/VIX','observatory.json',True),
@@ -76,7 +83,7 @@ def build_status(root: Path = ROOT) -> dict:
         'tripod':group('TRI-POD',tripod_state,public.get('generated_kst') or obs.get('generated_kst'),tripod_session,f"{tripod.get('regime') or public_tripod.get('regime') or '—'} · {tripod.get('target') or public_tripod.get('target') or '—'}",'public-market-daily.json + observatory.json',True),
         'sector':group('Sector ETF',sector_state,sector.get('generated_kst'),sector.get('as_of_date'),f"priced={(sector.get('summary') or {}).get('priced_count','—')}",'sector-etf.json',False),
         'official_macro':group('Official Macro','LIVE' if macro.get('generated_kst') else 'UNAVAILABLE',macro.get('generated_kst'),None,macro.get('schema'),'official-macro.json',False),
-        'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={len(cal_fresh.get('overdue') or [])}",'economic-calendar.json',False),
+        'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={cal_overdue} · pending={cal_pending} · source_failures={cal_failed_sources}",'economic-calendar.json',False),
         'audit':group('Full Data Audit',audit.get('overall') or 'UNAVAILABLE',audit.get('generated_kst'),session,f"critical={audit.get('critical_count','—')} · warnings={audit.get('warning_count','—')}",'data-audit.json',True),
     }
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK'}
