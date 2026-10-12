@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, date
+from datetime import datetime, date, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'market-observatory'/'data'
 OUT=DATA/'data-audit.json'
-KST=ZoneInfo('Asia/Seoul')
+KST=ZoneInfo('Asia/Seoul'); ET=ZoneInfo('America/New_York')
 
 EXPECTED_SERIES={
   'core_us':['NASDAQ100','SP500','VIX'],
@@ -33,6 +33,10 @@ def days_between(a,b):
     try:return (date.fromisoformat(a)-date.fromisoformat(b)).days
     except Exception:return None
 
+def parse_dt(v):
+    try:return datetime.fromisoformat(str(v))
+    except Exception:return None
+
 def point(rows):
     rows=rows or []
     if not rows:return {'count':0,'last_date':None,'last_value':None}
@@ -43,15 +47,26 @@ def state_from_dates(dates,anchor=None,allow_lag_days=0):
     dates=[d for d in dates if d]
     if not dates:return 'UNAVAILABLE'
     if not anchor:return 'LIVE'
-    min_d=min(dates);max_d=max(dates)
-    lag=days_between(anchor,min_d)
+    lag=days_between(anchor,min(dates))
     if lag is None:return 'UNAVAILABLE'
-    if max_d>anchor:return 'AHEAD_OF_ANCHOR'
+    if max(dates)>anchor:return 'AHEAD_OF_ANCHOR'
     if lag>allow_lag_days:return 'LAGGING'
     return 'LIVE'
 
+def previous_weekday(d):
+    d=d-timedelta(days=1)
+    while d.weekday()>=5:d-=timedelta(days=1)
+    return d
+
+def expected_fedwatch_trade_date(now_et):
+    d=now_et.date()
+    if d.weekday()>=5:
+        while d.weekday()>=5:d-=timedelta(days=1)
+        return d
+    return d if now_et.timetz().replace(tzinfo=None)>=time(16,30) else previous_weekday(d)
+
 def build():
-    now=datetime.now(KST)
+    now=datetime.now(KST); now_et=now.astimezone(ET); today=now.date().isoformat()
     obs=load(DATA/'observatory.json');pulse=load(DATA/'daily-market-pulse.json');public=load(ROOT/'public-market-daily.json')
     fed=load(DATA/'fed-watch.json');cal=load(DATA/'economic-calendar.json');sector=load(DATA/'sector-etf.json')
     macro=load(DATA/'official-macro.json');regime=load(DATA/'market-regime.json');fresh=load(DATA/'freshness-status.json');watchdog=load(DATA/'watchdog-status.json')
@@ -66,33 +81,54 @@ def build():
         state='UNAVAILABLE' if missing else state_from_dates(dates,anchor,allow_lag_days)
         if mismatched and state=='LIVE':state='INCONSISTENT'
         groups[name]={'state':state,'anchor':anchor,'allow_lag_days':allow_lag_days,'critical':critical,'items':items,'missing':missing,'latest_mismatch':mismatched}
-    make_group('core_us',EXPECTED_SERIES['core_us'],session,0,True);make_group('us_supplement',EXPECTED_SERIES['us_supplement'],session,0,False);make_group('kr_equity',EXPECTED_SERIES['kr_equity'],None,0,True)
-    make_group('fx',EXPECTED_SERIES['fx'],session,1,False);make_group('energy',EXPECTED_SERIES['energy'],session,1,False);make_group('metals',EXPECTED_SERIES['metals'],session,1,False)
-    make_group('us_rates',EXPECTED_SERIES['us_rates'],session,3,False);make_group('kr_rates',EXPECTED_SERIES['kr_rates'],None,3,False);make_group('jp_rates',EXPECTED_SERIES['jp_rates'],None,3,False);make_group('crypto',EXPECTED_SERIES['crypto'],None,0,False);make_group('sentiment',EXPECTED_SERIES['sentiment'],session,2,False)
+    make_group('core_us',EXPECTED_SERIES['core_us'],session,0,True)
+    make_group('us_supplement',EXPECTED_SERIES['us_supplement'],session,0,False)
+    make_group('kr_equity',EXPECTED_SERIES['kr_equity'],today,4,True)
+    make_group('fx',EXPECTED_SERIES['fx'],session,1,False)
+    make_group('energy',EXPECTED_SERIES['energy'],session,1,False)
+    make_group('metals',EXPECTED_SERIES['metals'],session,1,False)
+    make_group('us_rates',EXPECTED_SERIES['us_rates'],session,3,False)
+    make_group('kr_rates',EXPECTED_SERIES['kr_rates'],today,4,False)
+    make_group('jp_rates',EXPECTED_SERIES['jp_rates'],today,5,False)
+    make_group('crypto',EXPECTED_SERIES['crypto'],None,0,False)
+    make_group('sentiment',EXPECTED_SERIES['sentiment'],session,2,False)
+
     pulse_session=str(pulse.get('market_date_us') or '')[:10] or None;tripod=(public.get('tripod_signal') or {});tripod_session=str(tripod.get('date') or tripod.get('session_date') or '')[:10] or None
     supplement=(obs.get('market_supplement_quality') or {});us_sup_quality={k:(supplement.get(k) or {}) for k in EXPECTED_SERIES['us_supplement']};kr_quality={k:(supplement.get(k) or {}) for k in EXPECTED_SERIES['kr_equity']}
-    crypto_market=obs.get('crypto_market') or {};crypto_status={k:{'status':(crypto_market.get(k) or {}).get('status'),'quote_as_of_kst':(crypto_market.get(k) or {}).get('quote_as_of_kst'),'quote_age_seconds':(crypto_market.get(k) or {}).get('quote_age_seconds')} for k in EXPECTED_SERIES['crypto']}
-    file_status={'observatory':{'generated_kst':obs.get('generated_kst'),'session':session,'schema':obs.get('schema')},'daily_pulse':{'generated_kst':pulse.get('generated_kst'),'session':pulse_session,'snapshot_status':pulse.get('snapshot_status')},'public_tripod':{'generated_kst':public.get('generated_kst'),'session':tripod_session,'ok':tripod.get('ok'),'target':tripod.get('target')},'fedwatch':{'generated_kst':fed.get('generated_kst'),'market_data_as_of':fed.get('market_data_as_of'),'expected_market_data_date':fed.get('expected_market_data_date'),'declared_freshness':fed.get('freshness')},'calendar':{'generated_kst':cal.get('generated_kst'),'events':len(cal.get('events') or []),'actual_freshness':(cal.get('actual_freshness') or {}).get('status')},'sector':{'generated_kst':sector.get('generated_kst'),'as_of_date':sector.get('as_of_date'),'priced_count':(sector.get('summary') or {}).get('priced_count')},'official_macro':{'generated_kst':macro.get('generated_kst'),'schema':macro.get('schema')},'market_regime':{'status':regime.get('status'),'effective_window':regime.get('effective_window'),'source_generated_kst':(regime.get('source') or {}).get('generated_kst')},'freshness':{'generated_kst':fresh.get('generated_kst'),'overall':fresh.get('overall'),'critical_bad':fresh.get('critical_bad'),'warnings':fresh.get('warnings')},'watchdog':{'checked_kst':watchdog.get('checked_kst'),'result':watchdog.get('result'),'decision':watchdog.get('decision')}}
+
+    crypto_market=obs.get('crypto_market') or {};crypto_status={}
+    for k in EXPECTED_SERIES['crypto']:
+        raw=crypto_market.get(k) or {};qdt=parse_dt(raw.get('quote_as_of_kst'));age=None
+        if qdt:
+            if qdt.tzinfo is None:qdt=qdt.replace(tzinfo=KST)
+            age=max(0,int((now-qdt.astimezone(KST)).total_seconds()))
+        state='LIVE' if age is not None and age<=3600 else ('STALE' if raw else 'UNAVAILABLE')
+        crypto_status[k]={'status':state,'producer_status':raw.get('status'),'quote_as_of_kst':raw.get('quote_as_of_kst'),'current_quote_age_seconds':age,'captured_quote_age_seconds':raw.get('quote_age_seconds')}
+    if any(v['status']!='LIVE' for v in crypto_status.values()):groups['crypto']['state']='STALE'
+
+    fed_expected=expected_fedwatch_trade_date(now_et).isoformat();fed_asof=str(fed.get('market_data_as_of') or '')[:10] or None
+    fed_state='UNAVAILABLE' if not fed_asof else ('LIVE' if fed_asof>=fed_expected else 'LAGGING')
+    groups['fedwatch']={'state':fed_state,'anchor':fed_expected,'allow_lag_days':0,'critical':False,'items':{'FEDWATCH':{'last_date':fed_asof,'last_value':None}},'missing':[] if fed_asof else ['FEDWATCH'],'latest_mismatch':[]}
+
+    file_status={'observatory':{'generated_kst':obs.get('generated_kst'),'session':session,'schema':obs.get('schema')},'daily_pulse':{'generated_kst':pulse.get('generated_kst'),'session':pulse_session,'snapshot_status':pulse.get('snapshot_status')},'public_tripod':{'generated_kst':public.get('generated_kst'),'session':tripod_session,'ok':tripod.get('ok'),'target':tripod.get('target')},'fedwatch':{'generated_kst':fed.get('generated_kst'),'market_data_as_of':fed_asof,'expected_market_data_date':fed.get('expected_market_data_date'),'audit_expected_market_data_date':fed_expected,'declared_freshness':fed.get('freshness'),'audit_state':fed_state},'calendar':{'generated_kst':cal.get('generated_kst'),'events':len(cal.get('events') or []),'actual_freshness':(cal.get('actual_freshness') or {}).get('status'),'overdue_count':len((cal.get('actual_freshness') or {}).get('overdue') or [])},'sector':{'generated_kst':sector.get('generated_kst'),'as_of_date':sector.get('as_of_date'),'priced_count':(sector.get('summary') or {}).get('priced_count')},'official_macro':{'generated_kst':macro.get('generated_kst'),'schema':macro.get('schema')},'market_regime':{'status':regime.get('status'),'effective_window':regime.get('effective_window'),'source_generated_kst':(regime.get('source') or {}).get('generated_kst')},'freshness':{'generated_kst':fresh.get('generated_kst'),'overall':fresh.get('overall'),'critical_bad':fresh.get('critical_bad'),'warnings':fresh.get('warnings')},'watchdog':{'checked_kst':watchdog.get('checked_kst'),'result':watchdog.get('result'),'decision':watchdog.get('decision')}}
+
     issues=[]
     def issue(code,severity,detail):issues.append({'code':code,'severity':severity,'detail':detail})
     if not session:issue('NO_US_SESSION','CRITICAL','observatory.us_completed_session_date missing')
     if pulse_session!=session:issue('PULSE_SESSION_MISMATCH','CRITICAL',f'pulse={pulse_session} observatory={session}')
     if tripod_session!=session or tripod.get('ok') is not True:issue('TRIPOD_SESSION_MISMATCH','CRITICAL',f'tripod={tripod_session} ok={tripod.get("ok")} observatory={session}')
     for name,g in groups.items():
-        if g['state']!='LIVE':issue('GROUP_'+name.upper()+'_'+g['state'],'CRITICAL' if g.get('critical') else 'WARN',f"anchor={g.get('anchor')} dates="+','.join(f"{k}:{v.get('last_date')}" for k,v in g['items'].items()))
-    fed_asof=str(fed.get('market_data_as_of') or '')[:10] or None
-    if session and fed_asof:
-        lag=days_between(session,fed_asof)
-        if lag is not None and lag>3:issue('FEDWATCH_STALE','WARN',f'FedWatch market_data_as_of={fed_asof}, observatory session={session}')
-    if fed.get('freshness')=='LIVE' and fed.get('expected_market_data_date')!=fed_asof:issue('FEDWATCH_DECLARATION_INCONSISTENT','WARN',f"expected={fed.get('expected_market_data_date')} asof={fed_asof}")
+        if g['state']!='LIVE':issue('GROUP_'+name.upper()+'_'+g['state'],'CRITICAL' if g.get('critical') else 'WARN',f"anchor={g.get('anchor')} dates="+','.join(f"{k}:{v.get('last_date')}" for k,v in g.get('items',{}).items()))
+    if fed.get('freshness')=='LIVE' and fed_state!='LIVE':issue('FEDWATCH_DECLARATION_INCONSISTENT','WARN',f'declared=LIVE audit={fed_state} expected={fed_expected} asof={fed_asof}')
     for k,q in us_sup_quality.items():
         if q.get('last_date')!=session or q.get('status')!='LIVE':issue('US_SUPPLEMENT_QUALITY_'+k,'WARN',str(q))
     if len({q.get('last_date') for q in kr_quality.values() if q.get('last_date')})>1:issue('KR_EQUITY_DATE_MISMATCH','CRITICAL',str({k:q.get('last_date') for k,q in kr_quality.items()}))
     for k,q in crypto_status.items():
-        if q.get('status')!='LIVE':issue('CRYPTO_'+k+'_'+str(q.get('status')),'WARN',str(q))
-    if (cal.get('actual_freshness') or {}).get('status') in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_'+str((cal.get('actual_freshness') or {}).get('status')),'WARN','economic calendar actual-freshness warning')
+        if q.get('status')!='LIVE':issue('CRYPTO_'+k+'_'+q['status'],'WARN',str(q))
+    cal_state=(cal.get('actual_freshness') or {}).get('status')
+    if cal_state in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_'+str(cal_state),'WARN',f"overdue_count={file_status['calendar']['overdue_count']}")
     critical=[x for x in issues if x['severity']=='CRITICAL'];warnings=[x for x in issues if x['severity']=='WARN'];overall='FAIL' if critical else ('WARN' if warnings else 'PASS')
-    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V1','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY','official_rates':'US_OFFICIAL_RATES_MAY_LAG_CORE_BY_AT_MOST_3_CALENDAR_DAYS_FOR_HOLIDAYS','no_account_data':True,'read_only':True},'read_only':True}
+    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V2','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY','official_rates':'US_OFFICIAL_RATES_MAX_3_CALENDAR_DAYS_KR_MAX_4_JP_MAX_5','crypto':'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S','fedwatch':'MARKET_DATA_AS_OF_MUST_MEET_CURRENT_EXPECTED_CME_TRADE_DATE','no_account_data':True,'read_only':True},'read_only':True}
 
 def main():
     out=build();OUT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_DATA_AUDIT='+out['overall']);print('critical_count='+str(out['critical_count']));print('warning_count='+str(out['warning_count']));print('session='+str(out['observatory_session']))
