@@ -3,6 +3,12 @@
 
 Calendar conflicts use the same source-ranked merge as collection. Conflicts in
 code/UI files stop publication; they are never resolved with `-X theirs`.
+
+A producer can legitimately refresh additional generated JSON files that are
+owned by another publishing workflow (for example the 10Y calendar-history
+archive while the Market Observatory writer only publishes the live board).
+Those *unselected generated JSON* changes are discarded before rebase. Code,
+UI, workflow, and other non-generated dirty files still fail closed.
 """
 import argparse
 import json
@@ -79,6 +85,56 @@ def merge_generated(path, local, remote):
     return local
 
 
+def parse_porcelain(output):
+    """Return (status, path) pairs from `git status --porcelain=v1`."""
+    out = []
+    for raw in str(output or '').splitlines():
+        if len(raw) < 4:
+            continue
+        status = raw[:2]
+        path = raw[3:]
+        if ' -> ' in path:
+            path = path.split(' -> ', 1)[1]
+        out.append((status, path))
+    return out
+
+
+def clean_unselected_generated(selected_paths):
+    """Make the worktree rebase-safe without hiding code/UI changes.
+
+    Files under market-observatory/data/*.json that are not part of this
+    caller's publication contract belong to another canonical writer. Their
+    local by-products may be discarded. Everything else is fail-closed.
+    """
+    selected = set(selected_paths)
+    entries = parse_porcelain(git('status', '--porcelain=v1', '--untracked-files=all').stdout)
+    discard = []
+    unsafe = []
+    for status, path in entries:
+        if path in selected:
+            # Selected files should already be committed; if one is still dirty,
+            # treating it as unsafe prevents a silent loss of the intended payload.
+            unsafe.append((status, path))
+        elif path.startswith(DATA) and path.endswith('.json'):
+            discard.append((status, path))
+        else:
+            unsafe.append((status, path))
+    if unsafe:
+        details = ', '.join(f'{status}:{path}' for status, path in unsafe)
+        raise RuntimeError('Uncommitted non-selected/non-generated change requires review: ' + details)
+    tracked = [path for status, path in discard if status != '??']
+    untracked = [path for status, path in discard if status == '??']
+    if tracked:
+        git('restore', '--worktree', '--', *tracked)
+    for path in untracked:
+        p = ROOT / path
+        if p.is_file():
+            p.unlink()
+    if discard:
+        print('OBSERVATORY_PUBLISH_DISCARD_UNSELECTED_GENERATED=' + ','.join(path for _, path in discard))
+    return [path for _, path in discard]
+
+
 def publish(paths, message):
     paths = list(paths)
     paths.extend(materialize(ROOT, paths))
@@ -90,6 +146,12 @@ def publish(paths, message):
         print('OBSERVATORY_PUBLISH=NO_CHANGE')
         return
     git('commit', '-m', message)
+
+    # Producers sometimes touch generated snapshots that this workflow does not
+    # own. A dirty worktree makes `git rebase` fail with no merge conflicts, which
+    # previously surfaced misleadingly as an empty "Concurrent non-data" error.
+    clean_unselected_generated(paths)
+
     for attempt in range(3):
         git('fetch', 'origin', 'main')
         payloads = {}
@@ -104,7 +166,11 @@ def publish(paths, message):
         result = git('rebase', 'origin/main', check=False)
         while result.returncode:
             conflicts = git('diff', '--name-only', '--diff-filter=U').stdout.splitlines()
-            if not conflicts or any(path not in payloads for path in conflicts):
+            if not conflicts:
+                error = (result.stderr or result.stdout or 'unknown rebase error').strip().replace('\n', ' | ')
+                git('rebase', '--abort', check=False)
+                raise RuntimeError('Rebase failed without merge conflicts: ' + error)
+            if any(path not in payloads for path in conflicts):
                 git('rebase', '--abort', check=False)
                 raise RuntimeError('Concurrent non-data change requires review: ' + ', '.join(conflicts))
             for path in conflicts:
@@ -130,5 +196,3 @@ if __name__ == '__main__':
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     publish(args.paths, args.message)
-
-
