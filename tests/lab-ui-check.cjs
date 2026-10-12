@@ -20,7 +20,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?process.
   await page.selectOption('#labBasis','reference');await page.locator('#labSave').click();await page.locator('[data-preset="dollar"]').click();await page.locator('#labLoad').click();assert.equal(await page.locator('#labType').inputValue(),'correlation');
   await page.locator('#labShare').click();assert.match(await page.locator('#labShareUrl').inputValue(),/#analysis=/);
   await page.locator('#labExpand').click();assert.equal(await page.locator('.labExpanded').count(),1);await page.keyboard.press('Escape');assert.equal(await page.locator('.labExpanded').count(),0);
-  const size=await page.evaluate(()=>({width:document.documentElement.scrollWidth,inner:innerWidth}));assert(size.width<=size.inner+2,JSON.stringify(size));
+  await page.screenshot({path:'lab-'+width+'.png',fullPage:true});const size=await page.evaluate(()=>({width:document.documentElement.scrollWidth,inner:innerWidth,overflow:[...document.querySelectorAll('#analysis-lab *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,8).map(e=>({tag:e.tagName,cls:e.className,right:e.getBoundingClientRect().right}))}));assert(size.width<=size.inner+2,JSON.stringify(size));
   assert.equal(await page.locator('#latestMarketBoard').isVisible(),false);assert.deepEqual(errors,[]);
   await page.screenshot({path:'lab-'+width+'.png',fullPage:true});console.log('LAB_UI_PASS width='+width+' stats='+initial);await page.close();
  }
