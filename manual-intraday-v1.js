@@ -64,19 +64,20 @@ function render(){if(!panel)return;panel.replaceChildren();const head=el('div',n
 }panel.append(cards)
 }
 panel.append(el('p','배경색은 국내 KRX 정규장(한국시각 09:00~15:30), 미국 정규장(동부시각 09:30~16:00)을 기준으로 구분합니다. 실제 장전·장후 거래는 API가 제공한 구간만 표시합니다. 가격 차트는 API가 반환한 1분봉을 표시합니다. 누락된 시간대는 선을 연결하지 않습니다. 프리·애프터장 포함 여부는 원천 제공 범위에 따릅니다.','mcNote'));renderAccounts();if(largeDialog?.open)renderLargeChart();}
+function closeLargeChart(){document.documentElement.style.overflow=priorOverflow;largeDialog?.close()}
 function openLargeChart(code){
  if(!code)return;S.selected=code;largeSymbol=code;render();
  if(!largeDialog){largeDialog=el('dialog',null,'ctManualChart mcLargeDialog');largeDialog.id='ctLargeIntraday';largeDialog.setAttribute('aria-labelledby','ctLargeIntradayTitle');document.body.append(largeDialog);
-  largeDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();largeDialog.close()}},true);
-  largeDialog.addEventListener('close',()=>{document.documentElement.style.overflow=priorOverflow;const button=panel?.querySelector('.mcCard[data-symbol="'+CSS.escape(largeSymbol)+'"]');button?.focus({preventScroll:true})});
-  largeDialog.addEventListener('click',e=>{if(e.target===largeDialog){const r=largeDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)largeDialog.close()}});
+  largeDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeLargeChart()}},true);
+  largeDialog.addEventListener('close',()=>{if(largeDialog.open)return;document.documentElement.style.overflow=priorOverflow;const button=panel?.querySelector('.mcCard[data-symbol="'+CSS.escape(largeSymbol)+'"]');button?.focus({preventScroll:true})});
+  largeDialog.addEventListener('click',e=>{if(e.target===largeDialog){const r=largeDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeLargeChart()}});
  }
  largeDialog.dataset.range='ALL';if(!largeDialog.open){priorOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';largeDialog.showModal()}
  renderLargeChart();readCache({fill:true});
 }
 function renderLargeChart(){
  if(!largeDialog?.open)return;const code=largeSymbol,p=positions(canon()).find(p=>p.symbol===code),data=S.charts.get(code),range=largeDialog.dataset.range||'ALL';largeDialog.replaceChildren();
- const header=el('div',null,'mcLargeHeader'),title=el('h3',(p?.name||code)+' · '+code);title.id='ctLargeIntradayTitle';const close=el('button','닫기');close.setAttribute('aria-label','큰 그래프 닫기');close.onclick=()=>largeDialog.close();header.append(title,close);largeDialog.append(header);
+ const header=el('div',null,'mcLargeHeader'),title=el('h3',(p?.name||code)+' · '+code);title.id='ctLargeIntradayTitle';const close=el('button','닫기');close.setAttribute('aria-label','큰 그래프 닫기');close.onclick=closeLargeChart;header.append(title,close);largeDialog.append(header);
  const info=data?.candles?.length?'거래일 '+data.session_date+' · '+(data.market_timezone==='America/New_York'?'미국 동부시각':'한국시각')+' · 마지막 가격 '+money(data.candles.at(-1).close)+' '+(data.candles.at(-1).currency||''):'저장 데이터를 확인하고 필요한 분봉을 조회 중입니다.';
  largeDialog.append(el('p',info,'mcLargeMessage'));
  const controls=el('div',null,'mcLargeControls');for(const [value,label] of [['ALL','전체 거래일'],['REGULAR','정규장 확대'],['120','최근 2시간']]){const button=el('button',label,range===value?'mcRangeActive':'');button.setAttribute('aria-pressed',String(range===value));button.onclick=()=>{largeDialog.dataset.range=value;renderLargeChart()};controls.append(button)}
