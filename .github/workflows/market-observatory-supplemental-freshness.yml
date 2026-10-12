@@ -1,12 +1,19 @@
 name: Market Observatory Cross-Market Freshness
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - tools/refresh_observatory_supplementals.py
+      - tools/build_fed_watch.py
+      - tools/audit_observatory_data.py
+      - .github/workflows/market-observatory-supplemental-freshness.yml
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
     types: [completed]
   schedule:
-    # Lightweight self-heal.  Market daily series are clipped to the latest
+    # Lightweight self-heal. Market daily series are clipped to the latest
     # completed canonical session; crypto remains 24/7 spot.
     - cron: '25 * * * *'
   workflow_dispatch:
