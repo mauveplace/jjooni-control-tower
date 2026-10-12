@@ -1,12 +1,15 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-13T04:40:52+09:00",
-  "overall": "LIVE_WITH_WARNINGS",
-  "critical_bad": [],
+  "generated_kst": "2026-10-13T05:06:47+09:00",
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "kr_equity"
+  ],
   "warnings": [
+    "us_supplement",
     "calendar"
   ],
-  "watchdog_required": false,
+  "watchdog_required": true,
   "session_alignment": {
     "source_session": "2026-10-09",
     "market_aligned": true,
@@ -15,7 +18,10 @@
     "tripod": "2026-10-09",
     "pulse_aligned": true,
     "tripod_aligned": true,
-    "aligned": true
+    "us_supplement_aligned": false,
+    "kr_kospi": null,
+    "kr_kosdaq": null,
+    "aligned": false
   },
   "groups": {
     "market": {
@@ -23,9 +29,27 @@
       "state": "LIVE",
       "generated_kst": "2026-10-13T04:25:11+09:00",
       "as_of": "2026-10-09",
-      "detail": "미국 완료 세션 + 한국/FX/금리 최신 스냅샷",
+      "detail": "미국 핵심 완료세션 기준 · KR/미국보조는 별도 날짜검증",
       "source": "observatory.json",
       "critical": true
+    },
+    "kr_equity": {
+      "label": "KR Equity",
+      "state": "UNAVAILABLE",
+      "generated_kst": "2026-10-13T04:25:14+09:00",
+      "as_of": null,
+      "detail": "KOSPI — · KOSDAQ —",
+      "source": "— / —",
+      "critical": true
+    },
+    "us_supplement": {
+      "label": "US Supplement",
+      "state": "UNAVAILABLE",
+      "generated_kst": "2026-10-13T04:25:14+09:00",
+      "as_of": "2026-10-09",
+      "detail": "RUT — · DOW — · IXIC —",
+      "source": "Yahoo completed cash-session daily",
+      "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
@@ -82,6 +106,6 @@
       "critical": false
     }
   },
-  "contract": "DISPLAY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V1",
+  "contract": "DISPLAY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V2",
   "read_only": true
 }
