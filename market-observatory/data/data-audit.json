@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-13T08:42:54+09:00",
+  "generated_kst": "2026-10-13T08:45:24+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 3,
+  "warning_count": 2,
   "observatory_session": "2026-10-12",
   "file_status": {
     "observatory": {
@@ -31,30 +31,14 @@
       "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-10-13T05:30:46+09:00",
+      "generated_kst": "2026-10-13T08:44:44+09:00",
       "events": 184,
       "actual_freshness": "DEGRADED",
-      "overdue_count": 14,
+      "overdue_count": 3,
       "pending_count": 0,
-      "collection_health": "DEGRADED",
-      "failed_source_count": 3,
-      "failed_sources": [
-        {
-          "source": "Trading Economics",
-          "error": "HTTPError",
-          "http_status": 410
-        },
-        {
-          "source": "FairEconomy/lastweek",
-          "error": "HTTPError",
-          "http_status": 404
-        },
-        {
-          "source": "FairEconomy/nextweek",
-          "error": "HTTPError",
-          "http_status": 404
-        }
-      ]
+      "collection_health": "LIVE",
+      "failed_source_count": 0,
+      "failed_sources": []
     },
     "sector": {
       "generated_kst": "2026-10-13T08:36:22+09:00",
@@ -80,7 +64,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-13T08:37:05+09:00",
+      "generated_kst": "2026-10-13T08:42:54+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -530,14 +514,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T08:36:14+09:00",
-      "current_quote_age_seconds": 400,
+      "current_quote_age_seconds": 550,
       "captured_quote_age_seconds": 5
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T08:36:12+09:00",
-      "current_quote_age_seconds": 402,
+      "current_quote_age_seconds": 552,
       "captured_quote_age_seconds": 7
     }
   },
@@ -550,12 +534,7 @@
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
       "severity": "WARN",
-      "detail": "overdue_count=14 pending_count=0"
-    },
-    {
-      "code": "CALENDAR_COLLECTION_DEGRADED",
-      "severity": "WARN",
-      "detail": "failed_source_count=3 sources=Trading Economics,FairEconomy/lastweek,FairEconomy/nextweek"
+      "detail": "overdue_count=3 pending_count=0"
     }
   ],
   "contracts": {
