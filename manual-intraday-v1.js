@@ -67,6 +67,7 @@ panel.append(el('p','배경색은 국내 KRX 정규장(한국시각 09:00~15:30)
 function openLargeChart(code){
  if(!code)return;S.selected=code;largeSymbol=code;render();
  if(!largeDialog){largeDialog=el('dialog',null,'ctManualChart mcLargeDialog');largeDialog.id='ctLargeIntraday';largeDialog.setAttribute('aria-labelledby','ctLargeIntradayTitle');document.body.append(largeDialog);
+  largeDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();largeDialog.close()}},true);
   largeDialog.addEventListener('close',()=>{document.documentElement.style.overflow=priorOverflow;const button=panel?.querySelector('.mcCard[data-symbol="'+CSS.escape(largeSymbol)+'"]');button?.focus({preventScroll:true})});
   largeDialog.addEventListener('click',e=>{if(e.target===largeDialog){const r=largeDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)largeDialog.close()}});
  }
