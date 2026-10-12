@@ -1,71 +1,71 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-13T05:27:12+09:00",
+  "generated_kst": "2026-10-13T06:36:42+09:00",
   "overall": "DEGRADED",
   "critical_bad": [
-    "kr_equity"
+    "pulse",
+    "tripod"
   ],
   "warnings": [
-    "us_supplement",
     "calendar"
   ],
   "watchdog_required": true,
   "session_alignment": {
     "source_session": "2026-10-09",
     "market_aligned": true,
-    "observatory": "2026-10-09",
+    "observatory": "2026-10-12",
     "daily_market_pulse": "2026-10-09",
     "tripod": "2026-10-09",
-    "pulse_aligned": true,
-    "tripod_aligned": true,
-    "us_supplement_aligned": false,
-    "kr_kospi": null,
-    "kr_kosdaq": null,
+    "pulse_aligned": false,
+    "tripod_aligned": false,
+    "us_supplement_aligned": true,
+    "kr_kospi": "2026-10-12",
+    "kr_kosdaq": "2026-10-12",
     "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T04:25:11+09:00",
-      "as_of": "2026-10-09",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12",
       "detail": "미국 핵심 완료세션 기준 · KR/미국보조는 별도 날짜검증",
       "source": "observatory.json",
       "critical": true
     },
     "kr_equity": {
       "label": "KR Equity",
-      "state": "UNAVAILABLE",
-      "generated_kst": "2026-10-13T04:25:14+09:00",
-      "as_of": null,
-      "detail": "KOSPI — · KOSDAQ —",
-      "source": "— / —",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:39+09:00",
+      "as_of": "2026-10-12",
+      "detail": "KOSPI 2026-10-12 · KOSDAQ 2026-10-12",
+      "source": "Naver Finance index daily / Naver Finance index daily",
       "critical": true
     },
     "us_supplement": {
       "label": "US Supplement",
-      "state": "UNAVAILABLE",
-      "generated_kst": "2026-10-13T04:25:14+09:00",
-      "as_of": "2026-10-09",
-      "detail": "RUT — · DOW — · IXIC —",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:39+09:00",
+      "as_of": "2026-10-12",
+      "detail": "RUT 2026-10-12 · DOW 2026-10-12 · IXIC 2026-10-12",
       "source": "Yahoo completed cash-session daily",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "MISALIGNED",
       "generated_kst": "2026-10-12T08:37:15+09:00",
       "as_of": "2026-10-09",
-      "detail": "snapshot=FINAL · Observatory session=2026-10-09",
+      "detail": "snapshot=FINAL · Observatory session=2026-10-12",
       "source": "daily-market-pulse.json",
       "critical": true
     },
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T04:25:11+09:00",
-      "as_of": "2026-10-12T19:16:14+00:00",
-      "detail": "45.0/100 · NEUTRAL",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12T21:11:06+00:00",
+      "detail": "45.7/100 · NEUTRAL",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
@@ -80,7 +80,7 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "MISALIGNED",
       "generated_kst": "2026-10-12T08:37:17+09:00",
       "as_of": "2026-10-09",
       "detail": "상승 · TQQQ 100%",
@@ -90,8 +90,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-11T17:31:24+09:00",
-      "as_of": "2026-10-11T17:31:24+09:00",
+      "generated_kst": "2026-10-13T05:30:46+09:00",
+      "as_of": "2026-10-13T05:30:46+09:00",
       "detail": "events=184",
       "source": "economic-calendar.json",
       "critical": false
@@ -99,8 +99,8 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-10T17:58:03+09:00",
-      "as_of": "2026-10-09",
+      "generated_kst": "2026-10-13T05:30:54+09:00",
+      "as_of": "2026-10-12",
       "detail": "priced=46",
       "source": "sector-etf.json",
       "critical": false
