@@ -14,6 +14,20 @@ import build_observatory_freshness as freshness  # noqa: E402
 
 
 class ObservatoryFreshnessStatusTest(unittest.TestCase):
+    def write(self, root: Path, rel: str, obj: dict):
+        p = root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(obj), encoding='utf-8')
+
+    def supplements(self, us_date='2026-10-08', kr_date='2026-10-08'):
+        return {
+            'KOSPI': {'status': 'LIVE', 'last_date': kr_date, 'source': 'Naver Finance index daily'},
+            'KOSDAQ': {'status': 'LIVE', 'last_date': kr_date, 'source': 'Naver Finance index daily'},
+            'RUSSELL2000': {'status': 'LIVE', 'last_date': us_date, 'source': 'Yahoo completed cash-session daily'},
+            'DOW': {'status': 'LIVE', 'last_date': us_date, 'source': 'Yahoo completed cash-session daily'},
+            'NASDAQCOMPOSITE': {'status': 'LIVE', 'last_date': us_date, 'source': 'Yahoo completed cash-session daily'},
+        }
+
     def test_old_downstream_cannot_be_live_against_new_source(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -21,6 +35,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'generated_kst': '2026-10-10T06:00:00+09:00',
                 'us_completed_session_date': '2026-10-08',
                 'freshness': {'status': 'LIVE'},
+                'market_supplement_quality': self.supplements(),
             })
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL',
@@ -36,21 +51,18 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertFalse(out['session_alignment']['aligned'])
             self.assertTrue(out['watchdog_required'])
 
-    def write(self, root: Path, rel: str, obj: dict):
-        p = root / rel
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(obj), encoding='utf-8')
-
     def test_aligned_live_inputs_are_live(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             self.write(root, 'market-observatory/data/observatory.json', {
                 'generated_kst': '2026-10-09T06:10:00+09:00',
+                'equity_enriched_kst': '2026-10-09T06:10:00+09:00',
                 'us_completed_session_date': '2026-10-08',
                 'freshness': {'status': 'LIVE'},
                 'latest': {'FEAR_GREED': 38.1, 'FEAR_GREED_RATING': 'FEAR'},
                 'quality': {'fear_greed': {'state': 'LIVE', 'source': 'CNN', 'observed_at': '2026-10-08'}},
                 'tripod_latest': {'date': '2026-10-08', 'regime': '상승', 'target': 'TQQQ 100%'},
+                'market_supplement_quality': self.supplements(),
             })
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'generated_kst': '2026-10-09T06:11:00+09:00',
@@ -75,6 +87,9 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertTrue(out['session_alignment']['aligned'])
             self.assertTrue(out['session_alignment']['pulse_aligned'])
             self.assertTrue(out['session_alignment']['tripod_aligned'])
+            self.assertTrue(out['session_alignment']['us_supplement_aligned'])
+            self.assertEqual(out['groups']['kr_equity']['state'], 'LIVE')
+            self.assertEqual(out['groups']['us_supplement']['state'], 'LIVE')
             self.assertEqual(out['groups']['pulse']['state'], 'LIVE')
             self.assertEqual(out['groups']['tripod']['state'], 'LIVE')
             self.assertFalse(out['watchdog_required'])
@@ -88,6 +103,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'freshness': {'status': 'LIVE'},
                 'latest': {'FEAR_GREED': 38.1},
                 'tripod_latest': {'date': '2026-10-08'},
+                'market_supplement_quality': self.supplements(),
             })
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'market_date_us': '2026-10-07', 'snapshot_status': 'FINAL'
@@ -113,6 +129,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'freshness': {'status': 'LIVE'},
                 'latest': {'FEAR_GREED': 38.1},
                 'tripod_latest': {'date': '2026-10-08'},
+                'market_supplement_quality': self.supplements(),
             })
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL'
@@ -138,6 +155,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'freshness': {'status': 'LIVE'},
                 'latest': {'FEAR_GREED': 38.1},
                 'tripod_latest': {'date': '2026-10-08'},
+                'market_supplement_quality': self.supplements(),
             })
             self.write(root, 'market-observatory/data/daily-market-pulse.json', {
                 'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL'
@@ -154,4 +172,3 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
