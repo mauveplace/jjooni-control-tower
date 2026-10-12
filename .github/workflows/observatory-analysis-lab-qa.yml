@@ -1,0 +1,54 @@
+name: Observatory Analysis Lab QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/analysis-lab-core.js
+      - market-observatory/analysis-lab-v1.js
+      - market-observatory/latest-board-v1.js
+      - market-observatory/index.html
+      - tests/analysis-lab-core.test.cjs
+      - tests/lab-ui-check.cjs
+      - .github/workflows/observatory-analysis-lab-qa.yml
+  pull_request:
+    paths:
+      - market-observatory/analysis-lab-core.js
+      - market-observatory/analysis-lab-v1.js
+      - tests/analysis-lab-core.test.cjs
+      - tests/lab-ui-check.cjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: observatory-analysis-lab-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate time alignment and analytical calculations
+        run: |
+          node --check market-observatory/analysis-lab-v1.js
+          node --test tests/analysis-lab-core.test.cjs
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save playwright@1.55.0 chart.js@4.4.7
+          npx playwright install --with-deps chromium
+      - name: Serve repository and verify phone and tablet interactions
+        run: |
+          python -m http.server 8765 --bind 127.0.0.1 >/tmp/lab-server.log 2>&1 &
+          node tests/lab-ui-check.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: analysis-lab-screen-checks
+          path: lab-*.png
