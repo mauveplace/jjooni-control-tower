@@ -70,8 +70,6 @@ def merge_rows(old,new):
 
 def completed_us_cutoff(now=None):
     now=(now or datetime.now(ET)).astimezone(ET)
-    # Same contract as core NDX/SPX/VIX: do not consume provisional cash-index
-    # daily bars before 16:15 ET.
     if now.time()<time(16,15):
         from datetime import timedelta
         return (now.date()-timedelta(days=1)).isoformat()
@@ -149,9 +147,8 @@ def main():
     quality={};us_session=str(data.get('us_completed_session_date') or '')[:10]
 
     for key in KR_KEYS:
-        code=key
         try:
-            fresh,url=naver_index_recent(code);xs=merge_rows(prev.get(key,[]),fresh);state='LIVE';source='Naver Finance index daily';err=None
+            fresh,url=naver_index_recent(key);xs=merge_rows(prev.get(key,[]),fresh);state='LIVE';source='Naver Finance index daily';err=None
         except Exception as e:
             try:
                 xs=yahoo_series(SYMBOLS[key],KST);state='FALLBACK';source='Yahoo Finance daily fallback';err=f'Naver {type(e).__name__}: {e}'
@@ -182,7 +179,10 @@ def main():
     src['GLOBAL_EQUITY_SUPPLEMENT']='Yahoo Finance completed US cash-session daily (^RUT/^DJI/^IXIC)'
     src['SILVER']='Yahoo public daily (SI=F)';src['FEAR_GREED']='FearAndGreedGraph public JSON (CNN-derived sentiment reference)'
     data['market_supplement_quality']=quality
-    data['equity_enrichment_contract']='KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2'
+    # Preserve the established field/value for downstream acceptance compatibility;
+    # the stricter date/source semantics are versioned separately.
+    data['equity_enrichment_contract']='KOSPI_KOSDAQ_DAILY_REFERENCE_V1'
+    data['equity_session_contract']='KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2'
     data['market_supplement_contract']='US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3'
     data['equity_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
     OBS.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
