@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -36,10 +34,11 @@ def test_audit_contract_recomputes_age_and_checks_fedwatch():
         'current_quote_age_seconds',
         'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S',
         'FEDWATCH_DECLARATION_INCONSISTENT',
-        'JP_RATES',
+        "make_group('jp_rates'",
         "make_group('energy'",
         "make_group('fx'",
         "make_group('metals'",
+        "groups['fedwatch']",
     ]:
         assert token in src, token
 
