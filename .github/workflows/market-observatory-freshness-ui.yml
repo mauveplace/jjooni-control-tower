@@ -20,6 +20,7 @@ on:
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
+      - "Market Observatory Cross-Market Freshness"
       - "Market Observatory Daily Pulse"
       - "Market Observatory FedWatch Matrix V2"
       - "Public Market + TRI-POD Daily Sidecar"
@@ -75,7 +76,7 @@ jobs:
           from pathlib import Path
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="./freshness-watchdog-v1.js?v=1.2"></script>'
+          tag='<script src="./freshness-watchdog-v1.js?v=1.3"></script>'
           if 'freshness-watchdog-v1.js' not in s:
               s=s.replace('</body>',tag+'</body>',1)
           else:
@@ -96,22 +97,23 @@ jobs:
           w=json.load(open('market-observatory/data/watchdog-status.json'))
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
           js=Path('market-observatory/freshness-watchdog-v1.js').read_text(encoding='utf-8')
-          assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
+          assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2',f.get('schema')
           assert f.get('read_only') is True
-          assert set(['market','kr_equity','us_supplement','pulse','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
+          required=['market','kr_equity','us_supplement','energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','pulse','fear_greed','fedwatch','tripod','sector','official_macro','calendar','audit']
+          assert set(required).issubset((f.get('groups') or {}).keys()),set(required)-set((f.get('groups') or {}).keys())
           align=f.get('session_alignment') or {}
           assert align.get('observatory')
           assert 'pulse_aligned' in align and 'tripod_aligned' in align and 'us_supplement_aligned' in align,align
-          assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V1',a
+          assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V2',a.get('schema')
           assert a.get('read_only') is True
           assert int(a.get('critical_count') or 0)==0,a.get('issues')
-          for group in ['core_us','us_supplement','kr_equity','fx','energy','metals','us_rates','kr_rates','jp_rates','crypto','sentiment']:
-              assert group in (a.get('groups') or {}),group
+          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','us_rates','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
+              assert name in (a.get('groups') or {}),name
           assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
-          assert 'freshness-watchdog-v1.js?v=1.2' in html
-          for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2']:
+          assert 'freshness-watchdog-v1.js?v=1.3' in html
+          for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2','energy','crypto','jp_rates']:
               assert token in js,token
           print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' audit='+str(a.get('overall'))+' watchdog='+str(w.get('result')))
           PY
