@@ -1,0 +1,103 @@
+name: Market Observatory Cross-Market Freshness
+
+on:
+  workflow_run:
+    workflows:
+      - "Market Observatory Daily + Calendar"
+    types: [completed]
+  schedule:
+    # Lightweight self-heal.  Market daily series are clipped to the latest
+    # completed canonical session; crypto remains 24/7 spot.
+    - cron: '25 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: economic-calendar-canonical-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Observatory runtime
+        run: python -m pip install --quiet -r tools/requirements-observatory.txt
+
+      - name: Test freshness repair code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/refresh_observatory_supplementals.py \
+            tools/build_fed_watch.py \
+            tools/audit_observatory_data.py \
+            tools/build_observatory_sector_etf.py
+
+      - name: Refresh all public market families
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/refresh_observatory_supplementals.py
+
+      - name: Refresh FedWatch when stale
+        shell: bash
+        run: |
+          set +e
+          python tools/build_fed_watch.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "FEDWATCH_REFRESH_WARN=builder_exit_$rc"
+          fi
+          exit 0
+
+      - name: Refresh Sector ETF snapshot
+        shell: bash
+        run: |
+          set +e
+          python tools/build_observatory_sector_etf.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "SECTOR_REFRESH_WARN=builder_exit_$rc"
+          fi
+          exit 0
+
+      - name: Audit all Observatory data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/audit_observatory_data.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('market-observatory/data/data-audit.json').read_text(encoding='utf-8'))
+          assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V2',a.get('schema')
+          assert int(a.get('critical_count') or 0)==0,a.get('issues')
+          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals']:
+              assert (a.get('groups') or {}).get(name,{}).get('state')=='LIVE',(name,(a.get('groups') or {}).get(name))
+          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall='+str(a.get('overall'))+' warnings='+str(a.get('warning_count')))
+          PY
+
+      - name: Publish repaired market sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py \
+            --message 'data(observatory): cross-market freshness self-heal' \
+            market-observatory/data/observatory.json \
+            market-observatory/data/fed-watch.json \
+            market-observatory/data/sector-etf.json
