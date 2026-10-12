@@ -2,13 +2,15 @@
 """One ordered calendar pipeline shared by routine publishing workflows.
 
 Schedule seed -> restore observations -> collect official/secondary/feed once ->
-merge curated forecasts + generic all-event fallback -> retain -> representative
-sync -> compute health -> archive -> rolling 10Y history -> previous-value fallback
--> representative sync -> validate.
+merge curated forecasts + generic all-event fallback -> retain -> recent historical
+recovery -> representative sync -> compute health -> archive -> rolling 10Y history
+-> previous-value fallback -> representative sync -> validate.
 
 The expensive 10-year source crawl is intentionally decoupled into its own
 resumable workflow. Routine calendar refreshes preserve and extend the 10-year
-SSOT without re-downloading hundreds of historical weekly pages.
+SSOT without re-downloading hundreds of historical weekly pages.  A lightweight
+recent-overdue bridge may fetch only weeks containing currently unresolved
+releases so weekly-feed rollover cannot leave market actuals permanently blank.
 """
 import argparse
 import json
@@ -51,6 +53,10 @@ def refresh(previous=None, seed=False):
             run('tools/persist_calendar_history.py', previous)
         run('tools/enrich_calendar_with_all_events.py')
         run('tools/calendar_market_events.py', 'refresh')
+        # The public this-week feed rolls off old releases. Revisit only weeks
+        # containing currently overdue events through the existing browser-grade
+        # ForexFactory historical collector before we finalize freshness.
+        run('tools/refresh_calendar_recent_forexfactory.py')
         run('tools/persist_calendar_history.py', snapshot)
         normalize_calendar_contract()
         run('tools/sync_calendar_representative_values.py')
@@ -65,8 +71,10 @@ def refresh(previous=None, seed=False):
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))
     health = data['actual_freshness']
+    recovery = data.get('recent_historical_recovery') or {}
     print(f'CALENDAR_PIPELINE=PASS health={health["status"]} '
-          f'pending={health["pending_count"]} overdue={health["overdue_count"]}')
+          f'pending={health["pending_count"]} overdue={health["overdue_count"]} '
+          f'recent_recovery={recovery.get("overdue_before")}->{recovery.get("overdue_after")}')
 
 
 if __name__ == '__main__':
