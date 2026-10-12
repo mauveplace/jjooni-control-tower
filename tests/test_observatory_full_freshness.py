@@ -43,6 +43,17 @@ def test_audit_contract_recomputes_age_and_checks_fedwatch():
         assert token in src, token
 
 
+def test_calendar_audit_uses_canonical_overdue_and_collection_fields():
+    audit = (ROOT / 'tools/audit_observatory_data.py').read_text(encoding='utf-8')
+    fresh = (ROOT / 'tools/build_observatory_freshness.py').read_text(encoding='utf-8')
+    for token in ["'overdue_count'", "'overdue_events'", "'pending_count'", "'pending_events'", "'collection_health'", "'failed_sources'"]:
+        assert token in audit, token
+    for token in ["'overdue_count'", "'overdue_events'", "'pending_count'", "'pending_events'", "'collection_health'", 'source_failures']:
+        assert token in fresh, token
+    assert "cal_fresh.get('overdue')" not in audit
+    assert "cal_fresh.get('overdue')" not in fresh
+
+
 def test_fedwatch_compat_does_not_reuse_stale_snapshot():
     mod = load_module('build_fed_watch_compat_test', 'tools/build_fed_watch.py')
     path = ROOT / 'tests' / '.tmp-fedwatch-stale.json'
@@ -82,3 +93,4 @@ def test_cross_market_workflow_runs_hourly_and_after_daily():
     assert 'Market Observatory Daily + Calendar' in src
     assert 'python tools/refresh_observatory_supplementals.py' in src
     assert 'python tools/audit_observatory_data.py' in src
+    assert 'fedwatch-history' in src
