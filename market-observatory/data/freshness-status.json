@@ -1,10 +1,14 @@
 {
-  "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1",
-  "generated_kst": "2026-10-13T08:23:08+09:00",
+  "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
+  "generated_kst": "2026-10-13T08:24:05+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "calendar"
+    "jp_rates",
+    "crypto",
+    "fedwatch",
+    "calendar",
+    "audit"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -26,7 +30,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-13T06:27:35+09:00",
       "as_of": "2026-10-12",
-      "detail": "미국 핵심 완료세션 기준 · KR/미국보조는 별도 날짜검증",
+      "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
       "critical": true
     },
@@ -36,7 +40,7 @@
       "generated_kst": "2026-10-13T06:27:39+09:00",
       "as_of": "2026-10-12",
       "detail": "KOSPI 2026-10-12 · KOSDAQ 2026-10-12",
-      "source": "Naver Finance index daily / Naver Finance index daily",
+      "source": "Naver Finance primary",
       "critical": true
     },
     "us_supplement": {
@@ -44,8 +48,71 @@
       "state": "LIVE",
       "generated_kst": "2026-10-13T06:27:39+09:00",
       "as_of": "2026-10-12",
-      "detail": "RUT 2026-10-12 · DOW 2026-10-12 · IXIC 2026-10-12",
+      "detail": "RUSSELL2000 2026-10-12 · DOW 2026-10-12 · NASDAQCOMPOSITE 2026-10-12",
       "source": "Yahoo completed cash-session daily",
+      "critical": false
+    },
+    "energy": {
+      "label": "Energy",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12",
+      "detail": "WTI 2026-10-12 · BRENT 2026-10-12 · NATGAS 2026-10-12",
+      "source": "Yahoo CL=F / BZ=F / NG=F",
+      "critical": false
+    },
+    "fx": {
+      "label": "FX / DXY",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12",
+      "detail": "DXY 2026-10-12 · USDKRW 2026-10-12 · USDJPY 2026-10-12 · JPYKRW 2026-10-12",
+      "source": "Yahoo DXY / FX daily",
+      "critical": false
+    },
+    "metals": {
+      "label": "Metals",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12",
+      "detail": "GOLD 2026-10-12 · SILVER 2026-10-12 · COPPER 2026-10-12",
+      "source": "Yahoo Gold / Silver / Copper",
+      "critical": false
+    },
+    "us_rates": {
+      "label": "US Rates",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-09",
+      "detail": "US3M 2026-10-09 · US2Y 2026-10-09 · US5Y_OFFICIAL 2026-10-09 · US10Y_OFFICIAL 2026-10-09 · US30Y_OFFICIAL 2026-10-09 · US_2S10S 2026-10-09",
+      "source": "U.S. Treasury official",
+      "critical": false
+    },
+    "kr_rates": {
+      "label": "KR Rates",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-10-12",
+      "detail": "KR3Y 2026-10-12 · KR5Y 2026-10-12 · KR10Y 2026-10-12 · KR20Y 2026-10-12 · KR30Y 2026-10-12 · KR_3S10S 2026-10-12",
+      "source": "BOK ECOS",
+      "critical": false
+    },
+    "jp_rates": {
+      "label": "JP Rates",
+      "state": "LAGGING",
+      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "as_of": "2026-09-30",
+      "detail": "JP2Y 2026-09-30 · JP5Y 2026-09-30 · JP10Y 2026-09-30 · JP30Y 2026-09-30 · JP_2S10S 2026-09-30",
+      "source": "Japan MOF current JGB CSV",
+      "critical": false
+    },
+    "crypto": {
+      "label": "Crypto",
+      "state": "STALE",
+      "generated_kst": "2026-10-13T06:27:39+09:00",
+      "as_of": null,
+      "detail": "BTCUSD age=6992s · ETHUSD age=6988s",
+      "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
@@ -61,18 +128,18 @@
       "label": "Fear & Greed",
       "state": "LIVE",
       "generated_kst": "2026-10-13T06:27:35+09:00",
-      "as_of": "2026-10-12T21:11:06+00:00",
+      "as_of": "2026-10-12",
       "detail": "45.7/100 · NEUTRAL",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-10T17:56:37+09:00",
       "as_of": "2026-10-09",
-      "detail": "FOMC 2026-10-28",
-      "source": "fed-watch.json",
+      "detail": "expected=2026-10-12 · FOMC 2026-10-28",
+      "source": "CME Fed Funds settlement",
       "critical": false
     },
     "tripod": {
@@ -84,15 +151,6 @@
       "source": "public-market-daily.json + observatory.json",
       "critical": true
     },
-    "calendar": {
-      "label": "Economic Calendar",
-      "state": "DEGRADED",
-      "generated_kst": "2026-10-13T05:30:46+09:00",
-      "as_of": "2026-10-13T05:30:46+09:00",
-      "detail": "events=184",
-      "source": "economic-calendar.json",
-      "critical": false
-    },
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
@@ -101,8 +159,36 @@
       "detail": "priced=46",
       "source": "sector-etf.json",
       "critical": false
+    },
+    "official_macro": {
+      "label": "Official Macro",
+      "state": "LIVE",
+      "generated_kst": "2026-10-13T06:52:50+09:00",
+      "as_of": null,
+      "detail": "JJOONI_OFFICIAL_MACRO_V1",
+      "source": "official-macro.json",
+      "critical": false
+    },
+    "calendar": {
+      "label": "Economic Calendar",
+      "state": "DEGRADED",
+      "generated_kst": "2026-10-13T05:30:46+09:00",
+      "as_of": "2026-10-13T05:30:46+09:00",
+      "detail": "events=184 · overdue=0",
+      "source": "economic-calendar.json",
+      "critical": false
+    },
+    "audit": {
+      "label": "Full Data Audit",
+      "state": "WARN",
+      "generated_kst": "2026-10-13T08:24:04+09:00",
+      "as_of": "2026-10-12",
+      "detail": "critical=0 · warnings=7",
+      "source": "data-audit.json",
+      "critical": true
     }
   },
-  "contract": "DISPLAY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V2",
+  "audit_schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
+  "contract": "DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3",
   "read_only": true
 }
