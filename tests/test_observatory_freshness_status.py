@@ -28,6 +28,31 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             'NASDAQCOMPOSITE': {'status': 'LIVE', 'last_date': us_date, 'source': 'Yahoo completed cash-session daily'},
         }
 
+    def write_v2_support(self, root: Path, fed_state='LIVE'):
+        groups = {
+            name: {'state': 'LIVE', 'items': {}}
+            for name in (
+                'core_us', 'us_supplement', 'kr_equity', 'fx', 'energy', 'metals',
+                'us_rates', 'kr_rates', 'jp_rates', 'crypto', 'sentiment', 'fedwatch'
+            )
+        }
+        groups['fedwatch']['state'] = fed_state
+        overall = 'PASS' if fed_state == 'LIVE' else 'WARN'
+        self.write(root, 'market-observatory/data/data-audit.json', {
+            'schema': 'JJOONI_OBSERVATORY_DATA_AUDIT_V2',
+            'generated_kst': '2026-10-09T06:12:00+09:00',
+            'overall': overall,
+            'critical_count': 0,
+            'warning_count': 0 if overall == 'PASS' else 1,
+            'groups': groups,
+            'file_status': {'fedwatch': {'audit_expected_market_data_date': '2026-10-08'}},
+            'crypto_status': {},
+        })
+        self.write(root, 'market-observatory/data/official-macro.json', {
+            'schema': 'JJOONI_OFFICIAL_MACRO_V1',
+            'generated_kst': '2026-10-09T06:12:00+09:00',
+        })
+
     def test_old_downstream_cannot_be_live_against_new_source(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -43,6 +68,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'public-market-daily.json', {
                 'tripod_signal': {'ok': True, 'date': '2026-10-09'},
             })
+            self.write_v2_support(root)
             out = freshness.build_status(root)
             self.assertEqual(out['overall'], 'DEGRADED')
             self.assertEqual(out['groups']['market']['state'], 'MISALIGNED')
@@ -80,6 +106,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'generated_kst': '2026-10-09T06:12:00+09:00', 'events': [], 'actual_freshness': {'status': 'LIVE'}
             })
             self.write(root, 'market-observatory/data/sector-etf.json', {'as_of_date': '2026-10-08'})
+            self.write_v2_support(root)
 
             out = freshness.build_status(root)
 
@@ -109,6 +136,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'market_date_us': '2026-10-07', 'snapshot_status': 'FINAL'
             })
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-08'}})
+            self.write_v2_support(root)
 
             out = freshness.build_status(root)
 
@@ -135,6 +163,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'market_date_us': '2026-10-08', 'snapshot_status': 'FINAL'
             })
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-07'}})
+            self.write_v2_support(root)
 
             out = freshness.build_status(root)
 
@@ -162,6 +191,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             })
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-08'}})
             self.write(root, 'market-observatory/data/fed-watch.json', {'freshness': 'LAGGING', 'market_data_as_of': '2026-10-07'})
+            self.write_v2_support(root, fed_state='LAGGING')
 
             out = freshness.build_status(root)
 

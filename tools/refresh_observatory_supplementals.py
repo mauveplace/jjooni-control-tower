@@ -71,7 +71,7 @@ def completed_us_cutoff(now=None):
     return now.date().isoformat()
 
 def refresh_yahoo(data):
-    sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{})
+    sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{});legacy=data.setdefault('market_supplement_quality',{})
     previous={k:list(sm.get(k) or []) for k in YAHOO_SYMBOLS}
     cutoff=completed_us_cutoff()
     fetched={}
@@ -97,6 +97,10 @@ def refresh_yahoo(data):
         if common:rows=[x for x in rows if x['date']<=common]
         sm[key]=rows;latest[key]=rows[-1]['value'] if rows else None
         quality[key]={'status':'LIVE' if rows and rows[-1]['date']==common else ('LAGGING' if rows else 'UNAVAILABLE'),'source':'Yahoo public completed daily','last_date':rows[-1]['date'] if rows else None,'target_session':common}
+        if key in US_SUP:
+            # Keep the established compatibility metadata in lock-step.  Several
+            # UI/readers still consume market_supplement_quality for alignment.
+            legacy[key]=dict(quality[key])
 
     for key in CONTINUOUS:
         # The board is an EOD/completed-session dashboard.  Never let an in-progress
@@ -164,11 +168,12 @@ def refresh_jgb(data):
 
 def refresh_kr_and_sentiment_and_crypto(data):
     from add_observatory_equities import naver_index_recent, merge_rows as eq_merge, fear_greed_series, enrich_crypto
-    sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{})
+    sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{});legacy=data.setdefault('market_supplement_quality',{})
     for key in ('KOSPI','KOSDAQ'):
         try:
             fresh,url=naver_index_recent(key);rows=eq_merge(sm.get(key),fresh);sm[key]=rows;latest[key]=rows[-1]['value'];quality[key]={'status':'LIVE','source':'Naver Finance index daily','last_date':rows[-1]['date'],'source_url':url}
         except Exception as exc:quality[key]={'status':'STALE' if sm.get(key) else 'UNAVAILABLE','source':'Naver Finance index daily','last_date':(sm.get(key) or [{}])[-1].get('date'),'fetch_error':f'{type(exc).__name__}: {exc}'}
+        legacy[key]=dict(quality[key])
     try:
         fg=fear_greed_series();sm['FEAR_GREED']=fg;latest['FEAR_GREED']=fg[-1]['value'] if fg else None;quality['FEAR_GREED']={'status':'LIVE' if fg else 'UNAVAILABLE','source':'FearAndGreedGraph public JSON','last_date':fg[-1]['date'] if fg else None}
     except Exception as exc:quality['FEAR_GREED']={'status':'STALE' if sm.get('FEAR_GREED') else 'UNAVAILABLE','fetch_error':f'{type(exc).__name__}: {exc}'}
