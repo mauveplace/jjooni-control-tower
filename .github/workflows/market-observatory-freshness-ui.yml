@@ -5,17 +5,17 @@ on:
     branches: [main]
     paths:
       - tools/build_observatory_freshness.py
+      - tools/audit_observatory_data.py
       - market-observatory/freshness-watchdog-v1.js
       - market-observatory/data/watchdog-status.json
-      # Data commits are authoritative refresh events. Relying only on
-      # workflow_run can miss reruns/skipped wrapper runs and leave the panel
-      # describing an older session than the page itself.
       - market-observatory/data/observatory.json
       - market-observatory/data/daily-market-pulse.json
       - public-market-daily.json
       - market-observatory/data/fed-watch.json
       - market-observatory/data/economic-calendar.json
       - market-observatory/data/sector-etf.json
+      - market-observatory/data/official-macro.json
+      - market-observatory/data/market-regime.json
       - .github/workflows/market-observatory-freshness-ui.yml
   workflow_run:
     workflows:
@@ -25,6 +25,7 @@ on:
       - "Public Market + TRI-POD Daily Sidecar"
       - "Market Observatory Verified Calendar"
       - "Economic Calendar Light Refresh"
+      - "Market Observatory Official Macro"
       - "Market Observatory Close Freshness Watchdog"
     types: [completed]
   workflow_dispatch:
@@ -32,8 +33,6 @@ on:
 permissions:
   contents: write
 
-# A separate lock prevents lightweight status jobs cancelling a pending recovery.
-# Publication merges concurrent data and rejects conflicting UI changes.
 concurrency:
   group: observatory-freshness-panel
   cancel-in-progress: false
@@ -53,6 +52,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Build full Observatory data audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/audit_observatory_data.py
+          python tools/audit_observatory_data.py
+
       - name: Build consolidated freshness SSOT
         shell: bash
         run: |
@@ -67,7 +73,6 @@ jobs:
           python - <<'PY'
           import re
           from pathlib import Path
-
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
           tag='<script src="./freshness-watchdog-v1.js?v=1.2"></script>'
@@ -79,41 +84,46 @@ jobs:
           print('OBSERVATORY_FRESHNESS_RUNTIME_INSTALL=PASS')
           PY
 
-      - name: Freshness panel acceptance
+      - name: Freshness and full-data audit acceptance
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
-
           f=json.load(open('market-observatory/data/freshness-status.json'))
+          a=json.load(open('market-observatory/data/data-audit.json'))
           w=json.load(open('market-observatory/data/watchdog-status.json'))
           html=Path('market-observatory/index.html').read_text(encoding='utf-8')
           js=Path('market-observatory/freshness-watchdog-v1.js').read_text(encoding='utf-8')
-
           assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
           assert f.get('read_only') is True
           assert set(['market','kr_equity','us_supplement','pulse','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
           align=f.get('session_alignment') or {}
           assert align.get('observatory')
           assert 'pulse_aligned' in align and 'tripod_aligned' in align and 'us_supplement_aligned' in align,align
+          assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V1',a
+          assert a.get('read_only') is True
+          assert int(a.get('critical_count') or 0)==0,a.get('issues')
+          for group in ['core_us','us_supplement','kr_equity','fx','energy','metals','us_rates','kr_rates','jp_rates','crypto','sentiment']:
+              assert group in (a.get('groups') or {}),group
           assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
           assert 'freshness-watchdog-v1.js?v=1.2' in html
           for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2']:
               assert token in js,token
-          print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' watchdog='+str(w.get('result')))
+          print('OBSERVATORY_FRESHNESS_PANEL_ACCEPTANCE=PASS overall='+str(f.get('overall'))+' audit='+str(a.get('overall'))+' watchdog='+str(w.get('result')))
           PY
 
-      - name: Publish freshness SSOT and UI bootstrap
+      - name: Publish freshness and full-data audit SSOT
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python tools/publish_observatory_data.py \
-            --message 'data(observatory): refresh freshness panel' \
+            --message 'data(observatory): refresh freshness and full-data audit' \
             market-observatory/data/freshness-status.json \
+            market-observatory/data/data-audit.json \
             market-observatory/index.html
