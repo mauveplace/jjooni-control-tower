@@ -103,8 +103,13 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # build_fed_watch.py updates both the canonical snapshot and its immutable/
+          # analyst-facing history derivatives. Publish the complete canonical output
+          # set, matching the dedicated FedWatch workflow, so the generic publisher
+          # can remain fail-closed for every other unselected change.
           python tools/publish_observatory_data.py \
             --message 'data(observatory): cross-market freshness self-heal' \
             market-observatory/data/observatory.json \
             market-observatory/data/fed-watch.json \
-            market-observatory/data/sector-etf.json
+            market-observatory/data/sector-etf.json \
+            $(find market-observatory/data/fedwatch-history -type f | sort)
