@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-13T08:24:04+09:00",
+  "generated_kst": "2026-10-13T08:24:25+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 7,
+  "warning_count": 6,
   "observatory_session": "2026-10-12",
   "file_status": {
     "observatory": {
@@ -23,11 +23,11 @@
       "target": "TQQQ 100%"
     },
     "fedwatch": {
-      "generated_kst": "2026-10-10T17:56:37+09:00",
+      "generated_kst": "2026-10-13T08:24:06+09:00",
       "market_data_as_of": "2026-10-09",
-      "expected_market_data_date": "2026-10-09",
+      "expected_market_data_date": "2026-10-12",
       "audit_expected_market_data_date": "2026-10-12",
-      "declared_freshness": "LIVE",
+      "declared_freshness": "LAGGING",
       "audit_state": "LAGGING"
     },
     "calendar": {
@@ -60,11 +60,15 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-13T08:23:08+09:00",
+      "generated_kst": "2026-10-13T08:24:05+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "calendar"
+        "jp_rates",
+        "crypto",
+        "fedwatch",
+        "calendar",
+        "audit"
       ]
     },
     "watchdog": {
@@ -508,14 +512,14 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T06:27:32+09:00",
-      "current_quote_age_seconds": 6992,
+      "current_quote_age_seconds": 7013,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T06:27:36+09:00",
-      "current_quote_age_seconds": 6988,
+      "current_quote_age_seconds": 7009,
       "captured_quote_age_seconds": 3
     }
   },
@@ -536,19 +540,14 @@
       "detail": "anchor=2026-10-12 dates=FEDWATCH:2026-10-09"
     },
     {
-      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
-      "severity": "WARN",
-      "detail": "declared=LIVE audit=LAGGING expected=2026-10-12 asof=2026-10-09"
-    },
-    {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-13T06:27:32+09:00', 'current_quote_age_seconds': 6992, 'captured_quote_age_seconds': 6}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-13T06:27:32+09:00', 'current_quote_age_seconds': 7013, 'captured_quote_age_seconds': 6}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-13T06:27:36+09:00', 'current_quote_age_seconds': 6988, 'captured_quote_age_seconds': 3}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-13T06:27:36+09:00', 'current_quote_age_seconds': 7009, 'captured_quote_age_seconds': 3}"
     },
     {
       "code": "CALENDAR_DEGRADED",
