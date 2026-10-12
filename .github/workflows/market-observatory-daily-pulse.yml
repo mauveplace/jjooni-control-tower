@@ -6,6 +6,10 @@ on:
     paths:
       - tools/build_daily_market_pulse.py
       - tools/build_public_market_daily.py
+      # The canonical Observatory data commit is itself a downstream trigger.
+      # This closes the gap where a rerun publishes a new completed session but
+      # workflow_run chaining is skipped or delayed.
+      - market-observatory/data/observatory.json
       - market-observatory/data/daily-market-pulse.json
       - market-observatory/data/morning-brief-contract.json
       - market-observatory/data/ai-read-contract.json
@@ -63,16 +67,27 @@ jobs:
 
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
-          import os, json
+          import os, json, subprocess
           from pathlib import Path
           from datetime import datetime, timezone
           from zoneinfo import ZoneInfo
 
           event=os.environ.get("EVENT_NAME","")
           sched=os.environ.get("SCHEDULE","")
-          if event in {"push","pull_request","workflow_dispatch"}:
+          if event == "push":
+              changed=subprocess.run(
+                  ['git','diff-tree','--no-commit-id','--name-only','-r','HEAD'],
+                  text=True,capture_output=True,check=False
+              ).stdout.splitlines()
+              from_observatory='market-observatory/data/observatory.json' in changed
               print("run=true")
               print("phase=FINAL")
+              print("publish_from_observatory="+("true" if from_observatory else "false"))
+              raise SystemExit
+          if event in {"pull_request","workflow_dispatch"}:
+              print("run=true")
+              print("phase=FINAL")
+              print("publish_from_observatory=false")
               raise SystemExit
 
           now_et=datetime.now(timezone.utc).astimezone(ZoneInfo("America/New_York"))
@@ -91,6 +106,7 @@ jobs:
                   and (pulse.get("market_date_us") != session or pulse.get("snapshot_status") != "FINAL"))
               print("run="+("true" if ok else "false"))
               print("phase=FINAL")
+              print("publish_from_observatory=false")
               print("ny_now="+now_et.isoformat())
               raise SystemExit
           expected_hour=20 if now_et.utcoffset().total_seconds()==-4*3600 else 21
@@ -100,6 +116,7 @@ jobs:
           ok=(hour==expected_hour and minute==10)
           print("run="+("true" if ok else "false"))
           print("phase=FINAL")
+          print("publish_from_observatory=false")
           print("ny_now="+now_et.isoformat())
           PY
 
@@ -168,7 +185,7 @@ jobs:
           PY
 
       - name: Publish Daily Market Pulse
-        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[force-market-pulse-refresh]')))
+        if: steps.gate.outputs.run == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[force-market-pulse-refresh]') || steps.gate.outputs.publish_from_observatory == 'true')))
         shell: bash
         run: |
           set -euo pipefail

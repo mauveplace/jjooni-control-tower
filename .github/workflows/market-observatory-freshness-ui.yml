@@ -7,6 +7,15 @@ on:
       - tools/build_observatory_freshness.py
       - market-observatory/freshness-watchdog-v1.js
       - market-observatory/data/watchdog-status.json
+      # Data commits are authoritative refresh events. Relying only on
+      # workflow_run can miss reruns/skipped wrapper runs and leave the panel
+      # describing an older session than the page itself.
+      - market-observatory/data/observatory.json
+      - market-observatory/data/daily-market-pulse.json
+      - public-market-daily.json
+      - market-observatory/data/fed-watch.json
+      - market-observatory/data/economic-calendar.json
+      - market-observatory/data/sector-etf.json
       - .github/workflows/market-observatory-freshness-ui.yml
   workflow_run:
     workflows:
@@ -85,10 +94,10 @@ jobs:
 
           assert f.get('schema')=='JJOONI_OBSERVATORY_FRESHNESS_STATUS_V1',f
           assert f.get('read_only') is True
-          assert set(['market','pulse','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
+          assert set(['market','kr_equity','us_supplement','pulse','fear_greed','fedwatch','tripod','calendar','sector']).issubset((f.get('groups') or {}).keys())
           align=f.get('session_alignment') or {}
           assert align.get('observatory')
-          assert 'pulse_aligned' in align and 'tripod_aligned' in align,align
+          assert 'pulse_aligned' in align and 'tripod_aligned' in align and 'us_supplement_aligned' in align,align
           assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
