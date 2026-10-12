@@ -1,0 +1,50 @@
+{
+  "bucket": {
+    "available_from": "2026-09-30",
+    "available_to": "2026-09-30",
+    "category": "GDP/PCE/무역",
+    "count": 1,
+    "country": "US",
+    "event_title": "Personal Income and Outlays, August 2026",
+    "kind": "metric",
+    "label": "PCE Price Index YoY",
+    "metric_key": "pce_yoy",
+    "quality": {
+      "actual_count": 1,
+      "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+      "consensus_count": 1,
+      "frequency_validation": "NOT_VALIDATED",
+      "max_observed_gap_days": 0,
+      "rows_by_year": {
+        "2026": 1
+      },
+      "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+    },
+    "ref": "US::personal-income-and-outlays::pce_yoy",
+    "rows": [
+      {
+        "actual": "0.2%",
+        "checked_kst": "2026-10-13T08:44:41+09:00",
+        "consensus": "0.3%",
+        "consensus_source": "FairEconomy/ForexFactory",
+        "consensus_source_tier": "MARKET_FEED",
+        "date": "2026-09-30",
+        "datetime_kst": "2026-09-30T21:30+09:00",
+        "label": "PCE Price Index YoY",
+        "metric_key": "pce_yoy",
+        "previous": "0.1%",
+        "previous_source": "FairEconomy/ForexFactory",
+        "previous_source_tier": "MARKET_FEED",
+        "reference_period": "",
+        "source": "FairEconomy/ForexFactory",
+        "source_tier": "MARKET_FEED",
+        "source_url": "https://www.forexfactory.com/calendar?week=sep27.2026",
+        "surprise": null,
+        "te_forecast": null,
+        "verification_status": "MARKET_REPORTED"
+      }
+    ]
+  },
+  "ref": "US::personal-income-and-outlays::pce_yoy",
+  "schema": "JJOONI_CALENDAR_HISTORY_SERIES_V1"
+}
