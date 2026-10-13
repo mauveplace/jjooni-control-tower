@@ -14,6 +14,8 @@ import math
 import os
 import urllib.parse
 import urllib.request
+import urllib.error
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -37,8 +39,20 @@ LOOKBACK_DAYS = 500
 
 def _get_json(url: str) -> dict:
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/json'})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        return json.loads(r.read().decode('utf-8'))
+    # Retry transient transport errors only, with a bounded per-request budget.
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return json.loads(r.read().decode('utf-8'))
+        except urllib.error.HTTPError as exc:
+            if exc.code not in {429, 500, 502, 503, 504}:
+                raise RuntimeError(f'ECOS_HTTP_{exc.code}') from None
+        except (urllib.error.URLError, TimeoutError, OSError):
+            pass
+        if attempt < 2:
+            time.sleep(0.5 * (attempt + 1))
+    # Never include the URL (which contains the registered API key) in errors.
+    raise RuntimeError('ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS') from None
 
 
 def _url(key: str, start_count: int, end_count: int, start: str, end: str, item: str) -> str:

@@ -82,6 +82,11 @@ def build():
     make_group('metals',EXPECTED_SERIES['metals'],session,1,False)
     make_group('us_rates',EXPECTED_SERIES['us_rates'],session,3,False)
     make_group('kr_rates',EXPECTED_SERIES['kr_rates'],today,4,False)
+    kr_fetch=(obs.get('cross_market_freshness_quality') or {}).get('KR_RATES') or {}
+    if kr_fetch.get('fetch_succeeded') is False:
+        groups['kr_rates']['state']='STALE'
+        groups['kr_rates']['fetch_succeeded']=False
+        groups['kr_rates']['failed_series']=kr_fetch.get('failed_series') or {}
     make_group('jp_rates',EXPECTED_SERIES['jp_rates'],today,5,False)
     make_group('crypto',EXPECTED_SERIES['crypto'],None,0,False)
     make_group('sentiment',EXPECTED_SERIES['sentiment'],session,2,False)
