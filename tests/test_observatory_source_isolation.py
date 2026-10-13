@@ -57,6 +57,11 @@ class SourceIsolationTest(unittest.TestCase):
         self.assertEqual(got['groups']['kr_rates']['state'],'STALE')
         self.assertTrue(any(i['code']=='GROUP_KR_RATES_STALE' for i in got['issues']))
 
+    def test_daily_publishes_all_fedwatch_generated_outputs(self):
+        src=(ROOT/'.github/workflows/market-observatory-daily.yml').read_text()
+        publication=next(line for line in src.splitlines() if 'publish_observatory_data.py' in line and 'fed-watch.json' in line)
+        self.assertIn('find market-observatory/data/fedwatch-history -type f',publication)
+
     def test_failed_collector_cannot_skip_independent_publish_and_remains_failed(self):
         workflow=yaml.safe_load((ROOT/'.github/workflows/market-observatory-supplemental-freshness.yml').read_text())
         self.assertEqual(workflow['concurrency']['group'],'observatory-cross-market-writer')
