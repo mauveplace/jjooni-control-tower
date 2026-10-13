@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1]
 TOOLS=ROOT/'tools'
 if str(TOOLS) not in sys.path:sys.path.insert(0,str(TOOLS))
-import build_fed_watch as fedwatch_calendar
+import fedwatch_trade_calendar as fedwatch_calendar
 
 DATA=ROOT/'market-observatory'/'data'
 OUT=DATA/'data-audit.json'

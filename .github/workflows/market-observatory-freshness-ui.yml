@@ -6,6 +6,7 @@ on:
     paths:
       - tools/build_observatory_freshness.py
       - tools/audit_observatory_data.py
+      - tools/fedwatch_trade_calendar.py
       - market-observatory/freshness-watchdog-v1.js
       - market-observatory/freshness-all-groups-v1.js
       - market-observatory/data/watchdog-status.json
@@ -58,7 +59,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/audit_observatory_data.py
+          python -m py_compile tools/fedwatch_trade_calendar.py tools/audit_observatory_data.py
           python tools/audit_observatory_data.py
 
       - name: Build consolidated freshness SSOT
