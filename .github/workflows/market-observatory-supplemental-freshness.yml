@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - tools/refresh_observatory_supplementals.py
+      - tools/refresh_observatory_kr_rates.py
       - tools/build_fed_watch.py
       - tools/audit_observatory_data.py
+      - tests/test_observatory_kr_rates_freshness.py
       - .github/workflows/market-observatory-supplemental-freshness.yml
   workflow_run:
     workflows:
@@ -49,15 +51,25 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             tools/refresh_observatory_supplementals.py \
+            tools/refresh_observatory_kr_rates.py \
             tools/build_fed_watch.py \
             tools/audit_observatory_data.py \
             tools/build_observatory_sector_etf.py
+          python -m unittest tests.test_observatory_kr_rates_freshness -v
 
       - name: Refresh all public market families
         shell: bash
         run: |
           set -euo pipefail
           python tools/refresh_observatory_supplementals.py
+
+      - name: Refresh Korean Treasury curve from BOK ECOS
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/refresh_observatory_kr_rates.py
 
       - name: Refresh FedWatch when stale
         shell: bash
@@ -92,9 +104,11 @@ jobs:
           a=json.loads(Path('market-observatory/data/data-audit.json').read_text(encoding='utf-8'))
           assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V2',a.get('schema')
           assert int(a.get('critical_count') or 0)==0,a.get('issues')
-          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals']:
+          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
               assert (a.get('groups') or {}).get(name,{}).get('state')=='LIVE',(name,(a.get('groups') or {}).get(name))
-          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall='+str(a.get('overall'))+' warnings='+str(a.get('warning_count')))
+          assert int(a.get('warning_count') or 0)==0,a.get('issues')
+          assert a.get('overall')=='PASS',a.get('issues')
+          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall=PASS warnings=0')
           PY
 
       - name: Publish repaired market sources
