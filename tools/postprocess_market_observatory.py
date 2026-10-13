@@ -110,39 +110,18 @@ def merge(a, b):
 
 
 def patch_rates(o):
-    key = os.getenv('BOK_ECOS_API_KEY') or 'sample'
-    now = datetime.now(KST)
-    s = o.setdefault('series', {})
+    from refresh_observatory_kr_rates import refresh
+    refresh(o)
+    q = (o.get('cross_market_freshness_quality') or {}).get('KR_RATES') or {}
+    o.setdefault('quality', {})['kr_rates'] = {
+        'state': 'PASS' if q.get('status') == 'LIVE' else 'STALE',
+        'source': 'BOK_ECOS',
+        'errors': q.get('failed_series') or {},
+    }
     latest = o.setdefault('latest', {})
-    first = not bool(s.get('KR3Y'))
-    start = (now - timedelta(days=370 if first else 45)).strftime('%Y%m%d')
-    end = now.strftime('%Y%m%d')
-    errors = {}
-    for name, item in KR.items():
-        try:
-            fresh = ecos_series(item, start, end, key, cap=320 if first else 80)
-            if fresh:
-                s[name] = merge(s.get(name), fresh)
-            latest[name] = s[name][-1]['value'] if s.get(name) else None
-        except Exception as exc:
-            errors[name] = type(exc).__name__
-    if s.get('KR3Y') and s.get('KR10Y'):
-        a = {x['date']: x['value'] for x in s['KR10Y']}
-        b = {x['date']: x['value'] for x in s['KR3Y']}
-        s['KR_3S10S'] = [
-            {'date': d, 'value': round(a[d] - b[d], 8)}
-            for d in sorted(set(a) & set(b))
-        ]
-        latest['KR_3S10S'] = s['KR_3S10S'][-1]['value'] if s['KR_3S10S'] else None
     us = latest.get('US10Y_OFFICIAL') or latest.get('US10Y')
     if latest.get('KR10Y') is not None and us is not None:
         latest['KR_US_10Y'] = round(latest['KR10Y'] - us, 8)
-    o.setdefault('quality', {})['kr_rates'] = {
-        'state': 'PASS' if latest.get('KR10Y') is not None else 'UNAVAILABLE',
-        'source': 'BOK_ECOS',
-        'window': '1Y_BACKFILL_THEN_45D_INCREMENT',
-        'errors': errors,
-    }
 
 
 def cnn_fear_greed_snapshot():

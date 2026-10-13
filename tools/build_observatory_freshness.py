@@ -32,7 +32,11 @@ def _aggregate_states(states):
 
 def _audit_detail(audit_group):
     items=audit_group.get('items') or {}
-    return ' · '.join(f"{k} {v.get('last_date') or '—'}" for k,v in items.items())
+    detail = ' · '.join(f"{k} {v.get('last_date') or '—'}" for k,v in items.items())
+    failed = audit_group.get('failed_series') or {}
+    if failed:
+        detail += ' · 수집 실패: ' + ', '.join(f'{k} ({v})' for k, v in failed.items())
+    return detail
 
 def _audit_asof(audit_group):
     dates=[str(v.get('last_date') or '')[:10] for v in (audit_group.get('items') or {}).values() if v.get('last_date')]
@@ -74,7 +78,7 @@ def build_status(root: Path = ROOT) -> dict:
         'fx':group('FX / DXY',(ag.get('fx') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('fx') or {}),_audit_detail(ag.get('fx') or {}),'Yahoo DXY / FX daily',False),
         'metals':group('Metals',(ag.get('metals') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('metals') or {}),_audit_detail(ag.get('metals') or {}),'Yahoo Gold / Silver / Copper',False),
         'us_rates':group('US Rates',(ag.get('us_rates') or {}).get('state'),obs.get('generated_kst'),_audit_asof(ag.get('us_rates') or {}),_audit_detail(ag.get('us_rates') or {}),'U.S. Treasury official',False),
-        'kr_rates':group('KR Rates',(ag.get('kr_rates') or {}).get('state'),obs.get('generated_kst'),_audit_asof(ag.get('kr_rates') or {}),_audit_detail(ag.get('kr_rates') or {}),'BOK ECOS',False),
+        'kr_rates':group('KR Rates',(ag.get('kr_rates') or {}).get('state'),obs.get('kr_rates_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('kr_rates') or {}),_audit_detail(ag.get('kr_rates') or {}),'BOK ECOS',False),
         'jp_rates':group('JP Rates',(ag.get('jp_rates') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('jp_rates') or {}),_audit_detail(ag.get('jp_rates') or {}),'Japan MOF current JGB CSV',False),
         'crypto':group('Crypto',(ag.get('crypto') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('equity_enriched_kst'),None,' · '.join(f"{k} age={v.get('current_quote_age_seconds','—')}s" for k,v in (audit.get('crypto_status') or {}).items()),'Yahoo spot crypto quote',False),
         'pulse':group('Daily Pulse',pulse_state,pulse.get('generated_kst'),pulse_session,f"snapshot={pulse.get('snapshot_status') or '—'} · Observatory session={session or '—'}",'daily-market-pulse.json',True),

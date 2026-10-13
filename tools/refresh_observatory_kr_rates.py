@@ -35,6 +35,20 @@ KR_RATES = {
 REGISTERED_MAX_PAGE = 1000
 SAMPLE_MAX_PAGE = 10
 LOOKBACK_DAYS = 500
+INCREMENTAL_LOOKBACK_DAYS = 14
+
+
+def _fallback_json(url: str) -> dict:
+    """Same official HTTPS endpoint through libcurl; never expose the key URL."""
+    try:
+        from curl_cffi import requests
+        response = requests.get(url, headers={'User-Agent': UA, 'Accept': 'application/json'},
+                                impersonate='chrome', timeout=(5, 15))
+        response.raise_for_status()
+        return response.json()
+    except Exception as exc:
+        # Exception strings may embed the registered key. Keep only the class.
+        raise RuntimeError('ECOS_CURL_FALLBACK_' + type(exc).__name__) from None
 
 
 def _get_json(url: str) -> dict:
@@ -52,7 +66,12 @@ def _get_json(url: str) -> dict:
         if attempt < 2:
             time.sleep(0.5 * (attempt + 1))
     # Never include the URL (which contains the registered API key) in errors.
-    raise RuntimeError('ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS') from None
+    try:
+        result = _fallback_json(url)
+        print('ECOS_TRANSPORT_RECOVERED=HTTPS_LIBCURL_FALLBACK')
+        return result
+    except RuntimeError as exc:
+        raise RuntimeError('ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;' + str(exc)) from None
 
 
 def _url(key: str, start_count: int, end_count: int, start: str, end: str, item: str) -> str:
@@ -164,9 +183,16 @@ def refresh(data: dict, api_key: str | None = None) -> dict:
     last_dates = {}
     refreshed_status = {}
 
+    transport_unavailable = False
     for name, item in KR_RATES.items():
         try:
-            fresh = fetch_ecos_series(api_key, item, start, end)
+            if transport_unavailable:
+                raise RuntimeError('ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN')
+            old_last = str(((series.get(name) or [{}])[-1]).get('date') or '')[:10]
+            old_age = _age_days(old_last)
+            request_start = ((end_d - timedelta(days=INCREMENTAL_LOOKBACK_DAYS)).strftime('%Y%m%d')
+                             if old_age is not None and 0 <= old_age <= 10 else start)
+            fresh = fetch_ecos_series(api_key, item, request_start, end)
             merged = merge_rows(series.get(name), fresh)
             series[name] = merged
             latest[name] = merged[-1]['value'] if merged else None
@@ -188,6 +214,8 @@ def refresh(data: dict, api_key: str | None = None) -> dict:
             }
             print(f'KR_RATE_REFRESH={name} status={status} last_date={last} rows={len(fresh)} api_mode={api_mode}')
         except Exception as exc:
+            if str(exc).startswith('ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS'):
+                transport_unavailable = True
             old = series.get(name) or []
             last = str((old[-1] if old else {}).get('date') or '')[:10] or None
             last_dates[name] = last

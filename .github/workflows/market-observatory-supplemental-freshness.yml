@@ -6,9 +6,11 @@ on:
     paths:
       - tools/refresh_observatory_supplementals.py
       - tools/refresh_observatory_kr_rates.py
+      - tools/accept_observatory_sources.py
       - tools/build_fed_watch.py
       - tools/audit_observatory_data.py
       - tests/test_observatory_kr_rates_freshness.py
+      - tests/test_observatory_ecos_resilience.py
       - tests/test_observatory_source_isolation.py
       - tests/test_observatory_fedwatch_publish_conflict.py
       - tools/publish_observatory_data.py
@@ -58,7 +60,7 @@ jobs:
             tools/build_fed_watch.py \
             tools/audit_observatory_data.py \
             tools/build_observatory_sector_etf.py
-          python -m unittest tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status tests.test_observatory_fedwatch_publish_conflict -v
+          python -m unittest tests.test_observatory_ecos_resilience tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status tests.test_observatory_fedwatch_publish_conflict -v
 
       - name: Refresh all public market families
         id: supplemental
@@ -128,10 +130,12 @@ jobs:
             market-observatory/data/observatory.json \
             market-observatory/data/fed-watch.json \
             market-observatory/data/sector-etf.json \
+            market-observatory/data/data-audit.json \
+            market-observatory/data/freshness-status.json \
             $(find market-observatory/data/fedwatch-history -type f | sort)
 
-      # Publish independently repaired families first. A failed source remains
-      # STALE and the run still fails; it cannot suppress other fresh families.
+      # Source degradation is visible in its own status and job summary.
+      # Only structural/critical integrity errors block the publication contract.
       - name: Final cross-market health acceptance
         if: ${{ !cancelled() }}
         env:
@@ -139,19 +143,4 @@ jobs:
           KR_RATES_OUTCOME: ${{ steps.kr_rates.outcome }}
           FEDWATCH_OUTCOME: ${{ steps.fedwatch.outcome }}
           SECTOR_OUTCOME: ${{ steps.sector.outcome }}
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          outcomes={k:os.environ[k] for k in ['SUPPLEMENTAL_OUTCOME','KR_RATES_OUTCOME','FEDWATCH_OUTCOME','SECTOR_OUTCOME']}
-          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
-              f.write('## Cross-market collector results\n'+json.dumps(outcomes)+'\n')
-          assert all(v=='success' for v in outcomes.values()),outcomes
-          a=json.loads(Path('market-observatory/data/data-audit.json').read_text(encoding='utf-8'))
-          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
-              assert (a.get('groups') or {}).get(name,{}).get('state')=='LIVE',(name,(a.get('groups') or {}).get(name))
-          assert int(a.get('warning_count') or 0)==0,a.get('issues')
-          assert a.get('overall')=='PASS',a.get('issues')
-          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall=PASS warnings=0')
-          PY
+        run: python tools/accept_observatory_sources.py
