@@ -89,7 +89,9 @@ def build():
         groups['kr_rates']['failed_series']=kr_fetch.get('failed_series') or {}
     make_group('jp_rates',EXPECTED_SERIES['jp_rates'],today,5,False)
     make_group('crypto',EXPECTED_SERIES['crypto'],None,0,False)
-    make_group('sentiment',EXPECTED_SERIES['sentiment'],session,2,False)
+    # Sentiment is a latest published observation, not a completed cash close.
+    # Accept today's published value, reject future dates and retain weekend tolerance.
+    make_group('sentiment',EXPECTED_SERIES['sentiment'],today,4,False)
 
     pulse_session=str(pulse.get('market_date_us') or '')[:10] or None;tripod=(public.get('tripod_signal') or {});tripod_session=str(tripod.get('date') or tripod.get('session_date') or '')[:10] or None
     supplement=(obs.get('market_supplement_quality') or {});us_sup_quality={k:(supplement.get(k) or {}) for k in EXPECTED_SERIES['us_supplement']};kr_quality={k:(supplement.get(k) or {}) for k in EXPECTED_SERIES['kr_equity']}
