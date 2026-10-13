@@ -38,6 +38,15 @@ class SourceIsolationTest(unittest.TestCase):
             self.assertEqual(len(got['series']['KR3Y']),2)
             self.assertFalse(got['cross_market_freshness_quality']['KR_RATES']['fetch_succeeded'])
 
+    def test_concurrent_daily_publish_preserves_supplemental_same_session_only(self):
+        remote={'generated_kst':'2026-10-13T14:00:00+09:00','us_completed_session_date':'2026-10-12','series':{'WTI':[{'date':'2026-10-09','value':90}]}}
+        local={'generated_kst':'2026-10-13T12:00:00+09:00','us_completed_session_date':'2026-10-12','supplemental_refreshed_kst':'2026-10-13T13:00:00+09:00','series':{'WTI':[{'date':'2026-10-12','value':93.16}]}}
+        got=pub.merge_generated('market-observatory/data/observatory.json',local,remote)
+        self.assertEqual(got['latest']['WTI'],93.16)
+        remote['us_completed_session_date']='2026-10-13'
+        got=pub.merge_generated('market-observatory/data/observatory.json',local,remote)
+        self.assertEqual(got['series']['WTI'],remote['series']['WTI'])
+
     def test_audit_does_not_declare_cached_dates_live_after_failed_fetch(self):
         obs=audit.load(audit.DATA/'observatory.json')
         obs=copy.deepcopy(obs)
@@ -50,6 +59,7 @@ class SourceIsolationTest(unittest.TestCase):
 
     def test_failed_collector_cannot_skip_independent_publish_and_remains_failed(self):
         workflow=yaml.safe_load((ROOT/'.github/workflows/market-observatory-supplemental-freshness.yml').read_text())
+        self.assertEqual(workflow['concurrency']['group'],'observatory-cross-market-writer')
         steps=workflow['jobs']['refresh']['steps']
         collectors={s['id']:s for s in steps if s.get('id')}
         for name in ('supplemental','kr_rates','fedwatch','sector'):
