@@ -26,6 +26,17 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    await page.goto(base,{waitUntil:'networkidle',timeout:90000});
    await page.click('button[data-tab="calendar"]');
    await page.waitForSelector('#events .event');
+   // The UI correctly opens the current month. Navigate to the historical
+   // release month explicitly so this regression survives month rollover.
+   const targetMonth=targets[0][0].slice(0,7);
+   for(let attempt=0;attempt<120;attempt++){
+    const selected=(await page.locator('#calendarMonth').innerText()).trim();
+    if(selected===targetMonth)break;
+    assert(/^\d{4}-\d{2}$/.test(selected),'invalid selected calendar month');
+    await page.click(selected>targetMonth?'#prevMonth':'#nextMonth');
+   }
+   assert.equal((await page.locator('#calendarMonth').innerText()).trim(),targetMonth);
+
    const response=await page.request.get(base+'data/economic-calendar.json?qa='+Date.now());
    assert(response.ok());const data=await response.json();
    for(const [date,title,value] of targets){
@@ -34,7 +45,7 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
     // Recurring releases (claims, PMI, etc.) legitimately appear multiple times in
     // the selected month. Scope the DOM assertion to the target release's verified
     // actual instead of requiring the title itself to be globally unique.
-    const row=page.locator('#events .event').filter({hasText:title}).filter({hasText:value});
+    const row=page.locator('#events .event').filter({hasText:title}).filter({has:page.locator('.date').filter({hasText:date.slice(5)})});
     assert.equal(await row.count(),1,`${title} ${date} ${value}`);await row.scrollIntoViewIfNeeded();
     const text=await row.innerText();assert(text.includes(value),title+' actual not rendered');
     const metrics=await row.locator('.actual').allTextContents();assert(metrics.some(x=>x.includes(value)),title+' actual column missing');
