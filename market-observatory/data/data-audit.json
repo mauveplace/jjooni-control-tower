@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-13T12:17:38+09:00",
+  "generated_kst": "2026-10-13T12:18:04+09:00",
   "overall": "PASS",
   "critical_count": 0,
   "warning_count": 0,
@@ -23,11 +23,11 @@
       "target": "TQQQ 100%"
     },
     "fedwatch": {
-      "generated_kst": "2026-10-13T12:00:48+09:00",
+      "generated_kst": "2026-10-13T12:17:40+09:00",
       "market_data_as_of": "2026-10-09",
-      "expected_market_data_date": "2026-10-09",
+      "expected_market_data_date": "2026-10-12",
       "audit_expected_market_data_date": "2026-10-09",
-      "declared_freshness": "LIVE",
+      "declared_freshness": "LAGGING",
       "audit_state": "LIVE"
     },
     "calendar": {
@@ -64,15 +64,10 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-13T12:00:14+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
+      "generated_kst": "2026-10-13T12:17:38+09:00",
+      "overall": "LIVE",
       "critical_bad": [],
-      "warnings": [
-        "kr_rates",
-        "jp_rates",
-        "fedwatch",
-        "audit"
-      ]
+      "warnings": []
     },
     "watchdog": {
       "checked_kst": "2026-10-13T10:58:24+09:00",
@@ -515,14 +510,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T12:13:30+09:00",
-      "current_quote_age_seconds": 248,
+      "current_quote_age_seconds": 274,
       "captured_quote_age_seconds": 5
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-13T12:13:27+09:00",
-      "current_quote_age_seconds": 251,
+      "current_quote_age_seconds": 277,
       "captured_quote_age_seconds": 9
     }
   },
