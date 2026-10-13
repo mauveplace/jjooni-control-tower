@@ -57,6 +57,14 @@ class SourceIsolationTest(unittest.TestCase):
         self.assertEqual(got['groups']['kr_rates']['state'],'STALE')
         self.assertTrue(any(i['code']=='GROUP_KR_RATES_STALE' for i in got['issues']))
 
+    def test_concurrent_fedwatch_index_preserves_both_revisions(self):
+        def document(digest,generated):
+            return {'entries':[{'market_data_as_of':'2026-10-09','revisions':[{'sha256':digest,'path':digest+'.json','generated_kst':generated}]}]}
+        got=pub.merge_generated('market-observatory/data/fedwatch-history/index.json',document('a','2026-10-13T12:00:00'),document('b','2026-10-13T13:00:00'))
+        entry=got['entries'][0]
+        self.assertEqual(len(entry['revisions']),2)
+        self.assertEqual(entry['path'],'b.json')
+
     def test_skipped_heartbeat_never_enters_canonical_writer_queue(self):
         daily=yaml.safe_load((ROOT/'.github/workflows/market-observatory-daily.yml').read_text())
         verified=yaml.safe_load((ROOT/'.github/workflows/market-observatory-calendar-verified.yml').read_text())
