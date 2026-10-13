@@ -1,9 +1,12 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-13T13:22:58+09:00",
-  "overall": "LIVE",
+  "generated_kst": "2026-10-13T13:23:16+09:00",
+  "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
-  "warnings": [],
+  "warnings": [
+    "fear_greed",
+    "audit"
+  ],
   "watchdog_required": false,
   "session_alignment": {
     "source_session": "2026-10-12",
@@ -31,7 +34,7 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-13",
       "detail": "KOSPI 2026-10-13 · KOSDAQ 2026-10-13",
       "source": "Naver Finance primary",
@@ -40,7 +43,7 @@
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-12",
       "detail": "RUSSELL2000 2026-10-12 · DOW 2026-10-12 · NASDAQCOMPOSITE 2026-10-12",
       "source": "Yahoo completed cash-session daily",
@@ -49,7 +52,7 @@
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-12",
       "detail": "WTI 2026-10-12 · BRENT 2026-10-12 · NATGAS 2026-10-12",
       "source": "Yahoo CL=F / BZ=F / NG=F",
@@ -58,7 +61,7 @@
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-12",
       "detail": "DXY 2026-10-12 · USDKRW 2026-10-12 · USDJPY 2026-10-12 · JPYKRW 2026-10-12",
       "source": "Yahoo DXY / FX daily",
@@ -67,7 +70,7 @@
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-12",
       "detail": "GOLD 2026-10-12 · SILVER 2026-10-12 · COPPER 2026-10-12",
       "source": "Yahoo Gold / Silver / Copper",
@@ -94,7 +97,7 @@
     "jp_rates": {
       "label": "JP Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": "2026-10-09",
       "detail": "JP2Y 2026-10-09 · JP5Y 2026-10-09 · JP10Y 2026-10-09 · JP30Y 2026-10-09 · JP_2S10S 2026-10-09",
       "source": "Japan MOF current JGB CSV",
@@ -103,9 +106,9 @@
     "crypto": {
       "label": "Crypto",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=368s · ETHUSD age=369s",
+      "detail": "BTCUSD age=67s · ETHUSD age=68s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -120,17 +123,17 @@
     },
     "fear_greed": {
       "label": "Fear & Greed",
-      "state": "LIVE",
-      "generated_kst": "2026-10-13T13:16:53+09:00",
-      "as_of": "2026-10-12",
-      "detail": "45.7/100 · NEUTRAL",
+      "state": "AHEAD_OF_ANCHOR",
+      "generated_kst": "2026-10-13T13:22:21+09:00",
+      "as_of": "2026-10-13",
+      "detail": "45.4/100 · NEUTRAL",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
     "fedwatch": {
       "label": "FedWatch",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:17:00+09:00",
+      "generated_kst": "2026-10-13T13:22:27+09:00",
       "as_of": "2026-10-09",
       "detail": "expected=2026-10-09 · FOMC 2026-10-28",
       "source": "CME Fed Funds settlement",
@@ -148,7 +151,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T13:17:07+09:00",
+      "generated_kst": "2026-10-13T13:22:31+09:00",
       "as_of": "2026-10-12",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -174,10 +177,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-13T13:22:57+09:00",
+      "state": "WARN",
+      "generated_kst": "2026-10-13T13:23:16+09:00",
       "as_of": "2026-10-12",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     }
