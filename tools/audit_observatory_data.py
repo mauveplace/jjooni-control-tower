@@ -2,11 +2,16 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, date, time, timedelta
+import sys
+from datetime import datetime, date
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT=Path(__file__).resolve().parents[1]
+TOOLS=ROOT/'tools'
+if str(TOOLS) not in sys.path:sys.path.insert(0,str(TOOLS))
+import build_fed_watch as fedwatch_calendar
+
 DATA=ROOT/'market-observatory'/'data'
 OUT=DATA/'data-audit.json'
 KST=ZoneInfo('Asia/Seoul'); ET=ZoneInfo('America/New_York')
@@ -53,18 +58,6 @@ def state_from_dates(dates,anchor=None,allow_lag_days=0):
     if lag>allow_lag_days:return 'LAGGING'
     return 'LIVE'
 
-def previous_weekday(d):
-    d=d-timedelta(days=1)
-    while d.weekday()>=5:d-=timedelta(days=1)
-    return d
-
-def expected_fedwatch_trade_date(now_et):
-    d=now_et.date()
-    if d.weekday()>=5:
-        while d.weekday()>=5:d-=timedelta(days=1)
-        return d
-    return d if now_et.timetz().replace(tzinfo=None)>=time(16,30) else previous_weekday(d)
-
 def build():
     now=datetime.now(KST); now_et=now.astimezone(ET); today=now.date().isoformat()
     obs=load(DATA/'observatory.json');pulse=load(DATA/'daily-market-pulse.json');public=load(ROOT/'public-market-daily.json')
@@ -106,7 +99,7 @@ def build():
         crypto_status[k]={'status':state,'producer_status':raw.get('status'),'quote_as_of_kst':raw.get('quote_as_of_kst'),'current_quote_age_seconds':age,'captured_quote_age_seconds':raw.get('quote_age_seconds')}
     if any(v['status']!='LIVE' for v in crypto_status.values()):groups['crypto']['state']='STALE'
 
-    fed_expected=expected_fedwatch_trade_date(now_et).isoformat();fed_asof=str(fed.get('market_data_as_of') or '')[:10] or None
+    fed_expected=fedwatch_calendar._expected_latest_trade_date(now_et).isoformat();fed_asof=str(fed.get('market_data_as_of') or '')[:10] or None
     fed_state='UNAVAILABLE' if not fed_asof else ('LIVE' if fed_asof>=fed_expected else 'LAGGING')
     groups['fedwatch']={'state':fed_state,'anchor':fed_expected,'allow_lag_days':0,'critical':False,'items':{'FEDWATCH':{'last_date':fed_asof,'last_value':None}},'missing':[] if fed_asof else ['FEDWATCH'],'latest_mismatch':[]}
 
@@ -140,7 +133,7 @@ def build():
     if cal_state in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_ACTUAL_'+str(cal_state),'WARN',f'overdue_count={calendar_overdue_count} pending_count={calendar_pending_count}')
     if cal_collection.get('status') in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_COLLECTION_'+str(cal_collection.get('status')),'WARN',f'failed_source_count={len(failed_calendar_sources)} sources='+','.join(str(x.get('source') or 'unknown') for x in failed_calendar_sources if isinstance(x,dict)))
     critical=[x for x in issues if x['severity']=='CRITICAL'];warnings=[x for x in issues if x['severity']=='WARN'];overall='FAIL' if critical else ('WARN' if warnings else 'PASS')
-    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V2','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY','official_rates':'US_OFFICIAL_RATES_MAX_3_CALENDAR_DAYS_KR_MAX_4_JP_MAX_5','crypto':'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S','fedwatch':'MARKET_DATA_AS_OF_MUST_MEET_CURRENT_EXPECTED_CME_TRADE_DATE','calendar':'USES_CANONICAL_OVERDUE_COUNT_AND_OVERDUE_EVENTS_PLUS_COLLECTION_HEALTH','no_account_data':True,'read_only':True},'read_only':True}
+    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V2','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY','official_rates':'US_OFFICIAL_RATES_MAX_3_CALENDAR_DAYS_KR_MAX_4_JP_MAX_5','crypto':'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S','fedwatch':'CME_FED_FUNDS_HOLIDAY_AWARE_EXPECTED_TRADE_DATE','calendar':'USES_CANONICAL_OVERDUE_COUNT_AND_OVERDUE_EVENTS_PLUS_COLLECTION_HEALTH','no_account_data':True,'read_only':True},'read_only':True}
 
 def main():
     out=build();OUT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_DATA_AUDIT='+out['overall']);print('critical_count='+str(out['critical_count']));print('warning_count='+str(out['warning_count']));print('session='+str(out['observatory_session']))
