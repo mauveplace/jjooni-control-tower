@@ -87,6 +87,18 @@ def merge_generated(path, local, remote):
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result
+    if path.endswith('/fedwatch-history/index.json'):
+        entries={}
+        for doc in (remote,local):
+            for row in doc.get('entries') or []:
+                day=row['market_data_as_of']
+                revisions={r['sha256']:r for r in (entries.get(day,{}).get('revisions') or [])}
+                revisions.update({r['sha256']:deepcopy(r) for r in row.get('revisions') or []})
+                if not revisions:continue
+                ordered=sorted(revisions.values(),key=lambda r:(r['generated_kst'],r['sha256']))
+                selected=ordered[-1]
+                entries[day]={'market_data_as_of':day,'path':selected['path'],'generated_kst':selected['generated_kst'],'revisions':ordered}
+        return {**deepcopy(remote),**deepcopy(local),'entries':[entries[d] for d in sorted(entries,reverse=True)]}
     if path.endswith('/economic-calendar-history.json'):
         return merge_history_documents(local, remote)
     if path.endswith('/economic-calendar.json'):
@@ -197,6 +209,12 @@ def publish(paths, message):
         git('fetch', 'origin', 'main')
         payloads = {}
         for path in paths:
+            if path in {DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv'}:
+                # These are deterministic views, regenerated from the merged
+                # archive after rebase. Only these exact generated paths qualify.
+                remote_view=git('show','origin/main:'+path,check=False)
+                payloads[path]=remote_view.stdout if remote_view.returncode==0 else (ROOT/path).read_text(encoding='utf-8')
+                continue
             if not path.startswith(DATA) or not path.endswith('.json'):
                 continue
             remote = git('show', 'origin/main:' + path, check=False)
@@ -219,6 +237,12 @@ def publish(paths, message):
             result = git('-c', 'core.editor=true', 'rebase', '--continue', check=False)
         for path, payload in payloads.items():
             (ROOT / path).write_text(payload, encoding='utf-8')
+        if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
+            from archive_fedwatch import archive_snapshot
+            snapshot=json.loads((ROOT/(DATA+'fed-watch.json')).read_text(encoding='utf-8'))
+            archive_snapshot(snapshot,ROOT/DATA)
+            paths.extend(str(p.relative_to(ROOT)) for p in (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file() and str(p.relative_to(ROOT)) not in paths)
+            git('add','--',*paths)
         refreshed = materialize(ROOT, paths)
         git('add', '--', *payloads, *refreshed)
         if git('diff', '--cached', '--quiet', check=False).returncode:

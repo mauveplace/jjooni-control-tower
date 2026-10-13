@@ -10,6 +10,7 @@ on:
       - tools/audit_observatory_data.py
       - tests/test_observatory_kr_rates_freshness.py
       - tests/test_observatory_source_isolation.py
+      - tests/test_observatory_fedwatch_publish_conflict.py
       - tools/publish_observatory_data.py
       - .github/workflows/market-observatory-supplemental-freshness.yml
   workflow_run:
@@ -57,7 +58,7 @@ jobs:
             tools/build_fed_watch.py \
             tools/audit_observatory_data.py \
             tools/build_observatory_sector_etf.py
-          python -m unittest tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status -v
+          python -m unittest tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status tests.test_observatory_fedwatch_publish_conflict -v
 
       - name: Refresh all public market families
         id: supplemental
