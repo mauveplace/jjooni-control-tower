@@ -14,6 +14,7 @@ workflow, and other non-generated dirty files still fail closed.
 import argparse
 import json
 import subprocess
+import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -192,9 +193,19 @@ def clean_unselected_generated(selected_paths):
     return [path for _, path in discard + ephemeral]
 
 
+def materialize_health(paths):
+    """Derive health from the exact merged sources, never carry an old audit."""
+    health = {DATA + 'data-audit.json', DATA + 'freshness-status.json'}
+    if health.issubset(set(paths)):
+        for script in ('audit_observatory_data.py', 'build_observatory_freshness.py'):
+            subprocess.run([sys.executable, str(ROOT / 'tools' / script)], cwd=ROOT,
+                           check=True, capture_output=True, text=True)
+
+
 def publish(paths, message):
     paths = list(paths)
     paths.extend(materialize(ROOT, paths))
+    materialize_health(paths)
     for path in paths:
         if not (ROOT / path).is_file():
             raise ValueError(f'Publish path missing: {path}')
@@ -244,6 +255,7 @@ def publish(paths, message):
             paths.extend(str(p.relative_to(ROOT)) for p in (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file() and str(p.relative_to(ROOT)) not in paths)
             git('add','--',*paths)
         refreshed = materialize(ROOT, paths)
+        materialize_health(paths)
         git('add', '--', *payloads, *refreshed)
         if git('diff', '--cached', '--quiet', check=False).returncode:
             git('commit', '-m', 'data(observatory): preserve concurrent official observations')

@@ -22,7 +22,7 @@ class SourceIsolationTest(unittest.TestCase):
         self.assertEqual(fetch.call_args.kwargs['timeout'],10)
 
     def test_timeout_budget_is_bounded_and_error_redacts_key(self):
-        with patch.object(kr.urllib.request,'urlopen',side_effect=urllib.error.URLError('secret-key')) as fetch, patch.object(kr.time,'sleep'):
+        with patch.object(kr.urllib.request,'urlopen',side_effect=urllib.error.URLError('secret-key')) as fetch, patch.object(kr.time,'sleep'), patch.object(kr,'_fallback_json',side_effect=RuntimeError('ECOS_CURL_FALLBACK_TIMEOUT')):
             with self.assertRaisesRegex(RuntimeError,'ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS') as caught:
                 kr._get_json('https://ecos.bok.or.kr/api/secret-key')
         self.assertEqual(fetch.call_count,3)
@@ -94,7 +94,7 @@ class SourceIsolationTest(unittest.TestCase):
         publication=next(line for line in src.splitlines() if 'publish_observatory_data.py' in line and 'fed-watch.json' in line)
         self.assertIn('find market-observatory/data/fedwatch-history -type f',publication)
 
-    def test_failed_collector_cannot_skip_independent_publish_and_remains_failed(self):
+    def test_failed_collector_cannot_skip_independent_publish_and_remains_visible(self):
         workflow=yaml.safe_load((ROOT/'.github/workflows/market-observatory-supplemental-freshness.yml').read_text())
         self.assertEqual(workflow['concurrency']['group'],'observatory-cross-market-writer')
         steps=workflow['jobs']['refresh']['steps']
@@ -104,7 +104,10 @@ class SourceIsolationTest(unittest.TestCase):
         names=[s.get('name') for s in steps]
         self.assertLess(names.index('Publish repaired market sources'),names.index('Final cross-market health acceptance'))
         final=steps[-1]
-        self.assertIn("assert all(v=='success'",final['run'])
+        self.assertIn("accept_observatory_sources.py",final['run'])
+        publication=next(s for s in steps if s.get("name")=="Publish repaired market sources")["run"]
+        self.assertIn("data-audit.json",publication)
+        self.assertIn("freshness-status.json",publication)
         self.assertIn('critical_count',next(s for s in steps if s.get('name')=='Audit all Observatory data')['run'])
 
 if __name__=='__main__':unittest.main()
