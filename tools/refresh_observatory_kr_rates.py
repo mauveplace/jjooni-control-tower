@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Refresh the Korean Treasury yield curve in Observatory from BOK ECOS.
 
-The main Observatory builder historically queried the whole recent window with a
-single 1..1000 ECOS page and silently kept old data on an exception.  This small
-self-heal uses the same canonical BOK series identities, fetches the *tail* page
-when a response exceeds 1000 rows, validates the requested item code and merges
-only verified observations.  It never fabricates or interpolates yields.
+Uses the canonical BOK series identities, validates item identity, merges only
+verified observations and never fabricates/interpolates yields.  The public
+ECOS `sample` key is limited to 10 rows per request, so freshness uses a cheap
+head request to discover `list_total_count` followed by an explicit tail page.
+Registered keys retain the normal larger page size.
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 OBS = ROOT / 'market-observatory' / 'data' / 'observatory.json'
 KST = ZoneInfo('Asia/Seoul')
-UA = 'Mozilla/5.0 JJOONI-KR-Rates-Freshness/1.0'
+UA = 'Mozilla/5.0 JJOONI-KR-Rates-Freshness/1.1'
 STAT_CODE = '817Y002'
 KR_RATES = {
     'KR3Y': '010200000',
@@ -30,7 +30,8 @@ KR_RATES = {
     'KR20Y': '010220000',
     'KR30Y': '010230000',
 }
-MAX_PAGE = 1000
+REGISTERED_MAX_PAGE = 1000
+SAMPLE_MAX_PAGE = 10
 LOOKBACK_DAYS = 500
 
 
@@ -46,6 +47,22 @@ def _url(key: str, start_count: int, end_count: int, start: str, end: str, item:
         'https://ecos.bok.or.kr/api/StatisticSearch/' + safe_key +
         f'/json/kr/{start_count}/{end_count}/{STAT_CODE}/D/{start}/{end}/{item}'
     )
+
+
+def _page_size(key: str) -> int:
+    return SAMPLE_MAX_PAGE if str(key or '').strip().lower() == 'sample' else REGISTERED_MAX_PAGE
+
+
+def _api_mode(key: str) -> str:
+    return 'sample' if str(key or '').strip().lower() == 'sample' else 'registered'
+
+
+def _result_error(obj: dict) -> str | None:
+    result = obj.get('RESULT') or {}
+    code = str(result.get('CODE') or '').strip()
+    if code and code not in {'INFO-000'}:
+        return code
+    return None
 
 
 def _extract_rows(obj: dict, item: str) -> tuple[list[dict], int]:
@@ -74,21 +91,28 @@ def _extract_rows(obj: dict, item: str) -> tuple[list[dict], int]:
 
 
 def fetch_ecos_series(key: str, item: str, start: str, end: str) -> list[dict]:
-    first = _get_json(_url(key, 1, MAX_PAGE, start, end, item))
+    page_size = _page_size(key)
+    first = _get_json(_url(key, 1, page_size, start, end, item))
+    err = _result_error(first)
+    if err:
+        raise RuntimeError(f'ECOS_{item}_{err}')
     rows, total = _extract_rows(first, item)
-    # ECOS returns ascending rows.  If there are more than 1000 observations,
-    # request the tail explicitly so a busy/multidimensional series can never
-    # freeze at the 1000th historical row.
-    if total > MAX_PAGE:
-        begin = max(1, total - MAX_PAGE + 1)
+
+    # ECOS is ascending.  We only need the latest verified observations for the
+    # freshness repair, so jump directly to the tail instead of crawling pages.
+    if total > page_size:
+        begin = max(1, total - page_size + 1)
         tail = _get_json(_url(key, begin, total, start, end, item))
+        err = _result_error(tail)
+        if err:
+            raise RuntimeError(f'ECOS_{item}_{err}')
         tail_rows, _ = _extract_rows(tail, item)
         rows.extend(tail_rows)
+
     ded = {x['date']: x for x in rows}
     result = [ded[d] for d in sorted(ded)]
     if not result:
-        code = ((first.get('RESULT') or {}).get('CODE') or 'NO_VERIFIED_ROWS')
-        raise RuntimeError(f'ECOS_{item}_{code}')
+        raise RuntimeError(f'ECOS_{item}_NO_VERIFIED_ROWS')
     return result
 
 
@@ -113,6 +137,7 @@ def _age_days(d: str | None) -> int | None:
 
 def refresh(data: dict, api_key: str | None = None) -> dict:
     api_key = (api_key or os.getenv('BOK_ECOS_API_KEY') or 'sample').strip()
+    api_mode = _api_mode(api_key)
     end_d = datetime.now(KST).date()
     start_d = end_d - timedelta(days=LOOKBACK_DAYS)
     start = start_d.strftime('%Y%m%d')
@@ -123,6 +148,7 @@ def refresh(data: dict, api_key: str | None = None) -> dict:
     source = 'BOK ECOS 817Y002 daily market rates'
     failures = {}
     last_dates = {}
+    refreshed_status = {}
 
     for name, item in KR_RATES.items():
         try:
@@ -134,6 +160,7 @@ def refresh(data: dict, api_key: str | None = None) -> dict:
             last_dates[name] = last
             age = _age_days(last)
             status = 'LIVE' if age is not None and age <= 4 else ('LAGGING' if last else 'UNAVAILABLE')
+            refreshed_status[name] = status
             quality[name] = {
                 'status': status,
                 'source': source,
@@ -142,39 +169,48 @@ def refresh(data: dict, api_key: str | None = None) -> dict:
                 'last_date': last,
                 'age_days': age,
                 'verified_rows': len(fresh),
+                'api_mode': api_mode,
+                'fetch_succeeded': True,
             }
-            print(f'KR_RATE_REFRESH={name} status={status} last_date={last} rows={len(fresh)}')
+            print(f'KR_RATE_REFRESH={name} status={status} last_date={last} rows={len(fresh)} api_mode={api_mode}')
         except Exception as exc:
             old = series.get(name) or []
             last = str((old[-1] if old else {}).get('date') or '')[:10] or None
             last_dates[name] = last
             failures[name] = f'{type(exc).__name__}:{exc}'
+            refreshed_status[name] = 'STALE' if last else 'UNAVAILABLE'
             quality[name] = {
-                'status': 'STALE' if last else 'UNAVAILABLE',
+                'status': refreshed_status[name],
                 'source': source,
                 'stat_code': STAT_CODE,
                 'item_code': item,
                 'last_date': last,
+                'api_mode': api_mode,
+                'fetch_succeeded': False,
                 'fetch_error': failures[name],
             }
-            print(f'KR_RATE_REFRESH={name} status={quality[name]["status"]} last_date={last} error={failures[name]}')
+            print(f'KR_RATE_REFRESH={name} status={quality[name]["status"]} last_date={last} api_mode={api_mode} error={failures[name]}')
 
-    # Derived spread is produced only from two observations sharing the exact
-    # same date; there is no tenor interpolation or carry-forward synthesis.
+    # Derived spread only from observations sharing the exact same date.
     kr3 = {x['date']: x['value'] for x in series.get('KR3Y', []) if x.get('date') and x.get('value') is not None}
     kr10 = {x['date']: x['value'] for x in series.get('KR10Y', []) if x.get('date') and x.get('value') is not None}
     common = sorted(set(kr3) & set(kr10))
     series['KR_3S10S'] = [{'date': d, 'value': round(kr10[d] - kr3[d], 8)} for d in common]
     latest['KR_3S10S'] = series['KR_3S10S'][-1]['value'] if common else None
-    spread_last = common[-1] if common else None
-    last_dates['KR_3S10S'] = spread_last
+    last_dates['KR_3S10S'] = common[-1] if common else None
 
-    ages = [_age_days(last_dates.get(k)) for k in KR_RATES]
-    group_live = not failures and all(a is not None and a <= 4 for a in ages)
+    group_live = (
+        not failures
+        and set(refreshed_status) == set(KR_RATES)
+        and all(refreshed_status.get(k) == 'LIVE' for k in KR_RATES)
+    )
     quality['KR_RATES'] = {
         'status': 'LIVE' if group_live else 'LAGGING',
         'source': source,
+        'api_mode': api_mode,
+        'fetch_succeeded': not failures,
         'last_dates': last_dates,
+        'refreshed_status': refreshed_status,
         'failed_series': failures,
         'spread_contract': 'SAME_DATE_KR10Y_MINUS_KR3Y_NO_INTERPOLATION',
     }
@@ -188,7 +224,12 @@ def main() -> None:
     refresh(data)
     OBS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     q = (data.get('cross_market_freshness_quality') or {}).get('KR_RATES') or {}
-    print('KR_RATES_REFRESH=' + str(q.get('status')) + ' last_dates=' + json.dumps(q.get('last_dates') or {}, ensure_ascii=False, sort_keys=True))
+    print(
+        'KR_RATES_REFRESH=' + str(q.get('status')) +
+        ' api_mode=' + str(q.get('api_mode')) +
+        ' fetch_succeeded=' + str(q.get('fetch_succeeded')) +
+        ' last_dates=' + json.dumps(q.get('last_dates') or {}, ensure_ascii=False, sort_keys=True)
+    )
 
 
 if __name__ == '__main__':
