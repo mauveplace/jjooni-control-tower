@@ -9,6 +9,8 @@ on:
       - tools/build_fed_watch.py
       - tools/audit_observatory_data.py
       - tests/test_observatory_kr_rates_freshness.py
+      - tests/test_observatory_source_isolation.py
+      - tools/publish_observatory_data.py
       - .github/workflows/market-observatory-supplemental-freshness.yml
   workflow_run:
     workflows:
@@ -29,7 +31,7 @@ concurrency:
 
 jobs:
   refresh:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -43,7 +45,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Observatory runtime
-        run: python -m pip install --quiet -r tools/requirements-observatory.txt
+        run: python -m pip install --quiet -r tools/requirements-observatory.txt "PyYAML>=6,<7"
 
       - name: Test freshness repair code
         shell: bash
@@ -55,15 +57,19 @@ jobs:
             tools/build_fed_watch.py \
             tools/audit_observatory_data.py \
             tools/build_observatory_sector_etf.py
-          python -m unittest tests.test_observatory_kr_rates_freshness -v
+          python -m unittest tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status -v
 
       - name: Refresh all public market families
+        id: supplemental
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
           python tools/refresh_observatory_supplementals.py
 
       - name: Refresh Korean Treasury curve from BOK ECOS
+        id: kr_rates
+        continue-on-error: true
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
         shell: bash
@@ -87,26 +93,14 @@ jobs:
           PY
 
       - name: Refresh FedWatch when stale
-        shell: bash
-        run: |
-          set +e
-          python tools/build_fed_watch.py
-          rc=$?
-          if [ $rc -ne 0 ]; then
-            echo "FEDWATCH_REFRESH_WARN=builder_exit_$rc"
-          fi
-          exit 0
+        id: fedwatch
+        continue-on-error: true
+        run: python tools/build_fed_watch.py
 
       - name: Refresh Sector ETF snapshot
-        shell: bash
-        run: |
-          set +e
-          python tools/build_observatory_sector_etf.py
-          rc=$?
-          if [ $rc -ne 0 ]; then
-            echo "SECTOR_REFRESH_WARN=builder_exit_$rc"
-          fi
-          exit 0
+        id: sector
+        continue-on-error: true
+        run: python tools/build_observatory_sector_etf.py
 
       - name: Audit all Observatory data
         shell: bash
@@ -119,11 +113,7 @@ jobs:
           a=json.loads(Path('market-observatory/data/data-audit.json').read_text(encoding='utf-8'))
           assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V2',a.get('schema')
           assert int(a.get('critical_count') or 0)==0,a.get('issues')
-          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
-              assert (a.get('groups') or {}).get(name,{}).get('state')=='LIVE',(name,(a.get('groups') or {}).get(name))
-          assert int(a.get('warning_count') or 0)==0,a.get('issues')
-          assert a.get('overall')=='PASS',a.get('issues')
-          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall=PASS warnings=0')
+          print('CROSS_MARKET_SAFE_PUBLICATION=PASS critical=0; source warnings remain visible')
           PY
 
       - name: Publish repaired market sources
@@ -138,3 +128,29 @@ jobs:
             market-observatory/data/fed-watch.json \
             market-observatory/data/sector-etf.json \
             $(find market-observatory/data/fedwatch-history -type f | sort)
+
+      # Publish independently repaired families first. A failed source remains
+      # STALE and the run still fails; it cannot suppress other fresh families.
+      - name: Final cross-market health acceptance
+        if: ${{ !cancelled() }}
+        env:
+          SUPPLEMENTAL_OUTCOME: ${{ steps.supplemental.outcome }}
+          KR_RATES_OUTCOME: ${{ steps.kr_rates.outcome }}
+          FEDWATCH_OUTCOME: ${{ steps.fedwatch.outcome }}
+          SECTOR_OUTCOME: ${{ steps.sector.outcome }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          outcomes={k:os.environ[k] for k in ['SUPPLEMENTAL_OUTCOME','KR_RATES_OUTCOME','FEDWATCH_OUTCOME','SECTOR_OUTCOME']}
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Cross-market collector results\n'+json.dumps(outcomes)+'\n')
+          assert all(v=='success' for v in outcomes.values()),outcomes
+          a=json.loads(Path('market-observatory/data/data-audit.json').read_text(encoding='utf-8'))
+          for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
+              assert (a.get('groups') or {}).get(name,{}).get('state')=='LIVE',(name,(a.get('groups') or {}).get(name))
+          assert int(a.get('warning_count') or 0)==0,a.get('issues')
+          assert a.get('overall')=='PASS',a.get('issues')
+          print('CROSS_MARKET_FRESHNESS_ACCEPTANCE=PASS overall=PASS warnings=0')
+          PY

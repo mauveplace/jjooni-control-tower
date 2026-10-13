@@ -48,6 +48,23 @@ def merge_generated(path, local, remote):
                 result.setdefault('sources', {})['CRYPTO_SPOT'] = winner['sources']['CRYPTO_SPOT']
             if winner.get('crypto_contract'):
                 result['crypto_contract'] = winner['crypto_contract']
+        # A daily producer may advance generated_kst while the independent KR
+        # collector is running. Preserve its newer attempt and verified curve.
+        kr_winner=max((remote,local),key=lambda doc:str(doc.get('kr_rates_refreshed_kst') or ''))
+        if kr_winner.get('kr_rates_refreshed_kst'):
+            result['kr_rates_refreshed_kst']=kr_winner['kr_rates_refreshed_kst']
+            for key in ('KR3Y','KR5Y','KR10Y','KR20Y','KR30Y','KR_3S10S'):
+                rows={str(r['date']):deepcopy(r) for doc in (remote,local) for r in (doc.get('series') or {}).get(key,[]) if r.get('date') and r.get('value') is not None}
+                # Newer KR attempt wins any same-date official correction.
+                rows.update({str(r['date']):deepcopy(r) for r in (kr_winner.get('series') or {}).get(key,[]) if r.get('date') and r.get('value') is not None})
+                if rows:
+                    result.setdefault('series',{})[key]=[rows[d] for d in sorted(rows)]
+                    result.setdefault('latest',{})[key]=result['series'][key][-1]['value']
+            for key in ('KR3Y','KR5Y','KR10Y','KR20Y','KR30Y','KR_RATES'):
+                q=(kr_winner.get('cross_market_freshness_quality') or {}).get(key)
+                if q is not None:result.setdefault('cross_market_freshness_quality',{})[key]=deepcopy(q)
+            source=(kr_winner.get('sources') or {}).get('KR_RATES_CURRENT')
+            if source:result.setdefault('sources',{})['KR_RATES_CURRENT']=source
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result
