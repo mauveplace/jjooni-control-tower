@@ -88,6 +88,9 @@ def merge_generated(path, local, remote):
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result
+    if path.endswith('/fed-watch.json') or path.endswith('/fedwatch-official.json'):
+        # An older fallback cannot replace a newer official observation.
+        return deepcopy(max((remote, local), key=lambda doc: (str(doc.get('market_data_as_of') or ''), doc.get('source_kind') == 'CME_OFFICIAL_PUBLIC_TABLE', str(doc.get('source_as_of_ct') or ''), str(doc.get('generated_kst') or ''))))
     if path.endswith('/fedwatch-history/index.json'):
         entries={}
         for doc in (remote,local):
@@ -96,7 +99,7 @@ def merge_generated(path, local, remote):
                 revisions={r['sha256']:r for r in (entries.get(day,{}).get('revisions') or [])}
                 revisions.update({r['sha256']:deepcopy(r) for r in row.get('revisions') or []})
                 if not revisions:continue
-                ordered=sorted(revisions.values(),key=lambda r:(r['generated_kst'],r['sha256']))
+                ordered=sorted(revisions.values(),key=lambda r:(r.get('source_kind')=='CME_OFFICIAL_PUBLIC_TABLE',r['generated_kst'],r['sha256']))
                 selected=ordered[-1]
                 entries[day]={'market_data_as_of':day,'path':selected['path'],'generated_kst':selected['generated_kst'],'revisions':ordered}
         return {**deepcopy(remote),**deepcopy(local),'entries':[entries[d] for d in sorted(entries,reverse=True)]}
@@ -301,4 +304,5 @@ if __name__ == '__main__':
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     publish(args.paths, args.message)
+
 

@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - tools/collect_fedwatch_official.py
+      - tests/test_fedwatch_official.py
+      - market-observatory/data/fedwatch-official.json
       - tools/archive_fedwatch.py
       - tools/build_fed_watch_v2.py
       - tools/build_fed_watch.py
@@ -14,6 +17,8 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - tools/collect_fedwatch_official.py
+      - tests/test_fedwatch_official.py
       - tools/build_fed_watch_v2.py
       - tools/build_fed_watch.py
       - tools/fedwatch_core.py
@@ -75,7 +80,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/fedwatch_core.py tools/build_fed_watch.py tools/build_fed_watch_v2.py tests/test_fed_watch_matrix.py
-          python -m unittest tests.test_fed_watch_matrix tests.test_fedwatch_history -v
+          python -m unittest tests.test_fed_watch_matrix tests.test_fedwatch_history tests.test_fedwatch_official -v
 
       - name: Build CME FedWatch full meeting matrix
         if: steps.gate.outputs.should_run == 'true'
@@ -120,12 +125,17 @@ jobs:
               missing=sorted(expected-actual)
               assert not missing,('MISSING_FOMC_HORIZON',missing,sorted(actual))
 
+          tolerance=.002000001 if d.get('source_kind')=='CME_OFFICIAL_PUBLIC_TABLE' else .001
           for row in rows:
               probs=row.get('probabilities') or {}
               assert probs,row
-              assert abs(sum(float(v) for v in probs.values())-1.0) < 0.001,(row.get('meeting_date'),sum(probs.values()))
+              assert abs(sum(float(v) for v in probs.values())-1.0) < tolerance,(row.get('meeting_date'),sum(probs.values()))
               assert row.get('most_likely_target') in probs
-              assert abs(sum(float(x.get('probability',0)) for x in row.get('conditional_move_distribution') or [])-1.0) < 0.001
+              if d.get('source_kind')=='CME_OFFICIAL_PUBLIC_TABLE':
+                  assert row.get('probability_basis')=='CME_PUBLISHED_ROUNDED_TABLE'
+                  assert d.get('source_as_of_ct_display') and d.get('official_evidence')
+              else:
+                  assert abs(sum(float(x.get('probability',0)) for x in row.get('conditional_move_distribution') or [])-1.0) < 0.001
           assert abs(sum(float(x.get('probability',0)) for x in d.get('outcomes') or [])-1.0) < 0.001
           assert d.get('path_summary',{}).get('terminal_meeting_date')==rows[-1]['meeting_date']
           js=Path('market-observatory/fed-watch-v1.js').read_text(encoding='utf-8')
@@ -146,4 +156,5 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh CME FedWatch meeting matrix v2' market-observatory/data/fed-watch.json $(find market-observatory/data/fedwatch-history -type f | sort)
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh CME FedWatch meeting matrix v2' market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json $(find market-observatory/data/fedwatch-history -type f | sort)
+

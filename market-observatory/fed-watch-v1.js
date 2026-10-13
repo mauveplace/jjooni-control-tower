@@ -47,7 +47,7 @@ async function selectHistory(value){
 }
 function historyToolbar(){
   const options=(HISTORY?.entries||[]).map(e=>'<option value="'+esc(e.market_data_as_of)+'" '+(SELECTION===e.market_data_as_of?'selected':'')+'>'+esc(e.market_data_as_of)+'</option>').join('');
-  return '<div class="fedWatchArchive"><label>정산 기준일 <select id="fedWatchArchiveDate" aria-label="FedWatch 정산 기준일"><option value="latest" '+(SELECTION==='latest'?'selected':'')+'>최신 관측</option>'+options+'</select></label><a href="./data/fedwatch-history/brief.md" target="_blank" rel="noopener">PB 읽기 안내</a><a href="./data/fedwatch-history/index.json" target="_blank" rel="noopener">이력 JSON</a><a href="./data/fedwatch-history/probabilities.csv" download>확률 CSV</a><div id="fedWatchArchiveNotice">'+(SELECTION==='latest'?'하루 한 번 정산자료 갱신 · 기준일별 원문 보존':'과거 관측 자료 · 아래 상태는 수집 당시 판정입니다. 현재 투자판단에는 최신 자료를 확인하세요.')+'</div></div>';
+  return '<div class="fedWatchArchive"><label>자료 기준일 <select id="fedWatchArchiveDate" aria-label="FedWatch 자료 기준일"><option value="latest" '+(SELECTION==='latest'?'selected':'')+'>최신 관측</option>'+options+'</select></label><a href="./data/fedwatch-history/brief.md" target="_blank" rel="noopener">PB 읽기 안내</a><a href="./data/fedwatch-history/index.json" target="_blank" rel="noopener">이력 JSON</a><a href="./data/fedwatch-history/probabilities.csv" download>확률 CSV</a><div id="fedWatchArchiveNotice">'+(SELECTION==='latest'?'하루 한 번 공식 자료 저장 · 원천시각·기준일별 원문 보존':'과거 관측 자료 · 아래 상태는 수집 당시 판정입니다. 현재 투자판단에는 최신 자료를 확인하세요.')+'</div></div>';
 }
 
 function ensureCard(){
@@ -57,7 +57,7 @@ function ensureCard(){
   if(card)return card;
   card=document.createElement('div');
   card.className='card fedWatchCard';card.id='fedWatchCard';
-  card.innerHTML='<div class="fedWatchHead"><div><h3>FOMC Market Pricing · FedWatch</h3><div class="meta">CME 30-Day Fed Funds futures settlement 기반 · 전체 FOMC 조건부 금리확률 경로</div></div><span id="fedWatchFresh" class="fedWatchBadge">LOADING</span></div><div id="fedWatchBody" class="fedWatchBody"><div class="meta">FedWatch 데이터를 불러오는 중입니다…</div></div>';
+  card.innerHTML='<div class="fedWatchHead"><div><h3>FOMC Market Pricing · FedWatch</h3><div class="meta">CME 공식 확률표 우선 · 하루 한 번 저장 · 전체 FOMC 회의별 확률</div></div><span id="fedWatchFresh" class="fedWatchBadge">LOADING</span></div><div id="fedWatchBody" class="fedWatchBody"><div class="meta">FedWatch 데이터를 불러오는 중입니다…</div></div>';
   grid.insertBefore(card,grid.firstChild);
   return card;
 }
@@ -86,6 +86,7 @@ function matrixHtml(d){
   const body=rows.map(row=>{
     const max=Number(row.most_likely_probability||0);
     const cells=ranges.map(r=>{
+      if(!Object.prototype.hasOwnProperty.call(row.probabilities||{},r))return '<td>—</td>';
       const p=Number((row.probabilities||{})[r]||0),isMax=p>0&&Math.abs(p-max)<1e-7;
       const alpha=Math.min(.24,.035+p*.34);
       return `<td class="${isMax?'mode':''}" style="background:rgba(23,92,211,${alpha.toFixed(3)})"><b>${(p*100).toFixed(1)}%</b>${deltaText(row,r)}</td>`;
@@ -124,7 +125,7 @@ function render(){
       <div class="fedWatchBox"><div class="fedWatchBoxTitle">다음 FOMC outcome</div>${outcomes||'<div class="meta">outcome 없음</div>'}</div>
       <div class="fedWatchBox"><div class="fedWatchBoxTitle">최근 다음회의 인상확률</div><div class="fedWatchHistory">${hist||'<div class="meta">history 없음</div>'}</div></div>
     </div>
-    <div class="fedWatchMeta"><span>CME 기준 ${esc(d.market_data_as_of||'—')}</span><span>기대 기준일 ${esc(d.expected_market_data_date||'—')}</span><span>회의 ${esc(d.meeting_count??1)}개</span><span>산출 revision ${esc(d.schema_revision||'1.x')}</span><span>lag ${esc(q.cme_trade_date_gap_business_days??q.cme_trade_date_gap_days??'—')}영업일</span><span>다음회의 조건부 변화 ${calc.next_meeting_conditional_expected_change_bp==null?(calc.expected_change_bp==null?'—':esc(Number(calc.expected_change_bp).toFixed(1)+'bp')):esc(Number(calc.next_meeting_conditional_expected_change_bp).toFixed(1)+'bp')}</span></div>
+    <div class="fedWatchMeta"><span>CME 자료일 ${esc(d.market_data_as_of||'—')}</span><span>원천 표시 ${esc(d.source_as_of_kst||d.source_as_of_ct_display||d.market_data_as_of||'—')}</span><span>수집 ${esc(d.captured_kst||d.generated_kst||'—')}</span><span>기대 기준일 ${esc(d.expected_market_data_date||'—')}</span><span>회의 ${esc(d.meeting_count??1)}개</span><span>산출 revision ${esc(d.schema_revision||'1.x')}</span><span>lag ${esc(q.cme_trade_date_gap_business_days??q.cme_trade_date_gap_days??'—')}영업일</span><span>다음회의 조건부 변화 ${calc.next_meeting_conditional_expected_change_bp==null?(calc.expected_change_bp==null?'—':esc(Number(calc.expected_change_bp).toFixed(1)+'bp')):esc(Number(calc.next_meeting_conditional_expected_change_bp).toFixed(1)+'bp')}</span></div>
     <div class="fedWatchSource">${esc(src)}</div>`;
   card.querySelector('#fedWatchArchiveDate')?.addEventListener('change',e=>selectHistory(e.target.value));
 }
@@ -163,3 +164,4 @@ restoreViewAfterAutoRefresh();
 window.__JJOONI_FED_WATCH={version:'2.0',data:'./data/fed-watch.json',contract:'CME_CONDITIONAL_MEETING_MATRIX_V2',legacy_fields:['hike_25bp_probability','change_1w_pctpt']};
 window.__JJOONI_AUTO_REFRESH={version:'1.1',interval_minutes:60,mode:'PAGE_RELOAD_LATEST_PUBLISHED_DATA',preserve_view:true};
 })();
+
