@@ -35,11 +35,11 @@ def archive_snapshot(snapshot: dict, data: Path = DATA) -> dict:
     entries = {r["market_data_as_of"]: r for r in index["entries"]}
     old = entries.get(trade_date, {})
     revisions = list(old.get("revisions") or [])
-    revision = {"path": relative, "sha256": digest, "generated_kst": snapshot["generated_kst"]}
+    revision = {"path": relative, "sha256": digest, "generated_kst": snapshot["generated_kst"], "source_kind": snapshot.get("source_kind")}
     if not any(r["sha256"] == digest for r in revisions):
         revisions.append(revision)
     # Older reruns may add evidence, but must not replace a newer observation.
-    selected = max(revisions, key=lambda r: (r["generated_kst"], r["sha256"]))
+    selected = max(revisions, key=lambda r: (r.get('source_kind') == 'CME_OFFICIAL_PUBLIC_TABLE', r["generated_kst"], r["sha256"]))
     entries[trade_date] = {"market_data_as_of": trade_date, "path": selected["path"],
                            "generated_kst": selected["generated_kst"], "revisions": revisions}
     index = {"schema": "JJOONI_FEDWATCH_HISTORY_INDEX_V1", "read_only": True,

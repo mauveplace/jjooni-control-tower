@@ -60,6 +60,19 @@ class OfficialFedWatchTests(unittest.TestCase):
             self.assertEqual(got['market_data_as_of'], '2026-10-13')
             self.assertEqual(got['source_kind'], official.SOURCE_KIND)
 
+    def test_newer_fallback_does_not_replace_official_archive_selection(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            data = self.snapshot()
+            (root / 'fed-watch.json').write_text(json.dumps(data))
+            original = archive_snapshot(data, root)['entries'][0]['path']
+            fallback = {**copy.deepcopy(data), 'source_kind': 'SETTLEMENT_DERIVED',
+                        'generated_kst': '2026-10-14T12:00:00+09:00',
+                        'meeting_probability_matrix': [data['meeting_probability_matrix'][0]]}
+            index = archive_snapshot(fallback, root)
+            self.assertEqual(index['entries'][0]['path'], original)
+            self.assertEqual(len(index['entries'][0]['revisions']), 2)
+
     def test_rounded_official_rows_archive_with_raw_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

@@ -152,7 +152,7 @@ def parse_tables(current_html, matrix_html, captured=None):
             'change_1d_pctpt': first['change_1d_pp'].get(f'{lower+.25:.2f}-{upper+.25:.2f}'),
             'change_1w_pctpt': first['change_1w_pp'].get(f'{lower+.25:.2f}-{upper+.25:.2f}'),
             'history': [], 'path_summary': path,
-            'quality': {'state': state, 'matrix_meetings': len(rows), 'matrix_failures': [],
+            'quality': {'state': state, 'cme_trade_date_gap_business_days': 0 if state == 'LIVE' else None, 'matrix_meetings': len(rows), 'matrix_failures': [],
                         'published_precision_pctpt': .1, 'probability_sum_tolerance': ROUNDING_TOLERANCE},
             'calculation': {'matrix_method': 'Official published probabilities copied without renormalization; weighted summaries derived from rounded rows.'},
             'provenance': {'official_page': PAGE, 'evidence_sha256': digest}, 'official_evidence': evidence,

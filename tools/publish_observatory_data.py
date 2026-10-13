@@ -99,7 +99,7 @@ def merge_generated(path, local, remote):
                 revisions={r['sha256']:r for r in (entries.get(day,{}).get('revisions') or [])}
                 revisions.update({r['sha256']:deepcopy(r) for r in row.get('revisions') or []})
                 if not revisions:continue
-                ordered=sorted(revisions.values(),key=lambda r:(r['generated_kst'],r['sha256']))
+                ordered=sorted(revisions.values(),key=lambda r:(r.get('source_kind')=='CME_OFFICIAL_PUBLIC_TABLE',r['generated_kst'],r['sha256']))
                 selected=ordered[-1]
                 entries[day]={'market_data_as_of':day,'path':selected['path'],'generated_kst':selected['generated_kst'],'revisions':ordered}
         return {**deepcopy(remote),**deepcopy(local),'entries':[entries[d] for d in sorted(entries,reverse=True)]}
