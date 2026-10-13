@@ -70,6 +70,21 @@ jobs:
         run: |
           set -euo pipefail
           python tools/refresh_observatory_kr_rates.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          o=json.loads(Path('market-observatory/data/observatory.json').read_text(encoding='utf-8'))
+          q=(o.get('cross_market_freshness_quality') or {})
+          group=q.get('KR_RATES') or {}
+          assert group.get('status')=='LIVE',group
+          assert group.get('fetch_succeeded') is True,group
+          assert (group.get('failed_series') or {})=={},group
+          for name in ['KR3Y','KR5Y','KR10Y','KR20Y','KR30Y']:
+              item=q.get(name) or {}
+              assert item.get('status')=='LIVE',(name,item)
+              assert item.get('fetch_succeeded') is True,(name,item)
+          print('KR_RATES_SOURCE_REFRESH_ACCEPTANCE=PASS api_mode='+str(group.get('api_mode'))+' last_dates='+str(group.get('last_dates')))
+          PY
 
       - name: Refresh FedWatch when stale
         shell: bash
@@ -117,10 +132,6 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          # build_fed_watch.py updates both the canonical snapshot and its immutable/
-          # analyst-facing history derivatives. Publish the complete canonical output
-          # set, matching the dedicated FedWatch workflow, so the generic publisher
-          # can remain fail-closed for every other unselected change.
           python tools/publish_observatory_data.py \
             --message 'data(observatory): cross-market freshness self-heal' \
             market-observatory/data/observatory.json \
