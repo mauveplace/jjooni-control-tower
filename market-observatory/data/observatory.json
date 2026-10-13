@@ -38,13 +38,13 @@
     "JP10Y": 3.027,
     "JP30Y": 4.085,
     "JP_2S10S": 1.116,
-    "BTCUSD": 83168.32,
-    "ETHUSD": 2504.84,
+    "BTCUSD": 83279.56,
+    "ETHUSD": 2508.31,
     "KR_US_10Y": -0.934,
-    "FEAR_GREED": 45.7,
+    "FEAR_GREED": 45.4,
     "FEAR_GREED_RATING": "NEUTRAL",
-    "KOSPI": 5990.36,
-    "KOSDAQ": 822.79,
+    "KOSPI": 5974.87,
+    "KOSDAQ": 821.99,
     "RUSSELL2000": 2794.47998047,
     "DOW": 51850.55078125,
     "NASDAQCOMPOSITE": 27245.90039062,
@@ -292253,10 +292253,10 @@
       },
       {
         "date": "2026-10-13",
-        "value": 83168.32,
+        "value": 83279.56,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-13T13:16:49+09:00"
+        "observed_kst": "2026-10-13T13:22:09+09:00"
       }
     ],
     "ETHUSD": [
@@ -298832,10 +298832,10 @@
       },
       {
         "date": "2026-10-13",
-        "value": 2504.84,
+        "value": 2508.31,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-13T13:16:48+09:00"
+        "observed_kst": "2026-10-13T13:22:08+09:00"
       }
     ],
     "FEAR_GREED": [
@@ -305057,7 +305057,11 @@
       },
       {
         "date": "2026-10-12",
-        "value": 45.7
+        "value": 45.4
+      },
+      {
+        "date": "2026-10-13",
+        "value": 45.4
       }
     ],
     "KOSPI": [
@@ -305299,7 +305303,7 @@
       },
       {
         "date": "2026-10-13",
-        "value": 5990.36
+        "value": 5974.87
       }
     ],
     "KOSDAQ": [
@@ -305541,7 +305545,7 @@
       },
       {
         "date": "2026-10-13",
-        "value": 822.79
+        "value": 821.99
       }
     ],
     "RUSSELL2000": [
@@ -322871,11 +322875,11 @@
       "symbol": "BTC-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 83168.32,
-      "quote_as_of_kst": "2026-10-13T13:16:49+09:00",
-      "captured_kst": "2026-10-13T13:16:53+09:00",
+      "price": 83279.56,
+      "quote_as_of_kst": "2026-10-13T13:22:09+09:00",
+      "captured_kst": "2026-10-13T13:22:20+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 4,
+      "quote_age_seconds": 11,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     },
@@ -322883,11 +322887,11 @@
       "symbol": "ETH-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/ETH-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 2504.84,
-      "quote_as_of_kst": "2026-10-13T13:16:48+09:00",
-      "captured_kst": "2026-10-13T13:16:53+09:00",
+      "price": 2508.31,
+      "quote_as_of_kst": "2026-10-13T13:22:08+09:00",
+      "captured_kst": "2026-10-13T13:22:21+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 5,
+      "quote_age_seconds": 13,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     }
@@ -322991,7 +322995,7 @@
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
   "equity_enriched_kst": "2026-10-13T13:15:20+09:00",
-  "supplemental_refreshed_kst": "2026-10-13T13:16:53+09:00",
+  "supplemental_refreshed_kst": "2026-10-13T13:22:21+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "cross_market_freshness_quality": {
     "NASDAQ100": {
@@ -323105,7 +323109,7 @@
     "FEAR_GREED": {
       "status": "LIVE",
       "source": "FearAndGreedGraph public JSON",
-      "last_date": "2026-10-12"
+      "last_date": "2026-10-13"
     },
     "JP_RATES": {
       "status": "LIVE",
@@ -323192,6 +323196,6 @@
       "spread_contract": "SAME_DATE_KR10Y_MINUS_KR3Y_NO_INTERPOLATION"
     }
   },
-  "kr_rates_refreshed_kst": "2026-10-13T13:17:00+09:00",
+  "kr_rates_refreshed_kst": "2026-10-13T13:22:27+09:00",
   "crypto_enriched_kst": "2026-10-13T05:12:54+09:00"
 }
