@@ -49,10 +49,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: economic-calendar-canonical-writer
-  cancel-in-progress: false
-
 jobs:
   us_close_gate:
     if: ${{ github.event_name == 'schedule' && github.event.schedule == '10 20,21 * * 0-5' }}
@@ -111,6 +107,9 @@ jobs:
           PY
 
   hourly_refresh:
+    concurrency:
+      group: economic-calendar-canonical-writer
+      cancel-in-progress: false
     needs: hourly_gate
     if: ${{ needs.hourly_gate.result == 'success' && needs.hourly_gate.outputs.should_refresh == 'true' }}
     runs-on: ubuntu-latest
@@ -166,6 +165,9 @@ jobs:
           python tools/publish_observatory_data.py --message 'data(observatory): hourly market refresh' market-observatory/data/observatory.json
 
   build:
+    concurrency:
+      group: economic-calendar-canonical-writer
+      cancel-in-progress: false
     needs: [us_close_gate]
     if: ${{ always() && github.event_name != 'workflow_run' && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') && (github.event_name != 'schedule' || github.event.schedule != '10 20,21 * * 0-5' || needs.us_close_gate.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest

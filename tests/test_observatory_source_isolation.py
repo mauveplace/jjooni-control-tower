@@ -57,6 +57,17 @@ class SourceIsolationTest(unittest.TestCase):
         self.assertEqual(got['groups']['kr_rates']['state'],'STALE')
         self.assertTrue(any(i['code']=='GROUP_KR_RATES_STALE' for i in got['issues']))
 
+    def test_skipped_heartbeat_never_enters_canonical_writer_queue(self):
+        daily=yaml.safe_load((ROOT/'.github/workflows/market-observatory-daily.yml').read_text())
+        verified=yaml.safe_load((ROOT/'.github/workflows/market-observatory-calendar-verified.yml').read_text())
+        self.assertNotIn('concurrency',daily)
+        self.assertNotIn('concurrency',verified)
+        for name in ('us_close_gate','hourly_gate'):
+            self.assertNotIn('concurrency',daily['jobs'][name])
+        for job in (daily['jobs']['build'],daily['jobs']['hourly_refresh'],verified['jobs']['verify-calendar']):
+            self.assertEqual(job['concurrency']['group'],'economic-calendar-canonical-writer')
+            self.assertIn('if',job)
+
     def test_daily_publishes_all_fedwatch_generated_outputs(self):
         src=(ROOT/'.github/workflows/market-observatory-daily.yml').read_text()
         publication=next(line for line in src.splitlines() if 'publish_observatory_data.py' in line and 'fed-watch.json' in line)
