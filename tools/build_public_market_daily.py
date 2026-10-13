@@ -119,13 +119,21 @@ def target_for(regime: str, vix10: float, dd: float) -> str:
     return 'QQQ 50% + QLD 50%' if vix10 < 18 else '현금 100%'
 
 
-def build_tripod() -> dict:
-    ndx_all = daily_rows('^NDX', '2y')
-    vix_all = daily_rows('^VIX', '6mo')
+def build_tripod(observatory=None) -> dict:
+    if observatory is None:
+        ndx_all = daily_rows('^NDX', '2y')
+        vix_all = daily_rows('^VIX', '6mo')
+    else:
+        anchor = observatory['us_completed_session_date']
+        series = observatory['series']
+        ndx_all = [(r['date'], float(r['value'])) for r in series['NASDAQ100'] if r['date'] <= anchor]
+        vix_all = [(r['date'], float(r['value'])) for r in series['VIX'] if r['date'] <= anchor]
     common = sorted(set(d for d, _ in ndx_all) & set(d for d, _ in vix_all))
     if not common:
         raise RuntimeError('TRIPOD_NO_COMMON_SESSION')
     session_date = common[-1]
+    if observatory is not None and session_date != observatory['us_completed_session_date']:
+        raise RuntimeError('TRIPOD_CANONICAL_SESSION_MISMATCH')
     ndx = [(d, v) for d, v in ndx_all if d <= session_date]
     vix = [(d, v) for d, v in vix_all if d <= session_date]
     ndx_c = [v for _, v in ndx]
@@ -205,20 +213,42 @@ def load_previous() -> dict:
         return {}
 
 
-def main() -> int:
+def main(observatory=None) -> int:
     previous = load_previous()
     old_items = ((previous.get('market_context') or {}).get('items') or {})
     items, errors = {}, {}
     for key, symbol, label, unit in MARKET:
         try:
-            items[key] = market_item(symbol, label, unit)
+            if observatory is None:
+                items[key] = market_item(symbol, label, unit)
+            else:
+                canonical_key = {'DOW30': 'DOW', 'NASDAQCOMP': 'NASDAQCOMPOSITE', 'US10Y': 'US10Y_OFFICIAL'}.get(key, key)
+                rows = observatory['series'].get(canonical_key) or []
+                if not rows:
+                    raise RuntimeError('CANONICAL_MARKET_MISSING_' + key)
+                cur = float(rows[-1]['value'])
+                prev = float(rows[-2]['value']) if len(rows) > 1 else None
+                items[key] = {'label': label, 'value': cur, 'prev_close': prev,
+                    'change': cur - prev if prev is not None else None,
+                    'change_pct': (cur / prev - 1) * 100 if prev else None,
+                    'unit': unit, 'source': 'OBSERVATORY_CANONICAL',
+                    'session_date': rows[-1]['date'], 'as_of_date': rows[-1]['date'],
+                    'market_state': 'COMPLETED_DAILY_REFERENCE',
+                    'basis': 'LATEST_COMPLETED_DAILY_CLOSE_VS_PREVIOUS_CLOSE'}
         except Exception as exc:
             errors[key] = type(exc).__name__
             old = old_items.get(key)
             if isinstance(old, dict) and isinstance(old.get('value'), (int, float)):
                 items[key] = {**old, 'data_state': 'STALE_FALLBACK', 'fallback_reason': type(exc).__name__}
     try:
-        items['FEAR_GREED'] = fear_greed()
+        if observatory is None:
+            items['FEAR_GREED'] = fear_greed()
+        else:
+            rows = observatory['series'].get('FEAR_GREED') or []
+            if not rows:
+                raise RuntimeError('CANONICAL_SENTIMENT_MISSING')
+            items['FEAR_GREED'] = {'label': '공포탐욕지수', 'value': rows[-1]['value'],
+                'unit': 'score', 'source': 'OBSERVATORY_CANONICAL', 'as_of_date': rows[-1]['date']}
     except Exception as exc:
         errors['FEAR_GREED'] = type(exc).__name__
         old = old_items.get('FEAR_GREED')
@@ -227,7 +257,7 @@ def main() -> int:
 
     # TRI-POD is the critical contract: never publish a newly generated file if
     # NDX/VIX daily history cannot produce one aligned, fresh, completed-session signal.
-    tripod = build_tripod()
+    tripod = build_tripod(observatory)
     critical = ('NASDAQ100', 'VIX')
     for key in critical:
         if not isinstance((items.get(key) or {}).get('value'), (int, float)):
@@ -269,3 +299,4 @@ def main() -> int:
 
 if __name__ == '__main__':
     raise SystemExit(main())
+

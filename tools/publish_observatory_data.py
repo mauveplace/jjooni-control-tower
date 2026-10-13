@@ -33,7 +33,7 @@ def git(*args, check=True):
 
 def merge_generated(path, local, remote):
     if path.endswith('/observatory.json'):
-        result = deepcopy(remote if str(remote.get('generated_kst', '')) > str(local.get('generated_kst', '')) else local)
+        result = deepcopy(max((remote, local), key=lambda doc: (str(doc.get('us_completed_session_date') or ''), str(doc.get('generated_kst') or ''))))
         for key in ('BTCUSD', 'ETHUSD'):
             candidates = [doc for doc in (remote, local) if (doc.get('crypto_market') or {}).get(key) and (doc.get('series') or {}).get(key)]
             if not candidates:
@@ -193,6 +193,33 @@ def clean_unselected_generated(selected_paths):
     return [path for _, path in discard + ephemeral]
 
 
+def materialize_market_dependents(paths):
+    """Build consumers from the exact source snapshot before audit and after rebase."""
+    required = {DATA + 'observatory.json', DATA + 'daily-market-pulse.json', 'public-market-daily.json'}
+    if not required.issubset(set(paths)):
+        return
+    import build_daily_market_pulse as pulse
+    import build_public_market_daily as public
+    obs = json.loads((ROOT / (DATA + 'observatory.json')).read_text(encoding='utf-8'))
+    # Bind paths explicitly for isolated publication worktrees and tests.
+    pulse.DATA = ROOT / DATA
+    pulse.OUT = pulse.DATA / 'daily-market-pulse.json'
+    public.OUT = ROOT / 'public-market-daily.json'
+    public.main(observatory=obs)
+    pulse.main(offline=True)
+    from build_market_observatory import tripod_history
+    from postprocess_market_observatory import build_today_strategy
+    sidecar = json.loads(public.OUT.read_text(encoding='utf-8'))
+    report = json.loads(pulse.OUT.read_text(encoding='utf-8'))
+    obs['tripod_latest'] = sidecar['tripod_signal']
+    history, signals = tripod_history(obs['series'])
+    obs['tripod_history'] = history[-800:]
+    obs['signal_log'] = signals[-100:]
+    obs['today_strategy'] = build_today_strategy(obs, report)
+    obs['today_strategy_contract'] = 'TRIPOD_CANONICAL_DECISION_SUPPORT_V1'
+    (ROOT / (DATA + 'observatory.json')).write_text(json.dumps(obs, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+
 def materialize_health(paths):
     """Derive health from the exact merged sources, never carry an old audit."""
     health = {DATA + 'data-audit.json', DATA + 'freshness-status.json'}
@@ -205,6 +232,7 @@ def materialize_health(paths):
 def publish(paths, message):
     paths = list(paths)
     paths.extend(materialize(ROOT, paths))
+    materialize_market_dependents(paths)
     materialize_health(paths)
     for path in paths:
         if not (ROOT / path).is_file():
@@ -226,7 +254,7 @@ def publish(paths, message):
                 remote_view=git('show','origin/main:'+path,check=False)
                 payloads[path]=remote_view.stdout if remote_view.returncode==0 else (ROOT/path).read_text(encoding='utf-8')
                 continue
-            if not path.startswith(DATA) or not path.endswith('.json'):
+            if (not path.startswith(DATA) and path != 'public-market-daily.json') or not path.endswith('.json'):
                 continue
             remote = git('show', 'origin/main:' + path, check=False)
             local = json.loads((ROOT / path).read_text(encoding='utf-8'))
@@ -255,8 +283,9 @@ def publish(paths, message):
             paths.extend(str(p.relative_to(ROOT)) for p in (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file() and str(p.relative_to(ROOT)) not in paths)
             git('add','--',*paths)
         refreshed = materialize(ROOT, paths)
+        materialize_market_dependents(paths)
         materialize_health(paths)
-        git('add', '--', *payloads, *refreshed)
+        git('add', '--', *paths, *refreshed)
         if git('diff', '--cached', '--quiet', check=False).returncode:
             git('commit', '-m', 'data(observatory): preserve concurrent official observations')
         if git('push', 'origin', 'HEAD:main', check=False).returncode == 0:
@@ -272,3 +301,4 @@ if __name__ == '__main__':
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     publish(args.paths, args.message)
+
