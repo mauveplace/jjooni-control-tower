@@ -2,8 +2,21 @@
   "schema": "JJOONI_FEDWATCH_HISTORY_INDEX_V1",
   "read_only": true,
   "contains_account_data": false,
-  "date_basis": "CME_SETTLEMENT_TRADE_DATE",
+  "date_basis": "CME_SOURCE_OBSERVATION_DATE",
   "entries": [
+    {
+      "market_data_as_of": "2026-10-13",
+      "path": "fedwatch-history/2026-10-13/e59d2d195cde6471d6a961dfcd6c9cf6e07abc621de3aa9d0bbf4688d99f4e12.json",
+      "generated_kst": "2026-10-14T08:09:35+09:00",
+      "revisions": [
+        {
+          "path": "fedwatch-history/2026-10-13/e59d2d195cde6471d6a961dfcd6c9cf6e07abc621de3aa9d0bbf4688d99f4e12.json",
+          "sha256": "e59d2d195cde6471d6a961dfcd6c9cf6e07abc621de3aa9d0bbf4688d99f4e12",
+          "generated_kst": "2026-10-14T08:09:35+09:00",
+          "source_kind": "CME_OFFICIAL_PUBLIC_TABLE"
+        }
+      ]
+    },
     {
       "market_data_as_of": "2026-10-12",
       "path": "fedwatch-history/2026-10-12/1eba9eba24f8f06b2423402cc450c9f0ebbdb25c3e2659887c691d9602a62d0b.json",
