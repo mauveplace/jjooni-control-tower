@@ -13,6 +13,7 @@ import csv
 import io
 import json
 import math
+import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, time
@@ -22,9 +23,14 @@ from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1]
 OBS=ROOT/'market-observatory'/'data'/'observatory.json'
 KST=ZoneInfo('Asia/Seoul');ET=ZoneInfo('America/New_York')
-UA='Mozilla/5.0 JJOONI-Market-Observatory-Freshness/2.0'
+UA='Mozilla/5.0 JJOONI-Market-Observatory-Freshness/2.1'
 YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
-JGB_CURRENT='https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/jgbcme.csv'
+# MOF's canonical current file moved to the Japanese public path.  Keep the old
+# English path as a fallback because it may still be mirrored intermittently.
+JGB_CURRENT_URLS=(
+ 'https://www.mof.go.jp/jgbs/reference/interest_rate/jgbcm.csv',
+ 'https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/jgbcme.csv',
+)
 
 YAHOO_SYMBOLS={
  'NASDAQ100':'^NDX','SP500':'^GSPC','VIX':'^VIX',
@@ -98,13 +104,9 @@ def refresh_yahoo(data):
         sm[key]=rows;latest[key]=rows[-1]['value'] if rows else None
         quality[key]={'status':'LIVE' if rows and rows[-1]['date']==common else ('LAGGING' if rows else 'UNAVAILABLE'),'source':'Yahoo public completed daily','last_date':rows[-1]['date'] if rows else None,'target_session':common}
         if key in US_SUP:
-            # Keep the established compatibility metadata in lock-step.  Several
-            # UI/readers still consume market_supplement_quality for alignment.
             legacy[key]=dict(quality[key])
 
     for key in CONTINUOUS:
-        # The board is an EOD/completed-session dashboard.  Never let an in-progress
-        # futures/FX daily bar jump ahead of the canonical completed US session.
         fresh=[x for x in fetched.get(key,[]) if not common or x['date']<=common]
         rows=merge_rows(previous[key],fresh)
         if common:rows=[x for x in rows if x['date']<=common]
@@ -120,13 +122,26 @@ def _decode_csv(blob):
     return blob.decode('utf-8','ignore')
 
 def _normalize_tenor(raw):
-    s=str(raw or '').strip().lower().replace('years','y').replace('year','y').replace(' ','').replace('-','')
-    for n in (2,5,10,20,30,40):
+    s=str(raw or '').strip().lower().replace('years','y').replace('year','y').replace('年','y').replace(' ','').replace('-','')
+    for n in (1,2,3,5,10,20,30,40):
         if s in {str(n),f'{n}y',f'{n}yr'} or s.startswith(f'{n}y'):return f'{n}Y'
     return str(raw or '').strip()
 
-def fetch_current_jgb_rows():
-    text=_decode_csv(get_bytes(JGB_CURRENT));reader=csv.reader(io.StringIO(text));header=None;rows=[]
+def _parse_jgb_date(raw):
+    s=str(raw or '').strip()
+    for fmt in ('%Y/%m/%d','%Y-%m-%d','%Y.%m.%d'):
+        try:return datetime.strptime(s,fmt).date().isoformat()
+        except Exception:pass
+    m=re.fullmatch(r'R\s*(\d{1,2})[./-](\d{1,2})[./-](\d{1,2})',s,re.I)
+    if not m:
+        m=re.fullmatch(r'令和\s*(\d{1,2})年\s*(\d{1,2})月\s*(\d{1,2})日',s)
+    if m:
+        y,mo,da=map(int,m.groups())
+        return datetime(2018+y,mo,da).date().isoformat()
+    return None
+
+def _parse_jgb_csv(blob):
+    text=_decode_csv(blob);reader=csv.reader(io.StringIO(text));header=None;rows=[]
     for row in reader:
         if not row:continue
         first=str(row[0] or '').strip()
@@ -134,10 +149,7 @@ def fetch_current_jgb_rows():
             if 'date' in first.lower() or first in {'年月日','基準日'}:
                 header=[_normalize_tenor(x) for x in row]
             continue
-        raw=first;d=None
-        for fmt in ('%Y/%m/%d','%Y-%m-%d','%Y.%m.%d'):
-            try:d=datetime.strptime(raw,fmt).date().isoformat();break
-            except Exception:pass
+        d=_parse_jgb_date(first)
         if not d:continue
         vals={}
         for i,name in enumerate(header[1:],1):
@@ -148,22 +160,29 @@ def fetch_current_jgb_rows():
     if not rows:raise RuntimeError('JGB_CURRENT_CSV_NO_ROWS')
     return sorted(rows,key=lambda x:x['date'])
 
+def fetch_current_jgb_rows():
+    errors=[]
+    for url in JGB_CURRENT_URLS:
+        try:return _parse_jgb_csv(get_bytes(url,'text/csv,*/*')),url
+        except Exception as exc:errors.append(f'{url}:{type(exc).__name__}:{exc}')
+    raise RuntimeError('JGB_CURRENT_ALL_SOURCES_FAILED|'+'|'.join(errors))
+
 def refresh_jgb(data):
     sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{})
     try:
-        rows=fetch_current_jgb_rows();mapping={'JP2Y':'2Y','JP5Y':'5Y','JP10Y':'10Y','JP20Y':'20Y','JP30Y':'30Y'}
+        rows,source_url=fetch_current_jgb_rows();mapping={'JP2Y':'2Y','JP5Y':'5Y','JP10Y':'10Y','JP20Y':'20Y','JP30Y':'30Y'}
         for key,tenor in mapping.items():
             fresh=[{'date':x['date'],'value':x['values'].get(tenor)} for x in rows if x['values'].get(tenor) is not None]
             merged=merge_rows(sm.get(key),fresh);sm[key]=merged;latest[key]=merged[-1]['value'] if merged else None
         if sm.get('JP2Y') and sm.get('JP10Y'):
             a={x['date']:x['value'] for x in sm['JP10Y']};b={x['date']:x['value'] for x in sm['JP2Y']};sm['JP_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))];latest['JP_2S10S']=sm['JP_2S10S'][-1]['value'] if sm['JP_2S10S'] else None
         last=max((sm.get(k) or [{}])[-1].get('date','') for k in mapping)
-        quality['JP_RATES']={'status':'LIVE','source':'Japan MOF current JGB yield CSV','source_url':JGB_CURRENT,'last_date':last}
-        data.setdefault('sources',{})['JP_JGB_CURRENT']='Japan MOF current JGB yield CSV (jgbcme.csv) merged with historical series'
-        print('JGB_CURRENT_REFRESH=PASS last_date='+str(last))
+        quality['JP_RATES']={'status':'LIVE','source':'Japan MOF current JGB yield CSV','source_url':source_url,'last_date':last}
+        data.setdefault('sources',{})['JP_JGB_CURRENT']='Japan MOF current JGB yield CSV (jgbcm.csv primary) merged with historical series'
+        print('JGB_CURRENT_REFRESH=PASS last_date='+str(last)+' source='+source_url)
     except Exception as exc:
         old=max(((sm.get(k) or [{}])[-1].get('date','') for k in ('JP2Y','JP5Y','JP10Y','JP30Y')),default='')
-        quality['JP_RATES']={'status':'STALE' if old else 'UNAVAILABLE','source':'Japan MOF current JGB yield CSV','source_url':JGB_CURRENT,'last_date':old or None,'fetch_error':f'{type(exc).__name__}: {exc}'}
+        quality['JP_RATES']={'status':'STALE' if old else 'UNAVAILABLE','source':'Japan MOF current JGB yield CSV','source_urls':list(JGB_CURRENT_URLS),'last_date':old or None,'fetch_error':f'{type(exc).__name__}: {exc}'}
         print('JGB_CURRENT_REFRESH=WARN',quality['JP_RATES'])
 
 def refresh_kr_and_sentiment_and_crypto(data):

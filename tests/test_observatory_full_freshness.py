@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
+TOOLS = ROOT / 'tools'
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
 
 
 def load_module(name, path):
@@ -21,10 +27,20 @@ def test_supplemental_refresh_contract_is_complete():
         "'WTI':'CL=F'", "'BRENT':'BZ=F'", "'NATGAS':'NG=F'",
         "'GOLD':'GC=F'", "'SILVER':'SI=F'", "'COPPER':'HG=F'",
         "'DXY':'DX-Y.NYB'", "'USDKRW':'KRW=X'",
-        "jgbcme.csv", "time(16,10)", "enrich_crypto(data)",
+        "jgbcm.csv", "jgbcme.csv", "time(16,10)", "enrich_crypto(data)",
         "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
     ]:
         assert token in src, token
+
+
+def test_jgb_current_parser_accepts_reiwa_and_japanese_tenors():
+    mod = load_module('supplemental_jgb_test', 'tools/refresh_observatory_supplementals.py')
+    blob = '基準日,1年,2年,3年,5年,10年,20年,30年,40年\nR8.10.9,1.2,1.95,2.0,2.1,2.9,3.7,4.1,4.2\n'.encode('utf-8')
+    rows = mod._parse_jgb_csv(blob)
+    assert rows[-1]['date'] == '2026-10-09'
+    assert rows[-1]['values']['2Y'] == 1.95
+    assert rows[-1]['values']['10Y'] == 2.9
+    assert rows[-1]['values']['30Y'] == 4.1
 
 
 def test_audit_contract_recomputes_age_and_checks_fedwatch():
@@ -34,6 +50,7 @@ def test_audit_contract_recomputes_age_and_checks_fedwatch():
         'current_quote_age_seconds',
         'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S',
         'FEDWATCH_DECLARATION_INCONSISTENT',
+        'CME_FED_FUNDS_HOLIDAY_AWARE_EXPECTED_TRADE_DATE',
         "make_group('jp_rates'",
         "make_group('energy'",
         "make_group('fx'",
@@ -68,6 +85,15 @@ def test_fedwatch_compat_does_not_reuse_stale_snapshot():
         assert reason.startswith('STALE:')
     finally:
         path.unlink(missing_ok=True)
+
+
+def test_fedwatch_expected_trade_date_skips_columbus_day():
+    mod = load_module('build_fed_watch_holiday_test', 'tools/build_fed_watch.py')
+    et = ZoneInfo('America/New_York')
+    now = datetime(2026, 10, 12, 18, 0, tzinfo=et)
+    assert mod._expected_latest_trade_date(now).isoformat() == '2026-10-09'
+    next_day = datetime(2026, 10, 13, 18, 0, tzinfo=et)
+    assert mod._expected_latest_trade_date(next_day).isoformat() == '2026-10-13'
 
 
 def test_freshness_builder_exposes_every_family():
