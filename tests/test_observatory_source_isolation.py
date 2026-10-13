@@ -57,6 +57,19 @@ class SourceIsolationTest(unittest.TestCase):
         self.assertEqual(got['groups']['kr_rates']['state'],'STALE')
         self.assertTrue(any(i['code']=='GROUP_KR_RATES_STALE' for i in got['issues']))
 
+    def test_today_sentiment_is_valid_after_previous_us_cash_session(self):
+        from datetime import datetime,timedelta
+        today=datetime.now(audit.KST).date()
+        obs=copy.deepcopy(audit.load(audit.DATA/'observatory.json'))
+        obs['us_completed_session_date']=(today-timedelta(days=1)).isoformat()
+        obs.setdefault('series',{})['FEAR_GREED']=[{'date':today.isoformat(),'value':45.4}]
+        obs.setdefault('latest',{})['FEAR_GREED']=45.4
+        real_load=audit.load
+        with patch.object(audit,'load',side_effect=lambda path,*args:obs if Path(path).name=='observatory.json' else real_load(path,*args)):
+            self.assertEqual(audit.build()['groups']['sentiment']['state'],'LIVE')
+            obs['series']['FEAR_GREED'][0]['date']=(today+timedelta(days=1)).isoformat()
+            self.assertEqual(audit.build()['groups']['sentiment']['state'],'AHEAD_OF_ANCHOR')
+
     def test_concurrent_fedwatch_index_preserves_both_revisions(self):
         def document(digest,generated):
             return {'entries':[{'market_data_as_of':'2026-10-09','revisions':[{'sha256':digest,'path':digest+'.json','generated_kst':generated}]}]}
