@@ -58,7 +58,7 @@ jobs:
                   assert r.get(k) is not None,(r['ticker'],k)
               assert len(d.get('series',{}).get(r['ticker'],[]))>=100,(r['ticker'],'sparkline history')
           theme_keys=[g['key'] for g in d['groups'] if g['key']!='classic']
-          assert theme_keys==['semiconductor','software','biotech','financial','defense_infra','robotics','country'],theme_keys
+          assert theme_keys==['kr_index','kr_sector','benchmark','semiconductor','software','biotech','financial','defense_infra','robotics','country'],theme_keys
           country=next(g['rows'] for g in d['groups'] if g['key']=='country')
           assert [r['ticker'] for r in country]==['SPY','EWY','EWJ','MCHI','EWT','INDA','EWZ','VGK']
           theme_rows=[r for g in d['groups'] if g['key']!='classic' for r in g.get('rows',[])]
