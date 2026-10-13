@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-13T08:54:51+09:00",
+  "generated_kst": "2026-10-13T10:58:44+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "jp_rates",
     "fedwatch",
     "audit"
   ],
@@ -17,15 +18,15 @@
     "pulse_aligned": true,
     "tripod_aligned": true,
     "us_supplement_aligned": true,
-    "kr_kospi": "2026-10-12",
-    "kr_kosdaq": "2026-10-12",
+    "kr_kospi": "2026-10-13",
+    "kr_kosdaq": "2026-10-13",
     "aligned": true
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -34,16 +35,16 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
-      "as_of": "2026-10-12",
-      "detail": "KOSPI 2026-10-12 · KOSDAQ 2026-10-12",
+      "generated_kst": "2026-10-13T10:37:09+09:00",
+      "as_of": "2026-10-13",
+      "detail": "KOSPI 2026-10-13 · KOSDAQ 2026-10-13",
       "source": "Naver Finance primary",
       "critical": true
     },
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:09+09:00",
       "as_of": "2026-10-12",
       "detail": "RUSSELL2000 2026-10-12 · DOW 2026-10-12 · NASDAQCOMPOSITE 2026-10-12",
       "source": "Yahoo completed cash-session daily",
@@ -52,7 +53,7 @@
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "WTI 2026-10-12 · BRENT 2026-10-12 · NATGAS 2026-10-12",
       "source": "Yahoo CL=F / BZ=F / NG=F",
@@ -61,7 +62,7 @@
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "DXY 2026-10-12 · USDKRW 2026-10-12 · USDJPY 2026-10-12 · JPYKRW 2026-10-12",
       "source": "Yahoo DXY / FX daily",
@@ -70,7 +71,7 @@
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "GOLD 2026-10-12 · SILVER 2026-10-12 · COPPER 2026-10-12",
       "source": "Yahoo Gold / Silver / Copper",
@@ -79,7 +80,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-09",
       "detail": "US3M 2026-10-09 · US2Y 2026-10-09 · US5Y_OFFICIAL 2026-10-09 · US10Y_OFFICIAL 2026-10-09 · US30Y_OFFICIAL 2026-10-09 · US_2S10S 2026-10-09",
       "source": "U.S. Treasury official",
@@ -88,7 +89,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T06:27:35+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "KR3Y 2026-10-12 · KR5Y 2026-10-12 · KR10Y 2026-10-12 · KR20Y 2026-10-12 · KR30Y 2026-10-12 · KR_3S10S 2026-10-12",
       "source": "BOK ECOS",
@@ -96,19 +97,19 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
-      "as_of": "2026-10-08",
-      "detail": "JP2Y 2026-10-08 · JP5Y 2026-10-08 · JP10Y 2026-10-08 · JP30Y 2026-10-08 · JP_2S10S 2026-10-08",
+      "state": "LAGGING",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
+      "as_of": "2026-09-30",
+      "detail": "JP2Y 2026-09-30 · JP5Y 2026-09-30 · JP10Y 2026-09-30 · JP30Y 2026-09-30 · JP_2S10S 2026-09-30",
       "source": "Japan MOF current JGB CSV",
       "critical": false
     },
     "crypto": {
       "label": "Crypto",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:09+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1116s · ETHUSD age=1118s",
+      "detail": "BTCUSD age=1303s · ETHUSD age=1303s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -124,7 +125,7 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-13T08:36:19+09:00",
+      "generated_kst": "2026-10-13T10:37:03+09:00",
       "as_of": "2026-10-12",
       "detail": "45.7/100 · NEUTRAL",
       "source": "CNN_FEAR_GREED_PUBLIC",
@@ -178,9 +179,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-13T08:54:50+09:00",
+      "generated_kst": "2026-10-13T10:58:43+09:00",
       "as_of": "2026-10-12",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     }
