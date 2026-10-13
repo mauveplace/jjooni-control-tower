@@ -10,6 +10,7 @@ on:
       - tools/build_daily_market_pulse.py
       - tools/build_public_market_daily.py
       - tests/test_observatory_atomic_session.py
+      - tools/collect_fedwatch_official.py
       - tools/build_fed_watch.py
       - tools/audit_observatory_data.py
       - tests/test_observatory_kr_rates_freshness.py
@@ -143,6 +144,7 @@ jobs:
             market-observatory/data/daily-market-pulse.json \
             public-market-daily.json \
             market-observatory/data/fed-watch.json \
+            market-observatory/data/fedwatch-official.json \
             market-observatory/data/sector-etf.json \
             market-observatory/data/data-audit.json \
             market-observatory/data/freshness-status.json \
@@ -158,4 +160,5 @@ jobs:
           FEDWATCH_OUTCOME: ${{ steps.fedwatch.outcome }}
           SECTOR_OUTCOME: ${{ steps.sector.outcome }}
         run: python tools/accept_observatory_sources.py
+
 

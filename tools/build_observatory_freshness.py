@@ -83,7 +83,7 @@ def build_status(root: Path = ROOT) -> dict:
         'crypto':group('Crypto',(ag.get('crypto') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('equity_enriched_kst'),None,' · '.join(f"{k} age={v.get('current_quote_age_seconds','—')}s" for k,v in (audit.get('crypto_status') or {}).items()),'Yahoo spot crypto quote',False),
         'pulse':group('Daily Pulse',pulse_state,pulse.get('generated_kst'),pulse_session,f"snapshot={pulse.get('snapshot_status') or '—'} · Observatory session={session or '—'}",'daily-market-pulse.json',True),
         'fear_greed':group('Fear & Greed',fg_state,obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('sentiment') or {}) or fgq.get('observed_at') or session,f"{(obs.get('latest') or {}).get('FEAR_GREED','—')}/100 · {(obs.get('latest') or {}).get('FEAR_GREED_RATING') or ''}".strip(),fgq.get('source') or 'Fear & Greed public',False),
-        'fedwatch':group('FedWatch',fed_state,fed.get('generated_kst'),fed.get('market_data_as_of'),f"expected={(audit.get('file_status') or {}).get('fedwatch',{}).get('audit_expected_market_data_date') or '—'} · FOMC {fed.get('meeting_date') or '—'}",'CME Fed Funds settlement',False),
+        'fedwatch':group('FedWatch',fed_state,fed.get('generated_kst'),fed.get('market_data_as_of'),f"expected={(audit.get('file_status') or {}).get('fedwatch',{}).get('audit_expected_market_data_date') or '—'} · FOMC {fed.get('meeting_date') or '—'}",text(fed.get('source')) or 'CME Fed Funds settlement',False),
         'tripod':group('TRI-POD',tripod_state,public.get('generated_kst') or obs.get('generated_kst'),tripod_session,f"{tripod.get('regime') or public_tripod.get('regime') or '—'} · {tripod.get('target') or public_tripod.get('target') or '—'}",'public-market-daily.json + observatory.json',True),
         'sector':group('Sector ETF',sector_state,sector.get('generated_kst'),sector.get('as_of_date'),f"priced={(sector.get('summary') or {}).get('priced_count','—')}",'sector-etf.json',False),
         'official_macro':group('Official Macro','LIVE' if macro.get('generated_kst') else 'UNAVAILABLE',macro.get('generated_kst'),None,macro.get('schema'),'official-macro.json',False),
@@ -99,3 +99,4 @@ def main():
     status=build_status(ROOT);OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_FRESHNESS_STATUS=PASS',status['overall'],'aligned=',status['session_alignment']['aligned'],'warnings=',status['warnings'])
 
 if __name__=='__main__':main()
+

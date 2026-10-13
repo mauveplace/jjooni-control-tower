@@ -228,6 +228,23 @@ def main() -> None:
     now_kst = datetime.now(KST)
     now_et = now_kst.astimezone(ET)
     expected = core._expected_latest_trade_date(now_et).isoformat()
+    # Prefer CME's published probabilities; readers consume the stored daily JSON.
+    try:
+        from collect_fedwatch_official import acquire
+        official = acquire(cache=DATA_DIR / 'fedwatch-official.json', now=now_kst)
+        if official.get('market_data_as_of', '') >= expected:
+            required = {d.isoformat() for d in _load_full_fomc_meetings() if d >= now_et.date()}
+            actual = {r['meeting_date'] for r in official['meeting_probability_matrix']}
+            if not required.issubset(actual):
+                raise ValueError('OFFICIAL_FOMC_HORIZON_INCOMPLETE')
+            OUT.write_text(json.dumps(official, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            from archive_fedwatch import archive_snapshot
+            archive_snapshot(official)
+            print('FEDWATCH_OFFICIAL_DAILY=PASS source_as_of=' + official['source_as_of_ct_display'])
+            return
+    except Exception as exc:
+        # Preserve the settlement collector as a source-specific fallback.
+        print('FEDWATCH_OFFICIAL_FALLBACK=' + type(exc).__name__ + ':' + str(exc)[:180])
     if OUT.exists():
         existing = json.loads(OUT.read_text(encoding="utf-8"))
         if existing.get("market_data_as_of") == expected and existing.get("freshness") == "LIVE":
@@ -367,3 +384,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

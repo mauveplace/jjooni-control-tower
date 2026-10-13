@@ -18,7 +18,8 @@ def archive_snapshot(snapshot: dict, data: Path = DATA) -> dict:
         raise ValueError("FEDWATCH_ARCHIVE_PUBLIC_BOUNDARY")
     trade_date = date.fromisoformat(snapshot["market_data_as_of"]).isoformat()
     rows = snapshot.get("meeting_probability_matrix") or []
-    if not rows or any(abs(sum(r["probabilities"].values()) - 1) > .001 for r in rows):
+    tolerance = .002000001 if snapshot.get('source_kind') == 'CME_OFFICIAL_PUBLIC_TABLE' else .001
+    if not rows or any(abs(sum(r["probabilities"].values()) - 1) > tolerance for r in rows):
         raise ValueError("FEDWATCH_ARCHIVE_PROBABILITIES")
     raw = json.dumps(snapshot, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     digest = hashlib.sha256(raw.encode()).hexdigest()
@@ -42,7 +43,7 @@ def archive_snapshot(snapshot: dict, data: Path = DATA) -> dict:
     entries[trade_date] = {"market_data_as_of": trade_date, "path": selected["path"],
                            "generated_kst": selected["generated_kst"], "revisions": revisions}
     index = {"schema": "JJOONI_FEDWATCH_HISTORY_INDEX_V1", "read_only": True,
-             "contains_account_data": False, "date_basis": "CME_SETTLEMENT_TRADE_DATE",
+             "contains_account_data": False, "date_basis": "CME_SOURCE_OBSERVATION_DATE",
              "entries": sorted(entries.values(), key=lambda r: r["market_data_as_of"], reverse=True)}
     index_path.write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     stream = io.StringIO()
@@ -59,8 +60,9 @@ def archive_snapshot(snapshot: dict, data: Path = DATA) -> dict:
     latest = json.loads((data / "fed-watch.json").read_text(encoding="utf-8"))
     brief = f"""# FedWatch · PB / Analyst Read View
 
-- 가격 기준일: {latest['market_data_as_of']}
-- 관측 시각: {latest['generated_kst']}
+- 자료 기준일: {latest['market_data_as_of']}
+- 원천 표시시각: {latest.get('source_as_of_kst') or latest.get('source_as_of_ct_display') or latest['market_data_as_of']}
+- 수집 시각: {latest['generated_kst']}
 - 수집 당시 상태: {latest['freshness']}
 - 원천: {latest['source']}
 - 공식 API: {latest.get('official_api_status', 'UNKNOWN')}
@@ -88,3 +90,4 @@ next FOMC가 바뀌면 다음회의 확률끼리 단순 비교하지 마십시�
 if __name__ == "__main__":
     archive_snapshot(json.loads((DATA / "fed-watch.json").read_text(encoding="utf-8")))
     print("FEDWATCH_ARCHIVE=PASS")
+

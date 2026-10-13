@@ -224,7 +224,7 @@ jobs:
           if 'latest-board-v1.js' not in s:s=s.replace('</body>',board+'</body>',1)
           sector='<script src="./sector-etf-v1.js?v=1.0"></script>'
           if 'sector-etf-v1.js' not in s:s=s.replace('</body>',sector+'</body>',1)
-          fedwatch='<script src="./fed-watch-v1.js?v=1.0"></script>'
+          fedwatch='<script src="./fed-watch-v1.js?v=2.1"></script>'
           if 'fed-watch-v1.js' not in s:s=s.replace('</body>',fedwatch+'</body>',1)
           s=s.replace('Macro · Rates · FX · Energy · Sector ETF · TRI-POD · Event Calendar','Macro · Rates · FedWatch · FX · Energy · Sector ETF · TRI-POD · Event Calendar')
 
@@ -353,7 +353,7 @@ jobs:
           board_runtime_version=re.search(r"version:'([0-9.]+)'",board)
           assert board_url_version and board_runtime_version,'latest board runtime/cache version missing'
           assert board_url_version[1]==board_runtime_version[1],(board_url_version[1],board_runtime_version[1])
-          assert 'fed-watch-v1.js?v=1.2' in html
+          assert 'fed-watch-v1.js?v=2.1' in html
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))
@@ -366,7 +366,8 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)
+
 
 
 
