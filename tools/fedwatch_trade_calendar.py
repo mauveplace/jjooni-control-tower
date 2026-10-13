@@ -31,11 +31,12 @@ def _observed_fixed(d: date) -> date:
 
 
 def _easter_sunday(year: int) -> date:
+    # Gregorian computus.
     a = year % 19
     b = year // 100
     c = year % 100
     d = b // 4
-    e = b % 100
+    e = b % 4
     f = (b + 8) // 25
     g = (b - f + 1) // 3
     h = (19 * a + b - d - g + 15) % 30
