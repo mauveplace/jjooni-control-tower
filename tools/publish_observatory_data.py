@@ -48,6 +48,25 @@ def merge_generated(path, local, remote):
                 result.setdefault('sources', {})['CRYPTO_SPOT'] = winner['sources']['CRYPTO_SPOT']
             if winner.get('crypto_contract'):
                 result['crypto_contract'] = winner['crypto_contract']
+        # Supplemental collectors own a separate attempt clock. Preserve their
+        # observations only for the same US session; never mix session anchors.
+        supplemental=max((remote,local),key=lambda doc:str(doc.get('supplemental_refreshed_kst') or ''))
+        if supplemental.get('supplemental_refreshed_kst') and supplemental.get('us_completed_session_date') == result.get('us_completed_session_date'):
+            result['supplemental_refreshed_kst']=supplemental['supplemental_refreshed_kst']
+            result['supplemental_refresh_contract']=supplemental.get('supplemental_refresh_contract')
+            owned=('NASDAQ100','SP500','VIX','RUSSELL2000','DOW','NASDAQCOMPOSITE','DXY','USDKRW','USDJPY','JPYKRW','WTI','BRENT','NATGAS','GOLD','SILVER','COPPER','KOSPI','KOSDAQ','FEAR_GREED','JP2Y','JP5Y','JP10Y','JP30Y','JP_2S10S')
+            for key in owned:
+                rows=(supplemental.get('series') or {}).get(key)
+                if rows:
+                    result.setdefault('series',{})[key]=deepcopy(rows)
+                    result.setdefault('latest',{})[key]=rows[-1]['value']
+                for section in ('cross_market_freshness_quality','market_supplement_quality'):
+                    quality=(supplemental.get(section) or {}).get(key)
+                    if quality is not None:result.setdefault(section,{})[key]=deepcopy(quality)
+            jp_quality=(supplemental.get('cross_market_freshness_quality') or {}).get('JP_RATES')
+            if jp_quality is not None:result.setdefault('cross_market_freshness_quality',{})['JP_RATES']=deepcopy(jp_quality)
+            jp_source=(supplemental.get('sources') or {}).get('JP_JGB_CURRENT')
+            if jp_source:result.setdefault('sources',{})['JP_JGB_CURRENT']=jp_source
         # A daily producer may advance generated_kst while the independent KR
         # collector is running. Preserve its newer attempt and verified curve.
         kr_winner=max((remote,local),key=lambda doc:str(doc.get('kr_rates_refreshed_kst') or ''))
