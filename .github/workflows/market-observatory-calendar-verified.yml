@@ -23,12 +23,11 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: economic-calendar-canonical-writer
-  cancel-in-progress: false
-
 jobs:
   verify-calendar:
+    concurrency:
+      group: economic-calendar-canonical-writer
+      cancel-in-progress: false
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
