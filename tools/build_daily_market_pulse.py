@@ -276,7 +276,7 @@ def derive(raw: dict) -> dict:
     }
 
 
-def main():
+def main(offline=False):
     now = datetime.now(KST)
     obs = read_json(DATA / "observatory.json")
     sec = read_json(DATA / "sector-etf.json")
@@ -305,8 +305,8 @@ def main():
         "sp500_breadth": breadth,
         "sector_flow": sectors,
         "tradingview_cross_asset": cross,
-        "nasdaq100_concentration": slickcharts_concentration(),
-        "fear_greed": cnn_fear_greed(),
+        "nasdaq100_concentration": {**((previous.get("raw") or {}).get("nasdaq100_concentration") or {}), "status": "STALE_FALLBACK"} if offline else slickcharts_concentration(),
+        "fear_greed": {"score": series_fact(obs, "FEAR_GREED").get("value"), "status": "OBSERVATORY_CANONICAL", "market_date": series_fact(obs, "FEAR_GREED").get("market_date")} if offline else cnn_fear_greed(),
         "calendar": important_calendar(cal, now),
         "canonical_context": {
             "sp500": series_fact(obs, "SP500"),
@@ -393,3 +393,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
