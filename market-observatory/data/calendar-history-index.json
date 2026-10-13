@@ -1,6 +1,6 @@
 {
-  "available_from": "2016-10-15",
-  "available_to": "2026-10-13",
+  "available_from": "2016-10-17",
+  "available_to": "2026-10-14",
   "backfill": {
     "canonical_rows_matched": 0,
     "checked_kst": "2026-10-13T13:25:35+09:00",
@@ -81,9 +81,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-13T20:40:15+09:00",
+  "generated_kst": "2026-10-14T02:25:33+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37765,
+  "row_count": 37769,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -11335,25 +11335,25 @@
       "sha256": "14e059a740434f141074ab6af9958b6d86976d2c8145a481f0e98f038cfa3772"
     },
     "FF::US::federal-budget-balance": {
-      "available_from": "2016-10-15",
+      "available_from": "2016-11-11",
       "available_to": "2026-09-12",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "US",
       "event_title": "Federal Budget Balance",
       "kind": "event",
       "label": "Federal Budget Balance",
       "metric_key": null,
-      "path": "./calendar-history/series/2075b7d06f977b4cf57028f2154ddf378b56e0428c422c7b906bd9d48ec68a40.json",
+      "path": "./calendar-history/series/1c58f3bdcefb2c8ae62e12072ac2e7000d614d5ca30a91db89369ebeeff0ad6f.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 62,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -11368,7 +11368,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::federal-budget-balance",
-      "sha256": "2075b7d06f977b4cf57028f2154ddf378b56e0428c422c7b906bd9d48ec68a40"
+      "sha256": "1c58f3bdcefb2c8ae62e12072ac2e7000d614d5ca30a91db89369ebeeff0ad6f"
     },
     "FF::US::final-gdp-price-index-q-q": {
       "available_from": "2016-12-22",
@@ -12609,7 +12609,7 @@
       "event_title": "2026년 8월 산업활동동향",
       "kind": "event",
       "label": "2026년 8월 산업활동동향",
-      "path": "./calendar-history/series/8f9f0f620faaa516f5d251b4aebef767db601c483ba7f9423fc683b392e793fb.json",
+      "path": "./calendar-history/series/33f33c4c42b637906099299902c3e460a98b338d28f2709e3568a8bcd6ce07b6.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12622,7 +12622,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::산업활동동향",
-      "sha256": "8f9f0f620faaa516f5d251b4aebef767db601c483ba7f9423fc683b392e793fb"
+      "sha256": "33f33c4c42b637906099299902c3e460a98b338d28f2709e3568a8bcd6ce07b6"
     },
     "KR::생산자물가지수": {
       "available_from": "2026-09-18",
@@ -12756,7 +12756,7 @@
       "event_title": "2026년 8월 소비자물가동향",
       "kind": "event",
       "label": "2026년 8월 소비자물가동향",
-      "path": "./calendar-history/series/390eb01878520346724e31401b96fe2f90da2577041bc759f05c15b7b2808263.json",
+      "path": "./calendar-history/series/515375ab28b2c87f02cd0602db28d5713da154b5aef7936908d56bb8bc2a9d47.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12769,7 +12769,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::소비자물가동향",
-      "sha256": "390eb01878520346724e31401b96fe2f90da2577041bc759f05c15b7b2808263"
+      "sha256": "515375ab28b2c87f02cd0602db28d5713da154b5aef7936908d56bb8bc2a9d47"
     },
     "KR::소비자물가동향::kr_cpi_mom": {
       "available_from": "2026-09-02",
@@ -13021,43 +13021,43 @@
     },
     "US::consumer-price-index": {
       "available_from": "2026-01-13",
-      "available_to": "2026-09-11",
+      "available_to": "2026-10-14",
       "category": "물가/고용",
-      "count": 9,
+      "count": 10,
       "country": "US",
       "event_title": "Consumer Price Index",
       "kind": "event",
       "label": "Consumer Price Index",
-      "path": "./calendar-history/series/25f36794b0fc54fa253447a03de430f58a09b2ea7289409a073da07e80d32261.json",
+      "path": "./calendar-history/series/95b17bb92756abe0938e4e116f0b13db5c6ef94be6f421fc0463881c7312467f.json",
       "quality": {
         "actual_count": 9,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 1,
+        "consensus_count": 2,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 34,
         "rows_by_year": {
-          "2026": 9
+          "2026": 10
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index",
-      "sha256": "25f36794b0fc54fa253447a03de430f58a09b2ea7289409a073da07e80d32261"
+      "sha256": "95b17bb92756abe0938e4e116f0b13db5c6ef94be6f421fc0463881c7312467f"
     },
     "US::consumer-price-index::core_cpi_mom": {
       "available_from": "2016-10-18",
-      "available_to": "2026-09-11",
+      "available_to": "2026-10-14",
       "category": "물가/고용",
-      "count": 118,
+      "count": 119,
       "country": "US",
       "event_title": "Consumer Price Index",
       "kind": "metric",
       "label": "Core CPI MoM",
       "metric_key": "core_cpi_mom",
-      "path": "./calendar-history/series/7a7e34abf639e25ff722ef65fa836eefde3190c4d84ca4356567b896454a580f.json",
+      "path": "./calendar-history/series/a8d69f1e9a0a73ba906d123cea279f5d51a30c9ec0e917048acd84dceb4810fa.json",
       "quality": {
         "actual_count": 118,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 118,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 81,
         "rows_by_year": {
@@ -13071,28 +13071,28 @@
           "2023": 12,
           "2024": 12,
           "2025": 10,
-          "2026": 9
+          "2026": 10
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::core_cpi_mom",
-      "sha256": "7a7e34abf639e25ff722ef65fa836eefde3190c4d84ca4356567b896454a580f"
+      "sha256": "a8d69f1e9a0a73ba906d123cea279f5d51a30c9ec0e917048acd84dceb4810fa"
     },
     "US::consumer-price-index::core_cpi_yoy": {
       "available_from": "2016-10-18",
-      "available_to": "2026-09-11",
+      "available_to": "2026-10-14",
       "category": "물가/고용",
-      "count": 119,
+      "count": 120,
       "country": "US",
       "event_title": "Consumer Price Index",
       "kind": "metric",
       "label": "Core CPI YoY",
       "metric_key": "core_cpi_yoy",
-      "path": "./calendar-history/series/d88b8b09cd9fb221d1aa58f6def77ca86196f43684fc7adab4cdcc9447bf5e19.json",
+      "path": "./calendar-history/series/73681b671e71dd2f698d66ef6ff0260a726bab5e9b975a784cecd0a330b257dd.json",
       "quality": {
         "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 55,
         "rows_by_year": {
@@ -13106,28 +13106,28 @@
           "2023": 12,
           "2024": 12,
           "2025": 11,
-          "2026": 9
+          "2026": 10
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::core_cpi_yoy",
-      "sha256": "d88b8b09cd9fb221d1aa58f6def77ca86196f43684fc7adab4cdcc9447bf5e19"
+      "sha256": "73681b671e71dd2f698d66ef6ff0260a726bab5e9b975a784cecd0a330b257dd"
     },
     "US::consumer-price-index::cpi_mom": {
       "available_from": "2016-10-18",
-      "available_to": "2026-09-11",
+      "available_to": "2026-10-14",
       "category": "물가/고용",
-      "count": 118,
+      "count": 119,
       "country": "US",
       "event_title": "Consumer Price Index",
       "kind": "metric",
       "label": "CPI MoM",
       "metric_key": "cpi_mom",
-      "path": "./calendar-history/series/3dbe83b238ee826215d77612a4618cee53ea9f2f7a9364ce2ff3cdcc5cb8bb19.json",
+      "path": "./calendar-history/series/552c237f86a32b943ea9891f988dc78f9fb9807bdba88f565636a324042c663e.json",
       "quality": {
         "actual_count": 118,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 118,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 81,
         "rows_by_year": {
@@ -13141,28 +13141,28 @@
           "2023": 12,
           "2024": 12,
           "2025": 10,
-          "2026": 9
+          "2026": 10
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::cpi_mom",
-      "sha256": "3dbe83b238ee826215d77612a4618cee53ea9f2f7a9364ce2ff3cdcc5cb8bb19"
+      "sha256": "552c237f86a32b943ea9891f988dc78f9fb9807bdba88f565636a324042c663e"
     },
     "US::consumer-price-index::cpi_yoy": {
       "available_from": "2016-10-18",
-      "available_to": "2026-09-11",
+      "available_to": "2026-10-14",
       "category": "물가/고용",
-      "count": 119,
+      "count": 120,
       "country": "US",
       "event_title": "Consumer Price Index",
       "kind": "metric",
       "label": "CPI YoY",
       "metric_key": "cpi_yoy",
-      "path": "./calendar-history/series/418af18bf4f1b8e9b51997784dd738152f6b042a50fdd0ded2d5deb57a47c3e2.json",
+      "path": "./calendar-history/series/13114b8ea9ca620f6e94cfc61d647f3d23cdc066b36b44d919af73de373a962c.json",
       "quality": {
         "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 55,
         "rows_by_year": {
@@ -13176,12 +13176,12 @@
           "2023": 12,
           "2024": 12,
           "2025": 11,
-          "2026": 9
+          "2026": 10
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::cpi_yoy",
-      "sha256": "418af18bf4f1b8e9b51997784dd738152f6b042a50fdd0ded2d5deb57a47c3e2"
+      "sha256": "13114b8ea9ca620f6e94cfc61d647f3d23cdc066b36b44d919af73de373a962c"
     },
     "US::employment-cost-index": {
       "available_from": "2026-02-10",
@@ -14655,11 +14655,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 430,
-  "snapshot_id": "9c1429012dfadf79ceb0b5323ebc92bd5fb02285d6ce00c1978d653ad5fc550a",
-  "source_sha256": "9c1429012dfadf79ceb0b5323ebc92bd5fb02285d6ce00c1978d653ad5fc550a",
+  "snapshot_id": "500f3fc88a8b118c512c872195a481bafb210e96e32a1b715b56ea8e8b5b15ce",
+  "source_sha256": "500f3fc88a8b118c512c872195a481bafb210e96e32a1b715b56ea8e8b5b15ce",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-10-13",
-  "window_start": "2016-10-15",
+  "window_end": "2026-10-14",
+  "window_start": "2016-10-16",
   "window_years": 10
 }
