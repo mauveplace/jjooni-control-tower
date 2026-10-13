@@ -313,12 +313,22 @@ function mergeSeries(base,recent){
   for(const x of(recent||[]))if(x?.date)m.set(x.date,x);
   return[...m.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
 }
+async function waitForMarketData(){
+  // Window load does not wait for the asynchronous canonical JSON request.
+  // A cached history response can otherwise beat DATA and leave charts in error.
+  const deadline=Date.now()+30000;
+  while(typeof DATA==='undefined'||!DATA){
+    if(Date.now()>=deadline)throw new Error('canonical market data load timeout');
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+}
 async function hydrateHistory(force=false){
   if(historyState==='loaded')return true;
   if(historyPromise&&!force)return historyPromise;
   historyState='loading';refreshAllCoverage();
   historyPromise=(async()=>{
     try{
+      await waitForMarketData();
       const h=await fetch('./data/history-lite.json?v=1',{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(new Error('history-lite '+r.status)));
       if(h?.schema!=='JJOONI_MARKET_HISTORY_LITE_V1')throw new Error('history-lite schema');
       if(typeof DATA==='undefined'||!DATA)throw new Error('DATA unavailable');
@@ -359,4 +369,5 @@ window.addEventListener('load',()=>{
 });
 window.__JJOONI_OBSERVATORY_UI={version:'2.12-real-time-axis',responsive:true,history_common:'LITE_30Y_PLUS_RECENT',history_state:historyState,ranges:RANGE_ORDER,yield_chart:'MATURITY_TIME_SERIES',x_axis_dates:true,x_axis_contract:'LINEAR_UTC_EPOCH_REAL_ELAPSED_TIME',calendar_refresh_ms:CALENDAR_REFRESH_MS,refresh_calendar:refreshCalendarData};
 })();
+
 

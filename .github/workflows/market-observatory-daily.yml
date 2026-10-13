@@ -216,7 +216,7 @@ jobs:
           s=p.read_text(encoding='utf-8')
           zoom='<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>'
           if 'chartjs-plugin-zoom@2.2.0' not in s:s=s.replace('</head>',zoom+'</head>',1)
-          bridge='<script src="./observatory-v2.js?v=2.12"></script>'
+          bridge='<script src="./observatory-v2.js?v=2.12.2"></script>'
           if 'observatory-v2.js' not in s:s=s.replace('</body>',bridge+'</body>',1)
           editor='<script src="./calendar-editor-v1.js?v=1.2"></script>'
           if 'calendar-editor-v1.js' not in s:s=s.replace('</body>',editor+'</body>',1)
@@ -367,5 +367,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)
+
 
 
