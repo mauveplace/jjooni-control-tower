@@ -31,12 +31,15 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    for(const [date,title,value] of targets){
     const event=data.events.find(e=>e.datetime_kst.startsWith(date)&&e.title.includes(title));
     assert(event, title);assert.equal(event.actual,value,title);assert.equal(event.source_tier,'OFFICIAL',title);assert(event.source_url,title);
-    const row=page.locator('#events .event').filter({hasText:title});
-    assert.equal(await row.count(),1,title);await row.scrollIntoViewIfNeeded();
+    // Recurring releases (claims, PMI, etc.) legitimately appear multiple times in
+    // the selected month. Scope the DOM assertion to the target release's verified
+    // actual instead of requiring the title itself to be globally unique.
+    const row=page.locator('#events .event').filter({hasText:title}).filter({hasText:value});
+    assert.equal(await row.count(),1,`${title} ${date} ${value}`);await row.scrollIntoViewIfNeeded();
     const text=await row.innerText();assert(text.includes(value),title+' actual not rendered');
     const metrics=await row.locator('.actual').allTextContents();assert(metrics.some(x=>x.includes(value)),title+' actual column missing');
     await row.screenshot({path:`calendar-${width}-${event.country}.png`});
-    report.push({width,title,actual:event.actual,source_url:event.source_url,text});
+    report.push({width,date,title,actual:event.actual,source_url:event.source_url,text});
    }
    const size=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));
    assert(size.scroll<=size.width+3,'calendar horizontal overflow');
@@ -52,7 +55,8 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    await page.route('**/data/economic-calendar.json?refresh=*',route=>route.fulfill({json:simulated}));
    assert(await page.evaluate(()=>window.__JJOONI_OBSERVATORY_UI.refresh_calendar(true)));
    assert.equal(await page.locator('#calendarMonth').innerText(),month);
-   const delayedRow=page.locator('#events .event').filter({hasText:'U.S. Initial Jobless Claims'});
+   const delayedRow=page.locator('#events .event').filter({hasText:'U.S. Initial Jobless Claims'}).filter({hasText:'수집 지연'});
+   assert.equal(await delayedRow.count(),1,'target overdue claims row must be unique after simulated refresh');
    assert((await delayedRow.innerText()).includes('수집 지연'));
    assert((await page.locator('#calendarLiveStatus').innerText()).includes('수집 지연 1건'));
    await delayedRow.screenshot({path:`calendar-${width}-overdue.png`});
