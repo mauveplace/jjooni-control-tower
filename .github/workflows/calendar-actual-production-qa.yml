@@ -3,6 +3,11 @@ on:
   workflow_run:
     workflows: ["Market Observatory Verified Calendar"]
     types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - tests/calendar-actual-production.cjs
+      - .github/workflows/calendar-actual-production-qa.yml
   workflow_dispatch:
 permissions:
   contents: read
