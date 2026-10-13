@@ -48,8 +48,7 @@
     "RUSSELL2000": 2783.36889648,
     "DOW": 51670.1015625,
     "NASDAQCOMPOSITE": 27204.38085938,
-    "SILVER": 59.39500046,
-    "JP20Y": 3.853
+    "SILVER": 59.39500046
   },
   "series": {
     "NASDAQ100": [
@@ -317667,36 +317666,6 @@
         "date": "2026-10-13",
         "value": 59.39500046
       }
-    ],
-    "JP20Y": [
-      {
-        "date": "2026-10-01",
-        "value": 3.91
-      },
-      {
-        "date": "2026-10-02",
-        "value": 3.925
-      },
-      {
-        "date": "2026-10-05",
-        "value": 3.935
-      },
-      {
-        "date": "2026-10-06",
-        "value": 3.946
-      },
-      {
-        "date": "2026-10-07",
-        "value": 3.943
-      },
-      {
-        "date": "2026-10-08",
-        "value": 3.916
-      },
-      {
-        "date": "2026-10-09",
-        "value": 3.853
-      }
     ]
   },
   "curves": {
@@ -317818,7 +317787,7 @@
     "drawdown_52w_pct": -2.097682425420755,
     "ma250": 27195.45363281276,
     "ndx": 30569.48046875,
-    "observed_at": "2026-10-14T06:11:18+09:00",
+    "observed_at": "2026-10-14T06:11:22+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -1.7927333010454127,
     "previous_ma250": 27171.49299218776,
@@ -323147,12 +323116,6 @@
       "last_date": "2026-10-13",
       "target_session": "2026-10-13"
     },
-    "JP_RATES": {
-      "status": "LIVE",
-      "source": "Japan MOF current JGB yield CSV",
-      "source_url": "https://www.mof.go.jp/jgbs/reference/interest_rate/jgbcm.csv",
-      "last_date": "2026-10-09"
-    },
     "KOSPI": {
       "status": "LIVE",
       "source": "Naver Finance index daily",
@@ -323169,6 +323132,12 @@
       "status": "LIVE",
       "source": "FearAndGreedGraph public JSON",
       "last_date": "2026-10-13"
+    },
+    "JP_RATES": {
+      "status": "LIVE",
+      "source": "Japan MOF current JGB yield CSV",
+      "source_url": "https://www.mof.go.jp/jgbs/reference/interest_rate/jgbcm.csv",
+      "last_date": "2026-10-09"
     }
   },
   "kr_rates_refreshed_kst": "2026-10-14T06:11:03+09:00",
