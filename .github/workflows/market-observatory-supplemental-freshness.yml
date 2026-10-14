@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - market-observatory/data-refresh-v1.js
+      - tests/test_observatory_data_refresh.cjs
       - tools/refresh_observatory_supplementals.py
       - tools/refresh_observatory_kr_rates.py
       - tools/accept_observatory_sources.py
@@ -58,6 +60,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node --test tests/test_observatory_data_refresh.cjs
           python -m py_compile \
             tools/refresh_observatory_supplementals.py \
             tools/refresh_observatory_kr_rates.py \
@@ -102,7 +105,11 @@ jobs:
       - name: Refresh FedWatch when stale
         id: fedwatch
         continue-on-error: true
-        run: python tools/build_fed_watch.py
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python tools/collect_fedwatch_official.py --force || echo 'FEDWATCH_OFFICIAL_MANUAL_ATTEMPT_FAILED; continuing fallback'
+          fi
+          python tools/build_fed_watch.py
 
       - name: Refresh Sector ETF snapshot
         id: sector
@@ -132,6 +139,30 @@ jobs:
           print('CROSS_MARKET_SAFE_PUBLICATION=PASS critical=0; source warnings remain visible')
           PY
 
+      - name: Record collection publication receipt
+        env:
+          SUPPLEMENTAL_OUTCOME: ${{ steps.supplemental.outcome }}
+          KR_RATES_OUTCOME: ${{ steps.kr_rates.outcome }}
+          FEDWATCH_OUTCOME: ${{ steps.fedwatch.outcome }}
+          SECTOR_OUTCOME: ${{ steps.sector.outcome }}
+        run: |
+          python - <<'PY_RECEIPT'
+          import json, os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          receipt = {
+              'schema': 'JJOONI_OBSERVATORY_REFRESH_RECEIPT_V1',
+              'run_id': os.environ['GITHUB_RUN_ID'],
+              'event': os.environ['GITHUB_EVENT_NAME'],
+              'generated_kst': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(timespec='seconds'),
+              'sources': {k: os.environ[v] for k, v in {
+                  'market': 'SUPPLEMENTAL_OUTCOME', 'kr_rates': 'KR_RATES_OUTCOME',
+                  'fedwatch': 'FEDWATCH_OUTCOME', 'sector': 'SECTOR_OUTCOME'}.items()},
+          }
+          Path('market-observatory/data/refresh-receipt.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          PY_RECEIPT
+
       - name: Publish repaired market sources
         shell: bash
         run: |
@@ -146,6 +177,7 @@ jobs:
             market-observatory/data/fed-watch.json \
             market-observatory/data/fedwatch-official.json \
             market-observatory/data/sector-etf.json \
+            market-observatory/data/refresh-receipt.json \
             market-observatory/data/data-audit.json \
             market-observatory/data/freshness-status.json \
             $(find market-observatory/data/fedwatch-history -type f | sort)
