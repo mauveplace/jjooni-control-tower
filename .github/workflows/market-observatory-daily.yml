@@ -40,7 +40,7 @@ on:
     # Sunday ET candidate refreshes the last completed US session for Monday KST.
     # 20:10 UTC = 05:10 KST while New York is on EDT; 21:10 UTC = 06:10 KST while on EST.
     # Sunday UTC candidate intentionally refreshes Monday KST using the last completed Friday US session.
-    # us_close_gate below allows only the slot where America/New_York local time is 16:10.
+    # us_close_gate permits execution after 16:10 so delayed scheduled runs still collect.
     - cron: '10 20,21 * * 0-5'
     # 16:10 KST: Korea market close refresh for KOSPI/KOSDAQ and KR reference data.
     - cron: '10 7 * * 1-5'
@@ -58,13 +58,13 @@ jobs:
       ny_time: ${{ steps.close.outputs.ny_time }}
     steps:
       - id: close
-        name: Gate exact US regular-session close +10m
+        name: Gate US close refresh with scheduler delay tolerance
         shell: bash
         run: |
           set -euo pipefail
           ny_time="$(TZ=America/New_York date +%H%M)"
           echo "ny_time=$ny_time" >> "$GITHUB_OUTPUT"
-          if [ "$ny_time" = "1610" ]; then
+          if [ "$ny_time" -ge "1610" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             echo "US_CLOSE_PLUS_10_GATE=PASS ny_time=$ny_time"
           else
