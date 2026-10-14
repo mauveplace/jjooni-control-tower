@@ -16,6 +16,34 @@ from archive_fedwatch import archive_snapshot
 
 
 class OfficialFedWatchTests(unittest.TestCase):
+    def test_public_embed_remains_available_when_marketing_page_returns_403(self):
+        from urllib.error import HTTPError
+        from unittest.mock import MagicMock
+        calls = []
+        current = self.raw['current_html'] + "<form action='/User/QuikStrikeView.aspx?test=1'><input type='hidden' name='__VIEWSTATE' value='test'/><a href=\"javascript:__doPostBack('probabilities','')\">Probabilities</a></form>"
+        payloads = iter(["<form action='?test=1'></form>", current, self.raw['matrix_html']])
+        def request(req, timeout):
+            calls.append(req)
+            if req.full_url == official.PAGE:
+                raise HTTPError(req.full_url, 403, 'Forbidden', {}, None)
+            response = MagicMock()
+            response.__enter__.return_value = response
+            response.url = req.full_url
+            response.read.return_value = next(payloads).encode()
+            return response
+        opener = MagicMock()
+        opener.open.side_effect = request
+        with patch.object(official.urllib.request, 'build_opener', return_value=opener):
+            got = official.fetch_tables()
+        self.assertEqual(got, (current, self.raw['matrix_html']))
+        self.assertEqual(len(calls), 4)
+        self.assertTrue(calls[1].full_url.startswith(official.HOST))
+        self.assertEqual(calls[1].get_header('Referer'), official.PAGE)
+
+    def test_rendered_uppercase_table_headers_are_accepted(self):
+        raw = {**self.raw, 'current_html': self.raw['current_html'].replace('Target Rate (bps)', 'TARGET RATE (BPS)')}
+        self.assertEqual(official.parse_tables(**raw, captured=self.now)['meeting_count'], 10)
+
     def setUp(self):
         self.raw = json.loads((ROOT / 'tests/fixtures/fedwatch-official-tables.json').read_text())
         self.now = datetime(2026, 10, 14, 8, 0, tzinfo=ZoneInfo('Asia/Seoul'))
