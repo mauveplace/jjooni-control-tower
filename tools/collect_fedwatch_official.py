@@ -6,6 +6,7 @@ import hashlib
 import http.cookiejar
 import json
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime
@@ -52,7 +53,7 @@ def parse_tables(current_html, matrix_html, captured=None):
     if asof.date() > now.astimezone(CT).date():
         raise ValueError('OFFICIAL_SOURCE_TIMESTAMP_FUTURE')
     current_table = next((t for t in current.find_all('table')
-                          if 'Target Rate (bps)' in t.get_text() and len(t.get_text()) < 10000), None)
+                          if 'target rate (bps)' in t.get_text().lower() and len(t.get_text()) < 10000), None)
     if current_table is None:
         raise ValueError('OFFICIAL_CURRENT_TABLE_MISSING')
     comparison = table_rows(current_table)
@@ -168,9 +169,19 @@ def fetch_tables():
         req = urllib.request.Request(url, data=data, headers={'User-Agent': 'Mozilla/5.0 JJOONI-Daily-FedWatch/1.0', 'Referer': referer})
         with opener.open(req, timeout=25) as response:
             return response.read().decode('utf-8'), response.url
-    page, _ = read(PAGE)
-    soup = BeautifulSoup(page, 'html.parser')
-    frame = next((x.get('src') for x in soup.find_all('iframe') if 'cmegroup-tools.quikstrike.net' in str(x.get('src'))), None)
+    try:
+        page, _ = read(PAGE)
+        soup = BeautifulSoup(page, 'html.parser')
+        frame = next((x.get('src') for x in soup.find_all('iframe') if 'cmegroup-tools.quikstrike.net' in str(x.get('src'))), None)
+    except urllib.error.HTTPError as error:
+        if error.code not in {403, 404, 500, 502, 503, 504}:
+            raise
+        # The CME marketing page and the publicly embedded QuikStrike data
+        # service are separate hosts. Use the exact public embed observed on
+        # the official page, with its normal parent Referer and fresh cookies.
+        # Do not alter fingerprints, credentials, or retry a data-service denial.
+        frame = HOST + '/User/QuikStrikeTools.aspx?viewitemid=IntegratedFedWatchTool&userId=lwolf&jobRole=&company=&companyType=&userId=&jobRole=&company=&companyType='
+        print('FEDWATCH_OFFICIAL=PUBLIC_EMBED_DIRECT marketing_status=' + str(error.code))
     if not frame:
         raise ValueError('OFFICIAL_IFRAME_MISSING')
     loading, loading_url = read(frame)

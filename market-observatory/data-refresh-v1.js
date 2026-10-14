@@ -11,7 +11,7 @@ function selectRun(runs,since){return (runs||[]).filter(r=>r.event==='workflow_d
 function stateFor(run,receipt){
   if(!run)return {state:'WAITING',text:'실행 대기 · 열린 GitHub 화면에서 Run workflow → Run workflow를 눌러 주세요.'};
   const published=receipt&&String(receipt.run_id)===String(run.id);
-  if(published){const failed=Object.values(receipt.sources||{}).some(v=>v!=='success');return {state:failed?'PARTIAL':'PUBLISHED',text:failed?'일부 원천 실패 · 성공한 데이터는 게시되었습니다.':'수집 결과가 게시되었습니다.',published:true};}
+  if(published){const failed=Object.values(receipt.sources||{}).some(v=>v!=='success')||receipt.quality?.source_health==='DEGRADED';return {state:failed?'PARTIAL':'PUBLISHED',text:failed?'일부 원천 실패 또는 지연 · 성공한 데이터는 게시되었습니다.':'수집 결과가 게시되었습니다.',published:true};}
   if(run.status!=='completed')return {state:'RUNNING',text:run.status==='queued'?'수집 실행 대기열 · 잠시 기다려 주세요.':'데이터 수집·검증·게시 중…'};
   if(run.conclusion==='success')return {state:'DEPLOYING',text:'수집 완료 · 화면에 게시될 때까지 확인 중…'};
   return {state:'FAILED',text:'수집 또는 게시 실패 · 기존 데이터를 유지합니다. 실행 기록에서 실패 단계를 확인하세요.'};
