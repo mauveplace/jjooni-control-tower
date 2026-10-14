@@ -105,7 +105,11 @@ jobs:
       - name: Refresh FedWatch when stale
         id: fedwatch
         continue-on-error: true
-        run: python tools/build_fed_watch.py
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python tools/collect_fedwatch_official.py --force || echo 'FEDWATCH_OFFICIAL_MANUAL_ATTEMPT_FAILED; continuing fallback'
+          fi
+          python tools/build_fed_watch.py
 
       - name: Refresh Sector ETF snapshot
         id: sector
