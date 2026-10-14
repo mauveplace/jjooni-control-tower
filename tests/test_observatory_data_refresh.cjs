@@ -25,3 +25,7 @@ test('queued and running jobs retain separate progress',()=>{
   assert.match(stateFor({...run,status:'queued'},null).text,/대기열/);
   assert.equal(stateFor(run,null).state,'RUNNING');
 });
+
+test('a successful process with stale source data is partial, never all-current',()=>{
+  assert.equal(stateFor(run,{run_id:'42',sources:{fedwatch:'success'},quality:{source_health:'DEGRADED',degraded_sources:{fedwatch:'LAGGING'}}}).state,'PARTIAL');
+});

@@ -147,7 +147,9 @@ jobs:
           SECTOR_OUTCOME: ${{ steps.sector.outcome }}
         run: |
           python - <<'PY_RECEIPT'
-          import json, os
+          import json, os, sys
+          sys.path.insert(0, "tools")
+          from accept_observatory_sources import acceptance
           from datetime import datetime
           from pathlib import Path
           from zoneinfo import ZoneInfo
@@ -160,6 +162,8 @@ jobs:
                   'market': 'SUPPLEMENTAL_OUTCOME', 'kr_rates': 'KR_RATES_OUTCOME',
                   'fedwatch': 'FEDWATCH_OUTCOME', 'sector': 'SECTOR_OUTCOME'}.items()},
           }
+          audit = json.loads(Path('market-observatory/data/data-audit.json').read_text())
+          receipt['quality'] = acceptance(audit, receipt['sources'])
           Path('market-observatory/data/refresh-receipt.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
           PY_RECEIPT
 
