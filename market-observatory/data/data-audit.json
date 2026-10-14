@@ -1,13 +1,13 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-14T23:56:38+09:00",
+  "generated_kst": "2026-10-15T02:38:31+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 3,
   "observatory_session": "2026-10-13",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-14T21:51:36+09:00",
+      "generated_kst": "2026-10-15T00:14:23+09:00",
       "session": "2026-10-13",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
@@ -48,7 +48,7 @@
       "priced_count": 46
     },
     "official_macro": {
-      "generated_kst": "2026-10-14T18:45:33+09:00",
+      "generated_kst": "2026-10-15T02:38:10+09:00",
       "schema": "JJOONI_OFFICIAL_MACRO_V1"
     },
     "market_regime": {
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-14T23:56:37+09:00",
+      "generated_kst": "2026-10-15T02:38:31+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -152,7 +152,7 @@
     },
     "kr_equity": {
       "state": "LIVE",
-      "anchor": "2026-10-14",
+      "anchor": "2026-10-15",
       "allow_lag_days": 4,
       "critical": true,
       "items": {
@@ -346,7 +346,7 @@
     },
     "kr_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-14",
+      "anchor": "2026-10-15",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -404,7 +404,7 @@
     },
     "jp_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-14",
+      "anchor": "2026-10-15",
       "allow_lag_days": 5,
       "critical": false,
       "items": {
@@ -461,17 +461,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-14",
-          "last_value": 82736.23,
+          "last_value": 81782.22,
           "group": "crypto",
-          "latest_value": 82736.23,
+          "latest_value": 81782.22,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-14",
-          "last_value": 2470.26,
+          "last_value": 2428.11,
           "group": "crypto",
-          "latest_value": 2470.26,
+          "latest_value": 2428.11,
           "latest_matches": true
         }
       },
@@ -480,7 +480,7 @@
     },
     "sentiment": {
       "state": "LIVE",
-      "anchor": "2026-10-14",
+      "anchor": "2026-10-15",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -515,16 +515,16 @@
     "BTCUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-14T22:53:27+09:00",
-      "current_quote_age_seconds": 3791,
-      "captured_quote_age_seconds": 5
+      "quote_as_of_kst": "2026-10-15T00:14:24+09:00",
+      "current_quote_age_seconds": 8647,
+      "captured_quote_age_seconds": 2
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-14T22:53:25+09:00",
-      "current_quote_age_seconds": 3793,
-      "captured_quote_age_seconds": 7
+      "quote_as_of_kst": "2026-10-15T00:14:21+09:00",
+      "current_quote_age_seconds": 8650,
+      "captured_quote_age_seconds": 6
     }
   },
   "issues": [
@@ -536,12 +536,12 @@
     {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-14T22:53:27+09:00', 'current_quote_age_seconds': 3791, 'captured_quote_age_seconds': 5}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T00:14:24+09:00', 'current_quote_age_seconds': 8647, 'captured_quote_age_seconds': 2}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-14T22:53:25+09:00', 'current_quote_age_seconds': 3793, 'captured_quote_age_seconds': 7}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T00:14:21+09:00', 'current_quote_age_seconds': 8650, 'captured_quote_age_seconds': 6}"
     }
   ],
   "contracts": {
