@@ -1,11 +1,11 @@
 # FedWatch · PB / Analyst Read View
 
 - 자료 기준일: 2026-10-13
-- 원천 표시시각: 2026-10-13
-- 수집 시각: 2026-10-15T05:57:26+09:00
-- 수집 당시 상태: LAGGING
-- 원천: CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix
-- 공식 API: NOT_CONFIGURED_SETTLEMENT_DERIVED
+- 원천 표시시각: 13 Oct 2026 05:55:31 CT
+- 수집 시각: 2026-10-14T08:09:35+09:00
+- 수집 당시 상태: LIVE
+- 원천: CME FedWatch official public probability tables (QuikStrike)
+- 공식 API: PUBLIC_WEB_TABLE_CAPTURE
 - 최신 원문: [fed-watch.json](../fed-watch.json)
 - 전체 관측 이력: [index.json](index.json)
 - 회의별 확률 CSV: [probabilities.csv](probabilities.csv)
