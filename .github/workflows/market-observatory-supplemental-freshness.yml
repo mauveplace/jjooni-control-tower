@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - tools/collect_us_rates_intraday.py
       - market-observatory/data-refresh-v1.js
       - tests/test_observatory_data_refresh.cjs
       - tools/refresh_observatory_supplementals.py
@@ -111,6 +112,11 @@ jobs:
           fi
           python tools/build_fed_watch.py
 
+      - name: Refresh observed US yield intraday bars
+        id: intraday
+        continue-on-error: true
+        run: python tools/collect_us_rates_intraday.py
+
       - name: Refresh Sector ETF snapshot
         id: sector
         continue-on-error: true
@@ -141,6 +147,7 @@ jobs:
 
       - name: Record collection publication receipt
         env:
+          INTRADAY_OUTCOME: ${{ steps.intraday.outcome }}
           SUPPLEMENTAL_OUTCOME: ${{ steps.supplemental.outcome }}
           KR_RATES_OUTCOME: ${{ steps.kr_rates.outcome }}
           FEDWATCH_OUTCOME: ${{ steps.fedwatch.outcome }}
@@ -160,7 +167,7 @@ jobs:
               'generated_kst': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(timespec='seconds'),
               'sources': {k: os.environ[v] for k, v in {
                   'market': 'SUPPLEMENTAL_OUTCOME', 'kr_rates': 'KR_RATES_OUTCOME',
-                  'fedwatch': 'FEDWATCH_OUTCOME', 'sector': 'SECTOR_OUTCOME'}.items()},
+                  'fedwatch': 'FEDWATCH_OUTCOME', 'sector': 'SECTOR_OUTCOME', 'us_rates_intraday': 'INTRADAY_OUTCOME'}.items()},
           }
           audit = json.loads(Path('market-observatory/data/data-audit.json').read_text())
           receipt['quality'] = acceptance(audit, receipt['sources'])
@@ -181,6 +188,7 @@ jobs:
             market-observatory/data/fed-watch.json \
             market-observatory/data/fedwatch-official.json \
             market-observatory/data/sector-etf.json \
+            market-observatory/data/us-rates-intraday.json \
             market-observatory/data/refresh-receipt.json \
             market-observatory/data/data-audit.json \
             market-observatory/data/freshness-status.json \

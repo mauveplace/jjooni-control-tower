@@ -1,0 +1,60 @@
+name: Observatory US Rates Intraday
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/collect_us_rates_intraday.py
+      - market-observatory/us-rates-intraday-v1.js
+      - tests/test_us_rates_intraday.py
+      - tests/us-rates-intraday.test.cjs
+      - .github/workflows/observatory-us-rates-intraday.yml
+  pull_request:
+    paths:
+      - tools/collect_us_rates_intraday.py
+      - market-observatory/us-rates-intraday-v1.js
+      - tests/test_us_rates_intraday.py
+      - tests/us-rates-intraday.test.cjs
+      - .github/workflows/observatory-us-rates-intraday.yml
+  schedule:
+    - cron: '17,47 * * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: observatory-us-rates-intraday-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test observation units, clock, gaps and source isolation
+        run: |
+          python -m unittest tests.test_us_rates_intraday -v
+          node --test tests/us-rates-intraday.test.cjs
+      - name: Collect observed yield-index bars
+        if: github.event_name != 'pull_request'
+        id: source
+        continue-on-error: true
+        run: python tools/collect_us_rates_intraday.py
+      - name: Publish independent intraday observations
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py --message 'data(observatory): observed US yield intraday bars' market-observatory/data/us-rates-intraday.json
+      - name: Expose partial source failures
+        if: github.event_name != 'pull_request' && steps.source.outcome != 'success'
+        run: |
+          echo '::error::Intraday source partially unavailable; retained observations published independently.'
+          exit 1
