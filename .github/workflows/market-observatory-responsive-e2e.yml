@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - market-observatory/index.html
+      - market-observatory/us-rates-intraday-v1.js
       - market-observatory/observatory-v2.js
       - market-observatory/sector-etf-v1.js
       - .github/workflows/market-observatory-responsive-e2e.yml
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - market-observatory/index.html
+      - market-observatory/us-rates-intraday-v1.js
       - market-observatory/observatory-v2.js
       - market-observatory/sector-etf-v1.js
       - .github/workflows/market-observatory-responsive-e2e.yml
@@ -103,6 +105,18 @@ jobs:
               assert(sector.classicSparks===11,`${tc.name} classic sector sparklines ${sector.classicSparks}/11`);
               if(tc.width<=430)assert(inside(sector.mobileRows),`${tc.name} sector metric row overflow ${JSON.stringify(sector.mobileRows)}`);
 
+              await page.click('button[data-tab="rates"]');
+              await page.waitForFunction(()=>window.__JJOONI_US_RATES_INTRADAY,{timeout:30000});
+              await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-status]')?.textContent.startsWith('수집 '),{timeout:30000});
+              await page.click('#usRatesIntraday [data-rate-latest]');
+              await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-summary]')?.textContent.includes('개 관측'),{timeout:30000});
+              const rates=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,canvas:document.querySelector('#usRatesIntraday canvas').hidden}));
+              assert(rates.scroll<=rates.width+3,`${tc.name} intraday rates overflow`);
+              assert(rates.canvas===false,`${tc.name} intraday chart missing`);
+              await page.route('**/data/us-rates-intraday.json?*',route=>route.fulfill({status:503,body:'source unavailable'}));
+              await page.click('#usRatesIntraday [data-rate-read]');
+              await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-status]')?.textContent.includes('조회 실패'),{timeout:30000});
+              assert(await page.locator('#usRatesIntraday canvas').isVisible(),`${tc.name} failed refresh discarded observations`);
               await page.click('button[data-tab="calendar"]');
               await page.waitForTimeout(300);
               const cal=await page.evaluate(()=>({
