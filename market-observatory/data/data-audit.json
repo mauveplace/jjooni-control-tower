@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-15T18:05:26+09:00",
+  "generated_kst": "2026-10-15T18:28:31+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 3,
@@ -48,7 +48,7 @@
       "priced_count": 46
     },
     "official_macro": {
-      "generated_kst": "2026-10-15T13:47:00+09:00",
+      "generated_kst": "2026-10-15T18:28:12+09:00",
       "schema": "JJOONI_OFFICIAL_MACRO_V1"
     },
     "market_regime": {
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-15T18:05:25+09:00",
+      "generated_kst": "2026-10-15T18:28:31+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -516,14 +516,14 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-15T16:36:28+09:00",
-      "current_quote_age_seconds": 5338,
+      "current_quote_age_seconds": 6723,
       "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-15T16:36:24+09:00",
-      "current_quote_age_seconds": 5342,
+      "current_quote_age_seconds": 6727,
       "captured_quote_age_seconds": 7
     }
   },
@@ -536,12 +536,12 @@
     {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T16:36:28+09:00', 'current_quote_age_seconds': 5338, 'captured_quote_age_seconds': 3}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T16:36:28+09:00', 'current_quote_age_seconds': 6723, 'captured_quote_age_seconds': 3}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T16:36:24+09:00', 'current_quote_age_seconds': 5342, 'captured_quote_age_seconds': 7}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-15T16:36:24+09:00', 'current_quote_age_seconds': 6727, 'captured_quote_age_seconds': 7}"
     }
   ],
   "contracts": {
