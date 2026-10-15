@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'market-observatory/data/us-rates-intraday.json'
 KST = ZoneInfo('Asia/Seoul')
+NY = ZoneInfo('America/New_York')
 SERIES = {
     'US13W': ('^IRX', '13주 단기물'),
     'US5Y': ('^FVX', '5년물'),
@@ -28,6 +29,23 @@ def fetch(symbol):
     request = urllib.request.Request(source_url(symbol), headers={'User-Agent': 'Mozilla/5.0'})
     with urllib.request.urlopen(request, timeout=18) as response:
         return json.load(response)
+
+
+def fetch_daily(symbol):
+    url = source_url(symbol).replace('range=5d&interval=5m', 'range=10y&interval=1d')
+    request = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(request, timeout=25) as response:
+        return json.load(response)
+
+
+def completed_day(now):
+    local = now.astimezone(NY)
+    date = local.date()
+    if (local.hour, local.minute) < (16, 30):
+        date -= timedelta(days=1)
+    while date.weekday() >= 5:
+        date -= timedelta(days=1)
+    return date.isoformat()
 
 
 def parse_payload(payload, symbol, now):
@@ -47,7 +65,7 @@ def parse_payload(payload, symbol, now):
     for stamp, value in zip(stamps, values):
         if value is None:
             continue
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 30:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not -10 <= value <= 30:
             raise ValueError('YIELD_PERCENT_UNIT_OR_VALUE')
         if isinstance(stamp, bool) or not isinstance(stamp, int) or stamp > now.timestamp() + 60:
             raise ValueError('SOURCE_TIMESTAMP_INVALID')
@@ -57,13 +75,17 @@ def parse_payload(payload, symbol, now):
     return [points[k] for k in sorted(points)]
 
 
-def build(previous=None, now=None, fetcher=fetch):
+def build(previous=None, now=None, fetcher=fetch, daily_fetcher=fetch_daily):
     now = now or datetime.now(KST)
     previous = previous or {}
     cutoff = (now - timedelta(days=30)).timestamp()
     sources = {}
+    completed = completed_day(now)
     with ThreadPoolExecutor(max_workers=4) as pool:
         jobs = {key: pool.submit(fetcher, symbol) for key, (symbol, _) in SERIES.items()}
+        daily_jobs = {key: pool.submit(daily_fetcher, symbol) for key, (symbol, _) in SERIES.items()
+                      if not ((previous.get('series') or {}).get(key) or {}).get('daily_points')
+                      or ((previous.get('series') or {}).get(key) or {}).get('daily_checked_for') != completed}
         for key, (symbol, label) in SERIES.items():
             old = (previous.get('series') or {}).get(key) or {}
             points = {p['timestamp']: p for p in old.get('points', []) if p['timestamp'] >= cutoff}
@@ -76,12 +98,30 @@ def build(previous=None, now=None, fetcher=fetch):
                 state = 'STALE' if points else 'UNAVAILABLE'
                 error = type(exc).__name__ + ': ' + str(exc)[:140]
                 last_success = old.get('last_success_kst')
+            daily = old.get('daily_points', [])
+            daily_state, daily_error = old.get('daily_state', 'AVAILABLE'), old.get('daily_error')
+            daily_success = old.get('daily_last_success_kst')
+            checked = old.get('daily_checked_for')
+            if key in daily_jobs:
+                try:
+                    observed_daily = parse_payload(daily_jobs[key].result(), symbol, now)
+                    completed_rows = [p for p in observed_daily if datetime.fromtimestamp(p['timestamp'], NY).date().isoformat() <= completed]
+                    if not completed_rows:
+                        raise ValueError('COMPLETED_DAILY_BARS_EMPTY')
+                    daily = completed_rows
+                    daily_state, daily_error, checked = 'AVAILABLE', None, completed
+                    daily_success = now.isoformat(timespec='seconds')
+                except Exception as exc:
+                    daily_state = 'STALE' if daily else 'UNAVAILABLE'
+                    daily_error = type(exc).__name__ + ': ' + str(exc)[:140]
             ordered = [points[k] for k in sorted(points)]
             sources[key] = {
                 'symbol': symbol, 'label': label, 'unit': 'percent_yield',
                 'state': state, 'error': error, 'last_success_kst': last_success,
                 'last_observed_kst': datetime.fromtimestamp(ordered[-1]['timestamp'], KST).isoformat(timespec='seconds') if ordered else None,
                 'source_url': source_url(symbol), 'points': ordered,
+                'daily_points': daily, 'daily_state': daily_state, 'daily_error': daily_error,
+                'daily_last_success_kst': daily_success, 'daily_checked_for': checked,
             }
     return {
         'schema': 'JJOONI_US_RATES_INTRADAY_V1', 'generated_kst': now.isoformat(timespec='seconds'),
@@ -100,7 +140,7 @@ def main():
     OUT.write_text(json.dumps(document, ensure_ascii=False, separators=(',', ':')) + '\n')
     states = {k: v['state'] for k, v in document['series'].items()}
     print('US_RATES_INTRADAY=' + json.dumps(states))
-    if any(state != 'AVAILABLE' for state in states.values()):
+    if any(state != 'AVAILABLE' for state in states.values()) or any(s['daily_state'] != 'AVAILABLE' for s in document['series'].values()):
         raise SystemExit(1)
 
 

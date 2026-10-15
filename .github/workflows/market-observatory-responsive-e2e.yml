@@ -113,6 +113,16 @@ jobs:
               const rates=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,canvas:document.querySelector('#usRatesIntraday canvas').hidden}));
               assert(rates.scroll<=rates.width+3,`${tc.name} intraday rates overflow`);
               assert(rates.canvas===false,`${tc.name} intraday chart missing`);
+              for(const grain of ['daily','weekly','monthly','intraday']){
+                await page.click(`#usRatesIntraday [data-rate-grain="${grain}"]`);
+                await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-summary]')?.textContent.includes('개 관측'));
+                const view=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,hidden:document.querySelector('#usRatesIntraday canvas').hidden,title:document.querySelector('#usRatesIntraday [data-rate-title]').textContent}));
+                assert(view.scroll<=view.width+3,`${tc.name} ${grain} rates overflow`);
+                assert(!view.hidden,`${tc.name} ${grain} rates missing`);
+              }
+              await page.click('#usRatesIntraday [data-rate-basis="kst"]');
+              await page.click('#usRatesIntraday [data-rate-mode="bp"]');
+              await page.click('#usRatesIntraday [data-rate-basis="ny"]');
               await page.route('**/data/us-rates-intraday.json?*',route=>route.fulfill({status:503,body:'source unavailable'}));
               await page.click('#usRatesIntraday [data-rate-read]');
               await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-status]')?.textContent.includes('조회 실패'),{timeout:30000});
