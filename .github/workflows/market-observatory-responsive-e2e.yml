@@ -116,9 +116,11 @@ jobs:
               for(const grain of ['daily','weekly','monthly','intraday']){
                 await page.click(`#usRatesIntraday [data-rate-grain="${grain}"]`);
                 await page.waitForFunction(()=>document.querySelector('#usRatesIntraday [data-rate-summary]')?.textContent.includes('개 관측'));
-                const view=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,hidden:document.querySelector('#usRatesIntraday canvas').hidden,title:document.querySelector('#usRatesIntraday [data-rate-title]').textContent}));
+                const view=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,hidden:document.querySelector('#usRatesIntraday canvas').hidden,title:document.querySelector('#usRatesIntraday [data-rate-title]').textContent,chart:(()=>{const c=Chart.getChart(document.querySelector('#usRatesIntraday canvas'));return c?{count:c.data.datasets[0].data.filter(p=>p.y!==null).length,min:c.scales.x.min,max:c.scales.x.max}:null})()}));
                 assert(view.scroll<=view.width+3,`${tc.name} ${grain} rates overflow`);
                 assert(!view.hidden,`${tc.name} ${grain} rates missing`);
+                assert(view.chart&&view.chart.count>1&&view.chart.max>view.chart.min,`${tc.name} ${grain} chart not rendered`);
+                assert(view.title.includes({daily:'일간',weekly:'주간',monthly:'월간',intraday:'일중'}[grain]),`${tc.name} wrong grain title`);
               }
               await page.click('#usRatesIntraday [data-rate-basis="kst"]');
               await page.click('#usRatesIntraday [data-rate-mode="bp"]');

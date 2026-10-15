@@ -18,7 +18,7 @@ function aggregate(points,grain){
 }
 function historyRows(points,grain,end,months){
   // Filter before aggregation: never leak observations after the selected as-of date.
-  const cutoff=new Date(end+'T00:00:00Z');cutoff.setUTCMonth(cutoff.getUTCMonth()-months);const start=cutoff.toISOString().slice(0,10);
+  const cutoff=new Date(end+'T00:00:00Z'),dateOfMonth=cutoff.getUTCDate();cutoff.setUTCDate(1);cutoff.setUTCMonth(cutoff.getUTCMonth()-months);const last=new Date(Date.UTC(cutoff.getUTCFullYear(),cutoff.getUTCMonth()+1,0)).getUTCDate();cutoff.setUTCDate(Math.min(dateOfMonth,last));const start=cutoff.toISOString().slice(0,10);
   return aggregate((points||[]).filter(p=>{const date=day(p.timestamp,'ny');return date>=start&&date<=end;}),grain);
 }
 function chartPoints(rows,mode,grain='intraday'){
