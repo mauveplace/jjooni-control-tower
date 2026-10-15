@@ -1,12 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-15T09:48:44+09:00",
+  "generated_kst": "2026-10-15T10:26:10+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "crypto",
-    "calendar",
-    "audit"
+    "calendar"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -26,7 +24,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-15T07:34:07+09:00",
+      "generated_kst": "2026-10-15T09:49:05+09:00",
       "as_of": "2026-10-14",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -80,7 +78,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-15T07:34:07+09:00",
+      "generated_kst": "2026-10-15T09:49:05+09:00",
       "as_of": "2026-10-14",
       "detail": "US3M 2026-10-14 · US2Y 2026-10-14 · US5Y_OFFICIAL 2026-10-14 · US10Y_OFFICIAL 2026-10-14 · US30Y_OFFICIAL 2026-10-14 · US_2S10S 2026-10-14",
       "source": "U.S. Treasury official",
@@ -89,7 +87,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-15T07:34:06+09:00",
+      "generated_kst": "2026-10-15T09:49:04+09:00",
       "as_of": "2026-10-14",
       "detail": "KR3Y 2026-10-14 · KR5Y 2026-10-14 · KR10Y 2026-10-14 · KR20Y 2026-10-14 · KR30Y 2026-10-14 · KR_3S10S 2026-10-14",
       "source": "BOK ECOS",
@@ -106,10 +104,10 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "STALE",
+      "state": "LIVE",
       "generated_kst": "2026-10-15T07:26:09+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=8078s · ETHUSD age=8079s",
+      "detail": "BTCUSD age=2224s · ETHUSD age=2224s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -161,7 +159,7 @@
     "official_macro": {
       "label": "Official Macro",
       "state": "LIVE",
-      "generated_kst": "2026-10-15T03:12:12+09:00",
+      "generated_kst": "2026-10-15T10:25:46+09:00",
       "as_of": null,
       "detail": "JJOONI_OFFICIAL_MACRO_V1",
       "source": "official-macro.json",
@@ -178,10 +176,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-10-15T09:48:44+09:00",
+      "state": "PASS",
+      "generated_kst": "2026-10-15T10:26:09+09:00",
       "as_of": "2026-10-14",
-      "detail": "critical=0 · warnings=3",
+      "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     }
