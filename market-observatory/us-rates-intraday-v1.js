@@ -28,8 +28,9 @@ function chartPoints(rows,mode,grain='intraday'){
     points.push({x:p.timestamp*1000,y:mode==='bp'?(p.yield_pct-first)*100:p.yield_pct});
   });return points;
 }
+function observationLabel(rows,grain){if(!rows.length)return '선택 구간 자료 없음';return grain==='intraday'?'선택 구간 마지막 관측 '+fullClock.format(new Date(rows.at(-1).timestamp*1000))+' KST':'마지막 일간 자료일 '+day(rows.at(-1).timestamp,'ny')+' (미국 거래일)';}
 function axisLabel(value,grain){return grain==='intraday'?fullClock.format(new Date(value)).slice(5):day(value/1000,'ny');}
-if(typeof module!=='undefined'&&module.exports){module.exports={day,rowsForDay,chartPoints,periodKey,aggregate,historyRows,axisLabel};return;}
+if(typeof module!=='undefined'&&module.exports){module.exports={day,rowsForDay,chartPoints,periodKey,aggregate,historyRows,axisLabel,observationLabel};return;}
 const doc=root.document;if(!doc)return;
 let host,data=null,inflight=null,chart=null,selected='US10Y',mode='yield',grain='intraday',basis='ny',months=12,date=day(Date.now()/1000,'ny'),dateChosen=false;
 function available(){const source=data?.series?.[selected];return (grain==='intraday'?source?.points:source?.daily_points)||[];}
@@ -46,13 +47,13 @@ function render(){
   const dates=points.map(p=>day(p.timestamp,dateBasis())).sort();if(dates.length)dateInput.min=dates[0];else dateInput.removeAttribute('min');
   host.querySelector('[data-rate-title]').textContent=TENORS[selected]+' · '+GRAINS[grain]+' · '+(grain==='intraday'?date:rows.length?day(rows[0].timestamp,'ny')+' → '+day(rows.at(-1).timestamp,'ny'):date)+(grain==='intraday'?(basis==='ny'?' (미국 거래일 · 시각 KST)':' (한국 날짜 · KST)'):' (미국 거래일)');
   const stamp=grain==='intraday'?source?.last_success_kst:source?.daily_last_success_kst,state=grain==='intraday'?source?.state:source?.daily_state;
-  status.textContent=data?`수집 ${String(stamp||data.generated_kst||'').replace('T',' ').slice(0,16)} KST · 선택 구간 마지막 관측 ${rows.length?fullClock.format(new Date(rows.at(-1).timestamp*1000))+' KST':'없음'}${state!=='AVAILABLE'?' · 원천 수집 실패, 이전 관측 유지':''}`:'금리 관측 자료를 읽는 중…';
+  status.textContent=data?`수집 ${String(stamp||data.generated_kst||'').replace('T',' ').slice(0,16)} KST · ${observationLabel(rows,grain)}${state!=='AVAILABLE'?' · 원천 수집 실패, 이전 관측 유지':''}`:'금리 관측 자료를 읽는 중…';
   const summary=host.querySelector('[data-rate-summary]');
   if(rows.length){const first=rows[0].yield_pct,last=rows.at(-1).yield_pct,values=rows.map(p=>p.yield_pct),change=(last-first)*100;
     summary.textContent=`마지막 ${last.toFixed(3)}% · 첫 관측 ${first.toFixed(3)}% · 변화 ${change>=0?'+':''}${change.toFixed(2)}bp · 최저 ${Math.min(...values).toFixed(3)}% · 최고 ${Math.max(...values).toFixed(3)}% · ${rows.length}개 관측`;
   }else summary.textContent=data?'선택한 기간에 저장된 관측이 없습니다. 최근 자료일 또는 다른 날짜를 선택해 주세요.':'자료를 읽는 중입니다.';
   let gaps=0;for(let i=1;i<rows.length;i++)if(rows[i].timestamp-rows[i-1].timestamp>900)gaps++;
-  host.querySelector('[data-rate-explanation]').textContent=grain==='intraday'?(basis==='ny'?'미국 현지 날짜로 한 거래일을 모았습니다. 가로축은 날짜를 포함한 한국시간입니다.':'한국 날짜 하루에는 전일 미국장 마감과 당일 미국장 시작이 함께 들어갈 수 있습니다.')+(gaps?` · 15분 초과 관측 공백 ${gaps}곳: 휴장·거래 외 시간 또는 원천 미제공 구간이며 값을 채우지 않았습니다.`:' · 관측 시각 사이의 실제 간격을 표시합니다.'):'일간은 원천의 완료된 거래일 종가, 주간·월간은 각 기간의 마지막 실제 일간 관측값입니다. 마지막 주·월은 조회 종료일까지의 값이며, 휴일에는 관측점을 만들지 않습니다. 최저·최고는 화면에 표시한 관측값 기준입니다.';
+  host.querySelector('[data-rate-explanation]').textContent=grain==='intraday'?(basis==='ny'?'미국 현지 날짜로 한 거래일을 모았습니다. 가로축은 날짜를 포함한 한국시간입니다.':'한국 날짜 하루에는 전일 미국장 마감과 당일 미국장 시작이 함께 들어갈 수 있습니다.')+(gaps?` · 15분 초과 관측 공백 ${gaps}곳: 해당 지수의 제공 시간 밖이거나 원천에 관측이 없는 구간이며 값을 채우지 않았습니다.`:' · 관측 시각 사이의 실제 간격을 표시합니다.'):'일간은 원천의 완료된 거래일 종가, 주간·월간은 각 기간의 마지막 실제 일간 관측값입니다. 마지막 주·월은 조회 종료일까지의 값이며, 휴일에는 관측점을 만들지 않습니다. 최저·최고는 화면에 표시한 관측값 기준입니다.';
   const canvas=host.querySelector('canvas');canvas.hidden=!rows.length;
   if(chart){chart.destroy();chart=null;}
   if(!rows.length||typeof root.Chart!=='function')return;

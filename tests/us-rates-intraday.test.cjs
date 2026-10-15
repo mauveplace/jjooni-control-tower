@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {day,rowsForDay,chartPoints,aggregate,historyRows,axisLabel}=require('../market-observatory/us-rates-intraday-v1.js');
+const {day,rowsForDay,chartPoints,aggregate,historyRows,axisLabel,observationLabel}=require('../market-observatory/us-rates-intraday-v1.js');
 test('KST day starts at 15:00 UTC, independent of machine timezone',()=>{
   const before=Date.parse('2026-10-14T14:59:00Z')/1000,after=before+60;
   assert.equal(day(before),'2026-10-14');assert.equal(day(after),'2026-10-15');
@@ -33,4 +33,11 @@ test('weekly and monthly series retain actual last observations across year boun
 test('intraday ticks include dates across midnight and history ticks use US dates',()=>{
   assert.equal(axisLabel(Date.parse('2026-10-15T15:05:00Z'),'intraday'),'10-16 00:05');
   assert.equal(axisLabel(Date.parse('2026-10-15T01:05:00Z'),'daily'),'2026-10-14');
+});
+
+test('daily bar anchors are labelled as trading dates, never as observed closing times',()=>{
+  const rows=[point('2026-10-15T12:20:00Z',5.089)];
+  assert.equal(observationLabel(rows,'daily'),'마지막 일간 자료일 2026-10-15 (미국 거래일)');
+  assert.equal(observationLabel(rows,'monthly'),'마지막 일간 자료일 2026-10-15 (미국 거래일)');
+  assert.equal(observationLabel(rows,'intraday'),'선택 구간 마지막 관측 2026-10-15 21:20 KST');
 });
