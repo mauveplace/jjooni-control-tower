@@ -1,0 +1,351 @@
+{
+  "archive_contract": "IMMUTABLE_FACTS_AND_RULES_NOT_AI_COMMENTARY_V1",
+  "contains_account_data": false,
+  "contract": {
+    "path": "./morning-brief-contract.json",
+    "schema": "JJOONI_MORNING_MARKET_BRIEF_CONTRACT_V1"
+  },
+  "derived": {
+    "autobot_direct_trade_trigger": false,
+    "breadth": "BROAD",
+    "breadth_basis": "SECTOR_MA20_PROXY",
+    "inputs_used": [
+      "NDX_D1",
+      "VIX_D1",
+      "SECTOR_MA20_PROXY",
+      "US10Y_D1"
+    ],
+    "rates_pressure": "EASING",
+    "risk": "RISK_ON",
+    "rule_version": "DAILY_MARKET_PULSE_REGIME_V1",
+    "score": 2,
+    "usd_pressure": "EASING"
+  },
+  "generated_kst": "2026-10-16T21:38:19+09:00",
+  "market_date_us": "2026-10-15",
+  "quality": {
+    "missing_value_policy": "NULL_NOT_ESTIMATE",
+    "required_values": {
+      "dxy": true,
+      "market_date_us": true,
+      "ndx": true,
+      "us10y": true,
+      "usdkrw": true
+    },
+    "source_status": {
+      "cnn_fear_greed": "OBSERVATORY_CANONICAL",
+      "finviz_calendar": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
+      "finviz_sp500_map": "WEB_VERIFICATION_REQUIRED",
+      "slickcharts_nasdaq100": "STALE_FALLBACK",
+      "tradingview": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED"
+    },
+    "status": "LIVE"
+  },
+  "raw": {
+    "calendar": [
+      {
+        "actual": null,
+        "consensus": null,
+        "country": "KR",
+        "datetime_kst": "2026-10-16T08:00+09:00",
+        "importance": 2,
+        "previous": "2.7%",
+        "source": "KOSTAT",
+        "source_url": null,
+        "title": "2026년 9월 고용동향"
+      },
+      {
+        "actual": "1.1%",
+        "consensus": "0.9%",
+        "country": "US",
+        "datetime_kst": "2026-10-16T21:30+09:00",
+        "importance": 2,
+        "previous": "0.5%",
+        "source": "BLS",
+        "source_url": "https://www.forexfactory.com/calendar?week=oct11.2026",
+        "title": "U.S. Import and Export Price Indexes"
+      }
+    ],
+    "canonical_context": {
+      "sp500": {
+        "change_bp": null,
+        "change_pct": 0.32543480543536507,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 7744.06005859
+      },
+      "vix": {
+        "change_bp": null,
+        "change_pct": -2.4303600449613216,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 16.45999908
+      }
+    },
+    "fear_greed": {
+      "market_date": "2026-10-16",
+      "score": 32.1,
+      "status": "OBSERVATORY_CANONICAL"
+    },
+    "nasdaq100_concentration": {
+      "source": "slickcharts_nasdaq100",
+      "status": "STALE_FALLBACK",
+      "top10": [
+        {
+          "name": "Nvidia Corp",
+          "rank": 1,
+          "ticker": "NVDA",
+          "weight_pct": 12.36
+        },
+        {
+          "name": "Apple Inc.",
+          "rank": 2,
+          "ticker": "AAPL",
+          "weight_pct": 11.74
+        },
+        {
+          "name": "Microsoft Corp",
+          "rank": 3,
+          "ticker": "MSFT",
+          "weight_pct": 9.4
+        },
+        {
+          "name": "Amazon.Com Inc",
+          "rank": 4,
+          "ticker": "AMZN",
+          "weight_pct": 6.45
+        },
+        {
+          "name": "Alphabet Inc. Class A Common Stock",
+          "rank": 5,
+          "ticker": "GOOGL",
+          "weight_pct": 5.18
+        },
+        {
+          "name": "Alphabet Inc. Class C Capital Stock",
+          "rank": 6,
+          "ticker": "GOOG",
+          "weight_pct": 4.81
+        },
+        {
+          "name": "Space Exploration Technologies Corp. Class A Common Stock",
+          "rank": 7,
+          "ticker": "SPCX",
+          "weight_pct": 4.62
+        },
+        {
+          "name": "Meta Platforms, Inc. Class A Common Stock",
+          "rank": 8,
+          "ticker": "META",
+          "weight_pct": 4.41
+        },
+        {
+          "name": "Broadcom Inc. Common Stock",
+          "rank": 9,
+          "ticker": "AVGO",
+          "weight_pct": 3.86
+        },
+        {
+          "name": "Tesla, Inc. Common Stock",
+          "rank": 10,
+          "ticker": "TSLA",
+          "weight_pct": 3.38
+        }
+      ],
+      "top10_weight_pct": 66.21,
+      "top3_weight_pct": 33.5
+    },
+    "sector_flow": [
+      {
+        "above_ma20": false,
+        "d1_pct": -0.6512,
+        "m1_pct": 2.8598,
+        "name": "Technology",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLK",
+        "w1_pct": -4.3432
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.4618,
+        "m1_pct": -0.4956,
+        "name": "Communication Services",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLC",
+        "w1_pct": 0.3302
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.713,
+        "m1_pct": 2.9316,
+        "name": "Consumer Discretionary",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLY",
+        "w1_pct": 1.5218
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.3756,
+        "m1_pct": -1.18,
+        "name": "Financials",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLF",
+        "w1_pct": 1.9178
+      },
+      {
+        "above_ma20": false,
+        "d1_pct": 0.5089,
+        "m1_pct": -0.486,
+        "name": "Industrials",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLI",
+        "w1_pct": -0.3028
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": -1.5821,
+        "m1_pct": 3.9513,
+        "name": "Energy",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLE",
+        "w1_pct": 2.0233
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.7918,
+        "m1_pct": 0.3971,
+        "name": "Materials",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLB",
+        "w1_pct": 2.6182
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.8567,
+        "m1_pct": 5.6148,
+        "name": "Health Care",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLV",
+        "w1_pct": 5.3699
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 0.7204,
+        "m1_pct": 4.0202,
+        "name": "Consumer Staples",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLP",
+        "w1_pct": 3.9079
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": -0.1678,
+        "m1_pct": 0.7986,
+        "name": "Utilities",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLU",
+        "w1_pct": 1.4122
+      },
+      {
+        "above_ma20": true,
+        "d1_pct": 1.2051,
+        "m1_pct": -1.9154,
+        "name": "Real Estate",
+        "observed_date": "2026-10-15",
+        "source": "Yahoo public daily",
+        "ticker": "XLRE",
+        "w1_pct": 2.7907
+      }
+    ],
+    "sp500_breadth": {
+      "finviz_advancers": null,
+      "finviz_breadth_ratio": null,
+      "finviz_decliners": null,
+      "finviz_unchanged": null,
+      "note": "Finviz constituent breadth is intentionally null until web-verified. The sector MA20 ratio is a labeled proxy only.",
+      "proxy_above_ma20": 9,
+      "proxy_basis": "S&P500_11_SECTOR_ETF_ABOVE_MA20",
+      "proxy_count": 11,
+      "proxy_ratio": 0.8181818181818182,
+      "source_status": "WEB_VERIFICATION_REQUIRED"
+    },
+    "tradingview_cross_asset": {
+      "dxy": {
+        "change_bp": null,
+        "change_pct": -0.5363267027226115,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 102.0
+      },
+      "ndx": {
+        "change_bp": null,
+        "change_pct": -0.050818985794687244,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 29935.59960938
+      },
+      "preferred_web_source": "tradingview",
+      "us10y": {
+        "change_bp": -9.000000000000075,
+        "change_pct": null,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 5.1
+      },
+      "usdkrw": {
+        "change_bp": null,
+        "change_pct": 0.5778915422453679,
+        "market_date": "2026-10-15",
+        "source": "OBSERVATORY_CANONICAL",
+        "value": 1347.08996582
+      },
+      "web_verification_status": "REQUIRED_FOR_MORNING_BRIEF"
+    }
+  },
+  "read_only": true,
+  "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
+  "snapshot_status": "FINAL",
+  "sources": {
+    "cnn_fear_greed": {
+      "observed_at_kst": "2026-10-16T21:38:19+09:00",
+      "status": "OBSERVATORY_CANONICAL",
+      "url": "https://edition.cnn.com/markets/fear-and-greed"
+    },
+    "finviz_calendar": {
+      "observed_at_kst": "2026-10-16T21:38:19+09:00",
+      "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
+      "url": "https://finviz.com/calendar.ashx"
+    },
+    "finviz_sp500_map": {
+      "observed_at_kst": "2026-10-16T21:38:19+09:00",
+      "status": "WEB_VERIFICATION_REQUIRED",
+      "url": "https://finviz.com/map?t=sec"
+    },
+    "slickcharts_nasdaq100": {
+      "observed_at_kst": "2026-10-16T21:38:19+09:00",
+      "status": "STALE_FALLBACK",
+      "url": "https://www.slickcharts.com/nasdaq100"
+    },
+    "tradingview": {
+      "observed_at_kst": "2026-10-16T21:38:19+09:00",
+      "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
+      "url": "https://kr.tradingview.com/"
+    }
+  },
+  "usage_contract": {
+    "autobot_direct_trade_trigger": false,
+    "morning_brief_required_web_verification": true,
+    "pb_ai_usable": true,
+    "rollout_stage": "READ_ONLY"
+  }
+}
