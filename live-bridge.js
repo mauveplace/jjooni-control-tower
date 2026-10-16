@@ -364,6 +364,13 @@ function applyLive(live){
 let refreshBusy=false;
 async function refresh(){if(refreshBusy)return;refreshBusy=true;try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};window.__JJOONI_COST_SIDECAR=null;let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}finally{refreshBusy=false}}
 
+function renderRefreshStatus(){
+ const live=window.__JJOONI_LIVE_PAYLOAD||{},facts=M.freshness(live),pending=window.__JJOONI_FAST_ACCESS_REFRESH_V1||{};
+ let box=document.getElementById('ctLiveRefreshStatus');if(!box){box=document.createElement('div');box.id='ctLiveRefreshStatus';box.style.cssText='margin:8px 0;padding:9px 12px;border:1px solid #dce5ef;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#344054';const top=document.querySelector('.top');if(top?.parentNode)top.after(box);else (document.querySelector('.app')||document.body).prepend(box);const label=document.createElement('span');label.className='ctRefreshFacts';const button=document.createElement('button');button.type='button';button.textContent='계좌·시세 최신화';button.style.cssText='padding:7px 11px;border:0;border-radius:7px;background:#1459a6;color:white;cursor:pointer';button.onclick=async()=>{await triggerFastAccessRefresh('manual');await refresh();renderRefreshStatus()};box.append(label,button)}
+ const at=live.generated_kst||live.observed_at,ms=M.parseMs(at),time=ms==null?'확인 필요':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(ms));
+ box.querySelector('.ctRefreshFacts').textContent='계좌·시세 원본 '+time+' · '+facts.text+(pending.state==='REFRESHING'?' · 새 데이터 수집 중':pending.state==='REFERENCE'?' · 수집 요청 실패, 재시도 가능':'')+' · 화면은 1분마다 확인';
+ box.title='원본 스냅샷: '+String(live.snapshot_id||'미확인');const button=box.querySelector('button');button.disabled=pending.state==='REFRESHING';button.textContent=button.disabled?'수집 중…':'계좌·시세 최신화';
+}
 const FAST_REFRESH_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';
 const FAST_REFRESH_MIN_GAP_MS=45000;
 let FAST_REFRESH_BUSY=false,FAST_REFRESH_LAST=0;
@@ -376,7 +383,7 @@ async function fastProof(password,bucket){
 async function triggerFastAccessRefresh(reason){
  const now=Date.now();if(FAST_REFRESH_BUSY||now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS)return;
  const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;
- FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};
+ FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';renderRefreshStatus();window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};
  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);
  try{
   const bucket=Math.floor(Date.now()/1000/30),proof=await fastProof(pw,bucket);
@@ -386,10 +393,10 @@ async function triggerFastAccessRefresh(reason){
   window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};
   setTimeout(refresh,400);setTimeout(refresh,1800);setTimeout(refresh,4200);
  }catch(e){window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFERENCE';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:'REFERENCE',error:String(e&&e.message||e)};console.warn('CT FAST access refresh',e)}
- finally{clearTimeout(timer);FAST_REFRESH_BUSY=false}
+ finally{clearTimeout(timer);FAST_REFRESH_BUSY=false;renderRefreshStatus()}
 }
 
-injectResponsiveCss();ensureWatchlistUi();refresh();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden)refresh()},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});
+document.addEventListener('jjooni:live-applied',renderRefreshStatus);injectResponsiveCss();ensureWatchlistUi();refresh();renderRefreshStatus();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden){refresh();renderRefreshStatus();if(M.freshness(window.__JJOONI_LIVE_PAYLOAD||{}).state==='STALE')triggerFastAccessRefresh('stale-visible')}},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});
 })();
 
 /* CT_UI_STATE_WATCHLIST_V1 */
