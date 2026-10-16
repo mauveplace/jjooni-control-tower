@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-17T03:25:34+09:00",
+  "generated_kst": "2026-10-17T04:45:42+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "crypto",
     "calendar",
     "audit"
   ],
@@ -105,10 +106,10 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-17T02:34:05+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=801s · ETHUSD age=799s",
+      "detail": "BTCUSD age=5609s · ETHUSD age=5607s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -169,8 +170,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-17T03:24:50+09:00",
-      "as_of": "2026-10-17T03:24:50+09:00",
+      "generated_kst": "2026-10-17T04:45:00+09:00",
+      "as_of": "2026-10-17T04:45:00+09:00",
       "detail": "events=184 · overdue=1 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
@@ -178,9 +179,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-17T03:25:34+09:00",
+      "generated_kst": "2026-10-17T04:45:42+09:00",
       "as_of": "2026-10-15",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     }
