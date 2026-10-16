@@ -4,7 +4,24 @@ The only additive accounts are TOSS, ISA, PENSION, IRP, TRIPOD. Strategy screens
 
 ## Strategy attribution
 
-Passive Nasdaq-100 ETFs QQQ, QQQM, QLD, TQQQ and named domestic Nasdaq-100 ETFs form NASDAQ_SYSTEM. TIME Nasdaq-100 Active 426030 and other explicitly active Nasdaq funds belong to NASDAQ_ACTIVE, excluded from the system but retained in whole-portfolio NAV. Covered calls and inverse products are not automatically included. OTHER and UNALLOCATED complete the partition. 1x/2x/3x product exposures are labeled MONO/BI/TRI-POD. Mixed exposure is value weighted, never added to NAV. MONO/BI/TRI product sub-books are shown separately within every physical account and across accounts. Their values partition the existing Nasdaq system balance. Closed products retain their period P&L. Income/costs without a product-level attribution remain a separate POD residual; they are never guessed into a product book. These are exposure labels, not newly invented strategy trading rules. Existing verified TRI-POD signals remain the decision authority. No order path exists.
+Passive Nasdaq-100 ETFs QQQ, QQQM, QLD, TQQQ and named domestic Nasdaq-100 ETFs form NASDAQ_SYSTEM. TIME Nasdaq-100 Active 426030 and other explicitly active Nasdaq funds belong to NASDAQ_ACTIVE, excluded from the system but retained in whole-portfolio NAV. Covered calls and inverse products are not automatically included. OTHER and UNALLOCATED complete the partition. Product multipliers are numeric exposure descriptions, never MONO/BI/TRI strategy identities. There are no product-multiplier strategy sub-books.
+
+## Account-specific operation rules (user reference photo, 2026-10-16)
+
+All account implementations use the SAME verified market-state signal. They have different target compositions, not different names for product leverage.
+
+| Implementation | Green | Yellow | Red |
+| --- | --- | --- | --- |
+| Existing overseas TRI-POD | Nasdaq 3x 100% | Nasdaq 1x 50% + 2x 50% | Parking 100% |
+| ISA photo model | Nasdaq 2x 100% | Nasdaq 1x 50% + 2x 50% | Parking 100% |
+| Pension savings photo model | Nasdaq 1x 100% | Nasdaq 1x 100% | Parking 100% |
+| IRP/DC photo model | Nasdaq 1x 70% + Nasdaq/bond 50/50 fund 30% | Same composition | Parking 100% |
+
+IRP/DC effective equity exposure is 0.7*1 + 0.3*0.5 = 0.85. These are supplied strategy-model constraints, not independently verified legal eligibility advice. Do not invent a BI-POD name for the ISA model or a MONO-POD definition from a single product's multiplier. A general account containing domestic and overseas products requires application-scope confirmation instead of assuming all products follow the overseas target.
+
+The existing freshness guard verifies the daily market signal. Its trusted target 3x/1.5x/cash maps to green/yellow/red; current holdings never infer a state. Green is rising, VIX10<28 and 52-week drawdown<=9%; yellow is rising but not green, or falling with VIX10<18; red is falling with VIX10>=18. Static account rules remain visible if signals are unavailable, but no current target/action is certified. HOLD_NO_TRADE stays no additional trading. No order path exists.
+
+Target weights apply only to capital assigned to that strategy, not all assets in an account. Active Nasdaq is never interpreted as strategy execution. Bond-mixed/parking holdings remain OTHER or UNALLOCATED until strategy ownership is evidenced. Their absence from certified strategy attribution is disclosed; no hypothetical parking performance is invented. System trading gains stay in the same physical-account strategy across product changes; the existing baseline, journal, source IDs and historical KRW accounting are not reset.
 
 Per physical account, sum(strategy position values) + residual cash/unallocated = source NAV. The residual is not silently relabeled cash; it may include unreconciled assets or other source differences. A negative residual or conflicting position rows prevent certification. Global NAV is always sum of five physical NAVs, never global NAV plus strategy balances.
 
