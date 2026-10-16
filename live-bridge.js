@@ -396,7 +396,7 @@ async function triggerFastAccessRefresh(reason){
  finally{clearTimeout(timer);FAST_REFRESH_BUSY=false;renderRefreshStatus()}
 }
 
-document.addEventListener('jjooni:live-applied',renderRefreshStatus);injectResponsiveCss();ensureWatchlistUi();refresh();renderRefreshStatus();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden){refresh();renderRefreshStatus();if(M.freshness(window.__JJOONI_LIVE_PAYLOAD||{}).state==='STALE')triggerFastAccessRefresh('stale-visible')}},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});
+injectResponsiveCss();ensureWatchlistUi();refresh();document.addEventListener('jjooni:live-applied',renderRefreshStatus);renderRefreshStatus();triggerFastAccessRefresh('open');setInterval(()=>{if(!document.hidden){refresh();renderRefreshStatus();if(M.freshness(window.__JJOONI_LIVE_PAYLOAD||{}).state==='STALE')triggerFastAccessRefresh('stale-visible')}},REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();triggerFastAccessRefresh('resume')}});
 })();
 
 /* CT_UI_STATE_WATCHLIST_V1 */
