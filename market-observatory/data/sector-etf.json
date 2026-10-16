@@ -1,7 +1,7 @@
 {
   "schema": "JJOONI_OBSERVATORY_SECTOR_ETF_V1",
-  "generated_kst": "2026-10-16T10:32:22+09:00",
-  "as_of_date": "2026-10-15",
+  "generated_kst": "2026-10-16T16:23:15+09:00",
+  "as_of_date": "2026-10-16",
   "read_only": true,
   "contains_account_data": false,
   "universe_version": "SONG_SECTOR_UNIVERSE_V2_COUNTRY",
@@ -9,7 +9,7 @@
   "membership_policy": "VERSIONED_INDEX_SECTOR_REGISTRY_NO_RANKING_NO_ACCOUNT_INPUT",
   "daily_bar_contract": "PER_MARKET_COMPLETED_CUTOFF_V1",
   "completed_cutoffs": {
-    "KR": "2026-10-15",
+    "KR": "2026-10-16",
     "US": "2026-10-15"
   },
   "source_contract": "YAHOO_PUBLIC_COMPLETED_DAILY_REFERENCE",
@@ -73,7 +73,7 @@
     "classic_count": 11,
     "priced_count": 46,
     "total_count": 46,
-    "classic_above_ma20": 8,
+    "classic_above_ma20": 9,
     "leaders_20d_rs_spy": [
       {
         "ticker": "XLV",
@@ -94,15 +94,15 @@
         "value": -3.4175
       },
       {
-        "ticker": "XLC",
-        "value": -3.1343
-      },
-      {
         "ticker": "XLF",
         "value": -2.2967
+      },
+      {
+        "ticker": "XLI",
+        "value": -1.8678
       }
     ],
-    "growth_defense_spread_20d_pct": -2.7346,
+    "growth_defense_spread_20d_pct": -2.0649,
     "leaders_1m_rs_spy": [
       {
         "ticker": "XLV",
@@ -119,19 +119,19 @@
     ],
     "laggards_1m_rs_spy": [
       {
-        "ticker": "XLC",
-        "value": -5.1676
-      },
-      {
         "ticker": "XLRE",
         "value": -4.268
       },
       {
         "ticker": "XLF",
         "value": -3.5326
+      },
+      {
+        "ticker": "XLC",
+        "value": -2.8482
       }
     ],
-    "growth_defense_spread_1m_pct": -2.4857
+    "growth_defense_spread_1m_pct": -1.7126
   },
   "groups": [
     {
@@ -139,24 +139,24 @@
       "label": "한국 대표 지수",
       "rows": [
         {
-          "price": 87025.0,
-          "ytd_pct": 38.8845,
-          "ma20": 106229.25,
-          "ma60": 105504.5833,
-          "vs_ma20_pct": -18.0781,
-          "vs_ma60_pct": -17.5154,
-          "high20_gap_pct": -23.0854,
+          "price": 88750.0,
+          "ytd_pct": 41.6374,
+          "ma20": 105396.25,
+          "ma60": 105167.0833,
+          "vs_ma20_pct": -15.794,
+          "vs_ma60_pct": -15.6105,
+          "high20_gap_pct": -21.5608,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -8.2063,
-          "ret_5d_pct": -19.8296,
-          "ret_10d_pct": -20.8792,
-          "ret_20d_pct": -20.5251,
-          "ret_50d_pct": -0.6961,
-          "ret_100d_pct": -26.1499,
-          "ret_1m_pct": -22.2053,
-          "ret_3m_pct": -27.843,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 1.9822,
+          "ret_5d_pct": -15.9962,
+          "ret_10d_pct": -18.9831,
+          "ret_20d_pct": -15.805,
+          "ret_50d_pct": -18.4433,
+          "ret_100d_pct": -22.3636,
+          "ret_1m_pct": -18.9498,
+          "ret_3m_pct": -18.4433,
           "ticker": "069500",
           "name": "KOSPI 200",
           "group": "한국 대표 지수",
@@ -165,7 +165,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -182,24 +182,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 12760.0,
-          "ytd_pct": -19.3426,
-          "ma20": 14290.75,
-          "ma60": 13827.25,
-          "vs_ma20_pct": -10.7115,
-          "vs_ma60_pct": -7.7185,
-          "high20_gap_pct": -19.4953,
+          "price": 13370.0,
+          "ytd_pct": -15.4867,
+          "ma20": 14280.0,
+          "ma60": 13823.75,
+          "vs_ma20_pct": -6.3725,
+          "vs_ma60_pct": -3.2824,
+          "high20_gap_pct": -15.6467,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -8.3333,
-          "ret_5d_pct": -16.8459,
-          "ret_10d_pct": -10.7692,
-          "ret_20d_pct": -7.8035,
-          "ret_50d_pct": 20.3206,
-          "ret_100d_pct": -30.9897,
-          "ret_1m_pct": -11.173,
-          "ret_3m_pct": -11.5118,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 4.7806,
+          "ret_5d_pct": -11.8365,
+          "ret_10d_pct": -7.5061,
+          "ret_20d_pct": -1.5826,
+          "ret_50d_pct": 10.4959,
+          "ret_100d_pct": -26.2955,
+          "ret_1m_pct": -3.396,
+          "ret_3m_pct": -3.1159,
           "ticker": "229200",
           "name": "KOSDAQ 150",
           "group": "한국 대표 지수",
@@ -208,7 +208,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -225,24 +225,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 176515.0,
-          "ytd_pct": 8.3878,
-          "ma20": 181295.5,
-          "ma60": 181583.3333,
-          "vs_ma20_pct": -2.6369,
-          "vs_ma60_pct": -2.7912,
-          "high20_gap_pct": -4.9231,
+          "price": 176775.0,
+          "ytd_pct": 8.5475,
+          "ma20": 181481.75,
+          "ma60": 181302.75,
+          "vs_ma20_pct": -2.5935,
+          "vs_ma60_pct": -2.4973,
+          "high20_gap_pct": -4.7831,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -2.4779,
-          "ret_5d_pct": -4.7332,
-          "ret_10d_pct": -2.8536,
-          "ret_20d_pct": 1.4425,
-          "ret_50d_pct": 1.5242,
-          "ret_100d_pct": -8.0771,
-          "ret_1m_pct": 1.1315,
-          "ret_3m_pct": -10.3621,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 0.1473,
+          "ret_5d_pct": -3.9736,
+          "ret_10d_pct": -2.7694,
+          "ret_20d_pct": 2.1526,
+          "ret_50d_pct": -1.7098,
+          "ret_100d_pct": -8.2832,
+          "ret_1m_pct": 1.5919,
+          "ret_3m_pct": -9.8524,
           "ticker": "133690",
           "name": "TIGER 미국나스닥100",
           "group": "한국 대표 지수",
@@ -251,7 +251,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -274,24 +274,24 @@
       "label": "한국 KRX 섹터 지수",
       "rows": [
         {
-          "price": 112300.0,
-          "ytd_pct": 71.5027,
-          "ma20": 135852.0,
-          "ma60": 126397.6667,
-          "vs_ma20_pct": -17.3365,
-          "vs_ma60_pct": -11.1534,
-          "high20_gap_pct": -25.6587,
+          "price": 116215.0,
+          "ytd_pct": 77.4817,
+          "ma20": 135487.75,
+          "ma60": 126130.75,
+          "vs_ma20_pct": -14.2247,
+          "vs_ma60_pct": -7.8615,
+          "high20_gap_pct": -23.067,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -11.9354,
-          "ret_5d_pct": -22.3992,
-          "ret_10d_pct": -20.4449,
-          "ret_20d_pct": -12.8782,
-          "ret_50d_pct": 19.8826,
-          "ret_100d_pct": -23.2137,
-          "ret_1m_pct": -17.9813,
-          "ret_3m_pct": -23.2819,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 3.4862,
+          "ret_5d_pct": -20.5041,
+          "ret_10d_pct": -18.5599,
+          "ret_20d_pct": -5.8988,
+          "ret_50d_pct": -3.8194,
+          "ret_100d_pct": -17.211,
+          "ret_1m_pct": -9.841,
+          "ret_3m_pct": -10.837,
           "ticker": "091160",
           "name": "반도체",
           "group": "한국 KRX 섹터 지수",
@@ -300,7 +300,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -317,24 +317,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 14745.0,
-          "ytd_pct": 16.7921,
-          "ma20": 16075.0,
-          "ma60": 16065.0,
-          "vs_ma20_pct": -8.2737,
-          "vs_ma60_pct": -8.2166,
-          "high20_gap_pct": -14.2234,
+          "price": 14835.0,
+          "ytd_pct": 17.505,
+          "ma20": 15957.25,
+          "ma60": 16037.0,
+          "vs_ma20_pct": -7.0329,
+          "vs_ma60_pct": -7.4952,
+          "high20_gap_pct": -11.9323,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -0.1693,
-          "ret_5d_pct": -6.2321,
-          "ret_10d_pct": -10.8525,
-          "ret_20d_pct": -12.206,
-          "ret_50d_pct": -4.8403,
-          "ret_100d_pct": -0.4389,
-          "ret_1m_pct": -10.6364,
-          "ret_3m_pct": -9.8716,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 0.6104,
+          "ret_5d_pct": -3.0392,
+          "ret_10d_pct": -7.4259,
+          "ret_20d_pct": -13.6998,
+          "ret_50d_pct": -5.2682,
+          "ret_100d_pct": -0.0674,
+          "ret_1m_pct": -11.6701,
+          "ret_3m_pct": -9.7902,
           "ticker": "091170",
           "name": "은행",
           "group": "한국 KRX 섹터 지수",
@@ -343,7 +343,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -360,24 +360,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 23360.0,
-          "ytd_pct": -6.3727,
-          "ma20": 25251.5,
-          "ma60": 27416.8333,
-          "vs_ma20_pct": -7.4906,
-          "vs_ma60_pct": -14.7969,
-          "high20_gap_pct": -11.5487,
+          "price": 24140.0,
+          "ytd_pct": -3.2465,
+          "ma20": 25138.0,
+          "ma60": 27323.0,
+          "vs_ma20_pct": -3.9701,
+          "vs_ma60_pct": -11.6495,
+          "high20_gap_pct": -7.6864,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -4.1051,
-          "ret_5d_pct": -7.2095,
-          "ret_10d_pct": -7.4302,
-          "ret_20d_pct": -13.7211,
-          "ret_50d_pct": -10.2746,
-          "ret_100d_pct": -36.6508,
-          "ret_1m_pct": -14.3538,
-          "ret_3m_pct": -24.0819,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 3.339,
+          "ret_5d_pct": -2.8767,
+          "ret_10d_pct": -3.382,
+          "ret_20d_pct": -8.5952,
+          "ret_50d_pct": -13.6315,
+          "ret_100d_pct": -29.7848,
+          "ret_1m_pct": -10.8403,
+          "ret_3m_pct": -19.3586,
           "ticker": "091180",
           "name": "자동차",
           "group": "한국 KRX 섹터 지수",
@@ -386,7 +386,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -403,24 +403,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 11030.0,
-          "ytd_pct": -17.4401,
-          "ma20": 13015.5,
-          "ma60": 13223.5,
-          "vs_ma20_pct": -15.2549,
-          "vs_ma60_pct": -16.5879,
-          "high20_gap_pct": -20.1592,
+          "price": 11210.0,
+          "ytd_pct": -16.0928,
+          "ma20": 12885.25,
+          "ma60": 13190.25,
+          "vs_ma20_pct": -13.0013,
+          "vs_ma60_pct": -15.013,
+          "high20_gap_pct": -17.8755,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -7.1549,
-          "ret_5d_pct": -15.1538,
-          "ret_10d_pct": -15.8015,
-          "ret_20d_pct": -20.676,
-          "ret_50d_pct": -1.1206,
-          "ret_100d_pct": -40.9213,
-          "ret_1m_pct": -21.6063,
-          "ret_3m_pct": -20.3322,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 1.6319,
+          "ret_5d_pct": -12.5244,
+          "ret_10d_pct": -14.3621,
+          "ret_20d_pct": -18.8563,
+          "ret_50d_pct": -9.5968,
+          "ret_100d_pct": -37.6183,
+          "ret_1m_pct": -19.3815,
+          "ret_3m_pct": -14.6555,
           "ticker": "102960",
           "name": "KODEX 기계장비",
           "group": "한국 KRX 섹터 지수",
@@ -429,7 +429,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -446,24 +446,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 13240.0,
-          "ytd_pct": 6.6023,
-          "ma20": 14004.5,
-          "ma60": 13645.1667,
-          "vs_ma20_pct": -5.459,
-          "vs_ma60_pct": -2.9693,
-          "high20_gap_pct": -11.2005,
+          "price": 13300.0,
+          "ytd_pct": 7.0853,
+          "ma20": 13976.75,
+          "ma60": 13649.4167,
+          "vs_ma20_pct": -4.842,
+          "vs_ma60_pct": -2.5599,
+          "high20_gap_pct": -10.7981,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -6.2987,
-          "ret_5d_pct": -10.1764,
-          "ret_10d_pct": -4.5422,
-          "ret_20d_pct": -6.7606,
-          "ret_50d_pct": 12.2034,
-          "ret_100d_pct": -21.073,
-          "ret_1m_pct": -9.4701,
-          "ret_3m_pct": 2.3184,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 0.4532,
+          "ret_5d_pct": -9.493,
+          "ret_10d_pct": -6.0071,
+          "ret_20d_pct": -4.0058,
+          "ret_50d_pct": 9.33,
+          "ret_100d_pct": -17.7489,
+          "ret_1m_pct": -6.338,
+          "ret_3m_pct": 3.1408,
           "ticker": "117460",
           "name": "에너지·화학",
           "group": "한국 KRX 섹터 지수",
@@ -472,7 +472,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -489,24 +489,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 10890.0,
-          "ytd_pct": -12.3894,
-          "ma20": 12169.0,
-          "ma60": 11944.25,
-          "vs_ma20_pct": -10.5103,
-          "vs_ma60_pct": -8.8264,
-          "high20_gap_pct": -15.1539,
+          "price": 11120.0,
+          "ytd_pct": -10.539,
+          "ma20": 12100.25,
+          "ma60": 11949.6667,
+          "vs_ma20_pct": -8.1011,
+          "vs_ma60_pct": -6.943,
+          "high20_gap_pct": -13.3619,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -5.9179,
-          "ret_5d_pct": -8.1013,
-          "ret_10d_pct": -9.3256,
-          "ret_20d_pct": -13.1925,
-          "ret_50d_pct": 8.143,
-          "ret_100d_pct": -35.8657,
-          "ret_1m_pct": -15.4175,
-          "ret_3m_pct": -0.9099,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 2.112,
+          "ret_5d_pct": -6.6331,
+          "ret_10d_pct": -7.6028,
+          "ret_20d_pct": -11.0044,
+          "ret_50d_pct": 3.9252,
+          "ret_100d_pct": -30.8673,
+          "ret_1m_pct": -11.3591,
+          "ret_3m_pct": 3.2019,
           "ticker": "117680",
           "name": "철강",
           "group": "한국 KRX 섹터 지수",
@@ -515,7 +515,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -532,24 +532,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 5640.0,
-          "ytd_pct": 38.2353,
-          "ma20": 6767.25,
-          "ma60": 6561.4167,
-          "vs_ma20_pct": -16.6574,
-          "vs_ma60_pct": -14.043,
-          "high20_gap_pct": -23.2653,
+          "price": 5765.0,
+          "ytd_pct": 41.299,
+          "ma20": 6693.25,
+          "ma60": 6561.1667,
+          "vs_ma20_pct": -13.8684,
+          "vs_ma60_pct": -12.1345,
+          "high20_gap_pct": -21.5646,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -7.084,
-          "ret_5d_pct": -15.0602,
-          "ret_10d_pct": -16.2584,
-          "ret_20d_pct": -24.8501,
-          "ret_50d_pct": 10.3718,
-          "ret_100d_pct": -31.5534,
-          "ret_1m_pct": -23.4735,
-          "ret_3m_pct": -10.4762,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 2.2163,
+          "ret_5d_pct": -10.1325,
+          "ret_10d_pct": -15.0957,
+          "ret_20d_pct": -20.4279,
+          "ret_50d_pct": 3.4081,
+          "ret_100d_pct": -26.6539,
+          "ret_1m_pct": -23.1845,
+          "ret_3m_pct": -2.2053,
           "ticker": "117700",
           "name": "건설",
           "group": "한국 KRX 섹터 지수",
@@ -558,7 +558,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -575,24 +575,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 18680.0,
-          "ytd_pct": 46.1087,
-          "ma20": 20401.75,
-          "ma60": 20128.4167,
-          "vs_ma20_pct": -8.4392,
-          "vs_ma60_pct": -7.1959,
-          "high20_gap_pct": -13.2172,
+          "price": 18750.0,
+          "ytd_pct": 46.6562,
+          "ma20": 20263.0,
+          "ma60": 20109.1667,
+          "vs_ma20_pct": -7.4668,
+          "vs_ma60_pct": -6.7589,
+          "high20_gap_pct": -11.5357,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -1.4248,
-          "ret_5d_pct": -8.0709,
-          "ret_10d_pct": -11.4692,
-          "ret_20d_pct": -13.3581,
-          "ret_50d_pct": 2.6938,
-          "ret_100d_pct": 3.6914,
-          "ret_1m_pct": -11.5321,
-          "ret_3m_pct": -3.5871,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 0.3747,
+          "ret_5d_pct": -6.0386,
+          "ret_10d_pct": -7.4759,
+          "ret_20d_pct": -12.892,
+          "ret_50d_pct": -0.3455,
+          "ret_100d_pct": 3.3627,
+          "ret_1m_pct": -13.0334,
+          "ret_3m_pct": -2.0376,
           "ticker": "140700",
           "name": "보험",
           "group": "한국 KRX 섹터 지수",
@@ -601,7 +601,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -618,24 +618,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 8825.0,
-          "ytd_pct": -34.7987,
-          "ma20": 9223.5,
-          "ma60": 9747.3333,
-          "vs_ma20_pct": -4.3205,
-          "vs_ma60_pct": -9.4624,
-          "high20_gap_pct": -8.5018,
+          "price": 9095.0,
+          "ytd_pct": -32.8038,
+          "ma20": 9196.0,
+          "ma60": 9735.9167,
+          "vs_ma20_pct": -1.0983,
+          "vs_ma60_pct": -6.583,
+          "high20_gap_pct": -5.2604,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": -1.2864,
-          "ret_5d_pct": -4.8004,
-          "ret_10d_pct": -4.5946,
-          "ret_20d_pct": -7.7847,
-          "ret_50d_pct": -9.6262,
-          "ret_100d_pct": -22.2467,
-          "ret_1m_pct": -8.4544,
-          "ret_3m_pct": -12.9684,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 3.0595,
+          "ret_5d_pct": 0.2756,
+          "ret_10d_pct": -0.9259,
+          "ret_20d_pct": -5.7024,
+          "ret_50d_pct": -8.7306,
+          "ret_100d_pct": -19.5844,
+          "ret_1m_pct": -4.9634,
+          "ret_3m_pct": -7.8987,
           "ticker": "266360",
           "name": "미디어·엔터테인먼트",
           "group": "한국 KRX 섹터 지수",
@@ -644,7 +644,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -661,24 +661,24 @@
           "rs_qqq_1m_pct": null
         },
         {
-          "price": 9120.0,
-          "ytd_pct": 12.2462,
-          "ma20": 9449.5,
-          "ma60": 9572.5833,
-          "vs_ma20_pct": -3.487,
-          "vs_ma60_pct": -4.7279,
-          "high20_gap_pct": -6.3655,
+          "price": 9410.0,
+          "ytd_pct": 15.8154,
+          "ma20": 9433.0,
+          "ma60": 9577.3333,
+          "vs_ma20_pct": -0.2438,
+          "vs_ma60_pct": -1.7472,
+          "high20_gap_pct": -2.487,
           "above_ma20": false,
           "above_ma60": false,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": 1.7289,
-          "ret_5d_pct": -5.4922,
-          "ret_10d_pct": -4.4526,
-          "ret_20d_pct": -5.5412,
-          "ret_50d_pct": -0.1642,
-          "ret_100d_pct": -6.653,
-          "ret_1m_pct": -4.6025,
-          "ret_3m_pct": 0.2198,
+          "observed_date": "2026-10-16",
+          "ret_1d_pct": 3.1798,
+          "ret_5d_pct": -0.7384,
+          "ret_10d_pct": -0.6336,
+          "ret_20d_pct": -3.3881,
+          "ret_50d_pct": 4.5556,
+          "ret_100d_pct": -3.734,
+          "ret_1m_pct": -2.5375,
+          "ret_3m_pct": 2.1161,
           "ticker": "266410",
           "name": "필수소비재",
           "group": "한국 KRX 섹터 지수",
@@ -687,7 +687,7 @@
           "market": "KR",
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
-          "completed_cutoff": "2026-10-15",
+          "completed_cutoff": "2026-10-16",
           "rs_spy_1d_pct": null,
           "rs_qqq_1d_pct": null,
           "rs_spy_5d_pct": null,
@@ -802,24 +802,24 @@
           "rs_qqq_1m_pct": -0.4436
         },
         {
-          "price": 110.82,
-          "ytd_pct": -5.201,
-          "ma20": 111.8175,
-          "ma60": 111.3395,
-          "vs_ma20_pct": -0.8921,
-          "vs_ma60_pct": -0.4666,
-          "high20_gap_pct": -3.4248,
-          "above_ma20": false,
-          "above_ma60": false,
-          "observed_date": "2026-10-14",
-          "ret_1d_pct": -1.3003,
-          "ret_5d_pct": -0.3955,
-          "ret_10d_pct": -0.1352,
-          "ret_20d_pct": -1.9292,
-          "ret_50d_pct": -1.0889,
-          "ret_100d_pct": -4.5478,
-          "ret_1m_pct": -2.815,
-          "ret_3m_pct": -1.6245,
+          "price": 112.44,
+          "ytd_pct": -3.8152,
+          "ma20": 111.822,
+          "ma60": 111.3935,
+          "vs_ma20_pct": 0.5527,
+          "vs_ma60_pct": 0.9395,
+          "high20_gap_pct": -2.0131,
+          "above_ma20": true,
+          "above_ma60": true,
+          "observed_date": "2026-10-15",
+          "ret_1d_pct": 1.4618,
+          "ret_5d_pct": 0.3302,
+          "ret_10d_pct": 2.274,
+          "ret_20d_pct": 0.0801,
+          "ret_50d_pct": 1.4161,
+          "ret_100d_pct": -2.6156,
+          "ret_1m_pct": -0.4956,
+          "ret_3m_pct": 1.6177,
           "ticker": "XLC",
           "name": "Communication Services",
           "group": "S&P 500 섹터",
@@ -829,20 +829,20 @@
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
           "completed_cutoff": "2026-10-15",
-          "rs_spy_1d_pct": -1.5849,
-          "rs_qqq_1d_pct": -1.17,
-          "rs_spy_5d_pct": -0.119,
-          "rs_qqq_5d_pct": 2.2236,
-          "rs_spy_10d_pct": -1.1562,
-          "rs_qqq_10d_pct": 1.7556,
-          "rs_spy_20d_pct": -3.1343,
-          "rs_qqq_20d_pct": -3.4747,
-          "rs_spy_50d_pct": -1.3487,
-          "rs_qqq_50d_pct": -2.5806,
-          "rs_spy_100d_pct": -8.0548,
-          "rs_qqq_100d_pct": -6.0056,
-          "rs_spy_1m_pct": -5.1676,
-          "rs_qqq_1m_pct": -6.1184
+          "rs_spy_1d_pct": 1.1772,
+          "rs_qqq_1d_pct": 1.5921,
+          "rs_spy_5d_pct": 0.6067,
+          "rs_qqq_5d_pct": 2.9493,
+          "rs_spy_10d_pct": 1.253,
+          "rs_qqq_10d_pct": 4.1648,
+          "rs_spy_20d_pct": -1.125,
+          "rs_qqq_20d_pct": -1.4654,
+          "rs_spy_50d_pct": 1.1563,
+          "rs_qqq_50d_pct": -0.0756,
+          "rs_spy_100d_pct": -6.1226,
+          "rs_qqq_100d_pct": -4.0734,
+          "rs_spy_1m_pct": -2.8482,
+          "rs_qqq_1m_pct": -3.799
         },
         {
           "price": 113.41,
@@ -3226,10 +3226,6 @@
     ],
     "069500": [
       {
-        "date": "2026-04-03",
-        "value": 80575.0
-      },
-      {
         "date": "2026-04-06",
         "value": 81750.0
       },
@@ -3744,13 +3740,13 @@
       {
         "date": "2026-10-15",
         "value": 87025.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 88750.0
       }
     ],
     "229200": [
-      {
-        "date": "2026-04-03",
-        "value": 18080.0
-      },
       {
         "date": "2026-04-06",
         "value": 17815.0
@@ -4266,13 +4262,13 @@
       {
         "date": "2026-10-15",
         "value": 12760.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 13370.0
       }
     ],
     "133690": [
-      {
-        "date": "2026-04-03",
-        "value": 160160.0
-      },
       {
         "date": "2026-04-06",
         "value": 160610.0
@@ -4788,13 +4784,13 @@
       {
         "date": "2026-10-15",
         "value": 176515.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 176775.0
       }
     ],
     "091160": [
-      {
-        "date": "2026-04-03",
-        "value": 93160.0
-      },
       {
         "date": "2026-04-06",
         "value": 93330.0
@@ -5310,13 +5306,13 @@
       {
         "date": "2026-10-15",
         "value": 112300.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 116215.0
       }
     ],
     "091170": [
-      {
-        "date": "2026-04-03",
-        "value": 14620.0
-      },
       {
         "date": "2026-04-06",
         "value": 14880.0
@@ -5832,13 +5828,13 @@
       {
         "date": "2026-10-15",
         "value": 14745.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 14835.0
       }
     ],
     "091180": [
-      {
-        "date": "2026-04-03",
-        "value": 29565.0
-      },
       {
         "date": "2026-04-06",
         "value": 29510.0
@@ -6354,13 +6350,13 @@
       {
         "date": "2026-10-15",
         "value": 23360.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 24140.0
       }
     ],
     "102960": [
-      {
-        "date": "2026-04-03",
-        "value": 15815.0
-      },
       {
         "date": "2026-04-06",
         "value": 15895.0
@@ -6876,13 +6872,13 @@
       {
         "date": "2026-10-15",
         "value": 11030.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 11210.0
       }
     ],
     "117460": [
-      {
-        "date": "2026-04-03",
-        "value": 14935.0
-      },
       {
         "date": "2026-04-06",
         "value": 15200.0
@@ -7398,13 +7394,13 @@
       {
         "date": "2026-10-15",
         "value": 13240.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 13300.0
       }
     ],
     "117680": [
-      {
-        "date": "2026-04-03",
-        "value": 14665.0
-      },
       {
         "date": "2026-04-06",
         "value": 14900.0
@@ -7920,13 +7916,13 @@
       {
         "date": "2026-10-15",
         "value": 10890.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 11120.0
       }
     ],
     "117700": [
-      {
-        "date": "2026-04-03",
-        "value": 7255.0
-      },
       {
         "date": "2026-04-06",
         "value": 7470.0
@@ -8442,13 +8438,13 @@
       {
         "date": "2026-10-15",
         "value": 5640.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 5765.0
       }
     ],
     "140700": [
-      {
-        "date": "2026-04-03",
-        "value": 15130.0
-      },
       {
         "date": "2026-04-06",
         "value": 15235.0
@@ -8964,13 +8960,13 @@
       {
         "date": "2026-10-15",
         "value": 18680.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 18750.0
       }
     ],
     "266360": [
-      {
-        "date": "2026-04-03",
-        "value": 11485.0
-      },
       {
         "date": "2026-04-06",
         "value": 11390.0
@@ -9486,13 +9482,13 @@
       {
         "date": "2026-10-15",
         "value": 8825.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 9095.0
       }
     ],
     "266410": [
-      {
-        "date": "2026-04-03",
-        "value": 9185.0
-      },
       {
         "date": "2026-04-06",
         "value": 9215.0
@@ -10008,6 +10004,10 @@
       {
         "date": "2026-10-15",
         "value": 9120.0
+      },
+      {
+        "date": "2026-10-16",
+        "value": 9410.0
       }
     ],
     "XLK": [
@@ -10534,10 +10534,6 @@
     ],
     "XLC": [
       {
-        "date": "2026-04-10",
-        "value": 113.94999695
-      },
-      {
         "date": "2026-04-13",
         "value": 114.81999969
       },
@@ -11052,6 +11048,10 @@
       {
         "date": "2026-10-14",
         "value": 110.81999969
+      },
+      {
+        "date": "2026-10-15",
+        "value": 112.44000244
       }
     ],
     "XLY": [
