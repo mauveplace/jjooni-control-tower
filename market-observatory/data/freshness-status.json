@@ -1,10 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-17T07:46:37+09:00",
+  "generated_kst": "2026-10-17T08:29:16+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "crypto",
     "calendar",
     "audit"
   ],
@@ -26,7 +25,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:21:07+09:00",
+      "generated_kst": "2026-10-17T07:47:54+09:00",
       "as_of": "2026-10-16",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -80,7 +79,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:21:07+09:00",
+      "generated_kst": "2026-10-17T07:47:54+09:00",
       "as_of": "2026-10-16",
       "detail": "US3M 2026-10-16 · US2Y 2026-10-16 · US5Y_OFFICIAL 2026-10-16 · US10Y_OFFICIAL 2026-10-16 · US30Y_OFFICIAL 2026-10-16 · US_2S10S 2026-10-16",
       "source": "U.S. Treasury official",
@@ -89,7 +88,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:27:20+09:00",
+      "generated_kst": "2026-10-17T07:47:54+09:00",
       "as_of": "2026-10-16",
       "detail": "KR3Y 2026-10-16 · KR5Y 2026-10-16 · KR10Y 2026-10-16 · KR20Y 2026-10-16 · KR30Y 2026-10-16 · KR_3S10S 2026-10-16",
       "source": "BOK ECOS",
@@ -106,10 +105,10 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "STALE",
+      "state": "LIVE",
       "generated_kst": "2026-10-17T06:27:16+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=4763s · ETHUSD age=4764s",
+      "detail": "BTCUSD age=2472s · ETHUSD age=2474s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -152,7 +151,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:27:22+09:00",
+      "generated_kst": "2026-10-17T07:48:08+09:00",
       "as_of": "2026-10-16",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -170,18 +169,18 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-17T07:12:23+09:00",
-      "as_of": "2026-10-17T07:12:23+09:00",
-      "detail": "events=184 · overdue=1 · pending=0 · source_failures=0",
+      "generated_kst": "2026-10-17T07:48:00+09:00",
+      "as_of": "2026-10-17T07:48:00+09:00",
+      "detail": "events=185 · overdue=1 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
     },
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-17T07:46:37+09:00",
+      "generated_kst": "2026-10-17T08:29:16+09:00",
       "as_of": "2026-10-16",
-      "detail": "critical=0 · warnings=4",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     }
