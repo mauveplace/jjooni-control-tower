@@ -77,6 +77,7 @@ function ensureStyle(){
 }
 function ensureBox(panel){let b=q('#ctTripodDailyVerifiedV35',panel);if(!b){b=document.createElement('section');b.id='ctTripodDailyVerifiedV35';panel.insertBefore(b,panel.firstChild)}return b}
 function authorityName(source){return source==='PUBLIC_MARKET_DAILY_V1'?'PUBLIC DAILY':'FAST V31'}
+function publish(last){const changed=JSON.stringify(STATE.last)!==JSON.stringify(last);STATE.last=last;if(changed)document.dispatchEvent(new CustomEvent('jjooni:tripod-daily-verified'))}
 function render(){
  const panel=q('#panel-tripod');if(!panel)return false;
  ensureStyle();const sig=signal(),t=trust(sig),box=ensureBox(panel);
@@ -90,13 +91,13 @@ function render(){
   const market=t.marketDate||'확인 불가';
   const signature=['BLOCK',t.reason,legacy,market,String(sig.source||'')].join('|');
   if(box.dataset.signature!==signature){box.dataset.signature=signature;box.innerHTML='<div class="ctTpHead"><div><div class="ctTpTitle" style="color:#9a3412">TRI-POD 오늘 신호 검증 대기</div><div style="margin-top:4px;font-size:10px">구형 정적 판단화면은 안전을 위해 숨겼습니다.</div></div><span class="ctTpBadge" style="color:#9a3412">STALE BLOCKED</span></div><div class="ctTpGrid"><div class="ctTpCell"><span class="ctTpLabel">마지막 신호 기준일</span><b class="ctTpValue">'+esc(legacy)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">시장 데이터 기준일</span><b class="ctTpValue">'+esc(market)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">현재 전략 판단</span><b class="ctTpValue">사용 금지</b></div><div class="ctTpCell"><span class="ctTpLabel">복구 조건</span><b class="ctTpValue">검증된 완료 일봉</b></div></div><div class="ctTpNote">기준일·NDX·MA250·VIX 최근 10거래일 종가·52주 낙폭·목표비중이 같은 스냅샷으로 검증되기 전에는 TQQQ/QLD/QQQ 비중과 HOLD/REBALANCE를 현재 지시처럼 표시하지 않습니다. 원인: '+esc(t.reason)+'</div>'}
-  STATE.last={trusted:false,...t,source:sig.source||null};STATE.renders++;return false;
+  publish({trusted:false,...t,source:sig.source||null});STATE.renders++;return false;
  }
  const regime=String(sig.regime||'—'),target=String(sig.target||'—'),action=String(sig.action||'—'),spot=n(sig.vix_latest_close),vix10=n(sig.vix10),ndx=n(sig.ndx),ma250=n(sig.ma250),dd=n(sig.drawdown_52w_pct),gap=ndx!=null&&ma250>0?(ndx/ma250-1)*100:null,authority=authorityName(t.source);
  box.style.cssText='margin:8px 0 14px;padding:15px;border-radius:16px;font-family:system-ui,-apple-system,sans-serif;border:1px solid #b7e4cc;background:#f7fffb;color:#153b2a';
  const signature=[t.date,regime,target,action,spot,vix10,ndx,ma250,dd,t.source].join('|');
  if(box.dataset.signature!==signature){box.dataset.signature=signature;box.innerHTML='<div class="ctTpHead"><div><div class="ctTpTitle" style="color:#087443">TRI-POD 검증된 일별 신호</div><div style="margin-top:4px;font-size:10px">공식 기준 '+esc(t.date)+' · 최근 완료 일봉</div></div><span class="ctTpBadge" style="color:#087443">VERIFIED DAILY</span></div><div class="ctTpGrid"><div class="ctTpCell"><span class="ctTpLabel">CURRENT REGIME</span><b class="ctTpValue">'+esc(regime)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">TARGET EXPOSURE</span><b class="ctTpValue">'+esc(target)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">TODAY ACTION</span><b class="ctTpValue">'+esc(action)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">NASDAQ-100 / MA250</span><b class="ctTpValue">'+num(ndx,2)+' / '+num(ma250,2)+'</b><div style="font-size:9px;margin-top:3px;color:#667085">MA250 대비 '+pct(gap)+'</div></div><div class="ctTpCell"><span class="ctTpLabel">VIX 최근 완료 일봉</span><b class="ctTpValue">'+num(spot,2)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">VIX 10일 평균 · 전략 입력</span><b class="ctTpValue">'+num(vix10,2)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">52주 고점 대비 낙폭</span><b class="ctTpValue">'+pct(dd)+'</b></div><div class="ctTpCell"><span class="ctTpLabel">DATA AUTHORITY</span><b class="ctTpValue" style="font-size:11px">'+esc(authority)+'</b><div style="font-size:9px;margin-top:3px;color:#667085">'+esc(observed||'')+'</div></div></div><div class="ctTpNote">TRI-POD 전략 입력 VIX는 현재 VIX 숫자가 아니라 최근 10개 완료 거래일 VIX 종가의 산술평균입니다. 시장/전략 sidecar는 계좌·주문 데이터와 완전히 분리된 read-only 경로입니다.</div>'}
- STATE.last={trusted:true,...t,regime,target,action,vix10,spot};STATE.renders++;return true;
+ publish({trusted:true,...t,regime,target,action,vix10,spot});STATE.renders++;return true;
 }
 let pending=false;function queue(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render()})}
 document.addEventListener('jjooni:live-applied',()=>setTimeout(queue,0));
