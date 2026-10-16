@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-17T07:46:03+09:00",
+  "generated_kst": "2026-10-17T07:46:36+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
@@ -109,14 +109,14 @@
       "state": "STALE",
       "generated_kst": "2026-10-17T06:27:16+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=4728s · ETHUSD age=4729s",
+      "detail": "BTCUSD age=4762s · ETHUSD age=4763s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:27:37+09:00",
+      "generated_kst": "2026-10-17T07:46:08+09:00",
       "as_of": "2026-10-16",
       "detail": "snapshot=FINAL · Observatory session=2026-10-16",
       "source": "daily-market-pulse.json",
@@ -143,7 +143,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T06:27:37+09:00",
+      "generated_kst": "2026-10-17T07:46:10+09:00",
       "as_of": "2026-10-16",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -179,7 +179,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-17T07:46:02+09:00",
+      "generated_kst": "2026-10-17T07:46:36+09:00",
       "as_of": "2026-10-16",
       "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
