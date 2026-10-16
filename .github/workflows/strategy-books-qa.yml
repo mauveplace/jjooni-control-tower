@@ -1,0 +1,27 @@
+name: Strategy Books KRW Attribution QA
+on:
+  pull_request:
+    paths: ['strategy-books-v1.js', 'trade-review-loader.js', 'tripod-daily-freshness-v35.js', 'tests/strategy-books*', '.github/workflows/strategy-books-qa.yml']
+  push:
+    branches: [main]
+    paths: ['strategy-books-v1.js', 'trade-review-loader.js', 'tripod-daily-freshness-v35.js', 'tests/strategy-books*', '.github/workflows/strategy-books-qa.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/strategy-books.test.cjs
+      - run: npm install --no-save --package-lock=false playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/strategy-books-e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strategy-books-ui
+          path: strategy-books-*.png

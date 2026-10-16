@@ -64,7 +64,7 @@ function trust(sig){
 function ensureStyle(){
  if(q('#ctTripodDailyFreshnessStyleV35'))return;
  const s=document.createElement('style');s.id='ctTripodDailyFreshnessStyleV35';s.textContent=`
-#panel-tripod[data-ct-tripod-daily-quarantine="1"]>*:not(#ctTripodDailyVerifiedV35){display:none!important}
+#panel-tripod[data-ct-tripod-daily-quarantine="1"]>*:not(#ctTripodDailyVerifiedV35):not(#ctStrategyBooksV1){display:none!important}
 #ctTripodDailyVerifiedV35{margin:8px 0 14px;padding:15px;border-radius:16px;font-family:system-ui,-apple-system,sans-serif}
 #ctTripodDailyVerifiedV35 .ctTpHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 #ctTripodDailyVerifiedV35 .ctTpTitle{font-weight:900;font-size:16px}.ctTpBadge{font-size:10px;font-weight:900;white-space:nowrap}
