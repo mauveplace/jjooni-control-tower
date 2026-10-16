@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-17T01:59:31+09:00",
+  "generated_kst": "2026-10-17T02:34:22+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 4,
+  "warning_count": 1,
   "observatory_session": "2026-10-15",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-16T23:21:16+09:00",
+      "generated_kst": "2026-10-17T02:00:04+09:00",
       "session": "2026-10-15",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-16T21:38:21+09:00",
+      "generated_kst": "2026-10-17T02:34:21+09:00",
       "session": "2026-10-15",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-16T21:38:21+09:00",
+      "generated_kst": "2026-10-17T02:34:21+09:00",
       "session": "2026-10-15",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-16T21:38:05+09:00",
+      "generated_kst": "2026-10-17T02:34:10+09:00",
       "as_of_date": "2026-10-16",
       "priced_count": 46
     },
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-17T01:59:30+09:00",
+      "generated_kst": "2026-10-17T01:59:31+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -453,7 +453,7 @@
       "latest_mismatch": []
     },
     "crypto": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -461,17 +461,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-16",
-          "last_value": 82215.62,
+          "last_value": 80965.12,
           "group": "crypto",
-          "latest_value": 82215.62,
+          "latest_value": 80965.12,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-16",
-          "last_value": 2470.43,
+          "last_value": 2405.7,
           "group": "crypto",
-          "latest_value": 2470.43,
+          "latest_value": 2405.7,
           "latest_matches": true
         }
       },
@@ -487,9 +487,9 @@
         "FEAR_GREED": {
           "count": 1559,
           "last_date": "2026-10-16",
-          "last_value": 32.1,
+          "last_value": 20.8,
           "group": "sentiment",
-          "latest_value": 32.1,
+          "latest_value": 20.8,
           "latest_matches": true
         }
       },
@@ -513,36 +513,21 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-16T23:21:12+09:00",
-      "current_quote_age_seconds": 9499,
-      "captured_quote_age_seconds": 7
+      "quote_as_of_kst": "2026-10-17T02:34:02+09:00",
+      "current_quote_age_seconds": 20,
+      "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-16T23:21:14+09:00",
-      "current_quote_age_seconds": 9497,
+      "quote_as_of_kst": "2026-10-17T02:34:00+09:00",
+      "current_quote_age_seconds": 22,
       "captured_quote_age_seconds": 5
     }
   },
   "issues": [
-    {
-      "code": "GROUP_CRYPTO_STALE",
-      "severity": "WARN",
-      "detail": "anchor=None dates=BTCUSD:2026-10-16,ETHUSD:2026-10-16"
-    },
-    {
-      "code": "CRYPTO_BTCUSD_STALE",
-      "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-16T23:21:12+09:00', 'current_quote_age_seconds': 9499, 'captured_quote_age_seconds': 7}"
-    },
-    {
-      "code": "CRYPTO_ETHUSD_STALE",
-      "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-16T23:21:14+09:00', 'current_quote_age_seconds': 9497, 'captured_quote_age_seconds': 5}"
-    },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
       "severity": "WARN",
