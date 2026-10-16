@@ -14,3 +14,6 @@ test('background bands split exactly at session boundaries',()=>{const bands=ses
 const {chartReference,changeText}=require('../manual-intraday-v1.js');
 test('reference requires dated positive previous trading close',()=>{assert.equal(chartReference({session_date:'2026-10-12',previous_close:100,previous_close_date:'2026-10-08'}),100);for(const d of ['2026-10-12','2026-10-13',null])assert.equal(chartReference({session_date:'2026-10-12',previous_close:100,previous_close_date:d}),null);assert.equal(chartReference({session_date:'2026-10-12',previous_close:0,previous_close_date:'2026-10-08'}),null)});
 test('price changes use the reference and show missing as unknown',()=>{assert.equal(changeText(102,100),'+2 (+2.00%)');assert.equal(changeText(98,100),'-2 (-2.00%)');assert.match(changeText(102,null),/확인 중/)});
+
+const {needsRefresh}=require('../manual-intraday-v1.js');
+test('latest complete cache expires after ten minutes; explicit historical date remains cached',()=>{const now=Date.parse('2026-10-16T04:00:00Z'),d={candles:[{close:100}],backfill_complete:true,updated_at:'2026-10-16T03:00:00Z'};assert.equal(needsRefresh(d,'',now),true);assert.equal(needsRefresh(d,'2026-10-15',now),false);d.updated_at='2026-10-16T03:59:00Z';assert.equal(needsRefresh(d,'',now),false)});
