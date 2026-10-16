@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_SECTOR_ETF_V1",
-  "generated_kst": "2026-10-16T08:31:21+09:00",
+  "generated_kst": "2026-10-16T10:32:22+09:00",
   "as_of_date": "2026-10-15",
   "read_only": true,
   "contains_account_data": false,
@@ -73,7 +73,7 @@
     "classic_count": 11,
     "priced_count": 46,
     "total_count": 46,
-    "classic_above_ma20": 9,
+    "classic_above_ma20": 8,
     "leaders_20d_rs_spy": [
       {
         "ticker": "XLV",
@@ -94,15 +94,15 @@
         "value": -3.4175
       },
       {
-        "ticker": "XLF",
-        "value": -2.2967
+        "ticker": "XLC",
+        "value": -3.1343
       },
       {
-        "ticker": "XLI",
-        "value": -1.8678
+        "ticker": "XLF",
+        "value": -2.2967
       }
     ],
-    "growth_defense_spread_20d_pct": -2.0649,
+    "growth_defense_spread_20d_pct": -2.7346,
     "leaders_1m_rs_spy": [
       {
         "ticker": "XLV",
@@ -119,19 +119,19 @@
     ],
     "laggards_1m_rs_spy": [
       {
+        "ticker": "XLC",
+        "value": -5.1676
+      },
+      {
         "ticker": "XLRE",
         "value": -4.268
       },
       {
         "ticker": "XLF",
         "value": -3.5326
-      },
-      {
-        "ticker": "XLC",
-        "value": -2.8482
       }
     ],
-    "growth_defense_spread_1m_pct": -1.7126
+    "growth_defense_spread_1m_pct": -2.4857
   },
   "groups": [
     {
@@ -802,24 +802,24 @@
           "rs_qqq_1m_pct": -0.4436
         },
         {
-          "price": 112.44,
-          "ytd_pct": -3.8152,
-          "ma20": 111.822,
-          "ma60": 111.3935,
-          "vs_ma20_pct": 0.5527,
-          "vs_ma60_pct": 0.9395,
-          "high20_gap_pct": -2.0131,
-          "above_ma20": true,
-          "above_ma60": true,
-          "observed_date": "2026-10-15",
-          "ret_1d_pct": 1.4618,
-          "ret_5d_pct": 0.3302,
-          "ret_10d_pct": 2.274,
-          "ret_20d_pct": 0.0801,
-          "ret_50d_pct": 1.4161,
-          "ret_100d_pct": -2.6156,
-          "ret_1m_pct": -0.4956,
-          "ret_3m_pct": 1.6177,
+          "price": 110.82,
+          "ytd_pct": -5.201,
+          "ma20": 111.8175,
+          "ma60": 111.3395,
+          "vs_ma20_pct": -0.8921,
+          "vs_ma60_pct": -0.4666,
+          "high20_gap_pct": -3.4248,
+          "above_ma20": false,
+          "above_ma60": false,
+          "observed_date": "2026-10-14",
+          "ret_1d_pct": -1.3003,
+          "ret_5d_pct": -0.3955,
+          "ret_10d_pct": -0.1352,
+          "ret_20d_pct": -1.9292,
+          "ret_50d_pct": -1.0889,
+          "ret_100d_pct": -4.5478,
+          "ret_1m_pct": -2.815,
+          "ret_3m_pct": -1.6245,
           "ticker": "XLC",
           "name": "Communication Services",
           "group": "S&P 500 섹터",
@@ -829,20 +829,20 @@
           "asset_class": "ETF",
           "bar_status": "COMPLETED_DAILY",
           "completed_cutoff": "2026-10-15",
-          "rs_spy_1d_pct": 1.1772,
-          "rs_qqq_1d_pct": 1.5921,
-          "rs_spy_5d_pct": 0.6067,
-          "rs_qqq_5d_pct": 2.9493,
-          "rs_spy_10d_pct": 1.253,
-          "rs_qqq_10d_pct": 4.1648,
-          "rs_spy_20d_pct": -1.125,
-          "rs_qqq_20d_pct": -1.4654,
-          "rs_spy_50d_pct": 1.1563,
-          "rs_qqq_50d_pct": -0.0756,
-          "rs_spy_100d_pct": -6.1226,
-          "rs_qqq_100d_pct": -4.0734,
-          "rs_spy_1m_pct": -2.8482,
-          "rs_qqq_1m_pct": -3.799
+          "rs_spy_1d_pct": -1.5849,
+          "rs_qqq_1d_pct": -1.17,
+          "rs_spy_5d_pct": -0.119,
+          "rs_qqq_5d_pct": 2.2236,
+          "rs_spy_10d_pct": -1.1562,
+          "rs_qqq_10d_pct": 1.7556,
+          "rs_spy_20d_pct": -3.1343,
+          "rs_qqq_20d_pct": -3.4747,
+          "rs_spy_50d_pct": -1.3487,
+          "rs_qqq_50d_pct": -2.5806,
+          "rs_spy_100d_pct": -8.0548,
+          "rs_qqq_100d_pct": -6.0056,
+          "rs_spy_1m_pct": -5.1676,
+          "rs_qqq_1m_pct": -6.1184
         },
         {
           "price": 113.41,
@@ -10534,6 +10534,10 @@
     ],
     "XLC": [
       {
+        "date": "2026-04-10",
+        "value": 113.94999695
+      },
+      {
         "date": "2026-04-13",
         "value": 114.81999969
       },
@@ -11048,10 +11052,6 @@
       {
         "date": "2026-10-14",
         "value": 110.81999969
-      },
-      {
-        "date": "2026-10-15",
-        "value": 112.44000244
       }
     ],
     "XLY": [
