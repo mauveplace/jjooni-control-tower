@@ -98,3 +98,9 @@ html[data-ct-layout="mobile-first"] body .ctWlRet[data-selected="1"]{display:blo
 html[data-ct-layout="mobile-first"] body .ctWlRet small{display:block!important;font-size:11px!important;color:#53657b!important}
 @media(min-width:768px){html[data-ct-layout="mobile-first"] body .ctWlRow{grid-template-columns:26px minmax(0,1.6fr) 100px repeat(4,minmax(52px,.6fr))!important}html[data-ct-layout="mobile-first"] body .ctWlRet[data-period]{display:block!important}}
 @media(max-width:359px){html[data-ct-layout="mobile-first"] body .ctWlRow{grid-template-columns:18px minmax(0,1fr) 70px!important}html[data-ct-layout="mobile-first"] body .ctWlPrice{grid-column:2}html[data-ct-layout="mobile-first"] body .ctWlRet[data-selected="1"]{grid-column:3;grid-row:1/3}}
+
+html[data-ct-layout="mobile-first"] body .ctAccountHoldings{margin-top:14px;border-top:1px solid #e5eaf0;padding-top:8px}
+html[data-ct-layout="mobile-first"] body .ctAccountHoldings summary{font-size:14px!important;line-height:1.5!important;cursor:pointer;padding:10px 0}
+html[data-ct-layout="mobile-first"] body .ctAccountHoldingRows article{padding:12px 0;border-top:1px solid #e5eaf0;overflow-wrap:anywhere}
+html[data-ct-layout="mobile-first"] body .ctAccountHoldingRows :is(b,span,strong,small){display:block!important;line-height:1.5!important;white-space:normal!important}
+html[data-ct-layout="mobile-first"] body .ctAccountHoldingRows b{font-size:15px!important}.ctAccountHoldingRows span,.ctAccountHoldingRows small{font-size:12px!important;color:#53657b!important}.ctAccountHoldingRows strong{font-size:18px!important}
