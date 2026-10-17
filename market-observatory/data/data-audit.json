@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-17T17:30:23+09:00",
+  "generated_kst": "2026-10-17T20:02:40+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-10-16",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-17T16:35:35+09:00",
+      "generated_kst": "2026-10-17T19:55:33+09:00",
       "session": "2026-10-16",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-17T16:36:02+09:00",
+      "generated_kst": "2026-10-17T20:02:39+09:00",
       "session": "2026-10-16",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-17T16:36:02+09:00",
+      "generated_kst": "2026-10-17T20:02:39+09:00",
       "session": "2026-10-16",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-17T16:35:46+09:00",
+      "generated_kst": "2026-10-17T20:02:28+09:00",
       "as_of_date": "2026-10-16",
       "priced_count": 46
     },
@@ -344,7 +344,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": "2026-10-17",
       "allow_lag_days": 4,
       "critical": false,
@@ -399,7 +399,15 @@
         }
       },
       "missing": [],
-      "latest_mismatch": []
+      "latest_mismatch": [],
+      "fetch_succeeded": false,
+      "failed_series": {
+        "KR3Y": "RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout",
+        "KR5Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR10Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR20Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR30Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN"
+      }
     },
     "jp_rates": {
       "state": "LIVE",
@@ -460,17 +468,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-17",
-          "last_value": 81604.07,
+          "last_value": 81558.98,
           "group": "crypto",
-          "latest_value": 81604.07,
+          "latest_value": 81558.98,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-17",
-          "last_value": 2432.3,
+          "last_value": 2437.56,
           "group": "crypto",
-          "latest_value": 2432.3,
+          "latest_value": 2437.56,
           "latest_matches": true
         }
       },
@@ -514,19 +522,24 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-17T16:35:41+09:00",
-      "current_quote_age_seconds": 3282,
-      "captured_quote_age_seconds": 4
+      "quote_as_of_kst": "2026-10-17T20:01:44+09:00",
+      "current_quote_age_seconds": 56,
+      "captured_quote_age_seconds": 5
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-17T16:35:40+09:00",
-      "current_quote_age_seconds": 3283,
-      "captured_quote_age_seconds": 6
+      "quote_as_of_kst": "2026-10-17T20:01:38+09:00",
+      "current_quote_age_seconds": 62,
+      "captured_quote_age_seconds": 12
     }
   },
   "issues": [
+    {
+      "code": "GROUP_KR_RATES_STALE",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-17 dates=KR3Y:2026-10-16,KR5Y:2026-10-16,KR10Y:2026-10-16,KR20Y:2026-10-16,KR30Y:2026-10-16,KR_3S10S:2026-10-16"
+    },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
       "severity": "WARN",
