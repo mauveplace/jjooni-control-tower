@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const PRIMARY_TABS=['overview','portfolio','trades','accounts','compare','tripod','decisions','quality','watchlist','cost'];
+const PRIMARY_TABS=['overview','portfolio','accounts','tripod'];
 const SECONDARY_TABS=[];
 const PAGE_SIZE=30;
 const STATE={tradeParent:null,tradeNodes:[],shown:PAGE_SIZE,tradeControls:null,tradeAnchor:null};
@@ -43,12 +43,20 @@ function activateTab(name){
 }
 
 function ensureMobileNav(){
- const more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');if(more)more.remove();if(menu)menu.remove();
  const tabs=qs('.tabs');if(!tabs)return;
- qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase(),txt=String(t.textContent||'').trim().toUpperCase();if(id==='ai'||txt==='AI BOT'||txt.includes('AUTOBOT'))t.style.setProperty('display','none','important');else if(mobile())t.style.removeProperty('display')});
+ document.documentElement.dataset.ctLayout='mobile-first';
+ if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.0';document.head.appendChild(link)}
+ qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase();t.dataset.primary=PRIMARY_TABS.includes(id)?'1':'0';t.setAttribute('role','button');t.tabIndex=0;t.setAttribute('aria-label',t.textContent.trim());if(!t.dataset.keyboardBound){t.dataset.keyboardBound='1';t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click()}})}});
+ let more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');
+ if(!more){more=document.createElement('button');more.id='ctMoreTab';more.type='button';more.textContent='더보기';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','ctMoreMenu');tabs.append(more)}
+ if(!menu){menu=document.createElement('nav');menu.id='ctMoreMenu';menu.setAttribute('aria-label','전체 메뉴');document.body.append(menu)}
+ const secondary=qsa('.tab[data-tab]',tabs).filter(t=>!PRIMARY_TABS.includes(t.dataset.tab)&&!t.dataset.ctNavDuplicate);
+ const signature=secondary.map(t=>t.dataset.tab+':'+t.textContent).join('|');
+ if(menu.dataset.signature!==signature){menu.dataset.signature=signature;menu.replaceChildren();secondary.forEach(t=>{const b=document.createElement('button');b.type='button';b.dataset.tab=t.dataset.tab;b.textContent=t.textContent;b.onclick=()=>{t.click();menu.classList.remove('open');more.setAttribute('aria-expanded','false')};menu.append(b)})}
+ more.onclick=()=>{const open=menu.classList.toggle('open');more.setAttribute('aria-expanded',String(open));if(open)menu.querySelector('button')?.focus()};
+ if(!menu.dataset.bound){menu.dataset.bound='1';document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open')){menu.classList.remove('open');more.setAttribute('aria-expanded','false');more.focus()}});document.addEventListener('click',e=>{if(!menu.contains(e.target)&&!more.contains(e.target)){menu.classList.remove('open');more.setAttribute('aria-expanded','false')}})}
 }
-
-function syncMoreState(){}
+function syncMoreState(){const active=qs('.tabs .tab.on[data-tab]'),brand=qs('.top .brand');if(active&&brand&&brand.textContent!==active.textContent)brand.textContent=active.textContent;}
 
 function trustKind(raw){
  const s=String(raw||'').toUpperCase();
@@ -137,6 +145,7 @@ function paginateTrades(){
 let busy=false;
 function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.6',mobile_nav:'FULL_SCROLL',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
+document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctMoreMenu button'))setTimeout(()=>{ensureMobileNav();syncMoreState()},120)});
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 document.addEventListener('jjooni:live-applied',enforce);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});

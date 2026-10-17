@@ -70,7 +70,6 @@ html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg path{stroke-width:2.5!impo
 /* Touch tablets use the full interactive trade-review renderer, not the compact
    desktop replacement. Keep all tap targets and P&L text readable. */
 html.ctStableTabletV37 #panel-trades>#ctDesktopTradeReviewV8,
-html.ctStableTabletV37 #panel-accounts>#ctDesktopAccountsV8,
 html.ctStableTabletV37 #panel-performance>#ctDesktopPerformanceV8{display:none!important}
 html.ctStableTabletV37 #ctTradeReviewV2{display:block!important;margin:12px 0 30px!important;font-family:system-ui,-apple-system,'Noto Sans KR',sans-serif;color:#172033}
 html.ctStableTabletV37 #ctTradeReviewV2 .ctTrHead{margin:8px 2px 16px!important}

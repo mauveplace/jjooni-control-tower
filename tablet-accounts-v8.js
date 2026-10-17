@@ -7,11 +7,11 @@ const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
-const wide=()=>innerWidth>=1200&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+const wide=()=>true; // Shared canonical account view on every viewport.
 const C=()=>window.__JJOONI_CANONICAL_SSOT||{};
 const L=()=>window.__JJOONI_LIVE_PAYLOAD||{};
 const won=v=>n(v)==null?'—':'₩'+Math.round(Math.abs(Number(v)||0)).toLocaleString('ko-KR');
-const signed=v=>{const x=Number(v)||0;return (x>=0?'+':'-')+won(x)};
+const signed=v=>{if(n(v)==null)return '산정 대기';const x=Number(v)||0;return (x>=0?'+':'-')+won(x)};
 const pct=v=>n(v)==null?'—':(Number(v)>=0?'+':'')+Number(v).toFixed(2)+'%';
 const cls=v=>Number(v)>0?'gain':Number(v)<0?'loss':'neutral';
 function trustKind(raw){const s=String(raw||'').toUpperCase();if(s.includes('BROKER_DIRECT')||s.includes('BROKER_LIVE')||s.includes('BROKER_API')||s.includes('ACTUAL_BROKER'))return '증권사 확인';if(s.includes('MODEL')||s.includes('MODELED')||s.includes('MTM')||s.includes('ACCOUNTING')||s.includes('PARTIAL'))return '계산값';return '참고값'}
@@ -19,7 +19,7 @@ function authority(a){return a?.holdings_quality||a?.cash_quality||a?.account_au
 function displayCash(id,a){const x=window.JjooniMetrics.cash(a);if(x==null)return null;const auth=String(authority(a)).toUpperCase();if(id==='IRP'&&!auth.includes('BROKER_DIRECT')&&Math.abs(x)<=1.01){const stock=window.JjooniMetrics.stock(a),nav=n(a?.nav);if(stock!=null&&nav!=null&&Math.abs(nav-stock-x)<=1.01)return null}return x}
 function fx(id,a){const live=(L().accounts||{})[id]||{};for(const v of [a?.fx_krw_per_usd,a?.fx,live.fx_krw_per_usd,live.fx]){const x=n(v);if(x&&x>500&&x<3000)return x}const ref=L().fx_reference||{},x=n(ref.krw_per_usd);return x&&x>500&&x<3000&&String(ref.source||'').toUpperCase()!=='FX_REFERENCE_MISSING'?x:null}
 function style(){if(qs('#ctTabletAccountsV8Style'))return;const s=document.createElement('style');s.id='ctTabletAccountsV8Style';s.textContent=`
-@media(min-width:1200px) and (hover:hover) and (pointer:fine){
+@media(min-width:0px){
  #panel-accounts>#ctDesktopAccountsV8{display:block!important}#panel-accounts>:not(#ctDesktopAccountsV8){display:none!important}
  #ctDesktopAccountsV8{font-family:system-ui,-apple-system,'Noto Sans KR',sans-serif;color:#172033}.ctA8Head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:8px 0 12px}.ctA8Title{font-size:22px;font-weight:900}.ctA8Sub{font-size:10px;color:#667085;margin-top:3px}.ctA8Total{text-align:right;font-size:11px;font-weight:900}.ctA8Grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ctA8Card{background:#fff;border:1px solid #e5eaf0;border-radius:14px;padding:12px;min-width:0}.ctA8Name{font-size:12px;font-weight:900}.ctA8Nav{font-size:18px;font-weight:900;margin-top:4px}.ctA8Rows{margin-top:9px;border-top:1px solid #edf1f5;padding-top:6px}.ctA8Line{display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:9px;color:#667085}.ctA8Line b{color:#172033}.ctA8Source{margin-top:7px;font-size:8px;color:#98a2b3}.gain{color:#d92d20!important}.loss{color:#175cd3!important}.neutral{color:#667085!important}
 }

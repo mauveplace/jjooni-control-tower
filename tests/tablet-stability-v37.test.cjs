@@ -29,9 +29,9 @@ test('metric drilldown fails open when modal host is unavailable',()=>{
   assert.match(drill,/OPEN_METRIC_INFO_MISSING/);
 });
 
-test('desktop replacement panels cannot take over touch tablet',()=>{
+test('legacy trade replacement stays desktop-only; canonical accounts are shared',()=>{
   assert.match(tablet,/innerWidth>=1200&&window\.matchMedia\('\(hover:hover\) and \(pointer:fine\)'\)\.matches/);
-  assert.match(accounts,/innerWidth>=1200&&window\.matchMedia\('\(hover:hover\) and \(pointer:fine\)'\)\.matches/);
+  assert.match(accounts,/const wide=\(\)=>true/);
 });
 
 test('touch tablet keeps interactive trade review instead of reverting to legacy history',()=>{
@@ -51,7 +51,7 @@ test('tablet account drilldown stays single-surface and readable',()=>{
 });
 
 test('tablet readability and navigation guard is loaded',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.9/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.10/);
   assert.match(guard,/ctStableTabletV37/);
   assert.match(guard,/font-size:20px!important/);
   assert.match(guard,/font-size:16px!important/);
@@ -86,7 +86,7 @@ test('tablet detail modal and account charts are not phone-sized',()=>{
 
 
 test('last-loaded tablet authority preserves pt-sized modal text',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.9/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.10/);
   assert.match(guard,/#accountDrillModal :is\(\.label,\.v2Label,\[class\*=\"Label\"\]\)\{font-size:16pt!important/);
   assert.match(guard,/#accountDrillModal :is\(\.value,\.v2Value,\[class\*=\"Value\"\]\)\{font-size:22pt!important/);
   assert.match(guard,/#accountDrillModal :is\(td,th,li,p,small\)\{font-size:16pt!important/);
