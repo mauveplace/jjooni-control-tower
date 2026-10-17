@@ -62,11 +62,12 @@ function cleanLegacy(){
   }
  }
  // The old footer describes retired sources, not the current four-account feed.
- for(const e of qsa('.app div,.app p,.app small'))if(!e.children.length&&/^(Human = PB DB SSOT|CURRENT는 최신 운용값|현재 전체자산 = Broker Actual NAV)/.test(text(e)))e.hidden=true;
+ for(const e of qsa('.app div,.app p,.app small,.footer'))if((!e.children.length||e.classList.contains('footer'))&&/^(Human = PB DB SSOT|CURRENT는 최신 운용값|현재 전체자산 = Broker Actual NAV)/.test(text(e)))e.hidden=true;
  const decisions=qs('#panel-decisions');if(decisions){const p=qsa('div,p',decisions).find(e=>!e.children.length&&text(e)==='표시 가능한 Decision 데이터가 없습니다.');if(p)setText(p,'연결된 PB 판단 자료가 없습니다. 판단 생성·연결 여부를 확인해 주세요. 계좌 수집 정상과는 별도 상태입니다.')}
 }
 function overviewCommon(){
  const panel=qs('#panel-overview');if(!panel)return;const {C,L,total,history}=commonModel();
+ for(const e of qsa('.ctAcctSpark,.ctSparkHead',panel))e.hidden=history.historyStale;
  const dayHeading=qsa('h3',panel).find(e=>/^오늘 손익/.test(text(e))),dayCard=qs('#ctCanonicalDailySummary',panel)||dayHeading?.closest('.card');
  if(dayCard){dayCard.id='ctCanonicalDailySummary';writeHtml(dayCard,`<h3>계좌별 오늘 투자손익</h3><p>상단과 동일한 계좌 원본 · ${total.known_day}/4계좌 확인</p>${ACCOUNT_IDS.map(id=>`<div class="ctCommonLine"><span>${ACCOUNT_NAMES[id]}</span><b>${signed(C.accounts?.[id]?.today_pnl)}</b></div>`).join('')}<div class="ctCommonLine"><b>4계좌 합계</b><strong>${signed(total.day)}</strong></div>`)}
  const bench=qs('#ctBenchmarkTable',panel);if(bench){bench.hidden=true;const card=bench.closest('.card');const badge=qs('.badge',card);if(badge)setText(badge,'검증 대기');if(card){let note=qs('.ctCommonNotice',card);if(!note){note=document.createElement('p');note.className='ctCommonNotice';card.append(note)}setText(note,'계좌별 정규장 비교는 같은 거래일·시세 범위 대사 후 표시합니다. 상단 시장지표는 마지막 원본 기준입니다.')}}
