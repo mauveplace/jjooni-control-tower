@@ -10,6 +10,7 @@ import urllib.request
 from datetime import datetime, date
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from tripod_rules import regime_for, target_for
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public-market-daily.json'
@@ -113,12 +114,6 @@ def fear_greed() -> dict:
     }
 
 
-def target_for(regime: str, vix10: float, dd: float) -> str:
-    if regime == '상승':
-        return 'TQQQ 100%' if vix10 < 28 and dd >= -9 else 'QQQ 50% + QLD 50%'
-    return 'QQQ 50% + QLD 50%' if vix10 < 18 else '현금 100%'
-
-
 def build_tripod(observatory=None) -> dict:
     if observatory is None:
         ndx_all = daily_rows('^NDX', '2y')
@@ -145,10 +140,7 @@ def build_tripod(observatory=None) -> dict:
     for i in range(249, len(ndx_c)):
         ma = statistics.fmean(ndx_c[i-249:i+1])
         px = ndx_c[i]
-        if px > ma * 1.01:
-            state = '상승'
-        elif px < ma * 0.95:
-            state = '하락'
+        state = regime_for(px, ma, state)
         states.append(state)
 
     regime = states[-1]
@@ -206,15 +198,16 @@ def build_tripod(observatory=None) -> dict:
     }
 
 
-def load_previous() -> dict:
+def load_previous(path=None) -> dict:
     try:
-        return json.loads(OUT.read_text(encoding='utf-8'))
+        return json.loads((OUT if path is None else Path(path)).read_text(encoding='utf-8'))
     except Exception:
         return {}
 
 
-def main(observatory=None) -> int:
-    previous = load_previous()
+def main(observatory=None, *, out=None) -> int:
+    output_path = OUT if out is None else Path(out)
+    previous = load_previous(output_path)
     old_items = ((previous.get('market_context') or {}).get('items') or {})
     items, errors = {}, {}
     for key, symbol, label, unit in MARKET:
@@ -281,9 +274,9 @@ def main(observatory=None) -> int:
         },
         'tripod_signal': tripod,
     }
-    tmp = OUT.with_suffix('.json.tmp')
+    tmp = output_path.with_suffix('.json.tmp')
     tmp.write_text(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-    tmp.replace(OUT)
+    tmp.replace(output_path)
     print('PUBLIC_MARKET_DAILY=PASS')
     print('generated_kst=' + now)
     print('market=%s/%s' % (available, len(expected)))
@@ -298,5 +291,9 @@ def main(observatory=None) -> int:
 
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    import argparse
+    parser = argparse.ArgumentParser(description='Build public market facts and TRI-POD from one source.')
+    parser.add_argument('--canonical', type=Path, help='Use this Observatory snapshot without another network read.')
+    args = parser.parse_args()
+    raise SystemExit(main(json.loads(args.canonical.read_text()) if args.canonical else None))
 

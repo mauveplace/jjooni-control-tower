@@ -205,16 +205,19 @@ def add_official_yields(series):
     return us,jp
 
 def tripod_history(series):
+    from tripod_rules import regime_for, target_for
+    from statistics import fmean
     ndx=series.get('NASDAQ100',[]);vix=series.get('VIX',[]); vm={x['date']:x['value'] for x in vix}; vals=[x['value'] for x in ndx]; out=[];state=None; last_target=None;log=[]
     for i,x in enumerate(ndx):
-        if i<249 or x['date'] not in vm:continue
-        ma=sum(vals[i-249:i+1])/250; px=x['value'];state='상승' if state is None and px>=ma else ('하락' if state is None else state)
-        if px>ma*1.01:state='상승'
-        elif px<ma*0.95:state='하락'
+        if i<249:continue
+        ma=fmean(vals[i-249:i+1]); px=x['value'];state=regime_for(px,ma,state)
+        # NDX regime evolves even if a VIX observation is absent that day.
+        # Missing VIX suppresses that day's signal, not future regime history.
+        if x['date'] not in vm:continue
         vx=[p['value'] for p in vix if p['date']<=x['date']][-10:]
         if len(vx)<10:continue
-        v10=sum(vx)/10; high=max(vals[max(0,i-251):i+1]);dd=(px/high-1)*100
-        target='TQQQ 100%' if state=='상승' and v10<28 and dd>=-9 else ('QQQ 50% + QLD 50%' if (state=='상승' or v10<18) else '현금 100%')
+        v10=fmean(vx); high=max(vals[max(0,i-251):i+1]);dd=(px/high-1)*100
+        target=target_for(state,v10,dd)
         out.append({'date':x['date'],'ndx':px,'ma250':ma,'vix':vm[x['date']],'vix10':v10,'drawdown_52w_pct':dd,'regime':state,'target':target})
         if target!=last_target:log.append({'date':x['date'],'regime':state,'target':target,'reason':'regime/vix10/drawdown 조건 변경'});last_target=target
     return out,log

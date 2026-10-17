@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-if(window.__JJOONI_UI_BOOT_V14&&window.__JJOONI_UI_BOOT_V14.state==='ACTIVE')return;
+if(['ACTIVE','WAITING_FOR_SSOT','LOADING_REQUIRED_UI'].includes(window.__JJOONI_UI_BOOT_V14?.state))return;
 
 const head=document.head||document.documentElement;
 const BOOT={state:'WAITING_FOR_SSOT',version:'14.33',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};

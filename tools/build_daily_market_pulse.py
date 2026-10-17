@@ -149,6 +149,7 @@ def slickcharts_concentration() -> dict:
             out["top3_weight_pct"] = round(sum(x["weight_pct"] for x in top10[:3]), 4)
             out["top10_weight_pct"] = round(sum(x["weight_pct"] for x in top10), 4)
             out["status"] = "LIVE"
+            out["observed_at_kst"] = datetime.now(KST).isoformat(timespec="seconds")
     except Exception as e:
         out["error"] = type(e).__name__
     return out
@@ -276,13 +277,28 @@ def derive(raw: dict) -> dict:
     }
 
 
-def main(offline=False):
+def cached_concentration(previous, now):
+    """Reuse optional enrichment only with its original verified capture clock."""
+    cached = dict((previous.get('raw') or {}).get('nasdaq100_concentration') or {})
+    try:
+        captured = datetime.fromisoformat(cached.get('observed_at_kst') or '')
+        age = (now - captured).total_seconds()
+        if cached.get('status') == 'LIVE' and 0 <= age <= 86400:
+            return cached
+    except (ValueError, TypeError):
+        pass
+    return {**cached, 'status': 'STALE_FALLBACK'}
+
+
+def main(offline=False, *, data_dir=None, out=None):
+    data_dir = DATA if data_dir is None else Path(data_dir)
+    out = OUT if out is None else Path(out)
     now = datetime.now(KST)
-    obs = read_json(DATA / "observatory.json")
-    sec = read_json(DATA / "sector-etf.json")
-    cal = read_json(DATA / "economic-calendar.json")
-    previous = read_json(OUT, {})
-    contract = read_json(DATA / "morning-brief-contract.json")
+    obs = read_json(data_dir / "observatory.json")
+    sec = read_json(data_dir / "sector-etf.json")
+    cal = read_json(data_dir / "economic-calendar.json")
+    previous = read_json(out, {})
+    contract = read_json(data_dir / "morning-brief-contract.json")
 
     market_date = obs.get("us_completed_session_date")
     if not market_date:
@@ -305,7 +321,7 @@ def main(offline=False):
         "sp500_breadth": breadth,
         "sector_flow": sectors,
         "tradingview_cross_asset": cross,
-        "nasdaq100_concentration": {**((previous.get("raw") or {}).get("nasdaq100_concentration") or {}), "status": "STALE_FALLBACK"} if offline else slickcharts_concentration(),
+        "nasdaq100_concentration": cached_concentration(previous, now) if offline else slickcharts_concentration(),
         "fear_greed": {"score": series_fact(obs, "FEAR_GREED").get("value"), "status": "OBSERVATORY_CANONICAL", "market_date": series_fact(obs, "FEAR_GREED").get("market_date")} if offline else cnn_fear_greed(),
         "calendar": important_calendar(cal, now),
         "canonical_context": {
@@ -383,7 +399,7 @@ def main(offline=False):
             "rollout_stage": "READ_ONLY",
         },
     }
-    OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("DAILY_MARKET_PULSE_BUILD=PASS")
     print("market_date_us=", market_date)
     print("snapshot_status=", phase)

@@ -362,8 +362,23 @@ function applyLive(live){
  else setBadge('SSOT '+CANON.total.known_today_count+'/'+CANON.total.account_count+' · '+t,CANON.total.today_complete?'good':'warn','Canonical feed drives overview, performance, account drilldowns, trade review, TRI-POD and watchlist. Missing daily P&L: '+miss);
 }
 
-let refreshBusy=false;
-async function refresh(){if(refreshBusy)return;refreshBusy=true;try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};window.__JJOONI_COST_SIDECAR=null;let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}finally{refreshBusy=false}}
+// One in-flight encrypted read is shared by open/resume/manual/recovery.
+let refreshFlight=null,lastRecoveryRead=0;
+function refresh(){
+ if(refreshFlight)return refreshFlight;
+ refreshFlight=readEncryptedFeed().finally(()=>{refreshFlight=null});
+ return refreshFlight;
+}
+async function readEncryptedFeed(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};window.__JJOONI_COST_SIDECAR=null;let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
+function requestRefresh(reason){
+ if(refreshFlight)return refreshFlight;
+ if(document.hidden)return Promise.resolve();
+ const now=Date.now();
+ if(now-lastRecoveryRead<5000)return Promise.resolve();
+ lastRecoveryRead=now;
+ return refresh();
+}
+window.__JJOONI_LIVE_BRIDGE={refresh,requestRefresh};
 
 function renderRefreshStatus(){
  const live=window.__JJOONI_LIVE_PAYLOAD||{},facts=M.freshness(live),pending=window.__JJOONI_FAST_ACCESS_REFRESH_V1||{};

@@ -1,0 +1,66 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+
+function feedRuntime(reader){
+  const source=read('live-bridge.js');
+  const start=source.indexOf('let refreshFlight=null');
+  const end=source.indexOf('\nfunction renderRefreshStatus()',start);
+  // Isolate scheduling from crypto/DOM rendering, retaining the production
+  // single-flight and recovery throttling functions unchanged.
+  const code=source.slice(start,end).replace(/async function readEncryptedFeed\(\)\{.*\}\nfunction requestRefresh/s,
+    'async function readEncryptedFeed(){return reader()}\nfunction requestRefresh');
+  let now=100000;
+  const context={window:{},document:{hidden:false},reader,Promise,Date:{now:()=>now}};
+  vm.runInNewContext(code,context);
+  return {api:context.window.__JJOONI_LIVE_BRIDGE,document:context.document,advance:ms=>{now+=ms}};
+}
+
+test('manual, resume and recovery consumers share the same pending feed read',async()=>{
+  let calls=0,complete;
+  const r=feedRuntime(()=>{calls++;return new Promise(resolve=>{complete=resolve})});
+  const first=r.api.refresh();
+  assert.equal(r.api.refresh(),first);
+  assert.equal(r.api.requestRefresh('boot'),first);
+  assert.equal(calls,1);
+  complete('done');
+  await first;
+  const second=r.api.refresh();
+  assert.equal(calls,2);
+  complete();await second;
+});
+
+test('failed reads release the flight, and recovery is bounded independently of UI pulses',async()=>{
+  let calls=0;
+  const r=feedRuntime(async()=>{calls++;if(calls===1)throw Error('offline')});
+  await assert.rejects(r.api.requestRefresh('boot'),/offline/);
+  for(let i=0;i<5;i++){r.advance(900);await r.api.requestRefresh('boot')}
+  assert.equal(calls,1);
+  r.advance(500);await r.api.requestRefresh('boot');
+  assert.equal(calls,2);
+  r.document.hidden=true;r.advance(5000);await r.api.requestRefresh('boot');
+  assert.equal(calls,2);
+});
+
+test('loader re-entry during WAITING_FOR_SSOT cannot replace the boot owner',()=>{
+  const source=read('trade-review-loader.js');
+  const code=source.slice(0,source.lastIndexOf('boot();'))+'})();';
+  const window={},context={window,document:{head:{},documentElement:{}},Date,console};
+  vm.runInNewContext(code,context);
+  const owner=window.__JJOONI_UI_BOOT_V14;
+  vm.runInNewContext(code,context);
+  assert.equal(window.__JJOONI_UI_BOOT_V14,owner);
+  assert.equal(owner.state,'WAITING_FOR_SSOT');
+});
+
+test('boot and master recovery do not broadcast fake browser lifecycle events',()=>{
+  for(const file of ['boot-coordinator-v33.js','fast-refresh-v32.js']){
+    assert.doesNotMatch(read(file),/dispatchEvent\(new Event\(['"]visibilitychange/);
+    assert.match(read(file),/__JJOONI_LIVE_BRIDGE\?\.requestRefresh/);
+  }
+  const fast=read('fast-refresh-v32.js');
+  assert.doesNotMatch(fast,/s\.src='trade-review-loader/);
+});

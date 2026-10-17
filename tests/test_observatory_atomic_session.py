@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import sys
 import subprocess
@@ -12,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import publish_observatory_data as pub
 import build_public_market_daily as public
 import build_daily_market_pulse as pulse
+from observatory_history_views import encoded
 
 
 def observation():
@@ -95,6 +97,14 @@ class AtomicSessionTest(unittest.TestCase):
             self.assertEqual(obs['generated_kst'], newer['generated_kst'])
             self.assertEqual(obs['tripod_latest']['session_date'], report['market_date_us'])
             self.assertEqual(sidecar['tripod_signal']['session_date'], report['market_date_us'])
+            archived = {k: v for k, v in report.items() if k != 'history'}
+            archived['archive_contract'] = 'IMMUTABLE_FACTS_AND_RULES_NOT_AI_COMMENTARY_V1'
+            digest = hashlib.sha256(encoded(archived)).hexdigest()
+            stored = local / pub.DATA / 'pulse-history/observations' / (digest + '.json')
+            self.assertTrue(stored.is_file(), 'post-rebase archive must match the exact published pulse')
+            self.assertEqual(json.loads(stored.read_text()), archived)
+            index = json.loads((local / pub.DATA / 'pulse-history/index.json').read_text())
+            self.assertIn(digest, [r['snapshot_id'] for r in index['observations']])
             self.assertEqual(git(local, 'status', '--porcelain'), '')
 
     def test_incomplete_new_session_cannot_be_mislabeled(self):
