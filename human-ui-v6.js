@@ -131,7 +131,7 @@ function humanProducerText(){
 }
 function updateProducerBadge(){
  const b=qs('#ctProducerFreshnessBadge');if(!b)return;
- const top=qs('.top');if(mobile()&&top&&b.parentNode!==top)top.appendChild(b);
+ const top=qs('.top');if(top&&b.parentNode!==top)top.appendChild(b);
  const text=humanProducerText();if(b.textContent!==text)b.textContent=text;
  b.title='데이터 경과시간은 generated_kst 기준으로 계산합니다. 브라우저 렌더 시각은 freshness 판정에 쓰지 않습니다.';
 }

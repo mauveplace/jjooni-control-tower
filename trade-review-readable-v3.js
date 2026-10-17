@@ -34,6 +34,7 @@ function style(){
   const st=document.createElement('style');
   st.id='ctTradeReadableV3Style';
   st.textContent=`
+.ctDevNoteHiddenV3{display:none!important}
 @media(max-width:767px){
   .ctDevNoteHiddenV3{display:none!important}
   #ctTradeReviewV2{margin:8px 0 24px!important}
@@ -77,7 +78,6 @@ function style(){
 }
 
 function hideDeveloperNotes(){
-  if(window.innerWidth>767)return;
   const markers=['Human = PB DB SSOT','CURRENT는 최신 운용값','현재 전체자산 = Broker Actual NAV'];
   qsa('div,p,small,section').forEach(el=>{
     if(el.id==='ctTradeReviewV2'||el.closest('#ctTradeReviewV2'))return;
