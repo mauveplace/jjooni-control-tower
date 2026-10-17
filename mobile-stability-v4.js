@@ -175,7 +175,7 @@ function stabilizeTradeDefault(){
 function clarifySortLabel(){const b=qs('#ctTradeReviewV2 [data-sort="error"]');if(b)b.textContent='오차율순'}
 
 function apply(){
- ensureStyle();hideRawHeroLog();updateNetSummary();updateTrustStrip();dockLiveBadge();ensureMoreSheet();wrapRender();stabilizeTradeDefault();clarifySortLabel();
+ ensureStyle();hideRawHeroLog();updateNetSummary();updateTrustStrip();dockLiveBadge();wrapRender();stabilizeTradeDefault();clarifySortLabel();
  window.__JJOONI_MOBILE_STABILITY_V4={state:'ACTIVE',version:'4.4',scroll_guard:true,polling_full_render_blocked:true,viewport_anchor_restore:true,hero_raw_log_hidden:true,trust_strip:true,total_asset_primary:true,more_bottom_sheet:true,dynamic_viewport:true};
 }
 

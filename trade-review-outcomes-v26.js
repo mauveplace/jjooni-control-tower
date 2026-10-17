@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.7',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'BUY=(basis-trade)*qty;SELL=(trade-basis)*qty',horizon:'now',horizon_label:'현재'};
+const RT={state:'ACTIVE',render_state:'WAITING_FOR_PANEL',version:'26.8',rendered_at:null,trade_count:0,buy_count:0,sell_count:0,realized_known:0,opportunity_known:0,missing_realized:0,missing_opportunity:0,sort:'RECENT_DESC',formula:'BUY=(basis-trade)*qty;SELL=(trade-basis)*qty',horizon:'now',horizon_label:'현재'};
 window.__JJOONI_TRADE_OUTCOMES_V26=RT;
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(/,/g,''));return Number.isFinite(x)?x:null};
@@ -78,6 +78,9 @@ const name=t=>{
  return tk||raw||'UNKNOWN';
 };
 
+// Fund ledger amounts are not exchange-traded per-share prices. Until unit
+// NAV and broker units are explicit, do not reconstruct either kind of profit.
+function fundUnitsUnknown(t){return /^F\d+$/i.test(ticker(t))||String(t.record_type||t.asset_type||'').toUpperCase()==='FUND'||/증권.*투자신탁|혼합자산|적격TDF/.test(name(t))}
 function firstNum(o,keys){for(const k of keys){const x=n(o&&o[k]);if(x!==null)return {value:x,key:k}}return null}
 function fee(t){return firstNum(t,['commission','fee','commission_krw','fee_krw'])?.value??0}
 function tax(t){return firstNum(t,['tax','tax_krw','transaction_tax'])?.value??0}
@@ -118,6 +121,7 @@ function reconstructRealized(trades){
  });
  for(const t of ordered){
   const k=acct(t)+'|'+ticker(t),qv=qty(t),p=px(t);if(!ticker(t)||!qv||p===null)continue;
+  if(fundUnitsUnknown(t)){if(side(t)==='SELL'){const ex=explicitRealized(t);map.set(t,ex?{...ex,state:'OK'}:{value:null,currency:ccy(t),basis:'FUND_UNITS_REQUIRED',state:'NA'})}continue}
   let b=books.get(k)||{qty:0,avg:null,incomplete:false};
   if(side(t)==='BUY'){
    if(b.qty<0)b.incomplete=true;
@@ -160,8 +164,9 @@ function horizonStore(){
 }
 function horizonBasis(t,key,curMap){
  const def=horizonDef(key);
+ if(fundUnitsUnknown(t))return {price:null,state:'FUND_UNITS_REQUIRED',date:'',target:'',label:def.label};
  if(key==='now'){
-  const cp=n(t.current_price??t.last_price)??curMap.get(acct(t)+'|'+ticker(t))??null;
+  const cp=curMap.get(acct(t)+'|'+ticker(t))??null;
   return {price:cp,state:cp!==null?'PASS':'UNAVAILABLE',date:'',target:'',label:def.label};
  }
  const date=tradeDateKey(t),store=horizonStore(),marks=store[ticker(t)+'|'+date]||{},mark=marks[key]||{};
@@ -182,9 +187,9 @@ function shortBasisDate(v){
 function currentPriceMap(trades){
  const m=new Map();
  const set=(a,s,v)=>{const x=n(v);if(x!==null&&x>0&&s)m.set(String(a||'')+'|'+sym(s),x)};
- trades.forEach(t=>set(acct(t),ticker(t),t.current_price??t.last_price));
+ trades.filter(t=>!fundUnitsUnknown(t)).forEach(t=>set(acct(t),ticker(t),t.current_price??t.last_price));
  try{Object.entries(window.__JJOONI_CANONICAL_SSOT?.accounts||{}).forEach(([a,o])=>(o.positions||[]).forEach(p=>set(a,p.ticker||p.symbol,p.current_price||p.price||p.last_price)))}catch(_){}
- try{const w=D?.human?.watchlist||{};[...(w.kr||[]),...(w.us||[])].forEach(x=>{const s=sym(x.ticker||x.symbol),v=x.current_price||x.price;for(const a of ['TOSS','ISA','PENSION','IRP'])set(a,s,v)})}catch(_){}
+ // Watchlist reference prices never override current account holdings.
  return m;
 }
 
@@ -225,10 +230,11 @@ function render(){
  const knownR=rows.filter(x=>x.trade_side==='SELL'&&x.realized.value!==null).length,knownO=rows.filter(x=>x.opportunity!==null).length;
  const sumTxt=(kr,usd)=>{const a=[];if(kr.count)a.push(money(kr.sum,'KRW'));if(usd.count)a.push(money(usd.sum,'USD'));return a.length?a.join(' · '):'—'};
  const hbuttons=HORIZONS.map(h=>`<button type="button" class="ctO26HBtn ${h.key===(RT.horizon||'now')?'active':''}" data-horizon-v26="${h.key}" aria-pressed="${h.key===(RT.horizon||'now')?'true':'false'}">${h.label}</button>`).join('');
- root.innerHTML=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">체결 이후 기준시점별 복기 · 매수=(기준가−매수가)×수량 · 매도=(매도가−기준가)×수량 · +는 유리, −는 불리</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
+ const html=`<div class="ctO26Head"><div><div class="ctO26Title">매매복기</div><div class="ctO26Sub">체결 이후 기준시점별 복기 · 매수=(기준가−매수가)×수량 · 매도=(매도가−기준가)×수량 · +는 유리, −는 불리</div></div><div class="ctO26Badge">거래 ${rows.length}건</div></div>
  <div class="ctO26Horizons" role="group" aria-label="체결 후 성과 기준">${hbuttons}</div>
  <div class="ctO26Summary"><div class="ctO26Sum"><span>확인된 실현손익 합계</span><b>${esc(sumTxt(krR,usdR))}</b><small>매도 ${sellCount}건 중 ${knownR}건 원가근거 확인</small></div><div class="ctO26Sum"><span>${esc(hdef.label)} 복기손익 합계</span><b>${esc(sumTxt(krO,usdO))}</b><small>${knownO}/${rows.length}건 · 해당 기준가가 확정된 거래만 반영</small></div></div>
- <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side,b=x.basis||{},label=b.label||hdef.label;let opWord;if(op===null){opWord=b.state==='PENDING'?label+' 아직 미도달':b.state==='UNAVAILABLE'?label+' 기준가 없음':'기준가 없음'}else if(sd==='SELL'){opWord=op<0?'기회손실 · 매도 후 상승':op>0?'회피손실 · 매도 후 하락':'변동 없음'}else{opWord=op>0?label+' 기준 수익':op<0?label+' 기준 손실':'변동 없음'}const basisDate=shortBasisDate(b.date),target=shortBasisDate(b.target),basisTxt=x.current!==null?' · '+label+' '+price(x.current,ccy(t))+(basisDate?' ('+basisDate+')':''):(target?' · 목표 '+target:'');const pctTxt=x.performance_pct===null?'':` · ${x.performance_pct>=0?'+':''}${x.performance_pct.toFixed(2)}%`;return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-horizon="${esc(RT.horizon||'now')}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}주 × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>${esc(label)} 복기손익</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${basisTxt}${pctTxt}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
+ <div class="ctO26List">${rows.length?rows.map(x=>{const t=x.t,r=x.realized,op=x.opportunity,sd=x.trade_side,b=x.basis||{},label=b.label||hdef.label;let opWord;if(op===null){opWord=b.state==='FUND_UNITS_REQUIRED'?'펀드 기준가·좌수 확인 필요':b.state==='PENDING'?label+' 아직 미도달':b.state==='UNAVAILABLE'?label+' 기준가 없음':'기준가 없음'}else if(sd==='SELL'){opWord=op<0?'기회손실 · 매도 후 상승':op>0?'회피손실 · 매도 후 하락':'변동 없음'}else{opWord=op>0?label+' 기준 수익':op<0?label+' 기준 손실':'변동 없음'}const basisDate=shortBasisDate(b.date),target=shortBasisDate(b.target),basisTxt=x.current!==null?' · '+label+' '+price(x.current,ccy(t))+(basisDate?' ('+basisDate+')':''):(target?' · 목표 '+target:'');const pctTxt=x.performance_pct===null?'':` · ${x.performance_pct>=0?'+':''}${x.performance_pct.toFixed(2)}%`;return `<div class="ctO26Row" data-v26-ticker="${esc(ticker(t))}" data-v26-account="${esc(acct(t))}" data-v26-side="${esc(sd)}" data-v26-horizon="${esc(RT.horizon||'now')}" data-v26-realized="${r.value===null?'NA':'OK'}" data-v26-opportunity="${op===null?'NA':'OK'}"><div class="ctO26Identity"><div class="ctO26Name">${identityNameHtml(t)}</div><div class="ctO26Meta">${esc(acct(t))} · ${esc(sd)} · ${esc(String(ts(t)||t.trade_date||'').replace('T',' ').slice(0,16))} · ${qty(t).toLocaleString()}${fundUnitsUnknown(t)?'원장단위':'주'} × ${esc(price(px(t),ccy(t)))}</div></div><div class="ctO26Metric"><span>실현손익</span><b class="${sd==='SELL'?cls(r.value):'na'}">${sd==='SELL'?esc(money(r.value,r.currency)):'—'}</b><small>${sd==='BUY'?'매수 거래는 미실현':r.value===null?'원가근거 필요':r.basis==='WEIGHTED_AVG_LEDGER'?'가중평균 원가':'원장/브로커'}</small></div><div class="ctO26Metric"><span>${esc(label)} 복기손익</span><b class="${cls(op)}">${esc(money(op,ccy(t)))}</b><small>${esc(opWord)}${basisTxt}${pctTxt}</small></div></div>`}).join(''):'<div class="ctO26Empty">최근 거래가 없습니다.</div>'}</div>`;
+ if(root.innerHTML===html)return;root.innerHTML=html;
  root.querySelectorAll('[data-horizon-v26]').forEach(btn=>btn.addEventListener('click',()=>{const key=String(btn.dataset.horizonV26||'now');if(key===(RT.horizon||'now'))return;RT.horizon=key;RT.horizon_label=horizonDef(key).label;render()}));
  RT.state='ACTIVE';RT.render_state='ACTIVE';RT.rendered_at=new Date().toISOString();RT.horizon_label=hdef.label;RT.trade_count=rows.length;RT.buy_count=buyCount;RT.sell_count=sellCount;RT.realized_known=knownR;RT.opportunity_known=knownO;RT.missing_realized=sellCount-knownR;RT.missing_opportunity=rows.length-knownO;
 }

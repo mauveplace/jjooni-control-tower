@@ -95,7 +95,7 @@ function apply(){
 
 let queued=false;function schedule(){if(queued)return;queued=true;setTimeout(()=>{queued=false;apply()},80)}
 document.addEventListener('jjooni:live-applied',schedule);
-document.addEventListener('jjooni:source-truth-applied',schedule);
-try{new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(_){}
+document.addEventListener('click',e=>{if(e.target.closest?.('.tab,[data-metric-drill-v11],[data-auto-drill]'))schedule()});
+// No whole-document observer: this module emits source-truth-applied itself.
 setTimeout(apply,0);setTimeout(apply,500);setTimeout(apply,1500);setTimeout(apply,2600);
 })();

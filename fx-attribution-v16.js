@@ -8,8 +8,8 @@ const NAME={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-P
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const z=v=>n(v)==null?0:n(v);
-const signedKrw=v=>{const x=Number(v)||0;return(x>=0?'+':'-')+'₩'+Math.round(Math.abs(x)).toLocaleString('ko-KR')};
-const signedUsd=v=>{const x=Number(v)||0;return(x>=0?'+':'-')+'$'+Math.abs(x).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const signedKrw=v=>{if(n(v)==null)return '산정 대기';const x=Number(v)||0;return(x>=0?'+':'-')+'₩'+Math.round(Math.abs(x)).toLocaleString('ko-KR')};
+const signedUsd=v=>{if(n(v)==null)return '산정 대기';const x=Number(v)||0;return(x>=0?'+':'-')+'$'+Math.abs(x).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
 const fmtFx=v=>n(v)==null?'—':Number(v).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=v=>n(v)==null?'—':(Number(v)>=0?'+':'')+Number(v).toFixed(2)+'%';
 const fmtAsOf=v=>{const s=String(v||'').trim();if(!s)return '시각 확인 불가';const ms=Date.parse(s);if(!Number.isFinite(ms))return s.slice(0,16);const p=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date(ms));const g=t=>(p.find(x=>x.type===t)||{}).value||'';return `${g('month')}/${g('day')} ${g('hour')}:${g('minute')}:${g('second')}`};
@@ -41,6 +41,7 @@ function buildRows(){
   }
  }
  rows.sort((a,b)=>Math.abs(b.fx_effect_krw)-Math.abs(a.fx_effect_krw));
+ if(!rows.length)return {f,rows,price_usd:null,price_krw_live:null,price_krw_decomp:null,fx:null,total:null};
  return{f,rows,price_usd:rows.reduce((s,x)=>s+x.price_effect_usd,0),price_krw_live:rows.reduce((s,x)=>s+x.price_effect_krw_live,0),price_krw_decomp:rows.reduce((s,x)=>s+x.price_effect_krw,0),fx:rows.reduce((s,x)=>s+x.fx_effect_krw,0),total:rows.reduce((s,x)=>s+x.total_effect_krw,0)};
 }
 function enrichAccounts(calc){const C=window.__JJOONI_CANONICAL_SSOT||{};for(const id of IDS){const a=(C.accounts||{})[id];if(!a)continue;const xs=calc.rows.filter(x=>x.account===id);a.reference_usd_price_effect_usd=xs.length?xs.reduce((s,x)=>s+x.price_effect_usd,0):null;a.reference_usd_price_effect_krw=xs.length?xs.reduce((s,x)=>s+x.price_effect_krw,0):null;a.reference_usd_price_effect_krw_live=xs.length?xs.reduce((s,x)=>s+x.price_effect_krw_live,0):null;a.reference_usd_fx_effect_krw=xs.length?xs.reduce((s,x)=>s+x.fx_effect_krw,0):null;a.fx_attribution_position_count=xs.length;}window.__JJOONI_FX_ATTRIBUTION_ROWS=calc.rows}
