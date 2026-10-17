@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 test('encrypted shell keeps canonical metrics before the legacy loader',()=>{
   const index=read('index.html');
   const canonical=index.search(/canonical-metrics\.js\?v=33\.(?:[2-9]|[1-9]\d+)/);
-  const legacy=index.indexOf('trade-review-loader.js?v=14.33');
+  const legacy=index.search(/trade-review-loader\.js\?v=14\.\d+/);
   assert.ok(canonical>=0,'canonical-metrics.js missing from decrypted postfix');
   assert.ok(legacy>=0,'trade-review-loader.js missing from decrypted postfix');
   assert.ok(canonical<legacy,'canonical metrics must install the deferred boot hold before legacy loader');
