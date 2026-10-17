@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-17T14:46:57+09:00",
+  "generated_kst": "2026-10-17T16:33:10+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "crypto",
     "calendar",
     "audit"
   ],
@@ -25,7 +26,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T10:38:59+09:00",
+      "generated_kst": "2026-10-17T15:08:18+09:00",
       "as_of": "2026-10-16",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -79,7 +80,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T10:38:59+09:00",
+      "generated_kst": "2026-10-17T15:08:18+09:00",
       "as_of": "2026-10-16",
       "detail": "US3M 2026-10-16 · US2Y 2026-10-16 · US5Y_OFFICIAL 2026-10-16 · US10Y_OFFICIAL 2026-10-16 · US30Y_OFFICIAL 2026-10-16 · US_2S10S 2026-10-16",
       "source": "U.S. Treasury official",
@@ -88,7 +89,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-17T14:46:15+09:00",
+      "generated_kst": "2026-10-17T15:08:13+09:00",
       "as_of": "2026-10-16",
       "detail": "KR3Y 2026-10-16 · KR5Y 2026-10-16 · KR10Y 2026-10-16 · KR20Y 2026-10-16 · KR30Y 2026-10-16 · KR_3S10S 2026-10-16",
       "source": "BOK ECOS",
@@ -105,10 +106,10 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-17T14:46:12+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=50s · ETHUSD age=55s",
+      "detail": "BTCUSD age=5091s · ETHUSD age=5093s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -178,9 +179,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-17T14:46:57+09:00",
+      "generated_kst": "2026-10-17T16:33:10+09:00",
       "as_of": "2026-10-16",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     }
