@@ -6,6 +6,8 @@ on:
     paths:
       - .github/workflows/public-market-daily.yml
       - tools/build_public_market_daily.py
+      - tools/tripod_rules.py
+      - tools/publish_observatory_data.py
   schedule:
     # 07:10 KST Tue-Sat: after each completed US Mon-Fri regular session.
     - cron: '10 22 * * 1-5'
@@ -41,7 +43,7 @@ jobs:
           ok=0
           for attempt in 1 2 3; do
             echo "PUBLIC_MARKET_ATTEMPT=$attempt"
-            if python tools/build_public_market_daily.py; then
+            if python tools/build_public_market_daily.py --canonical market-observatory/data/observatory.json; then
               ok=1
               break
             fi
@@ -83,10 +85,4 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public-market-daily.json
-          if git diff --cached --quiet; then
-            echo PUBLIC_MARKET_NO_CHANGE
-            exit 0
-          fi
-          git commit -m 'data: refresh public market and TRI-POD daily signal'
-          git push
+          python tools/publish_observatory_data.py --message 'data: refresh canonical public market and TRI-POD' public-market-daily.json

@@ -25,6 +25,20 @@ from calendar_actual_contract import KST, build_freshness, merge_observation, re
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = 'market-observatory/data/'
+MARKET_BUNDLE = (DATA + 'observatory.json', DATA + 'daily-market-pulse.json', 'public-market-daily.json')
+
+
+def publication_paths(paths):
+    """Declare the market dependency group once for every publisher.
+
+    Independent crypto/rate collectors can publish observatory.json alone.
+    Publishing either daily consumer always includes its canonical source and
+    sibling consumer. Thus a source merge cannot leave a stale TRI-POD/pulse.
+    """
+    paths = list(dict.fromkeys(paths))
+    if set(paths).intersection(MARKET_BUNDLE[1:]):
+        paths = list(dict.fromkeys([*paths, *MARKET_BUNDLE]))
+    return paths
 
 
 def git(*args, check=True):
@@ -204,16 +218,16 @@ def materialize_market_dependents(paths):
     import build_daily_market_pulse as pulse
     import build_public_market_daily as public
     obs = json.loads((ROOT / (DATA + 'observatory.json')).read_text(encoding='utf-8'))
-    # Bind paths explicitly for isolated publication worktrees and tests.
-    pulse.DATA = ROOT / DATA
-    pulse.OUT = pulse.DATA / 'daily-market-pulse.json'
-    public.OUT = ROOT / 'public-market-daily.json'
-    public.main(observatory=obs)
-    pulse.main(offline=True)
+    # Explicit paths prevent one publication/worktree from mutating another
+    # builder's module globals in a long-lived process.
+    public_out = ROOT / 'public-market-daily.json'
+    pulse_out = ROOT / DATA / 'daily-market-pulse.json'
+    public.main(observatory=obs, out=public_out)
+    pulse.main(offline=True, data_dir=ROOT / DATA, out=pulse_out)
     from build_market_observatory import tripod_history
     from postprocess_market_observatory import build_today_strategy
-    sidecar = json.loads(public.OUT.read_text(encoding='utf-8'))
-    report = json.loads(pulse.OUT.read_text(encoding='utf-8'))
+    sidecar = json.loads(public_out.read_text(encoding='utf-8'))
+    report = json.loads(pulse_out.read_text(encoding='utf-8'))
     obs['tripod_latest'] = sidecar['tripod_signal']
     history, signals = tripod_history(obs['series'])
     obs['tripod_history'] = history[-800:]
@@ -232,11 +246,21 @@ def materialize_health(paths):
                            check=True, capture_output=True, text=True)
 
 
-def publish(paths, message):
-    paths = list(paths)
-    paths.extend(materialize(ROOT, paths))
+def materialize_publication(paths):
+    """One order before commit AND after every rebase: derive, archive, audit."""
     materialize_market_dependents(paths)
+    paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
+    if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
+        from archive_fedwatch import archive_snapshot
+        archive_snapshot(json.loads((ROOT/(DATA+'fed-watch.json')).read_text()), ROOT/DATA)
+        paths = list(dict.fromkeys([*paths, *(str(p.relative_to(ROOT)) for p in
+                     (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file())]))
     materialize_health(paths)
+    return paths
+
+
+def publish(paths, message):
+    paths = materialize_publication(publication_paths(paths))
     for path in paths:
         if not (ROOT / path).is_file():
             raise ValueError(f'Publish path missing: {path}')
@@ -279,16 +303,8 @@ def publish(paths, message):
             result = git('-c', 'core.editor=true', 'rebase', '--continue', check=False)
         for path, payload in payloads.items():
             (ROOT / path).write_text(payload, encoding='utf-8')
-        if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
-            from archive_fedwatch import archive_snapshot
-            snapshot=json.loads((ROOT/(DATA+'fed-watch.json')).read_text(encoding='utf-8'))
-            archive_snapshot(snapshot,ROOT/DATA)
-            paths.extend(str(p.relative_to(ROOT)) for p in (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file() and str(p.relative_to(ROOT)) not in paths)
-            git('add','--',*paths)
-        refreshed = materialize(ROOT, paths)
-        materialize_market_dependents(paths)
-        materialize_health(paths)
-        git('add', '--', *paths, *refreshed)
+        paths = materialize_publication(paths)
+        git('add', '--', *paths)
         if git('diff', '--cached', '--quiet', check=False).returncode:
             git('commit', '-m', 'data(observatory): preserve concurrent official observations')
         if git('push', 'origin', 'HEAD:main', check=False).returncode == 0:

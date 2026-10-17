@@ -39,7 +39,9 @@ function paint(text,failed){
 }
 function nudge(){
  S.pulses++;
- try{document.dispatchEvent(new Event('visibilitychange'))}catch(_){}
+ // Recovery requests only the encrypted feed. A synthetic visibility event
+ // also wakes master sync, quote refresh and every legacy UI observer.
+ window.__JJOONI_LIVE_BRIDGE?.requestRefresh?.('boot-recovery');
  // Existing verified SSOT should open first. FAST refresh is a post-open freshness
  // improvement, not a prerequisite for rendering the dashboard.
  if(S.pulses>8){try{window.__JJOONI_CT_FAST?.kick?.()}catch(_){}}
@@ -59,6 +61,13 @@ function startVerifiedUi(){
  s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.',true);setTimeout(startVerifiedUi,1500)};
  (document.head||document.documentElement).appendChild(s);
 }
+
+// This coordinator is the only owner allowed to (re)start the UI loader.
+S.retry=()=>{
+ if(!verifiedReady()||window.__JJOONI_UI_BOOT_V14?.state==='ACTIVE')return false;
+ if(window.__JJOONI_UI_BOOT_V14?.state==='BLOCKED')S.state='WAITING_FOR_LIVE';
+ startVerifiedUi();return true;
+};
 
 // Hold the legacy eager loader. canonical-metrics runs before the legacy
 // trade-review-loader tag, so the old loader sees ACTIVE and returns. We only

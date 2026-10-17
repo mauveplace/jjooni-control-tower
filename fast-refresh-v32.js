@@ -12,7 +12,6 @@ const BRIDGE_RECOVERY_WINDOW_MS=28000;
 const BRIDGE_RECOVERY_PULSE_MS=900;
 let lastKick=0,busy=false,fastUrl='';
 let recoveryTimer=null,recoveryStarted=0,recoveryPulses=0;
-let verifiedBootRecoveryInFlight=false;
 
 function badge(text,state,title){
  const e=document.getElementById('ctEncryptedLiveBadge');if(!e)return;
@@ -91,40 +90,10 @@ function reapplyStoredMasterTrades(reason){
 }
 
 function recoverVerifiedBoot(){
+ // UI loader retries belong to the boot coordinator, never a second loader.
  const boot=window.__JJOONI_UI_BOOT_V14;
- if(!boot||boot.state!=='BLOCKED'||String(boot.failed||'')!=='SSOT_READY_TIMEOUT')return false;
- if(verifiedBootRecoveryInFlight)return true;
- verifiedBootRecoveryInFlight=true;
- window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'RELOADING_VERIFIED_BOOT',reason:'SSOT_READY_TIMEOUT',at:new Date().toISOString()};
- const shield=document.getElementById('ctUiBootShieldV14');
- if(shield){
-  const title=shield.querySelector('#ctUiBootTitleV14'),text=shield.querySelector('#ctUiBootTextV14'),btn=shield.querySelector('#ctUiBootReloadV14');
-  if(title)title.textContent='검증된 화면 재구성 중';
-  if(text)text.textContent='SSOT 연결이 복구되어 필수 UI 모듈을 다시 검증합니다.';
-  if(btn)btn.style.display='none';
- }
- try{
-  window.__JJOONI_UI_BOOT_V14=null;
-  const s=document.createElement('script');
-  s.dataset.ctVerifiedBootRecovery='1';
-  s.src='trade-review-loader.js?v=14.20-recovery&_='+Date.now();
-  s.async=false;
-  s.onload=()=>{
-   verifiedBootRecoveryInFlight=false;
-   window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RELOADED',at:new Date().toISOString()};
-  };
-  s.onerror=()=>{
-   verifiedBootRecoveryInFlight=false;
-   window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RELOAD_FAILED',at:new Date().toISOString()};
-   badge('UI BOOT 재시도 실패','warn','trade-review-loader.js 재로딩 실패');
-  };
-  (document.head||document.documentElement).appendChild(s);
-  return true;
- }catch(e){
-  verifiedBootRecoveryInFlight=false;
-  window.__JJOONI_CT_FAST_BOOT_RECOVERY={state:'VERIFIED_BOOT_RECOVERY_ERROR',error:String(e&&e.message||e),at:new Date().toISOString()};
-  return false;
- }
+ if(boot?.state!=='BLOCKED'||boot.failed!=='SSOT_READY_TIMEOUT')return false;
+ return window.__JJOONI_BOOT_COORDINATOR_V33?.retry?.()||false;
 }
 
 function releaseLateReady(){
@@ -139,7 +108,7 @@ function nudgeBridge(reason){
  if(document.hidden||liveReadyFacts())return;
  recoveryPulses++;
  window.__JJOONI_CT_FAST_BRIDGE_RECOVERY={state:'NUDGE',reason:String(reason||''),pulses:recoveryPulses,at:new Date().toISOString()};
- document.dispatchEvent(new Event('visibilitychange'));
+ window.__JJOONI_LIVE_BRIDGE?.requestRefresh?.('master-recovery');
 }
 
 function startBridgeRecovery(reason){

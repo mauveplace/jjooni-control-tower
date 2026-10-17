@@ -6,6 +6,8 @@ on:
     paths:
       - tools/build_daily_market_pulse.py
       - tools/build_public_market_daily.py
+      - tools/tripod_rules.py
+      - tools/publish_observatory_data.py
       # The canonical Observatory data commit is itself a downstream trigger.
       # This closes the gap where a rerun publishes a new completed session but
       # workflow_run chaining is skipped or delayed.
