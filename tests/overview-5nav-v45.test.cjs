@@ -9,10 +9,10 @@ test('live bridge remains valid JavaScript',()=>{
   execFileSync(process.execPath,['--check','live-bridge.js'],{stdio:'pipe'});
 });
 
-test('overview current total asset is pinned to five-account canonical NAV',()=>{
+test('overview current total asset is pinned to four-account canonical NAV',()=>{
   assert.match(src,/function updateOverviewTotalNav\(/);
   assert.match(src,/CANON\.total\.nav/);
-  assert.match(src,/현재 총자산 \(5계좌 NAV\)/);
+  assert.match(src,/현재 총자산 \(4계좌 NAV\)/);
   assert.match(src,/account_count:REGISTRY\.length/);
 });
 
@@ -33,17 +33,17 @@ test('account detail cards remain separate from overview total patch',()=>{
 });
 
 
-test('five-account guard directly patches mobile and performance aggregate surfaces',()=>{
+test('four-account guard directly patches mobile and performance aggregate surfaces',()=>{
   assert.match(src,/function patchAllFiveAccountTotalSurfaces\(/);
   assert.match(src,/#ctMobileNetSummaryV4 \.ctNetValue/);
   assert.match(src,/\.ctP8Total/);
   assert.match(src,/\.ctA8Total/);
-  assert.match(src,/총자산\\s\*\[·•\]\\s\*5계좌/);
-  assert.match(src,/전체\\s\*5계좌\\s\*NAV/);
+  assert.ok(src.includes('총자산\\s*[·•]\\s*[45]계좌'));
+  assert.ok(src.includes('전체\\s*[45]계좌\\s*NAV'));
 });
 
-test('FAST effective source is an accepted five-account authority',()=>{
-  assert.match(src,/FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV/);
+test('FAST effective source is an accepted four-account authority',()=>{
+  assert.match(src,/FAST_EFFECTIVE_SUM_4_ACCOUNT_NAV/);
   assert.match(src,/total_nav_component_count/);
   assert.match(src,/total_nav_missing_accounts/);
 });

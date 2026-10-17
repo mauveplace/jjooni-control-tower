@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const DEFAULT_IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const DEFAULT_IDS=['TOSS','ISA','PENSION','IRP'];
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const won=v=>n(v)==null?'—':'₩'+Math.round(Math.abs(Number(v))).toLocaleString('ko-KR');
 const signed=v=>n(v)==null?'—':(Number(v)>=0?'+':'-')+won(v);
@@ -10,7 +10,7 @@ const live=()=>window.__JJOONI_LIVE_PAYLOAD||null;
 function ids(){
  const C=canon();
  const xs=C&&Array.isArray(C.registry)?C.registry.map(x=>String((x||{}).id||'').toUpperCase()).filter(Boolean):[];
- return xs.length?xs:DEFAULT_IDS.slice();
+ return [...new Set((xs.length?xs:DEFAULT_IDS).filter(id=>!['TRIPOD','AI','AIBOT','AI_BOT'].includes(id)))];
 }
 
 function validFx(v){const x=n(v);return x!=null&&x>500&&x<3000?x:null}

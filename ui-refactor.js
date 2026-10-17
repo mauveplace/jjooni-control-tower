@@ -77,7 +77,7 @@ const DISPLAY_MAP=[
  ['YAHOO_FALLBACK_NONLIVE','○ 참고'],['ACCOUNTING_MARKET_PNL','◐ 추정'],['MTM · KIS_MARKET_QUOTE','◐ 추정'],['BROKER_LIVE_FULL','● 실측'],['MODELED_LIVE','◐ 추정'],['MODEL_LIVE','◐ 추정'],['NO_DATA','○ 미검증']
 ];
 function normalizeFiveAccountLabels(){
- qsa('h1,h2,h3,h4,div,span,p,small,b,strong').forEach(e=>{if(e.children.length)return;const raw=String(e.textContent||'');if(raw.includes('6계좌'))e.textContent=raw.replaceAll('6계좌','5계좌')});
+ qsa('h1,h2,h3,h4,div,span,p,small,b,strong').forEach(e=>{if(e.children.length)return;const raw=String(e.textContent||'');if(/[56]계좌/.test(raw))e.textContent=raw.replace(/[56]계좌/g,'4계좌')});
 }
 
 function compactLeafCodes(){

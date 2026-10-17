@@ -2,7 +2,7 @@
 'use strict';
 if(window.__JJOONI_METRIC_DRILL_V11)return;
 
-const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',AI:'AI BOT',TRIPOD:'TRI-POD'};
 const ACCOUNT_ROUTES=new Set(['정규장 투자성과','순입출금','현재 NAV','오늘 수익률','전체 영향도','주식 평가액','예수금','📈 보유종목 가격효과','💱 보유종목 환율효과','🧩 당일매매·비용 Bridge','정규장 P&L','정규장 수익률','보유종목','KR','US','Best','Worst']);
 const state={boundAccount:0,boundTab:0,disabled:0,headlineCorrections:0,last:null};

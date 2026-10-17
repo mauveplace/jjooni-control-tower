@@ -11,8 +11,7 @@ const REGISTRY=[
  {id:'TOSS',label:'Toss',type:'HUMAN',broker:'Toss증권'},
  {id:'ISA',label:'ISA',type:'HUMAN',broker:'KB증권'},
  {id:'PENSION',label:'연금저축',type:'HUMAN',broker:'KB증권'},
- {id:'IRP',label:'IRP',type:'HUMAN',broker:'KB증권'},
- {id:'TRIPOD',label:'TRI-POD',type:'TRIPOD',broker:'카카오증권'}
+ {id:'IRP',label:'IRP',type:'HUMAN',broker:'KB증권'}
 ];
 const ORIGINAL={
  latestAccountRows:typeof window.latestAccountRows==='function'?window.latestAccountRows:null,
@@ -27,11 +26,11 @@ const signed=v=>n(v)==null?'—':(z(v)>=0?'+':'-')+won(v);
 const pct=v=>n(v)==null?'—':(z(v)>=0?'+':'')+z(v).toFixed(2)+'%';
 const usd=v=>n(v)==null?'—':'$'+z(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const clone=x=>JSON.parse(JSON.stringify(x));
-const FIVE_ACCOUNT_NAV_SOURCES=new Set(['ACCOUNT_SUM_5','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV']);
+const FIVE_ACCOUNT_NAV_SOURCES=new Set(['ACCOUNT_SUM_4','ACCOUNT_SUM_4_TOSS_OWNS_TRIPOD','FAST_EFFECTIVE_SUM_4_ACCOUNT_NAV']);
 function isFiveAccountNavSource(source,live){
  const s=String(source||'');
  if(!FIVE_ACCOUNT_NAV_SOURCES.has(s))return false;
- if(s==='FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'){
+ if(s==='FAST_EFFECTIVE_SUM_4_ACCOUNT_NAV'||s==='ACCOUNT_SUM_4_TOSS_OWNS_TRIPOD'){
   const count=n(live?.total_nav_component_count);
   const missing=Array.isArray(live?.total_nav_missing_accounts)?live.total_nav_missing_accounts:[];
   if(count!=null&&count!==REGISTRY.length)return false;
@@ -145,6 +144,7 @@ function makeCanonical(live){
   out[id].cash_total_krw=M.cash(out[id]);
   out[id].nav_change=day!=null&&flow!=null?day+flow:null;
  }
+ out.TRIPOD={id:'TRIPOD',type:'STRATEGY_VIEW',parent_account:'TOSS',additive:false,nav:null,positions:[],signal:(A.TRIPOD||{}).signal||live.tripod_signal||{}};
  const t=M.aggregate(out),rows=REGISTRY.map(r=>out[r.id]);
  // Producer canonical owns total NAV. The browser must not silently replace the
  // five-account ACCOUNT_SUM_5 total with a partial client-side recomputation.
@@ -153,8 +153,8 @@ function makeCanonical(live){
  const accountSum=t.nav;
  const producerTotalTrusted=producerTotal!=null&&isFiveAccountNavSource(producerTotalSource,live);
  const authoritativeTotal=producerTotalTrusted?producerTotal:accountSum;
- const totalGap=producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
- return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,total_nav:producerTotal,total_nav_source:producerTotalSource,total:{nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
+ const totalGap=producerTotalTrusted&&producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
+ return {snapshot_id:live.snapshot_id,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,account_ownership:{schema:'TOSS_OWNS_TRIPOD_V1',physical_accounts:REGISTRY.map(r=>r.id),strategy_parents:{TRIPOD:'TOSS'}},total_nav:authoritativeTotal,total_nav_source:producerTotalTrusted?producerTotalSource:'BROWSER_PHYSICAL_ACCOUNT_SUM',total:{nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
@@ -163,7 +163,7 @@ function mergePositions(live){
   D.human.positions=D.human.positions.filter(q=>{const acct=String(q.account||q.account_type||'').toUpperCase(),rt=String(q.record_type||'POSITION').toUpperCase();return acct!==id});
   (x.positions||[]).forEach(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();const m={...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,record_type:String(p.record_type||'POSITION').toUpperCase(),current_price:n(p.current_price),market_value:n(p.market_value),avg_price:n(p.avg_price),price_source:p.price_source||x.source||x.mode||'SOURCE_UNSPECIFIED',data_state:p.data_state||'CURRENT'};D.human.positions.push(m)});
  });
- const tp=a.TRIPOD||{};D.human.tripod_positions=tp.positions||[];D.human.tripod_market={ticker:'TQQQ',current_price:z(tp.current_price),prev_close:z(tp.prev_close),fx:z(tp.fx),previous_fx:n(tp.previous_fx),currency:'USD',quote_timestamp:live.observed_at,current_price_source:'PUBLIC_MARKET_MODEL'};D.human.tripod_signal=tp.signal||live.tripod_signal||{};
+ const tp=a.TRIPOD||{};D.human.tripod_positions=((a.TOSS||{}).positions||[]).filter(p=>['QQQ','QQQM','QLD','TQQQ'].includes(sym(p.ticker||p.symbol))).map(p=>({...p,account:'TOSS',account_type:'TOSS',strategy:'TRIPOD'}));D.human.tripod_market={ticker:'TQQQ',current_price:z(tp.current_price),prev_close:z(tp.prev_close),fx:z(tp.fx),previous_fx:n(tp.previous_fx),currency:'USD',quote_timestamp:live.observed_at,current_price_source:'PUBLIC_MARKET_MODEL'};D.human.tripod_signal=tp.signal||live.tripod_signal||{};
 }
 
 function mergeTrades(live){
@@ -250,7 +250,7 @@ function patchAllFiveAccountTotalSurfaces(){
    if(e.children&&e.children.length)return false;
    if(e.closest&&e.closest('.ctAcct'))return false;
    const t=String(e.textContent||'').trim().replace(/\s+/g,' ');
-   return /^(?:총자산\s*[·•]\s*5계좌|전체\s*5계좌\s*NAV|현재\s*총자산\s*\(5계좌\s*NAV\))$/i.test(t);
+   return /^(?:총자산\s*[·•]\s*[45]계좌|전체\s*[45]계좌\s*NAV|현재\s*총자산\s*\(4계좌\s*NAV\))$/i.test(t);
   });
   labels.forEach(label=>{
    let box=label.parentElement;
@@ -277,7 +277,7 @@ function updateOverviewTotalNav(){
    if(e.children&&e.children.length)return false;
    if(e.closest&&e.closest('.ctAcct'))return false;
    const t=String(e.textContent||'').trim().replace(/\s+/g,' ');
-   return /^(현재\s*총자산(?:\s*\(NAV\))?|현재\s*총자산\s*\(5계좌\s*NAV\)|전체\s*5계좌\s*NAV|총\s*자산(?:\s*\(NAV\))?|총자산(?:\s*\(NAV\))?)$/i.test(t);
+   return /^(현재\s*총자산(?:\s*\(NAV\))?|현재\s*총자산\s*\(4계좌\s*NAV\)|전체\s*[45]계좌\s*NAV|총\s*자산(?:\s*\(NAV\))?|총자산(?:\s*\(NAV\))?)$/i.test(t);
  });
  let patched=0;
  labels.forEach(label=>{
@@ -287,7 +287,7 @@ function updateOverviewTotalNav(){
      const direct=box.querySelector&&box.querySelector('.ctOvValue,.value,.v2Value,[class*="Value"],[class*="value"]');
      if(direct&&direct!==label){
        if(String(direct.textContent||'').trim()!==fmt)direct.textContent=fmt;
-       label.textContent='현재 총자산 (5계좌 NAV)';
+       label.textContent='현재 총자산 (4계좌 NAV)';
        direct.dataset.ctFiveAccountNav='1';
        patched++;break;
      }
@@ -296,7 +296,7 @@ function updateOverviewTotalNav(){
        leaves.sort((a,b)=>(parseFloat(getComputedStyle(b).fontSize)||0)-(parseFloat(getComputedStyle(a).fontSize)||0));
        const v=leaves[0];
        if(String(v.textContent||'').trim()!==fmt)v.textContent=fmt;
-       label.textContent='현재 총자산 (5계좌 NAV)';
+       label.textContent='현재 총자산 (4계좌 NAV)';
        v.dataset.ctFiveAccountNav='1';
        patched++;break;
      }
@@ -306,19 +306,20 @@ function updateOverviewTotalNav(){
  if(strip){
    const parts=REGISTRY.map(r=>r.label+' '+won((CANON.accounts[r.id]||{}).nav));
    strip.dataset.ctFiveAccountNav='1';
-   strip.title='5계좌 합산: '+parts.join(' · ');
+   strip.title='4계좌 합산: '+parts.join(' · ');
  }
  window.__JJOONI_OVERVIEW_5NAV_V45={state:patched?'ACTIVE':'WAITING_TARGET',version:'44.0',nav:total,account_count:REGISTRY.length,accounts:Object.fromEntries(REGISTRY.map(r=>[r.id,n((CANON.accounts[r.id]||{}).nav)])),patched,updated_at:new Date().toISOString()};
 }
 
 function updateCards(){
  removeRetiredAccountUi();
+ document.querySelectorAll('.ctAcct,.ctA8Card,.ctP8Card').forEach(card=>{const name=String(card.querySelector('.ctAcctName,.ctA8Name,.ctP8Name')?.textContent||'').trim();if(/^(?:TRI[- ]?POD|트라이팟)$/i.test(name))card.remove()});
  if(!CANON)return;const byName=name=>[...document.querySelectorAll('.ctAcct')].find(c=>String((c.querySelector('.ctAcctName')||{}).textContent||'').toLowerCase().includes(name.toLowerCase())),line=(card,id,html)=>{if(!card)return;let e=card.querySelector('#'+id);if(!e){e=document.createElement('div');e.id=id;e.style.cssText='grid-column:1/-1;font:800 9px/1.4 system-ui;margin-top:4px;padding-top:4px;border-top:1px dashed #e7ebf0;text-align:right;white-space:normal';card.appendChild(e)}if(e.innerHTML!==html)e.innerHTML=html};
  REGISTRY.forEach(r=>{const c=CANON.accounts[r.id]||{},card=byName(r.label==='TRI-POD'?'tri-pod':r.label.toLowerCase());if(!card)return;const nav=card.querySelector('.ctAcctNav'),navText=n(c.nav)!=null?won(c.nav):null;if(nav&&navText!=null&&nav.textContent!==navText)nav.textContent=navText;const day=card.querySelector('.ctAcctTodayValue'),dayText=n(c.today_pnl)==null?'당일손익 —':signed(c.today_pnl)+' '+pct(c.today_return);if(day&&day.textContent!==dayText)day.textContent=dayText;let extra='';if(r.id==='TOSS')extra=`예수금 KRW ${won(c.cash_krw)} · USD ${usd(c.cash_usd)} · <b style="color:#b45309">REF</b> · 오늘손익 ${n(c.today_pnl)==null?'—':signed(c.today_pnl)}`;else if(['ISA','PENSION','IRP'].includes(r.id))extra=`예수금 ${won(c.cash_krw)} · <b style="color:#175cd3">MODEL LIVE</b> · 오늘손익 ${n(c.today_pnl)==null?'—':signed(c.today_pnl)} · 순입출금 ${n(c.net_flow)==null?'—':signed(c.net_flow)}`;else if(r.id==='TRIPOD')extra=`TQQQ ${z(((LAST_LIVE.accounts||{}).TRIPOD||{}).qty).toLocaleString()}주 · ${usd(c.current_price)} · ${pct(c.today_return)} · ${(c.signal||{}).regime||'—'} / ${(c.signal||{}).target||'—'}`;if(extra)line(card,'ctCanonical'+r.id,extra)});
- let strip=document.getElementById('ctTodayNetStrip');if(!strip){const anchor=document.getElementById('overviewAccounts');if(anchor){strip=document.createElement('div');strip.id='ctTodayNetStrip';strip.style.cssText='margin:6px 0 10px;padding:9px 12px;border:1px solid #e5eaf0;border-radius:12px;background:#fff;font:800 10px/1.45 system-ui;color:#344054';anchor.parentNode.insertBefore(strip,anchor)}}if(strip){const html=`5계좌 SSOT · NAV <b>${won(CANON.total.nav)}</b> · 오늘 투자손익 <b>${signed(CANON.total.today_pnl)}</b> · 순입출금 <b>${CANON.total.flow_complete?signed(CANON.total.net_flow):'PARTIAL'}</b> · 오늘 순증 <b>${CANON.total.flow_complete?signed(CANON.total.today_change):'검증중'}</b>`;if(strip.innerHTML!==html)strip.innerHTML=html;}
+ let strip=document.getElementById('ctTodayNetStrip');if(!strip){const anchor=document.getElementById('overviewAccounts');if(anchor){strip=document.createElement('div');strip.id='ctTodayNetStrip';strip.style.cssText='margin:6px 0 10px;padding:9px 12px;border:1px solid #e5eaf0;border-radius:12px;background:#fff;font:800 10px/1.45 system-ui;color:#344054';anchor.parentNode.insertBefore(strip,anchor)}}if(strip){const html=`4계좌 SSOT · NAV <b>${won(CANON.total.nav)}</b> · 오늘 투자손익 <b>${signed(CANON.total.today_pnl)}</b> · 순입출금 <b>${CANON.total.flow_complete?signed(CANON.total.net_flow):'PARTIAL'}</b> · 오늘 순증 <b>${CANON.total.flow_complete?signed(CANON.total.today_change):'검증중'}</b>`;if(strip.innerHTML!==html)strip.innerHTML=html;}
 }
 
-function updateHero(){if(!CANON)return;const h=document.querySelector('.ctOvPrimary');if(!h)return;const label=h.querySelector('.ctOvLabel'),big=document.getElementById('overviewNavChange'),ret=document.getElementById('overviewDailyReturn'),labelText=`5계좌 오늘 투자손익 (${CANON.total.known_today_count}/${CANON.total.account_count})`,bigText=signed(CANON.total.today_pnl),retText=CANON.total.today_complete?'FULL':'PARTIAL';if(label&&label.textContent!==labelText)label.textContent=labelText;if(big&&big.textContent!==bigText)big.textContent=bigText;if(ret&&ret.textContent!==retText)ret.textContent=retText;let w=document.getElementById('ctHeroScopeWarning');if(!w){w=document.createElement('div');w.id='ctHeroScopeWarning';w.style.cssText='margin-top:5px;font:800 9px/1.35 system-ui;color:#ffb4bf';h.appendChild(w)}const sources=REGISTRY.map(r=>r.id+':'+((CANON.accounts[r.id]||{}).quality||'—')).join(' · '),wt=(CANON.total.today_complete?'당일 P&L 5계좌 연결':'당일 P&L 미연결 '+CANON.total.missing_today.join(','))+' · '+sources;if(w.textContent!==wt)w.textContent=wt;}
+function updateHero(){if(!CANON)return;const h=document.querySelector('.ctOvPrimary');if(!h)return;const label=h.querySelector('.ctOvLabel'),big=document.getElementById('overviewNavChange'),ret=document.getElementById('overviewDailyReturn'),labelText=`4계좌 오늘 투자손익 (${CANON.total.known_today_count}/${CANON.total.account_count})`,bigText=signed(CANON.total.today_pnl),retText=CANON.total.today_complete?'FULL':'PARTIAL';if(label&&label.textContent!==labelText)label.textContent=labelText;if(big&&big.textContent!==bigText)big.textContent=bigText;if(ret&&ret.textContent!==retText)ret.textContent=retText;let w=document.getElementById('ctHeroScopeWarning');if(!w){w=document.createElement('div');w.id='ctHeroScopeWarning';w.style.cssText='margin-top:5px;font:800 9px/1.35 system-ui;color:#ffb4bf';h.appendChild(w)}const sources=REGISTRY.map(r=>r.id+':'+((CANON.accounts[r.id]||{}).quality||'—')).join(' · '),wt=(CANON.total.today_complete?'당일 P&L 4계좌 연결':'당일 P&L 미연결 '+CANON.total.missing_today.join(','))+' · '+sources;if(w.textContent!==wt)w.textContent=wt;}
 function fixLegacyBadges(){const l=document.getElementById('ctLiveBadge');if(l)l.style.display='none';document.querySelectorAll('.live').forEach(e=>{if(e.id!=='ctEncryptedLiveBadge')e.style.display='none'})}
 
 function removeRetiredAccountUi(){

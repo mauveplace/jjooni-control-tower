@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 
-const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-POD'};
 const WINDOW=30;
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};

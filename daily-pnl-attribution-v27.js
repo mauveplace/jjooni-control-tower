@@ -3,7 +3,7 @@
 if(window.__JJOONI_DAILY_PNL_ATTR_V27?.booted)return;
 const S={booted:true,state:'BOOTING',version:'27.2',account:null,known:0,total:0,bridge:null,return_conflicts:0,updated_at:null};
 window.__JJOONI_DAILY_PNL_ATTR_V27=S;
-const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').replace(/\s+/g,' ').trim();

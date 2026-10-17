@@ -27,7 +27,7 @@ function cleanTabs(){
 function fixFiveAccountLabels(){
  let n=0;
  qa('h1,h2,h3,h4,div,span,p,small,b,strong').forEach(e=>{
-  if(e.children.length)return;const raw=String(e.textContent||'');if(!raw.includes('6계좌'))return;const next=raw.replaceAll('6계좌','5계좌');if(next!==raw){e.textContent=next;n++}
+  if(e.children.length)return;const raw=String(e.textContent||'');if(!/[56]계좌/.test(raw))return;const next=raw.replace(/[56]계좌/g,'4계좌');if(next!==raw){e.textContent=next;n++}
  });
  STATE.labels_fixed=n;
 }

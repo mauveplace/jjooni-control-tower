@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 const API='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';
-const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const S={version:'1.5',automatic_collection:false,busy:false,charts:new Map(),history:[],selected:'',date:'',message:'',accountDate:'',accountBusy:false,hydratedDate:null,hydrating:false,cacheFailures:new Set()};
 const num=v=>v==null||v===''||typeof v==='boolean'?null:Number.isFinite(Number(v))?Number(v):null;
 function symbol(v){return String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'')}

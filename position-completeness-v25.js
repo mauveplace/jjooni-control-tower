@@ -4,7 +4,7 @@ if(window.__JJOONI_POSITION_COMPLETENESS_V25?.booted)return;
 
 const S={booted:true,state:'BOOTING',version:'25.1.2',accounts:{},position_count:0,missing_value:0,missing_cum_pnl:0,missing_cum_return:0,missing_day_pnl:0,missing_day_return:0,not_applicable_day:0,updated_at:null};
 window.__JJOONI_POSITION_COMPLETENESS_V25=S;
-const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
 const sym=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');

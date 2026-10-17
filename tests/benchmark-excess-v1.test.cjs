@@ -26,7 +26,7 @@ test('missing benchmark input fails closed',()=>{
 });
 
 
-test('six-account portfolio return derives from account today-return contracts when previous_nav is absent',()=>{
+test('four-physical-account portfolio return derives from account today-return contracts when previous_nav is absent',()=>{
  const accounts={
   TOSS:{nav:74197059.9611795,today_pnl:756983.1293,today_return:1.16},
   ISA:{nav:61822307.6168,today_pnl:592925,today_return:0.968366778595142},
@@ -37,7 +37,7 @@ test('six-account portfolio return derives from account today-return contracts w
  };
  const r=computePortfolioReturnFromAccounts(accounts);
  assert.ok(r);
- assert.equal(r.used,6);
- assert.equal(Number(r.pnl_sum.toFixed(2)),2839193.52);
- assert.equal(Number(r.return_pct.toFixed(3)),1.064);
+ assert.equal(r.used,4);
+ assert.equal(Number(r.pnl_sum.toFixed(2)),2816128.13);
+ assert.equal(Number(r.return_pct.toFixed(3)),1.066);
 });
