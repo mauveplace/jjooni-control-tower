@@ -66,7 +66,8 @@ function cardFor(id){
 function leaves(root){return qa('div,span,b,strong,small',root).filter(e=>e.children.length===0)}
 function metricParts(card){
  if(!card)return {};
- const stats=q('.ctAcctStats',card)||card;
+ // Historical returns own only the historical slot, never today's return.
+ const stats=q('.ctSparkHead',card);if(!stats)return {};
  const xs=leaves(stats);
  let label=xs.find(e=>/30\s*거래일.*Flow[- ]?adjusted.*누적수익률/i.test(norm(e.textContent)))||
            xs.find(e=>/30D.*Flow[- ]?adjust/i.test(norm(e.textContent)))||
