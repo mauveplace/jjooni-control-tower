@@ -1,5 +1,52 @@
 # Control Tower 데이터 흐름 개편 · 2026-10-17
 
+## 운영 반영 결과 · 2026-10-17 20:25 KST
+
+초기 소스 조사 이후 실제 Cloud Run 이미지와 private canonical/PB를 추가로
+확인하고 핵심 데이터 경로를 개편했다. 아래 초기 점검 기록은 개편 전 상태를
+설명한다. 현재 기준은 다음과 같다.
+
+| 경로 | 현재 상태 | 확인 근거 |
+| --- | --- | --- |
+| 계좌 소유권 | TOSS·ISA·PENSION·IRP 4실계좌, TRI-POD는 TOSS 소속 비가산 전략 | canonical/PB 실데이터의 snapshot·합계 일치 |
+| 공통 계산 | canonical 최종 단계·PB·브라우저 projection·FAST가 `ct_account_ownership.py` 공유 | 멱등성·원천 계좌 보존·unknown/zero·게시 경계 회귀검증 |
+| 정기 producer | 소유권 필수 단계가 게시 전에 실행; 실패하면 게시 차단 | 배포 run `39027721314` 성공, 생성 시각 20:13:32 KST |
+| FAST 실행 소스 | 실제 배포 소스를 Git에 명시하고 Docker가 파일을 직접 복사 | run `39028476822` 성공; revision `jjooni-ct-fast-00009-zqk` 트래픽 100% |
+| FAST 기능·이력 | 국내/미국 보유종목 차트·전일종가 정상, 기존 추적 기준·원가 기준 유지 | 운영 API 검증 통과, ledger AVAILABLE, 주문 NONE |
+| 구형 경로 | FAST 문자열 패처 20개 보관 전환; 폐기 AUTOBOT source GET 경로 404 | 실제 배포 후 확인 |
+| 배포 책임 | producer와 FAST 각각 단일 배포 경로 및 동시 실행 제어 | 구형 5계좌 cutover 비활성화, 예상 이미지/revision 변경 시 덮어쓰기 차단 |
+
+### 실제 발견한 불일치
+
+추가 런타임 조사에서 정기 canonical이 별도 TRI-POD NAV와
+`ACCOUNT_SUM_5`를 사용하고, FAST/화면은 이미 4실계좌로 처리하는 차이가
+확인됐다. 원문·PB·화면 경계에 같은 소유권 함수를 적용해 바로잡았다.
+제거된 중복 모델 금액을 입출금이나 투자 손익으로 기록하지 않으며,
+실계좌 수량·원가·현금·기존 이력·원천 시각을 보존한다.
+결측치를 0으로 바꾸거나 MODELED 품질을 MEASURED로 올리지 않는다.
+
+구형 cutover가 공통 모듈 변경에도 실행되는 배포 충돌도 발견했다.
+해당 작업을 보관 전환하고 변경된 실운영 이미지를 다시 확인한 뒤,
+그 이미지를 기준으로 새 producer 배포와 원문/PB 검증을 완료했다.
+
+### 검증 범위와 남은 이관
+
+공개 쪽 Node 185개·Python 174개 및 브라우저 E2E 검사를 통과했다.
+서버 쪽은 소유권/게시 통합 12개, pipeline 7개, FAST 차트·성과·라우팅
+36개, 운영 보호 4개 검사를 통과했다. 이는 각 변경에 대응하는 검증이며
+전체 구형 앱의 모든 동작을 증명하는 전수 시험은 아니다.
+
+남은 큰 구조 이관은 내부 builder 버전 체인, 브라우저 renderer/DOM 보정,
+정기 producer와 FAST의 서로 다른 게시 시각을 다루는 불변 snapshot/reader
+계약이다. FAST의 provider 의존성도 검증한 기존 이미지 digest에 고정되어
+있어, 모든 서버 의존성을 새로 구축한 상태는 아니다.
+
+현재 private 설계 문서는 4실계좌·read-only 구조로 정정했다.
+자동주문·신규 스케줄·상주 인스턴스를 추가하지 않았다.
+
+## 초기 점검 기록 · 개편 전 기준
+
+
 ## 점검 범위와 확인 수준
 
 - 화면/시장 저장소 기준: `mauveplace/jjooni-control-tower`의 `bae0b90fa1fe1e2ad3315ae918137cbeee3e57b1`.
@@ -51,7 +98,7 @@ Master 직접 조회 결과는 거래 보완 경로이며 canonical 계좌 원�
 market bundle에 강제로 편입하지 않는다. 지수·VIX 계산 실패가 해당 개별 수집의
 게시까지 막지 않도록 분리 경계를 유지한다.
 
-## 서버 쪽에서 남은 주요 구조 문제
+## 초기 조사에서 확인한 서버 구조 문제
 
 1. **계좌 소유권 계약이 계층마다 다르다.** 정기 canonical 경로의
    `ct_active_universe.py`와 `ct_data_contract_five_account.py`는 아직
