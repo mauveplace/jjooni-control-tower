@@ -3,7 +3,7 @@
 if(window.__JJOONI_HUMAN_UI_V6)return;
 window.__JJOONI_HUMAN_UI_V6={state:'BOOTING',version:'6.3'};
 
-const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const LABEL={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-POD'};
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -120,7 +120,7 @@ function updateTrust(){
  let detail=qs('#ctTrustDetailV6',h);if(!detail){detail=document.createElement('div');detail.id='ctTrustDetailV6';detail.hidden=true;h.appendChild(detail)}
  const body=rows.map(r=>`<div class="ctTrustRowV6"><b>${r.label}</b><span class="ctTrustSourceV6">${trustLabel(r.kind)}</span><span>${r.pnl==null?'산정 대기':signed(r.pnl)}</span></div>`).join('');
  const known=rows.filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
- const dh=`<div class="ctTrustDetailTitleV6">오늘 투자손익 산정 근거</div><div class="ctTrustDetailSubV6">증권사 확인은 증권사가 전달한 값, 계산값은 현재가·전일종가·수량을 이용해 산출한 값입니다.</div>${body}<div class="ctTrustFootV6">증권사 확인 합계 ${signed(sums.measured)} · 계산값 합계 ${signed(sums.modeled)}${counts.reference?' · 참고값 합계 '+signed(sums.reference):''}<br>5계좌 합계 ${signed(known)}</div>`;
+ const dh=`<div class="ctTrustDetailTitleV6">오늘 투자손익 산정 근거</div><div class="ctTrustDetailSubV6">증권사 확인은 증권사가 전달한 값, 계산값은 현재가·전일종가·수량을 이용해 산출한 값입니다.</div>${body}<div class="ctTrustFootV6">증권사 확인 합계 ${signed(sums.measured)} · 계산값 합계 ${signed(sums.modeled)}${counts.reference?' · 참고값 합계 '+signed(sums.reference):''}<br>4계좌 합계 ${signed(known)}</div>`;
  if(detail.innerHTML!==dh)detail.innerHTML=dh;
  if(!strip.dataset.boundV6){strip.dataset.boundV6='1';strip.addEventListener('click',e=>{const b=e.target.closest('button[data-trust-v6]');if(!b)return;detail.hidden=!detail.hidden})}
 }

@@ -184,7 +184,7 @@ function currentPriceMap(trades){
  const set=(a,s,v)=>{const x=n(v);if(x!==null&&x>0&&s)m.set(String(a||'')+'|'+sym(s),x)};
  trades.forEach(t=>set(acct(t),ticker(t),t.current_price??t.last_price));
  try{Object.entries(window.__JJOONI_CANONICAL_SSOT?.accounts||{}).forEach(([a,o])=>(o.positions||[]).forEach(p=>set(a,p.ticker||p.symbol,p.current_price||p.price||p.last_price)))}catch(_){}
- try{const w=D?.human?.watchlist||{};[...(w.kr||[]),...(w.us||[])].forEach(x=>{const s=sym(x.ticker||x.symbol),v=x.current_price||x.price;for(const a of ['TOSS','ISA','PENSION','IRP','TRIPOD'])set(a,s,v)})}catch(_){}
+ try{const w=D?.human?.watchlist||{};[...(w.kr||[]),...(w.us||[])].forEach(x=>{const s=sym(x.ticker||x.symbol),v=x.current_price||x.price;for(const a of ['TOSS','ISA','PENSION','IRP'])set(a,s,v)})}catch(_){}
  return m;
 }
 

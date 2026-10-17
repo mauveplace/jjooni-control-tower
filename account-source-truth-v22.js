@@ -43,14 +43,14 @@ function modalAccountId(){
  const t=norm(q('h1,h2,h3,.modalTitle,.title',m)?.textContent).toUpperCase();
  if(t.includes('TRI-POD')||t.includes('TRIPOD'))return'TRIPOD';if(t.includes('연금'))return'PENSION';if(/\bISA\b/.test(t))return'ISA';if(/\bIRP\b/.test(t))return'IRP';if(t.includes('TOSS'))return'TOSS';
  const C=window.__JJOONI_CANONICAL_SSOT||{},txt=norm(m.textContent);
- for(const id of ['TOSS','ISA','PENSION','IRP','TRIPOD']){const v=n((C.accounts||{})[id]?.nav);if(v!=null&&txt.includes(won(v)))return id}
+ for(const id of ['TOSS','ISA','PENSION','IRP']){const v=n((C.accounts||{})[id]?.nav);if(v!=null&&txt.includes(won(v)))return id}
  return null;
 }
 function valueNode(el){return q('.value,.v2Value,[class*="Value"],[class*="value"]',el)}
 function routeMain(raw,panel){
  const t=norm(raw);
  if(panel.includes('quality')||/Source|Observed/i.test(t))return['disable','TECH_METADATA'];
- if(t.startsWith('전체 5계좌 NAV'))return['total-nav'];if(t.startsWith('총 누적손익'))return['total-pnl'];if(t.startsWith('총 수익률'))return['total-return'];
+ if(t.startsWith('전체 4계좌 NAV'))return['total-nav'];if(t.startsWith('총 누적손익'))return['total-pnl'];if(t.startsWith('총 수익률'))return['total-return'];
  if(t.startsWith('Human MDD'))return['disable','HISTORY_REQUIRED'];if(t.startsWith('현재 보유 TQQQ')||t.startsWith('평균단가')||t.startsWith('현재가')||t.startsWith('평가손익')||t.startsWith('수익률'))return['tp'];
  if(t.startsWith('송팀장 목표'))return['disable','STRATEGY_REFERENCE'];if(t.startsWith('Human 정규장 P&L'))return['human-day'];if(t.startsWith('장외변동'))return['disable','NO_COMPONENT'];if(t.startsWith('현재 Human NAV'))return['human-nav'];if(t.startsWith('정규장 수익률'))return['human-dayr'];if(t.startsWith('누적수익률'))return['human-ret'];
  if(t.startsWith('현재 Drawdown')||t.startsWith('최대 MDD'))return['disable','HISTORY_REQUIRED'];if(t.startsWith('보유종목 상승 기여')||t.startsWith('보유종목 하락 기여'))return['contrib'];if(/^Human\s/.test(t)&&/%/.test(t))return['human-ret'];

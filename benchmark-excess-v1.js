@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 
-const IDS=['TOSS','ISA','PENSION','IRP','AI','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const US_HINT=/(미국|NASDAQ|나스닥|S&P|필라델피아|GLOBAL|글로벌|SOXX|QQQ|TQQQ|QLD|UPRO|VOO|SPY|NVDA|AMAT|VRT|ANET|IONQ)/i;
 
 const n=v=>{

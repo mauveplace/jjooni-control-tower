@@ -48,13 +48,13 @@ function trustKind(raw){
  return 'reference';
 }
 
-const FIVE_NAV_SOURCES_V44=new Set(['ACCOUNT_SUM_5','FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV']);
+const FIVE_NAV_SOURCES_V44=new Set(['ACCOUNT_SUM_4','ACCOUNT_SUM_4_TOSS_OWNS_TRIPOD','FAST_EFFECTIVE_SUM_4_ACCOUNT_NAV']);
 function trustedFiveNavV44(L){
  const source=String(L?.total_nav_source||''),value=n(L?.total_nav??L?.total_nav_krw);
  if(value==null||!FIVE_NAV_SOURCES_V44.has(source))return null;
- if(source==='FAST_EFFECTIVE_SUM_5_ACCOUNT_NAV'){
+ if(source==='FAST_EFFECTIVE_SUM_4_ACCOUNT_NAV'||source==='ACCOUNT_SUM_4_TOSS_OWNS_TRIPOD'){
   const count=n(L?.total_nav_component_count),missing=Array.isArray(L?.total_nav_missing_accounts)?L.total_nav_missing_accounts:[];
-  if(count!=null&&count!==5)return null;
+  if(count!=null&&count!==4)return null;
   if(missing.length)return null;
  }
  return value;
@@ -79,7 +79,7 @@ function updateTrustStrip(){
  const C=window.__JJOONI_CANONICAL_SSOT,h=qs('.ctOvPrimary');if(!C||!h)return;
  let strip=qs('#ctHeroTrustStripV4',h);
  if(!strip){strip=document.createElement('div');strip.id='ctHeroTrustStripV4';h.appendChild(strip)}
- const ids=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+ const ids=['TOSS','ISA','PENSION','IRP'];
  const rows=ids.map(id=>{const c=(C.accounts||{})[id]||{};return {id,raw:String(c.quality||c.source||'NO_DATA')}});
  const counts={measured:0,modeled:0,reference:0};rows.forEach(x=>counts[trustKind(x.raw)]++);
  const bits=[];

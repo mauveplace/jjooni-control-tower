@@ -72,7 +72,7 @@ function accountStockValue(id){const a=(C().accounts||{})[id]||{},ps=window.Jjoo
 function patchOpenModal(){
  const m=document.getElementById('accountDrillModal');if(!m)return;
  const title=String(m.querySelector('h1,h2,h3,.modalTitle,.title')?.textContent||'').toUpperCase();let id=null;
- for(const x of ['TOSS','ISA','PENSION','IRP','TRIPOD']){if(title.includes(x)){id=x;break}}
+ for(const x of ['TOSS','ISA','PENSION','IRP']){if(title.includes(x)){id=x;break}}
  if(!id)return;const v=accountStockValue(id);
  m.querySelectorAll('.v2Kpi').forEach(k=>{const lab=String(k.querySelector('.label')?.textContent||'').trim();if(lab!=='주식 평가액')return;const el=k.querySelector('.value');if(!el)return;el.textContent=v==null?'환율/평가 근거 미확인':'₩'+Math.round(v).toLocaleString('ko-KR');if(v==null)el.title='검증된 KRW 평가값 또는 환율 원천이 없어 숫자를 표시하지 않습니다.';});
 }

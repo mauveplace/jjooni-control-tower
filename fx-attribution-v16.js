@@ -3,7 +3,7 @@
 if(window.__JJOONI_FX_ATTR_V16)return;
 const STATE={state:'BOOTING',version:'16.1-usd-primary',rows:0,fx_state:'NO_DATA',updated_at:null};
 window.__JJOONI_FX_ATTR_V16=STATE;
-const IDS=['TOSS','ISA','PENSION','IRP','TRIPOD'];
+const IDS=['TOSS','ISA','PENSION','IRP'];
 const NAME={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-POD'};
 const q=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
