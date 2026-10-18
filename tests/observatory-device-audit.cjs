@@ -39,6 +39,17 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
     console.log(`AUDIT_IMAGE ${width}-${tab} ${data.toString('base64')}`);
    }
   }
+  if([390,820].includes(width)&&await page.locator('body.obsDeviceUI').count()){
+   if(await page.locator('#obsCalendarDelay').isVisible()){
+    await page.locator('#obsCalendarDelay').click();
+    await page.waitForFunction(()=>{const r=document.querySelector('#events [data-actual-status="OVERDUE"]')?.getBoundingClientRect();return r&&r.top>=0&&r.top<innerHeight});
+   }
+   await page.locator('.obsFreshDetails>summary').click();
+   await page.waitForFunction(()=>document.querySelectorAll('#obsFreshGrid .obsFreshTile').length===19);
+   assert.equal(await page.locator('#obsFreshGrid .obsFreshTile:visible').count(),19);
+   await page.locator('#obsWatchToggle').click();assert(await page.locator('#obsWatchAnalysis').isVisible());
+   await page.locator('.obsFreshDetails>summary').click();assert.equal(await page.locator('#obsWatchAnalysis').isVisible(),false);
+  }
   await page.close();
  }
  await browser.close();
