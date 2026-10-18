@@ -8,16 +8,20 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
  const browser=await chromium.launch(); fs.mkdirSync('/tmp/obs-audit',{recursive:true});
  for(const width of widths){
   const page=await browser.newPage({viewport:{width,height:960},hasTouch:true});
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('OBS_PAGE_ERROR',e.message)});
+  page.on('requestfailed',r=>console.error('OBS_REQUEST_FAILED',r.url(),r.failure()?.errorText));
   const expected=[...fs.readFileSync('market-observatory/index.html','utf8').matchAll(/src="(\.\/[^"?]+\.js\?v=[^"]+)"/g)].map(m=>m[1]);
   for(let attempt=0;attempt<7;attempt++){
-   await page.goto(base,{waitUntil:'networkidle',timeout:90000});
+   const target=new URL(base);target.searchParams.set('ui_verify',Date.now());
+   await page.goto(target.href,{waitUntil:'networkidle',timeout:90000});
    const scripts=await page.locator('script[src]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));
    if(expected.every(src=>scripts.includes(src)))break;
    assert(attempt<6,'Pages has not published the current UI asset versions');
    console.log('OBS_UI_PUBLICATION_WAIT attempt='+attempt);await page.waitForTimeout(10000);
   }
   await page.waitForSelector('body.obsDeviceUI');
+  await page.waitForSelector('#latestMarketBoard .latestTile');
+  await page.waitForSelector('#tabs [data-tab="indices"]');
   await page.waitForSelector('[data-fresh-key="audit"]',{state:'attached'});
   if(smoke){
    for(const range of ['1Y','10Y','30Y']){

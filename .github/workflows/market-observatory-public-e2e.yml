@@ -33,6 +33,24 @@ jobs:
           node-version: '22'
       - name: Install browser dependencies
         run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
+      - name: Inspect published summary delivery
+        if: github.event_name == 'pull_request'
+        run: |
+          node <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch();const page=await browser.newPage();
+            page.on('pageerror',e=>console.log('PUBLIC_PAGE_ERROR',e.message));
+            page.on('requestfailed',r=>console.log('PUBLIC_REQUEST_FAILED',r.url(),r.failure()?.errorText));
+            page.on('response',r=>{if(r.url().includes('latest-board'))console.log('PUBLIC_BOARD_RESPONSE',r.status(),r.url())});
+            await page.goto('https://mauveplace.github.io/jjooni-control-tower/market-observatory/?delivery='+Date.now(),{waitUntil:'networkidle'});
+            await page.waitForTimeout(1800);
+            console.log('PUBLIC_BOARD_DOM',await page.evaluate(()=>({board:!!document.querySelector('#latestMarketBoard'),indices:!!document.querySelector('[data-tab="indices"]')})));
+            const asset=await page.request.get('https://mauveplace.github.io/jjooni-control-tower/market-observatory/latest-board-v1.js?v=2.5.1');
+            const body=await asset.text();console.log('PUBLIC_BOARD_ASSET',asset.status(),asset.headers()['content-type'],body.length,body.includes('ensureIndexShell'));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
       - name: Serve proposed source for pull requests
         if: github.event_name == 'pull_request'
         run: python3 -m http.server 8123 >/tmp/obs-http.log 2>&1 &
