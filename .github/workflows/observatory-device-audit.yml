@@ -2,10 +2,13 @@ name: Observatory Device Audit
 on:
   push:
     branches: [main]
-    paths: ['market-observatory/**', 'tests/observatory-device-audit.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-display-contract.test.cjs', '.github/workflows/observatory-device-audit.yml']
   pull_request:
     branches: [main]
-    paths: ['market-observatory/**', 'tests/observatory-device-audit.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-display-contract.test.cjs', '.github/workflows/observatory-device-audit.yml']
+concurrency:
+  group: observatory-device-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:

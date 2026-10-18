@@ -56,7 +56,7 @@ function ensureStyle(){
  #sectors .obsSectorChart{position:relative;width:100%;max-width:100%;min-width:0;height:330px;margin-top:8px;overflow:hidden}
  #sectors .obsSectorChart canvas{display:block;width:100%!important;max-width:100%!important;min-width:0!important}
  #sectors .obsSectorLoading{padding:40px 14px;text-align:center;color:#718096;font-size:11px}
- @media(max-width:760px){
+ @media(max-width:1100px){
   #sectors .obsSectorHead{align-items:flex-start;flex-wrap:wrap}
   #sectors .obsSectorBadge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
   #sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}
