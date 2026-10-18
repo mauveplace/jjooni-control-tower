@@ -12,7 +12,7 @@ test('sector spark return uses the same 100-session base as the table',()=>{
 });
 test('macro trend cannot masquerade as the actual used for surprise',()=>{
  const src=read('official-macro-v1.js'),context={};vm.createContext(context);
- const start=src.indexOf('function currentValue('),end=src.indexOf('function groupHtml(');
+ const start=src.indexOf('function trendBasis('),end=src.indexOf('function groupHtml(');
  const data=JSON.parse(read('data/official-macro.json'));
  const helpers=src.slice(src.indexOf('const esc='),src.indexOf('const COLORS='));
  const release=src.slice(src.indexOf('function releaseFmt('),src.indexOf('function surpriseRead('));
@@ -20,4 +20,6 @@ test('macro trend cannot masquerade as the actual used for surprise',()=>{
  const html=context.row('US_CORE_PCE');
  assert.match(html,/추세[^<]*전년비/);assert.match(html,/발표 실제 · MoM %/);assert.match(html,/이전 · MoM %/);assert.match(html,/예상 · MoM %/);assert.match(html,/%p/);
  assert(!context.row('US_SEP_DOT_PLOT').includes('발표 실제'));
+ assert.match(context.row('KR_INDUSTRIAL_PRODUCTION'),/추세[^<]*전월비/);
+ assert.match(context.row('US_AHE'),/3.02%/);
 });

@@ -81,11 +81,19 @@ function statusCard(label,obj){
  return '<div class="obsMacroStatus"><small>'+esc(label)+'</small><b>'+esc(COLORS[c]||'⚪')+' '+esc(r)+'</b></div>';
 }
 function metric(key){return DATA?.metrics?.[key]||null}
+function trendBasis(m){
+ const x=m?.latest||{};
+ if(x.yoy!=null&&n(x.value)===n(x.yoy))return '전년비';
+ if(x.mom!=null&&n(x.value)===n(x.mom))return '전월비';
+ if(x.qoq!=null&&n(x.value)===n(x.qoq))return '전분기비';
+ return m?.unit||'';
+}
 function currentValue(m){
  const x=m?.latest||{};
  if(m?.key==='US_FED_FUNDS'&&x.lower!=null&&x.upper!=null)return fmt(x.lower)+'–'+fmt(x.upper)+'%';
  if(x.yoy!=null&&['US_CPI','US_CORE_CPI','US_PCE','US_CORE_PCE','KR_CPI','KR_CORE_CPI'].includes(m?.key))return fmt(x.yoy)+'%';
  if(x.value==null)return '—';
+ if(['전년비','전월비','전분기비'].includes(trendBasis(m)))return fmt(x.value)+'%';
  return fmt(x.value)+(m?.unit&&String(m.unit).includes('%')?'%':(String(m?.unit||'').startsWith('K')?'천 명':(m?.unit==='USD million'?'백만 USD':'')));
 }
 function trendValue(m){
@@ -102,7 +110,7 @@ function rowHtml(k){
  const cls=m.status==='LIVE'?'live':'pending';
  return '<div class="obsMacroRow" data-macro-key="'+esc(k)+'">'+
   '<div class="obsMacroName">'+esc(m.name||k)+' <span class="obsMacroBadge '+cls+'">'+esc(src)+'</span><small>'+esc(m.status||'')+'</small><button type="button" class="obsMacroOpen">📈 그래프 · 의미</button></div>'+
-  '<div class="obsMacroCell"><span>'+ (m.value_role==='official_forecast'?'공식 전망 · '+esc(m.forecast_horizon):'추세 · '+esc((m.latest?.period||'').slice(0,7))+(m.latest?.yoy!=null?' · 전년비':'')) +'</span><b>'+esc(currentValue(m))+'</b></div>'+
+  '<div class="obsMacroCell"><span>'+ (m.value_role==='official_forecast'?'공식 전망 · '+esc(m.forecast_horizon):'추세 · '+esc((m.latest?.period||'').slice(0,7))+' · '+esc(trendBasis(m))) +'</span><b>'+esc(currentValue(m))+'</b></div>'+
   '<div class="obsMacroCell"><span>'+(m.value_role==='official_forecast'?'공식 전망':'발표 실제')+' · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+'</b></div>'+
   '<div class="obsMacroCell"><span>이전 · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(r.previous,r.measure))+'</b></div>'+
   '<div class="obsMacroCell"><span>예상 · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(r.consensus,r.measure))+'</b></div>'+
@@ -164,7 +172,7 @@ function showDetail(key){
  if(row){row.insertAdjacentElement('afterend',box);qa('.obsMacroRow',q('#official-macro')).forEach(x=>x.classList.toggle('selected',x===row));}
  box.innerHTML='<div class="obsMacroDetailHead"><div><div class="obsMacroTitle">'+esc(m.name||key)+'</div><div class="obsMacroSub">'+esc(key)+' · '+esc(m.frequency||'')+' · '+esc(m.status||'')+'</div><div class="obsMacroSource">'+src.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><span class="obsMacroBadge '+(m.status==='LIVE'?'live':'pending')+'">'+esc(m.primary_source?.institution||'OFFICIAL')+'</span></div>'+
  '<div class="obsMacroKpis">'+
-  kpi('현재 추세값',currentValue(m))+kpi(m.value_role==='official_forecast'?'공식 전망 ('+m.forecast_horizon+')':'발표 Actual',releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise))+kpi('발표 기준',r.measure||m.unit||'—')+
+  kpi('현재 추세값 · '+trendBasis(m),currentValue(m))+kpi(m.value_role==='official_forecast'?'공식 전망 ('+m.forecast_horizon+')':'발표 Actual',releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise)+(String(r.measure||'').includes('%')?'%p':''))+kpi('발표 기준',r.measure||m.unit||'—')+
   kpi('3M annualized / avg',l.ann_3m!=null?fmt(l.ann_3m)+'%':(l.avg_3m!=null?fmt(l.avg_3m):'—'))+kpi('6M annualized / avg',l.ann_6m!=null?fmt(l.ann_6m)+'%':(l.avg_6m!=null?fmt(l.avg_6m):'—'))+
   kpi('1Y 평균',m.historical_position?.avg_1y==null?'—':fmt(m.historical_position.avg_1y))+
   kpi('5Y 평균',m.historical_position?.avg_5y==null?'—':fmt(m.historical_position.avg_5y))+

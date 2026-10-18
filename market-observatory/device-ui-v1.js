@@ -20,5 +20,11 @@ function fromHash(){
 }
 window.addEventListener('hashchange',fromHash);
 window.addEventListener('load',()=>{fromHash();sync()});
+const observer=new MutationObserver(()=>{fromHash();sync()});observer.observe(tabs,{childList:true});
+setTimeout(()=>observer.disconnect(),10000);
+const menu=document.createElement('button');menu.type='button';menu.className='obsBackToMenu';menu.textContent='메뉴 ↑';menu.hidden=true;
+menu.onclick=()=>tabs.scrollIntoView({block:'start',behavior:'smooth'});document.body.appendChild(menu);
+let scrollPending=false;
+window.addEventListener('scroll',()=>{if(scrollPending)return;scrollPending=true;requestAnimationFrame(()=>{menu.hidden=scrollY<500;scrollPending=false})},{passive:true});
 sync();
 })();

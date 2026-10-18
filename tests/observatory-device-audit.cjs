@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 const fs=require('node:fs'),assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch(); fs.mkdirSync('/tmp/obs-audit',{recursive:true});
- for(const width of [360,390,430,768,820,1024,1363]){
+ for(const width of [360,390,430,768,800,820,1024,1363]){
   const page=await browser.newPage({viewport:{width,height:960},hasTouch:true});
   await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle'});
   await page.waitForSelector('[data-fresh-key="audit"]',{state:'attached'});
