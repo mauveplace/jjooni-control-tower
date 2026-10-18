@@ -1,12 +1,33 @@
 // Runs the repository's public Observatory in Chromium, without account APIs.
 const {chromium}=require('playwright');
 const fs=require('node:fs'),assert=require('node:assert/strict');
+const base=process.env.OBS_AUDIT_BASE_URL||'http://127.0.0.1:8123/market-observatory/';
+const widths=process.env.OBS_AUDIT_WIDTHS?process.env.OBS_AUDIT_WIDTHS.split(',').map(Number):[360,390,430,768,800,820,1024,1363];
+const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
 (async()=>{
  const browser=await chromium.launch(); fs.mkdirSync('/tmp/obs-audit',{recursive:true});
- for(const width of [360,390,430,768,800,820,1024,1363]){
+ for(const width of widths){
   const page=await browser.newPage({viewport:{width,height:960},hasTouch:true});
-  await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle'});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const expected=[...fs.readFileSync('market-observatory/index.html','utf8').matchAll(/src="(\.\/[^"?]+\.js\?v=[^"]+)"/g)].map(m=>m[1]);
+  for(let attempt=0;attempt<7;attempt++){
+   await page.goto(base,{waitUntil:'networkidle',timeout:90000});
+   const scripts=await page.locator('script[src]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));
+   if(expected.every(src=>scripts.includes(src)))break;
+   assert(attempt<6,'Pages has not published the current UI asset versions');
+   console.log('OBS_UI_PUBLICATION_WAIT attempt='+attempt);await page.waitForTimeout(10000);
+  }
+  await page.waitForSelector('body.obsDeviceUI');
   await page.waitForSelector('[data-fresh-key="audit"]',{state:'attached'});
+  if(smoke){
+   for(const range of ['1Y','10Y','30Y']){
+    await page.locator(`.obsRange[data-for="marketChart"] [data-range="${range}"]`).click();
+    await page.waitForFunction(r=>{const t=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';return t.startsWith(r+' 표시')&&!t.includes('로딩중')},range);
+    const plot=await page.evaluate(()=>{const c=Chart.getChart(document.querySelector('#marketChart'));return {type:c.scales.x.type,min:c.scales.x.min,max:c.scales.x.max,count:c.data.datasets[0].data.length}});
+    assert.equal(plot.type,'linear');assert(plot.min>0&&plot.max>plot.min&&plot.count>10,JSON.stringify(plot));
+   }
+   await page.locator('.obsRange[data-for="marketChart"] [data-range="5Y"]').click();
+  }
   for(const tab of ['overview','morning-brief','official-macro','indices','fx','energy','analysis-lab','sectors','regime','tripod','rates','calendar']){
    await page.locator(`#tabs [data-tab="${tab}"]`).click();
    if(tab==='analysis-lab')await page.waitForFunction(()=>window.__JJOONI_ANALYSIS_LAB.loaded);
@@ -50,6 +71,22 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
    await page.locator('#obsWatchToggle').click();assert(await page.locator('#obsWatchAnalysis').isVisible());
    await page.locator('.obsFreshDetails>summary').click();assert.equal(await page.locator('#obsWatchAnalysis').isVisible(),false);
   }
+  if(smoke){
+   await page.locator('#tabs [data-tab="rates"]').click();
+   for(const grain of ['daily','weekly','monthly','intraday']){
+    await page.locator(`[data-rate-grain="${grain}"]`).click();
+    await page.waitForFunction(()=>document.querySelector('[data-rate-summary]')?.textContent.includes('개 관측'));
+    assert(await page.locator('#usRatesIntraday canvas').isVisible());
+   }
+   await page.locator('#tabs [data-tab="calendar"]').click();
+   await page.locator('#events .obsCalEditBtn').first().click();
+   assert(await page.locator('#obsCalEditor.on').isVisible());
+   assert(await page.locator('#obsCalEditor input[data-field]').count()>=3);
+   await page.locator('#obsCalEditor [data-act="close"]').click();
+   assert.equal(await page.locator('#obsCalEditor.on').count(),0);
+   console.log('OBS_PUBLIC_E2E=PASS width='+width+' current-assets ranges=1Y/10Y/30Y calendar-editor=read-only');
+  }
+  assert.deepEqual(errors,[]);
   await page.close();
  }
  await browser.close();

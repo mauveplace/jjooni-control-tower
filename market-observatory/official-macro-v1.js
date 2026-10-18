@@ -78,7 +78,7 @@ function inject(){
 }
 function statusCard(label,obj){
  const c=obj?.color||'GRAY',r=obj?.regime||'DATA_PENDING';
- return '<div class="obsMacroStatus"><small>'+esc(label)+'</small><b>'+esc(COLORS[c]||'⚪')+' '+esc(({STICKY:'물가 둔화 정체',COOLING:'고용 둔화',EXPANDING:'경기 확장',MODERATELY_RESTRICTIVE:'완만한 긴축',ABOVE_TARGET:'목표 상회',SOURCE_PENDING:'원천 확인 중',DATA_PENDING:'자료 확인 중'})[r]||r)+'</b></div>';
+ return '<div class="obsMacroStatus"><small>'+esc(label)+'</small><b>'+esc(COLORS[c]||'⚪')+' '+esc(({STICKY:'물가 둔화 정체',COOLING:'둔화',EXPANDING:'경기 확장',MODERATELY_RESTRICTIVE:'완만한 긴축',ABOVE_TARGET:'목표 상회',SOURCE_PENDING:'원천 확인 중',DATA_PENDING:'자료 확인 중'})[r]||r)+'</b></div>';
 }
 function metric(key){return DATA?.metrics?.[key]||null}
 function trendBasis(m){
