@@ -101,3 +101,13 @@
  .obsDeviceUI .event .source,.obsDeviceUI .event-meta{font-size:11px}
  .obsDeviceUI .obsFullHead b{white-space:normal}
 }
+
+/* Full-width transition conditions stay visible on phone and tablet. */
+.obsDeviceUI .tripodNext{grid-column:1/-1;min-width:0;border:1px solid #cdddeb;border-radius:14px;background:#f5f9ff;padding:14px;color:#24364b;overflow-wrap:anywhere}
+.obsDeviceUI .tripodNext header{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.obsDeviceUI .tripodNext h3{margin:0;font-size:15px}.obsDeviceUI .tripodNext header span,.obsDeviceUI .tripodNext small{font-size:11px;line-height:1.6;color:#52657b}
+.obsDeviceUI .tripodNext p{font-size:12px;line-height:1.65;margin:8px 0}
+.obsDeviceUI .tripodGateGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.obsDeviceUI .tripodGateGrid article{min-width:0;background:#fff;border:1px solid #dde6f0;border-radius:10px;padding:12px}
+.obsDeviceUI .tripodGateGrid h4{font-size:12px;margin:0 0 8px}.obsDeviceUI .tripodGateGrid b{display:block;font-size:15px;line-height:1.5}
+@media(max-width:600px){.obsDeviceUI .tripodGateGrid{grid-template-columns:1fr}.obsDeviceUI .tripodNext{padding:12px}}
