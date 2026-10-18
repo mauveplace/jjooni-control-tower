@@ -47,6 +47,9 @@
 .obsDeviceUI .obsSectorTableWrap{scrollbar-width:thin}
 .obsDeviceUI #sectors .obsPeriod span,.obsDeviceUI #sectors .obsSparkHead,.obsDeviceUI #sectors .obsSparkHead b{font-size:11px}
 .obsDeviceUI #sectors .obsPeriod b{font-size:12px}
+.obsDeviceUI #sectors .obsSectorKpi b{font-size:14px;white-space:normal;overflow:visible;overflow-wrap:anywhere}
+.obsDeviceUI #sectors .ticker{font-size:14px}
+.obsDeviceUI #sectors .name{font-size:11px}
 @media(max-width:1100px){
  .obsDeviceUI .obsBackToMenu:not([hidden]){display:block;position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:80;min-height:44px;padding:8px 12px;border:1px solid #b7cce8;border-radius:22px;background:#0b3b70;color:#fff;font-size:13px;box-shadow:0 4px 14px #071b3525}
  .obsDeviceUI .top{position:static;padding:12px}
@@ -66,6 +69,8 @@
  .obsDeviceUI .obsMacroOpen{margin:0 0 0 auto}
  .obsDeviceUI .labSeriesRow{grid-template-columns:24px minmax(120px,2fr) minmax(100px,1.4fr) 70px 100px 52px}
  .obsDeviceUI #sectors .obsSectorGrid{grid-template-columns:minmax(0,1fr)}
+ .obsDeviceUI #sectors tbody td{font-size:13px}
+ .obsDeviceUI #sectors tbody td:before{font-size:11px}
  .obsDeviceUI .chart{height:390px!important}
 }
 @media(min-width:601px) and (max-width:1100px){
