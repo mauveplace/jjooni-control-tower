@@ -18,13 +18,14 @@ function render(d){
   const pulse=el('#pulse');
   if(pulse && !el('#mrPulse')){
     const x=document.createElement('span'); x.id='mrPulse'; x.className='chip';
-    x.textContent='REGIME '+(d.regime?.code||'—').replaceAll('_',' ');
+    x.textContent=(state==='ACTIVE'?'REGIME ':'과거 REGIME · '+state+' ')+(d.regime?.code||'—').replaceAll('_',' ');
     pulse.appendChild(x);
   }
   const bond=t.bond_stress||{}, actions=d.actions||{};
   root.innerHTML=
     '<div class="mrTop">'+
       '<div>'+badge(state,state==='ACTIVE'?'ok':'warn')+badge(d.source?.version||'—')+'</div>'+
+      (state==='ACTIVE'?'':'<div class="obsBasisWarning" role="status">'+(state==='EXPIRED'?'유효기간이 끝난 과거 합의문입니다. 아래 판단·행동은 현재 지침이 아닙니다. 최신 합의문 확인 전에는 기존 전략 규칙을 따르세요.':'현재 유효한 합의문이 아닙니다. 적용 기간을 확인하세요.')+'</div>')+
       '<div class="mrHeadline">'+esc(d.ui?.headline_ko||'—')+'</div>'+
       '<div class="meta">기준 '+esc(d.source?.generated_kst||'—')+' · 유효 '+esc(d.effective_window?.start_kst||'—')+' → '+esc(d.effective_window?.end_kst||'—')+'</div>'+
     '</div>'+
@@ -52,12 +53,12 @@ function render(d){
         '<div class="mrNote"><b>연구 메모</b><br>'+esc(r.note_ko||'')+'</div>'+
       '</div>'
     ):'')+
-    '<div class="mrSection"><h4>이번 주 행동</h4><div class="mrActions">'+
+    '<details class="mrSection" '+(state==='ACTIVE'?'open':'')+'><summary>'+(state==='ACTIVE'?'이번 주 행동':'과거 합의 당시 행동 · 현재 적용 안 함')+'</summary><div class="mrActions">'+
       '<div>정기 DCA <b>'+esc(actions.regular_dca||actions.dca||'—')+'</b></div>'+
       '<div>비정기 레버리지 <b>'+esc(actions.irregular_leverage_add||'—')+'</b></div>'+
       '<div>월요일 시초 <b>'+esc(actions.monday_open||'—')+'</b></div>'+
       '<div>반도체 코어 <b>'+esc(actions.semiconductor_core||'—')+'</b></div>'+
-    '</div></div>'+
+    '</div></details>'+
     '<div class="mrSection"><h4>핵심 트리거</h4>'+
       '<div class="mrRule"><b>Bond Stress</b><span>10Y ≥ 5.25% 또는 30Y ≥ 5.50% · H.15 확인 시 CONFIRMED</span></div>'+
       '<div class="mrRule"><b>Macro Stress</b><span>Bond Stress / Core PCE YoY ≥ 3.5% / NFP ≥ 20만 중 2개</span></div>'+
@@ -90,7 +91,7 @@ function render(d){
       const rm=el('.obsRateRegimeLoading');
       if(rm) rm.textContent='금리 Driver/신용 심각도 연구 레이어 · 이번 주 공식 SSOT 판정은 변경하지 않음';
     }else{
-      rateRoot.innerHTML='<div class="mrNote">금리 레짐 연구 오버레이가 아직 없습니다.</div>';
+      rateRoot.innerHTML='<div class="mrNote">금리 레짐 연구 오버레이가 아직 없습니다.</div>';const loading=el('.obsRateRegimeLoading');if(loading)loading.textContent='연구 오버레이 미게시';
     }
   }
   const meta=el('.obsRegimeLoading');

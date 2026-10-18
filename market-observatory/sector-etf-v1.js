@@ -56,7 +56,7 @@ function ensureStyle(){
  #sectors .obsSectorChart{position:relative;width:100%;max-width:100%;min-width:0;height:330px;margin-top:8px;overflow:hidden}
  #sectors .obsSectorChart canvas{display:block;width:100%!important;max-width:100%!important;min-width:0!important}
  #sectors .obsSectorLoading{padding:40px 14px;text-align:center;color:#718096;font-size:11px}
- @media(max-width:760px){
+ @media(max-width:1100px){
   #sectors .obsSectorHead{align-items:flex-start;flex-wrap:wrap}
   #sectors .obsSectorBadge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
   #sectors .obsSectorKpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -117,13 +117,13 @@ function growthDefense20(rows){const avg=xs=>{const a=xs.filter(v=>v!=null);retu
 
 function periodGrid(r){return `<div class="obsPeriodGrid">${H.map(d=>`<div class="obsPeriod"><span>${d}일</span><b class="${cls(ret(r,d))}">${pct(ret(r,d))}</b></div>`).join('')}</div>`}
 function sparkline(r){
- const xs=(DATA?.series?.[r?.ticker]||[]).slice(-100).map(p=>({date:p?.date,value:n(p?.value)})).filter(p=>p.value!=null);
- if(xs.length<2)return '<div class="obsSpark"><div class="obsSparkHead"><span>최근 100거래일</span><b class="flat">데이터 부족</b></div></div>';
+ const xs=(DATA?.series?.[r?.ticker]||[]).slice(-101).map(p=>({date:p?.date,value:n(p?.value)})).filter(p=>p.value!=null);
+ if(xs.length<2)return '<div class="obsSpark"><div class="obsSparkHead"><span>100거래일 수익률</span><b class="flat">데이터 부족</b></div></div>';
  const vals=xs.map(p=>p.value),lo=Math.min(...vals),hi=Math.max(...vals),span=hi-lo||1,w=320,h=42,pad=2;
  const points=vals.map((v,i)=>`${(pad+(i*(w-pad*2)/(vals.length-1))).toFixed(1)},${(pad+((hi-v)/span)*(h-pad*2)).toFixed(1)}`).join(' ');
- const first=vals[0],last=vals[vals.length-1],move=first?((last/first)-1)*100:null,tone=move==null?'flat':move>=0?'up':'down';
+ const move=ret(r,100),tone=move==null?'flat':move>=0?'up':'down';
  const lastPair=points.split(' ').pop().split(',');
- return `<div class="obsSpark ${tone}"><div class="obsSparkHead"><span>최근 100거래일</span><b class="${tone}">${pct(move)}</b></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(r.ticker)} 최근 100거래일 가격 추이"><line class="sparkBase" x1="0" y1="${h-1}" x2="${w}" y2="${h-1}"></line><polyline points="${points}"></polyline><circle cx="${lastPair[0]}" cy="${lastPair[1]}" r="2.4"></circle></svg></div>`;
+ return `<div class="obsSpark ${tone}"><div class="obsSparkHead"><span>100거래일 수익률</span><b class="${tone}">${pct(move)}</b></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(r.ticker)} 최근 100거래일 가격 추이"><line class="sparkBase" x1="0" y1="${h-1}" x2="${w}" y2="${h-1}"></line><polyline points="${points}"></polyline><circle cx="${lastPair[0]}" cy="${lastPair[1]}" r="2.4"></circle></svg></div>`;
 }
 function themeHtml(){
  const groups=(DATA?.groups||[]).filter(g=>g.key!=='classic');
@@ -147,7 +147,7 @@ function render(){
  const panel=q('#sectors');if(!panel||!DATA)return;
  const s=DATA.summary||{},rows=classicRows(),rank=ranked20(rows),leaders=rank.slice(0,3),laggards=rank.slice(-3).reverse(),quality=DATA.quality||{};
  const spread20=n(s.growth_defense_spread_20d_pct)??growthDefense20(rows),warning=n(quality.fetch_error_count)>0;
- panel.innerHTML=`<div class="obsSectorHead"><div><div class="obsSectorTitle">송팀장 Sector Observatory</div><div class="meta">완료 일봉 기준 · 수익률 구간을 1일·5일·10일·20일·50일·100일로 통일</div></div><div class="obsSectorBadge">${esc(DATA.universe_version||'SECTOR UNIVERSE')}</div></div>
+ panel.innerHTML=`<div class="obsSectorHead"><div><div class="obsSectorTitle">송팀장 Sector Observatory</div><div class="meta">완료 일봉 기준 · 수익률 구간을 1일·5일·10일·20일·50일·100일로 통일</div></div><div class="obsSectorBadge">국내·해외 ETF · 완료 일봉</div></div>
  <div class="obsSectorKpis"><div class="obsSectorKpi"><span>기준일</span><b>${esc(DATA.completed_cutoffs?'KR '+DATA.completed_cutoffs.KR+' / US '+DATA.completed_cutoffs.US:DATA.as_of_date||'—')}</b></div><div class="obsSectorKpi"><span>MA20 상회 · 11개 섹터</span><b>${esc(s.classic_above_ma20??'—')} / ${esc(s.classic_count??11)}</b></div><div class="obsSectorKpi"><span>20일 RS 강세</span><b>${esc(leaders[0]?.ticker||'—')} ${pct(leaders[0]?.value)}</b></div><div class="obsSectorKpi"><span>20일 RS 약세</span><b>${esc(laggards[0]?.ticker||'—')} ${pct(laggards[0]?.value)}</b></div><div class="obsSectorKpi"><span>성장-방어 20일</span><b class="${cls(spread20)}">${pct(spread20)}</b></div></div>
  <div class="obsSectorGrid"><div><section class="obsSectorCard"><h3>S&P 500 섹터 상대강도</h3><div class="meta">1·5·10·20·50·100 거래일 수익률 · 20일 SPY 대비 상대강도 순 정렬</div>${classicTable(rows)}</section><section class="obsSectorCard" style="margin-top:12px"><h3>테마·업종·국가 ETF</h3><div class="meta">6개 기간 수익률 + 최근 100거래일 스파크라인으로 테마·업종·국가별 방향과 속도를 함께 확인합니다.</div>${themeHtml()}</section></div><div><section class="obsSectorCard"><h3>20일 RS Ranking</h3><div class="meta">SPY 20거래일 성과 대비 상대강도 · 섹터 회전 확인</div><div class="obsSectorChart"><canvas id="sectorRsChart"></canvas></div></section><section class="obsSectorCard" style="margin-top:12px"><h3>리더 / 래거드</h3><div class="obsSectorLeader"><span><span class="obsSectorRank">L</span>강세 TOP3</span><b class="up">${esc(leaderText(leaders))}</b></div><div class="obsSectorLeader"><span><span class="obsSectorRank">W</span>약세 TOP3</span><b class="down">${esc(leaderText(laggards))}</b></div><div class="obsSectorLeader"><span>SPY 20일</span><b class="${cls(benchRet('SPY',20))}">${pct(benchRet('SPY',20))}</b></div><div class="obsSectorLeader"><span>QQQ 20일</span><b class="${cls(benchRet('QQQ',20))}">${pct(benchRet('QQQ',20))}</b></div><div class="obsSectorQuality ${warning?'warn':''}">${warning?'일부 Yahoo 일봉 수집 실패가 있어 직전 검증값으로 대체된 ETF가 있습니다.':'전체 섹터 ETF가 최신 완료 일봉으로 수집되었습니다.'}<br>가격 확인 ${esc(s.priced_count??0)}/${esc(s.total_count??0)} · fetch error ${esc(quality.fetch_error_count??0)} · source: ${esc(DATA.source_contract||'Yahoo public daily')}</div></section></div></div>`;
  try{drawRsChart(rows)}catch(e){STATE.chart_error=String(e);STATE.status='ACTIVE_DEGRADED';console.warn('sector RS chart render failed',e);const host=q('#sectorRsChart')?.parentElement;if(host)host.innerHTML='<div class="obsSectorLoading" style="padding:22px 8px">RS 차트만 표시하지 못했습니다. 표·ETF 데이터는 정상입니다.</div>'}

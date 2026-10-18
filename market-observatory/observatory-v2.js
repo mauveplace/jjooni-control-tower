@@ -215,6 +215,7 @@ function ensureCurveToolbar(id){
   wrap.insertBefore(bar,canvas);wrap.insertBefore(cov,canvas);
 }
 function ensureToolbar(id){
+  if(id==='labChart')return; // Lab owns its chart and controls.
   if(CURVE_IDS.has(id)){ensureCurveToolbar(id);return}
   const canvas=document.getElementById(id);if(!canvas||canvas.dataset.rangeReady)return;
   canvas.dataset.rangeReady='1';
@@ -256,7 +257,7 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function actualText(e,m){if(m.actual!=null&&m.actual!=='')return val(m.actual)+(m.value_vintage==='LATEST_REVISION'?' (수정치)':'');if(m.metric_type==='market_probability_snapshot'||m.value_role==='market_forecast'||m.value_role==='schedule_only'||m.actual_expected===false||e.actual_expected===false)return '—';return e.actual_status==='OVERDUE'?'수집 지연':e.actual_status==='PENDING'?'Actual 확인 중':'—'}
 function eventMetricsHtml(e){
   const ms=(e.market_metrics||[]).filter(m=>m&&m.label);
-  if(ms.length)return `<div class="obsMetricTable">${ms.map(m=>{const market=m.metric_type==='market_probability_snapshot';return `<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">${market?'1거래일 전':'이전'} <b>${esc(val(m.previous))}</b></div><div class="forecast">${market?'현재 시장예측':'예측'} <b>${esc(val(m.consensus))}</b></div><div class="actual">${market?'발표 결과':'실제'} <b>${esc(actualText(e,m))}</b></div></div>`}).join('')}</div>`;
+  if(ms.length)return `<div class="obsMetricTable">${ms.map(m=>{const market=m.metric_type==='market_probability_snapshot';return `<div class="obsMetricRow"><div class="obsMetricName">${esc(m.label)}</div><div class="obsPrev">${market?'이전 관측 '+esc(m.previous_observed_date||'기준일 미확인'):'이전'} <b>${esc(val(m.previous))}</b></div><div class="forecast">${market?'현재 시장예측':'예측'} <b>${esc(val(m.consensus))}</b></div><div class="actual">${market?'발표 결과':'실제'} <b>${esc(actualText(e,m))}</b></div></div>`}).join('')}</div>`;
   return `<div class="obsEventMetrics"><span>이전 <b>${esc(val(e.previous))}</b></span><span>예측 <b>${esc(val(e.consensus))}</b></span><span>실제 <b>${esc(actualText(e,e))}</b></span></div>`;
 }
 function releasedActual(e){const ms=(e.market_metrics||[]).filter(Boolean);if(ms.length)return ms.some(m=>m.metric_type!=='market_probability_snapshot'&&m.actual!=null&&m.actual!=='');return e.actual!=null&&e.actual!==''}
@@ -270,7 +271,7 @@ window.renderCalendar=function(){
   const box=document.querySelector('#events');if(!box)return;
   box.innerHTML=xs.length?xs.map(e=>{
     const dt=(e.time_status==='TBD'?String(e.release_date||e.datetime_kst||'').slice(5,10)+' 시간 미정':(e.datetime_kst||e.date||'').slice(5,16).replace('T',' ')),status=eventStatus(e);
-    return `<div class="event"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div class="obsEventMain"><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''} · ${status}</div>${eventMetricsHtml(e)}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}</div></div></div>`;
+    return `<div class="event" data-actual-status="${esc(e.actual_status||'')}"><div class="date">${esc(dt)}</div><div class="country">${esc(e.country)}</div><div class="obsEventMain"><div class="event-title">${esc(e.title)}</div><div class="event-meta">${esc(e.category||'')}${e.reference_period?' · '+esc(e.reference_period):''} · ${status}</div>${eventMetricsHtml(e)}</div><div class="importance">${'★'.repeat(e.importance||1)}<div class="source">${esc(e.source||'')}${e.market_data_source?' · '+esc(e.market_data_source):''}${e.source_tier==='MARKET_FEED'?' · 시장피드 발표값 (공식 시계열 계산값과 구분)':''}</div></div></div>`;
   }).join(''):'<div class="meta" style="padding:20px 0">등록된 일정이 없습니다.</div>';
 };
 

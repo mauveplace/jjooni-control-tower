@@ -70,12 +70,13 @@ jobs:
                 innerWidth:window.innerWidth,
                 scrollWidth:document.documentElement.scrollWidth,
                 bodyScroll:document.body.scrollWidth,
+                overflowing:[...document.querySelectorAll("body *")].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().right>innerWidth+2).slice(0,15).map(e=>({tag:e.tagName,cls:e.className,right:e.getBoundingClientRect().right,width:e.getBoundingClientRect().width})),
                 version:window.__JJOONI_OBSERVATORY_UI?.version,
                 coverage:document.querySelector('[data-coverage="marketChart"]')?.textContent||'',
                 cards:[...document.querySelectorAll('.card')].filter(x=>x.offsetParent!==null).map(x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width}})
               }));
               assert(base.scrollWidth<=base.innerWidth+3,`${tc.name} html horizontal overflow ${base.scrollWidth}>${base.innerWidth}`);
-              assert(base.bodyScroll<=base.innerWidth+3,`${tc.name} body horizontal overflow ${base.bodyScroll}>${base.innerWidth}`);
+              assert(base.bodyScroll<=base.innerWidth+3,`${tc.name} body horizontal overflow ${base.bodyScroll}>${base.innerWidth} ${JSON.stringify(base.overflowing)}`);
               assert(base.cards.every(r=>r.left>=-2&&r.right<=base.innerWidth+2),`${tc.name} card outside viewport ${JSON.stringify(base.cards)}`);
               assert(base.coverage,`${tc.name} market history coverage missing`);
               const y=Number((base.coverage.match(/표시\s+(\d{4})/)||[])[1]);

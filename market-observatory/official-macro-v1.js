@@ -78,14 +78,22 @@ function inject(){
 }
 function statusCard(label,obj){
  const c=obj?.color||'GRAY',r=obj?.regime||'DATA_PENDING';
- return '<div class="obsMacroStatus"><small>'+esc(label)+'</small><b>'+esc(COLORS[c]||'⚪')+' '+esc(r)+'</b></div>';
+ return '<div class="obsMacroStatus"><small>'+esc(label)+'</small><b>'+esc(COLORS[c]||'⚪')+' '+esc(({STICKY:'물가 둔화 정체',COOLING:'고용 둔화',EXPANDING:'경기 확장',MODERATELY_RESTRICTIVE:'완만한 긴축',ABOVE_TARGET:'목표 상회',SOURCE_PENDING:'원천 확인 중',DATA_PENDING:'자료 확인 중'})[r]||r)+'</b></div>';
 }
 function metric(key){return DATA?.metrics?.[key]||null}
+function trendBasis(m){
+ const x=m?.latest||{};
+ if(x.yoy!=null&&n(x.value)===n(x.yoy))return '전년비';
+ if(x.mom!=null&&n(x.value)===n(x.mom))return '전월비';
+ if(x.qoq!=null&&n(x.value)===n(x.qoq))return '전분기비';
+ return m?.unit||'';
+}
 function currentValue(m){
  const x=m?.latest||{};
  if(m?.key==='US_FED_FUNDS'&&x.lower!=null&&x.upper!=null)return fmt(x.lower)+'–'+fmt(x.upper)+'%';
  if(x.yoy!=null&&['US_CPI','US_CORE_CPI','US_PCE','US_CORE_PCE','KR_CPI','KR_CORE_CPI'].includes(m?.key))return fmt(x.yoy)+'%';
  if(x.value==null)return '—';
+ if(['전년비','전월비','전분기비'].includes(trendBasis(m)))return fmt(x.value)+'%';
  return fmt(x.value)+(m?.unit&&String(m.unit).includes('%')?'%':(String(m?.unit||'').startsWith('K')?'천 명':(m?.unit==='USD million'?'백만 USD':'')));
 }
 function trendValue(m){
@@ -102,10 +110,11 @@ function rowHtml(k){
  const cls=m.status==='LIVE'?'live':'pending';
  return '<div class="obsMacroRow" data-macro-key="'+esc(k)+'">'+
   '<div class="obsMacroName">'+esc(m.name||k)+' <span class="obsMacroBadge '+cls+'">'+esc(src)+'</span><small>'+esc(m.status||'')+'</small><button type="button" class="obsMacroOpen">📈 그래프 · 의미</button></div>'+
-  '<div class="obsMacroCell"><span>'+ (m.value_role==='official_forecast'?'공식 전망 · '+esc(m.forecast_horizon):'실제 · '+esc((m.latest?.period||'').slice(0,7))) +'</span><b>'+esc(currentValue(m))+'</b></div>'+
-  '<div class="obsMacroCell"><span>이전</span><b>'+esc(r.previous==null?'—':fmt(r.previous))+'</b></div>'+
-  '<div class="obsMacroCell"><span>예상</span><b>'+esc(r.consensus==null?'—':fmt(r.consensus))+'</b></div>'+
-  '<div class="obsMacroCell"><span>Surprise</span><b>'+esc(r.surprise==null?'—':signed(r.surprise))+'</b></div>'+
+  '<div class="obsMacroCell"><span>'+ (m.value_role==='official_forecast'?'공식 전망 · '+esc(m.forecast_horizon):'추세 · '+esc((m.latest?.period||'').slice(0,7))+' · '+esc(trendBasis(m))) +'</span><b>'+esc(currentValue(m))+'</b></div>'+
+  '<div class="obsMacroCell"><span>'+(m.value_role==='official_forecast'?'공식 전망':'발표 실제')+' · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+'</b></div>'+
+  '<div class="obsMacroCell"><span>이전 · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(r.previous,r.measure))+'</b></div>'+
+  '<div class="obsMacroCell"><span>예상 · '+esc(r.measure||m.unit||'')+'</span><b>'+esc(releaseFmt(r.consensus,r.measure))+'</b></div>'+
+  '<div class="obsMacroCell"><span>Surprise</span><b>'+esc(r.surprise==null?'—':signed(r.surprise)+(String(r.measure||'').includes('%')?'%p':''))+'</b></div>'+
   '<div class="obsMacroCell"><span>최근 3M</span><b>'+esc(trendValue(m))+'</b></div></div>';
 }
 function groupHtml(country,key,label){
@@ -118,7 +127,7 @@ function render(){
  panel.innerHTML='<div class="obsMacroHero">'+
  '<div class="obsMacroCard"><div class="obsMacroHead"><div><div class="obsMacroTitle">🇺🇸 US MACRO</div><div class="obsMacroSub">Fed · BLS · BEA 공식치 / FRED 전송계층</div></div><span class="obsMacroBadge live">OFFICIAL</span></div><div class="obsMacroStatusGrid">'+GROUPS.us.map(x=>statusCard(x[1],us[x[0]])).join('')+'</div></div>'+
  '<div class="obsMacroCard"><div class="obsMacroHead"><div><div class="obsMacroTitle">🇰🇷 KR MACRO</div><div class="obsMacroSub">한국은행 · 통계청 · 관세/산업부 공식치</div></div><span class="obsMacroBadge live">OFFICIAL</span></div><div class="obsMacroStatusGrid">'+GROUPS.kr.map(x=>statusCard(x[1],kr[x[0]])).join('')+'</div></div></div>'+
- '<div class="obsMacroInfo"><b>사용법:</b> 각 지표의 <b>📈 그래프 · 의미</b>를 누르면 해당 지표 바로 아래에 장기 그래프와 발표수치 해설이 열립니다. Actual=실제 발표치, Previous=이전 발표치, Consensus=시장 예상치, Surprise=실제치-예상치입니다.</div>'+
+ '<div class="obsMacroInfo"><b>사용법:</b> 각 지표의 <b>📈 그래프 · 의미</b>를 누르면 해당 지표 바로 아래에 장기 그래프와 발표수치 해설이 열립니다. 추세는 공식 시계열로 계산한 현재 수준입니다. 발표 실제·이전·예상은 표시된 동일 기준(MoM·YoY 등)으로 비교하고, Surprise는 실제−예상입니다. 미국 CPI 추세는 계절조정 FRED 지수의 계산값이므로 일정의 시장피드 발표값과 다를 수 있습니다.</div>'+
  '<div class="obsMacroSection">'+GROUPS.us.map(x=>groupHtml('us',x[0],'US · '+x[1])).join('')+GROUPS.kr.map(x=>groupHtml('kr',x[0],'KR · '+x[1])).join('')+'</div>'+
  '<div class="obsMacroDetail" id="officialMacroDetail"><div class="meta">지표를 누르면 10년 히스토리 · 추세 · 출처 · revision/vintage를 표시합니다.</div></div>'+
  '<div class="obsMacroQuality">generated '+esc(DATA.generated_kst||'—')+' · live '+esc(DATA.quality?.live_metrics??0)+' · pending '+esc((DATA.quality?.pending_metrics||[]).length)+' · degraded '+esc((DATA.quality?.degraded_metrics||[]).length)+' · vintage keys '+esc(DATA.quality?.vintage_keys??0)+'</div>';
@@ -163,7 +172,7 @@ function showDetail(key){
  if(row){row.insertAdjacentElement('afterend',box);qa('.obsMacroRow',q('#official-macro')).forEach(x=>x.classList.toggle('selected',x===row));}
  box.innerHTML='<div class="obsMacroDetailHead"><div><div class="obsMacroTitle">'+esc(m.name||key)+'</div><div class="obsMacroSub">'+esc(key)+' · '+esc(m.frequency||'')+' · '+esc(m.status||'')+'</div><div class="obsMacroSource">'+src.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><span class="obsMacroBadge '+(m.status==='LIVE'?'live':'pending')+'">'+esc(m.primary_source?.institution||'OFFICIAL')+'</span></div>'+
  '<div class="obsMacroKpis">'+
-  kpi('현재 추세값',currentValue(m))+kpi(m.value_role==='official_forecast'?'공식 전망 ('+m.forecast_horizon+')':'발표 Actual',releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise))+kpi('발표 기준',r.measure||m.unit||'—')+
+  kpi('현재 추세값 · '+trendBasis(m),currentValue(m))+kpi(m.value_role==='official_forecast'?'공식 전망 ('+m.forecast_horizon+')':'발표 Actual',releaseFmt(m.value_role==='official_forecast'?r.forecast:r.actual,r.measure))+kpi('Previous',releaseFmt(r.previous,r.measure))+kpi('Consensus',releaseFmt(r.consensus,r.measure))+kpi('Surprise',r.surprise==null?'—':signed(r.surprise)+(String(r.measure||'').includes('%')?'%p':''))+kpi('발표 기준',r.measure||m.unit||'—')+
   kpi('3M annualized / avg',l.ann_3m!=null?fmt(l.ann_3m)+'%':(l.avg_3m!=null?fmt(l.avg_3m):'—'))+kpi('6M annualized / avg',l.ann_6m!=null?fmt(l.ann_6m)+'%':(l.avg_6m!=null?fmt(l.avg_6m):'—'))+
   kpi('1Y 평균',m.historical_position?.avg_1y==null?'—':fmt(m.historical_position.avg_1y))+
   kpi('5Y 평균',m.historical_position?.avg_5y==null?'—':fmt(m.historical_position.avg_5y))+

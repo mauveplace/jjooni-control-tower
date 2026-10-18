@@ -42,7 +42,7 @@ function render(d){
  const article=document.getElementById('briefArticle');article.innerHTML=markdown(d.body_markdown);
  const heads=[...article.querySelectorAll('h2')];document.getElementById('briefContents').innerHTML=heads.map(h=>`<a href="#${h.id}">${esc(h.textContent)}</a>`).join('');
  document.getElementById('briefContents').onclick=e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth',block:'start'})};
- const status=document.getElementById('briefLoadStatus');status.textContent='게시된 원문을 읽었습니다. 작성 완료 후 자동 게시되며, 페이지는 60초마다 새 게시 여부를 확인합니다.';
+ const status=document.getElementById('briefLoadStatus');status.textContent='본문 수치는 작성 시점에 고정된 기록이며, 현재 시장 화면의 최신값과 다를 수 있습니다. 게시된 원문을 읽었습니다. 작성 완료 후 자동 게시되며, 페이지는 60초마다 새 게시 여부를 확인합니다.';
 }
 function renderHistory(){const select=document.getElementById('briefHistory');if(!select)return;const chosen=select.value||'latest';const entries=Array.isArray(INDEX?.entries)?INDEX.entries:[];select.innerHTML='<option value="latest">최신 브리핑</option>'+entries.filter(e=>/^\d{4}-\d{2}-\d{2}$/.test(e.report_date_kst||'')).slice(0,120).map(e=>`<option value="${esc(e.report_date_kst)}">${esc(e.report_date_kst)} · 미국 ${esc(e.market_date_us||'—')}</option>`).join('');select.value=[...select.options].some(o=>o.value===chosen)?chosen:'latest'}
 async function load(selected){const p=ensure();if(!p)return;const value=selected||document.getElementById('briefHistory').value||'latest';if(value!=='latest'&&!/^\d{4}-\d{2}-\d{2}$/.test(value))return;const id=++request,button=document.getElementById('briefRefresh');button.disabled=true;const status=document.getElementById('briefLoadStatus');status.textContent='브리핑을 읽는 중입니다…';
