@@ -53,6 +53,7 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
     assert.equal(result.smallTargets,0,'small touch targets '+JSON.stringify(result));
     assert(result.textMin>=11||result.textMin===null,'small text '+JSON.stringify(result));
     assert.equal(new URL(page.url()).hash,'#'+tab);
+    if(['overview','tripod'].includes(tab)){const next=page.locator('#latestMarketBoard .tripodNext');await next.waitFor();assert.match(await next.innerText(),/다음 스텝/);const clipped=await next.evaluate(e=>[e,...e.querySelectorAll('article')].some(n=>{const r=n.getBoundingClientRect();return r.left<0||r.right>innerWidth+1}));assert.equal(clipped,false,'transition card overflow');}
     if(tab==='official-macro'){const row=page.locator('[data-macro-key=US_CORE_PCE]');await row.waitFor();assert.match(await row.innerText(),/발표 실제/);assert(await row.getByText(/예상 ·/).isVisible());assert(await row.getByText('Surprise',{exact:true}).isVisible());}
     if(tab==='analysis-lab'){assert.equal(await page.locator('#analysis-lab .obsRange').count(),0);const folded=await page.locator('.labControls').getAttribute('open');assert.equal(folded===null,width<=1100);await page.locator('#labExpand').click();assert(await page.locator('.labExpanded').isVisible());await page.keyboard.press('Escape');assert.equal(await page.locator('.labExpanded').count(),0);}
     if(tab==='regime'){if(await page.getByText('유효기간이 끝난 과거 합의문입니다.',{exact:false}).count())assert.equal(await page.locator('.mrActions').isVisible(),false);}

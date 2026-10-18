@@ -46,7 +46,7 @@ jobs:
             await page.goto('https://mauveplace.github.io/jjooni-control-tower/market-observatory/?delivery='+Date.now(),{waitUntil:'networkidle'});
             await page.waitForTimeout(1800);
             console.log('PUBLIC_BOARD_DOM',await page.evaluate(()=>({board:!!document.querySelector('#latestMarketBoard'),indices:!!document.querySelector('[data-tab="indices"]')})));
-            const asset=await page.request.get('https://mauveplace.github.io/jjooni-control-tower/market-observatory/latest-board-v1.js?v=2.5.1');
+            const asset=await page.request.get('https://mauveplace.github.io/jjooni-control-tower/market-observatory/latest-board-v1.js?v=20261018-next1');
             const body=await asset.text();console.log('PUBLIC_BOARD_ASSET',asset.status(),asset.headers()['content-type'],body.length,body.includes('ensureIndexShell'));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
