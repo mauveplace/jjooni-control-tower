@@ -78,18 +78,9 @@ jobs:
           from pathlib import Path
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
-          tags=[
-              '<script src="./freshness-watchdog-v1.js?v=1.3"></script>',
-              '<script src="./freshness-all-groups-v1.js?v=1.0"></script>',
-          ]
-          if 'freshness-watchdog-v1.js' not in s:
-              s=s.replace('</body>',tags[0]+'</body>',1)
-          else:
-              s=re.sub(r'<script src="\./freshness-watchdog-v1\.js\?v=[^"]+"></script>',tags[0],s)
-          if 'freshness-all-groups-v1.js' not in s:
-              s=s.replace('</body>',tags[1]+'</body>',1)
-          else:
-              s=re.sub(r'<script src="\./freshness-all-groups-v1\.js\?v=[^"]+"></script>',tags[1],s)
+          from tools.observatory_ui_assets import ensure_runtime
+          s=ensure_runtime(s, 'freshness-watchdog-v1.js', '1.3')
+          s=ensure_runtime(s, 'freshness-all-groups-v1.js', '1.0')
           p.write_text(s,encoding='utf-8')
           print('OBSERVATORY_FRESHNESS_RUNTIME_INSTALL=PASS')
           PY
@@ -122,8 +113,9 @@ jobs:
           assert w.get('schema')=='JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',w
           assert w.get('manual_dispatch_supported') is True
           assert w.get('force_repair_supported') is True
-          assert 'freshness-watchdog-v1.js?v=1.3' in html
-          assert 'freshness-all-groups-v1.js?v=1.0' in html
+          from tools.observatory_ui_assets import require_runtime
+          require_runtime(html, 'freshness-watchdog-v1.js')
+          require_runtime(html, 'freshness-all-groups-v1.js')
           for token in ['DATA FRESHNESS','점검 결과 보기','상태 다시 읽기','obsWatchAnalysis','INLINE_WATCHDOG_ANALYSIS_WITH_SOURCE_EVIDENCE_V2']:
               assert token in js,token
           for token in ['energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','official_macro','ALL_MARKET_FAMILY_FRESHNESS_GRID_V1']:
