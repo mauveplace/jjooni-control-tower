@@ -12,7 +12,7 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
   page.on('requestfailed',r=>console.error('OBS_REQUEST_FAILED',r.url(),r.failure()?.errorText));
   const expected=[...fs.readFileSync('market-observatory/index.html','utf8').matchAll(/src="(\.\/[^"?]+\.js\?v=[^"]+)"/g)].map(m=>m[1]);
   for(let attempt=0;attempt<7;attempt++){
-   const target=new URL(base);target.searchParams.set('ui_verify',Date.now());
+   const target=new URL(base);if(attempt)target.searchParams.set('ui_verify',Date.now());
    await page.goto(target.href,{waitUntil:'networkidle',timeout:90000});
    const scripts=await page.locator('script[src]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));
    if(expected.every(src=>scripts.includes(src)))break;
