@@ -13,6 +13,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?process.
   await page.locator('[data-tab="analysis-lab"]').click();
   await page.waitForFunction(()=>window.__JJOONI_ANALYSIS_LAB?.loaded,{timeout:30000});
   assert.equal(await page.locator('#labSeries .labSeriesRow').count(),3);
+  if(await page.locator('details.labControls').count())await page.locator('details.labControls>summary').click();
   const initial=await page.locator('#labStats').innerText();assert.match(initial,/공통 관측/);
   await page.selectOption('#labType','scatter');assert.equal(await page.evaluate(()=>Chart.getChart('labChart').config.type),'scatter');
   await page.selectOption('#labType','correlation');assert.match(await page.locator('#labNotes').innerText(),/사후 분석/);

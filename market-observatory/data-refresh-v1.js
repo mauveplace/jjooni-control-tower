@@ -22,8 +22,8 @@ if(!root.document)return;
 const doc=root.document;
 let pending=null,timer=null,busy=false,button,message,links;
 function save(){try{pending?sessionStorage.setItem(KEY,JSON.stringify(pending)):sessionStorage.removeItem(KEY);}catch(_){}}
-function display(state,text){message.textContent=text;message.dataset.state=state;button.textContent=pending?'수집 실행 화면 열기':'데이터 최신화';}
-function stop(){if(timer)clearTimeout(timer);timer=null;pending=null;save();button.textContent='데이터 최신화';}
+function display(state,text){message.textContent=text;message.dataset.state=state;button.textContent=pending?'수집 실행 화면 열기':'원천 수집 열기';}
+function stop(){if(timer)clearTimeout(timer);timer=null;pending=null;save();button.textContent='원천 수집 열기';}
 async function json(url,optional=false){const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(12000),headers:url.startsWith('https://api.github.com/')?{Accept:'application/vnd.github+json'}:{}});if(optional&&r.status===404)return null;if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
 function reloadView(){try{sessionStorage.setItem('JJOONI_OBSERVATORY_AUTO_REFRESH_V1',JSON.stringify({tab:doc.querySelector('#tabs button.on')?.dataset.tab||'overview',scrollY:root.scrollY||0,savedAt:Date.now()}));}catch(_){}root.location.reload();}
 async function poll(){
@@ -51,7 +51,7 @@ function start(){
 function init(){
   const head=doc.querySelector('header.top');if(!head)return;
   const host=doc.createElement('div');host.className='obsCollectControls';
-  host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">데이터 최신화</button><button type="button" id="obsReadPublished">게시 데이터 다시 읽기</button><a target="_blank" rel="noopener noreferrer">수집 실행 기록 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">예약 수집 유지 · 데이터 최신화는 원천 수집 실행 화면으로 연결됩니다.</div>';
+  host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 새로고침</button><a target="_blank" rel="noopener noreferrer">실행 기록 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">예약 수집 중 · 원천 수집 열기 → GitHub에서 Run workflow 실행</div>';
   head.appendChild(host);button=host.querySelector('#obsCollectRefresh');message=host.querySelector('#obsCollectMessage');links=host.querySelector('a');links.href=RUN_URL;
   button.addEventListener('click',start);host.querySelector('#obsReadPublished').addEventListener('click',reloadView);
   try{pending=JSON.parse(sessionStorage.getItem(KEY)||'null');const result=sessionStorage.getItem(KEY+'_RESULT');if(result){message.textContent=result+' 최신 게시 데이터를 다시 읽었습니다.';sessionStorage.removeItem(KEY+'_RESULT');}}catch(_){pending=null;}

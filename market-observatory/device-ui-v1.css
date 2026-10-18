@@ -1,0 +1,86 @@
+/* Shared Observatory layout. Explicit body scope wins over older injected styles. */
+.obsDeviceUI button,.obsDeviceUI select,.obsDeviceUI input{font-family:inherit}
+.obsDeviceUI .top{position:static}
+.obsDeviceUI #tabs{top:0}
+.obsDeviceUI button:focus-visible,.obsDeviceUI summary:focus-visible,.obsDeviceUI select:focus-visible{outline:3px solid #3478db;outline-offset:2px}
+.obsDeviceUI .meta,.obsDeviceUI .obsCoverage{font-size:12px;line-height:1.6}
+.obsDeviceUI .obsRange{flex-wrap:wrap;overflow:visible;gap:6px}
+.obsDeviceUI .obsRange button,.obsDeviceUI .latestCompare button,.obsDeviceUI .obsMacroRange button,.obsDeviceUI .obsFullHead button{min-height:44px;min-width:44px;font-size:12px}
+.obsDeviceUI .chart{height:420px;padding-bottom:0;display:flex;flex-direction:column}
+.obsDeviceUI .chart canvas{flex:1;min-height:0!important}
+.obsDeviceUI .obsFreshDetails{margin:8px 0;background:#fff;border:1px solid #dce5ef;border-radius:12px;padding:10px}
+.obsDeviceUI summary{cursor:pointer;font-size:13px;font-weight:750;min-height:44px;line-height:1.6;padding:10px 2px}
+.obsDeviceUI .obsFreshGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;gap:8px;overflow:visible}
+.obsDeviceUI .obsFreshTile span,.obsDeviceUI .obsFreshTile strong{font-size:12px;white-space:normal}
+.obsDeviceUI .obsFreshTile b{font-size:10px}
+.obsDeviceUI .obsFreshTile small{font-size:11px;white-space:normal;overflow-wrap:anywhere;color:#667085}
+.obsDeviceUI .obsWatchMeta,.obsDeviceUI .obsFreshHead span{font-size:11px}
+.obsDeviceUI .obsFreshHead{flex-wrap:wrap}
+.obsDeviceUI .obsFreshNote{font-size:12px;line-height:1.6;margin:5px 0;color:#526071}
+.obsDeviceUI .obsFreshActions button{min-height:44px;font-size:12px}
+.obsDeviceUI .latestTileFoot,.obsDeviceUI .latestTileFoot time,.obsDeviceUI .latestTilePeriods,.obsDeviceUI .latestCryptoBasis{font-size:11px;line-height:1.5}
+.obsDeviceUI .latestBoardTitleBox span,.obsDeviceUI .latestBoardTools>span{font-size:12px;white-space:normal}
+.obsDeviceUI .obsMacroRow{grid-template-columns:minmax(150px,1.4fr) repeat(6,minmax(84px,1fr))}
+.obsDeviceUI .obsMacroRow>div:nth-child(n){display:block}
+.obsDeviceUI .obsMacroCell span,.obsDeviceUI .obsMacroName small,.obsDeviceUI .obsMacroKpi small{font-size:11px;color:#526071}
+.obsDeviceUI .obsMacroCell b{font-size:13px}
+.obsDeviceUI .obsMacroOpen{min-height:44px;font-size:12px}
+.obsDeviceUI .obsMacroInfo,.obsDeviceUI .obsMacroNotes,.obsDeviceUI .obsMacroSurprise,.obsDeviceUI .obsMacroQuality{font-size:12px;line-height:1.6}
+.obsDeviceUI .obsBasisWarning{margin:10px 0;padding:12px;border:1px solid #f0c56b;border-radius:12px;background:#fffbef;font-size:13px;line-height:1.65;color:#74440b}
+.obsDeviceUI .obsBasisWarning[hidden]{display:none}
+.obsDeviceUI .obsMacroDetail{grid-column:1/-1}
+.obsDeviceUI .labControls>summary{margin-bottom:8px}
+.obsDeviceUI .labControls:not([open])>summary{margin:0}
+.obsDeviceUI .labControls label,.obsDeviceUI .labNotes,.obsDeviceUI #labStatus{font-size:12px}
+.obsDeviceUI .labControls input,.obsDeviceUI .labControls select,.obsDeviceUI .labBar button,.obsDeviceUI .labSeriesRow button{min-height:44px;font-size:13px}
+.obsDeviceUI .labSeriesRow{grid-template-columns:24px minmax(140px,2.5fr) minmax(120px,1.5fr) 80px 110px 52px}
+.obsDeviceUI .labPlot{height:440px}
+.obsDeviceUI .mrBox b{overflow-wrap:anywhere}
+.obsDeviceUI .mrBox small,.obsDeviceUI .mrBox span,.obsDeviceUI .mrNote{font-size:12px;line-height:1.6}
+.obsDeviceUI .mrActions b{overflow-wrap:anywhere}
+.obsDeviceUI .obsCollectActions button,.obsDeviceUI .obsCollectActions a{min-height:44px;font-size:12px;padding:8px}
+.obsDeviceUI .obsCollectActions{gap:6px}
+.obsDeviceUI .obsSectorTableWrap{scrollbar-width:thin}
+.obsDeviceUI #sectors .obsPeriod span,.obsDeviceUI #sectors .obsSparkHead,.obsDeviceUI #sectors .obsSparkHead b{font-size:11px}
+@media(max-width:1100px){
+ .obsDeviceUI .top{position:static;padding:12px}
+ .obsDeviceUI .sub{display:none}
+ .obsDeviceUI .brand{font-size:17px}
+ .obsDeviceUI .pulse{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+ .obsDeviceUI .chip{flex:0 0 auto;font-size:11px}
+ .obsDeviceUI #tabs{position:sticky;top:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;overflow:visible;padding:8px 10px}
+ .obsDeviceUI #tabs button{min-width:0;min-height:44px;font-size:12px;padding:6px 3px;overflow-wrap:anywhere}
+ .obsDeviceUI .obsFreshGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .obsDeviceUI .grid{grid-template-columns:minmax(0,1fr)}
+ .obsDeviceUI .obsIndexGrid .card:last-child{grid-column:auto}
+ .obsDeviceUI .obsMacroRow{grid-template-columns:repeat(3,minmax(0,1fr));padding:8px}
+ .obsDeviceUI .obsMacroName{grid-column:1/-1;display:flex!important;align-items:center;gap:8px;flex-wrap:wrap}
+ .obsDeviceUI .obsMacroRow>div{padding:8px;min-width:0}
+ .obsDeviceUI .obsMacroName small{display:inline-block}
+ .obsDeviceUI .obsMacroOpen{margin:0 0 0 auto}
+ .obsDeviceUI .labSeriesRow{grid-template-columns:24px minmax(120px,2fr) minmax(100px,1.4fr) 70px 100px 52px}
+ .obsDeviceUI #sectors .obsSectorGrid{grid-template-columns:minmax(0,1fr)}
+ .obsDeviceUI .chart{height:390px!important}
+}
+@media(max-width:600px){
+ .obsDeviceUI #tabs{grid-template-columns:repeat(4,minmax(0,1fr));position:static}
+ .obsDeviceUI .obsFreshGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .obsDeviceUI .obsFreshTile>div{flex-wrap:wrap}
+ .obsDeviceUI .obsFreshHead>div:first-child{flex-wrap:wrap}
+ .obsDeviceUI .obsFreshActions{flex-wrap:wrap}
+ .obsDeviceUI .latestGroupGrid,.obsDeviceUI .latestBoardGrid:not(.grouped){display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:none;grid-auto-flow:row;grid-auto-columns:auto;overflow:visible}
+ .obsDeviceUI .latestTile{padding:10px;min-width:0}
+ .obsDeviceUI .latestTile strong{font-size:19px}
+ .obsDeviceUI .latestCompare{flex-wrap:wrap;overflow:visible}
+ .obsDeviceUI .chart{height:440px!important}
+ .obsDeviceUI .chart canvas{min-height:0}
+ .obsDeviceUI .obsMacroRow{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .obsDeviceUI .obsMacroHero{grid-template-columns:1fr}
+ .obsDeviceUI .labSeriesRow{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr)}
+ .obsDeviceUI .labSeriesRow label:first-of-type{grid-column:2/4}
+ .obsDeviceUI .labSeriesRow label:nth-of-type(2),.obsDeviceUI .labSeriesRow label:nth-of-type(4){grid-column:1/3}
+ .obsDeviceUI .labForm{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .obsDeviceUI .labPlot{height:380px}
+ .obsDeviceUI .event .source,.obsDeviceUI .event-meta{font-size:11px}
+ .obsDeviceUI .obsFullHead b{white-space:normal}
+}

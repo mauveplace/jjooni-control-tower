@@ -117,13 +117,13 @@ function growthDefense20(rows){const avg=xs=>{const a=xs.filter(v=>v!=null);retu
 
 function periodGrid(r){return `<div class="obsPeriodGrid">${H.map(d=>`<div class="obsPeriod"><span>${d}일</span><b class="${cls(ret(r,d))}">${pct(ret(r,d))}</b></div>`).join('')}</div>`}
 function sparkline(r){
- const xs=(DATA?.series?.[r?.ticker]||[]).slice(-100).map(p=>({date:p?.date,value:n(p?.value)})).filter(p=>p.value!=null);
- if(xs.length<2)return '<div class="obsSpark"><div class="obsSparkHead"><span>최근 100거래일</span><b class="flat">데이터 부족</b></div></div>';
+ const xs=(DATA?.series?.[r?.ticker]||[]).slice(-101).map(p=>({date:p?.date,value:n(p?.value)})).filter(p=>p.value!=null);
+ if(xs.length<2)return '<div class="obsSpark"><div class="obsSparkHead"><span>100거래일 수익률</span><b class="flat">데이터 부족</b></div></div>';
  const vals=xs.map(p=>p.value),lo=Math.min(...vals),hi=Math.max(...vals),span=hi-lo||1,w=320,h=42,pad=2;
  const points=vals.map((v,i)=>`${(pad+(i*(w-pad*2)/(vals.length-1))).toFixed(1)},${(pad+((hi-v)/span)*(h-pad*2)).toFixed(1)}`).join(' ');
- const first=vals[0],last=vals[vals.length-1],move=first?((last/first)-1)*100:null,tone=move==null?'flat':move>=0?'up':'down';
+ const move=ret(r,100),tone=move==null?'flat':move>=0?'up':'down';
  const lastPair=points.split(' ').pop().split(',');
- return `<div class="obsSpark ${tone}"><div class="obsSparkHead"><span>최근 100거래일</span><b class="${tone}">${pct(move)}</b></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(r.ticker)} 최근 100거래일 가격 추이"><line class="sparkBase" x1="0" y1="${h-1}" x2="${w}" y2="${h-1}"></line><polyline points="${points}"></polyline><circle cx="${lastPair[0]}" cy="${lastPair[1]}" r="2.4"></circle></svg></div>`;
+ return `<div class="obsSpark ${tone}"><div class="obsSparkHead"><span>100거래일 수익률</span><b class="${tone}">${pct(move)}</b></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(r.ticker)} 최근 100거래일 가격 추이"><line class="sparkBase" x1="0" y1="${h-1}" x2="${w}" y2="${h-1}"></line><polyline points="${points}"></polyline><circle cx="${lastPair[0]}" cy="${lastPair[1]}" r="2.4"></circle></svg></div>`;
 }
 function themeHtml(){
  const groups=(DATA?.groups||[]).filter(g=>g.key!=='classic');
