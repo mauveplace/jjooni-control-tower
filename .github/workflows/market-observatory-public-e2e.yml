@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: market-observatory-public-responsive-e2e
+  group: market-observatory-public-responsive-e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
