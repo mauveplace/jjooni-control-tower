@@ -8,6 +8,10 @@ const format=(v,d=2,suffix='')=>finite(v)?Number(v).toLocaleString('ko-KR',{mini
 function model(key){
  const data=typeof DATA!=='undefined'?DATA:null;if(!data)return null;
  const item=window.__JJOONI_LATEST_BOARD?.items?.find(x=>x.k===key)||(key==='KR_US_10Y'?{k:key,label:'한국−미국 10년 금리차',digits:3,suffix:'%',kind:'bp'}:null);
+ if(key==='KR_US_10Y'&&!data.series?.[key]?.length){
+  const us=new Map(clean(data.series?.US10Y).map(p=>[p.date,p.value]));
+  return{title:item.label,digits:3,suffix:'%',prefix:'',kind:'bp',lines:[{label:item.label,rows:clean(data.series?.KR10Y).filter(p=>us.has(p.date)).map(p=>({date:p.date,value:p.value-us.get(p.date)}))}],basis:'한국 10년 − 미국 10년 · 동일 관측일끼리 계산'};
+ }
  if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(data.series?.[key]?.length?data.series[key]:data.series?.[item.fallback])}],basis:'일별 관측값 · 날짜는 원천의 거래일/관측일 기준'};
  const t=data.tripod_latest||{},history=[...(data.tripod_history||[])];const date=t.session_date||t.date;
  if(date)history.push({...t,date});

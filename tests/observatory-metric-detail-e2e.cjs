@@ -19,6 +19,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    await dialog.getByRole('button',{name:'그래프 닫기'}).click();
    assert(await page.locator('dialog').evaluate(el=>!el.open));
   }
+  await page.locator('#spreadKpis [data-metric="KR_US_10Y"]').click();
+  assert.notEqual(await page.locator('dialog .obsMetricValue').textContent(),'관측값 없음','Same-date rate spread history');
+  await page.keyboard.press('Escape');
   const tile=page.locator('#latestBoardGrid [data-metric="US10Y_OFFICIAL"]');
   await tile.scrollIntoViewIfNeeded();const y=await page.evaluate(()=>scrollY);
   await tile.focus();await page.keyboard.press('Enter');
