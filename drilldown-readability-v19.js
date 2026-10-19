@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_DRILLDOWN_READABILITY_V19)return;
-const STATE={state:'ACTIVE',version:'19.3',patched:0,last_at:null};
+const STATE={state:'ACTIVE',version:'19.4',patched:0,last_at:null};
 window.__JJOONI_DRILLDOWN_READABILITY_V19=STATE;
 
 function ensureStyle(){
@@ -27,6 +27,12 @@ function ensureStyle(){
  #accountDrillModal button,[id*="position"][id*="Modal"] button,[id*="Position"][id*="Modal"] button{font-size:14pt!important;min-height:44px!important;padding:8px 12px!important}
  #accountDrillModal [style*="font:800 12px"],#accountDrillModal [style*="font:600 10px"],#accountDrillModal [style*="font:800 11px"]{font-size:16pt!important;line-height:1.5!important}
 }
+
+#metricInfoModal{font:16px/1.6 system-ui!important}
+#metricInfoModal :is(p,span,small,td,th,li){font-size:14px!important;line-height:1.6!important;overflow-wrap:anywhere}
+#metricInfoModal :is(h2,h3,h4){font-size:22px!important;line-height:1.4!important}
+#metricInfoModal button{font-size:15px!important;min-height:44px}
+#accountDrillModal .eyebrow,#accountDrillModal .heroLabel{font-size:14px!important;line-height:1.5!important}
 `;
  (document.head||document.documentElement).appendChild(s);
 }

@@ -40,7 +40,7 @@ setTimeout(bind,0);setTimeout(bind,300);setTimeout(bind,900);
 if(window.__JJOONI_DAILY_PNL_ATTR_V27||document.getElementById('ctDailyPnlAttrV27Script'))return;
 const st={state:'LOADING',version:'27.0',started_at:new Date().toISOString()};
 window.__JJOONI_DAILY_PNL_ATTR_LOADER_V27=st;
-const s=document.createElement('script');s.id='ctDailyPnlAttrV27Script';s.src='daily-pnl-attribution-v27.js?v=27.0&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctDailyPnlAttrV27Script';s.src='daily-pnl-attribution-v27.js?v=27.4&t='+Date.now();s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_DAILY_PNL_ATTR_V27?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('DAILY_PNL_ATTR_V27_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);

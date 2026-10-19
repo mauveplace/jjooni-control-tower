@@ -74,7 +74,7 @@ test('tablet overview account cards use one 18pt typography authority',()=>{
 
 test('tablet detail modal and account charts are not phone-sized',()=>{
   const read=fs.readFileSync('drilldown-readability-v19.js','utf8');
-  assert.match(loader,/drilldown-readability-v19\.js\?v=19\.3/);
+  assert.match(loader,/drilldown-readability-v19\.js\?v=19\.4/);
   assert.match(read,/font-size:18pt!important/);
   assert.match(read,/font-size:16pt!important/);
   assert.match(read,/font-size:22pt!important/);
