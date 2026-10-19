@@ -12,9 +12,10 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    const tile=page.locator(`#latestBoardGrid [data-metric="${key}"]`).first();
    await tile.click();
    const dialog=page.locator('dialog[open]');assert(await dialog.isVisible(),key+' opens');
-   const info=await dialog.evaluate(el=>{const r=el.getBoundingClientRect(),c=Chart.getChart(el.querySelector('canvas'));return{left:r.left,right:r.right,bottom:r.bottom,top:r.top,w:innerWidth,h:innerHeight,points:c?.data.datasets[0].data.length||0,value:el.querySelector('.obsMetricValue').textContent}});
+   const info=await dialog.evaluate(el=>{const r=el.getBoundingClientRect(),c=Chart.getChart(el.querySelector('canvas'));return{left:r.left,right:r.right,bottom:r.bottom,top:r.top,w:innerWidth,h:innerHeight,points:c?.data.datasets[0].data.length||0,axis:c?{min:c.scales.x.min,max:c.scales.x.max,first:c.data.datasets[0].data[0].x,last:c.data.datasets[0].data.at(-1).x}:null,value:el.querySelector('.obsMetricValue').textContent}});
    assert(info.left>=-1&&info.right<=info.w+1&&info.top>=-1&&info.bottom<=info.h+1,`${width} ${key} bounds ${JSON.stringify(info)}`);
    if(info.value!=='관측값 없음')assert(info.points>0,key+' actual points rendered');
+   if(info.points>1){assert.equal(info.axis.min,info.axis.first,key+' axis starts at first observation');assert.equal(info.axis.max,info.axis.last,key+' axis ends at last observation')}
    if(key==='US10Y_OFFICIAL')assert.match(info.value,/\d\.\d{3}%$/);
    await dialog.getByRole('button',{name:'그래프 닫기'}).click();
    assert(await page.locator('dialog').evaluate(el=>!el.open));
