@@ -48,8 +48,7 @@
     "RUSSELL2000": 2728.2980957,
     "DOW": 51966.03125,
     "NASDAQCOMPOSITE": 26430.88671875,
-    "SILVER": 57.16999817,
-    "JP20Y": 3.803
+    "SILVER": 57.16999817
   },
   "series": {
     "NASDAQ100": [
@@ -318027,52 +318026,6 @@
         "date": "2026-10-19",
         "value": 57.16999817
       }
-    ],
-    "JP20Y": [
-      {
-        "date": "2026-10-01",
-        "value": 3.91
-      },
-      {
-        "date": "2026-10-02",
-        "value": 3.925
-      },
-      {
-        "date": "2026-10-05",
-        "value": 3.935
-      },
-      {
-        "date": "2026-10-06",
-        "value": 3.946
-      },
-      {
-        "date": "2026-10-07",
-        "value": 3.943
-      },
-      {
-        "date": "2026-10-08",
-        "value": 3.916
-      },
-      {
-        "date": "2026-10-09",
-        "value": 3.853
-      },
-      {
-        "date": "2026-10-13",
-        "value": 3.841
-      },
-      {
-        "date": "2026-10-14",
-        "value": 3.849
-      },
-      {
-        "date": "2026-10-15",
-        "value": 3.786
-      },
-      {
-        "date": "2026-10-16",
-        "value": 3.803
-      }
     ]
   },
   "curves": {
@@ -318194,7 +318147,7 @@
     "drawdown_52w_pct": -5.428841274003149,
     "ma250": 27272.42061718776,
     "ndx": 29529.34375,
-    "observed_at": "2026-10-20T07:31:40+09:00",
+    "observed_at": "2026-10-20T07:31:43+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -6.523473019725101,
     "previous_ma250": 27254.867320312762,
@@ -323523,12 +323476,6 @@
       "last_date": "2026-10-19",
       "target_session": "2026-10-19"
     },
-    "JP_RATES": {
-      "status": "LIVE",
-      "source": "Japan MOF current JGB yield CSV",
-      "source_url": "https://www.mof.go.jp/jgbs/reference/interest_rate/jgbcm.csv",
-      "last_date": "2026-10-16"
-    },
     "KOSPI": {
       "status": "LIVE",
       "source": "Naver Finance index daily",
@@ -323545,6 +323492,12 @@
       "status": "LIVE",
       "source": "FearAndGreedGraph public JSON",
       "last_date": "2026-10-19"
+    },
+    "JP_RATES": {
+      "status": "LIVE",
+      "source": "Japan MOF current JGB yield CSV",
+      "source_url": "https://www.mof.go.jp/jgbs/reference/interest_rate/jgbcm.csv",
+      "last_date": "2026-10-16"
     }
   },
   "kr_rates_refreshed_kst": "2026-10-20T07:31:27+09:00",
