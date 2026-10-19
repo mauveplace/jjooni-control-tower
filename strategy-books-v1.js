@@ -125,10 +125,11 @@ function metric(label,value,sub){const x=el('div',null,'sbMetric');x.append(el('
 function colored(value,format=signed){return el('span',format(value),tone(value))}
 function periodLine(row){return row.periodPnl!=null&&row.periodParticipated?'추적기간 실수익 '+signed(row.periodPnl):row.periodParticipated===false?'추적기간 실수익 — · 미편입':'추적기간 실수익 — · '+(row.periodReason||'계좌별 확인 사유 참고')}
 function render(){
- if(!ensure())return;if(!S.busy&&box.querySelector('form')?.contains(document.activeElement))return;
+ if(!ensure())return;
  const C=root.__JJOONI_CANONICAL_SSOT||{},tp=root.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35?.last;let view;try{view=build(C,S.book,withBrokerTrades(S.ledger,root.__JJOONI_LIVE_PAYLOAD||{}),tp)}catch(e){box.replaceChildren(el('h3','트라이팟 성과'),el('p',e.message,'sbNote'));return}
  S.snapshot=view;const overview=strategySummary(view);S.performance=overview;sleeveStyle();accountSleeves();
  const refreshButton=box.querySelector('.sbControls button');if(refreshButton){refreshButton.disabled=S.busy;refreshButton.textContent=S.busy?'확인 중…':'성과 새로고침'}
+ const submitButton=box.querySelector('.sbFlowJournal button[type="submit"]');if(submitButton)submitButton.disabled=S.busy||!view.baseline_at;
  const signature=JSON.stringify([view,S.book,S.ledger,S.activeAccount,S.error]);
  if(signature===lastRenderSignature&&box.childElementCount)return;
  const openDetails=new Set([...box.querySelectorAll('details[open]')].map(d=>d.className+'|'+(d.dataset.account||'')));
