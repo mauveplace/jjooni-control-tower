@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-20T04:30:46+09:00",
+  "generated_kst": "2026-10-20T06:18:15+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 6,
   "observatory_session": "2026-10-16",
   "file_status": {
     "observatory": {
@@ -28,12 +28,12 @@
       "source_as_of_kst": null,
       "market_data_as_of": "2026-10-16",
       "expected_market_data_date": "2026-10-16",
-      "audit_expected_market_data_date": "2026-10-16",
+      "audit_expected_market_data_date": "2026-10-19",
       "declared_freshness": "LIVE",
-      "audit_state": "LIVE"
+      "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-10-20T01:51:30+09:00",
+      "generated_kst": "2026-10-20T06:17:30+09:00",
       "events": 185,
       "actual_freshness": "DEGRADED",
       "overdue_count": 1,
@@ -66,10 +66,12 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-20T04:30:45+09:00",
+      "generated_kst": "2026-10-20T06:18:15+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
+        "crypto",
+        "fedwatch",
         "calendar",
         "audit"
       ]
@@ -452,7 +454,7 @@
       "latest_mismatch": []
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -496,8 +498,8 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LIVE",
-      "anchor": "2026-10-16",
+      "state": "LAGGING",
+      "anchor": "2026-10-19",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
@@ -512,21 +514,46 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-20T03:53:43+09:00",
-      "current_quote_age_seconds": 2223,
+      "current_quote_age_seconds": 8672,
       "captured_quote_age_seconds": 4
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-20T03:53:43+09:00",
-      "current_quote_age_seconds": 2223,
+      "current_quote_age_seconds": 8672,
       "captured_quote_age_seconds": 4
     }
   },
   "issues": [
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-19,ETHUSD:2026-10-19"
+    },
+    {
+      "code": "GROUP_FEDWATCH_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-19 dates=FEDWATCH:2026-10-16"
+    },
+    {
+      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
+      "severity": "WARN",
+      "detail": "declared=LIVE audit=LAGGING expected=2026-10-19 asof=2026-10-16"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-20T03:53:43+09:00', 'current_quote_age_seconds': 8672, 'captured_quote_age_seconds': 4}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-20T03:53:43+09:00', 'current_quote_age_seconds': 8672, 'captured_quote_age_seconds': 4}"
+    },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
       "severity": "WARN",
