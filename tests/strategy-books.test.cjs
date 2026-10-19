@@ -82,3 +82,18 @@ test('broker supplements exclude duplicate IDs, duplicate executions and non-bro
  assert.equal(S.withBrokerTrades(ledger([trade]),{recent_trades:[{...fresh,order_id:'other'}]}).rows.length,1);
  assert.equal(S.withBrokerTrades(ledger([]),{recent_trades:[{...fresh,source:'MODEL'}, {...fresh,order_id:''}]}).rows.length,0);
 });
+
+test('shared confirmed FX resolves missing trade FX and stays fixed when spot FX changes',()=>{
+ const C=c(),b=openingBook(C);C.accounts.TOSS.nav=100000;C.accounts.TOSS.positions=[p('QQQ',3,60000,{currency:'USD',fx:9999})];
+ const t=tr('TOSS','pinned','BUY',1,20,{fx:null,commission:.1});
+ b.trade_fx_v1={'TOSS|pinned':{source:'USER_AUTHORIZED_CURRENT_SNAPSHOT_FX',fx:1200,confirmed_at:'2026-10-16T09:40:00Z',ticker:'QQQ',qty:1,price:20,filled_at:t.filled_at_kst}};
+ const report=()=>S.build(C,b,ledger([t])).accounts[0].groups[0].positions[0];assert.equal(report().cost,44120);
+ C.accounts.TOSS.positions[0].fx=2000;assert.equal(report().cost,44120);assert.equal(b.cost_basis_v1.positions['TOSS|QQQ'].cost_krw,20000);
+ t.qty=2;assert.equal(report().cost,null,'changed execution facts cannot reuse the pin');
+});
+test('a future FX confirmation cannot change an earlier snapshot and missing fees remain missing',()=>{
+ const C=c(),b=openingBook(C);C.accounts.TOSS.positions=[p('QQQ',3,60000,{currency:'USD'})];const t=tr('TOSS','pinned','BUY',1,20,{fx:null,commission:null});
+ b.trade_fx_v1={'TOSS|pinned':{source:'USER_AUTHORIZED_CURRENT_SNAPSHOT_FX',fx:1200,confirmed_at:'2026-10-17T09:40:00Z',ticker:'QQQ',qty:1,price:20,filled_at:t.filled_at_kst}};
+ assert.equal(S.withConfirmedTradeFx(ledger([t]),b,at).rows[0].fx,null);
+ b.trade_fx_v1['TOSS|pinned'].confirmed_at=old;assert.equal(S.build(C,b,ledger([t])).accounts[0].groups[0].positions[0].cost,null);
+});
