@@ -9,9 +9,11 @@
 <main>
 <h1>모바일 화면 확인</h1>
 <label>화면 너비 <select id="width"><option value="360">360px</option><option value="390" selected>390px</option><option value="412">412px</option></select></label>
+<label>화면 높이 <select id="height"><option value="844" selected>844px</option><option value="760">760px</option><option value="700">700px</option></select></label>
 <iframe title="Control Tower 모바일 화면" src="../index.html"></iframe>
 </main>
 <script>
-document.querySelector('select').addEventListener('change',e=>{document.querySelector('iframe').style.width=e.target.value+'px'});
+document.querySelector('#width').addEventListener('change',e=>{document.querySelector('iframe').style.width=e.target.value+'px'});
+document.querySelector('#height').addEventListener('change',e=>{document.querySelector('iframe').style.height=e.target.value+'px'});
 </script>
 </html>
