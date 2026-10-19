@@ -66,7 +66,7 @@ jobs:
               await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.responsive===true,{timeout:30000});
               await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile strong').length>10);
               const yields=await page.locator('#latestBoardGrid .latestTile').filter({hasText:/미국 (3개월|2Y|10Y|30Y)/}).locator('strong').allTextContents();
-              assert(yields.length===4&&yields.every(v=>/^\d+\.\d{3}%$/.test(v)),`${tc.name} US yield precision: ${JSON.stringify(yields)}`);
+              assert(yields.length===4&&yields.slice(0,2).every(v=>/^\d+\.\d{2}%$/.test(v))&&yields.slice(2).every(v=>/^\d+\.\d{3}%$/.test(v)),`${tc.name} source yield precision: ${JSON.stringify(yields)}`);
               const spreads=await page.locator('#spreadKpis .kpi b').allTextContents();
               assert(spreads.length===4&&spreads.every(v=>/^-?\d+\.\d{3}%$/.test(v)),`${tc.name} spread precision: ${JSON.stringify(spreads)}`);
               await page.click('.obsRange[data-for="marketChart"] button[data-range="30Y"]');

@@ -12,7 +12,7 @@ function model(key){
   const us=new Map(clean(data.series?.US10Y_OFFICIAL).map(p=>[p.date,p.value]));
   return{title:item.label,digits:3,suffix:'%',prefix:'',kind:'bp',lines:[{label:item.label,rows:clean(data.series?.KR10Y).filter(p=>us.has(p.date)).map(p=>({date:p.date,value:p.value-us.get(p.date)}))}],basis:'한국 10년 − 미국 재무부 공식 10년 · 동일 관측일끼리 계산'};
  }
- if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(window.__JJOONI_LATEST_BOARD?.getSeries?.(item)||(data.series?.[item.seriesKey||key]||[]))}],note:item.seriesKey?`시장 지수와 공식 일별 금리는 다른 지표입니다. 미 재무부 공식 일별: ${format(data.series?.[key]?.at(-1)?.value,2,'%')} (${data.series?.[key]?.at(-1)?.date||'관측일 미확인'})`:'',basis:item.seriesKey?'Cboe 금리지수 · Yahoo 일별 · 시장 원천 정밀도 유지':(['US3M','US2Y'].includes(key)?'미 재무부 공식 일별 · 원천 소수 2자리 · 세 번째 0은 표시 형식':'일별 관측값 · 날짜는 원천의 거래일/관측일 기준')};
+ if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(window.__JJOONI_LATEST_BOARD?.getSeries?.(item)||(data.series?.[item.seriesKey||key]||[]))}],note:item.seriesKey?`시장 지수와 공식 일별 금리는 다른 지표입니다. 미 재무부 공식 일별: ${format(data.series?.[key]?.at(-1)?.value,2,'%')} (${data.series?.[key]?.at(-1)?.date||'관측일 미확인'})`:'',basis:item.seriesKey?'Cboe 금리지수 · Yahoo 일별 · 시장 원천 정밀도 유지':(['US3M','US2Y'].includes(key)?'미 재무부 공식 일별 · 원천 소수 2자리 · 시장 금리지수와 별도 기준':'일별 관측값 · 날짜는 원천의 거래일/관측일 기준')};
  const t=data.tripod_latest||{},history=[...(data.tripod_history||[])];const date=t.session_date||t.date;
  if(date)history.push({...t,date});
  const line=(label,field)=>({label,rows:clean(history.map(p=>({date:p.date,value:p[field]})))});
