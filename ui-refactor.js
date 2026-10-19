@@ -157,7 +157,7 @@ function readableText(){
  }
  for(const [e,size] of changes){e.style.setProperty('font-size',size+'px','important');e.style.setProperty('line-height','1.5','important')}
 }
-function scheduleTypography(){clearTimeout(typeTimer);typeTimer=setTimeout(readableText,120)}
+function scheduleTypography(){if(typeTimer)return;typeTimer=setTimeout(()=>{typeTimer=null;readableText()},80)}
 new MutationObserver(scheduleTypography).observe(document.body||document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden']});
 document.addEventListener('click',scheduleTypography);
 window.addEventListener('resize',scheduleTypography,{passive:true});
