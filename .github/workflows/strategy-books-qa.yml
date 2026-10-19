@@ -24,4 +24,6 @@ jobs:
         if: always()
         with:
           name: strategy-books-ui
-          path: strategy-books-*.png
+          path: |
+            strategy-books-*.png
+            /tmp/irp-readability-*.png
