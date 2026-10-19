@@ -64,6 +64,11 @@ jobs:
               page.on('pageerror',e=>errors.push(String(e)));
               await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
               await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.responsive===true,{timeout:30000});
+              await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile strong').length>10);
+              const yields=await page.locator('#latestBoardGrid .latestTile').filter({hasText:/미국 (3개월|2Y|10Y|30Y)/}).locator('strong').allTextContents();
+              assert(yields.length===4&&yields.every(v=>/^\d+\.\d{3}%$/.test(v)),`${tc.name} US yield precision: ${JSON.stringify(yields)}`);
+              const spreads=await page.locator('#spreadKpis .kpi b').allTextContents();
+              assert(spreads.length===4&&spreads.every(v=>/^-?\d+\.\d{3}%$/.test(v)),`${tc.name} spread precision: ${JSON.stringify(spreads)}`);
               await page.click('.obsRange[data-for="marketChart"] button[data-range="30Y"]');
               await page.waitForFunction(()=>{const s=document.querySelector('[data-coverage="marketChart"]')?.textContent||'';return s.startsWith('30Y 표시')&&!s.includes('로딩중')},{timeout:30000});
               const base=await page.evaluate(()=>({
