@@ -76,10 +76,11 @@ function applyMasterTrades(receipt,reason){
   merged.push({...row,source:'MASTER_TRADE_LEDGER'});seen.add(k);added++;
  }
  merged.sort((a,b)=>String(a?.filled_at_kst||a?.trade_date||a?.date||'').localeCompare(String(b?.filled_at_kst||b?.trade_date||b?.date||'')));
- d.human.trades=merged;
+ const changed=JSON.stringify(current)!==JSON.stringify(merged);
+ if(changed)d.human.trades=merged;
  const sells=rows.filter(r=>tradeSide(r)==='SELL').length;
  window.__JJOONI_CT_MASTER_TRADE_BRIDGE={state:'APPLIED',version:'1.0',reason:String(reason||''),latest_trade_date:tradeDate(rows[0]),receipt_rows:rows.length,receipt_sells:sells,added,at:new Date().toISOString()};
- return true;
+ return changed;
 }
 function reapplyStoredMasterTrades(reason){
  const receipt=window.__JJOONI_CT_MASTER_RECEIPT;
