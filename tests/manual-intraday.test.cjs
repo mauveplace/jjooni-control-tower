@@ -27,3 +27,6 @@ test('reference queue prioritizes selected symbol and one failed source cannot b
  vm.createContext(context);vm.runInContext(src.slice(src.indexOf('const referencePending='),src.indexOf('async function hydrateSavedCharts()'))+';this.queue=queueReferences;',context);
  context.queue();assert.deepEqual(calls,['SELECTED','A','B']);pending[1].reject(Error('source unavailable'));await new Promise(r=>setImmediate(r));assert.equal(calls[3],'C');pending[0].resolve({reference:{session_date:'2026-10-19',previous_close:100,previous_close_date:'2026-10-16'}});await new Promise(r=>setImmediate(r));assert.equal(charts.get('SELECTED').previous_close,100);assert.equal(calls[4],'D');
 });
+
+const {displayTimezone}=require('../manual-intraday-v1.js');
+test('US charts default to Korea time and allow Eastern; domestic charts always stay KST',()=>{assert.equal(displayTimezone('America/New_York'),'Asia/Seoul');assert.equal(displayTimezone('America/New_York','America/New_York'),'America/New_York');assert.equal(displayTimezone('Asia/Seoul','America/New_York'),'Asia/Seoul');});
