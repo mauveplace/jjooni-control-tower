@@ -38,17 +38,18 @@
     "JP10Y": 2.958,
     "JP30Y": 4.04,
     "JP_2S10S": 1.04,
-    "BTCUSD": 81923.35,
-    "ETHUSD": 2399.1,
+    "BTCUSD": 81846.42,
+    "ETHUSD": 2397.13,
     "KR_US_10Y": -0.885,
-    "FEAR_GREED": 19.8,
+    "FEAR_GREED": 24.9,
     "FEAR_GREED_RATING": "EXTREME FEAR",
     "KOSPI": 5768.01,
     "KOSDAQ": 808.89,
     "RUSSELL2000": 2721.37011719,
     "DOW": 52002.41015625,
     "NASDAQCOMPOSITE": 26140.02929688,
-    "SILVER": 56.99499893
+    "SILVER": 56.99499893,
+    "JP20Y": 3.803
   },
   "series": {
     "NASDAQ100": [
@@ -292746,10 +292747,10 @@
       },
       {
         "date": "2026-10-19",
-        "value": 81923.35,
+        "value": 81846.42,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-20T02:26:27+09:00"
+        "observed_kst": "2026-10-20T02:37:09+09:00"
       }
     ],
     "ETHUSD": [
@@ -299331,10 +299332,10 @@
       },
       {
         "date": "2026-10-19",
-        "value": 2399.1,
+        "value": 2397.13,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-20T02:26:29+09:00"
+        "observed_kst": "2026-10-20T02:37:10+09:00"
       }
     ],
     "FEAR_GREED": [
@@ -305572,11 +305573,11 @@
       },
       {
         "date": "2026-10-16",
-        "value": 19.8
+        "value": 22.1
       },
       {
         "date": "2026-10-19",
-        "value": 19.8
+        "value": 24.9
       }
     ],
     "KOSPI": [
@@ -318138,6 +318139,52 @@
         "date": "2026-10-16",
         "value": 56.99499893
       }
+    ],
+    "JP20Y": [
+      {
+        "date": "2026-10-01",
+        "value": 3.91
+      },
+      {
+        "date": "2026-10-02",
+        "value": 3.925
+      },
+      {
+        "date": "2026-10-05",
+        "value": 3.935
+      },
+      {
+        "date": "2026-10-06",
+        "value": 3.946
+      },
+      {
+        "date": "2026-10-07",
+        "value": 3.943
+      },
+      {
+        "date": "2026-10-08",
+        "value": 3.916
+      },
+      {
+        "date": "2026-10-09",
+        "value": 3.853
+      },
+      {
+        "date": "2026-10-13",
+        "value": 3.841
+      },
+      {
+        "date": "2026-10-14",
+        "value": 3.849
+      },
+      {
+        "date": "2026-10-15",
+        "value": 3.786
+      },
+      {
+        "date": "2026-10-16",
+        "value": 3.803
+      }
     ]
   },
   "curves": {
@@ -318259,7 +318306,7 @@
     "drawdown_52w_pct": -6.523473019725101,
     "ma250": 27254.867320312762,
     "ndx": 29187.55078125,
-    "observed_at": "2026-10-20T02:26:37+09:00",
+    "observed_at": "2026-10-20T02:37:37+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -4.1277596215945405,
     "previous_ma250": 27237.38891406276,
@@ -323412,11 +323459,11 @@
       "symbol": "BTC-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 81923.35,
-      "quote_as_of_kst": "2026-10-20T02:26:27+09:00",
-      "captured_kst": "2026-10-20T02:26:32+09:00",
+      "price": 81846.42,
+      "quote_as_of_kst": "2026-10-20T02:37:09+09:00",
+      "captured_kst": "2026-10-20T02:37:15+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 5,
+      "quote_age_seconds": 6,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     },
@@ -323424,11 +323471,11 @@
       "symbol": "ETH-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/ETH-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 2399.1,
-      "quote_as_of_kst": "2026-10-20T02:26:29+09:00",
-      "captured_kst": "2026-10-20T02:26:32+09:00",
+      "price": 2397.13,
+      "quote_as_of_kst": "2026-10-20T02:37:10+09:00",
+      "captured_kst": "2026-10-20T02:37:15+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 3,
+      "quote_age_seconds": 5,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     }
@@ -323441,7 +323488,7 @@
       "item_code": "010200000",
       "last_date": "2026-10-19",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 9,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323452,7 +323499,7 @@
       "item_code": "010200001",
       "last_date": "2026-10-19",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 9,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323463,7 +323510,7 @@
       "item_code": "010210000",
       "last_date": "2026-10-19",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 9,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323474,7 +323521,7 @@
       "item_code": "010220000",
       "last_date": "2026-10-19",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 9,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323485,7 +323532,7 @@
       "item_code": "010230000",
       "last_date": "2026-10-19",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 9,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323632,7 +323679,7 @@
       "last_date": "2026-10-16"
     }
   },
-  "kr_rates_refreshed_kst": "2026-10-20T02:26:28+09:00",
+  "kr_rates_refreshed_kst": "2026-10-20T02:37:19+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -323658,9 +323705,7 @@
     "action_code": "HOLD_RISK_ON",
     "headline": "상승 레짐 유지 — 기존 노출 유지, 추격매수 자제",
     "action": "TRI-POD 목표 노출은 유지합니다. 신규 추격매수보다 기존 노출 유지가 우선이며 VIX10·52주 낙폭·MA250 레짐 훼손 여부를 감시합니다.",
-    "risk_flags": [
-      "Fear & Greed가 극단적 공포 구간이므로 변동성 확대 가능성 점검"
-    ],
+    "risk_flags": [],
     "guardrails": {
       "ma250_regime": "상승",
       "target": "TQQQ 100%",
@@ -323668,7 +323713,7 @@
       "vix10_risk_on_limit": 28.0,
       "drawdown_52w_pct": -6.523473019725101,
       "risk_on_drawdown_limit_pct": -9.0,
-      "fear_greed": 19.8,
+      "fear_greed": 24.9,
       "market_pulse_risk": "NEUTRAL"
     },
     "pulse_aligned": true,
@@ -323733,7 +323778,7 @@
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
   "equity_enriched_kst": "2026-10-20T02:26:34+09:00",
-  "supplemental_refreshed_kst": "2026-10-19T20:00:40+09:00",
+  "supplemental_refreshed_kst": "2026-10-20T02:37:15+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "crypto_enriched_kst": "2026-10-13T05:12:54+09:00"
 }
