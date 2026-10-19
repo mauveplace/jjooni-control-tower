@@ -14,14 +14,14 @@ const ITEMS=[
   {k:'USDJPY',label:'USD/JPY',kind:'pct',digits:2,group:'환율'},
   {k:'JPYKRW',label:'JPY/KRW',kind:'pct',digits:3,group:'환율'},
   {k:'DXY',label:'DXY',kind:'pct',digits:2,group:'환율'},
-  {k:'US3M',label:'미국 3개월',kind:'bp',digits:3,suffix:'%',group:'금리'},
+  {k:'US3M',label:'미국 3개월',kind:'bp',digits:2,suffix:'%',group:'금리'},
   {k:'JP30Y',label:'일본 30Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'GASOLINE',label:'가솔린',kind:'pct',digits:4,prefix:'$',group:'에너지'},
   {k:'BTCUSD',label:'비트코인',kind:'pct',digits:2,prefix:'$',group:'암호화폐'},
   {k:'ETHUSD',label:'이더리움',kind:'pct',digits:2,prefix:'$',group:'암호화폐'},
-  {k:'US2Y',label:'미국 2Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
-  {k:'US10Y_OFFICIAL',fallback:'US10Y',label:'미국 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
-  {k:'US30Y_OFFICIAL',fallback:'US30Y',label:'미국 30Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
+  {k:'US2Y',label:'미국 2Y',kind:'bp',digits:2,suffix:'%',group:'금리'},
+  {k:'US10Y_OFFICIAL',seriesKey:'US10Y',label:'미국 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
+  {k:'US30Y_OFFICIAL',seriesKey:'US30Y',label:'미국 30Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'KR3Y',label:'한국 3Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'KR10Y',label:'한국 10Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
   {k:'JP2Y',label:'일본 2Y',kind:'bp',digits:3,suffix:'%',group:'금리'},
@@ -63,7 +63,7 @@ let compareKey='D1';
 const TAB_CONFIG={
   overview:{title:'시장 한눈에 보기',sub:'지수 → TRI-POD → 매크로 → 이번 주 일정',groups:OVERVIEW_GROUPS},
   indices:{title:'주요 지수',sub:'완료 세션 종가 · 미국 주요 지수는 소수점 둘째 자리까지 표시',keys:INDEX_KEYS},
-  rates:{title:'금리 주요 지표',sub:'미국=US Treasury · 한국=BOK ECOS · 일본=MOF 공식 일별 기준',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
+  rates:{title:'금리 주요 지표',sub:'미국 10·30년=Cboe 금리지수 · 2년·3개월=미 재무부 공식 일별 · 한국=ECOS · 일본=MOF',keys:['US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','KR3Y','KR10Y','JP2Y','JP10Y','US_2S10S','KR_3S10S','JP_2S10S']},
   fx:{title:'환율 주요 지표',sub:'Yahoo daily close · 다른 제공사의 마감 cutoff와 소폭 차이 가능',keys:['USDKRW','USDJPY','JPYKRW','DXY']},
   energy:{title:'원자재 주요 지표',sub:'Yahoo 연속선물 daily close · 거래소 settlement/특정 월물과 직접 동일값 아님',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']},
   sectors:{title:'섹터·ETF 주요 지표',sub:'송팀장 Sector Observatory의 상대강도·breadth·rotation 요약',special:'sector'},
@@ -73,7 +73,7 @@ const TAB_CONFIG={
 const fmt=(v,d)=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const num=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
-function seriesOf(item){if(typeof DATA==='undefined'||!DATA?.series)return[];const a=DATA.series[item.k]||[];if(a.length)return a;return item.fallback?(DATA.series[item.fallback]||[]):[]}
+function seriesOf(item){if(typeof DATA==='undefined'||!DATA?.series)return[];const a=DATA.series[item.seriesKey||item.k]||[];if(a.length)return a;return item.fallback?(DATA.series[item.fallback]||[]):[]}
 function utcDate(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00Z');return Number.isNaN(d.getTime())?null:d}
 function refPoint(s,last,key){if(s.length<2)return null;const cfg=COMPARES[key]||COMPARES.D1;if(cfg.mode==='prev')return s[s.length-2]||null;const d=utcDate(last?.date);if(!d)return s[s.length-2]||null;if(cfg.days)d.setUTCDate(d.getUTCDate()-cfg.days);if(cfg.months)d.setUTCMonth(d.getUTCMonth()-cfg.months);if(cfg.years)d.setUTCFullYear(d.getUTCFullYear()-cfg.years);const target=d.toISOString().slice(0,10);for(let i=s.length-2;i>=0;i--){if(String(s[i]?.date||'')<=target)return s[i]}return null}
 function stat(item,key=compareKey){const s=seriesOf(item),last=s[s.length-1];if(!last)return null;const ref=refPoint(s,last,key);let ch=null;if(ref&&Number.isFinite(Number(ref.value))&&Number.isFinite(Number(last.value))){ch=item.kind==='bp'?(Number(last.value)-Number(ref.value))*100:item.kind==='pts'?(Number(last.value)-Number(ref.value)):(Number(ref.value)!==0?(Number(last.value)/Number(ref.value)-1)*100:null)}return{value:Number(last.value),date:last.date,change:ch,refDate:ref?.date||null,refValue:ref?Number(ref.value):null}}
@@ -85,7 +85,7 @@ function ensureIndexShell(){const tabs=document.getElementById('tabs'),main=docu
 function ensure(){ensureIndexShell();let host=document.getElementById('latestMarketBoard');if(host)return host;const nav=document.getElementById('tabs');if(!nav)return null;host=document.createElement('section');host.id='latestMarketBoard';host.className='latestBoardWrap';host.innerHTML='<div class="latestBoardHead"><div class="latestBoardTitleBox"><b id="latestBoardTitle">주요 지표</b><span id="latestBoardSub"></span></div><div class="latestBoardTools"><div id="latestCompare" class="latestCompare" aria-label="비교 기준"></div><span id="latestBoardGenerated"></span></div></div><div id="latestBoardGrid" class="latestBoardGrid"></div>';nav.insertAdjacentElement('afterend',host);return host}
 function periodContext(item){if(!INDEX_KEYS.includes(item.k)&&item.k!=='VIX')return '';const daily=stat(item,'D1'),weekly=stat(item,'W1');const cell=(name,s)=>`<span class="${cls(s?.change)}">${name} ${s?.change==null?'—':(s.change>0?'+':'')+s.change.toFixed(2)+'%'}</span>`;return `<div class="latestTilePeriods" aria-label="일간과 주간 등락률">${cell('일간',daily)}${cell('주간',weekly)}</div>`}
 function cryptoQuoteContext(item){if(!['BTCUSD','ETHUSD'].includes(item.k))return '';const q=(typeof DATA!=='undefined'&&DATA?.crypto_market?.[item.k])||{};const when=q.quote_as_of_kst?String(q.quote_as_of_kst).slice(0,16).replace('T',' ')+' KST':'시각 미확인';return `<div class="latestCryptoBasis">${esc(when)} · ${esc(q.status==='LIVE'?'수집 시점 시세':q.status==='STALE'?'이전 시세 · 갱신 지연':'시세 확인 중')}<br>등락 기준: UTC 일봉</div>`}
-function standardTile(item){const s=stat(item);const val=s?`${item.prefix||''}${fmt(s.value,item.digits)}${item.suffix||''}`:'—';const ch=s?changeText(item,s.change):'확인 가능한 값 없음';const dates=s?.refDate?`${s.refDate} → ${s.date}`:(s?.date||'—');return `<div class="latestTile" data-metric="${esc(item.k)}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(item.label)} 추이 보기"><div class="latestTileTop"><span>${esc(item.group)}</span><b>${esc(item.label)}</b></div><strong>${esc(val)}</strong><div class="latestTileFoot"><span class="${cls(s?.change)}">${esc(ch)}</span><time>${esc(dates)}</time></div>${periodContext(item)}${cryptoQuoteContext(item)}</div>`}
+function standardTile(item){const s=stat(item);const val=s?`${item.prefix||''}${fmt(s.value,item.digits)}${item.suffix||''}`:'—';const ch=s?changeText(item,s.change):'확인 가능한 값 없음';const source=item.seriesKey?'Cboe 금리지수 · Yahoo 일별':(['US3M','US2Y'].includes(item.k)?'미 재무부 공식 일별 · 원천 소수 2자리':'');const dates=s?.refDate?`${s.refDate} → ${s.date}`:(s?.date||'—');return `<div class="latestTile" data-metric="${esc(item.k)}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(item.label)} 추이 보기"><div class="latestTileTop"><span>${esc(item.group)}</span><b>${esc(item.label)}</b></div><strong>${esc(val)}</strong><div class="latestTileFoot"><span class="${cls(s?.change)}">${esc(ch)}</span><time>${esc(dates)}</time></div>${periodContext(item)}${cryptoQuoteContext(item)}${source?`<div class="latestCryptoBasis">${esc(source)}</div>`:''}</div>`}
 function customTile(group,label,value,foot='',tone='flat',time=''){const key={REGIME:'TRIPOD_TREND',TARGET:'TRIPOD_TARGET',INDEX:'NASDAQ100',TREND:'TRIPOD_MA',RISK:'TRIPOD_VIX',DRAWDOWN:'TRIPOD_DD'}[group];return `<div class="latestTile" ${key?`data-metric="${key}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(label)} 추이 보기"`:''}><div class="latestTileTop"><span>${esc(group)}</span><b>${esc(label)}</b></div><strong class="${esc(tone)}">${esc(value)}</strong><div class="latestTileFoot"><span class="${esc(tone)}">${esc(foot||'')}</span><time>${esc(time||'')}</time></div></div>`}
 function dataGenerated(){return String((typeof DATA!=='undefined'&&DATA?.generated_kst)||'').replace('T',' ').slice(0,16)}
 function renderCompare(show=true){const host=ensure(),box=host?.querySelector('#latestCompare');if(!box)return;box.style.display=show?'flex':'none';if(!show)return;box.innerHTML=Object.entries(COMPARES).map(([k,v])=>`<button type="button" data-compare="${k}" class="${k===compareKey?'on':''}">${esc(v.label)}</button>`).join('');box.querySelectorAll('button[data-compare]').forEach(b=>b.onclick=()=>{compareKey=b.dataset.compare;renderBoard()})}
@@ -197,7 +197,7 @@ const st=document.createElement('style');st.textContent=`
 .latestBoardWrap[data-tab="overview"] .latestGroupGrid{grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:none;grid-auto-flow:row;grid-auto-columns:auto;overflow:visible}.overviewMacroGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.overviewMacroBlock{min-width:0}.overviewMacroBlock h4{margin:0 0 7px;font-size:11px;color:#344054}.latestBoardWrap[data-tab="overview"] .overviewMacroBlock .latestGroupGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.overviewWeekMeta{font-size:9px;color:#667085;margin-bottom:8px}.overviewWeekRow{display:grid;grid-template-columns:65px 55px minmax(0,1fr);gap:8px;padding:9px 8px;border-top:1px solid #e8edf3;font-size:11px}.overviewWeekRow.head{background:#f4f7fb;font-weight:850}.overviewWeekRow b{font-size:11px;overflow-wrap:anywhere}.overviewWeekRow small{display:block;font-size:9px;color:#667085;margin-top:3px}.overviewWeekEmpty{padding:10px;font-size:11px;color:#667085}@media(max-width:980px){.latestBoardWrap[data-tab="overview"] .latestGroupGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.overviewMacroGrid{grid-template-columns:1fr}.latestBoardWrap[data-tab="overview"] .latestGroupGrid,.latestBoardWrap[data-tab="overview"] .overviewMacroBlock .latestGroupGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.overviewWeekRow{grid-template-columns:48px 44px minmax(0,1fr);font-size:10px;gap:5px}}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10&&window.__JJOONI_OFFICIAL_MACRO_V1)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'2.7.0',items:ITEMS,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'2.7.0',items:ITEMS,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
 
 
