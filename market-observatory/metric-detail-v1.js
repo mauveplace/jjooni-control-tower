@@ -9,10 +9,10 @@ function model(key){
  const data=typeof DATA!=='undefined'?DATA:null;if(!data)return null;
  const item=window.__JJOONI_LATEST_BOARD?.items?.find(x=>x.k===key)||(key==='KR_US_10Y'?{k:key,label:'한국−미국 10년 금리차',digits:3,suffix:'%',kind:'bp'}:null);
  if(key==='KR_US_10Y'&&!data.series?.[key]?.length){
-  const us=new Map(clean(data.series?.US10Y).map(p=>[p.date,p.value]));
-  return{title:item.label,digits:3,suffix:'%',prefix:'',kind:'bp',lines:[{label:item.label,rows:clean(data.series?.KR10Y).filter(p=>us.has(p.date)).map(p=>({date:p.date,value:p.value-us.get(p.date)}))}],basis:'한국 10년 − 미국 10년 · 동일 관측일끼리 계산'};
+  const us=new Map(clean(data.series?.US10Y_OFFICIAL).map(p=>[p.date,p.value]));
+  return{title:item.label,digits:3,suffix:'%',prefix:'',kind:'bp',lines:[{label:item.label,rows:clean(data.series?.KR10Y).filter(p=>us.has(p.date)).map(p=>({date:p.date,value:p.value-us.get(p.date)}))}],basis:'한국 10년 − 미국 재무부 공식 10년 · 동일 관측일끼리 계산'};
  }
- if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(data.series?.[key]?.length?data.series[key]:data.series?.[item.fallback])}],basis:'일별 관측값 · 날짜는 원천의 거래일/관측일 기준'};
+ if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(window.__JJOONI_LATEST_BOARD?.getSeries?.(item)||(data.series?.[item.seriesKey||key]||[]))}],note:item.seriesKey?`시장 지수와 공식 일별 금리는 다른 지표입니다. 미 재무부 공식 일별: ${format(data.series?.[key]?.at(-1)?.value,2,'%')} (${data.series?.[key]?.at(-1)?.date||'관측일 미확인'})`:'',basis:item.seriesKey?'Cboe 금리지수 · Yahoo 일별 · 시장 원천 정밀도 유지':(['US3M','US2Y'].includes(key)?'미 재무부 공식 일별 · 원천 소수 2자리 · 세 번째 0은 표시 형식':'일별 관측값 · 날짜는 원천의 거래일/관측일 기준')};
  const t=data.tripod_latest||{},history=[...(data.tripod_history||[])];const date=t.session_date||t.date;
  if(date)history.push({...t,date});
  const line=(label,field)=>({label,rows:clean(history.map(p=>({date:p.date,value:p[field]})))});
@@ -78,5 +78,5 @@ function linkExisting(){
  for(const el of document.querySelectorAll('#pulse .chip')){const item=window.__JJOONI_LATEST_BOARD?.items?.find(i=>el.textContent.startsWith(i.label+' '));if(item){el.dataset.metric=item.k;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-haspopup','dialog');el.setAttribute('aria-label',item.label+' 추이 보기');el.style.cursor='pointer'}}
 }
 const links=new MutationObserver(linkExisting);for(const id of ['overviewKpis','spreadKpis','pulse']){const el=document.getElementById(id);if(el)links.observe(el,{childList:true})}linkExisting();
-window.__JJOONI_METRIC_DETAIL={version:'1.1',clean,windowRows,position,model};
+window.__JJOONI_METRIC_DETAIL={version:'1.2',clean,windowRows,position,model};
 })();
