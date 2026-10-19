@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 
-const VERSION='43.1';
+const VERSION='43.2';
 const num=v=>{
  if(v===null||v===undefined||v===''||typeof v==='boolean'||typeof v==='object')return null;
  const x=Number(String(v).replace(/,/g,'').replace(/₩/g,'').replace(/원/g,'').trim());
@@ -32,11 +32,11 @@ const currentNav=()=>num(toss().nav);
 function ensureStyle(){
  if(q('#ctTossBasisV43Style'))return;
  const st=document.createElement('style');st.id='ctTossBasisV43Style';st.textContent=`
- .ctTossBasisNoteV43{margin-top:6px;font-size:10px;line-height:1.45;color:#667085;font-weight:750}
- .ctTossBasisNoteV43 b{color:#175cd3;font-weight:900}
- .ctTossHistoryNoteV43{margin:8px 0 4px;padding:8px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e4e7ec;font-size:10px;line-height:1.5;color:#667085}
- .ctTossHistoryNoteV43 b{color:#101828}
- @media(max-width:767px){.ctTossBasisNoteV43,.ctTossHistoryNoteV43{font-size:10px}}
+ .ctTossBasisNoteV43{margin-top:6px;font-size:14px;line-height:1.45;color:#667085;font-weight:750}
+ .ctTossBasisNoteV43 b{font-size:16px;color:#175cd3;font-weight:900}
+ .ctTossHistoryNoteV43{margin:8px 0 4px;padding:8px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e4e7ec;font-size:14px;line-height:1.5;color:#667085}
+ .ctTossHistoryNoteV43 b{font-size:16px;color:#101828}
+ @media(max-width:767px){.ctTossBasisNoteV43,.ctTossHistoryNoteV43{font-size:14px}}
  `; (document.head||document.documentElement).appendChild(st);
 }
 
@@ -49,6 +49,15 @@ function maxWonLeaf(container){
  xs.sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
  return xs[0];
 }
+// The global readability guard adds inline styles to descendants. Comparing
+// innerHTML would see those styles as new content and start an observer loop.
+// Compare authored content and visible text, preserving the existing nodes.
+function writeNote(note,html){
+ const text=html.replace(/<[^>]*>/g,'');
+ if(note.dataset.tossBasisContent===html&&note.textContent===text)return;
+ note.innerHTML=html;
+ note.dataset.tossBasisContent=html;
+}
 function patchCurrentCard(card,nav){
  const hit=maxWonLeaf(card);
  if(hit&&Math.abs(hit.v-nav)>0.5){hit.e.textContent=won(nav);hit.e.dataset.tossCanonicalNavV43='1'}
@@ -58,7 +67,7 @@ function patchCurrentCard(card,nav){
  });
  let note=q('.ctTossBasisNoteV43',card);
  if(!note){note=document.createElement('div');note.className='ctTossBasisNoteV43';card.appendChild(note)}
- note.innerHTML='<b>Toss 현재 NAV</b> · CT Overview 계좌별 Canonical NAV 기준';
+ writeNote(note,'<b>Toss 현재 NAV</b> · CT Overview 계좌별 Canonical NAV 기준');
  S.patched_current++;
 }
 
@@ -110,7 +119,7 @@ function patchHistoryCard(card,nav){
  if(!note){note=document.createElement('div');note.className='ctTossHistoryNoteV43';const head=q('h1,h2,h3,h4',card)||card.firstElementChild;head?.insertAdjacentElement('afterend',note)}
  if(note){
   if(hist!=null)note.dataset.historyNav=String(hist);
-  note.innerHTML='<b>Toss 현재 NAV '+won(nav)+'</b> · CT Overview 계좌별 Canonical NAV<br>Historical 성과 계산 기준 NAV '+(hist!=null?won(hist):'확인 중')+' · 현재 총자산과 별도';
+  writeNote(note,'<b>Toss 현재 NAV '+won(nav)+'</b> · CT Overview 계좌별 Canonical NAV<br>Historical 성과 계산 기준 NAV '+(hist!=null?won(hist):'확인 중')+' · 현재 총자산과 별도');
  }
  S.patched_history++;
 }
@@ -121,13 +130,13 @@ function patchTossModal(nav){
  qa('.v2Kpi',m).forEach(k=>{
   const label=norm(q('.label',k)?.textContent);
   if(label==='현재 NAV'||label==='총자산'){
-   const v=q('.value',k);if(v){v.textContent=won(nav);v.dataset.tossCanonicalNavV43='1';touched=true}
+   const v=q('.value',k);if(v){if(v.textContent!==won(nav))v.textContent=won(nav);v.dataset.tossCanonicalNavV43='1';touched=true}
   }
  });
  if(touched){
   let note=q('.ctTossBasisNoteV43',m);
   if(!note){note=document.createElement('div');note.className='ctTossBasisNoteV43';const hero=q('.accountHeroPrimary',m)||m.firstElementChild;hero?.insertAdjacentElement('afterend',note)}
-  if(note)note.innerHTML='<b>Toss 현재 NAV</b> · CT 계좌별 Canonical NAV 기준';
+  if(note)writeNote(note,'<b>Toss 현재 NAV</b> · CT 계좌별 Canonical NAV 기준');
   S.patched_modal++;
  }
 }
