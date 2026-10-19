@@ -106,3 +106,22 @@ html[data-ct-layout="mobile-first"] body .ctAccountHoldingRows :is(b,span,strong
 html[data-ct-layout="mobile-first"] body .ctAccountHoldingRows b{font-size:15px!important}.ctAccountHoldingRows span,.ctAccountHoldingRows small{font-size:12px!important;color:#53657b!important}.ctAccountHoldingRows strong{font-size:18px!important}
 
 html[data-ct-layout="mobile-first"] body .ctCommonFilters{display:flex;gap:8px;margin:10px 0}html[data-ct-layout="mobile-first"] body .ctCommonFilters button{font-size:14px;padding:10px 16px;border:1px solid #cad5e3;background:#fff;color:#344054;border-radius:10px}html[data-ct-layout="mobile-first"] body .ctCommonFilters button[aria-pressed="true"]{background:#12375d;color:#fff}
+
+/* Shared readable typography: body 16, metadata 14, financial emphasis 20+. */
+html[data-ct-layout="mobile-first"] body{font-size:16px;line-height:1.5}
+html[data-ct-layout="mobile-first"] body :is(.ctCommonLine,.ctA8Line,.sbCardAmounts,.ctO26Row){min-width:0;line-height:1.6}
+html[data-ct-layout="mobile-first"] body .ctCommonLine{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0!important;border-bottom:1px solid #e2e8f0;white-space:normal!important}
+html[data-ct-layout="mobile-first"] body .ctCommonLine>span{font-size:16px!important;min-width:0;overflow-wrap:anywhere}
+html[data-ct-layout="mobile-first"] body .ctCommonLine small{display:block;font-size:14px!important;color:#526579}
+html[data-ct-layout="mobile-first"] body .ctCommonLine>b{font-size:20px!important;font-variant-numeric:tabular-nums;flex-shrink:0}
+html[data-ct-layout="mobile-first"] body :is(.ctCommonView,.ctCommonNotice,.ctCommonAccount,.ctA8Card,.ctO26Row,.sbAccountCard){overflow-wrap:anywhere}
+html[data-ct-layout="mobile-first"] body :is(.ctCommonFilters button,.sbControls button,.sbControls select,.ctWlBtn,.ctO26HBtn){min-height:44px;white-space:normal}
+html[data-ct-layout="mobile-first"] body :is(.sbTableWrap,.ctMetricTableWrap){max-width:100%;overflow-x:auto}
+@media(max-width:767px){
+ html[data-ct-layout="mobile-first"] body .ctCommonLine{flex-wrap:wrap}
+ html[data-ct-layout="mobile-first"] body #ctCanonicalMovers .ctCommonLine>span{flex-basis:100%}
+ html[data-ct-layout="mobile-first"] body #ctCanonicalMovers .ctCommonLine>b{margin-left:auto}
+ html[data-ct-layout="mobile-first"] body .ctWlRow{grid-template-columns:22px minmax(0,1fr) 92px!important}
+ html[data-ct-layout="mobile-first"] body .ctWlPrice{grid-column:2}
+ html[data-ct-layout="mobile-first"] body .ctWlRet[data-selected="1"]{grid-column:3;grid-row:1/3}
+}
