@@ -70,7 +70,7 @@ function compactHeroSources(){
  const rows=(C.registry||[]).map(r=>{const c=(C.accounts||{})[r.id]||{};return {id:r.id,raw:String(c.quality||c.source||'NO_DATA')}});
  const buckets={measured:0,modeled:0,reference:0};rows.forEach(x=>buckets[trustKind(x.raw)[0]]++);
  const parts=[];if(buckets.measured)parts.push('<span class="ctTrustBadge measured" title="증권사/브로커 공식값">● 실측 '+buckets.measured+'</span>');if(buckets.modeled)parts.push('<span class="ctTrustBadge modeled" title="모델 계산값">◐ 추정 '+buckets.modeled+'</span>');if(buckets.reference)parts.push('<span class="ctTrustBadge reference" title="검증 미완료/참고값">○ 참고 '+buckets.reference+'</span>');
- e.innerHTML=parts.join('');e.title=rows.map(x=>x.id+':'+x.raw).join(' · ');
+ const html=parts.join('');if(e.innerHTML!==html)e.innerHTML=html;e.title=rows.map(x=>x.id+':'+x.raw).join(' · ');
 }
 
 function compactAttribution(){
