@@ -7,6 +7,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile[data-metric]').length>30);
   const keys=await page.locator('#latestBoardGrid .latestTile[data-metric]').evaluateAll(es=>es.map(e=>e.dataset.metric));
+  assert.equal(await page.locator('#latestBoardGrid [data-metric]').first().evaluate(el=>getComputedStyle(el).cursor),'pointer','Visible click affordance before first open');
   assert.equal(keys.length,await page.locator('#latestBoardGrid .latestTile').count(),'Every overview metric tile must link');
   for(const key of keys){
    const tile=page.locator(`#latestBoardGrid [data-metric="${key}"]`).first();
