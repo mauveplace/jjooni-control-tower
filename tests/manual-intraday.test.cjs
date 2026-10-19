@@ -17,3 +17,13 @@ test('price changes use the reference and show missing as unknown',()=>{assert.e
 
 const {needsRefresh}=require('../manual-intraday-v1.js');
 test('latest complete cache expires after ten minutes; explicit historical date remains cached',()=>{const now=Date.parse('2026-10-16T04:00:00Z'),d={candles:[{close:100}],backfill_complete:true,updated_at:'2026-10-16T03:00:00Z'};assert.equal(needsRefresh(d,'',now),true);assert.equal(needsRefresh(d,'2026-10-15',now),false);d.updated_at='2026-10-16T03:59:00Z';assert.equal(needsRefresh(d,'',now),false)});
+
+const {changePct,changeTone}=require('../manual-intraday-v1.js');
+test('percent and color share one dated reference and unknown is not a decline',()=>{assert.equal(changePct(103,100),3.0000000000000027);assert.equal(changeTone(103,100),'up');assert.equal(changeTone(98,100),'down');assert.equal(changeTone(100,100),'flat');for(const p of [null,'',NaN]){assert.equal(changePct(p,100),null);assert.equal(changeTone(p,100),'unknown')}assert.equal(changePct(100,null),null);});
+test('reference queue prioritizes selected symbol and one failed source cannot block others',async()=>{
+ const fs=require('fs'),vm=require('vm'),src=fs.readFileSync('manual-intraday-v1.js','utf8'),calls=[],pending=[];
+ const charts=new Map(['A','B','C','D','SELECTED'].map(symbol=>[symbol,{symbol,session_date:'2026-10-19',candles:[{close:102}]}]));
+ const context={S:{charts,selected:'SELECTED'},chartReference,referenceCache:new Map(),render:()=>{},request:(path,body)=>{calls.push(body.symbol);return new Promise((resolve,reject)=>pending.push({body,resolve,reject}))}};
+ vm.createContext(context);vm.runInContext(src.slice(src.indexOf('const referencePending='),src.indexOf('async function hydrateSavedCharts()'))+';this.queue=queueReferences;',context);
+ context.queue();assert.deepEqual(calls,['SELECTED','A','B']);pending[1].reject(Error('source unavailable'));await new Promise(r=>setImmediate(r));assert.equal(calls[3],'C');pending[0].resolve({reference:{session_date:'2026-10-19',previous_close:100,previous_close_date:'2026-10-16'}});await new Promise(r=>setImmediate(r));assert.equal(charts.get('SELECTED').previous_close,100);assert.equal(calls[4],'D');
+});
