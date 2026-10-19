@@ -63,7 +63,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctRecentTradeMetricV9Script','recent-trade-metric-drilldown-v9.js?v=9.2','recent-trade-drill'],
 ['ctCanonicalValuationV13Script','canonical-valuation-fix-v13.js?v=13.1','valuation'],
 ['ctFxAttributionV16Script','fx-attribution-v16.js?v=16.2','fx-attribution'],
-['ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.1','metric-router'],
+['ctMetricDrillV12Script','metric-drilldown-router-v12.js?v=12.2','metric-router'],
 ['ctDailyPerformanceAliasV23Script','daily-performance-alias-v23.js?v=23.1','daily-performance-alias'],
 ['ctRuntimeIntegrityV15Script','runtime-integrity-v15.js?v=15.6','runtime-integrity'],
 ['ctAccountIntegrityV17Script','account-integrity-v17.js?v=17.5','account-integrity'],
