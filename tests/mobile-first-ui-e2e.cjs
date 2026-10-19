@@ -11,8 +11,19 @@ for(const width of [360,390,500,768,820,1024,1363]){
  // The login shell and runtime now share one responsive stylesheet.
  let metrics=read('canonical-metrics.js').split('\n(function(){')[0];await page.addScriptTag({content:metrics});
  await page.evaluate(()=>{const at=new Date().toISOString(),ids=['TOSS','ISA','PENSION','IRP'];const C={observed_at:at,snapshot_id:'synthetic',accounts:Object.fromEntries(ids.map((id,i)=>[id,{nav:1000,today_pnl:i+1,today_return:(i+1)/10,cash_krw:100,net_flow:0,positions:[],source:'FIXTURE',quality:'BROKER_DIRECT'}]))};C.accounts.TOSS.positions=[{ticker:'TQQQ',name:'TQQQ',currency:'USD',qty:2,current_price:73,avg_price:70,fx:1300,market_value_krw:189800,daily_pnl:2600}];C.total={nav:4000,today_pnl:10,account_count:4};window.__JJOONI_CANONICAL_SSOT=C;window.__JJOONI_LIVE_PAYLOAD={generated_kst:at,market_closed:true,stale_after_kst:new Date(Date.now()+86400000).toISOString(),source_health:{pb_history:{state:'REFERENCE',as_of:'2026-09-04T09:12:00+09:00'}}};window.D={human:{trades:[{account:'TOSS',ticker:'TQQQ',name:'TQQQ',side:'BUY',qty:2,price:70,current_price:67,currency:'USD',trade_date:'2026-10-15'},{account:'IRP',ticker:'F002',name:'마이다스 혼합자산 투자신탁',side:'BUY',qty:1,price:360000,current_price:17599696,trade_date:'2026-09-21'},{account:'IRP',ticker:'F002',name:'마이다스 혼합자산 투자신탁',side:'SELL',qty:1,price:400000,trade_date:'2026-09-22'}]}};document.querySelectorAll('.tabs .tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tabs .tab').forEach(x=>x.classList.toggle('on',x===t));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+t.dataset.tab))}));});
- for(const f of ['ui-refactor.js','mobile-stability-v4.js','human-ui-v6.js','tablet-accounts-v8.js','trade-review-outcomes-v26.js','overview-consistency-v21.js','account-return-30d-v46.js','tablet-stability-v37.js'])await page.addScriptTag({content:read(f)});
+ for(const f of ['ui-refactor.js','toss-account-basis-v43.js','mobile-stability-v4.js','human-ui-v6.js','tablet-accounts-v8.js','trade-review-outcomes-v26.js','overview-consistency-v21.js','account-return-30d-v46.js','tablet-stability-v37.js'])await page.addScriptTag({content:read(f)});
  await page.waitForFunction(()=>document.querySelector('#ctDesktopAccountsV8')&&document.querySelector('#ctResponsiveLayout')?.sheet);await page.waitForTimeout(350);
+ // Keep the Toss runtime AND typography guard active together: the old
+ // unconditionally rewritten note cycled its bold font/line-wrap every 45ms.
+ await page.locator('#overviewAccounts .ctTossBasisNoteV43 b').waitFor();
+ const stability=await page.locator('#overviewAccounts .ctTossBasisNoteV43').evaluate(async note=>{
+  const bold=note.querySelector('b'),top=note.getBoundingClientRect().top;
+  let writes=0;const observer=new MutationObserver(ms=>writes+=ms.filter(m=>m.type==='childList'||m.type==='characterData').length);
+  observer.observe(note,{subtree:true,childList:true,characterData:true});
+  await new Promise(r=>setTimeout(r,1600));observer.disconnect();
+  return {writes,sameBold:bold===note.querySelector('b'),topDelta:Math.abs(top-note.getBoundingClientRect().top),font:parseFloat(getComputedStyle(note.querySelector('b')).fontSize)};
+ });
+ assert.equal(stability.writes,0,'unchanged Toss note must settle with typography: '+JSON.stringify(stability));assert(stability.sameBold);assert(stability.font>=16);
  assert.equal(await page.locator('#ctSideAI').count(),0);assert.equal(await page.locator('.footer').isVisible(),false);assert.match(await page.locator('#overviewAccounts .ctAcctStats').first().innerText(),/\+0.10%/,'30-day runtime cannot rewrite today return');
  const geo=await page.evaluate(()=>({w:innerWidth,scroll:document.documentElement.scrollWidth,app:document.querySelector('.app').getBoundingClientRect().toJSON(),tabs:document.querySelector('.tabs').getBoundingClientRect().toJSON()}));
  assert(geo.scroll<=geo.w+1,JSON.stringify(geo));if(width>=1200)assert(geo.app.x>=geo.tabs.right,JSON.stringify(geo));else assert.equal(geo.app.x,0);
