@@ -126,6 +126,16 @@ function colored(value,format=signed){return el('span',format(value),tone(value)
 function periodLine(row){return row.periodPnl!=null&&row.periodParticipated?'추적기간 실수익 '+signed(row.periodPnl):row.periodParticipated===false?'추적기간 실수익 — · 미편입':'추적기간 실수익 — · '+(row.periodReason||'계좌별 확인 사유 참고')}
 function render(){
  if(!ensure())return;
+ // An empty client book during the first network read is not missing cost data.
+ // Never publish a partial return or a missing-cost diagnosis before it arrives.
+ if(!S.loaded){
+  sleeveStyle();accountSleeves();box.setAttribute('aria-busy',String(S.busy));
+  const signature=JSON.stringify(['BOOK_PENDING',S.busy,S.error]);if(lastRenderSignature===signature&&box.childElementCount)return;
+  lastRenderSignature=signature;box.replaceChildren(el('h3','트라이팟 성과'),el('p',S.error?'전략 원장 연결 실패':'전략 원장 불러오는 중','sbBookStatus'),el('p',S.error?'저장된 원가·체결 원장을 조회하지 못했습니다. 원가 누락으로 판정하지 않았습니다.':'저장된 원가·체결 원장을 받은 뒤 보유 수익률을 계산합니다.','sbNote'));
+  if(S.error){box.append(el('p',S.error,'sbNote'));const retry=el('button','원장 다시 조회');retry.disabled=S.busy;retry.onclick=()=>load(true);box.append(retry)}
+  return;
+ }
+ box.setAttribute('aria-busy',String(S.busy));
  const C=root.__JJOONI_CANONICAL_SSOT||{},tp=root.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35?.last;let view;try{view=build(C,S.book,withBrokerTrades(S.ledger,root.__JJOONI_LIVE_PAYLOAD||{}),tp)}catch(e){box.replaceChildren(el('h3','트라이팟 성과'),el('p',e.message,'sbNote'));return}
  S.snapshot=view;const overview=strategySummary(view);S.performance=overview;sleeveStyle();accountSleeves();
  const refreshButton=box.querySelector('.sbControls button');if(refreshButton){refreshButton.disabled=S.busy;const label=S.busy?'확인 중…':'성과 새로고침';if(refreshButton.textContent!==label)refreshButton.textContent=label}
@@ -169,8 +179,17 @@ function render(){
 }
 function optionSelect(options,label){const s=el('select');s.setAttribute('aria-label',label);for(const [value,text] of options){const o=el('option',text);o.value=value;s.append(o)}return s}
 function flowForm(parent,view){const detail=el('details',null,'sbFlowJournal');detail.append(el('summary','입출금·내부이체·배당·비용 원장'));const form=el('form'),kind=optionSelect([['DEPOSIT','외부 입금'],['WITHDRAWAL','외부 출금'],['TRANSFER','계좌 간 내부이체'],['DIVIDEND','배당 귀속 메모'],['FEE','수수료 귀속 메모'],['TAX','세금 귀속 메모']],'현금흐름 종류'),account=optionSelect(IDS.map(id=>[id,NAMES[id]]),'출발 또는 대상 계좌'),to=optionSelect(IDS.map(id=>[id,NAMES[id]]),'도착 계좌'),strategy=optionSelect(Object.entries(GROUPS),'귀속 전략'),amount=el('input'),at=el('input'),note=el('input');amount.type='number';amount.min='0.01';amount.step='0.01';amount.required=true;amount.placeholder='원화 금액';amount.setAttribute('aria-label','실제 원화 금액');at.type='datetime-local';at.step='1';at.required=true;const now=new Date(Date.now()+9*3600000);at.value=now.toISOString().slice(0,19);at.setAttribute('aria-label','발생시각 한국시간');note.placeholder='내역 메모';note.setAttribute('aria-label','현금흐름 메모');const submit=el('button','원장에 기록');submit.type='submit';submit.disabled=S.busy||!view.baseline_at;to.value='ISA';to.hidden=true;kind.onchange=()=>{to.hidden=kind.value!=='TRANSFER'};form.append(kind,account,to,strategy,amount,at,note,submit);form.onsubmit=async e=>{e.preventDefault();const event={id:crypto.randomUUID(),kind:kind.value,account:account.value,from_account:account.value,to_account:to.value,strategy:strategy.value,amount_krw:Number(amount.value),at:at.value+(at.value.length===16?':00':'')+'+09:00',note:note.value};await write({command:'event',event});if(!S.error){amount.value='';note.value=''}};detail.append(el('p','실제 입출금만 기록해 주세요. 내부이체는 한 번만 입력합니다. 배당·비용 메모는 전략 귀속용이며 전체 순자산 손익에 다시 더하거나 빼지 않습니다. 체결 수수료는 체결 원장에 포함되므로 여기에서 중복 입력하지 않습니다.','sbNote'),form);const events=S.book.events||[];if(events.length)detail.append(table(['시각','유형','계좌','원화','메모','정정'],events.slice(-20).reverse().map(e=>{const cancel=el('button',e.voided_at?'취소됨':'기록 취소');cancel.disabled=S.busy||!!e.voided_at;cancel.onclick=()=>write({command:'void_event',event_id:e.id});return [e.at,e.kind,e.kind==='TRANSFER'?NAMES[e.from_account]+' → '+NAMES[e.to_account]:NAMES[e.account],won(e.amount_krw),e.note,cancel]})));parent.append(detail)}
-async function write(body){if(S.busy)return;S.busy=true;S.error='';render();try{const out=await request('/strategy/record',body);S.book=out.book||{};S.recorded.add(S.book.latest_snapshot_id)}catch(e){S.error='원장 기록: '+e.message}finally{S.busy=false;render()}}
-async function load(force=false){if(S.busy)return;S.busy=true;S.error='';render();try{const out=await request('/strategy/read',{refresh:force});S.book=out.book||{};S.ledger=out.ledger||{};S.loaded=true;if(!S.book.baseline||!S.book.cost_basis_v1){const record=await request('/strategy/record',{command:!S.book.baseline?'observe':'initialize_cost_basis'});S.book=record.book||{};S.recorded.add(S.book.latest_snapshot_id)}}catch(e){S.error='전략 원장 조회: '+e.message}finally{S.busy=false;render()}}
+function checkedBook(out,requireReady=false){
+ const book=out?.book;if(!book||typeof book!=='object'||Array.isArray(book))throw Error('전략 원장 응답 누락');
+ if((requireReady||S.loaded)&&(!book.baseline?.at||!book.cost_basis_v1))throw Error('전략 기준원가 응답 불완전 · 마지막 확인값 유지');
+ return book;
+}
+async function write(body){if(S.busy)return;S.busy=true;S.error='';render();try{const out=await request('/strategy/record',body);S.book=checkedBook(out,true);S.recorded.add(S.book.latest_snapshot_id)}catch(e){S.error='원장 기록: '+e.message}finally{S.busy=false;render()}}
+async function load(force=false){if(S.busy)return;S.busy=true;S.error='';render();try{
+ const out=await request('/strategy/read',{refresh:force});let nextBook=checkedBook(out);
+ if(!nextBook.baseline||!nextBook.cost_basis_v1){const record=await request('/strategy/record',{command:!nextBook.baseline?'observe':'initialize_cost_basis'});nextBook=checkedBook(record,true);S.recorded.add(nextBook.latest_snapshot_id)}
+ S.book=checkedBook({book:nextBook},true);S.ledger=out.ledger||{};S.loaded=true;
+}catch(e){S.error='전략 원장 조회: '+e.message}finally{S.busy=false;render()}}
 function visible(){return (box?.isConnected&&box.getClientRects().length>0)||[...document.querySelectorAll('.ctStrategySleeve')].some(x=>x.getClientRects().length>0)}
 async function boot(){if(!root.__JJOONI_LIVE_READY||!ensure())return;render();if(!visible())return;if(!S.loaded)return load();const id=root.__JJOONI_CANONICAL_SSOT?.snapshot_id;if(id&&!S.recorded.has(id)&&!S.busy)await write({command:'observe'})}
 document.addEventListener('jjooni:tripod-daily-verified',render);document.addEventListener('jjooni:live-applied',boot);document.addEventListener('jjooni:public-market-loaded',()=>setTimeout(render,100));document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab="tripod"],.tab[data-tab="compare"],.tab[data-tab="overview"],.tab[data-tab="accounts"],.tab[data-tab="performance"]'))setTimeout(boot,100)});root.addEventListener('resize',()=>{if(box?.isConnected)render()},{passive:true});
