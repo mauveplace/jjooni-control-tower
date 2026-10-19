@@ -24,5 +24,19 @@ for(const width of [360,390,500,768,820,1024,1363]){
  assert.match(await page.locator('[data-v26-ticker="TQQQ"]').innerText(),/\+\$6/,'canonical price 73 overrides stale trade price 67');
  await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.ISA.today_pnl=null;document.dispatchEvent(new Event('jjooni:live-applied'))});await page.waitForTimeout(220);assert.match(await page.locator('#ctCurrentPerformance').innerText(),/3\/4계좌/);assert.match(await page.locator('#ctCurrentPerformance').innerText(),/산정 대기/);
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="quality"]').click());await page.waitForTimeout(160);assert.equal(await page.locator('#ctCurrentQuality article').count(),4);assert(!(await page.locator('#panel-quality').innerText()).includes('old PB'));
+ // Check every navigation target, including delayed legacy and detail content.
+ for(const id of ['overview','portfolio','accounts','tripod','compare','decisions','trades','quality','watchlist','consultant']){
+  await page.evaluate(id=>document.querySelector('.tabs [data-tab="'+id+'"]').click(),id);
+  await page.waitForTimeout(320);
+  const small=await page.evaluate(()=>Array.from(document.querySelectorAll('.tabPanel.on *')).filter(e=>e.getClientRects().length&&!['STYLE','SCRIPT'].includes(e.tagName)&&Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim())&&parseFloat(getComputedStyle(e).fontSize)<13.9).map(e=>e.tagName+':'+e.className));
+  assert.deepEqual(small,[],id+' has unreadable text at '+width);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),id+' body overflow at '+width);
+ }
+ await page.evaluate(()=>{const dialog=document.createElement('section');dialog.id='syntheticDetail';dialog.setAttribute('role','dialog');dialog.innerHTML='<p style="font-size:10px">Late detail text</p><small style="font-size:9px">Metadata</small><strong style="font-size:32px">Large KPI</strong>';document.body.append(dialog)});
+ await page.waitForTimeout(320);
+ assert.deepEqual(await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize))),[16,14,32]);
+ await page.locator('#syntheticDetail').evaluate(e=>e.remove());
+ await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
+ assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
  await page.screenshot({path:'/tmp/ct-ui-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS mobile-first width='+width+' canonical=4000 missing=unknown fund=excluded nav=usable');await context.close();
 }await browser.close()})().catch(e=>{console.error(e);process.exit(1)});

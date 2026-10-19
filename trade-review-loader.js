@@ -45,7 +45,7 @@ function lockNavigation(){canonicalizeNavigation();const tabs=document.querySele
 async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot='waiting-ssot';try{bootText('Canonical SSOT 연결을 기다리는 중입니다.');await waitFor(()=>window.__JJOONI_LIVE_READY===true&&window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD,30000,'SSOT_READY');BOOT.state='LOADING_REQUIRED_UI';document.documentElement.dataset.ctBoot='loading-ui';const modules=[
 ['ctFastRefreshV32Script','fast-refresh-v32.js?v=32.2','master-trade-bridge'],
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
-['ctUiRefactorV14Script','ui-refactor.js?v=1.7','ui-refactor'],
+['ctUiRefactorV14Script','ui-refactor.js?v=1.8','ui-refactor'],
 ['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],
 ['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
