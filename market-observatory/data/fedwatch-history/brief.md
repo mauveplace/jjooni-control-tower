@@ -1,8 +1,8 @@
 # FedWatch · PB / Analyst Read View
 
-- 자료 기준일: 2026-10-16
-- 원천 표시시각: 16 Oct 2026 04:16:36 CT
-- 수집 시각: 2026-10-17T06:27:20+09:00
+- 자료 기준일: 2026-10-19
+- 원천 표시시각: 19 Oct 2026 05:17:10 CT
+- 수집 시각: 2026-10-20T07:31:27+09:00
 - 수집 당시 상태: LIVE
 - 원천: CME FedWatch official public probability tables (QuikStrike)
 - 공식 API: PUBLIC_WEB_TABLE_CAPTURE
@@ -21,6 +21,7 @@ next FOMC가 바뀌면 다음회의 확률끼리 단순 비교하지 마십시�
 
 | 가격 기준일 | 관측 시각 | 원문 | 보존 관측 수 |
 |---|---|---|---|
+| 2026-10-19 | 2026-10-20T07:31:27+09:00 | [JSON](../fedwatch-history/2026-10-19/d6591d5f9d52c255d28fed3912fa49fb7d0c0f8f6a3add999ce88d2c0f948840.json) | 1 |
 | 2026-10-16 | 2026-10-17T06:27:20+09:00 | [JSON](../fedwatch-history/2026-10-16/6818d72c512a5353772d3379951ec1c20af212be15141874be0207855cdea69b.json) | 1 |
 | 2026-10-15 | 2026-10-15T14:33:00+09:00 | [JSON](../fedwatch-history/2026-10-15/adb6e4a1285d1b70926002bde58fd7f3202b6054f8d097ab12532ec532ae2262.json) | 1 |
 | 2026-10-14 | 2026-10-15T06:04:02+09:00 | [JSON](../fedwatch-history/2026-10-14/9a9db411783e912c0226f69a15f0f8ec39450f2579cf5ea8d15a4b191160eade.json) | 2 |

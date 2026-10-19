@@ -1,21 +1,19 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-20T06:18:16+09:00",
+  "generated_kst": "2026-10-20T07:31:41+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "crypto",
-    "fedwatch",
     "calendar",
     "audit"
   ],
   "watchdog_required": false,
   "session_alignment": {
-    "source_session": "2026-10-16",
+    "source_session": "2026-10-19",
     "market_aligned": true,
-    "observatory": "2026-10-16",
-    "daily_market_pulse": "2026-10-16",
-    "tripod": "2026-10-16",
+    "observatory": "2026-10-19",
+    "daily_market_pulse": "2026-10-19",
+    "tripod": "2026-10-19",
     "pulse_aligned": true,
     "tripod_aligned": true,
     "us_supplement_aligned": true,
@@ -27,8 +25,8 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T03:53:44+09:00",
-      "as_of": "2026-10-16",
+      "generated_kst": "2026-10-20T06:43:53+09:00",
+      "as_of": "2026-10-19",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
       "critical": true
@@ -36,7 +34,7 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
       "as_of": "2026-10-19",
       "detail": "KOSPI 2026-10-19 · KOSDAQ 2026-10-19",
       "source": "Naver Finance primary",
@@ -45,52 +43,52 @@
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
-      "as_of": "2026-10-16",
-      "detail": "RUSSELL2000 2026-10-16 · DOW 2026-10-16 · NASDAQCOMPOSITE 2026-10-16",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
+      "as_of": "2026-10-19",
+      "detail": "RUSSELL2000 2026-10-19 · DOW 2026-10-19 · NASDAQCOMPOSITE 2026-10-19",
       "source": "Yahoo completed cash-session daily",
       "critical": false
     },
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
-      "as_of": "2026-10-16",
-      "detail": "WTI 2026-10-16 · BRENT 2026-10-16 · NATGAS 2026-10-16",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
+      "as_of": "2026-10-19",
+      "detail": "WTI 2026-10-19 · BRENT 2026-10-19 · NATGAS 2026-10-19",
       "source": "Yahoo CL=F / BZ=F / NG=F",
       "critical": false
     },
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
-      "as_of": "2026-10-16",
-      "detail": "DXY 2026-10-16 · USDKRW 2026-10-16 · USDJPY 2026-10-16 · JPYKRW 2026-10-16",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
+      "as_of": "2026-10-19",
+      "detail": "DXY 2026-10-19 · USDKRW 2026-10-19 · USDJPY 2026-10-19 · JPYKRW 2026-10-19",
       "source": "Yahoo DXY / FX daily",
       "critical": false
     },
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
-      "as_of": "2026-10-16",
-      "detail": "GOLD 2026-10-16 · SILVER 2026-10-16 · COPPER 2026-10-16",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
+      "as_of": "2026-10-19",
+      "detail": "GOLD 2026-10-19 · SILVER 2026-10-19 · COPPER 2026-10-19",
       "source": "Yahoo Gold / Silver / Copper",
       "critical": false
     },
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T03:53:44+09:00",
-      "as_of": "2026-10-16",
-      "detail": "US3M 2026-10-16 · US2Y 2026-10-16 · US5Y_OFFICIAL 2026-10-16 · US10Y_OFFICIAL 2026-10-16 · US30Y_OFFICIAL 2026-10-16 · US_2S10S 2026-10-16",
+      "generated_kst": "2026-10-20T06:43:53+09:00",
+      "as_of": "2026-10-19",
+      "detail": "US3M 2026-10-19 · US2Y 2026-10-19 · US5Y_OFFICIAL 2026-10-19 · US10Y_OFFICIAL 2026-10-19 · US30Y_OFFICIAL 2026-10-19 · US_2S10S 2026-10-19",
       "source": "U.S. Treasury official",
       "critical": false
     },
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T03:53:43+09:00",
+      "generated_kst": "2026-10-20T07:31:27+09:00",
       "as_of": "2026-10-19",
       "detail": "KR3Y 2026-10-19 · KR5Y 2026-10-19 · KR10Y 2026-10-19 · KR20Y 2026-10-19 · KR30Y 2026-10-19 · KR_3S10S 2026-10-19",
       "source": "BOK ECOS",
@@ -99,7 +97,7 @@
     "jp_rates": {
       "label": "JP Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
       "as_of": "2026-10-16",
       "detail": "JP2Y 2026-10-16 · JP5Y 2026-10-16 · JP10Y 2026-10-16 · JP30Y 2026-10-16 · JP_2S10S 2026-10-16",
       "source": "Japan MOF current JGB CSV",
@@ -107,36 +105,36 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "STALE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=8673s · ETHUSD age=8673s",
+      "detail": "BTCUSD age=22s · ETHUSD age=26s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T03:53:52+09:00",
-      "as_of": "2026-10-16",
-      "detail": "snapshot=FINAL · Observatory session=2026-10-16",
+      "generated_kst": "2026-10-20T07:31:40+09:00",
+      "as_of": "2026-10-19",
+      "detail": "snapshot=FINAL · Observatory session=2026-10-19",
       "source": "daily-market-pulse.json",
       "critical": true
     },
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:15+09:00",
+      "generated_kst": "2026-10-20T07:31:23+09:00",
       "as_of": "2026-10-19",
-      "detail": "24.9/100 · EXTREME FEAR",
+      "detail": "23.1/100 · EXTREME FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-17T06:27:20+09:00",
-      "as_of": "2026-10-16",
+      "state": "LIVE",
+      "generated_kst": "2026-10-20T07:31:27+09:00",
+      "as_of": "2026-10-19",
       "detail": "expected=2026-10-19 · FOMC 2026-10-28",
       "source": "CME FedWatch official public probability tables (QuikStrike)",
       "critical": false
@@ -144,8 +142,8 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T03:53:52+09:00",
-      "as_of": "2026-10-16",
+      "generated_kst": "2026-10-20T07:31:40+09:00",
+      "as_of": "2026-10-19",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
       "critical": true
@@ -153,7 +151,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-20T02:37:20+09:00",
+      "generated_kst": "2026-10-20T07:31:30+09:00",
       "as_of": "2026-10-19",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -180,9 +178,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-20T06:18:16+09:00",
-      "as_of": "2026-10-16",
-      "detail": "critical=0 · warnings=6",
+      "generated_kst": "2026-10-20T07:31:41+09:00",
+      "as_of": "2026-10-19",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     }
