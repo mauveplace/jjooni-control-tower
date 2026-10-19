@@ -66,3 +66,19 @@ test('same overseas symbol in a legacy TRI-POD model never changes TOSS owner qt
 test('legacy strategy transfer is inside TOSS while real cross-account flows stay opposite',()=>{const events=[{id:'legacy-split',kind:'TRANSFER',from_account:'TOSS',to_account:'TRIPOD',amount_krw:30,at:old},{id:'isa-to-tripod',kind:'TRANSFER',from_account:'ISA',to_account:'TRIPOD',amount_krw:10,at:old}];assert.deepEqual(S.flowBook({events}),{TOSS:10,ISA:-10,PENSION:0,IRP:0});assert.equal(S.dietzBase(100,events.slice(0,1),'TOSS',Date.parse(old),Date.parse(at)),100)});
 
 test('new IRP passive Nasdaq lot is included once and exposes name and quantity',()=>{const C=c();C.accounts.IRP.positions=[p('133690.KS',7,735,{name:'TIGER 미국나스닥100',avg_price:100}),p('426030.KS',2,200,{name:'TIME 미국나스닥100액티브'})];const report=S.strategySummary(S.build(C));const irp=report.accounts.find(a=>a.id==='IRP');assert.equal(irp.count,1);assert.equal(irp.holdings[0].ticker,'133690');assert.equal(irp.holdings[0].qty,7);assert.equal(irp.holdingPnl,35);assert.equal(report.total.value,735);});
+
+test('recent authoritative broker buys supplement a stale historical ledger without resetting opening cost',()=>{
+ const C=c(),b=openingBook(C);C.accounts.TOSS.nav=100000;C.accounts.TOSS.positions=[p('QQQ',3,60000,{currency:'USD'})];
+ const trade={...tr('TOSS','broker-new','BUY',1,20,{fx:1200,commission:.1}),trade_key:undefined,order_id:'order-new',source:'BROKER_DIRECT_TOSS_API'};
+ const merged=S.withBrokerTrades(ledger([]),{recent_trades:[trade]});assert.equal(merged.broker_added,1);
+ assert.equal(S.build(C,b,merged).accounts[0].groups[0].positions[0].cost,44120);
+ assert.equal(b.cost_basis_v1.positions['TOSS|QQQ'].cost_krw,20000);
+ const incomplete=S.withBrokerTrades(ledger([]),{recent_trades:[{...trade,fx:null}]});const row=S.build(C,b,incomplete).accounts[0].groups[0].positions[0];
+ assert.equal(row.cost,null);assert.match(S.costReason(row.costQuality),/거래 당시 환율/);
+});
+test('broker supplements exclude duplicate IDs, duplicate executions and non-broker rows',()=>{
+ const trade=tr('TOSS','existing','BUY',1,20),fresh={...trade,order_id:'existing',source:'BROKER_DIRECT_TOSS_API'};
+ assert.equal(S.withBrokerTrades(ledger([trade]),{recent_trades:[fresh]}).rows.length,1);
+ assert.equal(S.withBrokerTrades(ledger([trade]),{recent_trades:[{...fresh,order_id:'other'}]}).rows.length,1);
+ assert.equal(S.withBrokerTrades(ledger([]),{recent_trades:[{...fresh,source:'MODEL'}, {...fresh,order_id:''}]}).rows.length,0);
+});
