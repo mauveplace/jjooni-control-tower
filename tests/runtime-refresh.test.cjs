@@ -64,3 +64,13 @@ test('boot and master recovery do not broadcast fake browser lifecycle events',(
   const fast=read('fast-refresh-v32.js');
   assert.doesNotMatch(fast,/s\.src='trade-review-loader/);
 });
+
+test('unchanged master receipts retain trade array and do not request a redraw, but corrections do',()=>{
+ const source=read('fast-refresh-v32.js'),window={},D={human:{trades:[]}},context={window,D,console,Date};
+ vm.runInNewContext(source.slice(0,source.indexOf('window.__JJOONI_CT_FAST={'))+'window.applyMasterTrades=applyMasterTrades;})();',context);
+ const receipt={master_overlay:{trade_overlay:{schema:'JJOONI_CT_MASTER_TRADE_OVERLAY_V1',rows:[{account:'TOSS',ticker:'TQQQ',side:'BUY',trade_date:'2026-10-19',qty:1,price:10}]}}};
+ assert.equal(window.applyMasterTrades(receipt,'test'),true);const prior=D.human.trades;
+ assert.equal(window.applyMasterTrades(receipt,'repeat'),false);assert.equal(D.human.trades,prior);
+ receipt.master_overlay.trade_overlay.rows[0].price=11;
+ assert.equal(window.applyMasterTrades(receipt,'correction'),true);assert.equal(D.human.trades.length,1);assert.equal(D.human.trades[0].price,11);
+});

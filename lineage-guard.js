@@ -199,9 +199,9 @@ function paintAttribution(){
  if(!card)return;
  let e=card.querySelector('#ctTossAttributionLine');
  if(!e){e=document.createElement('div');e.id='ctTossAttributionLine';e.style.cssText='grid-column:1/-1;font:800 9px/1.4 system-ui;margin-top:4px;padding-top:4px;border-top:1px dashed #e7ebf0;text-align:right';card.appendChild(e)}
- if(!td){e.textContent='당일 귀속 · NO_DATA';return}
+ if(!td){if(e.textContent!=='당일 귀속 · NO_DATA')e.textContent='당일 귀속 · NO_DATA';return}
  const gap=n(td.unattributed_daily_pnl_krw_equiv),state=String(td.state||'UNKNOWN');
- e.textContent='당일 귀속 '+state+' · 미귀속 '+(gap==null?'—':signed(gap));
+ const text='당일 귀속 '+state+' · 미귀속 '+(gap==null?'—':signed(gap));if(e.textContent!==text)e.textContent=text;
  e.style.color=state==='RECONCILED'?'#087443':state==='UNATTRIBUTED'?'#be123c':'#b45309';
 }
 
