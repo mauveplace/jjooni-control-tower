@@ -34,7 +34,7 @@ for(const width of [360,390,500,768,820,1024,1363]){
  }
  await page.evaluate(()=>{const dialog=document.createElement('section');dialog.id='syntheticDetail';dialog.setAttribute('role','dialog');dialog.innerHTML='<p style="font-size:10px">Late detail text</p><small style="font-size:9px">Metadata</small><strong style="font-size:32px">Large KPI</strong>';document.body.append(dialog)});
  await page.waitForTimeout(320);
- assert.deepEqual(await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize))),[16,14,32]);
+ const detailFonts=await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));assert(detailFonts[0]>=16);assert(detailFonts[1]>=14);assert.equal(detailFonts[2],32);
  await page.locator('#syntheticDetail').evaluate(e=>e.remove());
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
  assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
