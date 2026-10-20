@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-10-21T07:20:12+09:00",
+  "generated_kst": "2026-10-21T08:09:23+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -38,8 +38,8 @@
     "JP10Y": 2.935,
     "JP30Y": 4.028,
     "JP_2S10S": 1.031,
-    "BTCUSD": 82999.53,
-    "ETHUSD": 2458.36,
+    "BTCUSD": 82892.33,
+    "ETHUSD": 2447.14,
     "KR_US_10Y": -0.944,
     "FEAR_GREED": 27.2,
     "FEAR_GREED_RATING": "FEAR",
@@ -292790,10 +292790,10 @@
       },
       {
         "date": "2026-10-20",
-        "value": 82999.53,
+        "value": 82892.33,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-21T07:28:09+09:00"
+        "observed_kst": "2026-10-21T08:09:29+09:00"
       }
     ],
     "ETHUSD": [
@@ -299375,10 +299375,10 @@
       },
       {
         "date": "2026-10-20",
-        "value": 2458.36,
+        "value": 2447.14,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-21T07:28:05+09:00"
+        "observed_kst": "2026-10-21T08:09:28+09:00"
       }
     ],
     "FEAR_GREED": [
@@ -318291,7 +318291,7 @@
     "drawdown_52w_pct": -5.553937219588212,
     "ma250": 27289.873250000237,
     "ndx": 29490.28320312,
-    "observed_at": "2026-10-21T08:08:52+09:00",
+    "observed_at": "2026-10-21T08:09:46+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -5.4288225086570385,
     "previous_ma250": 27272.420640625278,
@@ -318310,16 +318310,6 @@
     "vix_window_count": 10
   },
   "tripod_history": [
-    {
-      "date": "2024-10-17",
-      "ndx": 20190.41992188,
-      "ma250": 18063.24388671872,
-      "vix": 19.11000061,
-      "vix10": 20.454999923,
-      "drawdown_52w_pct": -2.3455961503121903,
-      "regime": "상승",
-      "target": "TQQQ 100%"
-    },
     {
       "date": "2024-10-18",
       "ndx": 20324.0390625,
@@ -323343,7 +323333,7 @@
   ],
   "signal_log": [
     {
-      "date": "2024-10-17",
+      "date": "2024-10-18",
       "regime": "상승",
       "target": "TQQQ 100%",
       "reason": "regime/vix10/drawdown 조건 변경"
@@ -323434,11 +323424,11 @@
       "symbol": "BTC-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 82999.53,
-      "quote_as_of_kst": "2026-10-21T07:28:09+09:00",
-      "captured_kst": "2026-10-21T07:28:12+09:00",
+      "price": 82892.33,
+      "quote_as_of_kst": "2026-10-21T08:09:29+09:00",
+      "captured_kst": "2026-10-21T08:09:34+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 3,
+      "quote_age_seconds": 5,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     },
@@ -323446,11 +323436,11 @@
       "symbol": "ETH-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/ETH-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 2458.36,
-      "quote_as_of_kst": "2026-10-21T07:28:05+09:00",
-      "captured_kst": "2026-10-21T07:28:12+09:00",
+      "price": 2447.14,
+      "quote_as_of_kst": "2026-10-21T08:09:28+09:00",
+      "captured_kst": "2026-10-21T08:09:34+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 7,
+      "quote_age_seconds": 6,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     }
@@ -323463,7 +323453,7 @@
       "item_code": "010200000",
       "last_date": "2026-10-20",
       "age_days": 1,
-      "verified_rows": 9,
+      "verified_rows": 20,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323474,7 +323464,7 @@
       "item_code": "010200001",
       "last_date": "2026-10-20",
       "age_days": 1,
-      "verified_rows": 9,
+      "verified_rows": 20,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323485,7 +323475,7 @@
       "item_code": "010210000",
       "last_date": "2026-10-20",
       "age_days": 1,
-      "verified_rows": 9,
+      "verified_rows": 20,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323496,7 +323486,7 @@
       "item_code": "010220000",
       "last_date": "2026-10-20",
       "age_days": 1,
-      "verified_rows": 9,
+      "verified_rows": 20,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323507,7 +323497,7 @@
       "item_code": "010230000",
       "last_date": "2026-10-20",
       "age_days": 1,
-      "verified_rows": 9,
+      "verified_rows": 20,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -323654,7 +323644,7 @@
       "last_date": "2026-10-19"
     }
   },
-  "kr_rates_refreshed_kst": "2026-10-21T07:28:15+09:00",
+  "kr_rates_refreshed_kst": "2026-10-21T08:09:23+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -323664,7 +323654,7 @@
     "fear_greed": {
       "state": "LIVE",
       "source": "CNN_FEAR_GREED_PUBLIC",
-      "observed_at": "2026-10-20T22:04:08+00:00",
+      "observed_at": "2026-10-20T22:49:08+00:00",
       "rating": "FEAR",
       "error": null,
       "history_source": "DAILY_MARKET_PULSE_HISTORY",
@@ -323699,7 +323689,7 @@
   "today_strategy_contract": "TRIPOD_CANONICAL_DECISION_SUPPORT_V1",
   "freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-10-21T07:20:11+09:00",
+    "checked_kst": "2026-10-21T08:09:23+09:00",
     "market_date_us": "2026-10-20",
     "us_close_refresh_contract": "US_REGULAR_CLOSE_PLUS_10M_DST_AWARE",
     "scheduled_kst": "05:10_OR_06:10_DST_DEPENDENT",
@@ -323752,7 +323742,7 @@
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
-  "equity_enriched_kst": "2026-10-21T07:20:25+09:00",
+  "equity_enriched_kst": "2026-10-21T08:09:36+09:00",
   "supplemental_refreshed_kst": "2026-10-21T07:28:12+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "crypto_enriched_kst": "2026-10-13T05:12:54+09:00"
