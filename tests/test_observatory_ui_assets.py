@@ -21,6 +21,16 @@ class RuntimeVersions(unittest.TestCase):
         with self.assertRaises(ValueError):
             ensure_runtime(html, 'x.js', '2')
 
+    def test_checked_in_board_cache_key_matches_production_publication_contract(self):
+        # This mismatch previously let UI tests pass but blocked every daily publish.
+        html = Path('market-observatory/index.html').read_text()
+        board = Path('market-observatory/latest-board-v1.js').read_text()
+        url = re.search(r'latest-board-v1[.]js[?]v=([^"&]+)', html)
+        runtime = re.search(r"version:'([^']+)'", board)
+        self.assertIsNotNone(url)
+        self.assertIsNotNone(runtime)
+        self.assertEqual(url[1], runtime[1], 'Board cache key blocks daily data publication')
+
     def test_actual_sector_acceptance_accepts_current_ui_release(self):
         # Execute the real workflow contract, including all dataset checks.
         yaml = Path('.github/workflows/market-observatory-sector-qa.yml').read_text()
