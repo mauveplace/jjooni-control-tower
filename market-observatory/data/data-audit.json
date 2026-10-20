@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-20T23:48:28+09:00",
+  "generated_kst": "2026-10-21T02:34:03+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 4,
   "observatory_session": "2026-10-19",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-20T21:49:59+09:00",
+      "generated_kst": "2026-10-21T00:21:20+09:00",
       "session": "2026-10-19",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-20T22:43:22+09:00",
+      "generated_kst": "2026-10-21T00:21:26+09:00",
       "session": "2026-10-19",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-20T22:43:22+09:00",
+      "generated_kst": "2026-10-21T00:21:26+09:00",
       "session": "2026-10-19",
       "ok": true,
       "target": "TQQQ 100%"
@@ -48,7 +48,7 @@
       "priced_count": 46
     },
     "official_macro": {
-      "generated_kst": "2026-10-20T18:40:47+09:00",
+      "generated_kst": "2026-10-21T02:33:22+09:00",
       "schema": "JJOONI_OFFICIAL_MACRO_V1"
     },
     "market_regime": {
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-20T23:48:26+09:00",
+      "generated_kst": "2026-10-21T02:34:03+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -152,7 +152,7 @@
     },
     "kr_equity": {
       "state": "LIVE",
-      "anchor": "2026-10-20",
+      "anchor": "2026-10-21",
       "allow_lag_days": 4,
       "critical": true,
       "items": {
@@ -346,7 +346,7 @@
     },
     "kr_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-20",
+      "anchor": "2026-10-21",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -404,7 +404,7 @@
     },
     "jp_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-20",
+      "anchor": "2026-10-21",
       "allow_lag_days": 5,
       "critical": false,
       "items": {
@@ -461,17 +461,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-20",
-          "last_value": 81530.64,
+          "last_value": 82330.22,
           "group": "crypto",
-          "latest_value": 81530.64,
+          "latest_value": 82330.22,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-20",
-          "last_value": 2391.18,
+          "last_value": 2431.17,
           "group": "crypto",
-          "latest_value": 2391.18,
+          "latest_value": 2431.17,
           "latest_matches": true
         }
       },
@@ -480,7 +480,7 @@
     },
     "sentiment": {
       "state": "LIVE",
-      "anchor": "2026-10-20",
+      "anchor": "2026-10-21",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -515,16 +515,16 @@
     "BTCUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-20T22:43:00+09:00",
-      "current_quote_age_seconds": 3928,
-      "captured_quote_age_seconds": 3
+      "quote_as_of_kst": "2026-10-21T00:21:17+09:00",
+      "current_quote_age_seconds": 7966,
+      "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-20T22:43:01+09:00",
-      "current_quote_age_seconds": 3927,
-      "captured_quote_age_seconds": 2
+      "quote_as_of_kst": "2026-10-21T00:21:17+09:00",
+      "current_quote_age_seconds": 7966,
+      "captured_quote_age_seconds": 6
     }
   },
   "issues": [
@@ -536,12 +536,12 @@
     {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-20T22:43:00+09:00', 'current_quote_age_seconds': 3928, 'captured_quote_age_seconds': 3}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-21T00:21:17+09:00', 'current_quote_age_seconds': 7966, 'captured_quote_age_seconds': 6}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-20T22:43:01+09:00', 'current_quote_age_seconds': 3927, 'captured_quote_age_seconds': 2}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-21T00:21:17+09:00', 'current_quote_age_seconds': 7966, 'captured_quote_age_seconds': 6}"
     },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
