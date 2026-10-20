@@ -25,7 +25,8 @@ on:
       - .github/workflows/market-observatory-daily.yml
   workflow_run:
     # Opportunistic heartbeats from already-running workflows.
-    # Each completion only refreshes Observatory when generated_kst is stale.
+    # A failed calendar/optional source must still trigger the independent freshness check.
+    # The gate below rebuilds only when the market snapshot itself is stale.
     workflows:
       - "pages build and deployment"
       - "Economic Calendar Light Refresh"
@@ -75,7 +76,7 @@ jobs:
           fi
 
   hourly_gate:
-    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '7,22,37,52 * * * *') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '7,22,37,52 * * * *') || (github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')) }}
     runs-on: ubuntu-latest
     outputs:
       should_refresh: ${{ steps.fresh.outputs.should_refresh }}
