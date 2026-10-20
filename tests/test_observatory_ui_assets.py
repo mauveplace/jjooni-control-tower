@@ -25,7 +25,7 @@ class RuntimeVersions(unittest.TestCase):
         # This mismatch previously let UI tests pass but blocked every daily publish.
         html = Path('market-observatory/index.html').read_text()
         board = Path('market-observatory/latest-board-v1.js').read_text()
-        url = re.search(r'latest-board-v1\\.js\\?v=([^"&]+)', html)
+        url = re.search(r'latest-board-v1[.]js[?]v=([^"&]+)', html)
         runtime = re.search(r"version:'([^']+)'", board)
         self.assertIsNotNone(url)
         self.assertIsNotNone(runtime)
