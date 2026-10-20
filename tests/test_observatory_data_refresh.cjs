@@ -29,3 +29,35 @@ test('queued and running jobs retain separate progress',()=>{
 test('a successful process with stale source data is partial, never all-current',()=>{
   assert.equal(stateFor(run,{run_id:'42',sources:{fedwatch:'success'},quality:{source_health:'DEGRADED',degraded_sources:{fedwatch:'LAGGING'}}}).state,'PARTIAL');
 });
+
+
+const live=require('../market-observatory/live-market-refresh-v1.js');
+const base={schema:'JJOONI_MARKET_OBSERVATORY_V1',generated_kst:'2026-10-21T04:24:29+09:00',us_completed_session_date:'2026-10-20',series:{NASDAQ100:[{date:'2026-10-20',value:100}]},latest:{NASDAQ100:100}};
+test('supplemental collection advances display clock without falsifying source generation',()=>{
+ const next={...base,supplemental_refreshed_kst:'2026-10-21T07:05:27+09:00'};
+ assert.equal(live.marketClock(next),next.supplemental_refreshed_kst);assert.notEqual(live.revision(base),live.revision(next));assert.equal(next.generated_kst,base.generated_kst);
+});
+test('delayed or invalid responses never replace a newer market snapshot',()=>{
+ const current={...base,supplemental_refreshed_kst:'2026-10-21T07:05:27+09:00'};
+ assert.equal(live.canApply(current,base),false);assert.equal(live.canApply(base,current),true);
+ assert.equal(live.canApply(current,{...current,us_completed_session_date:'2026-10-19'}),false);
+ assert.equal(live.canApply(current,{...current,schema:'wrong'}),false);
+});
+test('refresh preserves hydrated long history while the new source corrects overlapping dates',()=>{
+ const current={...base,history_loaded:true,series:{NASDAQ100:[{date:'2000-01-01',value:1},...base.series.NASDAQ100]}};
+ const next={...base,series:{NASDAQ100:[{date:'2026-10-20',value:101}]},latest:{NASDAQ100:101}};
+ const merged=live.retainHistory(current,next);assert.equal(merged.history_loaded,true);assert.deepEqual(merged.series.NASDAQ100,[{date:'2000-01-01',value:1},{date:'2026-10-20',value:101}]);assert.equal(current.series.NASDAQ100[1].value,100);
+});
+
+const vm=require('node:vm'),fs=require('node:fs');
+test('an open mobile tab updates without reload, retains nodes when unchanged and keeps last value on errors',async()=>{
+ let paints=0,reads=0,fail=false;const listeners={},message={};const next={...base,supplemental_refreshed_kst:'2026-10-21T07:05:27+09:00',latest:{NASDAQ100:101}};
+ const document={hidden:false,querySelector:()=>null,getElementById:()=>message,addEventListener:(n,f)=>listeners[n]=f,dispatchEvent:()=>{}};
+ const context=vm.createContext({DATA:structuredClone(base),document,AbortSignal,Date,console,CustomEvent:class{},render:()=>paints++,setInterval:()=>1,clearInterval:()=>{},fetch:async()=>{reads++;if(fail)throw Error('offline');return {ok:true,json:async()=>structuredClone(next)}}});
+ context.window=context;context.addEventListener=(n,f)=>listeners[n]=f;
+ vm.runInContext(fs.readFileSync(require.resolve('../market-observatory/live-market-refresh-v1.js'),'utf8'),context);
+ const runtime=context.__JJOONI_OBSERVATORY_MARKET_REFRESH;
+ assert.equal(await runtime.refresh(true),true);assert.equal(context.DATA.latest.NASDAQ100,101);assert.equal(paints,1);
+ assert.equal(await runtime.refresh(true),false);assert.equal(paints,1,'unchanged polling cannot rebuild chart nodes');
+ fail=true;const confirmed=context.DATA;await runtime.refresh(true);assert.equal(context.DATA,confirmed);assert.equal(runtime.status,'RETRY');assert.ok(listeners.visibilitychange);assert.ok(listeners.pageshow);assert.equal(reads,3);
+});

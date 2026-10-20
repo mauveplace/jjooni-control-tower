@@ -53,12 +53,13 @@ function init(){
   const host=doc.createElement('div');host.className='obsCollectControls';
   host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 새로고침</button><a target="_blank" rel="noopener noreferrer">실행 기록 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">예약 수집 중 · 원천 수집 열기 → GitHub에서 Run workflow 실행</div>';
   head.appendChild(host);button=host.querySelector('#obsCollectRefresh');message=host.querySelector('#obsCollectMessage');links=host.querySelector('a');links.href=RUN_URL;
-  button.addEventListener('click',start);host.querySelector('#obsReadPublished').addEventListener('click',reloadView);
+  button.addEventListener('click',start);host.querySelector('#obsReadPublished').addEventListener('click',()=>{const live=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;if(live)live.refresh(true);else reloadView()});
   try{pending=JSON.parse(sessionStorage.getItem(KEY)||'null');const result=sessionStorage.getItem(KEY+'_RESULT');if(result){message.textContent=result+' 최신 게시 데이터를 다시 읽었습니다.';sessionStorage.removeItem(KEY+'_RESULT');}}catch(_){pending=null;}
   if(pending&&Number.isFinite(pending.started))poll();else pending=null;
   doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pending){if(timer)clearTimeout(timer);poll();}});
-  root.__JJOONI_DATA_REFRESH={version:'1.0',mode:'SCHEDULE_PLUS_AUTHENTICATED_MANUAL_COLLECTION',start,poll};
+  root.__JJOONI_DATA_REFRESH={version:'1.0',mode:'SCHEDULE_PLUS_AUTHENTICATED_MANUAL_COLLECTION',get pending(){return !!pending},start,poll};
 }
 const style=doc.createElement('style');style.textContent='.obsCollectControls{margin-top:10px}.obsCollectActions{display:flex;flex-wrap:wrap;align-items:center;gap:7px}.obsCollectActions button,.obsCollectActions a{font:inherit;font-size:12px;font-weight:750;min-height:36px;border:1px solid #718faf;border-radius:8px;padding:7px 11px;color:#fff;background:#183959;cursor:pointer}.obsCollectActions #obsCollectRefresh{background:#e6f0ff;color:#123f71;border-color:#e6f0ff}.obsCollectActions a{background:transparent;text-decoration:none;display:inline-flex;align-items:center}#obsCollectMessage{font-size:11px;color:#c2d3e8;margin-top:6px;line-height:1.5}#obsCollectMessage[data-state=FAILED],#obsCollectMessage[data-state=CHECK_FAILED]{color:#ffd3aa}';doc.head.appendChild(style);
 init();
 })(typeof window!=='undefined'?window:globalThis);
+
