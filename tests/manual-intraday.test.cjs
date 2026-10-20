@@ -30,3 +30,5 @@ test('reference queue prioritizes selected symbol and one failed source cannot b
 
 const {displayTimezone}=require('../manual-intraday-v1.js');
 test('US charts default to Korea time and allow Eastern; domestic charts always stay KST',()=>{assert.equal(displayTimezone('America/New_York'),'Asia/Seoul');assert.equal(displayTimezone('America/New_York','America/New_York'),'America/New_York');assert.equal(displayTimezone('Asia/Seoul','America/New_York'),'Asia/Seoul');});
+
+ test('KRW price axes never fabricate fractional won; USD retains cents',()=>{const {axisMoney}=require('../manual-intraday-v1.js');assert.equal(axisMoney(220433.33,'KRW'),'220,433');assert.equal(axisMoney(203.125,'USD'),'203.13');assert.equal(axisMoney(null,'KRW'),'—')});
