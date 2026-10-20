@@ -22,7 +22,7 @@ async function refresh(force=false){
   const key=revision(next);state.checked_at=new Date().toISOString();state.market_collected_at=marketClock(next);
   if(key===lastRevision){state.status='UNCHANGED';return false}
   // Do not move a chart while the user is inspecting an expanded view.
-  if(document.querySelector('#obsFullChart.on,[aria-modal="true"]')){state.status='DEFERRED_DIALOG';return false}
+  if(document.querySelector('#obsFullChart.on,dialog[open]')){state.status='DEFERRED_DIALOG';return false}
   DATA=retainHistory(DATA,next);lastRevision=key;state.status='UPDATED';state.applied_at=new Date().toISOString();
   if(typeof render==='function')render();document.dispatchEvent(new CustomEvent('jjooni:observatory-market-updated',{detail:{generated_kst:next.generated_kst,market_collected_at:marketClock(next)}}));
   note('최신 게시값 반영 · 시장 수집 '+String(marketClock(next)).replace('T',' ').slice(0,16)+' KST · 원천별 기준일은 각 항목에 표시됩니다.');return true;
