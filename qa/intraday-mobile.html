@@ -6,7 +6,7 @@ const frame=document.querySelector('iframe'),origin=location.origin;
 const mock=()=>{
  Object.defineProperty(window,'sessionStorage',{value:{getItem:()=> 'synthetic-preview-only',setItem:()=>{}}});
  const day='2026-01-05';
- const chart=symbol=>({symbol,session_date:day,market_timezone:'Asia/Seoul',updated_at:new Date().toISOString(),last_bar_at:day+'T00:22:00Z',backfill_complete:true,status:'COMPLETE',previous_close:100000,previous_close_date:'2026-01-02',candles:Array.from({length:82},(_,i)=>({timestamp:new Date(Date.parse('2026-01-04T23:01:00Z')+i*60000).toISOString(),close:Math.round(99500-i*45+Math.sin(i/3)*400),currency:'KRW'}))});
+ const chart=symbol=>({schema:'CT_MANUAL_INTRADAY_V1',symbol,session_date:day,market_timezone:'Asia/Seoul',updated_at:new Date().toISOString(),last_bar_at:day+'T00:22:00Z',backfill_complete:true,status:'COMPLETE',previous_close:100000,previous_close_date:'2026-01-02',candles:Array.from({length:82},(_,i)=>({timestamp:new Date(Date.parse('2026-01-04T23:01:00Z')+i*60000).toISOString(),close:Math.round(99500-i*45+Math.sin(i/3)*400),currency:'KRW'}))});
  window.__JJOONI_LIVE_READY=true;window.__JJOONI_CANONICAL_SSOT={accounts:{ISA:{positions:[{ticker:'900001',qty:1,name:'모바일 그래프 가독성 예시종목 (합성자료)'},{ticker:'900002',qty:1,name:'수집 실패 점검 예시종목 (합성자료)'}]}}};
  window.fetch=async(url,options)=>{
   const path=new URL(url).pathname,body=JSON.parse(options.body||'{}');await new Promise(r=>setTimeout(r,25));
