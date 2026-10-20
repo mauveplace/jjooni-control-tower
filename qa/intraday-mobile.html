@@ -1,0 +1,19 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>일중 그래프 · 모바일 가독성 점검</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:12px;background:#e8edf3;color:#153451;font:16px/1.5 system-ui}main{width:max-content;max-width:100%;margin:auto}h1{font-size:18px;margin:0 0 6px}p{font-size:14px;margin:4px 0 10px}label{display:inline-block;margin:0 12px 10px 0}select{font:inherit;padding:6px}iframe{display:block;width:390px;max-width:100%;height:760px;background:white;border:1px solid #adbdcf;border-radius:10px}</style>
+<main><h1>일중 그래프 · 화면 점검</h1><p>합성자료 예시입니다. 실제 계좌·시세를 조회하지 않습니다.</p><label>너비 <select id="width"><option>360</option><option selected>390</option><option>412</option><option>800</option><option>1280</option></select></label><label>높이 <select id="height"><option>700</option><option selected>760</option><option>844</option></select></label><iframe title="합성자료 모바일 그래프" sandbox="allow-scripts"></iframe></main>
+<script>
+const frame=document.querySelector('iframe'),origin=location.origin;
+const mock=()=>{
+ Object.defineProperty(window,'sessionStorage',{value:{getItem:()=> 'synthetic-preview-only',setItem:()=>{}}});
+ const day='2026-01-05';
+ const chart=symbol=>({schema:'CT_MANUAL_INTRADAY_V1',symbol,session_date:day,market_timezone:'Asia/Seoul',updated_at:new Date().toISOString(),last_bar_at:day+'T00:22:00Z',backfill_complete:true,status:'COMPLETE',previous_close:100000,previous_close_date:'2026-01-02',candles:Array.from({length:82},(_,i)=>({timestamp:new Date(Date.parse('2026-01-04T23:01:00Z')+i*60000).toISOString(),close:Math.round(99500-i*45+Math.sin(i/3)*400),currency:'KRW'}))});
+ window.__JJOONI_LIVE_READY=true;window.__JJOONI_CANONICAL_SSOT={accounts:{ISA:{positions:[{ticker:'900001',qty:1,name:'모바일 그래프 가독성 예시종목 (합성자료)'},{ticker:'900002',qty:1,name:'수집 실패 점검 예시종목 (합성자료)'}]}}};
+ window.fetch=async(url,options)=>{
+  const path=new URL(url).pathname,body=JSON.parse(options.body||'{}');await new Promise(r=>setTimeout(r,25));
+  let out;if(path==='/charts/read')out={chart:chart(body.symbol)};else if(path==='/charts/reference')out={reference:{session_date:day,previous_close:100000,previous_close_date:'2026-01-02'}};else if(path==='/charts/observe')out={history:{points:[]}};else if(path==='/charts/update'){if(body.symbol==='900002')return{ok:false,status:503,json:async()=>({error:'합성자료: 일시적 수집 실패'})};out={chart:chart(body.symbol)}}else throw Error('Unexpected preview request');
+  return{ok:true,status:200,json:async()=>out};
+ };
+};
+frame.srcdoc='<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font:16px/1.5 system-ui;background:#f5f8fb}header{padding:14px;background:#0b2442;color:white}main{padding:10px}</style><header>모바일 그래프 점검 · 합성자료</header><main id="panel-portfolio"></main><script>('+mock.toString()+')()<\/script><script src="'+origin+'/jjooni-control-tower/ui-refactor.js"><\/script><script src="'+origin+'/jjooni-control-tower/manual-intraday-v1.js?v=2.0"><\/script></html>';
+for(const id of ['width','height'])document.getElementById(id).onchange=e=>frame.style[id]=e.target.value+'px';
+</script></html>
