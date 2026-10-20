@@ -1,10 +1,10 @@
 name: Observatory UI Runtime Version Contract
 on:
   pull_request:
-    paths: ['tools/observatory_ui_assets.py', 'tests/test_observatory_ui_assets.py', '.github/workflows/observatory-ui-assets-qa.yml', '.github/workflows/market-observatory-sector-qa.yml', '.github/workflows/market-observatory-daily.yml', '.github/workflows/market-observatory-freshness-ui.yml']
+    paths: ['market-observatory/index.html', 'market-observatory/latest-board-v1.js', 'tools/observatory_ui_assets.py', 'tests/test_observatory_ui_assets.py', '.github/workflows/observatory-ui-assets-qa.yml', '.github/workflows/market-observatory-sector-qa.yml', '.github/workflows/market-observatory-daily.yml', '.github/workflows/market-observatory-freshness-ui.yml']
   push:
     branches: [main]
-    paths: ['tools/observatory_ui_assets.py', 'tests/test_observatory_ui_assets.py', '.github/workflows/observatory-ui-assets-qa.yml', '.github/workflows/market-observatory-sector-qa.yml', '.github/workflows/market-observatory-daily.yml', '.github/workflows/market-observatory-freshness-ui.yml']
+    paths: ['market-observatory/index.html', 'market-observatory/latest-board-v1.js', 'tools/observatory_ui_assets.py', 'tests/test_observatory_ui_assets.py', '.github/workflows/observatory-ui-assets-qa.yml', '.github/workflows/market-observatory-sector-qa.yml', '.github/workflows/market-observatory-daily.yml', '.github/workflows/market-observatory-freshness-ui.yml']
 permissions:
   contents: read
 jobs:
