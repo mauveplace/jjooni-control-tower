@@ -186,9 +186,17 @@ function checkedBook(out,requireReady=false){
 }
 async function write(body){if(S.busy)return;S.busy=true;S.error='';render();try{const out=await request('/strategy/record',body);S.book=checkedBook(out,true);S.recorded.add(S.book.latest_snapshot_id)}catch(e){S.error='원장 기록: '+e.message}finally{S.busy=false;render()}}
 async function load(force=false){if(S.busy)return;S.busy=true;S.error='';render();try{
- const out=await request('/strategy/read',{refresh:force});let nextBook=checkedBook(out);
+ const out=await request('/strategy/read',{read_mode:'book'});let nextBook=checkedBook(out);
  if(!nextBook.baseline||!nextBook.cost_basis_v1){const record=await request('/strategy/record',{command:!nextBook.baseline?'observe':'initialize_cost_basis'});nextBook=checkedBook(record,true);S.recorded.add(nextBook.latest_snapshot_id)}
- S.book=checkedBook({book:nextBook},true);S.ledger=out.ledger||{};S.loaded=true;
+ S.book=checkedBook({book:nextBook},true);S.loaded=true;
+ // Paint saved basis before historical ledger I/O. Recent broker trades are
+ // already merged by render; quantity reconciliation still rejects gaps.
+ if(out.ledger?.status!=='DEFERRED')S.ledger=out.ledger||{};
+ render();
+ if(out.ledger?.status==='DEFERRED'){
+  try{const history=await request('/strategy/read',{read_mode:'ledger',refresh:force});S.ledger=history.ledger||{}}
+  catch(e){S.error='체결 원장 갱신: '+e.message}
+ }
 }catch(e){S.error='전략 원장 조회: '+e.message}finally{S.busy=false;render()}}
 function visible(){return (box?.isConnected&&box.getClientRects().length>0)||[...document.querySelectorAll('.ctStrategySleeve')].some(x=>x.getClientRects().length>0)}
 async function boot(){if(!root.__JJOONI_LIVE_READY||!ensure())return;render();if(!visible())return;if(!S.loaded)return load();const id=root.__JJOONI_CANONICAL_SSOT?.snapshot_id;if(id&&!S.recorded.has(id)&&!S.busy)await write({command:'observe'})}
