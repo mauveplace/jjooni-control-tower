@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-21T21:45:03+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-10-21T21:45:06+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "observatory_session": "2026-10-20",
   "file_status": {
     "observatory": {
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-21T21:45:03+09:00",
+      "generated_kst": "2026-10-21T21:45:05+09:00",
       "session": "2026-10-20",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-21T21:45:03+09:00",
+      "generated_kst": "2026-10-21T21:45:05+09:00",
       "session": "2026-10-20",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,10 +33,10 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-21T18:17:55+09:00",
+      "generated_kst": "2026-10-21T21:44:41+09:00",
       "events": 185,
-      "actual_freshness": "DEGRADED",
-      "overdue_count": 1,
+      "actual_freshness": "LIVE",
+      "overdue_count": 0,
       "pending_count": 0,
       "collection_health": "LIVE",
       "failed_source_count": 0,
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-21T18:41:23+09:00",
+      "generated_kst": "2026-10-21T21:45:03+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -515,24 +515,18 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-21T21:44:42+09:00",
-      "current_quote_age_seconds": 21,
+      "current_quote_age_seconds": 24,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-21T21:44:40+09:00",
-      "current_quote_age_seconds": 23,
+      "current_quote_age_seconds": 26,
       "captured_quote_age_seconds": 8
     }
   },
-  "issues": [
-    {
-      "code": "CALENDAR_ACTUAL_DEGRADED",
-      "severity": "WARN",
-      "detail": "overdue_count=1 pending_count=0"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
