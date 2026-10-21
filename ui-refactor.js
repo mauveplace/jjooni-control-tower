@@ -16,13 +16,8 @@ function ensureStyle(){
  const st=document.createElement('style');
  st.id='ctUiRefactorStyle';
  st.textContent=`
-@media(min-width:768px){#ctMoreTab,#ctMoreMenu{display:none!important}}
+/* Navigation geometry is owned only by responsive-layout.css. */
 @media(max-width:767px){
- .tabs{display:flex!important;grid-template-columns:none!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;height:56px!important;padding:4px 7px!important;scrollbar-width:none!important}
- .tabs::-webkit-scrollbar{display:none!important}
- .tabs>.tab[data-tab]{display:flex!important;flex:0 0 auto!important;min-width:82px!important;width:auto!important;height:48px!important;font-size:10px!important;line-height:1.15!important;padding:4px 9px!important;white-space:nowrap!important;align-items:center!important;justify-content:center!important}
- .tabs>.tab[data-tab="ai"]{display:none!important}
- #ctMoreTab,#ctMoreMenu{display:none!important}
  .ctTrustBadge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 7px;margin:1px 3px 1px 0;font:800 11px/1.15 system-ui;white-space:nowrap;background:rgba(127,127,127,.10);color:inherit;border:1px solid rgba(127,127,127,.28)}
  .ctTrustBadge.measured,.ctTrustBadge.modeled,.ctTrustBadge.reference{background:rgba(127,127,127,.10);color:inherit;border-color:rgba(127,127,127,.28)}
  #ctHeroScopeWarning{font-size:11px!important;line-height:1.6!important}
@@ -45,7 +40,7 @@ function activateTab(name){
 function ensureMobileNav(){
  const tabs=qs('.tabs');if(!tabs)return;
  document.documentElement.dataset.ctLayout='mobile-first';
- if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.1';document.head.appendChild(link)}
+ if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.2';document.head.appendChild(link)}
  qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase();t.dataset.primary=PRIMARY_TABS.includes(id)?'1':'0';t.setAttribute('role','button');t.tabIndex=0;t.setAttribute('aria-label',t.textContent.trim());if(!t.dataset.keyboardBound){t.dataset.keyboardBound='1';t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click()}})}});
  let more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');
  if(!more){more=document.createElement('button');more.id='ctMoreTab';more.type='button';more.textContent='더보기';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','ctMoreMenu');tabs.append(more)}
@@ -165,11 +160,11 @@ document.addEventListener('jjooni:live-applied',scheduleTypography);
 scheduleTypography();
 
 let busy=false;
-function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.8',mobile_nav:'FULL_SCROLL',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
+function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.8',mobile_nav:'BOTTOM_PRIMARY_WITH_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctMoreMenu button'))setTimeout(()=>{ensureMobileNav();syncMoreState()},120)});
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 document.addEventListener('jjooni:live-applied',enforce);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
-window.addEventListener('resize',()=>{if(!mobile()){const m=qs('#ctMoreMenu');if(m)m.classList.remove('open');resetTradeState()}enforce()},{passive:true});
+window.addEventListener('resize',()=>{if(window.matchMedia('(min-width:1200px) and (hover:hover) and (pointer:fine)').matches){const m=qs('#ctMoreMenu');if(m)m.classList.remove('open');resetTradeState()}enforce()},{passive:true});
 })();

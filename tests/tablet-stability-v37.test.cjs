@@ -62,12 +62,13 @@ test('tablet readability and navigation guard is loaded',()=>{
   assert.match(guard,/\.ctSleeve\.open \.ctSleeveDetail\{display:block!important\}/);
 });
 
-test('tablet overview account cards use one 18pt typography authority',()=>{
-  assert.match(guard,/Account-card typography authority/);
-  assert.match(guard,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-  assert.match(guard,/font-size:18pt!important/);
-  assert.match(guard,/font-size:20pt!important/);
-  assert.match(guard,/font-size:22pt!important/);
+test('tablet account cards use tiered text and width-based columns from the shared stylesheet',()=>{
+  const css=fs.readFileSync('responsive-layout.css','utf8');
+  assert.match(guard,/Account-card typography authority lives in responsive-layout/);
+  assert.doesNotMatch(guard,/\.ctAcct \*\{font-size:18pt/);
+  assert.match(css,/auto-fit,minmax\(min\(100%,340px\),1fr\)/);
+  assert.match(css,/\.ctAcctNav\{font-size:28px/);
+  assert.match(css,/\.ctSleeveHead strong\{font-size:24px/);
   assert.doesNotMatch(loader,/account-card-readability-v44/);
 });
 
