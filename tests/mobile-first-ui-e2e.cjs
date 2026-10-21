@@ -49,5 +49,16 @@ for(const width of [360,390,500,768,820,1024,1363]){
  await page.locator('#syntheticDetail').evaluate(e=>e.remove());
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
  assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
+ // A profitable day must coexist with a loss since the confirmed deposit.
+ await page.evaluate(()=>{const a=window.__JJOONI_CANONICAL_SSOT.accounts;Object.assign(a.ISA,{nav:54422276,principal:60000000,today_pnl:1515800,today_return:2.87,pnl:999999});Object.assign(a.PENSION,{nav:42221980,principal:38517414,today_pnl:820000,today_return:1.98});document.dispatchEvent(new Event('jjooni:live-applied'))});
+ await page.waitForTimeout(220);
+ for(const [name,day,cumulative,rate,capital] of [['ISA','+₩1,515,800','-₩5,577,724','-9.30%','₩60,000,000'],['연금저축','+₩820,000','+₩3,704,566','+9.62%','₩38,517,414']]){
+  const card=page.locator('#overviewAccounts .ctAcct').filter({has:page.locator('.ctAcctName',{hasText:name})}),daily=card.locator('[data-period="daily"]'),cum=card.locator('[data-period="cumulative"]');
+  assert((await daily.innerText()).includes(day));assert((await cum.innerText()).includes(cumulative));assert((await cum.innerText()).includes(rate));assert((await card.locator('.ctAccountCapitalRow').innerText()).includes(capital));
+  for(const label of [daily.locator('.ctAccountPeriodLabel'),cum.locator('.ctAccountPeriodLabel')])assert(await label.isVisible(),'period labels must stay visible');
+  assert.equal(await daily.locator('.ctAccountPeriodAmount').evaluate(e=>getComputedStyle(e).color),'rgb(180, 35, 24)');
+  if(name==='ISA')assert.equal(await cum.locator('.ctAccountPeriodAmount').evaluate(e=>getComputedStyle(e).color),'rgb(23, 92, 211)');
+ }
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'period rows overflow at '+width);
  await page.screenshot({path:'/tmp/ct-ui-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS mobile-first width='+width+' canonical=4000 missing=unknown fund=excluded nav=usable');await context.close();
 }await browser.close()})().catch(e=>{console.error(e);process.exit(1)});

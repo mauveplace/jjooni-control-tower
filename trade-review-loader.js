@@ -111,7 +111,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctIrpTradeUnitGuardV18Script','irp-trade-unit-guard-v18.js?v=18.0','irp-trade-unit-guard'],
 ['ctDrilldownReadabilityV19Script','drilldown-readability-v19.js?v=19.4','drilldown-readability'],
 ['ctMarketContextV20Script','market-context-v20.js?v=20.0','market-context'],
-['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.2','overview-consistency'],
+['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.3-periods','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.4','source-authority-guard'],
 ['ctStrategyBooksV1Script','strategy-books-v1.js?v=2.5-saved-cost','strategy-books'],
 ['ctManualIntradayV1Script','manual-intraday-v1.js?v=2.0','manual-intraday'],

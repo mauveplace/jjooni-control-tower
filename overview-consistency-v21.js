@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_OVERVIEW_CONSISTENCY_V21)return;
-const STATE={state:'BOOTING',version:'21.2',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
+const STATE={state:'BOOTING',version:'21.3',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
 window.__JJOONI_OVERVIEW_CONSISTENCY_V21=STATE;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -16,6 +16,14 @@ function ensureStyle(){if(qs('#ctOverviewConsistencyV21Style'))return;const s=do
 #ctSourceHealthBannerV15[data-v21="1"]{font-size:12px!important;line-height:1.45!important;padding:9px 12px!important}
 #panel-overview .ctOvMini,#panel-overview .ctOvLabel,#panel-overview .ctAcctStats,#panel-overview .ctAcctStats span,#panel-overview .ctAcctStats b,#panel-overview .ctHumanAccountLineV6{font-size:11px!important;line-height:1.45!important}
 #panel-overview .ctOvValue{font-size:max(20px,1.35vw)!important}
+#panel-overview #overviewAccounts .ctAcctStats[data-periods]{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important}
+#panel-overview #overviewAccounts .ctAccountPeriodRow{display:grid!important;grid-template-columns:60px minmax(0,1fr) 76px!important;gap:8px!important;align-items:center!important;width:100%!important}
+#panel-overview #overviewAccounts .ctAccountPeriodRow strong,#panel-overview #overviewAccounts .ctAccountPeriodRow b{display:block!important;visibility:visible!important;font-size:14px!important;line-height:1.5!important;white-space:nowrap!important}
+#panel-overview #overviewAccounts .ctAccountPeriodLabel{text-align:left!important;color:#475467!important}
+#panel-overview #overviewAccounts .ctAccountPeriodAmount,#panel-overview #overviewAccounts .ctAccountPeriodRate{text-align:right!important}
+#panel-overview #overviewAccounts .ctAccountPeriodRow .gain{color:#b42318!important}
+#panel-overview #overviewAccounts .ctAccountPeriodRow .loss{color:#175cd3!important}
+#panel-overview #overviewAccounts .ctAccountCapitalRow{display:flex!important;justify-content:space-between!important;gap:8px!important;border-top:1px solid #e7ebf0!important;padding-top:8px!important;color:#667085!important;font-size:13px!important}
 .ctDdGuardV21{color:#b45309!important;font-weight:900!important;font-size:11px!important;white-space:nowrap}
 `; (document.head||document.documentElement).appendChild(s)}
 function context(){const L=window.__JJOONI_LIVE_PAYLOAD||{};return (L.market_context||{}).items||{}}
@@ -65,6 +73,13 @@ function cleanLegacy(){
  for(const e of qsa('.app div,.app p,.app small,.footer'))if((!e.children.length||e.classList.contains('footer'))&&/^(Human = PB DB SSOT|CURRENT는 최신 운용값|현재 전체자산 = Broker Actual NAV)/.test(text(e)))e.hidden=true;
  const decisions=qs('#panel-decisions');if(decisions){const p=qsa('div,p',decisions).find(e=>!e.children.length&&text(e)==='표시 가능한 Decision 데이터가 없습니다.');if(p)setText(p,'연결된 PB 판단 자료가 없습니다. 판단 생성·연결 여부를 확인해 주세요. 계좌 수집 정상과는 별도 상태입니다.')}
 }
+function accountPeriods(stats,a){
+ const principal=num(a.principal),nav=num(a.nav),pnl=principal>0&&nav!=null?nav-principal:null,ret=pnl!=null?100*pnl/principal:null;
+ const tone=v=>num(v)==null?'unknown':v<0?'loss':'gain';
+ const row=(kind,label,amount,rate)=>`<div class="ctAccountPeriodRow" data-period="${kind}"><strong class="ctAccountPeriodLabel">${label}</strong><strong class="ctAccountPeriodAmount ${tone(amount)}">${signed(amount)}</strong><b class="ctAccountPeriodRate ${tone(amount)}">${pct(rate)}</b></div>`;
+ stats.dataset.periods='daily-cumulative';
+ writeHtml(stats,row('daily','당일',a.today_pnl,a.today_return)+row('cumulative','누적',pnl,ret)+`<div class="ctAccountCapitalRow"><strong>납입원금</strong><b>${money(principal)}</b></div>`);
+}
 function overviewCommon(){
  const panel=qs('#panel-overview');if(!panel)return;const {C,L,total,history}=commonModel();
  for(const e of qsa('.ctAcctSpark,.ctSparkHead',panel))e.hidden=history.historyStale;
@@ -76,7 +91,7 @@ function overviewCommon(){
    writeHtml(exposure,`<h3>계좌·통화 구성</h3><p>현재 4계좌 자산 기준 · 전략 자산 중복 합산 없음</p>${ACCOUNT_IDS.map(id=>`<div class="ctCommonLine"><span>${ACCOUNT_NAMES[id]}</span><b>${total.nav>0&&num(C.accounts?.[id]?.nav)!=null?(100*C.accounts[id].nav/total.nav).toFixed(1)+'%':'산정 대기'}</b></div>`).join('')}<h4>통화 노출 · 원화 환산</h4>${Object.entries(amounts).map(([k,v])=>`<div class="ctCommonLine"><span>${esc(k)}</span><b>${money(v)}</b></div>`).join('')}<p>환산 가능한 자산 ${money(covered)}${total.nav!=null?' · 잔여·대사 차이 '+money(total.nav-covered):''}. 통화는 상장 시장 기준과 다를 수 있습니다.</p>`)
  }
  if(history.historyStale){for(const root of qsa('.ctAcct',document)){for(const e of qsa('.ctAcctSpark,.ctSparkHead',root))e.hidden=true;for(const e of qsa('div,span,b,strong',root)){if(e.children.length)continue;const t=text(e);if(/^(?:30D|30거래일|NDX Proxy)/.test(t))setText(e,'기간 성과 · 검증 대기');else if(t==='DD')guardMetricLabel(e)}}const risk=qsa('.ctRiskTitle',panel).find(e=>/^현재 낙폭/.test(text(e)));if(risk)setText(risk,'현재 낙폭 · 검증 대기');}
- for(const card of qsa('#overviewAccounts .ctAcct',panel)){const name=text(qs('.ctAcctName',card)),id=ACCOUNT_IDS.find(id=>ACCOUNT_NAMES[id]===name);if(!id)continue;const a=C.accounts?.[id]||{},stats=qs('.ctAcctStats',card);if(stats)writeHtml(stats,`<span>오늘 투자손익</span><div class="ctAcctTodayValue">${signed(a.today_pnl)}</div><span>오늘 수익률</span><b>${pct(a.today_return)}</b>`)}
+ for(const card of qsa('#overviewAccounts .ctAcct',panel)){const name=text(qs('.ctAcctName',card)),id=ACCOUNT_IDS.find(id=>ACCOUNT_NAMES[id]===name);if(!id)continue;const a=C.accounts?.[id]||{},stats=qs('.ctAcctStats',card);if(stats){if(['ISA','PENSION'].includes(id))accountPeriods(stats,a);else writeHtml(stats,`<span>오늘 투자손익</span><div class="ctAcctTodayValue">${signed(a.today_pnl)}</div><span>오늘 수익률</span><b>${pct(a.today_return)}</b>`)}}
  const risk=qs('#ctCanonicalRisk',panel)||cardByHeading(panel,'Risk Alert');if(risk){risk.id='ctCanonicalRisk';const values=ACCOUNT_IDS.flatMap(id=>window.JjooniMetrics.positions(C.accounts?.[id]).map(p=>({id,p,value:window.JjooniMetrics.valueKrw(p,C.accounts[id])}))).filter(x=>x.value!=null).sort((a,b)=>b.value-a.value);const largest=values[0];writeHtml(risk,`<h3>리스크 확인</h3><div class="ctCommonNotice">${history.historyStale?'현재 낙폭 · 기간 성과 검증 대기':'기간 성과 검증 완료'}</div>${largest?`<p>최대 보유 평가액: ${esc(largest.p.name||largest.p.ticker)} · ${ACCOUNT_NAMES[largest.id]}<br>${money(largest.value)} · 전체 자산 대비 ${total.nav>0?(100*largest.value/total.nav).toFixed(1)+'%':'산정 대기'}</p>`:''}<p>실제 보유 원본 기준입니다. 손익·시세가 누락된 종목은 0으로 판단하지 않습니다.</p>`)}
  const meta=qs('.ctOvMetaRow .ctOvMeta',panel);if(meta)setText(meta,'계좌 원본 '+stamp(L.generated_kst||L.observed_at));
  // Stale regular/off-hours components cannot explain canonical account P&L.
