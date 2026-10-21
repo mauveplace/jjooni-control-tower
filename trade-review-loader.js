@@ -40,7 +40,38 @@ function loadRequired(id,src,label){return new Promise((resolve,reject)=>{
  s=document.createElement('script');s.id=id;s.src=bootUrl(src);s.async=false;s.onload=done;s.onerror=()=>finish(new Error(label+'_LOAD_FAILED'));head.appendChild(s);
 })}
 
-function canonicalizeNavigation(){const tabs=document.querySelector('.tabs');if(!tabs)return false;const seen=new Set();Array.from(tabs.querySelectorAll('.tab[data-tab]')).forEach(t=>{const key=String(t.dataset.tab||'').toLowerCase();if(LABELS[key]&&t.textContent!==LABELS[key])t.textContent=LABELS[key];const canonicalKey=key==='performance'&&tabs.querySelector('.tab[data-tab="accounts"]')?'accounts':key;if(seen.has(canonicalKey)){t.style.display='none';t.dataset.ctNavDuplicate='1';return}seen.add(canonicalKey);t.removeAttribute('data-ct-nav-duplicate');if(innerWidth>=1200&&t.style.display)t.style.removeProperty('display')});const more=document.getElementById('ctMoreTab');if(more&&innerWidth>=1200&&more.style.display!=='none')more.style.display='none';else if(more&&innerWidth<1200)more.style.removeProperty('display');tabs.dataset.ctCanonicalNavOwner='TRADE_REVIEW_LOADER_V14';document.documentElement.dataset.ctNavOwner='v14';BOOT.nav_signature=Array.from(tabs.querySelectorAll('.tab[data-tab]')).filter(e=>getComputedStyle(e).display!=='none').map(e=>String(e.dataset.tab)+':'+String(e.textContent||'').trim()).join('|');return true}
+function canonicalizeNavigation(){
+ const tabs=document.querySelector('.tabs');if(!tabs)return false;
+ const primary=['overview','portfolio','accounts','tripod'],retired=new Set(['ai','autobot','ai_bot']),seen=new Set(),canonical=[];
+ for(const t of Array.from(tabs.querySelectorAll('.tab[data-tab]'))){
+  const key=String(t.dataset.tab||'').toLowerCase();
+  if(retired.has(key)){t.remove();continue}
+  if(LABELS[key]&&t.textContent!==LABELS[key])t.textContent=LABELS[key];
+  const canonicalKey=key==='performance'&&tabs.querySelector('.tab[data-tab="accounts"]')?'accounts':key;
+  if(seen.has(canonicalKey)){if(t.style.display!=='none'||t.style.getPropertyPriority('display')!=='important')t.style.setProperty('display','none','important');t.dataset.ctNavDuplicate='1';continue}
+  seen.add(canonicalKey);canonical.push(t);t.removeAttribute('data-ct-nav-duplicate');
+  // Old encrypted-shell timers write inline display:none!important. The shared
+  // responsive stylesheet, not those timers, owns visibility on EVERY device.
+  if(t.style.getPropertyValue('display'))t.style.removeProperty('display');
+  if(t.hidden)t.hidden=false;
+  const wanted=primary.includes(key)?'1':'0';if(t.dataset.primary!==wanted)t.dataset.primary=wanted;
+ }
+ const more=document.getElementById('ctMoreTab'),menu=document.getElementById('ctMoreMenu');
+ if(more){if(innerWidth>=1200){if(more.style.display!=='none')more.style.display='none'}else if(more.style.getPropertyValue('display'))more.style.removeProperty('display')}
+ if(menu){
+  const secondary=canonical.filter(t=>!primary.includes(t.dataset.tab));
+  const keys=new Set(secondary.map(t=>t.dataset.tab));
+  for(const b of menu.querySelectorAll('button[data-tab]'))if(!keys.has(b.dataset.tab))b.remove();
+  for(const t of secondary){
+   let button=Array.from(menu.querySelectorAll('button[data-tab]')).find(b=>b.dataset.tab===t.dataset.tab);
+   if(!button){button=document.createElement('button');button.type='button';button.dataset.tab=t.dataset.tab;menu.appendChild(button)}
+   if(button.textContent!==t.textContent)button.textContent=t.textContent;
+   button.onclick=()=>{t.click();menu.classList.remove('open');document.getElementById('ctMoreBackdropV4')?.classList.remove('open');more?.setAttribute('aria-expanded','false')};
+  }
+ }
+ tabs.dataset.ctCanonicalNavOwner='TRADE_REVIEW_LOADER_V14';document.documentElement.dataset.ctNavOwner='v14';
+ BOOT.nav_signature=canonical.filter(e=>getComputedStyle(e).display!=='none').map(e=>String(e.dataset.tab)+':'+String(e.textContent||'').trim()).join('|');return true;
+}
 function lockNavigation(){canonicalizeNavigation();const tabs=document.querySelector('.tabs');if(!tabs||tabs.dataset.ctNavObservedV14)return;tabs.dataset.ctNavObservedV14='1';let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;canonicalizeNavigation()})}).observe(tabs,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});window.addEventListener('resize',canonicalizeNavigation,{passive:true})}
 async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot='waiting-ssot';try{bootText('Canonical SSOT 연결을 기다리는 중입니다.');await waitFor(()=>window.__JJOONI_LIVE_READY===true&&window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD,30000,'SSOT_READY');BOOT.state='LOADING_REQUIRED_UI';document.documentElement.dataset.ctBoot='loading-ui';const modules=[
 ['ctFastRefreshV32Script','fast-refresh-v32.js?v=32.3','master-trade-bridge'],

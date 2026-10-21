@@ -55,7 +55,7 @@ function startVerifiedUi(){
  window.__JJOONI_UI_BOOT_V14=null;
  const s=document.createElement('script');
  s.id='ctVerifiedUiLoaderV33';
- s.src='trade-review-loader.js?v=14.20-v33.2&_='+Date.now();
+ s.src='trade-review-loader.js?v=14.20-v33.2-navfix&_='+Date.now();
  s.async=false;
  s.onload=()=>{S.state='UI_LOADER_STARTED';S.ui_loader_at=new Date().toISOString()};
  s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.',true);setTimeout(startVerifiedUi,1500)};
