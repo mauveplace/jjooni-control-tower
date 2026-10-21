@@ -20,7 +20,7 @@ async function refresh(force=false){
   const r=await fetch('./data/observatory.json',{cache:'no-cache',signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('HTTP '+r.status);const next=await r.json();
   if(!canApply(DATA,next))throw Error('INVALID_OR_OLDER_MARKET_SNAPSHOT');
   const key=revision(next);state.checked_at=new Date().toISOString();state.market_collected_at=marketClock(next);
-  if(key===lastRevision){state.status='UNCHANGED';return false}
+  if(key===lastRevision){state.status='UNCHANGED';if(force)note('게시값 확인 완료 · 새로 게시된 시장 데이터 없음 · 신규 원천 수집은 실행하지 않았습니다.');return false}
   // Do not move a chart while the user is inspecting an expanded view.
   if(document.querySelector('#obsFullChart.on,dialog[open]')){state.status='DEFERRED_DIALOG';return false}
   DATA=retainHistory(DATA,next);lastRevision=key;state.status='UPDATED';state.applied_at=new Date().toISOString();

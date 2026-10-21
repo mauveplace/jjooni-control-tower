@@ -162,11 +162,15 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/audit_observatory_data.py
+          python tools/build_observatory_freshness.py
           python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 10y history' \
             market-observatory/data/economic-calendar.json \
             market-observatory/data/economic-calendar-history.json \
             market-observatory/data/calendar-manual-overrides.json \
             market-observatory/data/calendar-official-release-cache.json \
+            market-observatory/data/data-audit.json \
+            market-observatory/data/freshness-status.json \
             market-observatory/index.html
 
       - name: Signal overdue major actuals

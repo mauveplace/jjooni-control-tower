@@ -288,11 +288,11 @@ function calendarLiveStatus(){
 }
 async function refreshCalendarData(force=false){
   if(calendarRefreshInFlight||document.hidden||typeof CAL==='undefined'||!CAL)return false;
-  if(!document.querySelector('#calendar.on')||document.querySelector('#obsCalEditor.on'))return false;
+  if((!force&&!document.querySelector('#calendar.on'))||document.querySelector('#obsCalEditor.on'))return false;
   if(!force&&Date.now()-calendarLastChecked<CALENDAR_REFRESH_MS)return false;
   calendarRefreshInFlight=true;calendarLastChecked=Date.now();
   try{
-    const response=await fetch('./data/economic-calendar.json?refresh='+Date.now(),{cache:'no-store'});
+    const response=await fetch('./data/economic-calendar.json?refresh='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error('calendar HTTP '+response.status);
     const data=await response.json();
     if(!Array.isArray(data.events)||!data.generated_kst||!data.actual_freshness)throw new Error('calendar contract missing');

@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_CALENDAR_MANUAL_OVERRIDES_V1",
-  "generated_kst": "2026-10-21T18:17:55+09:00",
+  "generated_kst": "2026-10-21T21:37:51+09:00",
   "note": "Released previous/consensus/actual observations are archived so rolling weekly feeds cannot erase them. Official release schedules remain authoritative.",
   "overrides": [
     {
@@ -8607,6 +8607,92 @@
       "source_tier": "MARKET_FEED",
       "actual_source": "FairEconomy/ForexFactory",
       "source_url": "https://www.forexfactory.com/calendar?week=oct11.2026"
+    },
+    {
+      "match": {
+        "date": "2026-10-16",
+        "country": "KR",
+        "title_contains": "2026년 9월 고용동향"
+      },
+      "actual": "2.6%",
+      "previous": "2.7%",
+      "market_metrics": [
+        {
+          "key": "kr_unemployment_sa",
+          "label": "실업률 (계절조정)",
+          "actual": "2.6%",
+          "reference_period": "2026-09",
+          "value_vintage": "AS_RELEASED",
+          "source_tier": "OFFICIAL",
+          "source": "국가데이터처 2026년 9월 고용동향",
+          "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "checked_kst": "2026-10-21T21:37:51+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_actual_source": "국가데이터처 공식 보도자료",
+          "official_actual_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_actual_checked_kst": "2026-10-21T21:37:51+09:00",
+          "previous": "2.7%"
+        },
+        {
+          "key": "kr_unemployment",
+          "label": "실업률 (비계절조정)",
+          "actual": "2%",
+          "reference_period": "2026-09",
+          "value_vintage": "AS_RELEASED",
+          "source_tier": "OFFICIAL",
+          "source": "국가데이터처 2026년 9월 고용동향",
+          "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "checked_kst": "2026-10-21T21:37:51+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_actual_source": "국가데이터처 공식 보도자료",
+          "official_actual_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_actual_checked_kst": "2026-10-21T21:37:51+09:00"
+        },
+        {
+          "key": "kr_employment_rate",
+          "label": "15~64세 고용률 (OECD)",
+          "actual": "70.6%",
+          "reference_period": "2026-09",
+          "value_vintage": "AS_RELEASED",
+          "source_tier": "OFFICIAL",
+          "source": "국가데이터처 2026년 9월 고용동향",
+          "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "checked_kst": "2026-10-21T21:37:51+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_actual_source": "국가데이터처 공식 보도자료",
+          "official_actual_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_actual_checked_kst": "2026-10-21T21:37:51+09:00"
+        },
+        {
+          "key": "kr_employed",
+          "label": "취업자 수 (천명)",
+          "actual": "29266",
+          "reference_period": "2026-09",
+          "value_vintage": "AS_RELEASED",
+          "source_tier": "OFFICIAL",
+          "source": "국가데이터처 2026년 9월 고용동향",
+          "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "checked_kst": "2026-10-21T21:37:51+09:00",
+          "verification_status": "VERIFIED_OFFICIAL",
+          "official_actual_source": "국가데이터처 공식 보도자료",
+          "official_actual_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+          "official_actual_checked_kst": "2026-10-21T21:37:51+09:00"
+        }
+      ],
+      "source_tier": "OFFICIAL",
+      "source": "국가데이터처 2026년 9월 고용동향",
+      "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+      "official_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+      "checked_kst": "2026-10-21T21:37:51+09:00",
+      "verification_status": "VERIFIED_OFFICIAL",
+      "value_vintage": "AS_RELEASED",
+      "official_actual_source": "국가데이터처 공식 보도자료",
+      "official_actual_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
+      "official_actual_checked_kst": "2026-10-21T21:37:51+09:00"
     }
   ],
   "archive_contract": "PERSIST_RELEASED_VALUES_ACROSS_WEEKLY_FEED_ROLLOVER_V1"
