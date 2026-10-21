@@ -412,10 +412,10 @@ async function fastProof(password,bucket){
  return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 async function triggerFastAccessRefresh(reason){
- const now=Date.now();if(FAST_REFRESH_BUSY||now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS)return;
+ const now=Date.now();if(FAST_REFRESH_BUSY||(reason!=='manual'&&now-FAST_REFRESH_LAST<FAST_REFRESH_MIN_GAP_MS))return;
  const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;
  FAST_REFRESH_BUSY=true;FAST_REFRESH_LAST=now;window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFRESHING';renderRefreshStatus();window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_trigger={reason:reason||'access',at:new Date().toISOString()};
- const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),45000);
  try{
   const bucket=Math.floor(Date.now()/1000/30),proof=await fastProof(pw,bucket);
   const res=await fetch(FAST_REFRESH_URL+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':proof,'X-CT-Force':'false'}});
