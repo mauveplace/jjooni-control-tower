@@ -5,6 +5,8 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +16,18 @@ import build_observatory_freshness as freshness  # noqa: E402
 
 
 class ObservatoryFreshnessStatusTest(unittest.TestCase):
+    def test_same_old_session_across_all_files_cannot_validate_itself_as_live(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            self.write(root,'market-observatory/data/observatory.json',{
+                'generated_kst':'2026-10-22T05:14:23+09:00','us_completed_session_date':'2026-10-20','freshness':{'status':'LIVE'},'market_supplement_quality':self.supplements('2026-10-20','2026-10-21')})
+            self.write(root,'market-observatory/data/daily-market-pulse.json',{'market_date_us':'2026-10-20','snapshot_status':'FINAL'})
+            self.write(root,'public-market-daily.json',{'tripod_signal':{'ok':True,'date':'2026-10-20'}})
+            self.write_v2_support(root)
+            out=freshness.build_status(root,now=datetime(2026,10,22,6,28,tzinfo=ZoneInfo('Asia/Seoul')))
+            for key in ('market','pulse','tripod'):self.assertEqual(out['groups'][key]['state'],'LAGGING')
+            self.assertFalse(out['session_alignment']['aligned']);self.assertTrue(out['watchdog_required'])
+
     def write(self, root: Path, rel: str, obj: dict):
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -69,7 +83,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
                 'tripod_signal': {'ok': True, 'date': '2026-10-09'},
             })
             self.write_v2_support(root)
-            out = freshness.build_status(root)
+            out = freshness.build_status(root, now=datetime(2026,10,9,6,15,tzinfo=ZoneInfo("Asia/Seoul")))
             self.assertEqual(out['overall'], 'DEGRADED')
             self.assertEqual(out['groups']['market']['state'], 'MISALIGNED')
             self.assertIn('market', out['critical_bad'])
@@ -108,7 +122,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'market-observatory/data/sector-etf.json', {'as_of_date': '2026-10-08'})
             self.write_v2_support(root)
 
-            out = freshness.build_status(root)
+            out = freshness.build_status(root, now=datetime(2026,10,9,6,15,tzinfo=ZoneInfo("Asia/Seoul")))
 
             self.assertEqual(out['overall'], 'LIVE')
             self.assertTrue(out['session_alignment']['aligned'])
@@ -138,7 +152,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-08'}})
             self.write_v2_support(root)
 
-            out = freshness.build_status(root)
+            out = freshness.build_status(root, now=datetime(2026,10,9,6,15,tzinfo=ZoneInfo("Asia/Seoul")))
 
             self.assertEqual(out['overall'], 'DEGRADED')
             self.assertEqual(out['groups']['pulse']['state'], 'MISALIGNED')
@@ -165,7 +179,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'public-market-daily.json', {'tripod_signal': {'ok': True, 'date': '2026-10-07'}})
             self.write_v2_support(root)
 
-            out = freshness.build_status(root)
+            out = freshness.build_status(root, now=datetime(2026,10,9,6,15,tzinfo=ZoneInfo("Asia/Seoul")))
 
             self.assertEqual(out['overall'], 'DEGRADED')
             self.assertFalse(out['session_alignment']['aligned'])
@@ -193,7 +207,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.write(root, 'market-observatory/data/fed-watch.json', {'freshness': 'LAGGING', 'market_data_as_of': '2026-10-07'})
             self.write_v2_support(root, fed_state='LAGGING')
 
-            out = freshness.build_status(root)
+            out = freshness.build_status(root, now=datetime(2026,10,9,6,15,tzinfo=ZoneInfo("Asia/Seoul")))
 
             self.assertEqual(out['overall'], 'LIVE_WITH_WARNINGS')
             self.assertIn('fedwatch', out['warnings'])

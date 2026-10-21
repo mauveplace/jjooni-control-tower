@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from calendar_actual_contract import merge_observation, retain_calendar, PROVENANCE
+from observatory_session import expected_completed_session
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT_DIR=ROOT/'market-observatory'/'data'; OUT_DIR.mkdir(parents=True,exist_ok=True)
@@ -63,11 +64,7 @@ def completed_us_session_cutoff(now_et=None):
     closed (VIX commonly arrives before the index bars).  A small grace period
     after 16:00 ET keeps provisional values out of EOD/TRI-POD calculations.
     """
-    now_et=(now_et or datetime.now(ET)).astimezone(ET)
-    cutoff=now_et.date()
-    if (now_et.hour,now_et.minute)<US_REGULAR_CLOSE_GRACE:
-        cutoff-=timedelta(days=1)
-    return cutoff.isoformat()
+    return expected_completed_session(now_et)
 
 def completed_us_bars(rows,now_et=None):
     cutoff=completed_us_session_cutoff(now_et)

@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from observatory_session import expected_completed_session
 
 ROOT = Path(__file__).resolve().parents[1]
 KST = ZoneInfo('Asia/Seoul')
@@ -48,7 +49,7 @@ def _count_field(obj,count_key,list_key):
     try:return int(value or 0)
     except Exception:return len(obj.get(list_key) or [])
 
-def build_status(root: Path = ROOT) -> dict:
+def build_status(root: Path = ROOT, now=None) -> dict:
     data=root/'market-observatory'/'data'
     obs=load(data/'observatory.json');pulse=load(data/'daily-market-pulse.json');fed=load(data/'fed-watch.json');cal=load(data/'economic-calendar.json');sector=load(data/'sector-etf.json');public=load(root/'public-market-daily.json');audit=load(data/'data-audit.json');macro=load(data/'official-macro.json')
 
@@ -67,6 +68,12 @@ def build_status(root: Path = ROOT) -> dict:
     fg_state=(ag.get('sentiment') or {}).get('state') or text(fgq.get('state')) or ('LIVE' if (obs.get('latest') or {}).get('FEAR_GREED') is not None else 'UNAVAILABLE')
     fed_state=(ag.get('fedwatch') or {}).get('state') or text(fed.get('freshness')) or ('LIVE' if fed.get('market_data_as_of') else 'UNAVAILABLE')
     tripod_state='LIVE' if tripod_aligned else ('MISALIGNED' if session and tripod_session else 'UNAVAILABLE')
+    expected=expected_completed_session(now)
+    if session and session!=expected:
+        if market_state!='MISALIGNED':market_state='LAGGING' if session<expected else 'AHEAD_OF_ANCHOR'
+        if pulse_state=='LIVE':pulse_state='LAGGING' if session<expected else 'AHEAD_OF_ANCHOR'
+        if tripod_state=='LIVE':tripod_state='LAGGING' if session<expected else 'AHEAD_OF_ANCHOR'
+        aligned=False
     cal_fresh=cal.get('actual_freshness') or {};cal_collection=cal.get('collection_health') or {};cal_state=text(cal_fresh.get('status')) or ('LIVE' if cal.get('generated_kst') else 'UNAVAILABLE');sector_state='LIVE' if sector.get('as_of_date') else 'UNAVAILABLE'
     cal_overdue=_count_field(cal_fresh,'overdue_count','overdue_events');cal_pending=_count_field(cal_fresh,'pending_count','pending_events');cal_failed_sources=len(cal_collection.get('failed_sources') or [])
 
@@ -91,9 +98,9 @@ def build_status(root: Path = ROOT) -> dict:
         'audit':group('Full Data Audit',audit.get('overall') or 'UNAVAILABLE',audit.get('generated_kst'),session,f"critical={audit.get('critical_count','—')} · warnings={audit.get('warning_count','—')}",'data-audit.json',True),
     }
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK'}
-    critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in hard_bad];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
+    critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')
-    return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
+    return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'expected_session':expected,'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
 
 def main():
     status=build_status(ROOT);OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_FRESHNESS_STATUS=PASS',status['overall'],'aligned=',status['session_alignment']['aligned'],'warnings=',status['warnings'])

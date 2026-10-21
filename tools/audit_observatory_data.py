@@ -11,6 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 TOOLS=ROOT/'tools'
 if str(TOOLS) not in sys.path:sys.path.insert(0,str(TOOLS))
 import fedwatch_trade_calendar as fedwatch_calendar
+from observatory_session import expected_completed_session
 
 DATA=ROOT/'market-observatory'/'data'
 OUT=DATA/'data-audit.json'
@@ -74,7 +75,7 @@ def build():
         state='UNAVAILABLE' if missing else state_from_dates(dates,anchor,allow_lag_days)
         if mismatched and state=='LIVE':state='INCONSISTENT'
         groups[name]={'state':state,'anchor':anchor,'allow_lag_days':allow_lag_days,'critical':critical,'items':items,'missing':missing,'latest_mismatch':mismatched}
-    make_group('core_us',EXPECTED_SERIES['core_us'],session,0,True)
+    make_group('core_us',EXPECTED_SERIES['core_us'],expected_completed_session(now_et),0,True)
     make_group('us_supplement',EXPECTED_SERIES['us_supplement'],session,0,False)
     make_group('kr_equity',EXPECTED_SERIES['kr_equity'],today,4,True)
     make_group('fx',EXPECTED_SERIES['fx'],session,1,False)

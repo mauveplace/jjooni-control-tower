@@ -7,6 +7,8 @@ on:
       - tools/requirements-observatory.txt
       - tools/build_market_observatory.py
       - tools/tripod_rules.py
+      - tools/observatory_session.py
+      - tests/test_observatory_session.py
       - tools/publish_observatory_data.py
       - tools/build_observatory_sector_etf.py
       - tools/build_fed_watch.py
@@ -39,12 +41,12 @@ on:
     # Redundant hourly watchdog. GitHub scheduled runs can be delayed/dropped,
     # so check four off-peak minutes per hour and rebuild only when data is stale.
     - cron: '7,22,37,52 * * * *'
-    # US regular-session close +10m, DST-safe candidate slots.
+    # US regular-session close +20m, DST-safe candidate slots.
     # Sunday ET candidate refreshes the last completed US session for Monday KST.
-    # 20:10 UTC = 05:10 KST while New York is on EDT; 21:10 UTC = 06:10 KST while on EST.
+    # 20:20 UTC = 05:20 KST while New York is on EDT; 21:20 UTC = 06:20 KST while on EST.
     # Sunday UTC candidate intentionally refreshes Monday KST using the last completed Friday US session.
-    # us_close_gate permits execution after 16:10 so delayed scheduled runs still collect.
-    - cron: '10 20,21 * * 0-5'
+    # us_close_gate permits execution after 16:20 so delayed scheduled runs still collect.
+    - cron: '20 20,21 * * 0-5'
     # 16:10 KST: Korea market close refresh for KOSPI/KOSDAQ and KR reference data.
     - cron: '10 7 * * 1-5'
   workflow_dispatch:
@@ -54,7 +56,7 @@ permissions:
 
 jobs:
   us_close_gate:
-    if: ${{ github.event_name == 'schedule' && github.event.schedule == '10 20,21 * * 0-5' }}
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '20 20,21 * * 0-5' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.close.outputs.should_run }}
@@ -67,12 +69,12 @@ jobs:
           set -euo pipefail
           ny_time="$(TZ=America/New_York date +%H%M)"
           echo "ny_time=$ny_time" >> "$GITHUB_OUTPUT"
-          if [ "$ny_time" -ge "1610" ]; then
+          if [ "$ny_time" -ge "1620" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
-            echo "US_CLOSE_PLUS_10_GATE=PASS ny_time=$ny_time"
+            echo "US_CLOSE_PLUS_20_GATE=PASS ny_time=$ny_time"
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
-            echo "US_CLOSE_PLUS_10_GATE=SKIP ny_time=$ny_time"
+            echo "US_CLOSE_PLUS_20_GATE=SKIP ny_time=$ny_time"
           fi
 
   hourly_gate:
@@ -92,21 +94,16 @@ jobs:
           import json
           from datetime import datetime, timezone
           from pathlib import Path
-          refresh=True
-          age=None
-          try:
-              o=json.loads(Path('market-observatory/data/observatory.json').read_text(encoding='utf-8'))
-              dt=datetime.fromisoformat(str(o.get('generated_kst') or ''))
-              if dt.tzinfo is None:
-                  dt=dt.replace(tzinfo=timezone.utc)
-              age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
-              public=json.loads(Path('public-market-daily.json').read_text(encoding='utf-8'))
-              source_session=(public.get('tripod_signal') or {}).get('date')
-              refresh=age >= 45 or bool(source_session and source_session > str(o.get('us_completed_session_date') or ''))
-          except Exception:
-              refresh=True
-          print(f"should_refresh={'true' if refresh else 'false'}")
-          print(f"age_min={'' if age is None else round(age,1)}")
+          import sys
+          sys.path.insert(0,'tools')
+          from observatory_session import refresh_decision
+          def load(path):
+              try:return json.loads(Path(path).read_text(encoding='utf-8'))
+              except Exception:return {}
+          result=refresh_decision(load('market-observatory/data/observatory.json'),load('market-observatory/data/daily-market-pulse.json'),load('public-market-daily.json'))
+          print(f"should_refresh={str(result['should_refresh']).lower()}")
+          print(f"age_min={result['age_min']}")
+          print(f"expected_session={result['expected_session']}")
           PY
 
   hourly_refresh:
@@ -143,6 +140,8 @@ jobs:
           python tools/backfill_market_history_30y.py
           python -m unittest discover -s tests -p 'test_observatory_crypto.py'
           python tools/add_observatory_equities.py
+          python tools/build_daily_market_pulse.py
+          python tools/build_public_market_daily.py
       - name: Hourly acceptance
         shell: bash
         run: |
@@ -151,6 +150,10 @@ jobs:
           import json
           from datetime import datetime, timezone
           o=json.load(open('market-observatory/data/observatory.json'))
+          import sys
+          sys.path.insert(0,'tools')
+          from observatory_session import require_current
+          require_current(o,json.load(open('market-observatory/data/daily-market-pulse.json')),json.load(open('public-market-daily.json')))
           dt=datetime.fromisoformat(o['generated_kst'])
           age=(datetime.now(timezone.utc)-dt.astimezone(timezone.utc)).total_seconds()/60
           assert age < 10, age
@@ -172,7 +175,7 @@ jobs:
       group: economic-calendar-canonical-writer
       cancel-in-progress: false
     needs: [us_close_gate]
-    if: ${{ always() && github.event_name != 'workflow_run' && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') && (github.event_name != 'schedule' || github.event.schedule != '10 20,21 * * 0-5' || needs.us_close_gate.outputs.should_run == 'true') }}
+    if: ${{ always() && github.event_name != 'workflow_run' && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') && (github.event_name != 'schedule' || github.event.schedule != '20 20,21 * * 0-5' || needs.us_close_gate.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -209,6 +212,8 @@ jobs:
           python -m unittest discover -s tests -p 'test_observatory_crypto.py'
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
+          python tools/build_daily_market_pulse.py
+          python tools/build_public_market_daily.py
       - name: Install Observatory UI runtimes and optimize bootstrap
         shell: bash
         run: |
@@ -253,6 +258,10 @@ jobs:
           from pathlib import Path
           from zoneinfo import ZoneInfo
           o=json.load(open('market-observatory/data/observatory.json'))
+          import sys
+          sys.path.insert(0,'tools')
+          from observatory_session import require_current
+          require_current(o,json.load(open('market-observatory/data/daily-market-pulse.json')),json.load(open('public-market-daily.json')))
           c=json.load(open('market-observatory/data/economic-calendar.json'))
           h=json.load(open('market-observatory/data/history-30y.json'))
           s=json.load(open('market-observatory/data/sector-etf.json'))
