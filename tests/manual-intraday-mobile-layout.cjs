@@ -1,7 +1,7 @@
 const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch();
- for(const width of [360,390,800]){
+ for(const width of [360,390,800,1280]){
   const page=await browser.newPage({viewport:{width,height:700},isMobile:width<600,hasTouch:true}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   // Use the same isolated public preview; all account data and responses are synthetic.
@@ -27,6 +27,11 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   const dialog=frame.getByRole('dialog');await dialog.waitFor();
   const box=await dialog.evaluate(el=>{const r=el.getBoundingClientRect(),h=el.querySelector('.mcLargeHeader').getBoundingClientRect();return{top:r.top,bottom:r.bottom,height:innerHeight,headTop:h.top,close:el.querySelector('.mcLargeHeader button').getBoundingClientRect().top}});
   assert(box.top>=-1&&box.bottom<=box.height+1,JSON.stringify(box));assert(box.headTop>=-1&&box.close>=0,'Title and close are visible at open');
+  const graphBox=await dialog.locator('canvas').boundingBox();
+  await page.touchscreen.tap(graphBox.x+graphBox.width*.55,graphBox.y+graphBox.height*.65);
+  const touchReadout=await dialog.locator('.mcTooltip').evaluate(el=>({hidden:el.hidden,top:el.style.top,text:el.textContent}));
+  assert.equal(touchReadout.hidden,false,'finger tap displays the price');assert.equal(touchReadout.top,'4px','touch readout stays above the finger');assert.match(touchReadout.text,/가격/);
+
   await dialog.evaluate(el=>el.scrollTop=el.scrollHeight);await page.waitForTimeout(80);
   const head=await dialog.locator('.mcLargeHeader').evaluate(el=>el.getBoundingClientRect().top);assert(head>=-1,'Sticky title remains visible');
   await page.screenshot({path:`intraday-readable-${width}.png`,fullPage:true});
