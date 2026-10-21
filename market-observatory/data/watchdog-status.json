@@ -1,12 +1,12 @@
 {
   "schema": "JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1",
-  "checked_kst": "2026-10-21T08:07:54+09:00",
-  "checked_ny": "2026-10-20T19:07:53.599536-04:00",
+  "checked_kst": "2026-10-22T08:11:47+09:00",
+  "checked_ny": "2026-10-21T19:11:46.459862-04:00",
   "event": "schedule",
-  "eligible": false,
+  "eligible": true,
   "force_repair": false,
   "decision": "NOOP",
-  "result": "OUTSIDE_RECOVERY_WINDOW",
+  "result": "HEALTHY_NOOP",
   "before": {
     "observatory_fresh": true,
     "daily_market_pulse_fresh": true,
@@ -20,15 +20,15 @@
     "verify": "skipped"
   },
   "current": {
-    "observatory_generated_kst": "2026-10-21T07:20:12+09:00",
-    "observatory_session": "2026-10-20",
-    "pulse_generated_kst": "2026-10-21T07:28:35+09:00",
-    "pulse_session": "2026-10-20",
-    "public_generated_kst": "2026-10-21T07:28:35+09:00",
-    "tripod_session": "2026-10-20"
+    "observatory_generated_kst": "2026-10-22T08:09:05+09:00",
+    "observatory_session": "2026-10-21",
+    "pulse_generated_kst": "2026-10-22T08:09:32+09:00",
+    "pulse_session": "2026-10-21",
+    "public_generated_kst": "2026-10-22T08:09:32+09:00",
+    "tripod_session": "2026-10-21"
   },
   "workflow_url": "https://github.com/mauveplace/jjooni-control-tower/actions/workflows/market-observatory-close-watchdog.yml",
-  "run_url": "https://github.com/mauveplace/jjooni-control-tower/actions/runs/39512890107",
+  "run_url": "https://github.com/mauveplace/jjooni-control-tower/actions/runs/39691749821",
   "manual_dispatch_supported": true,
   "force_repair_supported": true,
   "repair_contract": "CLOSE_WINDOW_SELF_HEAL_PLUS_MANUAL_FORCE_REPAIR_V1",
