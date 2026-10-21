@@ -85,7 +85,16 @@ function openingHoldingCost(row,trades,book,asOf){
  if(!trades.available&&end!==cut)return fail('OPENING_COST_LEDGER_MISSING');
  if(trades.errors.some(e=>e.key===row.key))return fail('OPENING_COST_TRADE_CONFLICT');
  let qty=anchor?Number(anchor.qty):0,cost=anchor?Number(anchor.cost_krw):0,used=0;
- for(const t of trades.rows.filter(t=>t.key===row.key&&(t.at==null||t.at>cut&&t.at<=end))){
+ const carry=[],seenTransfers=new Set();
+ for(const e of book.cost_basis_transfers_v1||[]){
+  if(e.to_account!==row.account||sym(e.ticker)!==row.ticker)continue;
+  const at=M.parseMs(e.at),source=state.positions?.[e.source_key];
+  if(at==null||at<=cut||at>end)continue;
+  if(e.source!=='VERIFIED_LEGACY_TRIPOD_COST_CARRY'||e.from_account!=='TRIPOD'||e.to_account!=='TOSS'||e.source_key!=='TRIPOD|'+row.ticker||!source||seenTransfers.has(e.source_key)||n(e.qty)!==n(source.qty)||n(e.cost_krw)!==n(source.cost_krw))return fail('OPENING_COST_INPUT_MISSING');
+  seenTransfers.add(e.source_key);carry.push({kind:'BUY',qty:e.qty,gross:e.cost_krw,fees:0,at});
+ }
+ const inventory=[...trades.rows.filter(t=>t.key===row.key&&(t.at==null||t.at>cut&&t.at<=end)),...carry].sort((a,b)=>(a.at??0)-(b.at??0));
+ for(const t of inventory){
   if(t.at==null||t.gross==null||t.fees==null)return fail('OPENING_COST_TRADE_FX_OR_FEES_MISSING');
   if(t.kind==='BUY'){qty+=t.qty;cost+=t.gross+t.fees}else{if(qty+1e-7<t.qty)return fail('OPENING_COST_QUANTITY_MISMATCH');cost-=qty>0?cost/qty*t.qty:0;qty-=t.qty;if(Math.abs(qty)<1e-7){qty=0;cost=0}}used++
  }

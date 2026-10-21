@@ -116,3 +116,12 @@ test('KRW receipt cannot override broker settlement, another fill, account, or e
  assert.equal(S.withReceiptKrw(ledger([{...t,account:'ISA'}]),b,at).rows[0].fx,null);
  pin.confirmed_at='2099-01-01T00:00:00Z';assert.equal(S.withReceiptKrw(ledger([t]),b,at).rows[0].fx,null);
 });
+test('legacy TRI-POD inventory carries its frozen cost once into verified TOSS ownership',()=>{
+ const C=c(),b=openingBook(C);C.accounts.TOSS.positions=[p('TQQQ',5,60000,{currency:'USD'})];
+ b.cost_basis_v1.positions['TRIPOD|TQQQ']={account:'TRIPOD',ticker:'TQQQ',qty:3,cost_krw:30000};
+ const e={from_account:'TRIPOD',to_account:'TOSS',ticker:'TQQQ',source_key:'TRIPOD|TQQQ',qty:3,cost_krw:30000,at,source:'VERIFIED_LEGACY_TRIPOD_COST_CARRY'};b.cost_basis_transfers_v1=[e];
+ let r=S.build(C,b,ledger([])).accounts[0].groups[0].positions[0];assert.equal(r.cost,50000);
+ b.cost_basis_transfers_v1.push({...e});r=S.build(C,b,ledger([])).accounts[0].groups[0].positions[0];assert.equal(r.cost,null);
+ b.cost_basis_transfers_v1=[{...e,cost_krw:1}];assert.equal(S.build(C,b,ledger([])).accounts[0].groups[0].positions[0].cost,null);
+ assert.equal(b.cost_basis_v1.positions['TOSS|TQQQ'].cost_krw,20000);
+});
