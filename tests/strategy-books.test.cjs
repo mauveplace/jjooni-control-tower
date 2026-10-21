@@ -97,3 +97,22 @@ test('a future FX confirmation cannot change an earlier snapshot and missing fee
  assert.equal(S.withConfirmedTradeFx(ledger([t]),b,at).rows[0].fx,null);
  b.trade_fx_v1['TOSS|pinned'].confirmed_at=old;assert.equal(S.build(C,b,ledger([t])).accounts[0].groups[0].positions[0].cost,null);
 });
+
+test('user KRW receipt corrects an existing buy without adding inventory or changing opening cost',()=>{
+ const C=c(),b=openingBook(C),t=tr('TOSS','receipt-buy','BUY',1,20,{fx:null,commission:.1});
+ C.accounts.TOSS.nav=100000;C.accounts.TOSS.positions=[p('TQQQ',3,60000,{currency:'USD',fx:9999})];
+ b.trade_krw_v1={'TOSS|receipt-buy':{source:'USER_TOSS_ORDER_SCREENSHOT_KRW',confirmed_at:old,ticker:'TQQQ',qty:1,price:20,filled_at:t.filled_at_kst,krw_amount:24000}};
+ const source=ledger([t]),out=S.withReceiptKrw(source,b,at);
+ assert.equal(out.rows.length,1);assert.equal(out.rows[0].krw_amount,24000);assert.equal(out.rows[0].fx,1200);
+ assert.equal(S.build(C,b,source).accounts[0].groups[0].positions[0].cost,44120);
+ assert.equal(b.cost_basis_v1.positions['TOSS|TQQQ'].cost_krw,20000);
+ assert.equal(source.rows[0].fx,null);
+ t.commission=null;assert.equal(S.build(C,b,source).accounts[0].groups[0].positions[0].cost,null);
+});
+test('KRW receipt cannot override broker settlement, another fill, account, or earlier snapshot',()=>{
+ const t=tr('TOSS','receipt-buy','BUY',1,20,{fx:null}),pin={source:'USER_TOSS_ORDER_SCREENSHOT_KRW',confirmed_at:old,ticker:'TQQQ',qty:1,price:20,filled_at:t.filled_at_kst,krw_amount:24000},b={trade_krw_v1:{'TOSS|receipt-buy':pin}};
+ assert.equal(S.withReceiptKrw(ledger([{...t,krw_amount:25000}]),b,at).rows[0].krw_amount,25000);
+ assert.equal(S.withReceiptKrw(ledger([{...t,qty:2}]),b,at).rows[0].krw_amount,null);
+ assert.equal(S.withReceiptKrw(ledger([{...t,account:'ISA'}]),b,at).rows[0].fx,null);
+ pin.confirmed_at='2099-01-01T00:00:00Z';assert.equal(S.withReceiptKrw(ledger([t]),b,at).rows[0].fx,null);
+});
