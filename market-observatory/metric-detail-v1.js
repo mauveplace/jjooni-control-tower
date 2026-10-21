@@ -15,11 +15,13 @@ function model(key){
  if(item)return{title:item.label,digits:item.digits,suffix:item.suffix||'',prefix:item.prefix||'',kind:item.kind,lines:[{label:item.label,rows:clean(window.__JJOONI_LATEST_BOARD?.getSeries?.(item)||(data.series?.[item.seriesKey||key]||[]))}],note:item.seriesKey?`시장 지수와 공식 일별 금리는 다른 지표입니다. 미 재무부 공식 일별: ${format(data.series?.[key]?.at(-1)?.value,2,'%')} (${data.series?.[key]?.at(-1)?.date||'관측일 미확인'})`:'',basis:item.seriesKey?'Cboe 금리지수 · Yahoo 일별 · 시장 원천 정밀도 유지':(['US3M','US2Y'].includes(key)?'미 재무부 공식 일별 · 원천 소수 2자리 · 시장 금리지수와 별도 기준':'일별 관측값 · 날짜는 원천의 거래일/관측일 기준')};
  const t=data.tripod_latest||{},history=[...(data.tripod_history||[])];const date=t.session_date||t.date;
  if(date)history.push({...t,date});
- const line=(label,field)=>({label,rows:clean(history.map(p=>({date:p.date,value:p[field]})))});
+ const line=(label,field,factor=1)=>({label,rows:clean(history.map(p=>({date:p.date,value:finite(p[field])?Number(p[field])*factor:null})))});
  const definitions={
   TRIPOD_TREND:{title:'현재 상태 · NASDAQ 100과 MA250',lines:[line('NASDAQ 100','ndx'),line('MA250','ma250')],note:`현재 상태: ${t.regime||'미확인'} · 상승 진입 MA250 × 1.01 / 하락 진입 MA250 × 0.95`,thresholds:true},
   TRIPOD_TARGET:{title:'목표 노출 · 판단 근거',lines:[line('NASDAQ 100','ndx'),line('MA250','ma250')],note:`현재 목표: ${t.target||'미확인'} · 아래에서 VIX와 낙폭 근거도 확인하세요.`,thresholds:true},
-  TRIPOD_MA:{title:'MA250 · NASDAQ 100 대비',lines:[line('MA250','ma250'),line('NASDAQ 100','ndx')]},
+  TRIPOD_MA:{title:'MA250 · 계산 참고값',lines:[line('MA250','ma250'),line('NASDAQ 100','ndx')],note:'MA250 자체는 레짐 전환선이 아닙니다. 상승 전환은 MA250 × 1.01 초과, 하락 전환은 MA250 × 0.95 미만 종가이며 사이에서는 이전 레짐을 유지합니다.'},
+  TRIPOD_FALL:{title:'레짐 하락 전환선 · MA250 × 0.95',lines:[line('하락 전환선','ma250',.95),line('NASDAQ 100','ndx')],note:'종가가 이 선 미만이면 하락 레짐입니다. VIX10 ≥ 18이면 노팟(현금 100%), 18 미만이면 감속 목표입니다.'},
+  TRIPOD_RISE:{title:'레짐 상승 전환선 · MA250 × 1.01',lines:[line('상승 전환선','ma250',1.01),line('NASDAQ 100','ndx')],note:'종가가 이 선을 초과하면 상승 레짐입니다. 실제 목표 노출은 VIX10과 52주 고점 대비 낙폭을 함께 판정합니다.'},
   TRIPOD_VIX:{title:'VIX와 10일 평균',lines:[line('VIX','vix'),line('VIX 10일 평균','vix10')],levels:[18,28],note:'레짐별 VIX10 경계: 하락 상태 18 / 상승 상태 28. 일일 VIX와 구분해 확인하세요.'},
   TRIPOD_DD:{title:'52주 고점 대비 낙폭',lines:[line('52주 고점 대비','drawdown_52w_pct')],suffix:'%',levels:[-9],note:'상승 상태에서 낙폭이 9%를 초과하면 감속 조건입니다.'}
  };
@@ -67,7 +69,7 @@ function paint(){
  chart=new Chart(canvas,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'nearest',axis:'x',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:12},boxWidth:16}},tooltip:{callbacks:{title:items=>items.length?dateLabel(items[0].parsed.x):'',label:c=>`${c.dataset.label}: ${value(c.parsed.y)}`}}},scales:{x:{type:'linear',min:Date.parse(rows[0].date+'T00:00:00Z'),max:Date.parse(rows.at(-1).date+'T00:00:00Z'),ticks:{maxTicksLimit:4,callback:v=>dateLabel(v).slice(2)}},y:{ticks:{maxTicksLimit:5,callback:v=>format(v,m.digits,m.suffix)}}}}});
 }
 function open(key,trigger){if(dialog?.open||!model(key))return;ensure();opener=trigger;selected=key;range='1Y';scrollBefore=window.scrollY;previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';dialog.showModal();paint();dialog.querySelector('[data-close]').focus({preventScroll:true})}
-document.addEventListener('click',e=>{if(e.target.closest('[data-open-calendar]')){document.querySelector('#tabs [data-tab=calendar]')?.click();return}const tile=e.target.closest('[data-metric]');if(tile)open(tile.dataset.metric,tile);const gate=e.target.closest('[data-gate]');if(gate)open({drawdown:'TRIPOD_DD',vix:'TRIPOD_VIX',trend:'TRIPOD_TREND'}[gate.dataset.gate]||'TRIPOD_TREND',gate)});
+document.addEventListener('click',e=>{if(e.target.closest('[data-open-calendar]')){document.querySelector('#tabs [data-tab=calendar]')?.click();return}const tile=e.target.closest('[data-metric]');if(tile)open(tile.dataset.metric,tile);const gate=e.target.closest('[data-gate]');if(gate)open({drawdown:'TRIPOD_DD',vix:'TRIPOD_VIX',fall:'TRIPOD_FALL',rise:'TRIPOD_RISE',trend:'TRIPOD_TREND'}[gate.dataset.gate]||'TRIPOD_TREND',gate)});
 document.addEventListener('keydown',e=>{const tile=e.target.closest('[data-metric],[data-gate],[data-open-calendar]');if(tile&&['Enter',' '].includes(e.key)){e.preventDefault();tile.click()}});
 // Install click affordances before the first interaction.
 ensure();
@@ -78,5 +80,5 @@ function linkExisting(){
  for(const el of document.querySelectorAll('#pulse .chip')){const item=window.__JJOONI_LATEST_BOARD?.items?.find(i=>el.textContent.startsWith(i.label+' '));if(item){el.dataset.metric=item.k;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-haspopup','dialog');el.setAttribute('aria-label',item.label+' 추이 보기');el.style.cursor='pointer'}}
 }
 const links=new MutationObserver(linkExisting);for(const id of ['overviewKpis','spreadKpis','pulse']){const el=document.getElementById(id);if(el)links.observe(el,{childList:true})}linkExisting();
-window.__JJOONI_METRIC_DETAIL={version:'1.2',clean,windowRows,position,model};
+window.__JJOONI_METRIC_DETAIL={version:'1.3',clean,windowRows,position,model};
 })();
