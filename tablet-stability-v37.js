@@ -14,11 +14,6 @@ function ensureStyle(){
  if(q('#ctTabletStabilityV37Style'))return;
  const st=document.createElement('style');st.id='ctTabletStabilityV37Style';st.textContent=`
 html.ctStableTabletV37 body{font-size:17px!important}
-html.ctStableTabletV37 .tabs{width:210px!important;padding:108px 14px 20px!important;gap:9px!important}
-html.ctStableTabletV37 .tabs:before{left:22px!important;font-size:21px!important}
-html.ctStableTabletV37 .tabs:after{left:22px!important;top:76px!important;font-size:14px!important}
-html.ctStableTabletV37 .tab,html.ctStableTabletV37 .tab[data-tab]{min-height:54px!important;padding:13px 12px!important;font-size:17px!important;line-height:1.25!important;border-radius:11px!important}
-html.ctStableTabletV37 .app{margin-left:210px!important;width:calc(100% - 210px)!important;padding:0 22px 34px!important}
 html.ctStableTabletV37 .tabPanel{font-size:17px!important;line-height:1.55!important}
 html.ctStableTabletV37 button,html.ctStableTabletV37 [role="button"]{min-height:44px;font-size:16px!important;touch-action:manipulation}
 html.ctStableTabletV37 small{font-size:16px!important;line-height:1.45!important}
@@ -34,27 +29,7 @@ html.ctStableTabletV37 :is(.ctWlName,.ctCmMacroName,.ctTickerName,.ctSleeveName,
 html.ctStableTabletV37 :is(.ctCmMacroValue,.ctA8Nav,.ctP8Nav,.ctD8Kpi b){font-size:24px!important;line-height:1.2!important}
 html.ctStableTabletV37 :is(.ctWlBtn,.ctTrChip,.ctD8Btn){font-size:16px!important;min-height:44px!important;padding:9px 12px!important}
 
-/* Account-card typography authority: 18pt means 24 CSS px.
-   Keep this in tablet-stability only; do not add another readability sidecar. */
-html.ctStableTabletV37 #overviewAccounts.ctOvAccounts,
-html.ctStableTabletV37 .ctOvAccounts{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcct,
-html.ctStableTabletV37 .ctOvAccounts .ctAcct{padding:20px!important;min-height:260px!important;font-size:18pt!important;line-height:1.45!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcct *,
-html.ctStableTabletV37 .ctOvAccounts .ctAcct *{font-size:18pt!important;line-height:1.45!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcctName,
-html.ctStableTabletV37 .ctOvAccounts .ctAcctName{font-size:20pt!important;font-weight:900!important;line-height:1.3!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcctNav,
-html.ctStableTabletV37 .ctOvAccounts .ctAcctNav{font-size:22pt!important;font-weight:900!important;line-height:1.2!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcct :is(.gain,.loss),
-html.ctStableTabletV37 .ctOvAccounts .ctAcct :is(.gain,.loss){font-size:20pt!important;font-weight:900!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcctIcon,
-html.ctStableTabletV37 .ctOvAccounts .ctAcctIcon{width:34px!important;height:34px!important;font-size:14pt!important}
-html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg text,
-html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg text{font-size:18pt!important}
-html.ctStableTabletV37 #overviewAccounts .ctHumanAccountLineV6,
-html.ctStableTabletV37 .ctOvAccounts .ctHumanAccountLineV6{font-size:18pt!important;line-height:1.45!important;margin-top:10px!important;padding-top:10px!important}
-
+/* Account-card typography authority lives in responsive-layout.css. */
 /* Account chart geometry: tablet charts must be larger than phone sparklines. */
 html.ctStableTabletV37 #overviewAccounts .ctAcctSpark,
 html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark{display:block!important;min-height:150px!important;height:150px!important;margin-top:14px!important;overflow:visible!important}
@@ -113,9 +88,6 @@ html.ctStableTabletV37 #accountDrillModal #ctAccountPositionCompletenessV25{disp
 html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!important}
 
 @media (orientation:portrait){
- html.ctStableTabletV37 .tabs{width:188px!important}
- html.ctStableTabletV37 .app{margin-left:188px!important;width:calc(100% - 188px)!important;padding-left:18px!important;padding-right:18px!important}
- html.ctStableTabletV37 .tab,html.ctStableTabletV37 .tab[data-tab]{font-size:16px!important}
  html.ctStableTabletV37 #ctTradeReviewV2 .ctTrTitle{font-size:27px!important}
  html.ctStableTabletV37 #ctTradeReviewV2 .ctTickerName{font-size:19px!important}
 }
@@ -135,7 +107,8 @@ function enforceContentFontFloor(){
   if(!el||!el.style)continue;
   const tag=String(el.tagName||'').toUpperCase();
   if(['SCRIPT','STYLE','NOSCRIPT','LINK','META'].includes(tag))continue;
-  const txt=String(el.textContent||'').trim();if(!txt)continue;
+  const txt=Array.from(el.childNodes||[]).filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();if(!txt)continue;
+  if(el.matches('small,svg text,[class*="Note"],[class*="Meta"],[class*="Source"],.tabs *,#ctMoreMenu *'))continue;
   let cs;try{cs=getComputedStyle(el)}catch(_){continue}
   if(!cs||cs.display==='none'||cs.visibility==='hidden')continue;
   const fs=parseFloat(cs.fontSize||'0');
