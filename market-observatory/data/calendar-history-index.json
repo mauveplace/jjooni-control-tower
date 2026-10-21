@@ -83,9 +83,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-21T18:17:56+09:00",
+  "generated_kst": "2026-10-21T22:05:03+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37780,
+  "row_count": 37784,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -12511,9 +12511,9 @@
       "event_title": "2026년 8월 고용동향",
       "kind": "event",
       "label": "2026년 8월 고용동향",
-      "path": "./calendar-history/series/f903e4cea0ace8c1047a84fdb15701ba970bf011c41b9a77520f551296e19073.json",
+      "path": "./calendar-history/series/7dcfa27dbe8b1e56261f35d5a55cebc96cf7a8c4fc86b660f9a1c62935eed728.json",
       "quality": {
-        "actual_count": 1,
+        "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 1,
         "frequency_validation": "NOT_VALIDATED",
@@ -12524,7 +12524,57 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::고용동향",
-      "sha256": "f903e4cea0ace8c1047a84fdb15701ba970bf011c41b9a77520f551296e19073"
+      "sha256": "7dcfa27dbe8b1e56261f35d5a55cebc96cf7a8c4fc86b660f9a1c62935eed728"
+    },
+    "KR::고용동향::kr_employed": {
+      "available_from": "2026-10-16",
+      "available_to": "2026-10-16",
+      "category": "고용",
+      "count": 1,
+      "country": "KR",
+      "event_title": "2026년 9월 고용동향",
+      "kind": "metric",
+      "label": "취업자 수 (천명)",
+      "metric_key": "kr_employed",
+      "path": "./calendar-history/series/353c0a7a5a71d5ab56ddaa5b8b4d2c6c717632d352e49344615a3c4268223685.json",
+      "quality": {
+        "actual_count": 1,
+        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+        "consensus_count": 0,
+        "frequency_validation": "NOT_VALIDATED",
+        "max_observed_gap_days": 0,
+        "rows_by_year": {
+          "2026": 1
+        },
+        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+      },
+      "ref": "KR::고용동향::kr_employed",
+      "sha256": "353c0a7a5a71d5ab56ddaa5b8b4d2c6c717632d352e49344615a3c4268223685"
+    },
+    "KR::고용동향::kr_employment_rate": {
+      "available_from": "2026-10-16",
+      "available_to": "2026-10-16",
+      "category": "고용",
+      "count": 1,
+      "country": "KR",
+      "event_title": "2026년 9월 고용동향",
+      "kind": "metric",
+      "label": "15~64세 고용률 (OECD)",
+      "metric_key": "kr_employment_rate",
+      "path": "./calendar-history/series/6bf3309770f880438e3423f80c1d0479af89322dfdb33ad5e0be0b21c38176bb.json",
+      "quality": {
+        "actual_count": 1,
+        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+        "consensus_count": 0,
+        "frequency_validation": "NOT_VALIDATED",
+        "max_observed_gap_days": 0,
+        "rows_by_year": {
+          "2026": 1
+        },
+        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+      },
+      "ref": "KR::고용동향::kr_employment_rate",
+      "sha256": "6bf3309770f880438e3423f80c1d0479af89322dfdb33ad5e0be0b21c38176bb"
     },
     "KR::고용동향::kr_employment_yoy": {
       "available_from": "2026-09-09",
@@ -12551,21 +12601,21 @@
       "ref": "KR::고용동향::kr_employment_yoy",
       "sha256": "58445ff5e4bfe6106eababd7cb91f9dceab7332151e2cef3cb7f9ab786dac79f"
     },
-    "KR::고용동향::kr_unemployment_sa": {
-      "available_from": "2026-09-09",
-      "available_to": "2026-09-09",
+    "KR::고용동향::kr_unemployment": {
+      "available_from": "2026-10-16",
+      "available_to": "2026-10-16",
       "category": "고용",
       "count": 1,
       "country": "KR",
-      "event_title": "2026년 8월 고용동향",
+      "event_title": "2026년 9월 고용동향",
       "kind": "metric",
-      "label": "계절조정 실업률",
-      "metric_key": "kr_unemployment_sa",
-      "path": "./calendar-history/series/cdc904f6905fb4640543facf59ae0e92c6896df65599f1a58e2ec783b3f582c2.json",
+      "label": "실업률 (비계절조정)",
+      "metric_key": "kr_unemployment",
+      "path": "./calendar-history/series/7fd30e6d5e89352b033b5cb42f8976e1ab8262b324f754bea15c7c5eb29d865b.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 1,
+        "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 0,
         "rows_by_year": {
@@ -12573,8 +12623,33 @@
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
+      "ref": "KR::고용동향::kr_unemployment",
+      "sha256": "7fd30e6d5e89352b033b5cb42f8976e1ab8262b324f754bea15c7c5eb29d865b"
+    },
+    "KR::고용동향::kr_unemployment_sa": {
+      "available_from": "2026-09-09",
+      "available_to": "2026-10-16",
+      "category": "고용",
+      "count": 2,
+      "country": "KR",
+      "event_title": "2026년 8월 고용동향",
+      "kind": "metric",
+      "label": "계절조정 실업률",
+      "metric_key": "kr_unemployment_sa",
+      "path": "./calendar-history/series/27f84dbc33f52722fd62ceadcdedb575315e0818acaa29b89072af2ffaee7acb.json",
+      "quality": {
+        "actual_count": 2,
+        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
+        "consensus_count": 1,
+        "frequency_validation": "NOT_VALIDATED",
+        "max_observed_gap_days": 37,
+        "rows_by_year": {
+          "2026": 2
+        },
+        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
+      },
       "ref": "KR::고용동향::kr_unemployment_sa",
-      "sha256": "cdc904f6905fb4640543facf59ae0e92c6896df65599f1a58e2ec783b3f582c2"
+      "sha256": "27f84dbc33f52722fd62ceadcdedb575315e0818acaa29b89072af2ffaee7acb"
     },
     "KR::기업경기조사-및-esi": {
       "available_from": null,
@@ -12607,7 +12682,7 @@
       "event_title": "2026년 8월 산업활동동향",
       "kind": "event",
       "label": "2026년 8월 산업활동동향",
-      "path": "./calendar-history/series/3b980c7621b70ca805b887b08e98a66b216177c8ee417a7936c9388427bd10c6.json",
+      "path": "./calendar-history/series/4f80742671429768fdfd61a5ab5f0205d1f2927d017aa3ea132090de7e63da37.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12620,7 +12695,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::산업활동동향",
-      "sha256": "3b980c7621b70ca805b887b08e98a66b216177c8ee417a7936c9388427bd10c6"
+      "sha256": "4f80742671429768fdfd61a5ab5f0205d1f2927d017aa3ea132090de7e63da37"
     },
     "KR::생산자물가지수": {
       "available_from": "2026-09-18",
@@ -12754,7 +12829,7 @@
       "event_title": "2026년 8월 소비자물가동향",
       "kind": "event",
       "label": "2026년 8월 소비자물가동향",
-      "path": "./calendar-history/series/10a22aa7f5be2ca832a091ac74e83f3a7f83836017ae91673feac9191c5c9e6b.json",
+      "path": "./calendar-history/series/cb25104a29c14c8fc5dacc5c44c9de52839c7ec22fde662b5c213280ff3643cc.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12767,7 +12842,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::소비자물가동향",
-      "sha256": "10a22aa7f5be2ca832a091ac74e83f3a7f83836017ae91673feac9191c5c9e6b"
+      "sha256": "cb25104a29c14c8fc5dacc5c44c9de52839c7ec22fde662b5c213280ff3643cc"
     },
     "KR::소비자물가동향::kr_cpi_mom": {
       "available_from": "2026-09-02",
@@ -14652,9 +14727,9 @@
     }
   },
   "series_completeness_status": "NOT_VALIDATED",
-  "series_count": 430,
-  "snapshot_id": "c7b8566ebcd0b110324ceea82c6232477f664723d35e0a86a0d4cb06f2e39ca2",
-  "source_sha256": "c7b8566ebcd0b110324ceea82c6232477f664723d35e0a86a0d4cb06f2e39ca2",
+  "series_count": 433,
+  "snapshot_id": "edb8e43bcb6a321218d319164a1f4d1684987e516933f4ee37661ba483a8548e",
+  "source_sha256": "edb8e43bcb6a321218d319164a1f4d1684987e516933f4ee37661ba483a8548e",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
   "window_end": "2026-10-21",
