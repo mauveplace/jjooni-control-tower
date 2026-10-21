@@ -53,7 +53,7 @@ jobs:
             fx:{title:'환율 주요 지표',must:['USD/KRW','USD/JPY','JPY/KRW','DXY'],mustNot:['미국 10Y','WTI','KOSPI']},
             energy:{title:'원자재 주요 지표',must:['WTI','Brent','Natural Gas','Gold','Silver','Copper'],mustNot:['USD/KRW','미국 10Y','KOSPI']},
             sectors:{title:'섹터·ETF 주요 지표',must:['MA20 상회','1M RS 강세','1M RS 약세','성장-방어','SPY 1M','QQQ 1M'],mustNot:['USD/KRW','미국 10Y']},
-            tripod:{title:'TRI-POD 주요 입력',must:['현재 상태','목표 노출','NASDAQ 100','레짐 하락 전환선','레짐 상승 전환선','MA250 · 계산 참고','VIX / VIX10','52주 고점대비'],mustNot:['USD/KRW','WTI']},
+            tripod:{title:'TRI-POD 주요 입력',must:['현재 상태','목표 노출','NASDAQ 100','BIPOD 전환가격','NOPOD 가격선','MA250 · 계산 참고','VIX / VIX10','52주 고점대비'],mustNot:['USD/KRW','WTI']},
             calendar:{title:'경제일정 주요 지표',must:['오늘 일정','향후 7일','다음 일정','다음 ★★★'],mustNot:['USD/KRW','WTI','미국 10Y']}
           };
           async function snapshot(page){return page.evaluate(()=>({
