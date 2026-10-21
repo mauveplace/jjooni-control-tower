@@ -1,10 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-21T18:18:43+09:00",
+  "generated_kst": "2026-10-21T18:41:22+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "crypto",
     "calendar",
     "audit"
   ],
@@ -26,7 +25,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T16:14:19+09:00",
+      "generated_kst": "2026-10-21T18:19:07+09:00",
       "as_of": "2026-10-20",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -80,7 +79,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T16:14:19+09:00",
+      "generated_kst": "2026-10-21T18:19:07+09:00",
       "as_of": "2026-10-20",
       "detail": "US3M 2026-10-20 · US2Y 2026-10-20 · US5Y_OFFICIAL 2026-10-20 · US10Y_OFFICIAL 2026-10-20 · US30Y_OFFICIAL 2026-10-20 · US_2S10S 2026-10-20",
       "source": "U.S. Treasury official",
@@ -89,7 +88,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T16:51:52+09:00",
+      "generated_kst": "2026-10-21T18:19:07+09:00",
       "as_of": "2026-10-21",
       "detail": "KR3Y 2026-10-21 · KR5Y 2026-10-21 · KR10Y 2026-10-21 · KR20Y 2026-10-21 · KR30Y 2026-10-21 · KR_3S10S 2026-10-21",
       "source": "BOK ECOS",
@@ -106,17 +105,17 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "STALE",
+      "state": "LIVE",
       "generated_kst": "2026-10-21T16:51:49+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=5218s · ETHUSD age=5220s",
+      "detail": "BTCUSD age=1335s · ETHUSD age=1337s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T16:52:12+09:00",
+      "generated_kst": "2026-10-21T18:19:13+09:00",
       "as_of": "2026-10-20",
       "detail": "snapshot=FINAL · Observatory session=2026-10-20",
       "source": "daily-market-pulse.json",
@@ -143,7 +142,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T16:52:12+09:00",
+      "generated_kst": "2026-10-21T18:19:13+09:00",
       "as_of": "2026-10-20",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -161,7 +160,7 @@
     "official_macro": {
       "label": "Official Macro",
       "state": "LIVE",
-      "generated_kst": "2026-10-21T13:56:21+09:00",
+      "generated_kst": "2026-10-21T18:40:50+09:00",
       "as_of": null,
       "detail": "JJOONI_OFFICIAL_MACRO_V1",
       "source": "official-macro.json",
@@ -179,9 +178,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-21T18:18:43+09:00",
+      "generated_kst": "2026-10-21T18:41:22+09:00",
       "as_of": "2026-10-20",
-      "detail": "critical=0 · warnings=4",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     }
