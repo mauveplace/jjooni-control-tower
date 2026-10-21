@@ -17,6 +17,10 @@ test('manual refresh retries after automatic collection and allows the server co
  await context.window.collect('manual');assert.equal(calls,2,'explicit tap cannot silently do nothing');
  assert(timers.includes(45000),'cold request must cover read + collection + publication');
  assert.equal(context.window.__JJOONI_FAST_ACCESS_REFRESH_V1.state,'APPLIED');
+ context.fetch=async()=>({ok:true,json:async()=>({status:'PARTIAL',snapshot_id:'partial',errors:{tripod_signal:'RuntimeError'}})});
+ await context.window.collect('manual');
+ assert.equal(context.window.__JJOONI_FAST_ACCESS_REFRESH_V1.state,'PARTIAL');
+ assert.equal(context.window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result.errors.tripod_signal,'RuntimeError');
 });
 
 function feedRuntime(reader){

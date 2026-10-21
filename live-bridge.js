@@ -399,7 +399,7 @@ function renderRefreshStatus(){
  const live=window.__JJOONI_LIVE_PAYLOAD||{},facts=M.freshness(live),pending=window.__JJOONI_FAST_ACCESS_REFRESH_V1||{};
  let box=document.getElementById('ctLiveRefreshStatus');if(!box){box=document.createElement('div');box.id='ctLiveRefreshStatus';box.style.cssText='margin:8px 0;padding:9px 12px;border:1px solid #dce5ef;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#344054';const top=document.querySelector('.top');if(top?.parentNode)top.after(box);else (document.querySelector('.app')||document.body).prepend(box);const label=document.createElement('span');label.className='ctRefreshFacts';const button=document.createElement('button');button.type='button';button.textContent='계좌·시세 최신화';button.style.cssText='padding:7px 11px;border:0;border-radius:7px;background:#1459a6;color:white;cursor:pointer';button.onclick=async()=>{await triggerFastAccessRefresh('manual');await refresh();renderRefreshStatus()};box.append(label,button)}
  const at=live.generated_kst||live.observed_at,ms=M.parseMs(at),time=ms==null?'확인 필요':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(ms));
- box.querySelector('.ctRefreshFacts').textContent='계좌·시세 원본 '+time+' · '+facts.text+(pending.state==='REFRESHING'?' · 새 데이터 수집 중':pending.state==='REFERENCE'?' · 이번 갱신 요청 실패 — 마지막 원본 유지':'')+' · 화면은 1분마다 확인';
+ box.querySelector('.ctRefreshFacts').textContent='계좌·시세 원본 '+time+' · '+facts.text+(pending.state==='REFRESHING'?' · 새 데이터 수집 중':pending.state==='REFERENCE'?' · 이번 갱신 요청 실패 — 마지막 원본 유지':pending.state==='PARTIAL'?(pending.last_result?.errors?.tripod_signal?' · 일부 갱신 제한: TRI-POD 신호 재계산 실패 · 신호 기준일 확인 필요':' · 일부 자료 갱신 실패 · 해당 자료는 직전 원본 유지'):'')+' · 화면은 1분마다 확인';
  box.title='원본 스냅샷: '+String(live.snapshot_id||'미확인');const button=box.querySelector('button');button.disabled=pending.state==='REFRESHING';button.textContent=button.disabled?'수집 중…':'계좌·시세 최신화';
 }
 const FAST_REFRESH_URL='https://jjooni-ct-fast-apgynr7pea-du.a.run.app';
@@ -421,7 +421,7 @@ async function triggerFastAccessRefresh(reason){
   const res=await fetch(FAST_REFRESH_URL+'/refresh',{method:'POST',mode:'cors',cache:'no-store',signal:ctrl.signal,headers:{'X-CT-Epoch':String(bucket),'X-CT-Proof':proof,'X-CT-Force':'false'}});
   if(!res.ok)throw new Error('FAST_HTTP_'+res.status);
   const out=await res.json();if(!['PASS','PARTIAL','SKIP_RECENT'].includes(String(out.status||'')))throw new Error('FAST_STATUS_'+String(out.status||'UNKNOWN'));
-  window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};
+  window.__JJOONI_FAST_ACCESS_REFRESH_V1.state=(out.status==='PARTIAL'||Object.keys(out.errors||{}).length)?'PARTIAL':'APPLIED';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:out.status,snapshot_id:out.snapshot_id||null,duration_ms:out.duration_ms||null,errors:out.errors||{}};
   setTimeout(refresh,400);setTimeout(refresh,1800);setTimeout(refresh,4200);
  }catch(e){window.__JJOONI_FAST_ACCESS_REFRESH_V1.state='REFERENCE';window.__JJOONI_FAST_ACCESS_REFRESH_V1.last_result={status:'REFERENCE',error:String(e&&e.message||e)};console.warn('CT FAST access refresh',e)}
  finally{clearTimeout(timer);FAST_REFRESH_BUSY=false;renderRefreshStatus()}
