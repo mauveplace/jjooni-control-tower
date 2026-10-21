@@ -1,6 +1,6 @@
 {
   "available_from": "2016-10-24",
-  "available_to": "2026-10-19",
+  "available_to": "2026-10-22",
   "backfill": {
     "canonical_rows_matched": 8,
     "checked_kst": "2026-10-19T06:01:39+09:00",
@@ -83,9 +83,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-21T23:55:49+09:00",
+  "generated_kst": "2026-10-22T05:24:23+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37784,
+  "row_count": 37788,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -13045,52 +13045,52 @@
     },
     "KR::한국은행-통화정책방향-결정회의": {
       "available_from": "2026-01-15",
-      "available_to": "2026-08-27",
+      "available_to": "2026-10-22",
       "category": "중앙은행",
-      "count": 6,
+      "count": 7,
       "country": "KR",
       "event_title": "한국은행 통화정책방향 결정회의",
       "kind": "event",
       "label": "한국은행 통화정책방향 결정회의",
-      "path": "./calendar-history/series/857131a026600298c9e064049ae0938d301760f237e2b186d4681496f8ef3434.json",
+      "path": "./calendar-history/series/9220733c981f77cca2bbf4f30d2a964f24df3f024bd4b550ce760b8a96468293.json",
       "quality": {
         "actual_count": 6,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 49,
+        "max_observed_gap_days": 56,
         "rows_by_year": {
-          "2026": 6
+          "2026": 7
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::한국은행-통화정책방향-결정회의",
-      "sha256": "857131a026600298c9e064049ae0938d301760f237e2b186d4681496f8ef3434"
+      "sha256": "9220733c981f77cca2bbf4f30d2a964f24df3f024bd4b550ce760b8a96468293"
     },
     "KR::한국은행-통화정책방향-결정회의::bok_base_rate": {
       "available_from": "2026-01-15",
-      "available_to": "2026-08-27",
+      "available_to": "2026-10-22",
       "category": "중앙은행",
-      "count": 6,
+      "count": 7,
       "country": "KR",
       "event_title": "한국은행 통화정책방향 결정회의",
       "kind": "metric",
       "label": "한국은행 기준금리",
       "metric_key": "bok_base_rate",
-      "path": "./calendar-history/series/85934f5476770bb633e0a376705fdf279b0bb00279acf3eb033b29f0f0efd87e.json",
+      "path": "./calendar-history/series/0ceced8940b6b9be3a8ca4d2061eea9740893de0287bcc2b6ff87cdad558c57a.json",
       "quality": {
         "actual_count": 6,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 49,
+        "max_observed_gap_days": 56,
         "rows_by_year": {
-          "2026": 6
+          "2026": 7
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::한국은행-통화정책방향-결정회의::bok_base_rate",
-      "sha256": "85934f5476770bb633e0a376705fdf279b0bb00279acf3eb033b29f0f0efd87e"
+      "sha256": "0ceced8940b6b9be3a8ca4d2061eea9740893de0287bcc2b6ff87cdad558c57a"
     },
     "US::consumer-price-index": {
       "available_from": "2026-01-13",
@@ -14525,43 +14525,43 @@
     },
     "US::u-s-initial-jobless-claims": {
       "available_from": "2026-08-27",
-      "available_to": "2026-10-15",
+      "available_to": "2026-10-22",
       "category": "고용",
-      "count": 8,
+      "count": 9,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "event",
       "label": "U.S. Initial Jobless Claims",
-      "path": "./calendar-history/series/159c918fa41d60de978e6637260fab5d05df0fe453de3f69d05c9c5a7416fd81.json",
+      "path": "./calendar-history/series/85e044f0e065f2d9a73d13486df1df0ac1c20f4ee040a2deda3026b116f6a038.json",
       "quality": {
         "actual_count": 8,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 6,
+        "consensus_count": 7,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 7,
         "rows_by_year": {
-          "2026": 8
+          "2026": 9
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims",
-      "sha256": "159c918fa41d60de978e6637260fab5d05df0fe453de3f69d05c9c5a7416fd81"
+      "sha256": "85e044f0e065f2d9a73d13486df1df0ac1c20f4ee040a2deda3026b116f6a038"
     },
     "US::u-s-initial-jobless-claims::initial_claims": {
       "available_from": "2016-10-27",
-      "available_to": "2026-10-15",
+      "available_to": "2026-10-22",
       "category": "고용",
-      "count": 517,
+      "count": 518,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "metric",
       "label": "Initial Jobless Claims",
       "metric_key": "initial_claims",
-      "path": "./calendar-history/series/89c2f181efc24a322e016c8e4dde50dfaa8cf8cbb537789a913981f5adc37bc0.json",
+      "path": "./calendar-history/series/3a59ffee53aee6cf4f33cfdcf6b255e51978f7c15473810e615839c9b0bb5d9b.json",
       "quality": {
         "actual_count": 517,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 514,
+        "consensus_count": 515,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 54,
         "rows_by_year": {
@@ -14575,12 +14575,12 @@
           "2023": 52,
           "2024": 52,
           "2025": 49,
-          "2026": 41
+          "2026": 42
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims::initial_claims",
-      "sha256": "89c2f181efc24a322e016c8e4dde50dfaa8cf8cbb537789a913981f5adc37bc0"
+      "sha256": "3a59ffee53aee6cf4f33cfdcf6b255e51978f7c15473810e615839c9b0bb5d9b"
     },
     "US::u-s-international-trade-in-goods-and-services": {
       "available_from": "2026-10-06",
@@ -14728,11 +14728,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 433,
-  "snapshot_id": "1634fb0a99ff5a2cb5901dc7549799e815da9734227cdc5008fc6745f8c6387b",
-  "source_sha256": "1634fb0a99ff5a2cb5901dc7549799e815da9734227cdc5008fc6745f8c6387b",
+  "snapshot_id": "ced8497268035cf4c178fc2e4569798e1445ca838d2611b68ea2cdde52ec5e94",
+  "source_sha256": "ced8497268035cf4c178fc2e4569798e1445ca838d2611b68ea2cdde52ec5e94",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-10-21",
-  "window_start": "2016-10-23",
+  "window_end": "2026-10-22",
+  "window_start": "2016-10-24",
   "window_years": 10
 }
