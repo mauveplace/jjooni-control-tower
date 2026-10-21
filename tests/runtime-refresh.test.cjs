@@ -5,6 +5,20 @@ const vm=require('node:vm');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
+test('manual refresh retries after automatic collection and allows the server collection budget',async()=>{
+ const source=read('live-bridge.js');let calls=0;const timers=[];
+ const context={window:{},Date,TextEncoder,AbortController,sessionStorage:{getItem:()=> 'test-only'},
+  crypto:require('node:crypto').webcrypto,renderRefreshStatus(){},refresh(){},console,
+  setTimeout(fn,ms){timers.push(ms);return timers.length},clearTimeout(){},
+  fetch:async()=>{calls++;return {ok:true,json:async()=>({status:'PASS',snapshot_id:'new'})}}};
+ vm.runInNewContext(source.slice(source.indexOf('const FAST_REFRESH_URL='),source.indexOf('\ninjectResponsiveCss();ensureWatchlistUi();refresh();'))+'window.collect=triggerFastAccessRefresh;',context);
+ await context.window.collect('open');
+ await context.window.collect('resume');assert.equal(calls,1,'automatic retries stay throttled');
+ await context.window.collect('manual');assert.equal(calls,2,'explicit tap cannot silently do nothing');
+ assert(timers.includes(45000),'cold request must cover read + collection + publication');
+ assert.equal(context.window.__JJOONI_FAST_ACCESS_REFRESH_V1.state,'APPLIED');
+});
+
 function feedRuntime(reader){
   const source=read('live-bridge.js');
   const start=source.indexOf('let refreshFlight=null');
