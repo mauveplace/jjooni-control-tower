@@ -43,7 +43,7 @@ function render(){if(!wide())return;const panel=qs('#panel-accounts'),c=C();if(!
  }window.__JJOONI_TABLET_ACCOUNTS_V8={state:'ACTIVE',version:'8.3',card_count:IDS.length}}
 document.addEventListener('click',e=>{
  const button=e.target.closest?.('.ctHoldingGraph[data-chart-symbol]');if(!button)return;
- e.stopPropagation();document.querySelector('.tab[data-tab="portfolio"]')?.click();
+ e.stopPropagation();
  document.dispatchEvent(new CustomEvent('jjooni:open-intraday',{detail:{symbol:button.dataset.chartSymbol}}));
 });
 setTimeout(render,0);setTimeout(render,700);document.addEventListener('jjooni:live-applied',render);window.addEventListener('resize',render);

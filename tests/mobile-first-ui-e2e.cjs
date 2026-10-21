@@ -36,7 +36,7 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  assert(await holding.getAttribute('open')!==null,'live refresh retains the selected holding');
  assert(await page.locator('#ctDesktopAccountsV8 .ctAccountHoldings').first().getAttribute('open')!==null,'live refresh retains the account list');
  assert.match(await holding.innerText(),/74 USD/);assert.match(await holding.innerText(),/산정 대기/,'unknown cumulative cost must not turn into zero');
- await page.evaluate(()=>document.addEventListener('jjooni:open-intraday',e=>window.openedChart=e.detail.symbol,{once:true}));await holding.getByRole('button',{name:'일중 그래프 보기',exact:true}).click();assert.equal(await page.evaluate(()=>window.openedChart),'TQQQ');
+ await page.evaluate(()=>document.addEventListener('jjooni:open-intraday',e=>window.openedChart=e.detail.symbol,{once:true}));await holding.getByRole('button',{name:'일중 그래프 보기',exact:true}).click();assert.equal(await page.evaluate(()=>window.openedChart),'TQQQ');assert(await page.locator('#panel-accounts').isVisible(),'opening a chart retains the originating account view');
  await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.TOSS.positions[0].current_price=73;document.dispatchEvent(new Event('jjooni:live-applied'))});
 
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="trades"]').click());
