@@ -13,6 +13,8 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?process.
   await page.waitForSelector('.latestTile[data-metric="US10Y_OFFICIAL"] .latestTilePeriods');
   assert(!(await page.locator('body').innerText()).includes('\\n'),'literal newline must never leak into visible text');
   const rates=page.locator('.latestTile[data-metric="US10Y_OFFICIAL"] .latestTilePeriods');
+  const rateTile=page.locator('.latestTile[data-metric="US10Y_OFFICIAL"]');
+  const rateText=await rateTile.innerText();assert.equal((rateText.match(/일간/g)||[]).length,1);assert.equal((rateText.match(/주간/g)||[]).length,1);
   const rateBefore=await rates.innerText();assert.match(rateBefore,/일간 .*bp/);assert.match(rateBefore,/주간 .*bp/);
   assert.match(await page.locator('.latestTile[data-metric="USDKRW"] .latestTilePeriods').innerText(),/주간 .*%/);
   assert.match(await page.locator('.latestTile[data-metric="FEAR_GREED"] .latestTilePeriods').innerText(),/일간 .*pt/);

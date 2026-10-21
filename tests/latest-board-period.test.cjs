@@ -11,7 +11,7 @@ function board(series) {
     setInterval() {}, clearInterval() {}, console,
   };
   vm.createContext(context);
-  vm.runInContext(src.replace('let tries=0;', 'window.testPeriod={stat,standardTile,BY_KEY};let tries=0;'), context);
+  vm.runInContext(src.replace('let tries=0;', 'window.testPeriod={stat,standardTile,BY_KEY,setCompare:key=>compareKey=key};let tries=0;'), context);
   return context.window.testPeriod;
 }
 
@@ -71,4 +71,17 @@ test('missing observations are excluded rather than converted into zero changes'
   const html=api.standardTile(api.BY_KEY.KR10Y);
   assert.match(html,/일간 —/);assert.match(html,/주간 —/);
   assert.doesNotMatch(html,/-400\.0bp/);
+});
+
+test('daily and weekly each appear once while longer selected comparisons remain available',()=>{
+ const api=board({WTI:[{date:'2026-09-01',value:80},{date:'2026-10-13',value:100},{date:'2026-10-19',value:102},{date:'2026-10-20',value:101}]});
+ for(const comparison of ['D1','W1','M1','Y1']){
+  api.setCompare(comparison);
+  const html=api.standardTile(api.BY_KEY.WTI),text=html.replace(/<[^>]*>/g,'');
+  assert.equal((text.match(/일간/g)||[]).length,1,text);
+  assert.equal((text.match(/주간/g)||[]).length,1,text);
+  assert(text.includes('일간 -0.98%'));assert(text.includes('주간 +1.00%'));
+  if(comparison==='M1')assert(text.includes('전월 ▲ 26.25%'));
+  if(comparison==='Y1')assert.match(text,/전년 대비 —/);
+ }
 });
