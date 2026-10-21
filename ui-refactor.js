@@ -166,5 +166,5 @@ document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctM
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);
 document.addEventListener('jjooni:live-applied',enforce);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)enforce()});
-window.addEventListener('resize',()=>{if(!mobile()){const m=qs('#ctMoreMenu');if(m)m.classList.remove('open');resetTradeState()}enforce()},{passive:true});
+window.addEventListener('resize',()=>{if(window.matchMedia('(min-width:1200px) and (hover:hover) and (pointer:fine)').matches){const m=qs('#ctMoreMenu');if(m)m.classList.remove('open');resetTradeState()}enforce()},{passive:true});
 })();

@@ -32,7 +32,7 @@ html.ctStableTabletV37 :is(.ctWlBtn,.ctTrChip,.ctD8Btn){font-size:16px!important
 /* Account-card typography authority lives in responsive-layout.css. */
 /* Account chart geometry: tablet charts must be larger than phone sparklines. */
 html.ctStableTabletV37 #overviewAccounts .ctAcctSpark,
-html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark{display:block!important;min-height:150px!important;height:150px!important;margin-top:14px!important;overflow:visible!important}
+html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark{min-height:150px!important;height:150px!important;margin-top:14px!important;overflow:visible!important}
 html.ctStableTabletV37 #overviewAccounts .ctAcctSpark svg,
 html.ctStableTabletV37 .ctOvAccounts .ctAcctSpark svg{width:100%!important;height:150px!important;min-height:150px!important;overflow:visible!important}
 html.ctStableTabletV37 #overviewAccounts .ctAcctSpark canvas,
