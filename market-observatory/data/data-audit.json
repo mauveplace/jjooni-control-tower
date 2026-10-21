@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-21T21:45:06+09:00",
-  "overall": "PASS",
+  "generated_kst": "2026-10-21T21:45:13+09:00",
+  "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 0,
+  "warning_count": 3,
   "observatory_session": "2026-10-20",
   "file_status": {
     "observatory": {
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-21T21:45:05+09:00",
+      "generated_kst": "2026-10-21T20:39:32+09:00",
       "session": "2026-10-20",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-21T21:45:05+09:00",
+      "generated_kst": "2026-10-21T20:39:32+09:00",
       "session": "2026-10-20",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-21T21:44:52+09:00",
+      "generated_kst": "2026-10-21T16:51:53+09:00",
       "as_of_date": "2026-10-21",
       "priced_count": 46
     },
@@ -66,11 +66,11 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-21T21:45:03+09:00",
+      "generated_kst": "2026-10-21T21:45:13+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "calendar",
+        "crypto",
         "audit"
       ]
     },
@@ -452,7 +452,7 @@
       "latest_mismatch": []
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -460,17 +460,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-21",
-          "last_value": 83511.06,
+          "last_value": 83330.56,
           "group": "crypto",
-          "latest_value": 83511.06,
+          "latest_value": 83330.56,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-21",
-          "last_value": 2468.59,
+          "last_value": 2458.04,
           "group": "crypto",
-          "latest_value": 2468.59,
+          "latest_value": 2458.04,
           "latest_matches": true
         }
       },
@@ -484,11 +484,11 @@
       "critical": false,
       "items": {
         "FEAR_GREED": {
-          "count": 1562,
-          "last_date": "2026-10-21",
-          "last_value": 29.0,
+          "count": 1561,
+          "last_date": "2026-10-20",
+          "last_value": 27.2,
           "group": "sentiment",
-          "latest_value": 29.0,
+          "latest_value": 27.2,
           "latest_matches": true
         }
       },
@@ -512,21 +512,37 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-21T21:44:42+09:00",
-      "current_quote_age_seconds": 24,
+      "quote_as_of_kst": "2026-10-21T20:39:23+09:00",
+      "current_quote_age_seconds": 3950,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-21T21:44:40+09:00",
-      "current_quote_age_seconds": 26,
-      "captured_quote_age_seconds": 8
+      "quote_as_of_kst": "2026-10-21T20:39:24+09:00",
+      "current_quote_age_seconds": 3949,
+      "captured_quote_age_seconds": 5
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-21,ETHUSD:2026-10-21"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-21T20:39:23+09:00', 'current_quote_age_seconds': 3950, 'captured_quote_age_seconds': 6}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-21T20:39:24+09:00', 'current_quote_age_seconds': 3949, 'captured_quote_age_seconds': 5}"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
