@@ -176,8 +176,12 @@ jobs:
           python tools/backfill_market_history_30y.py
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
-          python tools/build_daily_market_pulse.py
-          python tools/build_public_market_daily.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'tools')
+          from publish_observatory_data import materialize_market_dependents, MARKET_BUNDLE
+          materialize_market_dependents(MARKET_BUNDLE)
+          PY
           python tools/audit_observatory_data.py
           python tools/build_observatory_freshness.py
 
