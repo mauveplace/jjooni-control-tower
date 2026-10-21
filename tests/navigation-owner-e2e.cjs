@@ -16,6 +16,9 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   await page.evaluate(()=>document.querySelector('.tab[data-tab="tripod"]').style.setProperty('display','none','important'));
   await page.waitForTimeout(150);
   assert(await page.locator('.tab[data-tab="tripod"]').isVisible(),'late legacy style cannot hide TRI-POD');
+  await page.evaluate(()=>document.querySelector('#ctMoreMenu button[data-tab=trades]').remove());
+  await page.waitForTimeout(150);
+  assert.equal(await page.locator('#ctMoreMenu button[data-tab=trades]').count(),1,'late legacy menu rebuild cannot discard a destination');
   await page.evaluate(()=>{window.testClicked=false;document.querySelector('.tab[data-tab="trades"]').onclick=()=>window.testClicked=true;document.querySelector('#ctMoreMenu').classList.add('open')});
   await page.locator('#ctMoreMenu button[data-tab="trades"]').evaluate(b=>b.click());
   assert(await page.evaluate(()=>window.testClicked));

@@ -72,7 +72,17 @@ function canonicalizeNavigation(){
  tabs.dataset.ctCanonicalNavOwner='TRADE_REVIEW_LOADER_V14';document.documentElement.dataset.ctNavOwner='v14';
  BOOT.nav_signature=canonical.filter(e=>getComputedStyle(e).display!=='none').map(e=>String(e.dataset.tab)+':'+String(e.textContent||'').trim()).join('|');return true;
 }
-function lockNavigation(){canonicalizeNavigation();const tabs=document.querySelector('.tabs');if(!tabs||tabs.dataset.ctNavObservedV14)return;tabs.dataset.ctNavObservedV14='1';let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;canonicalizeNavigation()})}).observe(tabs,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});window.addEventListener('resize',canonicalizeNavigation,{passive:true})}
+function lockNavigation(){
+ canonicalizeNavigation();const tabs=document.querySelector('.tabs');if(!tabs||tabs.dataset.ctNavObservedV14)return;
+ tabs.dataset.ctNavObservedV14='1';let queued=false,observedMenu=null;
+ const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;canonicalizeNavigation();watchMenu()})};
+ const observer=new MutationObserver(schedule);
+ observer.observe(tabs,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+ function watchMenu(){const menu=document.getElementById('ctMoreMenu');if(menu&&menu!==observedMenu){observedMenu=menu;observer.observe(menu,{subtree:true,childList:true,characterData:true})}}
+ watchMenu();
+ new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.id==='ctMoreMenu')))schedule()}).observe(document.body,{childList:true});
+ window.addEventListener('resize',schedule,{passive:true});
+}
 async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot='waiting-ssot';try{bootText('Canonical SSOT 연결을 기다리는 중입니다.');await waitFor(()=>window.__JJOONI_LIVE_READY===true&&window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD,30000,'SSOT_READY');BOOT.state='LOADING_REQUIRED_UI';document.documentElement.dataset.ctBoot='loading-ui';const modules=[
 ['ctFastRefreshV32Script','fast-refresh-v32.js?v=32.3','master-trade-bridge'],
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
