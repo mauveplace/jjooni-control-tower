@@ -50,6 +50,19 @@ test('refresh preserves hydrated long history while the new source corrects over
 });
 
 const vm=require('node:vm'),fs=require('node:fs');
+test('published-value button reads market and calendar independently and always unlocks',async()=>{
+ const source=fs.readFileSync(require.resolve('../market-observatory/data-refresh-v1.js'),'utf8');
+ const code=source.slice(source.indexOf('async function readPublished()'),source.indexOf('\nfunction init()'));
+ let marketCalls=0,calendarCalls=0,fail=false;const messages=[];
+ const button={};const root={__JJOONI_OBSERVATORY_MARKET_REFRESH:{status:'UNCHANGED',refresh:async()=>{marketCalls++;if(fail)throw Error('offline');return false}},__JJOONI_OBSERVATORY_UI:{refresh_calendar:async force=>{assert.equal(force,true);calendarCalls++;return true}}};
+ const context=vm.createContext({root,CAL:{},Promise,Error,readButton:button,display:(state,text)=>messages.push({state,text})});
+ vm.runInContext('let readBusy=false,pending=null;'+code+';root.readPublished=readPublished;',context);
+ await root.readPublished();assert.equal(marketCalls,1);assert.equal(calendarCalls,1);
+ assert.equal(button.disabled,false);assert.equal(messages.at(-1).state,'READ_COMPLETE');assert.match(messages.at(-1).text,/새 게시값 없음/);
+ fail=true;await root.readPublished();assert.equal(calendarCalls,2,'calendar still refreshes when the market reader fails');
+ assert.equal(messages.at(-1).state,'READ_PARTIAL');assert.match(messages.at(-1).text,/시장 게시값 조회 실패/);assert.equal(button.disabled,false);
+});
+
 test('an open mobile tab updates without reload, retains nodes when unchanged and keeps last value on errors',async()=>{
  let paints=0,reads=0,fail=false;const listeners={},message={};const next={...base,supplemental_refreshed_kst:'2026-10-21T07:05:27+09:00',latest:{NASDAQ100:101}};
  const document={hidden:false,querySelector:()=>null,getElementById:()=>message,addEventListener:(n,f)=>listeners[n]=f,dispatchEvent:()=>{}};

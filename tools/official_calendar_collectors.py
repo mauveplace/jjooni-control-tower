@@ -150,6 +150,53 @@ def collect_ccsi(e,checks):
         checks.append(dict(adapter='BOK_CCSI',title=e['title'],url=api,result=type(exc).__name__,error=str(exc)[:200]))
     return None
 
+def parse_kr_employment(text, year, month):
+    compact=re.sub(r'\s+', '', text)
+    heading=rf'\[{year}년0?{month}월고용동향\]'
+    match=re.search(heading,compact)
+    if not match: raise ValueError('KR_EMPLOYMENT_REFERENCE_PERIOD_MISMATCH')
+    body=compact[match.end():match.end()+1800]
+    definitions=(
+        ('kr_unemployment_sa','실업률 (계절조정)',r'계절조정실업률은([\d.]+)%','%'),
+        ('kr_unemployment','실업률 (비계절조정)',r'(?:▣|○)실업률은([\d.]+)%','%'),
+        ('kr_employment_rate','15~64세 고용률 (OECD)',r'15[~～∼]64세고용률\(OECD비교기준\)은([\d.]+)%','%'),
+        ('kr_employed','취업자 수 (천명)',r'취업자는([\d,]+)천명',''),
+    )
+    rows=[]
+    for key,label,pattern,suffix in definitions:
+        m=re.search(pattern,body)
+        if not m: raise ValueError('KR_EMPLOYMENT_HEADLINE_MISSING:'+key)
+        value=float(m[1].replace(',',''))
+        if not 0<=value<=(100 if suffix else 100000): raise ValueError('KR_EMPLOYMENT_VALUE_INVALID')
+        rows.append(metric(key,label,f'{value:g}'+suffix,
+                           reference_period=f'{year}-{month:02d}',value_vintage='AS_RELEASED'))
+    return rows
+
+
+def collect_kr_employment(e,checks):
+    period=re.search(r'(20\d{2})년\s*(\d{1,2})월\s*고용동향',e['title'])
+    if not period: raise ValueError('KR_EMPLOYMENT_TITLE_PERIOD_MISSING')
+    year,month=map(int,period.groups())
+    index='https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list'
+    try:
+        page=e.get('official_release_url')
+        if not page:
+            raw=raw_fetch(index).decode('utf-8',errors='replace')
+            link=next((u for u,t in Links(raw).rows if re.fullmatch(rf'{year}년\s*0?{month}월\s*고용동향',t.strip())),None)
+            if not link: raise ValueError('KR_EMPLOYMENT_RELEASE_NOT_FOUND')
+            page=urllib.parse.urljoin(index,html.unescape(link))
+        parsed=urllib.parse.urlparse(page)
+        if parsed.scheme!='https' or parsed.hostname not in ('mods.go.kr','www.mods.go.kr','kostat.go.kr','www.kostat.go.kr'):
+            raise ValueError('KR_EMPLOYMENT_OFFICIAL_HOST_REQUIRED')
+        rows=parse_kr_employment(text_fetch(page),year,month)
+        e['official_release_url']=page
+        checks.append(dict(adapter='KOSTAT_EMPLOYMENT',title=e['title'],url=page,result='PARSED'))
+        return rows,page
+    except Exception as exc:
+        checks.append(dict(adapter='KOSTAT_EMPLOYMENT',title=e['title'],url=locals().get('page') or index,result=type(exc).__name__,error=str(exc)[:200]))
+        return None
+
+
 def adapter_id(e):
     t=e.get('title',''); c=e.get('country')
     from official_bls_actuals import DEFS
@@ -158,6 +205,7 @@ def adapter_id(e):
     if c=='KR' and t=='한국은행 통화정책방향 결정회의': return 'BOK_RATE'
     if c=='KR' and '생산자물가' in t: return 'BOK'
     if c=='KR' and '소비자동향조사' in t: return 'BOK_CCSI'
+    if c=='KR' and re.search(r'고용동향',t): return 'KOSTAT_EMPLOYMENT'
     if c=='JP' and ('BOJ' in t or 'Bank of Japan' in t): return 'BOJ'
     if c=='GB' and 'Bank of England' in t: return 'BOE'
     return None
@@ -168,6 +216,7 @@ from official_bls_actuals import DEFS as BLS_DEFS
 REGISTRY.update({'BLS_'+code:keys for code,keys in BLS_DEFS.values()})
 REGISTRY['BOK_RATE']=('bok_base_rate',)
 REGISTRY['BOK_CCSI']=('kr_ccsi',)
+REGISTRY['KOSTAT_EMPLOYMENT']=('kr_unemployment_sa',)
 
 def discover_bok(e):
     period=re.search(r'(\d{4})년\s*(\d+)월',e['title'])
@@ -182,6 +231,8 @@ def discover_bok(e):
 
 def collect(e,kind,checks):
     dt=release_time(e)
+    if kind=='KOSTAT_EMPLOYMENT':
+        return collect_kr_employment(e,checks)
     if kind=='BOK_CCSI':
         return collect_ccsi(e,checks)
     if kind=='BOK_RATE':
@@ -234,6 +285,12 @@ def apply_official_actuals(calendar,now):
     for e in sorted(calendar.get('events',[]),key=priority):
         kind=adapter_id(e); dt=release_time(e)
         if not dt or not actual_expected(e): continue
+        # Older completed rows may use a different employment headline. Never
+        # relabel their existing actual as seasonally adjusted unemployment or
+        # retroactively turn completed observations into missing metric rows.
+        if kind=='KOSTAT_EMPLOYMENT' and clean(e.get('actual')) is not None and not any(
+            m.get('key')=='kr_unemployment_sa' for m in e.get('market_metrics',[])):
+            continue
         if kind=='BOK_RATE':
             try:
                 from official_bok_policy import correct_date

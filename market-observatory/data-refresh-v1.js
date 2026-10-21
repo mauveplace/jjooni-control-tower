@@ -20,10 +20,10 @@ const contract={selectRun,stateFor,RUN_URL,API};
 if(typeof module!=='undefined'&&module.exports){module.exports=contract;return;}
 if(!root.document)return;
 const doc=root.document;
-let pending=null,timer=null,busy=false,button,message,links;
+let pending=null,timer=null,busy=false,readBusy=false,button,message,links,readButton;
 function save(){try{pending?sessionStorage.setItem(KEY,JSON.stringify(pending)):sessionStorage.removeItem(KEY);}catch(_){}}
-function display(state,text){message.textContent=text;message.dataset.state=state;button.textContent=pending?'수집 실행 화면 열기':'원천 수집 열기';}
-function stop(){if(timer)clearTimeout(timer);timer=null;pending=null;save();button.textContent='원천 수집 열기';}
+function display(state,text){message.textContent=text;message.dataset.state=state;button.textContent=pending?'시장 수집 실행 화면 열기':'시장 원천 수집 열기';}
+function stop(){if(timer)clearTimeout(timer);timer=null;pending=null;save();button.textContent='시장 원천 수집 열기';}
 async function json(url,optional=false){const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(12000),headers:url.startsWith('https://api.github.com/')?{Accept:'application/vnd.github+json'}:{}});if(optional&&r.status===404)return null;if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
 function reloadView(){try{sessionStorage.setItem('JJOONI_OBSERVATORY_AUTO_REFRESH_V1',JSON.stringify({tab:doc.querySelector('#tabs button.on')?.dataset.tab||'overview',scrollY:root.scrollY||0,savedAt:Date.now()}));}catch(_){}root.location.reload();}
 async function poll(){
@@ -48,12 +48,34 @@ function start(){
   if(pending)return;
   pending={started:Date.now()};save();display('WAITING',stateFor(null,null).text);poll();
 }
+async function readPublished(){
+  if(readBusy)return;
+  readBusy=true;readButton.disabled=true;readButton.textContent='게시값 확인 중…';
+  if(!pending)display('CHECKING','시장·경제일정 게시값 확인 중 · 신규 원천 수집은 실행하지 않습니다.');
+  const tasks=[Promise.resolve().then(()=>{
+    const live=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;
+    if(!live)throw Error('MARKET_READER_UNAVAILABLE');
+    return live.refresh(true).then(updated=>{if(live.status==='RETRY')throw Error('MARKET_READ_FAILED');return updated});
+  }),Promise.resolve().then(async()=>{
+    if(typeof CAL==='undefined'||!CAL)await loadCalendar();
+    const ui=root.__JJOONI_OBSERVATORY_UI;
+    if(!ui||!await ui.refresh_calendar(true))throw Error('CALENDAR_READ_FAILED');
+    return true;
+  })];
+  try{
+    const results=await Promise.allSettled(tasks);
+    const failed=results.flatMap((r,i)=>r.status==='rejected'?[i===0?'시장':'경제일정']:[]);
+    const market=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;
+    const same=market?.status==='UNCHANGED';
+    if(!pending)display(failed.length?'READ_PARTIAL':'READ_COMPLETE',failed.length?`${failed.join('·')} 게시값 조회 실패 · 성공한 자료는 반영, 실패한 자료는 직전 값 유지`:`게시값 확인 완료 · ${same?'시장에 새 게시값 없음':'시장 최신 게시값 확인'} · 경제일정 확인 완료 · 신규 원천 수집은 실행하지 않았습니다.`);
+  }finally{readBusy=false;readButton.disabled=false;readButton.textContent='게시값 다시 확인';}
+}
 function init(){
   const head=doc.querySelector('header.top');if(!head)return;
   const host=doc.createElement('div');host.className='obsCollectControls';
-  host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 새로고침</button><a target="_blank" rel="noopener noreferrer">실행 기록 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">예약 수집 중 · 원천 수집 열기 → GitHub에서 Run workflow 실행</div>';
-  head.appendChild(host);button=host.querySelector('#obsCollectRefresh');message=host.querySelector('#obsCollectMessage');links=host.querySelector('a');links.href=RUN_URL;
-  button.addEventListener('click',start);host.querySelector('#obsReadPublished').addEventListener('click',()=>{const live=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;if(live)live.refresh(true);else reloadView()});
+  host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">시장 원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 다시 확인</button><a data-run-link target="_blank" rel="noopener noreferrer">시장 실행 기록 ↗</a><a href="https://github.com/mauveplace/jjooni-control-tower/actions/workflows/economic-calendar-light-refresh.yml" target="_blank" rel="noopener noreferrer">경제일정 수집 열기 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">게시값 다시 확인: 시장·경제일정 재조회 · 원천 수집 열기: GitHub에서 Run workflow 실행 필요</div>';
+  head.appendChild(host);button=host.querySelector('#obsCollectRefresh');message=host.querySelector('#obsCollectMessage');links=host.querySelector('[data-run-link]');links.href=RUN_URL;readButton=host.querySelector('#obsReadPublished');
+  button.addEventListener('click',start);readButton.addEventListener('click',readPublished);
   try{pending=JSON.parse(sessionStorage.getItem(KEY)||'null');const result=sessionStorage.getItem(KEY+'_RESULT');if(result){message.textContent=result+' 최신 게시 데이터를 다시 읽었습니다.';sessionStorage.removeItem(KEY+'_RESULT');}}catch(_){pending=null;}
   if(pending&&Number.isFinite(pending.started))poll();else pending=null;
   doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pending){if(timer)clearTimeout(timer);poll();}});

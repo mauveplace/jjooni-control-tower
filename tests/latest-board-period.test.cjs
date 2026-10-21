@@ -48,3 +48,27 @@ test('missing weekly reference remains unavailable instead of using daily gain',
   assert.equal(api.stat(api.BY_KEY.RUSSELL2000, 'W1').change, null);
   assert.match(api.standardTile(api.BY_KEY.RUSSELL2000), /주간 —/);
 });
+
+test('rate, spread, FX, commodity and sentiment cards show daily and weekly units together', () => {
+  const dates=['2026-10-13','2026-10-19','2026-10-20'];
+  const rows=values=>values.map((value,i)=>({date:dates[i],value}));
+  const api=board({US10Y:rows([4.90,5.10,5.117]),US_2S10S:rows([.2,.3,.33]),
+    USDKRW:rows([1300,1320,1327]),WTI:rows([100,102,101]),FEAR_GREED:rows([40,45,47])});
+  for(const [key,daily,weekly] of [
+    ['US10Y_OFFICIAL','일간 +1.7bp','주간 +21.7bp'],
+    ['US_2S10S','일간 +3.0bp','주간 +13.0bp'],
+    ['USDKRW','일간 +0.53%','주간 +2.08%'],
+    ['WTI','일간 -0.98%','주간 +1.00%'],
+    ['FEAR_GREED','일간 +2.0pt','주간 +7.0pt']]){
+      const html=api.standardTile(api.BY_KEY[key]);
+      assert(html.includes(daily),html);assert(html.includes(weekly),html);
+      assert(html.includes('2026-10-13 → 2026-10-20'),html);
+  }
+});
+
+test('missing observations are excluded rather than converted into zero changes',()=>{
+  const api=board({KR10Y:[{date:'2026-10-13',value:null},{date:'2026-10-19',value:4},{date:'2026-10-20',value:null}]});
+  const html=api.standardTile(api.BY_KEY.KR10Y);
+  assert.match(html,/일간 —/);assert.match(html,/주간 —/);
+  assert.doesNotMatch(html,/-400\.0bp/);
+});
