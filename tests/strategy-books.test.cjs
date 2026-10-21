@@ -125,3 +125,5 @@ test('legacy TRI-POD inventory carries its frozen cost once into verified TOSS o
  b.cost_basis_transfers_v1=[{...e,cost_krw:1}];assert.equal(S.build(C,b,ledger([])).accounts[0].groups[0].positions[0].cost,null);
  assert.equal(b.cost_basis_v1.positions['TOSS|TQQQ'].cost_krw,20000);
 });
+
+test('saved verified TQQQ cost renders without history and rejects changed evidence or later fills',()=>{const C=c(),b=book(C);C.accounts.TOSS.positions=[p('TQQQ',228,24000000,{currency:'USD',avg_price:75.83904})];b.cost_basis_v1={at:old,policy:'CURRENT_FX_OPENING_THEN_TRADE_FX',positions:{'TOSS|TQQQ':{qty:110,cost_krw:12013299}}};b.holding_costs_v1={'TOSS|TQQQ':{source:'VERIFIED_ROLLED_KRW_COST',qty:228,avg_native:75.83904,cost_krw:23682990.49513492,through_at:at,input_evidence:S.costEvidence(b)}};const cost=()=>S.build(C,b,{status:'DEFERRED',rows:[]}).accounts[0].groups[0].cost;assert.equal(cost(),23682990.49513492);C.accounts.TOSS.positions[0].fx=9999;assert.equal(cost(),23682990.49513492);b.trade_krw_v1={x:{ticker:'TQQQ',krw_amount:1}};assert.equal(cost(),null);delete b.trade_krw_v1;C.accounts.TOSS.positions[0].qty=229;assert.equal(cost(),null)});
