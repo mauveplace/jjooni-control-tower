@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_OVERVIEW_CONSISTENCY_V21)return;
-const STATE={state:'BOOTING',version:'21.3',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
+const STATE={state:'BOOTING',version:'21.4',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
 window.__JJOONI_OVERVIEW_CONSISTENCY_V21=STATE;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -25,6 +25,7 @@ function ensureStyle(){if(qs('#ctOverviewConsistencyV21Style'))return;const s=do
 #panel-overview #overviewAccounts .ctAccountPeriodRow .loss{color:#175cd3!important}
 #panel-overview #overviewAccounts .ctAccountCapitalRow{display:flex!important;justify-content:space-between!important;gap:8px!important;border-top:1px solid #e7ebf0!important;padding-top:8px!important;color:#667085!important;font-size:13px!important}
 .ctDdGuardV21{color:#b45309!important;font-weight:900!important;font-size:11px!important;white-space:nowrap}
+.ctPerformanceDayGrid,.ctPerformanceDayAccounts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ctPerformanceDayMetric,.ctPerformanceDayAccounts>article{padding:12px;border:1px solid #dbe4ef;border-radius:12px;background:#fff;min-width:0}.ctPerformanceDayMetric>span,.ctPerformanceDayMetric>strong,.ctPerformanceDayMetric>b,.ctPerformanceDayMetric>small{display:block;word-break:keep-all;overflow-wrap:anywhere}.ctPerformanceDayMetric>strong{font-size:24px;line-height:1.4;margin:8px 0}.ctPerformanceDayMetric>small{margin-top:6px;color:#667085}.ctPerformanceDay summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:800}.ctPerformanceDay p{line-height:1.6;color:#526071}.ctPerformanceDayAccounts article>div{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0}.ctPerformanceDayReference{border-top:1px solid #e5ebf2;padding-top:8px;color:#667085}.ctPerformanceDay h3,.ctPerformanceDay h4{word-break:keep-all}.ctPerformanceDayMetric b{font-size:14px}@media(max-width:480px){.ctPerformanceDayMetric{padding:10px}.ctPerformanceDayMetric>strong{font-size:21px}.ctPerformanceDayAccounts{grid-template-columns:1fr}.ctPerformanceDayGrid{gap:8px}}
 `; (document.head||document.documentElement).appendChild(s)}
 function context(){const L=window.__JJOONI_LIVE_PAYLOAD||{};return (L.market_context||{}).items||{}}
 function marketSourceLabel(v){const s=String(v||'').toUpperCase();if(s==='KIS_INDEX')return 'KIS 당일지수';if(s==='YAHOO_REFERENCE'||s.includes('YAHOO'))return '시장 참고값';return '당일 시장값'}
@@ -44,13 +45,15 @@ const ACCOUNT_NAMES={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>num(v)==null?'산정 대기':(Math.round(v)<0?'-':'')+'₩'+Math.abs(Math.round(v)).toLocaleString('ko-KR');
 const signed=v=>num(v)==null?'산정 대기':(v>0?'+':'')+money(v);
-function writeHtml(root,html){if(root&&root.innerHTML!==html)root.innerHTML=html}
+function writeHtml(root,html){if(root&&root.innerHTML!==html){const keep=!!root.querySelector?.('.ctPerformanceDay details[open]');root.innerHTML=html;if(keep){const detail=root.querySelector?.('.ctPerformanceDay details');if(detail)detail.open=true}}}
 function ownedRoot(panel,id){let root=qs('#'+id,panel);if(!root){root=document.createElement('section');root.id=id;root.className='ctCommonView';panel.prepend(root)}return root}
 function cardByHeading(root,label){return qsa('h2,h3',root).find(e=>text(e)===label)?.closest('.card')||null}
 function commonModel(){const C=window.__JJOONI_CANONICAL_SSOT||{},L=window.__JJOONI_LIVE_PAYLOAD||{};return {C,L,total:window.JjooniMetrics.aggregate(C.accounts),history:health()}}
 function currentPerformance(){
  const panel=qs('#panel-compare');if(!panel)return;const {C,L,total,history}=commonModel(),root=ownedRoot(panel,'ctCurrentPerformance');
  panel.dataset.ctHistoryLimited=history.historyStale?'1':'0';
+ const performanceDay=window.JjooniPerformanceDay?.html(L)||'';
+ if(performanceDay){writeHtml(root,`<h2>성과분석</h2><p>현재 총자산 · ${money(total.nav)} · 원본 ${esc(stamp(L.generated_kst||L.observed_at))}</p>${performanceDay}`);return}
  const max=Math.max(1,...ACCOUNT_IDS.map(id=>Math.abs(num(C.accounts?.[id]?.today_pnl)||0)));
  const rows=ACCOUNT_IDS.map(id=>{const a=C.accounts?.[id]||{},p=num(a.today_pnl);return `<div class="ctCommonAccount"><div><b>${ACCOUNT_NAMES[id]}</b><span>${money(a.nav)}</span></div><div class="ctCommonBar" aria-hidden="true"><i class="${p<0?'loss':'gain'}" style="width:${p==null?0:100*Math.abs(p)/max}%"></i></div><strong class="${p<0?'loss':'gain'}">${signed(p)}</strong><small>오늘 수익률 ${pct(a.today_return)}</small></div>`}).join('');
  writeHtml(root,`<h2>성과분석</h2><p>현재 계좌 원본 ${esc(stamp(L.generated_kst||L.observed_at))} · 오늘 투자손익과 순입출금을 구분합니다.</p><div class="ctCommonMetrics"><article><span>현재 총자산 · 4계좌</span><strong>${money(total.nav)}</strong></article><article><span>오늘 투자손익 · ${total.known_day}/4계좌</span><strong>${signed(total.day)}</strong></article><article><span>오늘 순입출금</span><strong>${signed(total.flow)}</strong></article></div><h3>계좌별 오늘 투자손익</h3><div class="ctCommonAccountGrid">${rows}</div>${history.historyStale?'<div class="ctCommonNotice"><b>기간 성과 검증 대기</b><p>과거 원장의 기준일·입출금 대사가 확인되기 전에는 누적수익률·낙폭·일별 성과 그래프를 현재 성과로 표시하지 않습니다.</p></div>':''}`);
@@ -83,8 +86,9 @@ function accountPeriods(stats,a){
 function overviewCommon(){
  const panel=qs('#panel-overview');if(!panel)return;const {C,L,total,history}=commonModel();
  for(const e of qsa('.ctAcctSpark,.ctSparkHead',panel))e.hidden=history.historyStale;
- const dayHeading=qsa('h3',panel).find(e=>/^오늘 손익/.test(text(e))),dayCard=qs('#ctCanonicalDailySummary',panel)||dayHeading?.closest('.card');
- if(dayCard){dayCard.id='ctCanonicalDailySummary';writeHtml(dayCard,`<h3>계좌별 오늘 투자손익</h3><p>상단과 동일한 계좌 원본 · ${total.known_day}/4계좌 확인</p>${ACCOUNT_IDS.map(id=>`<div class="ctCommonLine"><span>${ACCOUNT_NAMES[id]}</span><b>${signed(C.accounts?.[id]?.today_pnl)}</b></div>`).join('')}<div class="ctCommonLine"><b>4계좌 합계</b><strong>${signed(total.day)}</strong></div>`)}
+ const dayHeading=qsa('h3',panel).find(e=>/^오늘 손익/.test(text(e)));let dayCard=qs('#ctCanonicalDailySummary',panel)||dayHeading?.closest('.card');
+ if(!dayCard&&L.performance_day){dayCard=document.createElement('section');dayCard.className='card';dayCard.id='ctCanonicalDailySummary';const accounts=qs('#overviewAccounts',panel);if(accounts?.parentNode)accounts.parentNode.insertBefore(dayCard,accounts);else panel.prepend(dayCard)}
+ if(dayCard){dayCard.id='ctCanonicalDailySummary';const dayHtml=window.JjooniPerformanceDay?.html(L);if(dayHtml)writeHtml(dayCard,dayHtml);else writeHtml(dayCard,`<h3>계좌별 오늘 투자손익</h3><p>상단과 동일한 계좌 원본 · ${total.known_day}/4계좌 확인</p>${ACCOUNT_IDS.map(id=>`<div class="ctCommonLine"><span>${ACCOUNT_NAMES[id]}</span><b>${signed(C.accounts?.[id]?.today_pnl)}</b></div>`).join('')}<div class="ctCommonLine"><b>4계좌 합계</b><strong>${signed(total.day)}</strong></div>`)}
  const bench=qs('#ctBenchmarkTable',panel);if(bench){bench.hidden=true;const card=bench.closest('.card');const badge=qs('.badge',card);if(badge)setText(badge,'검증 대기');if(card){let note=qs('.ctCommonNotice',card);if(!note){note=document.createElement('p');note.className='ctCommonNotice';card.append(note)}setText(note,'계좌별 정규장 비교는 같은 거래일·시세 범위 대사 후 표시합니다. 상단 시장지표는 마지막 원본 기준입니다.')}}
  const exposure=qs('#ctCanonicalExposure',panel)||cardByHeading(panel,'노출 구성 (Look-through)');
  if(exposure){exposure.id='ctCanonicalExposure';const amounts={KRW:0,USD:0};let covered=0;for(const id of ACCOUNT_IDS){const a=C.accounts?.[id]||{};for(const p of window.JjooniMetrics.positions(a)){const v=window.JjooniMetrics.valueKrw(p,a);if(v!=null){const cur=window.JjooniMetrics.currency(p);amounts[cur]=(amounts[cur]||0)+v;covered+=v}}const kr=num(a.cash_krw),us=num(a.cash_usd),fx=window.JjooniMetrics.fx(a)||num(L.fx_reference?.krw_per_usd);if(kr!=null){amounts.KRW+=kr;covered+=kr}if(us!=null&&(us===0||fx>0)){const v=us===0?0:us*fx;amounts.USD+=v;covered+=v}}
@@ -102,7 +106,7 @@ let moverFilter='all';
 function renderMovers(){
  const panel=qs('#panel-overview'),card=qs('#ctCanonicalMovers',panel)||qs('.ctOvLossCard',panel);if(!card)return;card.id='ctCanonicalMovers';
  const {C}=commonModel(),positions=ACCOUNT_IDS.flatMap(id=>window.JjooniMetrics.positions(C.accounts?.[id]).map(p=>({id,p,day:window.JjooniMetrics.positionDay(p,C.accounts[id])}))),known=positions.filter(x=>x.day!=null),selected=known.filter(x=>moverFilter==='all'||(moverFilter==='up'?x.day>0:x.day<0)).sort((a,b)=>Math.abs(b.day)-Math.abs(a.day));
- writeHtml(card,`<h3>보유종목 당일손익</h3><p>종목별 손익 확인 ${known.length}/${positions.length}개 · 계좌 손익에는 매매·비용 등이 별도로 포함됩니다.</p><div class="ctCommonFilters" role="group" aria-label="보유종목 필터">${[['all','전체'],['up','상승'],['down','하락']].map(([key,label])=>`<button type="button" data-cm-filter="${key}" aria-pressed="${moverFilter===key}">${label}</button>`).join('')}</div>${selected.slice(0,12).map(x=>`<div class="ctCommonLine"><span>${esc(x.p.name||x.p.ticker)}<small> · ${ACCOUNT_NAMES[x.id]}</small></span><b class="${x.day<0?'loss':'gain'}">${signed(x.day)}</b></div>`).join('')||'<p>이 조건에서 확인된 종목별 손익이 없습니다. 전일 종가·종목별 손익 자료를 확인해 주세요.</p>'}`);
+ writeHtml(card,`<h3>${window.__JJOONI_LIVE_PAYLOAD?.performance_day?'보유종목 가격효과 · 원천 구간 참고':'보유종목 당일손익'}</h3><p>종목별 손익 확인 ${known.length}/${positions.length}개 · 계좌 손익에는 매매·비용 등이 별도로 포함됩니다.</p><div class="ctCommonFilters" role="group" aria-label="보유종목 필터">${[['all','전체'],['up','상승'],['down','하락']].map(([key,label])=>`<button type="button" data-cm-filter="${key}" aria-pressed="${moverFilter===key}">${label}</button>`).join('')}</div>${selected.slice(0,12).map(x=>`<div class="ctCommonLine"><span>${esc(x.p.name||x.p.ticker)}<small> · ${ACCOUNT_NAMES[x.id]}</small></span><b class="${x.day<0?'loss':'gain'}">${signed(x.day)}</b></div>`).join('')||'<p>이 조건에서 확인된 종목별 손익이 없습니다. 전일 종가·종목별 손익 자료를 확인해 주세요.</p>'}`);
  if(!card.dataset.filterBound){card.dataset.filterBound='1';card.addEventListener('click',e=>{const b=e.target.closest('[data-cm-filter]');if(b){moverFilter=b.dataset.cmFilter;renderMovers()}})}
 }
 

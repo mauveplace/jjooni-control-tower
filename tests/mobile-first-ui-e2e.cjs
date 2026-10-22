@@ -69,5 +69,22 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
   if(name==='ISA')assert.equal(await cum.locator('.ctAccountPeriodAmount').evaluate(e=>getComputedStyle(e).color),'rgb(23, 92, 211)');
  }
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'period rows overflow at '+width);
+ await page.addScriptTag({content:read('performance-day-view.js')});
+ await page.evaluate(()=>{
+  const L=window.__JJOONI_LIVE_PAYLOAD,C=window.__JJOONI_CANONICAL_SSOT,ids=['TOSS','ISA','PENSION','IRP'];
+  const at=new Date(),start=new Date(at.getTime()-3600000).toISOString(),end=new Date(at.getTime()+3600000).toISOString();
+  L.snapshot_id=C.snapshot_id='close-day-fixture';L.accounts=C.accounts;
+  L.performance_day={schema:'CT_US_CLOSE_PERFORMANCE_DAY_V1',snapshot_id:L.snapshot_id,date:'2026-10-22',previous_date:'2026-10-21',start_kst:start,end_kst:end,previous_start_kst:new Date(at.getTime()-90000000).toISOString(),as_of_kst:at.toISOString(),current:{accounts:Object.fromEntries(ids.map(id=>[id,{state:'PENDING',pnl_krw:null,reasons:['CLOSING_NAV_BASELINE_MISSING']}]))},previous:{accounts:Object.fromEntries(ids.map(id=>[id,{state:'PENDING',pnl_krw:null}]))}};
+  ids.forEach(id=>{C.accounts[id].broker_daily_reference={today_pnl:12345};C.accounts[id].today_pnl=null;C.accounts[id].today_return=null});
+  document.dispatchEvent(new Event('jjooni:live-applied'));
+ });
+ await page.waitForTimeout(250);
+ const closeDay=page.locator('#ctCanonicalDailySummary .ctPerformanceDay');
+ assert.match(await closeDay.innerText(),/오늘 진행 손익/);assert.match(await closeDay.innerText(),/전일 손익/);
+ assert.equal(await closeDay.locator('.ctPerformanceDayMetric').count(),2);
+ assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/산정 대기/);
+ await closeDay.locator('summary').click();assert.equal(await closeDay.locator('.ctPerformanceDayAccounts article:visible').count(),4);
+ assert.match(await closeDay.locator('.ctPerformanceDayReference').first().innerText(),/12,345/);
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'close day overflows at '+width);
  await page.screenshot({path:'/tmp/ct-ui-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS mobile-first width='+width+' canonical=4000 missing=unknown fund=excluded nav=usable');await context.close();
 }await browser.close()})().catch(e=>{console.error(e);process.exit(1)});
