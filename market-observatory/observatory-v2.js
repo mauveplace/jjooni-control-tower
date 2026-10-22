@@ -77,6 +77,8 @@ function timeDatasets(labels,sets){
   }));
 }
 function chartConfig(labels,sets,range='5Y',id=''){
+  const view=window.ObsIndexExplorer?.prepare(id,labels,sets)||{labels,sets};
+  labels=view.labels;sets=view.sets;
   return{
     type:'line',
     data:{datasets:timeDatasets(labels,sets)},
@@ -85,7 +87,7 @@ function chartConfig(labels,sets,range='5Y',id=''){
       layout:{padding:{bottom:2}},
       plugins:{
         legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}},
-        tooltip:{callbacks:{title:items=>items?.length?tooltipDate(items[0].parsed.x):'',label:ctx=>id==='usCurve'?`${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(3)}%`:`${ctx.dataset.label}: ${ctx.formattedValue}`}},
+        tooltip:{callbacks:{title:items=>items?.length?tooltipDate(items[0].parsed.x):'',label:ctx=>id==='usCurve'?`${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(3)}%`:`${ctx.dataset.label}: ${ctx.formattedValue}${view.unit==='%'?'%':''}`}},
         zoom:{limits:{x:{min:'original',max:'original'}},pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true,speed:.08},pinch:{enabled:true},mode:'x'}}
       },
       scales:{
@@ -94,7 +96,7 @@ function chartConfig(labels,sets,range='5Y',id=''){
           ticks:{display:true,color:'#667085',padding:6,maxTicksLimit:tickLimit(range),maxRotation:0,minRotation:0,font:{size:9},callback:v=>tickLabel(v,range)},
           grid:{color:'#eef2f6',drawTicks:true},border:{color:'#cfd8e3'}
         },
-        y:{ticks:{maxTicksLimit:6,font:{size:9},color:'#667085',...(id==='usCurve'?{callback:v=>Number(v).toFixed(3)+'%'}:{})},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
+        y:{title:{display:!!view.unit,text:view.unit||''},ticks:{maxTicksLimit:6,font:{size:9},color:'#667085',...(view.unit==='%'?{callback:v=>Number(v).toFixed(1)+'%'}:{}),...(id==='usCurve'?{callback:v=>Number(v).toFixed(3)+'%'}:{})},grid:{color:'#e8edf3'},border:{color:'#cfd8e3'}}
       }
     }
   };
@@ -248,8 +250,12 @@ function draw(id,labels,sets){
   const range=active[id]||'5Y',f=filtered(labels,sets,range);
   charts[id]=new Chart(c,chartConfig(f.labels,f.sets,range,id));
   ensureToolbar(id);refreshCoverage(id);
+  window.ObsIndexExplorer?.attach(id);
+  const view=window.ObsIndexExplorer?.prepare(id,f.labels,f.sets);
+  if(view?.note){const cov=document.querySelector(`[data-coverage="${id}"]`);if(cov)cov.textContent=view.note;}
 }
 function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
+window.__obsIndexBridge={redraw};
 window.chart=function(id,labels,sets){RAW[id]={labels:[...(labels||[])],sets:(sets||[]).map(s=>({...s,data:[...(s.data||[])]}))};draw(id,labels,sets)};
 
 function val(v){return v==null||v===''?'—':String(v)}

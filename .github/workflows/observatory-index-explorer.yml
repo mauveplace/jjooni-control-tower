@@ -1,0 +1,25 @@
+name: Observatory Index Explorer QA
+on:
+  push:
+    paths:
+      - 'market-observatory/index-explorer*'
+      - 'market-observatory/observatory-v2.js'
+      - 'market-observatory/index.html'
+      - 'tests/observatory-index-explorer*'
+      - '.github/workflows/observatory-index-explorer.yml'
+  workflow_dispatch:
+jobs:
+  index-explorer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/observatory-index-explorer.test.cjs
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8123 > /tmp/server.log 2>&1 &
+          node tests/observatory-index-explorer-e2e.cjs
