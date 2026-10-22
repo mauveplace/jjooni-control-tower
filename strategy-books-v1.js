@@ -32,7 +32,7 @@ function withBrokerTrades(source={},live={}){
  let added=0;
  for(const r of live.recent_trades||[]){
   const id=String(r.order_id||'').trim();
-  if(r.source!=='BROKER_DIRECT_TOSS_API'||String(r.account).toUpperCase()!=='TOSS'||!id||known.has(id))continue;
+  if(!['BROKER_DIRECT_TOSS_API','BROKER_DIRECT_TOSS_API_FAST'].includes(r.source)||String(r.account).toUpperCase()!=='TOSS'||!id||known.has(id))continue;
   const t=normalizeTrade({...r,trade_key:id});if(!t||t.at==null)continue;
   // Matching execution facts prevent cross-source duplication when IDs differ.
   if(rows.some(x=>{const old=normalizeTrade(x);return old&&old.key===t.key&&old.kind===t.kind&&old.at===t.at&&old.qty===t.qty&&old.price===t.price}))continue;

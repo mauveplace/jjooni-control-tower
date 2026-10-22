@@ -66,7 +66,7 @@ function humanAccountLine(id,c){
  bits.push(source);
  bits.push(`기준 ${basis}`);
  if(fresh.kind!=='good')bits.push(fresh.text);
- bits.push(day==null?'오늘손익 산정 대기':`오늘손익 ${signed(day)}`);
+ if(day!=null)bits.push(`오늘손익 ${signed(day)}`);else if(!c.holding_price_effect?.known_count)bits.push('전체 손익 대사 중');
  if(['ISA','PENSION','IRP'].includes(id)&&n(c.net_flow)!=null)bits.push(`순입출금 ${signed(c.net_flow)}`);
  return {html:bits.join(' · '),kind};
 }

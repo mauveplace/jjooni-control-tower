@@ -96,7 +96,7 @@ html.ctStableTabletV37 #accountDrillModal{grid-template-columns:minmax(0,1fr)!im
 const CONTENT_FONT_FLOOR_PX=16;
 let fontFloorTimer=0;
 function enforceContentFontFloor(){
- if(!isTablet())return 0;
+ if(!isTablet()||document.documentElement.dataset.ctLayout==='mobile-first')return 0;
  const roots=[q('.app'),q('#accountDrillModal'),q('#metricInfoModal')].filter(Boolean);
  if(!roots.length)roots.push(document.body);
  let changed=0;
@@ -140,7 +140,7 @@ function forceTab(name){
 }
 function apply(){
  const html=document.documentElement,on=isTablet();
- html.classList.toggle('ctStableTabletV37',on);
+ html.classList.toggle('ctStableTabletV37',on&&html.dataset.ctLayout!=='mobile-first');
  if(!on){S.state='INACTIVE_NON_TABLET';return}
  ensureStyle();
  enforceContentFontFloor();scheduleContentFontFloor(120);

@@ -10,7 +10,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   await page.addScriptTag({content:code});
   await page.evaluate(()=>window.testNav.lockNavigation());
   const visible=await page.locator('.tabs .tab:visible').evaluateAll(xs=>xs.map(x=>x.dataset.tab));
-  assert.deepEqual(visible,width<1200?['overview','portfolio','accounts','tripod']:keys.filter(k=>k!=='ai'));
+  assert.deepEqual(visible,['overview','portfolio','accounts','tripod']);
   assert.equal(await page.locator('[data-tab="ai"]').count(),0);
   assert.deepEqual(await page.locator('#ctMoreMenu button').evaluateAll(xs=>xs.map(x=>x.dataset.tab)),['compare','decisions','trades','quality','consultant','watchlist']);
   await page.evaluate(()=>document.querySelector('.tab[data-tab="tripod"]').style.setProperty('display','none','important'));

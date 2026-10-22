@@ -23,11 +23,12 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
   await new Promise(r=>setTimeout(r,1600));observer.disconnect();
   return {writes,sameBold:bold===note.querySelector('b'),topDelta:Math.abs(top-note.getBoundingClientRect().top),font:parseFloat(getComputedStyle(note.querySelector('b')).fontSize)};
  });
- assert.equal(stability.writes,0,'unchanged Toss note must settle with typography: '+JSON.stringify(stability));assert(stability.sameBold);assert(stability.font>=16);
+ await page.evaluate(()=>{const c=document.querySelector('#overviewAccounts .ctAcct'),d=document.createElement('section');d.className='ctStrategySleeve';d.id='navIsolation';d.innerHTML='<strong>₩90,000,000</strong>';c.append(d)});await page.waitForTimeout(250);assert.equal(await page.locator('#navIsolation strong').innerText(),'₩90,000,000','NAV correction must never rewrite strategy cost or value');await page.locator('#navIsolation').evaluate(e=>e.remove());
+ assert.equal(stability.writes,0,'unchanged Toss note must settle with typography: '+JSON.stringify(stability));assert(stability.sameBold);assert(stability.font>=12&&stability.font<=16);
  assert.equal(await page.locator('#ctSideAI').count(),0);assert.equal(await page.locator('.footer').isVisible(),false);assert.match(await page.locator('#overviewAccounts .ctAcctStats').first().innerText(),/\+0.10%/,'30-day runtime cannot rewrite today return');
  const geo=await page.evaluate(()=>({w:innerWidth,scroll:document.documentElement.scrollWidth,app:document.querySelector('.app').getBoundingClientRect().toJSON(),tabs:document.querySelector('.tabs').getBoundingClientRect().toJSON()}));
- assert(geo.scroll<=geo.w+1,JSON.stringify(geo));if(width>=1363)assert(geo.app.x>=geo.tabs.right,JSON.stringify(geo));else assert.equal(geo.app.x,0);
- if(width<1363){assert.equal(await page.locator('.tabs>.tab:visible').count(),4);await page.getByRole('button',{name:'더보기',exact:true}).click();assert(await page.locator('#ctMoreMenu').isVisible());await page.locator('#ctMoreMenu button[data-tab="compare"]').click();assert(!(await page.locator('#ctMoreMenu').isVisible()));}else await page.locator('.tabs [data-tab="compare"]').click();
+ assert(geo.scroll<=geo.w+1,JSON.stringify(geo));assert.equal(geo.app.x,0);assert(geo.tabs.y>=0&&geo.tabs.bottom<250,'navigation must be at the top: '+JSON.stringify(geo));
+ if(true){assert.equal(await page.locator('.tabs>.tab:visible').count(),4);await page.getByRole('button',{name:'더보기',exact:true}).click();assert(await page.locator('#ctMoreMenu').isVisible());await page.locator('#ctMoreMenu button[data-tab="compare"]').click();assert(!(await page.locator('#ctMoreMenu').isVisible()));}else await page.locator('.tabs [data-tab="compare"]').click();
  await page.waitForTimeout(160);assert.match(await page.locator('.brand').innerText(),/성과분석/);assert.match(await page.locator('#ctCurrentPerformance').innerText(),/₩4,000/);assert(!(await page.locator('#panel-compare').innerText()).includes('9999'));
  await page.locator('.tabs [data-tab="accounts"]').press('Enter');await page.waitForTimeout(140);assert.equal(await page.locator('#ctDesktopAccountsV8 .ctA8Card:visible').count(),4);assert.equal(await page.locator('#panel-accounts .legacy').isVisible(),false);await page.locator('#ctDesktopAccountsV8 .ctAccountHoldings summary').first().click();assert.match(await page.locator('#ctDesktopAccountsV8 .ctAccountHoldings').first().innerText(),/TQQQ/);assert(await page.locator('#ctDesktopAccountsV8 .ctAccountHoldingRows').first().isVisible());
  const holding=page.locator('#ctDesktopAccountsV8 .ctHoldingDetail').first();await holding.locator('summary').click();
@@ -48,16 +49,16 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  for(const id of ['overview','portfolio','accounts','tripod','compare','decisions','trades','quality','watchlist','consultant']){
   await page.evaluate(id=>document.querySelector('.tabs [data-tab="'+id+'"]').click(),id);
   await page.waitForTimeout(320);
-  const small=await page.evaluate(()=>Array.from(document.querySelectorAll('.tabPanel.on *')).filter(e=>e.getClientRects().length&&!['STYLE','SCRIPT'].includes(e.tagName)&&Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim())&&parseFloat(getComputedStyle(e).fontSize)<13.9).map(e=>e.tagName+':'+e.className));
+  const small=await page.evaluate(()=>Array.from(document.querySelectorAll('.tabPanel.on *')).filter(e=>e.getClientRects().length&&!['STYLE','SCRIPT'].includes(e.tagName)&&Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim())&&parseFloat(getComputedStyle(e).fontSize)<11.9).map(e=>e.tagName+':'+e.className));
   assert.deepEqual(small,[],id+' has unreadable text at '+width);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),id+' body overflow at '+width);
  }
  await page.evaluate(()=>{const dialog=document.createElement('section');dialog.id='syntheticDetail';dialog.setAttribute('role','dialog');dialog.innerHTML='<p style="font-size:10px">Late detail text</p><small style="font-size:9px">Metadata</small><strong style="font-size:32px">Large KPI</strong>';document.body.append(dialog)});
  await page.waitForTimeout(320);
- const detailFonts=await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));assert(detailFonts[0]>=16);assert(detailFonts[1]>=14);assert.equal(detailFonts[2],32);
+ const detailFonts=await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));assert(detailFonts[0]>=14);assert(detailFonts[1]>=12);assert.equal(detailFonts[2],32);
  await page.locator('#syntheticDetail').evaluate(e=>e.remove());
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
- assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
+ assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),17);
  // A profitable day must coexist with a loss since the confirmed deposit.
  await page.evaluate(()=>{const a=window.__JJOONI_CANONICAL_SSOT.accounts;Object.assign(a.ISA,{nav:54422276,principal:60000000,today_pnl:1515800,today_return:2.87,pnl:999999});Object.assign(a.PENSION,{nav:42221980,principal:38517414,today_pnl:820000,today_return:1.98});document.dispatchEvent(new Event('jjooni:live-applied'))});
  await page.waitForTimeout(220);

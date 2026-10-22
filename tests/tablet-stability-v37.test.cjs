@@ -51,7 +51,7 @@ test('tablet account drilldown stays single-surface and readable',()=>{
 });
 
 test('tablet readability and navigation guard is loaded',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.10/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.11-compact/);
   assert.match(guard,/ctStableTabletV37/);
   assert.match(guard,/font-size:20px!important/);
   assert.match(guard,/font-size:16px!important/);
@@ -66,9 +66,9 @@ test('tablet account cards use tiered text and width-based columns from the shar
   const css=fs.readFileSync('responsive-layout.css','utf8');
   assert.match(guard,/Account-card typography authority lives in responsive-layout/);
   assert.doesNotMatch(guard,/\.ctAcct \*\{font-size:18pt/);
-  assert.match(css,/auto-fit,minmax\(min\(100%,340px\),1fr\)/);
-  assert.match(css,/\.ctAcctNav\{font-size:28px/);
-  assert.match(css,/\.ctSleeveHead strong\{font-size:24px/);
+  assert.match(css,/auto-fit,minmax\(min\(100%,300px\),1fr\)/);
+  assert.match(css,/\.ctAcctNav\{font-size:23px/);
+  assert.match(css,/\.ctSleeveHead strong\{font-size:20px/);
   assert.doesNotMatch(loader,/account-card-readability-v44/);
 });
 
@@ -87,7 +87,7 @@ test('tablet detail modal and account charts are not phone-sized',()=>{
 
 
 test('last-loaded tablet authority preserves pt-sized modal text',()=>{
-  assert.match(loader,/tablet-stability-v37\.js\?v=37\.10/);
+  assert.match(loader,/tablet-stability-v37\.js\?v=37\.11-compact/);
   assert.match(guard,/#accountDrillModal :is\(\.label,\.v2Label,\[class\*=\"Label\"\]\)\{font-size:16pt!important/);
   assert.match(guard,/#accountDrillModal :is\(\.value,\.v2Value,\[class\*=\"Value\"\]\)\{font-size:22pt!important/);
   assert.match(guard,/#accountDrillModal :is\(td,th,li,p,small\)\{font-size:16pt!important/);

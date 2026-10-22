@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 
-const VERSION='43.2';
+const VERSION='43.3';
 const num=v=>{
  if(v===null||v===undefined||v===''||typeof v==='boolean'||typeof v==='object')return null;
  const x=Number(String(v).replace(/,/g,'').replace(/₩/g,'').replace(/원/g,'').trim());
@@ -59,15 +59,15 @@ function writeNote(note,html){
  note.dataset.tossBasisContent=html;
 }
 function patchCurrentCard(card,nav){
- const hit=maxWonLeaf(card);
- if(hit&&Math.abs(hit.v-nav)>0.5){hit.e.textContent=won(nav);hit.e.dataset.tossCanonicalNavV43='1'}
+ const target=q('.ctAcctNav',card);
+ if(target&&parseWonText(target.textContent)!==nav){target.textContent=won(nav);target.dataset.tossCanonicalNavV43='1'}
  qa('div,span,small,b,strong',card).filter(leaf).forEach(e=>{
   const t=norm(e.textContent);
   if(/30거래일\s*Flow-adjusted\s*누적수익률/i.test(t))e.textContent='30D Flow-adjusted 운용수익률';
  });
  let note=q('.ctTossBasisNoteV43',card);
  if(!note){note=document.createElement('div');note.className='ctTossBasisNoteV43';card.appendChild(note)}
- writeNote(note,'<b>Toss 현재 NAV</b> · CT Overview 계좌별 Canonical NAV 기준');
+ writeNote(note,'<b>토스 전체 계좌</b> · TRI-POD 포함');
  S.patched_current++;
 }
 

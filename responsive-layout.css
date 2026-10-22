@@ -1,18 +1,18 @@
 /* One mobile-first layout contract. Loaded by ui-refactor after sign-in. */
 html[data-ct-layout="mobile-first"] body{display:block!important;min-width:0;color:#172b45;background:#f4f7fb}
-html[data-ct-layout="mobile-first"] body .app{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:0 14px calc(90px + env(safe-area-inset-bottom))!important;overflow-x:clip!important}
+html[data-ct-layout="mobile-first"] body .app{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:0 14px 24px!important;overflow-x:clip!important}
 html[data-ct-layout="mobile-first"] body .top{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:8px!important;height:auto!important;min-height:76px!important;width:auto!important;margin:0 -14px 10px!important;padding:14px!important;background:#071a33!important;isolation:isolate!important}
 html[data-ct-layout="mobile-first"] body .top:before{display:none!important}
 html[data-ct-layout="mobile-first"] body .brand{position:static!important;transform:none!important;display:block!important;max-width:100%;font-size:20px!important;line-height:1.3!important;color:#fff!important;white-space:normal!important}
 html[data-ct-layout="mobile-first"] body .brand:after{display:none!important}
 html[data-ct-layout="mobile-first"] body #ctProducerFreshnessBadge{position:static!important;transform:none!important;margin:0!important;padding:0!important;max-width:100%!important;white-space:normal!important;box-shadow:none!important;background:transparent!important;border:0!important;color:#c7d8ee!important;font-size:12px!important;line-height:1.5!important}
 html[data-ct-layout="mobile-first"] body #ctEncryptedLiveBadge,html[data-ct-layout="mobile-first"] body #ctSideAI,html[data-ct-layout="mobile-first"] body .top>.live{display:none!important}
-html[data-ct-layout="mobile-first"] body .tabs{position:fixed!important;inset:auto 0 0!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;width:100%!important;height:auto!important;min-height:68px!important;padding:6px 5px calc(6px + env(safe-area-inset-bottom))!important;margin:0!important;overflow:visible!important;background:#071a33!important;z-index:100000!important}
+html[data-ct-layout="mobile-first"] body .tabs{position:sticky!important;inset:0 auto auto!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;width:100%!important;height:auto!important;min-height:52px!important;padding:4px 5px!important;margin:0 0 12px!important;overflow:visible!important;background:#071a33!important;z-index:100000!important}
 html[data-ct-layout="mobile-first"] body .tabs:before,html[data-ct-layout="mobile-first"] body .tabs:after{display:none!important}
 html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab]{display:none!important}
 html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"],html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{display:flex!important;align-items:center!important;justify-content:center!important;position:static!important;flex:none!important;min-width:0!important;width:auto!important;min-height:48px!important;height:auto!important;padding:8px 3px!important;font-size:12px!important;line-height:1.3!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#bccce0!important;white-space:normal!important;text-align:center!important;cursor:pointer}
 html[data-ct-layout="mobile-first"] body .tabs>.tab.on,html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab[aria-expanded="true"]{background:#163c68!important;color:#fff!important}
-html[data-ct-layout="mobile-first"] body #ctMoreMenu{position:fixed!important;inset:auto 12px calc(82px + env(safe-area-inset-bottom))!important;display:none!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:14px!important;margin:0!important;max-height:65dvh!important;overflow:auto!important;border:1px solid #355775!important;border-radius:16px!important;background:#071a33!important;box-shadow:0 12px 50px #0004!important;z-index:100010!important}
+html[data-ct-layout="mobile-first"] body #ctMoreMenu{position:fixed!important;inset:var(--ct-nav-menu-top,64px) 12px auto!important;display:none!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:14px!important;margin:0!important;max-height:65dvh!important;overflow:auto!important;border:1px solid #355775!important;border-radius:16px!important;background:#071a33!important;box-shadow:0 12px 50px #0004!important;z-index:100010!important}
 html[data-ct-layout="mobile-first"] body #ctMoreMenu.open{display:grid!important}
 html[data-ct-layout="mobile-first"] body #ctMoreMenu button{min-height:48px!important;font-size:14px!important;line-height:1.4!important;padding:10px!important;background:#12375d!important;color:#fff!important;border:1px solid #355775!important;border-radius:10px!important}
 html[data-ct-layout="mobile-first"] body :is(button,select,input,[role="button"],summary){touch-action:manipulation}
@@ -80,15 +80,7 @@ html[data-ct-layout="mobile-first"] body :is(.sbTableWrap,.ctFxTableWrap){max-wi
  html[data-ct-layout="mobile-first"] body .ctO26Row{grid-template-columns:minmax(0,1.4fr) 1fr 1fr!important}
  html[data-ct-layout="mobile-first"] body .ctO26Identity{grid-column:auto!important}
 }
-@media(min-width:1200px) and (hover:hover) and (pointer:fine){
- html[data-ct-layout="mobile-first"] body .app{margin-left:200px!important;width:calc(100% - 200px)!important;padding-bottom:32px!important}
- html[data-ct-layout="mobile-first"] body .tabs{inset:0 auto 0 0!important;display:flex!important;flex-direction:column!important;gap:6px!important;width:200px!important;height:100dvh!important;padding:100px 14px 24px!important;overflow-y:auto!important;min-height:0!important}
- html[data-ct-layout="mobile-first"] body .tabs:before{display:block!important;content:'CONTROL TOWER'!important;position:absolute!important;left:20px!important;top:30px!important;font-size:19px!important;line-height:1.2!important;color:#fff!important}
- html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab]{display:flex!important;justify-content:flex-start!important;min-height:44px!important;font-size:14px!important;padding:10px 12px!important;color:#bccce0!important;cursor:pointer}
- html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab,html[data-ct-layout="mobile-first"] body #ctMoreMenu{display:none!important}
- html[data-ct-layout="mobile-first"] body .ctOvHero{grid-template-columns:repeat(4,minmax(0,1fr))!important}
- html[data-ct-layout="mobile-first"] body .ctOvHero .ctOvPrimary{grid-column:1/-1!important}
-}
+
 html[data-ct-layout="mobile-first"] body .ctWlRow{grid-template-columns:22px minmax(0,1fr) 86px 70px!important;gap:8px!important;padding:14px 10px!important;font-size:13px!important}
 html[data-ct-layout="mobile-first"] body .ctWlName{font-size:14px!important;line-height:1.4!important;white-space:normal!important}
 html[data-ct-layout="mobile-first"] body :is(.ctWlTicker,.ctWlTag,.ctWlMeta){font-size:12px!important;line-height:1.5!important}
@@ -127,14 +119,14 @@ html[data-ct-layout="mobile-first"] body :is(.sbTableWrap,.ctMetricTableWrap){ma
 }
 
 /* Phone and touch tablet share one layout owner; rotate without switching nav. */
-html[data-ct-layout="mobile-first"] body :is(.ctOvAccounts,.ctA8Grid,.ctCommonAccountGrid,.sbAccountCards){grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))!important;align-items:start}
+html[data-ct-layout="mobile-first"] body :is(.ctOvAccounts,.ctA8Grid,.ctCommonAccountGrid,.sbAccountCards){grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))!important;align-items:start}
 html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct{min-height:0!important}
 html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct :is(p,small,.ctSleeveNote,.ctHumanAccountLineV6){font-size:14px!important;line-height:1.5!important}
 html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct :is(.ctAcctName,.ctSleeveHead b){font-size:18px!important;line-height:1.4!important}
-html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct .ctAcctNav{font-size:28px!important;line-height:1.3!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct .ctAcctNav{font-size:23px!important;line-height:1.3!important}
 html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct .ctAcctStats{font-size:16px!important}
 html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct .ctAcctStats :is(span,b){font-size:16px!important}
-html[data-ct-layout="mobile-first"] body #overviewAccounts .ctSleeveHead strong{font-size:24px!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctSleeveHead strong{font-size:20px!important}
 html[data-ct-layout="mobile-first"] body .ctSleeveDisclosure>summary{font-size:14px!important;min-height:44px;display:flex;align-items:center;cursor:pointer;color:#24598b}
 html[data-ct-layout="mobile-first"] body .ctSleeveDisclosure[open]>summary{font-weight:800}
 html[data-ct-layout="mobile-first"] body .ctHoldingMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:12px;background:#f4f7fb;border-radius:10px}
@@ -146,8 +138,8 @@ html[data-ct-layout="mobile-first"] body .ctHoldingDetail>summary small{grid-col
 html[data-ct-layout="mobile-first"] body .ctHoldingDetail>summary b{font-size:16px!important;overflow-wrap:anywhere}
 html[data-ct-layout="mobile-first"] body .ctHoldingDetail>summary strong{font-size:18px!important;white-space:nowrap}
 @media(pointer:coarse){
- html[data-ct-layout="mobile-first"] body .app{margin-left:0!important;width:100%!important;padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}
- html[data-ct-layout="mobile-first"] body .tabs{inset:auto 0 0!important;width:100%!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}
+ html[data-ct-layout="mobile-first"] body .app{margin-left:0!important;width:100%!important;padding-bottom:24px!important}
+ html[data-ct-layout="mobile-first"] body .tabs{inset:0 auto auto!important;width:100%!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}
  html[data-ct-layout="mobile-first"] body :is(button,select,input,summary){min-height:48px}
 }
 @media(max-width:599px){
@@ -156,3 +148,41 @@ html[data-ct-layout="mobile-first"] body .ctHoldingDetail>summary strong{font-si
  html[data-ct-layout="mobile-first"] body .ctA8Line>b{margin-left:auto;font-size:18px!important}
  html[data-ct-layout="mobile-first"] body .ctSleeveAmounts{display:grid;grid-template-columns:1fr;gap:3px}
 }
+
+/* Compact hierarchy: navigation stays above content on phone and tablet. */
+html[data-ct-layout="mobile-first"] body{font-size:14px!important;line-height:1.45}
+html[data-ct-layout="mobile-first"] body .app{margin-left:0!important;width:100%!important;padding-bottom:24px!important}
+html[data-ct-layout="mobile-first"] body .tabs{position:sticky!important;top:0!important;bottom:auto!important;left:auto!important;right:auto!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;height:auto!important;min-height:52px!important;padding:4px!important;gap:3px!important;margin:0 0 12px!important;box-shadow:0 3px 10px #071a3314}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab]{display:none!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"],html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{display:flex!important;min-height:44px!important;font-size:13px!important;padding:6px 3px!important}
+html[data-ct-layout="mobile-first"] body #ctMoreMenu{inset:var(--ct-nav-menu-top,64px) 12px auto!important;max-height:65dvh!important}
+html[data-ct-layout="mobile-first"] body .top{min-height:58px!important;padding-top:10px!important;padding-bottom:10px!important;gap:4px!important;margin-bottom:0!important}
+html[data-ct-layout="mobile-first"] body .brand{font-size:18px!important}
+html[data-ct-layout="mobile-first"] body :is(.card,.ctA8Card,.ctCommonView){padding:12px!important}
+html[data-ct-layout="mobile-first"] body :is(.ctOvHeroCell,#overviewAccounts .ctAcct){padding:12px!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct :is(.ctAcctName,.ctSleeveHead b){font-size:15px!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct .ctAcctNav{font-size:23px!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct :is(.ctAcctStats,.ctAcctStats span,.ctAcctStats b){font-size:14px!important}
+html[data-ct-layout="mobile-first"] body #overviewAccounts .ctAcct :is(p,small,.ctHumanAccountLineV6,.ctSleeveNote){font-size:12px!important;line-height:1.45!important}
+html[data-ct-layout="mobile-first"] body .ctStrategySleeve{padding:10px!important;margin-top:8px!important;font-size:13px!important}
+html[data-ct-layout="mobile-first"] body .ctStrategySleeve .ctSleeveHead strong{font-size:20px!important}
+html[data-ct-layout="mobile-first"] body .ctStrategySleeve .ctSleeveAmounts{font-size:13px!important;gap:3px 10px!important}
+html[data-ct-layout="mobile-first"] body :is(.ctCommonLine,.ctA8Line){padding-top:8px!important;padding-bottom:8px!important;line-height:1.45!important}
+html[data-ct-layout="mobile-first"] body .ctCommonLine>span{font-size:14px!important}
+html[data-ct-layout="mobile-first"] body .ctCommonLine small{font-size:12px!important}
+html[data-ct-layout="mobile-first"] body .ctCommonLine>b{font-size:17px!important}
+html[data-ct-layout="mobile-first"] body .ctPerformanceDay{font-size:14px!important}
+html[data-ct-layout="mobile-first"] body .ctPerformanceDay :is(small,p){font-size:12px!important}
+html[data-ct-layout="mobile-first"] body .ctA8Nav{font-size:23px!important}
+html[data-ct-layout="mobile-first"] body :is(#accountDrillModal,#positionDrillModal,#metricInfoModal,[role="dialog"]) :is(p,li,td,th){font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body :is(#accountDrillModal,#positionDrillModal,#metricInfoModal,[role="dialog"]) :is(small,.label,.v2Label){font-size:12px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body :is(#accountDrillModal,#positionDrillModal,#metricInfoModal,[role="dialog"]) .v2Kpi{min-height:80px!important;padding:12px!important}
+html[data-ct-layout="mobile-first"] body :is(#accountDrillModal,#positionDrillModal) :is(.value,.v2Value){font-size:22px!important}
+@media(min-width:768px){html[data-ct-layout="mobile-first"] body .tabs{grid-template-columns:repeat(5,minmax(0,1fr))!important}html[data-ct-layout="mobile-first"] body #ctCanonicalMovers .ctCommonLine>span{flex-basis:auto}}
+
+html[data-ct-layout="mobile-first"] body .sbHeroReturn{font-size:28px!important}
+html[data-ct-layout="mobile-first"] body :is(.ctStrategyBooks h3,.ctCommonView h3,.ctA8Name){font-size:16px!important}
+html[data-ct-layout="mobile-first"] body :is(.sbCardHead strong,.sbMetric b,.ctPerformanceDayMetric strong){font-size:22px!important}
+
+html[data-ct-layout="mobile-first"] body .tabs{z-index:100050!important}
+html[data-ct-layout="mobile-first"] body #ctMoreMenu{z-index:100060!important}
