@@ -193,6 +193,8 @@ function coverageText(id){
   if(CURVE_IDS.has(id))return curveDeltaText(id);
   const range=active[id]||'5Y',f=filtered(r.labels,r.sets,range);
   if(!f.labels.length)return'';
+  const view=window.ObsIndexExplorer?.prepare(id,f.labels,f.sets);
+  if(view?.note)return `${range} · ${view.note} · ${view.labels.length.toLocaleString()}pt`;
   const first=f.labels[0],last=f.labels[f.labels.length-1];
   const suffix=historyState==='loading'?' · 장기이력 로딩중':historyState==='error'&&LONG_RANGES.has(range)?' · 장기이력 재시도 필요':'';
   return `${range} 표시 ${first} → ${last} · ${f.labels.length.toLocaleString()}pt${suffix}`;
@@ -251,8 +253,7 @@ function draw(id,labels,sets){
   charts[id]=new Chart(c,chartConfig(f.labels,f.sets,range,id));
   ensureToolbar(id);refreshCoverage(id);
   window.ObsIndexExplorer?.attach(id);
-  const view=window.ObsIndexExplorer?.prepare(id,f.labels,f.sets);
-  if(view?.note){const cov=document.querySelector(`[data-coverage="${id}"]`);if(cov)cov.textContent=view.note;}
+
 }
 function redraw(id){const r=RAW[id];if(r)draw(id,r.labels,r.sets)}
 window.__obsIndexBridge={redraw};
