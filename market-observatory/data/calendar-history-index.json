@@ -83,7 +83,7 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-22T09:36:06+09:00",
+  "generated_kst": "2026-10-22T16:15:00+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37788,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
@@ -13052,9 +13052,9 @@
       "event_title": "한국은행 통화정책방향 결정회의",
       "kind": "event",
       "label": "한국은행 통화정책방향 결정회의",
-      "path": "./calendar-history/series/b95df7cc4a4ca584cd90dda816cb1eb40c6d5e50e53d73ef5336fc8dc80faaf6.json",
+      "path": "./calendar-history/series/d988f76eaaabf5931854175a02414954548d1c61899678fbeb2a500613a7b4eb.json",
       "quality": {
-        "actual_count": 6,
+        "actual_count": 7,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -13065,7 +13065,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::한국은행-통화정책방향-결정회의",
-      "sha256": "b95df7cc4a4ca584cd90dda816cb1eb40c6d5e50e53d73ef5336fc8dc80faaf6"
+      "sha256": "d988f76eaaabf5931854175a02414954548d1c61899678fbeb2a500613a7b4eb"
     },
     "KR::한국은행-통화정책방향-결정회의::bok_base_rate": {
       "available_from": "2026-01-15",
@@ -13077,9 +13077,9 @@
       "kind": "metric",
       "label": "한국은행 기준금리",
       "metric_key": "bok_base_rate",
-      "path": "./calendar-history/series/a4c54e402cd70eb2d6be5eb3c19ebd1aa1b871a851aaa04041090e1afcea0282.json",
+      "path": "./calendar-history/series/df5719c8f8039bcd28dfa04412a4e33e7067f44ec7bce8817cf99c7fce729d5c.json",
       "quality": {
-        "actual_count": 6,
+        "actual_count": 7,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -13090,7 +13090,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::한국은행-통화정책방향-결정회의::bok_base_rate",
-      "sha256": "a4c54e402cd70eb2d6be5eb3c19ebd1aa1b871a851aaa04041090e1afcea0282"
+      "sha256": "df5719c8f8039bcd28dfa04412a4e33e7067f44ec7bce8817cf99c7fce729d5c"
     },
     "US::consumer-price-index": {
       "available_from": "2026-01-13",
@@ -14532,7 +14532,7 @@
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "event",
       "label": "U.S. Initial Jobless Claims",
-      "path": "./calendar-history/series/f66aa5c2c93c065951536c10182b1dda84d3f5841a7240a950692640772d72f5.json",
+      "path": "./calendar-history/series/ac42e2b1f54f505f46375065df3d175fd43d241b8b57b1d8babf6dedf0cbbadf.json",
       "quality": {
         "actual_count": 8,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -14545,7 +14545,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims",
-      "sha256": "f66aa5c2c93c065951536c10182b1dda84d3f5841a7240a950692640772d72f5"
+      "sha256": "ac42e2b1f54f505f46375065df3d175fd43d241b8b57b1d8babf6dedf0cbbadf"
     },
     "US::u-s-initial-jobless-claims::initial_claims": {
       "available_from": "2016-10-27",
@@ -14557,7 +14557,7 @@
       "kind": "metric",
       "label": "Initial Jobless Claims",
       "metric_key": "initial_claims",
-      "path": "./calendar-history/series/40ea6447500e6c9a116c74a4faa9a187c48d944c9cca4662cb4435c852c4986c.json",
+      "path": "./calendar-history/series/707e334afa34c88d5c4d25d15a1b667392f4159a348177bee35e1fdc05c39046.json",
       "quality": {
         "actual_count": 517,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -14580,7 +14580,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims::initial_claims",
-      "sha256": "40ea6447500e6c9a116c74a4faa9a187c48d944c9cca4662cb4435c852c4986c"
+      "sha256": "707e334afa34c88d5c4d25d15a1b667392f4159a348177bee35e1fdc05c39046"
     },
     "US::u-s-international-trade-in-goods-and-services": {
       "available_from": "2026-10-06",
@@ -14728,8 +14728,8 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 433,
-  "snapshot_id": "25e674d84fa048764c7cce300755c0aa318d68f339dd6f86549806ba95d1e2f9",
-  "source_sha256": "25e674d84fa048764c7cce300755c0aa318d68f339dd6f86549806ba95d1e2f9",
+  "snapshot_id": "d021f37940dcb47deabd26da8b4ec8cde95a9fa5c1f627e0c8d8c3ec25183337",
+  "source_sha256": "d021f37940dcb47deabd26da8b4ec8cde95a9fa5c1f627e0c8d8c3ec25183337",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
   "window_end": "2026-10-22",
