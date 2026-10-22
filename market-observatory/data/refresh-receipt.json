@@ -1,24 +1,20 @@
 {
   "schema": "JJOONI_OBSERVATORY_REFRESH_RECEIPT_V1",
-  "run_id": "39791426344",
+  "run_id": "39833414521",
   "event": "schedule",
-  "generated_kst": "2026-10-22T22:58:15+09:00",
+  "generated_kst": "2026-10-23T03:41:15+09:00",
   "sources": {
     "market": "success",
-    "kr_rates": "failure",
+    "kr_rates": "success",
     "fedwatch": "success",
     "sector": "success",
     "us_rates_intraday": "success"
   },
   "quality": {
     "publication": "PASS",
-    "source_health": "DEGRADED",
-    "degraded_sources": {
-      "kr_rates": "STALE"
-    },
-    "collector_failures": {
-      "kr_rates": "failure"
-    },
-    "warning_count": 1
+    "source_health": "LIVE",
+    "degraded_sources": {},
+    "collector_failures": {},
+    "warning_count": 0
   }
 }
