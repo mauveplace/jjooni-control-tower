@@ -54,7 +54,7 @@ test('UI module optimization preloads downloads but preserves sequential executi
 
 test('verified UI loader cache-busts the NAV race-fixed mobile runtime',()=>{
   const loader=read('trade-review-loader.js');
-  assert.match(loader,/mobile-stability-v4\.js\?v=4\.5/);
+  assert.match(loader,/mobile-stability-v4\.js\?v=4\.6-holdings/);
   assert.match(loader,/version:'14\.36'/);
 });
 

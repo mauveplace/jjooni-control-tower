@@ -28,6 +28,6 @@ test('source daily return with opposite sign to canonical PnL is rejected and re
 test('misleading zero price FX legacy cards are hidden and v27 is loaded by verified daily module chain',()=>{
   assert.match(src,/종목별 주가·환율 기여도/);
   assert.match(src,/종목 기준 당일 가격효과/);
-  assert.match(alias,/daily-pnl-attribution-v27\.js\?v=27\.5-close-day/);
+  assert.match(alias,/daily-pnl-attribution-v27\.js\?v=27\.6-holdings/);
   assert.match(alias,/__JJOONI_DAILY_PNL_ATTR_LOADER_V27/);
 });

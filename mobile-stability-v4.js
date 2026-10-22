@@ -68,8 +68,9 @@ function updateNetSummary(){
  const producerNav=trustedFiveNavV44(L),producerSource=String(L.total_nav_source||'');
  const canonicalNav=n(C.total&&C.total.nav);
  const nav=producerNav!=null?producerNav:canonicalNav;
- const pnl=n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
- const html=`<div class="ctNetLabel">총자산${count!=null?' · '+count+'계좌':''}</div><div class="ctNetValue">${nav==null?'—':won(nav)}</div><div class="ctNetMeta">오늘 투자손익 ${pnl==null?'—':signed(pnl)}</div>`;
+ const pe=C.performance_day?.price_effect,priceOnly=n(C.total?.today_pnl)==null&&pe?.known_count>0&&n(pe.known_subtotal_krw)!=null;
+ const pnl=priceOnly?n(pe.known_subtotal_krw):n(C.total&&C.total.today_pnl),count=n(C.total&&C.total.account_count);
+ const html=`<div class="ctNetLabel">총자산${count!=null?' · '+count+'계좌':''}</div><div class="ctNetValue">${nav==null?'—':won(nav)}</div><div class="ctNetMeta">${priceOnly?'보유 가격변동 ('+pe.known_count+'/'+pe.position_count+'종목)':'오늘 투자손익'} ${pnl==null?'—':signed(pnl)}</div>`;
  if(box.innerHTML!==html)box.innerHTML=html;
  box.dataset.navAuthority=producerNav!=null?'PRODUCER_'+producerSource:'CANONICAL_FALLBACK';
 }

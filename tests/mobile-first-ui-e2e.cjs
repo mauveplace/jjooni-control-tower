@@ -86,5 +86,10 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  await closeDay.locator('summary').click();assert.equal(await closeDay.locator('.ctPerformanceDayAccounts article:visible').count(),4);
  assert.match(await closeDay.locator('.ctPerformanceDayReference').first().innerText(),/12,345/);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'close day overflows at '+width);
+ await page.evaluate(()=>{const L=window.__JJOONI_LIVE_PAYLOAD,C=window.__JJOONI_CANONICAL_SSOT,e={state:'PARTIAL',known_count:1,position_count:2,known_subtotal_krw:260000,return_pct:2,positions:[{ticker:'TQQQ',name:'TQQQ',qty:100,currency:'USD',baseline_price:100,current_price:102,baseline_session_date:'2026-10-21',price_effect_krw:260000}]};L.performance_day.price_effect={schema:'CT_CURRENT_HOLDINGS_PRICE_EFFECT_V1',snapshot_id:L.snapshot_id,start_kst:L.performance_day.start_kst,...e,accounts:{TOSS:e}};C.performance_day=L.performance_day;C.accounts.TOSS.holding_price_effect=e;document.dispatchEvent(new Event('jjooni:live-applied'))});
+ await page.waitForTimeout(250);
+ assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/보유종목 가격변동/);assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/260,000/);assert.match(await closeDay.innerText(),/1\/2종목/);
+ const priceDetails=closeDay.locator('[data-price-account="TOSS"]');await priceDetails.locator('summary').click();assert.match(await priceDetails.innerText(),/2026-10-21/);assert.match(await priceDetails.innerText(),/100 → 102/);
+ await page.evaluate(()=>document.dispatchEvent(new Event('jjooni:live-applied')));await page.waitForTimeout(250);assert(await priceDetails.getAttribute('open')!==null);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'price evidence overflow at '+width);
  await page.screenshot({path:'/tmp/ct-ui-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS mobile-first width='+width+' canonical=4000 missing=unknown fund=excluded nav=usable');await context.close();
 }await browser.close()})().catch(e=>{console.error(e);process.exit(1)});
