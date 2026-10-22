@@ -4,14 +4,14 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
  for(const width of [390,900,1363]){
   const page=await browser.newPage({viewport:{width,height:1000}});
   const keys=['overview','portfolio','accounts','tripod','compare','decisions','trades','quality','consultant','watchlist','ai'];
-  await page.setContent('<html data-ct-layout="mobile-first"><head><style>'+fs.readFileSync('responsive-layout.css','utf8')+'</style></head><body><nav class="tabs">'+keys.map(key=>'<button class="tab" data-tab="'+key+'" style="display:none!important">'+key+'</button>').join('')+'<button class="tab" data-tab="accounts" data-primary="1">duplicate</button><button id="ctMoreTab" style="display:none!important">더보기</button></nav><nav id="ctMoreMenu"></nav></body></html>');
+  await page.setContent('<html data-ct-layout="mobile-first"><head><style>'+fs.readFileSync('responsive-layout.css','utf8')+'</style></head><body><nav class="tabs"><div class="sideLabel">WATCHLIST</div>'+keys.map(key=>'<button class="tab" data-tab="'+key+'" style="display:none!important">'+key+'</button>').join('')+'<button class="tab" data-tab="accounts" data-primary="1">duplicate</button><button id="ctMoreTab" style="display:none!important">더보기</button></nav><nav id="ctMoreMenu"></nav></body></html>');
   let code=fs.readFileSync('trade-review-loader.js','utf8');
   code=code.slice(0,code.lastIndexOf('boot();'))+'window.testNav={canonicalizeNavigation,lockNavigation};})();';
   await page.addScriptTag({content:code});
   await page.evaluate(()=>window.testNav.lockNavigation());
   const visible=await page.locator('.tabs .tab:visible').evaluateAll(xs=>xs.map(x=>x.dataset.tab));
   assert.deepEqual(visible,['overview','portfolio','accounts','tripod']);
-  assert.equal(await page.locator('[data-tab="ai"]').count(),0);
+  assert.equal(await page.locator('[data-tab="ai"]').count(),0);assert.equal(await page.locator('.tabs .sideLabel').isVisible(),false);
   assert.deepEqual(await page.locator('#ctMoreMenu button').evaluateAll(xs=>xs.map(x=>x.dataset.tab)),['compare','decisions','trades','quality','consultant','watchlist']);
   await page.evaluate(()=>document.querySelector('.tab[data-tab="tripod"]').style.setProperty('display','none','important'));
   await page.waitForTimeout(150);
