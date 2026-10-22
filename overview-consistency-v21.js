@@ -86,6 +86,7 @@ function accountPeriods(stats,a){
 }
 function overviewCommon(){
  const panel=qs('#panel-overview');if(!panel)return;const {C,L,total,history}=commonModel();
+ if(L.performance_day){setText(qs('#ctPrevNav',panel),num(total.previous)!=null?money(total.previous):'마감 기준자산 확인 중');if(L.performance_day.price_effect?.known_count>0)setText(qs('#ctExtendedTotal',panel),'미국 정규장 마감 후 · 현재 보유수량 기준');if(num(total.day)==null)setText(qs('#ctBmState',panel),'계좌 수익률 대사 후 비교');}
  for(const e of qsa('.ctAcctSpark,.ctSparkHead',panel))e.hidden=history.historyStale;
  const dayHeading=qsa('h3',panel).find(e=>/^오늘 손익/.test(text(e)));let dayCard=qs('#ctCanonicalDailySummary',panel)||dayHeading?.closest('.card');
  if(!dayCard&&L.performance_day){dayCard=document.createElement('section');dayCard.className='card';dayCard.id='ctCanonicalDailySummary';const accounts=qs('#overviewAccounts',panel);if(accounts?.parentNode)accounts.parentNode.insertBefore(dayCard,accounts);else panel.prepend(dayCard)}
