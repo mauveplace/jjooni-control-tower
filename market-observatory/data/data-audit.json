@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-23T03:41:59+09:00",
-  "overall": "PASS",
-  "critical_count": 0,
-  "warning_count": 0,
+  "generated_kst": "2026-10-23T05:21:04+09:00",
+  "overall": "FAIL",
+  "critical_count": 1,
+  "warning_count": 3,
   "observatory_session": "2026-10-21",
   "file_status": {
     "observatory": {
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-23T00:03:30+09:00",
+      "generated_kst": "2026-10-23T05:20:58+09:00",
       "events": 185,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -66,10 +66,20 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-23T03:41:57+09:00",
-      "overall": "LIVE",
-      "critical_bad": [],
-      "warnings": []
+      "generated_kst": "2026-10-23T05:21:03+09:00",
+      "overall": "DEGRADED",
+      "critical_bad": [
+        "market",
+        "pulse",
+        "tripod",
+        "audit"
+      ],
+      "warnings": [
+        "market",
+        "crypto",
+        "pulse",
+        "tripod"
+      ]
     },
     "watchdog": {
       "checked_kst": "2026-10-22T08:11:47+09:00",
@@ -79,8 +89,8 @@
   },
   "groups": {
     "core_us": {
-      "state": "LIVE",
-      "anchor": "2026-10-21",
+      "state": "LAGGING",
+      "anchor": "2026-10-22",
       "allow_lag_days": 0,
       "critical": true,
       "items": {
@@ -449,7 +459,7 @@
       "latest_mismatch": []
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -509,21 +519,42 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-23T03:40:53+09:00",
-      "current_quote_age_seconds": 66,
+      "current_quote_age_seconds": 6011,
       "captured_quote_age_seconds": 7
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-23T03:40:55+09:00",
-      "current_quote_age_seconds": 64,
+      "current_quote_age_seconds": 6009,
       "captured_quote_age_seconds": 5
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_CORE_US_LAGGING",
+      "severity": "CRITICAL",
+      "detail": "anchor=2026-10-22 dates=NASDAQ100:2026-10-21,SP500:2026-10-21,VIX:2026-10-21"
+    },
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-22,ETHUSD:2026-10-22"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-23T03:40:53+09:00', 'current_quote_age_seconds': 6011, 'captured_quote_age_seconds': 7}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-23T03:40:55+09:00', 'current_quote_age_seconds': 6009, 'captured_quote_age_seconds': 5}"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",

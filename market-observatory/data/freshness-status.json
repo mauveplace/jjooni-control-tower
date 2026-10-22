@@ -1,12 +1,22 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-23T03:42:00+09:00",
-  "overall": "LIVE",
-  "critical_bad": [],
-  "warnings": [],
-  "watchdog_required": false,
+  "generated_kst": "2026-10-23T05:21:04+09:00",
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "market",
+    "pulse",
+    "tripod",
+    "audit"
+  ],
+  "warnings": [
+    "market",
+    "crypto",
+    "pulse",
+    "tripod"
+  ],
+  "watchdog_required": true,
   "session_alignment": {
-    "expected_session": "2026-10-21",
+    "expected_session": "2026-10-22",
     "source_session": "2026-10-21",
     "market_aligned": true,
     "observatory": "2026-10-21",
@@ -17,12 +27,12 @@
     "us_supplement_aligned": true,
     "kr_kospi": "2026-10-22",
     "kr_kosdaq": "2026-10-22",
-    "aligned": true
+    "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-23T02:34:17+09:00",
       "as_of": "2026-10-21",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
@@ -103,16 +113,16 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-23T03:41:00+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=66s · ETHUSD age=64s",
+      "detail": "BTCUSD age=6011s · ETHUSD age=6009s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-23T03:41:18+09:00",
       "as_of": "2026-10-21",
       "detail": "snapshot=FINAL · Observatory session=2026-10-21",
@@ -139,7 +149,7 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-23T03:41:18+09:00",
       "as_of": "2026-10-21",
       "detail": "상승 · TQQQ 100%",
@@ -167,18 +177,18 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-10-23T00:03:30+09:00",
-      "as_of": "2026-10-23T00:03:30+09:00",
+      "generated_kst": "2026-10-23T05:20:58+09:00",
+      "as_of": "2026-10-23T05:20:58+09:00",
       "detail": "events=185 · overdue=0 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-23T03:41:59+09:00",
+      "state": "FAIL",
+      "generated_kst": "2026-10-23T05:21:04+09:00",
       "as_of": "2026-10-21",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=1 · warnings=3",
       "source": "data-audit.json",
       "critical": true
     }
