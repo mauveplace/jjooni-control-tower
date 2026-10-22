@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-22T18:40:40+09:00",
+  "generated_kst": "2026-10-22T22:04:29+09:00",
   "overall": "LIVE",
   "critical_bad": [],
   "warnings": [],
@@ -23,7 +23,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:23:51+09:00",
+      "generated_kst": "2026-10-22T21:57:20+09:00",
       "as_of": "2026-10-21",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -77,7 +77,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:23:51+09:00",
+      "generated_kst": "2026-10-22T21:57:20+09:00",
       "as_of": "2026-10-21",
       "detail": "US3M 2026-10-21 · US2Y 2026-10-21 · US5Y_OFFICIAL 2026-10-21 · US10Y_OFFICIAL 2026-10-21 · US30Y_OFFICIAL 2026-10-21 · US_2S10S 2026-10-21",
       "source": "U.S. Treasury official",
@@ -86,7 +86,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:23:50+09:00",
+      "generated_kst": "2026-10-22T21:57:20+09:00",
       "as_of": "2026-10-22",
       "detail": "KR3Y 2026-10-22 · KR5Y 2026-10-22 · KR10Y 2026-10-22 · KR20Y 2026-10-22 · KR30Y 2026-10-22 · KR_3S10S 2026-10-22",
       "source": "BOK ECOS",
@@ -106,14 +106,14 @@
       "state": "LIVE",
       "generated_kst": "2026-10-22T16:47:48+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1011s · ETHUSD age=1020s",
+      "detail": "BTCUSD age=418s · ETHUSD age=428s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:23:58+09:00",
+      "generated_kst": "2026-10-22T21:57:47+09:00",
       "as_of": "2026-10-21",
       "detail": "snapshot=FINAL · Observatory session=2026-10-21",
       "source": "daily-market-pulse.json",
@@ -140,7 +140,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:23:58+09:00",
+      "generated_kst": "2026-10-22T21:57:47+09:00",
       "as_of": "2026-10-21",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -149,7 +149,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T16:47:51+09:00",
+      "generated_kst": "2026-10-22T21:57:33+09:00",
       "as_of": "2026-10-22",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -167,8 +167,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-10-22T18:21:56+09:00",
-      "as_of": "2026-10-22T18:21:56+09:00",
+      "generated_kst": "2026-10-22T22:03:49+09:00",
+      "as_of": "2026-10-22T22:03:49+09:00",
       "detail": "events=185 · overdue=0 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
@@ -176,7 +176,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "PASS",
-      "generated_kst": "2026-10-22T18:40:40+09:00",
+      "generated_kst": "2026-10-22T22:04:29+09:00",
       "as_of": "2026-10-21",
       "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
