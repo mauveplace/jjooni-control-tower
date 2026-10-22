@@ -10,7 +10,7 @@ test('daily position attribution is loss-first and reconciles to account PnL',()
   assert.match(src,/version:'27\.[0-9]+'/);
   assert.match(src,/JjooniMetrics\?\.positionDay/);
   assert.match(src,/return x\.day-y\.day/);
-  assert.match(src,/bridge=acct!=null&&known\.length\?acct-knownSum:null/);
+  assert.match(src,/bridge=a\.today_pnl_scope==='CT_US_CLOSE_PERFORMANCE_DAY_V1'\?null:acct!=null&&known\.length\?acct-knownSum:null/);
   assert.match(src,/오늘 종목별 손익 · 많이 빠진 순/);
   assert.match(src,/▼ 오늘 빠진 종목/);
   assert.match(src,/매매·수수료·미확인 Bridge/);
@@ -28,6 +28,6 @@ test('source daily return with opposite sign to canonical PnL is rejected and re
 test('misleading zero price FX legacy cards are hidden and v27 is loaded by verified daily module chain',()=>{
   assert.match(src,/종목별 주가·환율 기여도/);
   assert.match(src,/종목 기준 당일 가격효과/);
-  assert.match(alias,/daily-pnl-attribution-v27\.js\?v=27\.4/);
+  assert.match(alias,/daily-pnl-attribution-v27\.js\?v=27\.5-close-day/);
   assert.match(alias,/__JJOONI_DAILY_PNL_ATTR_LOADER_V27/);
 });
