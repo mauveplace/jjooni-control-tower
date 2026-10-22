@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-22T22:08:20+09:00",
-  "overall": "PASS",
+  "generated_kst": "2026-10-22T22:58:16+09:00",
+  "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 0,
+  "warning_count": 1,
   "observatory_session": "2026-10-21",
   "file_status": {
     "observatory": {
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-22T21:57:47+09:00",
+      "generated_kst": "2026-10-22T22:58:15+09:00",
       "session": "2026-10-21",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-22T21:57:47+09:00",
+      "generated_kst": "2026-10-22T22:58:15+09:00",
       "session": "2026-10-21",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-22T21:57:33+09:00",
+      "generated_kst": "2026-10-22T22:58:03+09:00",
       "as_of_date": "2026-10-22",
       "priced_count": 46
     },
@@ -66,7 +66,7 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-22T22:08:19+09:00",
+      "generated_kst": "2026-10-22T22:08:20+09:00",
       "overall": "LIVE",
       "critical_bad": [],
       "warnings": []
@@ -341,7 +341,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": "2026-10-22",
       "allow_lag_days": 4,
       "critical": false,
@@ -396,7 +396,15 @@
         }
       },
       "missing": [],
-      "latest_mismatch": []
+      "latest_mismatch": [],
+      "fetch_succeeded": false,
+      "failed_series": {
+        "KR3Y": "RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout",
+        "KR5Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR10Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR20Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR30Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN"
+      }
     },
     "jp_rates": {
       "state": "LIVE",
@@ -457,17 +465,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-22",
-          "last_value": 81602.67,
+          "last_value": 81710.67,
           "group": "crypto",
-          "latest_value": 81602.67,
+          "latest_value": 81710.67,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-22",
-          "last_value": 2398.82,
+          "last_value": 2411.38,
           "group": "crypto",
-          "latest_value": 2398.82,
+          "latest_value": 2411.38,
           "latest_matches": true
         }
       },
@@ -481,11 +489,11 @@
       "critical": false,
       "items": {
         "FEAR_GREED": {
-          "count": 1562,
-          "last_date": "2026-10-21",
-          "last_value": 31.4,
+          "count": 1563,
+          "last_date": "2026-10-22",
+          "last_value": 29.1,
           "group": "sentiment",
-          "latest_value": 31.4,
+          "latest_value": 29.1,
           "latest_matches": true
         }
       },
@@ -511,19 +519,25 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-22T21:57:31+09:00",
-      "current_quote_age_seconds": 649,
-      "captured_quote_age_seconds": 2
+      "quote_as_of_kst": "2026-10-22T22:57:20+09:00",
+      "current_quote_age_seconds": 56,
+      "captured_quote_age_seconds": 5
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-22T21:57:21+09:00",
-      "current_quote_age_seconds": 659,
-      "captured_quote_age_seconds": 12
+      "quote_as_of_kst": "2026-10-22T22:57:22+09:00",
+      "current_quote_age_seconds": 54,
+      "captured_quote_age_seconds": 3
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_KR_RATES_STALE",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-22 dates=KR3Y:2026-10-22,KR5Y:2026-10-22,KR10Y:2026-10-22,KR20Y:2026-10-22,KR30Y:2026-10-22,KR_3S10S:2026-10-22"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
