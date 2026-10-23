@@ -1,9 +1,12 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-23T10:42:45+09:00",
-  "overall": "LIVE",
+  "generated_kst": "2026-10-23T13:58:47+09:00",
+  "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
-  "warnings": [],
+  "warnings": [
+    "crypto",
+    "audit"
+  ],
   "watchdog_required": false,
   "session_alignment": {
     "expected_session": "2026-10-22",
@@ -103,10 +106,10 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-23T10:41:48+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=60s · ETHUSD age=61s",
+      "detail": "BTCUSD age=11822s · ETHUSD age=11823s",
       "source": "Yahoo spot crypto quote",
       "critical": false
     },
@@ -158,7 +161,7 @@
     "official_macro": {
       "label": "Official Macro",
       "state": "LIVE",
-      "generated_kst": "2026-10-23T10:26:46+09:00",
+      "generated_kst": "2026-10-23T13:58:15+09:00",
       "as_of": null,
       "detail": "JJOONI_OFFICIAL_MACRO_V1",
       "source": "official-macro.json",
@@ -175,10 +178,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-23T10:42:45+09:00",
+      "state": "WARN",
+      "generated_kst": "2026-10-23T13:58:47+09:00",
       "as_of": "2026-10-22",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=0 · warnings=3",
       "source": "data-audit.json",
       "critical": true
     }
