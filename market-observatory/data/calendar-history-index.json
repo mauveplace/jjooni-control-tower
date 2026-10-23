@@ -1,5 +1,5 @@
 {
-  "available_from": "2016-10-25",
+  "available_from": "2016-10-26",
   "available_to": "2026-10-22",
   "backfill": {
     "canonical_rows_matched": 8,
@@ -83,9 +83,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-23T23:44:05+09:00",
+  "generated_kst": "2026-10-24T03:45:24+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37776,
+  "row_count": 37770,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -4927,25 +4927,25 @@
       "sha256": "c75d7b19e7743fd81bef89b8c79a3a41486b672e2f7c159e3d3652cadf5fdc7f"
     },
     "FF::EU::german-ifo-business-climate": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-24",
       "available_to": "2026-09-24",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 120,
       "country": "EU",
       "event_title": "German ifo Business Climate",
       "kind": "event",
       "label": "German ifo Business Climate",
       "metric_key": null,
-      "path": "./calendar-history/series/4c4c081801c9d773763401eae594dacbefc9e6365b4524051bc9ffe176deb99b.json",
+      "path": "./calendar-history/series/260575469ca6c8d41c945e33ba9a1de19565c6919f85a3cd205b61e3181b042e.json",
       "quality": {
-        "actual_count": 121,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 41,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -4960,7 +4960,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::EU::german-ifo-business-climate",
-      "sha256": "4c4c081801c9d773763401eae594dacbefc9e6365b4524051bc9ffe176deb99b"
+      "sha256": "260575469ca6c8d41c945e33ba9a1de19565c6919f85a3cd205b61e3181b042e"
     },
     "FF::EU::german-import-prices-m-m": {
       "available_from": "2016-10-26",
@@ -10809,25 +10809,25 @@
       "sha256": "8f5109da621c4f46efbba906086bcd744bbd97a19c4cda29173cf9a20121c2bf"
     },
     "FF::US::cb-consumer-confidence": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-30",
       "available_to": "2026-09-29",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "US",
       "event_title": "CB Consumer Confidence",
       "kind": "event",
       "label": "CB Consumer Confidence",
       "metric_key": null,
-      "path": "./calendar-history/series/5faa3c020090c51222be9690fe6450cb758e8a563a8a4d17ea56062849908da9.json",
+      "path": "./calendar-history/series/9ac3b4cd9a43aebc424fe5933d5b62c97db40a46b03c4ba2a91920444bd0b207.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 41,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 11,
@@ -10842,7 +10842,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::cb-consumer-confidence",
-      "sha256": "5faa3c020090c51222be9690fe6450cb758e8a563a8a4d17ea56062849908da9"
+      "sha256": "9ac3b4cd9a43aebc424fe5933d5b62c97db40a46b03c4ba2a91920444bd0b207"
     },
     "FF::US::cb-leading-index-m-m": {
       "available_from": "2016-11-19",
@@ -11549,25 +11549,25 @@
       "sha256": "96b135f9bcd8f418af4de0d85af6ac0d20599c052f21de1928f57d5a9e05eb47"
     },
     "FF::US::hpi-m-m": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-23",
       "available_to": "2026-09-29",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "US",
       "event_title": "HPI m/m",
       "kind": "event",
       "label": "HPI m/m",
       "metric_key": null,
-      "path": "./calendar-history/series/ba04532a997001d90f5bf59d0db5439a21cd6cd3c37e672d1534ab533e2b0928.json",
+      "path": "./calendar-history/series/cf40fb5517b2406e1fa3737cfca9fe400a785b2a99a0a1bd992588d047ff28a2.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 35,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -11582,7 +11582,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::hpi-m-m",
-      "sha256": "ba04532a997001d90f5bf59d0db5439a21cd6cd3c37e672d1534ab533e2b0928"
+      "sha256": "cf40fb5517b2406e1fa3737cfca9fe400a785b2a99a0a1bd992588d047ff28a2"
     },
     "FF::US::industrial-production-m-m": {
       "available_from": "2016-11-16",
@@ -12151,25 +12151,25 @@
       "sha256": "5e26651b228034c4546e19497f3971424e866591008cd41f442e446378152df3"
     },
     "FF::US::rcm-tipp-economic-optimism": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-01",
       "available_to": "2026-10-06",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 120,
       "country": "US",
       "event_title": "RCM/TIPP Economic Optimism",
       "kind": "event",
       "label": "RCM/TIPP Economic Optimism",
       "metric_key": null,
-      "path": "./calendar-history/series/1aecadd8135678635caf793a5d2247c87ce8d0d5129b4859f6698449829203dc.json",
+      "path": "./calendar-history/series/08365ae275c4014c325afeb762a41707a16c10f3f9104327ea269019ee172630.json",
       "quality": {
-        "actual_count": 121,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 121,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 42,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -12184,7 +12184,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::rcm-tipp-economic-optimism",
-      "sha256": "1aecadd8135678635caf793a5d2247c87ce8d0d5129b4859f6698449829203dc"
+      "sha256": "08365ae275c4014c325afeb762a41707a16c10f3f9104327ea269019ee172630"
     },
     "FF::US::retail-sales-m-m": {
       "available_from": "2016-11-15",
@@ -12223,25 +12223,25 @@
       "sha256": "3d10e11bc84f2eaba61984828aaa1efdd84e6ae8e6e89dde20460220a95702d5"
     },
     "FF::US::s-p-cs-composite-20-hpi-y-y": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-29",
       "available_to": "2026-09-29",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "US",
       "event_title": "S&P/CS Composite-20 HPI y/y",
       "kind": "event",
       "label": "S&P/CS Composite-20 HPI y/y",
       "metric_key": null,
-      "path": "./calendar-history/series/f3751e4fd8b4fb07462f94b86ffa328b4002e826883d4943392b40c166708562.json",
+      "path": "./calendar-history/series/0c9edd38cfce3b61649f58f4efccd678d0ee6f4bc6104728ce3584609e18d8db.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 35,
         "rows_by_year": {
-          "2016": 3,
+          "2016": 2,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -12256,7 +12256,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::s-p-cs-composite-20-hpi-y-y",
-      "sha256": "f3751e4fd8b4fb07462f94b86ffa328b4002e826883d4943392b40c166708562"
+      "sha256": "0c9edd38cfce3b61649f58f4efccd678d0ee6f4bc6104728ce3584609e18d8db"
     },
     "FF::US::tic-long-term-purchases": {
       "available_from": "2016-11-17",
@@ -12682,7 +12682,7 @@
       "event_title": "2026년 8월 산업활동동향",
       "kind": "event",
       "label": "2026년 8월 산업활동동향",
-      "path": "./calendar-history/series/3509fdc098d0ec67c0375ff9b7f0dc2ec3b1372cd6ba0838aa42cf58b4c2d765.json",
+      "path": "./calendar-history/series/d9fdc056ea33d516c5b0091ea967b760a59e3d8e9e245378a8c3c264dc73486c.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12695,7 +12695,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::산업활동동향",
-      "sha256": "3509fdc098d0ec67c0375ff9b7f0dc2ec3b1372cd6ba0838aa42cf58b4c2d765"
+      "sha256": "d9fdc056ea33d516c5b0091ea967b760a59e3d8e9e245378a8c3c264dc73486c"
     },
     "KR::생산자물가지수": {
       "available_from": "2026-09-18",
@@ -12829,7 +12829,7 @@
       "event_title": "2026년 8월 소비자물가동향",
       "kind": "event",
       "label": "2026년 8월 소비자물가동향",
-      "path": "./calendar-history/series/b5a94c591d0d606ea220ca3c10c222ba56f522dc49176e817e18fe5a91133610.json",
+      "path": "./calendar-history/series/af36c095a86cc32ba94bb80f46f968f74f82e0bc1e27688392c6af9d22b273a4.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12842,7 +12842,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::소비자물가동향",
-      "sha256": "b5a94c591d0d606ea220ca3c10c222ba56f522dc49176e817e18fe5a91133610"
+      "sha256": "af36c095a86cc32ba94bb80f46f968f74f82e0bc1e27688392c6af9d22b273a4"
     },
     "KR::소비자물가동향::kr_cpi_mom": {
       "available_from": "2026-09-02",
@@ -14247,24 +14247,24 @@
       "sha256": "2f9b9043a9192681f6054869f0f0384f8540f088d0889057c959a6ca66ee2e58"
     },
     "US::s-p-global-us-manufacturing-pmi::sp_us_manufacturing_pmi": {
-      "available_from": "2016-10-25",
+      "available_from": "2016-11-01",
       "available_to": "2026-10-01",
       "category": "경기/PMI",
-      "count": 386,
+      "count": 385,
       "country": "US",
       "event_title": "S&P Global US Manufacturing PMI",
       "kind": "metric",
       "label": "S&P Global US Manufacturing PMI",
       "metric_key": "sp_us_manufacturing_pmi",
-      "path": "./calendar-history/series/37ac6b3aa77e1b8d31e7acca9ad4df16a5f0135fc14b9e0b9f34bbfcb38010d7.json",
+      "path": "./calendar-history/series/4259bf3f79a3aa3614c5ad020b23056dbca7c4ab315c721aa0a2d3257baf9910.json",
       "quality": {
-        "actual_count": 386,
+        "actual_count": 385,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 386,
+        "consensus_count": 385,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 23,
         "rows_by_year": {
-          "2016": 8,
+          "2016": 7,
           "2017": 38,
           "2018": 39,
           "2019": 39,
@@ -14279,7 +14279,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::s-p-global-us-manufacturing-pmi::sp_us_manufacturing_pmi",
-      "sha256": "37ac6b3aa77e1b8d31e7acca9ad4df16a5f0135fc14b9e0b9f34bbfcb38010d7"
+      "sha256": "4259bf3f79a3aa3614c5ad020b23056dbca7c4ab315c721aa0a2d3257baf9910"
     },
     "US::s-p-global-us-services-composite-pmi": {
       "available_from": "2026-08-05",
@@ -14728,11 +14728,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 433,
-  "snapshot_id": "848237460572e78f58be3a9f23ceba549ee2fa9f9dac9c578d0ea79d9b980d8c",
-  "source_sha256": "848237460572e78f58be3a9f23ceba549ee2fa9f9dac9c578d0ea79d9b980d8c",
+  "snapshot_id": "0f126de9e71b4ddcd721d91486dcd568bdc1d78eaf7461f042aa59cd2d01d683",
+  "source_sha256": "0f126de9e71b4ddcd721d91486dcd568bdc1d78eaf7461f042aa59cd2d01d683",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-10-23",
-  "window_start": "2016-10-25",
+  "window_end": "2026-10-24",
+  "window_start": "2016-10-26",
   "window_years": 10
 }
