@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --no-package-lock playwright@1.55.0
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium --only-shell
       - run: node --test tests/*.test.cjs
       - run: node tests/navigation-owner-e2e.cjs
       - run: node tests/strategy-saved-cost-e2e.cjs
