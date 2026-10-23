@@ -81,6 +81,7 @@ function ensureStyle(){
 #ctHeroTrustStripV6 button{appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#eef5ff;border-radius:999px;padding:6px 9px;font:850 10px/1 system-ui;cursor:pointer}
 #ctHeroTrustStripV6 button.measured:before{content:'● ';}#ctHeroTrustStripV6 button.modeled:before{content:'◐ ';}#ctHeroTrustStripV6 button.reference:before{content:'○ ';}
 #ctTrustDetailV6{margin-top:8px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.06);padding:9px;color:#eef5ff}
+#ctTrustDetailV6 .ctTrustRowV6 b{color:#edf4ff!important}#ctTrustDetailV6 .loss{color:#78b7ff!important}#ctTrustDetailV6 .gain{color:#ff8395!important}#ctTrustDetailV6 .neutral{color:#edf4ff!important}
 #ctTrustDetailV6[hidden]{display:none!important}.ctTrustDetailTitleV6{font-size:11px;font-weight:900}.ctTrustDetailSubV6{font-size:8px;color:#aebfd2;margin-top:2px;line-height:1.35}.ctTrustRowV6{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:7px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:9px}.ctTrustRowV6:last-of-type{border-bottom:0}.ctTrustRowV6 b{font-size:10px}.ctTrustSourceV6{color:#c9d6e6}.ctTrustFootV6{font-size:8px;color:#aebfd2;margin-top:7px;line-height:1.4}
 #overviewDailyReturn.ctHumanCompletionV6{font-size:10px!important;font-weight:850!important;color:#b7c7da!important;letter-spacing:0!important}
 @media(max-width:767px){
@@ -101,25 +102,34 @@ function updateAccountCards(){
    if(line.innerHTML!==html)line.innerHTML=html;
  });
 }
+function priceProof(){
+ const C=canon(),d=C.performance_day,pe=d?.price_effect;
+ if(C.total?.today_complete||!pe||pe.schema!=='CT_CURRENT_HOLDINGS_PRICE_EFFECT_V1'||pe.snapshot_id!==C.snapshot_id||pe.start_kst!==d.start_kst||!(pe.known_count>0))return null;
+ const now=Date.now(),start=Date.parse(d.start_kst),end=Date.parse(d.end_kst);
+ return start<=now&&now<end?pe:null;
+}
 function trustRows(){
- const C=canon(),rows=[];
- IDS.forEach(id=>{const c=(C.accounts||{})[id]||{},kind=trustKind(authority(c)),p=todayPnl(c);rows.push({id,label:LABEL[id],kind,pnl:p})});
- return rows;
+ const C=canon(),pe=priceProof();
+ return IDS.map(id=>{const c=C.accounts?.[id]||{},r=pe?.accounts?.[id];
+  if(pe)return {id,label:LABEL[id],kind:r?.known_count>0?'modeled':'excluded',pnl:r?.known_count>0?n(r.known_subtotal_krw):null,coverage:r};
+  return {id,label:LABEL[id],kind:trustKind(authority(c)),pnl:todayPnl(c)};
+ });
 }
 function updateTrust(){
  const h=qs('.ctOvPrimary');if(!h)return;
- const rows=trustRows(),counts={measured:0,modeled:0,reference:0},sums={measured:0,modeled:0,reference:0};
- rows.forEach(r=>{counts[r.kind]++;if(r.pnl!=null)sums[r.kind]+=r.pnl});
+ const pe=priceProof(),rows=trustRows(),counts={measured:0,modeled:0,reference:0,excluded:0};
+ rows.forEach(r=>counts[r.kind]++);
  let strip=qs('#ctHeroTrustStripV6',h);if(!strip){strip=document.createElement('div');strip.id='ctHeroTrustStripV6';h.appendChild(strip)}
  const buttons=[];
- if(counts.measured)buttons.push(`<button type="button" class="measured" data-trust-v6="measured">증권사 확인 ${counts.measured}계좌</button>`);
- if(counts.modeled)buttons.push(`<button type="button" class="modeled" data-trust-v6="modeled">계산값 ${counts.modeled}계좌</button>`);
- if(counts.reference)buttons.push(`<button type="button" class="reference" data-trust-v6="reference">참고값 ${counts.reference}계좌</button>`);
+ for(const [kind,label]of [['measured','증권사 확인'],['modeled','가격변동 계산'],['reference','참고값'],['excluded','펀드·기준가 별도']])if(counts[kind])buttons.push(`<button type="button" class="${kind}" data-trust-v6="${kind}">${label} ${counts[kind]}계좌</button>`);
  const bh=buttons.join('');if(strip.innerHTML!==bh)strip.innerHTML=bh;
  let detail=qs('#ctTrustDetailV6',h);if(!detail){detail=document.createElement('div');detail.id='ctTrustDetailV6';detail.hidden=true;h.appendChild(detail)}
- const body=rows.map(r=>`<div class="ctTrustRowV6"><b>${r.label}</b><span class="ctTrustSourceV6">${trustLabel(r.kind)}</span><span>${r.pnl==null?'산정 대기':signed(r.pnl)}</span></div>`).join('');
- const known=rows.filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
- const dh=`<div class="ctTrustDetailTitleV6">오늘 투자손익 산정 근거</div><div class="ctTrustDetailSubV6">증권사 확인은 증권사가 전달한 값, 계산값은 현재가·전일종가·수량을 이용해 산출한 값입니다.</div>${body}<div class="ctTrustFootV6">증권사 확인 합계 ${signed(sums.measured)} · 계산값 합계 ${signed(sums.modeled)}${counts.reference?' · 참고값 합계 '+signed(sums.reference):''}<br>${rows.every(r=>r.pnl!=null)?'4계좌 합계':'확인된 '+rows.filter(r=>r.pnl!=null).length+'/4계좌 소계'} ${signed(known)}</div>`;
+ detail.dataset.ctPnlScope=pe?'holdings-price':'account-pnl';
+ const tone=v=>v==null?'unknown':v<0?'loss':v>0?'gain':'neutral';
+ const body=rows.map(r=>`<div class="ctTrustRowV6"><b>${r.label}</b><span class="ctTrustSourceV6">${pe?(r.coverage?.known_count>0?r.coverage.known_count+'/'+r.coverage.position_count+'종목 계산':r.coverage?.excluded_funds_count?'펀드 '+r.coverage.excluded_funds_count+'건':'기준가격 미제공'):trustLabel(r.kind)}</span><span class="${tone(r.pnl)}">${r.pnl==null?(pe?'별도 기준가':'자료 없음'):signed(r.pnl)}</span></div>`).join('');
+ const knownRows=rows.filter(r=>r.pnl!=null),known=knownRows.length?knownRows.reduce((sum,r)=>sum+r.pnl,0):null;
+ const total=pe?n(pe.known_subtotal_krw):known;
+ const dh=`<div class="ctTrustDetailTitleV6">${pe?'오늘 보유종목 가격변동 산정 근거':'오늘 투자손익 산정 근거'}</div><div class="ctTrustDetailSubV6">${pe?'위 손익과 동일한 미국 정규장 마감 기준종가·현재가·현재 보유수량·현재 환율로 계산합니다. 매매·실현손익·배당·비용·환율변동은 제외합니다.':'계좌별 확인된 투자손익만 표시합니다. 원천 미제공 값을 0원으로 합산하지 않습니다.'}</div>${body}<div class="ctTrustFootV6">${pe?'가격변동 합계 · '+pe.known_count+'/'+pe.position_count+'종목':'확인된 '+knownRows.length+'/4계좌 소계'} <strong class="${tone(total)}">${total==null?'자료 없음':signed(total)}</strong>${pe?.excluded_funds_count?'<br>펀드 '+pe.excluded_funds_count+'건은 가격변동 합계에서 제외합니다.':''}</div>`;
  if(detail.innerHTML!==dh)detail.innerHTML=dh;
  if(!strip.dataset.boundV6){strip.dataset.boundV6='1';strip.addEventListener('click',e=>{const b=e.target.closest('button[data-trust-v6]');if(!b)return;detail.hidden=!detail.hidden})}
 }
@@ -138,7 +148,8 @@ function updateProducerBadge(){
 function updateHeroCompletion(){
  const e=qs('#overviewDailyReturn'),C=canon();if(!e||!C.total)return;
  const missing=(C.total.missing_today||[]).length;
- const text=C.total.today_complete?'합산 완료':missing?`오늘손익 미산정 ${missing}계좌`:'일부 산정';
+ const pe=priceProof();
+ const text=pe?`상장종목 ${pe.known_count}/${pe.position_count} 계산${pe.excluded_funds_count?' · 펀드 '+pe.excluded_funds_count+'건 별도':''}`:C.total.today_complete?'합산 완료':missing?`오늘손익 미산정 ${missing}계좌`:'일부 산정';
  if(e.textContent!==text)e.textContent=text;e.classList.add('ctHumanCompletionV6');
 }
 function scrubKnownCodes(){
@@ -147,7 +158,7 @@ function scrubKnownCodes(){
 }
 function apply(){
  ensureStyle();updateAccountCards();updateTrust();updateProducerBadge();updateHeroCompletion();scrubKnownCodes();
- const rows=trustRows(),counts={measured:0,modeled:0,reference:0};rows.forEach(r=>counts[r.kind]++);const age=basisAgeMs();
+ const rows=trustRows(),counts={measured:0,modeled:0,reference:0,excluded:0};rows.forEach(r=>counts[r.kind]++);const age=basisAgeMs();
  window.__JJOONI_HUMAN_UI_V6={state:'ACTIVE',version:'6.3',internal_codes_hidden:true,producer_badge_human:true,trust_detail_expandable:true,measured_accounts:counts.measured,modeled_accounts:counts.modeled,reference_accounts:counts.reference,basis_kst:basisTime(),basis_epoch_ms:parseKstMs(basisTime()),data_age_ms:age,data_age_text:ageText(age),freshness_authority:'generated_kst',dynamic_viewport:CSS.supports('height','100dvh')};
 }
 let scheduled=false;function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;apply()},45)}

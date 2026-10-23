@@ -21,8 +21,9 @@ function patchCanonical(){
  C.accounts.TOSS=toss;return direct;
 }
 function patchUi(){
- const sub=q('.ctTrustDetailSubV6');if(sub)sub.textContent='계좌별 보유자산·예수금·NAV는 각 계좌의 확인된 원천을 사용합니다. 오늘손익 산출 품질은 별도로 구분합니다.';
- qa('.ctTrustRowV6').forEach(row=>{const name=String(q('b',row)?.textContent||'').trim(),src=q('.ctTrustSourceV6',row);if(src&&name==='Toss')src.textContent='Toss API'});
+ const priceScope=q('#ctTrustDetailV6')?.dataset.ctPnlScope==='holdings-price';
+ const sub=q('.ctTrustDetailSubV6');if(sub&&!priceScope)sub.textContent='계좌별 보유자산·예수금·NAV는 각 계좌의 확인된 원천을 사용합니다. 오늘손익 산출 품질은 별도로 구분합니다.';
+ qa('.ctTrustRowV6').forEach(row=>{const name=String(q('b',row)?.textContent||'').trim(),src=q('.ctTrustSourceV6',row);if(src&&name==='Toss'&&!priceScope)src.textContent='Toss API'});
  qa('#ctDesktopAccountsV8 .ctA8Card').forEach(card=>{const name=norm(q('.ctA8Name',card)?.textContent),src=q('.ctA8Source',card);if(!src||name!=='Toss')return;const basis=(src.textContent||'').split('· 기준').slice(1).join('· 기준').trim();src.textContent='Toss API'+(basis?' · 기준 '+basis:'')});
 }
 
