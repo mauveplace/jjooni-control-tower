@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-24T03:47:04+09:00",
-  "overall": "PASS",
+  "generated_kst": "2026-10-24T05:08:54+09:00",
+  "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 0,
+  "warning_count": 3,
   "observatory_session": "2026-10-22",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-24T02:31:28+09:00",
+      "generated_kst": "2026-10-24T03:48:19+09:00",
       "session": "2026-10-22",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-24T03:32:58+09:00",
+      "generated_kst": "2026-10-24T03:48:26+09:00",
       "session": "2026-10-22",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-24T03:32:58+09:00",
+      "generated_kst": "2026-10-24T03:48:26+09:00",
       "session": "2026-10-22",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-24T03:46:25+09:00",
+      "generated_kst": "2026-10-24T05:08:49+09:00",
       "events": 185,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -66,10 +66,13 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-24T03:47:03+09:00",
-      "overall": "LIVE",
+      "generated_kst": "2026-10-24T05:08:53+09:00",
+      "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
-      "warnings": []
+      "warnings": [
+        "crypto",
+        "audit"
+      ]
     },
     "watchdog": {
       "checked_kst": "2026-10-23T08:14:56+09:00",
@@ -449,7 +452,7 @@
       "latest_mismatch": []
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -457,17 +460,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-23",
-          "last_value": 81385.97,
+          "last_value": 81323.88,
           "group": "crypto",
-          "latest_value": 81385.97,
+          "latest_value": 81323.88,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-23",
-          "last_value": 2401.07,
+          "last_value": 2397.49,
           "group": "crypto",
-          "latest_value": 2401.07,
+          "latest_value": 2397.49,
           "latest_matches": true
         }
       },
@@ -509,21 +512,37 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-24T03:32:30+09:00",
-      "current_quote_age_seconds": 874,
-      "captured_quote_age_seconds": 5
+      "quote_as_of_kst": "2026-10-24T03:48:16+09:00",
+      "current_quote_age_seconds": 4838,
+      "captured_quote_age_seconds": 7
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-24T03:32:25+09:00",
-      "current_quote_age_seconds": 879,
-      "captured_quote_age_seconds": 10
+      "quote_as_of_kst": "2026-10-24T03:48:20+09:00",
+      "current_quote_age_seconds": 4834,
+      "captured_quote_age_seconds": 3
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-23,ETHUSD:2026-10-23"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-24T03:48:16+09:00', 'current_quote_age_seconds': 4838, 'captured_quote_age_seconds': 7}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-24T03:48:20+09:00', 'current_quote_age_seconds': 4834, 'captured_quote_age_seconds': 3}"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
