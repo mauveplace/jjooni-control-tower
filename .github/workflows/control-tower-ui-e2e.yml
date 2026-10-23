@@ -1,10 +1,10 @@
 name: Control Tower Mobile First UI
 on:
   pull_request:
-    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
+    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
   push:
     branches: [main]
-    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
+    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
 permissions:
   contents: read
 concurrency:
