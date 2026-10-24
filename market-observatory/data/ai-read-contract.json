@@ -33,7 +33,9 @@
     {
       "path": "./observatory.json",
       "role": "rates, FX, energy, volatility, indices, TRI-POD",
-      "required": true
+      "required": true,
+      "usable_rule": "Check freshness-status groups individually and each source timestamp. LIVE is a collection verdict, never a streaming quote guarantee.",
+      "fallback": "Use only verified groups; disclose stale/missing groups. Never infer current guidance from an expired analyst consensus."
     },
     {
       "path": "./economic-calendar.json",
@@ -62,6 +64,20 @@
       "role": "Immutable full Daily Pulse observations and same-day revisions",
       "required": false,
       "usable_rule": "Select market_date_us and generated_kst; historical LIVE does not mean current freshness; AI commentary must reference snapshot_id."
+    },
+    {
+      "path": "./freshness-status.json",
+      "role": "Mandatory source validity and warning status before using any market family",
+      "required": true,
+      "usable_rule": "Relevant group state must be LIVE; recheck timestamps and effective_window against current time. Overall LIVE_WITH_WARNINGS is not blanket permission.",
+      "fallback": "Report which groups are unusable and keep valid independent groups separate."
+    },
+    {
+      "path": "./market-regime.json",
+      "role": "Analyst consensus and effective window",
+      "required": true,
+      "usable_rule": "Use as current guidance only when start_kst <= current time <= end_kst AND freshness.groups.market_regime.state == LIVE. Stored SCHEDULED/LIVE alone is insufficient.",
+      "fallback": "State 현재 유효한 합의 레짐 없음. Treat expired contents as historical only; existing strategy rules keep precedence. Do not fabricate a new consensus."
     }
   ],
   "fed_watch_policy": {
