@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
 const FRESH='./data/freshness-status.json',WATCH='./data/watchdog-status.json';
-const ORDER=['market','kr_equity','us_supplement','energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','pulse','fear_greed','fedwatch','tripod','sector','official_macro','calendar','audit'];
+const ORDER=['market','kr_equity','us_supplement','energy','fx','metals','us_rates','kr_rates','jp_rates','crypto','pulse','fear_greed','fedwatch','tripod','sector','official_macro','calendar','audit','market_regime'];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const tone=s=>{s=String(s||'').toUpperCase();if(['LIVE','HEALTHY','HEALTHY_NOOP','REPAIRED','PASS','FINAL'].includes(s))return'good';if(['FAIL','FAILED','ERROR','MISALIGNED','INCONSISTENT','AHEAD_OF_ANCHOR','REPAIR_FAILED','UNAVAILABLE'].includes(s))return'bad';return'warn'};
 const age=v=>{if(!v)return'—';const ms=Date.now()-Date.parse(v);if(!Number.isFinite(ms))return'—';const m=Math.max(0,Math.round(ms/60000));if(m<60)return`${m}분 전`;const h=Math.floor(m/60);return h<48?`${h}시간 전`:`${Math.floor(h/24)}일 전`};
 // A published LIVE verdict describes collection-time validity, not current spot freshness.
 const effective=(key,raw)=>{
  const g={...(raw||{})};
+ if(key==='market_regime'){if(g.state==='LIVE'&&Number.isFinite(Date.parse(g.as_of))&&Date.now()>Date.parse(g.as_of))g.state='EXPIRED';return g;}
  if(key!=='crypto')return g;
  const quotes=g.quotes||{},keys=['BTCUSD','ETHUSD'],limit=Number(g.max_age_seconds)||3600;
  const records=keys.map(k=>{

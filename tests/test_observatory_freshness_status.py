@@ -28,6 +28,19 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             for key in ('market','pulse','tripod'):self.assertEqual(out['groups'][key]['state'],'LAGGING')
             self.assertFalse(out['session_alignment']['aligned']);self.assertTrue(out['watchdog_required'])
 
+    def test_regime_expiry_boundaries_and_invalid_windows(self):
+        regime={'effective_window':{'start_kst':'2026-10-12T00:00:00+09:00','end_kst':'2026-10-16T23:59:59+09:00'}}
+        for stamp, expected in [('2026-10-11T23:59:59+09:00','PENDING'),('2026-10-12T00:00:00+09:00','LIVE'),('2026-10-16T23:59:59+09:00','LIVE'),('2026-10-17T00:00:00+09:00','EXPIRED')]:
+            self.assertEqual(freshness.regime_state(regime,datetime.fromisoformat(stamp)),expected)
+        self.assertEqual(freshness.regime_state({}), 'UNAVAILABLE')
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            self.write(root,'market-observatory/data/market-regime.json',regime)
+            out=freshness.build_status(root,now=datetime.fromisoformat('2026-10-25T07:00:00+09:00'))
+            self.assertEqual(out['groups']['market_regime']['state'],'EXPIRED')
+            self.assertIn('market_regime',out['warnings'])
+            self.assertNotIn('market_regime',out['critical_bad'])
+
     def write(self, root: Path, rel: str, obj: dict):
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -43,6 +56,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
         }
 
     def write_v2_support(self, root: Path, fed_state='LIVE'):
+        self.write(root, 'market-observatory/data/market-regime.json', {'effective_window': {'start_kst':'2026-01-01T00:00:00+09:00', 'end_kst':'2026-12-31T23:59:59+09:00'}})
         groups = {
             name: {'state': 'LIVE', 'items': {}}
             for name in (

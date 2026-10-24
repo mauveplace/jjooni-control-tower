@@ -49,6 +49,18 @@ def _count_field(obj,count_key,list_key):
     try:return int(value or 0)
     except Exception:return len(obj.get(list_key) or [])
 
+def regime_state(regime, now=None):
+    now = now or datetime.now(KST)
+    if now.tzinfo is None: now = now.replace(tzinfo=KST)
+    try:
+        window = regime['effective_window']
+        start = datetime.fromisoformat(window['start_kst'])
+        end = datetime.fromisoformat(window['end_kst'])
+        if start.tzinfo is None or end.tzinfo is None or end < start: return 'UNAVAILABLE'
+    except (KeyError, TypeError, ValueError): return 'UNAVAILABLE'
+    return 'PENDING' if now < start else 'EXPIRED' if now > end else 'LIVE'
+
+
 def build_status(root: Path = ROOT, now=None) -> dict:
     data=root/'market-observatory'/'data'
     obs=load(data/'observatory.json');pulse=load(data/'daily-market-pulse.json');fed=load(data/'fed-watch.json');cal=load(data/'economic-calendar.json');sector=load(data/'sector-etf.json');public=load(root/'public-market-daily.json');audit=load(data/'data-audit.json');macro=load(data/'official-macro.json')
@@ -97,6 +109,9 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={cal_overdue} · pending={cal_pending} · source_failures={cal_failed_sources}",'economic-calendar.json',False),
         'audit':group('Full Data Audit',audit.get('overall') or 'UNAVAILABLE',audit.get('generated_kst'),session,f"critical={audit.get('critical_count','—')} · warnings={audit.get('warning_count','—')}",'data-audit.json',True),
     }
+    regime = load(data/'market-regime.json')
+    window = regime.get('effective_window') or {}
+    groups['market_regime'] = group('합의 레짐', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '유효기간 기준 · 만료된 합의문은 현재 지침이 아닙니다', 'market-regime.json', False)
     # Quote timestamps travel with the SSOT so a viewer can re-evaluate the age
     # against its own clock. The producer's LIVE verdict is only a point-in-time audit.
     groups['crypto']['quotes'] = {
@@ -104,7 +119,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         for k, v in (audit.get('crypto_status') or {}).items()
     }
     groups['crypto']['max_age_seconds'] = 3600
-    hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK'}
+    hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK','EXPIRED'}
     critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')
     return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'expected_session':expected,'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
