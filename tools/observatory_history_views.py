@@ -63,8 +63,23 @@ def archive_pulse(root):
     return [path, index_path]
 
 
+def write_market_reader(root, limit=800):
+    data = root / 'market-observatory/data'
+    raw = (data / 'observatory.json').read_bytes()
+    view = json.loads(raw)
+    view['series'] = {key: rows[-limit:] for key, rows in (view.get('series') or {}).items()}
+    view['reader_view'] = {'schema':'OBSERVATORY_RECENT_READER_V1', 'max_observations':limit,
+                           'source_sha256':hashlib.sha256(raw).hexdigest(),
+                           'full_history_path':'./history-30y.json'}
+    target = data / 'observatory-recent.json'
+    target.write_bytes(encoded(view))
+    return [target]
+
+
 def materialize(root, paths):
     added = []
+    if 'market-observatory/data/observatory.json' in paths:
+        added.extend(write_market_reader(root))
     if 'market-observatory/data/economic-calendar-history.json' in paths:
         added.extend(write_calendar_views(root))
     if 'market-observatory/data/daily-market-pulse.json' in paths:

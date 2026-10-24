@@ -79,7 +79,7 @@ function cleanLegacy(){
  const decisions=qs('#panel-decisions');if(decisions){const p=qsa('div,p',decisions).find(e=>!e.children.length&&text(e)==='표시 가능한 Decision 데이터가 없습니다.');if(p)setText(p,'연결된 PB 판단 자료가 없습니다. 판단 생성·연결 여부를 확인해 주세요. 계좌 수집 정상과는 별도 상태입니다.')}
 }
 function accountPeriods(stats,a){
- const principal=num(a.principal),nav=num(a.nav),pnl=principal>0&&nav!=null?nav-principal:null,ret=pnl!=null?100*pnl/principal:null;
+ const principal=num(a.principal),result=window.JjooniMetrics.cumulative(a),pnl=result.pnl,ret=result.return_pct;
  const tone=v=>num(v)==null?'unknown':v<0?'loss':'gain';
  const row=(kind,label,amount,rate)=>`<div class="ctAccountPeriodRow" data-period="${kind}"><strong class="ctAccountPeriodLabel">${label}</strong><strong class="ctAccountPeriodAmount ${tone(amount)}">${signed(amount)}</strong><b class="ctAccountPeriodRate ${tone(amount)}">${pct(rate)}</b></div>`;
  stats.dataset.periods='daily-cumulative';

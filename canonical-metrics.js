@@ -31,9 +31,16 @@ function cash(a){
 }
 function stock(a){const ps=positions(a);return ps.length?sum(ps.map(p=>valueKrw(p,a))):Array.isArray(a?.positions)?0:null}
 function previous(a){const explicit=first(a,['previous_nav','previous_nav_krw','baseline_nav']);if(explicit!=null)return explicit;const nav=number(a?.nav),day=number(a?.today_pnl),flow=number(a?.net_flow);return nav!=null&&day!=null&&flow!=null?nav-day-flow:null}
+function cumulative(a){
+ const principal=number(a?.principal),nav=number(a?.nav);
+ if(String(a?.id||'').toUpperCase()==='IRP')return {pnl:null,return_pct:null};
+ if(['ISA','PENSION'].includes(String(a?.id||'').toUpperCase())&&principal>0){const pnl=nav==null?null:nav-principal;return {pnl,return_pct:pnl==null?null:100*pnl/principal};}
+ const pnl=number(a?.total_pnl)??(nav!=null&&principal!=null?nav-principal:null);
+ return {pnl,return_pct:number(a?.total_return_pct)??(pnl!=null&&principal>0?100*pnl/principal:null)};
+}
 function aggregate(accounts,ids=IDS){
  ids=[...new Set(ids.filter(id=>!['AI','AIBOT','AI_BOT'].includes(id)).map(accountOwner))];const xs=ids.map(id=>accounts?.[id]||{}),nav=sum(xs.map(x=>number(x.nav))),day=sum(xs.map(x=>number(x.today_pnl))),flow=sum(xs.map(x=>number(x.net_flow))),prior=sum(xs.map(previous)),cum=sum(xs.map(x=>number(x.pnl))),principal=sum(xs.map(x=>number(x.principal)));
- return {nav,day,flow,previous:prior,day_return:day!=null&&prior>0&&(!xs.some(a=>a.today_pnl_scope==='CT_US_CLOSE_PERFORMANCE_DAY_V1')||flow===0)?100*day/prior:null,cum,principal,return_pct:cum!=null&&principal>0?100*cum/principal:null,known_day:xs.filter(x=>number(x.today_pnl)!=null).length,account_count:ids.length,known_day_subtotal:xs.reduce((s,x)=>s+(number(x.today_pnl)??0),0)};
+ return {nav,day,flow,previous:prior,day_return:day!=null&&prior>0&&(!xs.some(a=>a.today_pnl_scope==='CT_US_CLOSE_PERFORMANCE_DAY_V1')||flow===0)?100*day/prior:null,cum,principal,return_pct:cum!=null&&principal>0?100*cum/principal:null,known_cumulative:xs.filter(x=>number(x.pnl)!=null).length,missing_cumulative:ids.filter((id,i)=>number(xs[i].pnl)==null),known_cumulative_subtotal:xs.some(x=>number(x.pnl)!=null)?xs.reduce((s,x)=>s+(number(x.pnl)??0),0):null,known_day:xs.filter(x=>number(x.today_pnl)!=null).length,account_count:ids.length,known_day_subtotal:xs.reduce((s,x)=>s+(number(x.today_pnl)??0),0)};
 }
 function dayKey(v){const s=String(v||'').trim();if(/^\d{8}$/.test(s))return s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6);if(/^\d{4}[/-]\d{2}[/-]\d{2}$/.test(s))return s.replaceAll('/','-');const t=parseMs(s);return t==null?'':new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date(t))}
 function parseMs(v){let s=String(v||'').trim();if(!s)return null;if(!/(Z|[+-]\d{2}:?\d{2})$/i.test(s)&&/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s))s=s.replace(' ','T')+'+09:00';const x=Date.parse(s);return Number.isFinite(x)?x:null}
@@ -51,7 +58,7 @@ function positionDay(p,a){
  return q!=null&&cur>0&&prev>0&&f!=null?q*(cur-prev)*f:null;
 }
 function audit(c){const rows={};for(const id of IDS){const a=c.accounts?.[id]||{},s=stock(a),k=cash(a),nav=number(a.nav);rows[id]={stock:s,cash:k,nav,gap:s!=null&&k!=null&&nav!=null?nav-s-k:null,cash_kind:a.cash_kind||'CASH',position_count:positions(a).length}}return rows}
-const api={IDS,accountOwner,number,first,sum,positions,currency,fx,valueKrw,cash,stock,previous,aggregate,dayKey,parseMs,freshness,positionDay,audit};
+const api={IDS,accountOwner,number,first,sum,positions,currency,fx,valueKrw,cash,stock,previous,cumulative,aggregate,dayKey,parseMs,freshness,positionDay,audit};
 root.JjooniMetrics=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window==='object'?window:globalThis);
 

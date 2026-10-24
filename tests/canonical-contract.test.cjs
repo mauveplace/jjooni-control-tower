@@ -48,3 +48,11 @@ test('custom day pending remains unknown in legacy accounting and uses the perfo
  const c=bridge(),p=live();p.performance_day={date:'2026-09-06'};for(const a of Object.values(p.accounts)){a.today_pnl=null;a.today_return=null;a.net_flow=null;a.today_pnl_scope='CT_US_CLOSE_PERFORMANCE_DAY_V1'}
  c.window.test.setCanon(c.window.test.makeCanonical(p));c.window.test.installCanonicalFunctions();const a=c.window.buildTodayAccounting();assert.equal(a.investment_pnl,null);assert.equal(a.net_cash_flow,null);assert.equal(a.current_nav,400);assert.equal(a.daily_return,null);c.window.test.syncLegacyMirrors();assert.equal(c.D.human.latest_performance.date,'2026-09-06');
 });
+
+test('funded account cumulative authority overrides position PnL and keeps unknown accounts unknown',()=>{
+ assert.deepEqual(M.cumulative({id:'ISA',principal:60000000,nav:58000000,total_pnl:999}),{pnl:-2000000,return_pct:100*(-2000000)/60000000});
+ assert.deepEqual(M.cumulative({id:'PENSION',principal:100,nav:110,total_pnl:-5}),{pnl:10,return_pct:10});
+ assert.deepEqual(M.cumulative({id:'IRP',principal:100,nav:110}),{pnl:null,return_pct:null});
+ const r=M.aggregate({TOSS:{pnl:10},ISA:{pnl:-2},PENSION:{pnl:0},IRP:{pnl:null}});
+ assert.equal(r.cum,null);assert.equal(r.known_cumulative_subtotal,8);assert.equal(r.known_cumulative,3);assert.deepEqual(r.missing_cumulative,['IRP']);
+});
