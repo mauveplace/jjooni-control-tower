@@ -97,6 +97,13 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={cal_overdue} · pending={cal_pending} · source_failures={cal_failed_sources}",'economic-calendar.json',False),
         'audit':group('Full Data Audit',audit.get('overall') or 'UNAVAILABLE',audit.get('generated_kst'),session,f"critical={audit.get('critical_count','—')} · warnings={audit.get('warning_count','—')}",'data-audit.json',True),
     }
+    # Quote timestamps travel with the SSOT so a viewer can re-evaluate the age
+    # against its own clock. The producer's LIVE verdict is only a point-in-time audit.
+    groups['crypto']['quotes'] = {
+        k: {'status': v.get('status'), 'quote_as_of_kst': v.get('quote_as_of_kst')}
+        for k, v in (audit.get('crypto_status') or {}).items()
+    }
+    groups['crypto']['max_age_seconds'] = 3600
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK'}
     critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')
