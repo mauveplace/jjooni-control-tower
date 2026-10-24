@@ -74,6 +74,7 @@ function init(){
   const head=doc.querySelector('header.top');if(!head)return;
   const host=doc.createElement('div');host.className='obsCollectControls';
   host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">시장 원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 다시 확인</button><a data-run-link target="_blank" rel="noopener noreferrer">시장 실행 기록 ↗</a><a href="https://github.com/mauveplace/jjooni-control-tower/actions/workflows/economic-calendar-light-refresh.yml" target="_blank" rel="noopener noreferrer">경제일정 수집 열기 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">게시값 다시 확인: 시장·경제일정 재조회 · 원천 수집 열기: GitHub에서 Run workflow 실행 필요</div>';
+  host.innerHTML='<details><summary style="cursor:pointer;min-height:44px;padding:10px 0;font-weight:700">데이터 관리 · 새로고침</summary>'+host.innerHTML+'</details>';
   head.appendChild(host);button=host.querySelector('#obsCollectRefresh');message=host.querySelector('#obsCollectMessage');links=host.querySelector('[data-run-link]');links.href=RUN_URL;readButton=host.querySelector('#obsReadPublished');
   button.addEventListener('click',start);readButton.addEventListener('click',readPublished);
   try{pending=JSON.parse(sessionStorage.getItem(KEY)||'null');const result=sessionStorage.getItem(KEY+'_RESULT');if(result){message.textContent=result+' 최신 게시 데이터를 다시 읽었습니다.';sessionStorage.removeItem(KEY+'_RESULT');}}catch(_){pending=null;}
