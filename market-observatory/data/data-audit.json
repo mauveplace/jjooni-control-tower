@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-25T08:18:07+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-10-25T08:19:01+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "observatory_session": "2026-10-23",
   "file_status": {
     "observatory": {
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-25T07:41:44+09:00",
+      "generated_kst": "2026-10-25T08:14:00+09:00",
       "session": "2026-10-23",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-25T07:41:44+09:00",
+      "generated_kst": "2026-10-25T08:14:00+09:00",
       "session": "2026-10-23",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-25T07:41:18+09:00",
+      "generated_kst": "2026-10-25T08:18:22+09:00",
       "events": 186,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -52,22 +52,21 @@
       "schema": "JJOONI_OFFICIAL_MACRO_V1"
     },
     "market_regime": {
-      "status": "EXPIRED",
-      "declared_status": "EXPIRED",
+      "status": "SCHEDULED",
       "effective_window": {
+        "start_kst": "2026-10-12T00:00:00+09:00",
         "end_kst": "2026-10-16T23:59:59+09:00",
         "kr_lag_event_date": "2026-10-15",
-        "note": "CPI 10/14 21:30 KST → 10/15 KR; TSMC 10/15 15:00 KST → 10/15 장중 및 10/16. 하이닉스 자사주 종료는 예상, 완료 공시 미확인.",
         "reassessment_dates": [
           "2026-10-15",
           "2026-10-16"
         ],
-        "start_kst": "2026-10-12T00:00:00+09:00"
+        "note": "CPI 10/14 21:30 KST → 10/15 KR; TSMC 10/15 15:00 KST → 10/15 장중 및 10/16. 하이닉스 자사주 종료는 예상, 완료 공시 미확인."
       },
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-25T07:49:49+09:00",
+      "generated_kst": "2026-10-25T08:19:00+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -515,24 +514,18 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-25T07:41:19+09:00",
-      "current_quote_age_seconds": 2208,
+      "current_quote_age_seconds": 2262,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-25T07:41:21+09:00",
-      "current_quote_age_seconds": 2206,
+      "current_quote_age_seconds": 2260,
       "captured_quote_age_seconds": 4
     }
   },
-  "issues": [
-    {
-      "code": "MARKET_REGIME_EXPIRED",
-      "severity": "WARN",
-      "detail": "No current analyst guidance; evaluate effective_window at read time"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",

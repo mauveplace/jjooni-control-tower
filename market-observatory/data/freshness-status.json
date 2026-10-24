@@ -1,10 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-25T08:18:07+09:00",
+  "generated_kst": "2026-10-25T08:19:01+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "audit",
     "market_regime"
   ],
   "watchdog_required": false,
@@ -109,7 +108,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-25T07:36:38+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=2208s · ETHUSD age=2206s",
+      "detail": "BTCUSD age=2262s · ETHUSD age=2260s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -127,7 +126,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-25T07:41:44+09:00",
+      "generated_kst": "2026-10-25T08:14:00+09:00",
       "as_of": "2026-10-23",
       "detail": "snapshot=FINAL · Observatory session=2026-10-23",
       "source": "daily-market-pulse.json",
@@ -154,7 +153,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-25T07:41:44+09:00",
+      "generated_kst": "2026-10-25T08:14:00+09:00",
       "as_of": "2026-10-23",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -181,18 +180,18 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-10-25T07:41:18+09:00",
-      "as_of": "2026-10-25T07:41:18+09:00",
+      "generated_kst": "2026-10-25T08:18:22+09:00",
+      "as_of": "2026-10-25T08:18:22+09:00",
       "detail": "events=186 · overdue=0 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-10-25T08:18:07+09:00",
+      "state": "PASS",
+      "generated_kst": "2026-10-25T08:19:01+09:00",
       "as_of": "2026-10-23",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     },

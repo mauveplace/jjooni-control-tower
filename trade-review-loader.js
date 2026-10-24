@@ -3,7 +3,7 @@
 if(['ACTIVE','WAITING_FOR_SSOT','LOADING_REQUIRED_UI'].includes(window.__JJOONI_UI_BOOT_V14?.state))return;
 
 const head=document.head||document.documentElement;
-const BOOT={state:'WAITING_FOR_SSOT',version:'14.36',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(Date.now())};
+const BOOT={state:'WAITING_FOR_SSOT',version:'14.36',started_at:new Date().toISOString(),loaded:[],failed:null,nav_owner:'TRADE_REVIEW_LOADER_V14',preload_token:String(window.__JJOONI_UI_RELEASE||'20261025-r3')};
 window.__JJOONI_UI_BOOT_V14=BOOT;
 
 const DEFERRED_LABELS=new Set(['decision-impact','manual-intraday']);
