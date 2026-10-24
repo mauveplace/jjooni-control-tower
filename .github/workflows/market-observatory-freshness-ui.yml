@@ -9,6 +9,7 @@ on:
       - tools/fedwatch_trade_calendar.py
       - market-observatory/freshness-watchdog-v1.js
       - market-observatory/freshness-all-groups-v1.js
+      - tests/observatory-crypto-freshness.test.cjs
       - market-observatory/data/watchdog-status.json
       - market-observatory/data/observatory.json
       - market-observatory/data/daily-market-pulse.json
@@ -79,8 +80,8 @@ jobs:
           p=Path('market-observatory/index.html')
           s=p.read_text(encoding='utf-8')
           from tools.observatory_ui_assets import ensure_runtime
-          s=ensure_runtime(s, 'freshness-watchdog-v1.js', '1.3')
-          s=ensure_runtime(s, 'freshness-all-groups-v1.js', '1.0')
+          s=ensure_runtime(s, 'freshness-watchdog-v1.js', '1.4')
+          s=ensure_runtime(s, 'freshness-all-groups-v1.js', '1.1')
           p.write_text(s,encoding='utf-8')
           print('OBSERVATORY_FRESHNESS_RUNTIME_INSTALL=PASS')
           PY
@@ -89,6 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node tests/observatory-crypto-freshness.test.cjs
           python - <<'PY'
           import json
           from pathlib import Path
