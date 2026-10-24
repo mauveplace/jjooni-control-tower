@@ -1,0 +1,11 @@
+/* Browser-scoped unlock capsule. Never fingerprints hardware or transmits secrets. */
+(function(root){
+'use strict';
+const DB='jjooni-trusted-browser-v1',STORE='capsule',TTL=30*86400000;
+function database(){return new Promise((resolve,reject)=>{const q=indexedDB.open(DB,1);q.onupgradeneeded=()=>q.result.createObjectStore(STORE);q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)})}
+async function record(mode,operation){const db=await database();try{return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,mode),q=operation(tx.objectStore(STORE));let result;q.onsuccess=()=>{result=q.result};tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}finally{db.close()}}
+async function forget(){await record('readwrite',s=>s.delete('unlock'))}
+async function remember(password){const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']),iv=crypto.getRandomValues(new Uint8Array(12)),aad=new TextEncoder().encode(location.origin),ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:aad},key,new TextEncoder().encode(password));await record('readwrite',s=>s.put({key,iv,ciphertext,origin:location.origin,expires:Date.now()+TTL},'unlock'))}
+async function restore(){const r=await record('readonly',s=>s.get('unlock'));if(!r)return null;if(r.origin!==location.origin||!Number.isFinite(r.expires)||Date.now()>=r.expires){await forget();return null}try{return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:r.iv,additionalData:new TextEncoder().encode(location.origin)},r.key,r.ciphertext))}catch(_){await forget();return null}}
+root.JjooniTrustedDevice={remember,restore,forget,ttl_days:30};
+})(window);
