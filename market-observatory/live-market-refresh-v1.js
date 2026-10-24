@@ -14,6 +14,7 @@ async function refresh(force=false){
  if(pending)return pending;
  if(!force&&(document.hidden||Date.now()-lastAttempt<55000))return;
  if(typeof DATA==='undefined'||!DATA)return;
+ if(lastRevision===null&&!force){lastRevision=revision(DATA);lastAttempt=Date.now();state.status='READY';return false}
  lastAttempt=Date.now();lastRevision??=revision(DATA);state.status='CHECKING';
  pending=(async()=>{try{
   // Revalidate the ETag instead of downloading a cache-busted 30Y payload each minute.
@@ -31,5 +32,5 @@ async function refresh(force=false){
 setInterval(()=>refresh(),state.interval_ms);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});root.addEventListener('pageshow',()=>refresh());
 // Also cover a tab restored from the mobile browser back-forward cache.
-const start=setInterval(()=>{if(typeof DATA!=='undefined'&&DATA){clearInterval(start);refresh(true)}},200);
+const start=setInterval(()=>{if(typeof DATA!=='undefined'&&DATA){clearInterval(start);lastRevision=revision(DATA);lastAttempt=Date.now();state.status='READY'}},200);
 })(typeof window==='object'?window:globalThis);

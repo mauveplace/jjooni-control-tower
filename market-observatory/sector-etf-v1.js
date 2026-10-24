@@ -160,8 +160,7 @@ async function load(){
  STATE.loading=true;STATE.status='LOADING';
  const box=q('#sectors .obsSectorLoading');if(box)box.textContent='섹터 ETF 완료 일봉을 불러오는 중입니다…';
  try{
-   const r=await fetch('./data/sector-etf.json?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('sector-etf '+r.status);
-   const d=await r.json();if(d?.schema!=='JJOONI_OBSERVATORY_SECTOR_ETF_V1')throw new Error('sector-etf schema mismatch');
+   const d=await window.JjooniDataReads.read('./data/sector-etf.json');if(d?.schema!=='JJOONI_OBSERVATORY_SECTOR_ETF_V1')throw new Error('sector-etf schema mismatch');
    DATA=d;render();return d;
  }catch(e){STATE.status='ERROR';STATE.error=String(e);const panel=q('#sectors');if(panel)panel.innerHTML='<div class="obsSectorLoading">섹터 ETF 원천 데이터를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.</div>';console.error(e);return null}
  finally{STATE.loading=false}

@@ -196,12 +196,12 @@ function showDetail(key){
 }
 async function load(){
  try{
-  const r=await fetch('./data/official-macro.json?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('official-macro '+r.status);
-  DATA=await r.json();if(DATA?.schema!=='JJOONI_OFFICIAL_MACRO_V1')throw new Error('official-macro schema');
+  DATA=await window.JjooniDataReads.read('./data/official-macro.json');if(DATA?.schema!=='JJOONI_OFFICIAL_MACRO_V1')throw new Error('official-macro schema');
   render();
  }catch(e){STATE.status='ACTIVE_DEGRADED';STATE.error=String(e);const p=q('#official-macro');if(p&&!DATA)p.innerHTML='<div class="card"><h3>Macro Official Data</h3><div class="meta">공식 거시데이터 생성 대기 · '+esc(String(e))+'</div></div>';console.warn(e)}
 }
-function boot(){if(!inject()){setTimeout(boot,200);return}load()}
+function boot(){if(!inject()){setTimeout(boot,200);return}if(q('#tabs button.on')?.dataset.tab==='official-macro')load()}
+document.addEventListener('click',e=>{if(e.target.closest('button[data-tab="official-macro"]'))load()});
 boot();
-setInterval(()=>{if(!document.hidden)load()},120000);
+setInterval(()=>{if(!document.hidden&&q('#tabs button.on')?.dataset.tab==='official-macro')load()},120000);
 })();
