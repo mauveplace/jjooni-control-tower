@@ -1,191 +1,396 @@
 {
-  "schema": "JJOONI_MARKET_REGIME_V1",
-  "status": "SCHEDULED",
-  "authority": "ANALYST_CONSENSUS_WEEKLY_SSOT",
-  "read_only": true,
   "account_authority": false,
-  "order_authority": false,
-  "source": {
-    "title": "[W] 261012 주간시황 v11.5.2 (쭈니·로이 최종합의·표현 보완)",
-    "version": "v11.5.2",
-    "url": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
-    "generated_kst": "2026-10-10T22:50:00+09:00",
-    "consensus_status": "CLOSED",
-    "unresolved_issues": 0,
-    "source_dates": {
-      "us_market": "2026-10-09",
-      "kr_market": "2026-10-08",
-      "pb_snapshot": "20261010T080534+0900"
-    },
-    "data_freshness": "CONSENSUS_REFERENCE_NOT_LIVE_MARKET",
-    "supersedes": [
-      "v11.4.2",
-      "v11.5",
-      "v11.5.1"
-    ]
+  "actions": {
+    "authority": "PB_GUIDANCE_NOT_ORDER",
+    "dca": "MAINTAIN_LONG_TERM_CORE_UNDER_EXISTING_RULES",
+    "dca_ev_independent": true,
+    "irregular_additional_buy": "NO_EV_ADVANTAGE",
+    "irregular_leverage_add": "ZERO",
+    "irregular_theme_add": "HOLD_PENDING_REASSESSMENT",
+    "monday_open": "FOLLOW_EXISTING_RULES_NO_IRREGULAR_ADD",
+    "regular_dca": "UNCHANGED_UNDER_EXISTING_PB_RULES",
+    "risk_reduction_precedence": true,
+    "semiconductor_core": "FOLLOW_EXISTING_RISK_RULES",
+    "summary_ko": "장기 코어 DCA와 기존 규칙매매 유지. 비정기 테마·레버리지 증액 보류. CPI·TSMC 이후 재판정하되 기존 위험축소 신호가 먼저 나오면 해당 규칙 우선.",
+    "tripod_rule_trading": "UNCHANGED"
   },
+  "authority": "ANALYST_CONSENSUS_WEEKLY_SSOT",
+  "buyback_reference": {
+    "actual_executed_cash_krw": null,
+    "actual_removed_demand_krw": null,
+    "basis": "ORDER_QUANTITY_TIMES_2026_10_08_CLOSE_PROXY",
+    "hynix_estimated_order_krw_range": [
+      1011600000000,
+      1095900000000
+    ],
+    "hynix_order_quantity_range": [
+      600000,
+      650000
+    ],
+    "hynix_price_assumption_krw": 1686000,
+    "index_impact_estimate": null,
+    "note": "약 2배는 추정 주문금액 비교에만 해당. 시장 충격 배수 아님.",
+    "samsung_estimated_order_krw": 526000000000,
+    "samsung_order_quantity": 2000000,
+    "samsung_price_assumption_krw": 263000
+  },
+  "checkpoints": [
+    {
+      "datetime_kst": "2026-10-14T21:30:00+09:00",
+      "label": "10/14 21:30 KST 미국 9월 CPI",
+      "market": "US",
+      "order": 1,
+      "purpose": "근원 MoM·금리 반응 확인 → 10/15 한국장"
+    },
+    {
+      "datetime_kst": "2026-10-15T15:00:00+09:00",
+      "label": "10/15 15:00 KST TSMC 실적 발표",
+      "market": "TW",
+      "order": 2,
+      "purpose": "4Q 가이던스·CAPEX 확인 → 10/15 장중·10/16"
+    },
+    {
+      "confirmed": false,
+      "date_end": "2026-10-16",
+      "date_start": "2026-10-15",
+      "label": "10/15~16 하이닉스 마지막 주문 예상",
+      "market": "KR",
+      "order": 3,
+      "purpose": "자사주 취득 완료 공시·일별 실제 체결 확인"
+    },
+    {
+      "label": "기존 위험축소 신호 상시 우선",
+      "market": "ALL",
+      "order": 4,
+      "purpose": "CPI·TSMC를 기다리며 기존 전략 신호를 유예하지 않는다."
+    }
+  ],
+  "consumer_contract": {
+    "precedence": "MARKET_REGIME_GUIDANCE_ONLY",
+    "rule": "계좌·주문·체결 SSOT를 절대 대체하지 않는다. PB는 이 레짐을 시장판단 참고값으로 사용하고 실제 집행은 계좌 SSOT·전략규칙·실행안전장치를 우선한다. 기존 위험축소·TRI-POD 신호를 합의문이 덮어쓰지 않는다. 미확인 트리거는 false가 아니라 UNKNOWN/NOT_EVALUATED로 처리한다.",
+    "stale_rule": "start_kst 이전 PENDING; end_kst 이후 EXPIRED. 보고서 source_date를 최신 실측값으로 취급하지 않는다."
+  },
+  "declared_status": "SCHEDULED",
   "effective_window": {
-    "start_kst": "2026-10-12T00:00:00+09:00",
     "end_kst": "2026-10-16T23:59:59+09:00",
     "kr_lag_event_date": "2026-10-15",
+    "note": "CPI 10/14 21:30 KST → 10/15 KR; TSMC 10/15 15:00 KST → 10/15 장중 및 10/16. 하이닉스 자사주 종료는 예상, 완료 공시 미확인.",
     "reassessment_dates": [
       "2026-10-15",
       "2026-10-16"
     ],
-    "note": "CPI 10/14 21:30 KST → 10/15 KR; TSMC 10/15 15:00 KST → 10/15 장중 및 10/16. 하이닉스 자사주 종료는 예상, 완료 공시 미확인."
+    "start_kst": "2026-10-12T00:00:00+09:00"
   },
+  "generated_kst": "2026-10-11T09:44:22.647+09:00",
+  "history": {
+    "current_consensus_path": "./market-regime-history/20261012-v11.5.2.json",
+    "legacy_research_policy": "9/29 연구 오버레이는 이전 합의본 이력에 보존; 현재 화면의 최신 연구로 표시하지 않는다.",
+    "previous_consensus_path": "./market-regime-history/20260928-v11.4.2.json"
+  },
+  "kospi_cascade": {
+    "amber_ev_threshold_pct": -0.5,
+    "base_probabilities_pct": [
+      33,
+      32,
+      35
+    ],
+    "current_state": "REFERENCE_BASE_NO_LIVE_EVALUATION",
+    "non_vkospi_amber_path": "MACRO_AND_OIL_AND_FOREIGN_FLOW",
+    "probability_adjustment_ceiling_pp": null,
+    "rows": [
+      {
+        "band": "NEUTRAL",
+        "base_pct": 32,
+        "base_return_pct": 0.5,
+        "bear_pct": 35,
+        "bear_return_pct": -4.5,
+        "bull_pct": 33,
+        "bull_return_pct": 4,
+        "ev_pct": -0.095,
+        "foreign_flow": false,
+        "macro": false,
+        "oil": false
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 29,
+        "base_return_pct": 0.5,
+        "bear_pct": 38,
+        "bear_return_pct": -4.5,
+        "bull_pct": 33,
+        "bull_return_pct": 4,
+        "ev_pct": -0.245,
+        "foreign_flow": true,
+        "macro": false,
+        "oil": false
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 29,
+        "base_return_pct": 0.5,
+        "bear_pct": 38,
+        "bear_return_pct": -4.5,
+        "bull_pct": 33,
+        "bull_return_pct": 4,
+        "ev_pct": -0.245,
+        "foreign_flow": false,
+        "macro": false,
+        "oil": true
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 26,
+        "base_return_pct": 0.5,
+        "bear_pct": 41,
+        "bear_return_pct": -4.5,
+        "bull_pct": 33,
+        "bull_return_pct": 4,
+        "ev_pct": -0.395,
+        "foreign_flow": true,
+        "macro": false,
+        "oil": true
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 30,
+        "base_return_pct": 0.5,
+        "bear_pct": 38,
+        "bear_return_pct": -4.5,
+        "bull_pct": 32,
+        "bull_return_pct": 4,
+        "ev_pct": -0.28,
+        "foreign_flow": false,
+        "macro": true,
+        "oil": false
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 27,
+        "base_return_pct": 0.5,
+        "bear_pct": 41,
+        "bear_return_pct": -4.5,
+        "bull_pct": 32,
+        "bull_return_pct": 4,
+        "ev_pct": -0.43,
+        "foreign_flow": true,
+        "macro": true,
+        "oil": false
+      },
+      {
+        "band": "NEUTRAL",
+        "base_pct": 27,
+        "base_return_pct": 0.5,
+        "bear_pct": 41,
+        "bear_return_pct": -4.5,
+        "bull_pct": 32,
+        "bull_return_pct": 4,
+        "ev_pct": -0.43,
+        "foreign_flow": false,
+        "macro": true,
+        "oil": true
+      },
+      {
+        "band": "AMBER",
+        "base_pct": 24,
+        "base_return_pct": 0.5,
+        "bear_pct": 44,
+        "bear_return_pct": -4.5,
+        "bull_pct": 32,
+        "bull_return_pct": 4,
+        "ev_pct": -0.58,
+        "foreign_flow": true,
+        "macro": true,
+        "oil": true
+      }
+    ],
+    "scenario_returns_pct": [
+      4,
+      0.5,
+      -4.5
+    ],
+    "unknown_is_not_false": true
+  },
+  "middle_east": {
+    "label": "SUPPLY_RISK_REPORTED_UNVERIFIED_EVENT_DETAILS",
+    "source": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
+    "summary_ko": "v11.5는 호르무즈 공급위험 지속을 보고. 정치·공습 시점은 미확정 가설이며 OIL-STRUCTURAL 확인 전 장기 공급충격 고착으로 단정하지 않는다."
+  },
+  "order_authority": false,
+  "read_only": true,
   "regime": {
+    "broad_risk_on": false,
     "code": "AI_LED_NARROW_RISK_ON_MACRO_STRESS_OVERLAY",
     "label_ko": "AI 주도 좁은 위험선호 + 매크로 스트레스 오버레이",
-    "broad_risk_on": false,
     "primary_risk": "LONG_REAL_RATE_AND_TERM_PREMIUM",
     "summary_ko": "미국은 AI 내부 반도체에서 SW·보안으로, 일부 대형 방어주·발전사로 로테이션하는 좁은 장. 한국은 외국인 매도와 자사주 매입 종료 예상이 겹친 수급 경고 구간. 구조 등급과 가격 추세는 별도 축이며, 실제 집행은 기존 계좌·전략 규칙 우선."
   },
-  "weekly_ev": {
-    "nasdaq": {
-      "bull_pct": 30,
-      "base_pct": 42,
-      "bear_pct": 28,
-      "bull_return_pct": 2.5,
-      "base_return_pct": 0.3,
-      "bear_return_pct": -3.5,
-      "ev_pct": -0.104,
-      "band": "NEUTRAL"
+  "schema": "JJOONI_MARKET_REGIME_V1",
+  "semiconductor": {
+    "condition_caveats": {
+      "BOND_STRESS": "재무부 관측 ON 보고; H.15 재확인 대기.",
+      "DRAM_SLOWDOWN": "4Q 가격은 전망치. 확정 실현값과 구분.",
+      "MU_MISS": "v11.4.2 고정 판정선과 SEC 실적 비교. 컨센 출처 독립성은 별도."
     },
-    "kospi": {
-      "bull_pct": 33,
-      "base_pct": 32,
-      "bear_pct": 35,
-      "bull_return_pct": 4,
-      "base_return_pct": 0.5,
-      "bear_return_pct": -4.5,
-      "ev_pct": -0.095,
-      "band": "NEUTRAL"
+    "current_grade": "S",
+    "downgrade_conditions": [
+      {
+        "definition": "범용 DRAM QoQ 상승률 +5% 미만 2개 분기 연속",
+        "id": "DRAM_SLOWDOWN"
+      },
+      {
+        "definition": "Bond Stress CONFIRMED",
+        "id": "BOND_STRESS"
+      },
+      {
+        "definition": "Micron 실적이 매출 50.45B USD 미만 또는 EPS 31.16 USD 미만",
+        "id": "MU_MISS"
+      }
+    ],
+    "grade_axis": "STRUCTURAL",
+    "grade_rule": {
+      "0_1_conditions": "S",
+      "2_conditions": "S-",
+      "3_conditions": "A"
     },
-    "one_month": {
-      "bull_pct": 28,
-      "base_pct": 37,
-      "bear_pct": 35,
-      "bull_return_pct": 4,
-      "base_return_pct": 0.5,
-      "bear_return_pct": -5,
-      "ev_pct": -0.445,
-      "band": "NEUTRAL",
-      "validation": "RECOMPUTED_FROM_V11_5_INPUTS"
+    "grade_source": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
+    "price_trend": {
+      "history_sessions": 130,
+      "label_ko": "상승 유지 · 단기 경고 · MA200 미확인",
+      "missing_policy": "MA200_UNAVAILABLE_NOT_ESTIMATED",
+      "observed_date": "2026-10-09",
+      "source": "OBSERVATORY_SECTOR_ETF_REFERENCE",
+      "status": "UPTREND_WITH_SHORT_TERM_WARNING",
+      "ticker": "SOXX",
+      "vs_ma120_pct": 3.51946204,
+      "vs_ma200_pct": null,
+      "vs_ma20_pct": 0.48834352,
+      "vs_ma50_pct": 4.1004524
     },
-    "six_month": {
-      "bull_pct": 28,
-      "base_pct": 40,
-      "bear_pct": 32,
-      "ev_pct": null,
-      "conservative_ev_pct": null,
-      "validation": "UNVERIFIED_MISSING_SCENARIO_RETURNS",
-      "reported_ev_pct": 3.64,
-      "reported_conservative_ev_pct": -0.66,
-      "note": "v11.5 승계값. 원문 점추정 부재로 재현 불가; 판단 입력에 사용하지 않는다."
+    "reported_condition_count": 1,
+    "semantics": {
+      "A": "정상 조정",
+      "C_or_below": "구조 추세 훼손",
+      "S": "강한 산업 구조 등급; 가격 상승추세 등급이나 추가매수 허가가 아님",
+      "S-": "강한 구조 유지 + 단기 경고"
     }
   },
-  "actions": {
-    "dca": "MAINTAIN_LONG_TERM_CORE_UNDER_EXISTING_RULES",
-    "irregular_additional_buy": "NO_EV_ADVANTAGE",
-    "irregular_theme_add": "HOLD_PENDING_REASSESSMENT",
-    "irregular_leverage_add": "ZERO",
-    "regular_dca": "UNCHANGED_UNDER_EXISTING_PB_RULES",
-    "tripod_rule_trading": "UNCHANGED",
-    "monday_open": "FOLLOW_EXISTING_RULES_NO_IRREGULAR_ADD",
-    "semiconductor_core": "FOLLOW_EXISTING_RISK_RULES",
-    "risk_reduction_precedence": true,
-    "summary_ko": "장기 코어 DCA와 기존 규칙매매 유지. 비정기 테마·레버리지 증액 보류. CPI·TSMC 이후 재판정하되 기존 위험축소 신호가 먼저 나오면 해당 규칙 우선.",
-    "dca_ev_independent": true,
-    "authority": "PB_GUIDANCE_NOT_ORDER"
+  "source": {
+    "consensus_status": "CLOSED",
+    "data_freshness": "CONSENSUS_REFERENCE_NOT_LIVE_MARKET",
+    "generated_kst": "2026-10-10T22:50:00+09:00",
+    "source_dates": {
+      "kr_market": "2026-10-08",
+      "pb_snapshot": "20261010T080534+0900",
+      "us_market": "2026-10-09"
+    },
+    "supersedes": [
+      "v11.4.2",
+      "v11.5",
+      "v11.5.1"
+    ],
+    "title": "[W] 261012 주간시황 v11.5.2 (쭈니·로이 최종합의·표현 보완)",
+    "unresolved_issues": 0,
+    "url": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
+    "version": "v11.5.2"
   },
+  "status": "EXPIRED",
   "triggers": {
     "bond_stress": {
       "confirmation_source": "FED_H15",
+      "current_reference": {
+        "confirmed": false,
+        "h15_confirmation_status": "PENDING_RECHECK",
+        "note": "최종 합의는 Bond Stress 1개 점등으로 판정. 기존 H.15 확인 계약을 임의 변경하지 않으며 10/9 H.15 재확인 필요.",
+        "source": "V11_5_REPORTED_TREASURY_PAR_YIELD",
+        "source_date": "2026-10-09",
+        "treasury_reported_on": true,
+        "us10y_official_pct": 5.24,
+        "us30y_official_pct": 5.6
+      },
+      "current_state": "ON_REPORTED_TREASURY_H15_PENDING",
+      "deep_extra_probability_shift_pct": 0,
+      "deep_if_all": true,
+      "deep_label": "BOND_STRESS_DEEP",
       "on_if_any": [
         {
           "metric": "US10Y",
           "operator": ">=",
-          "value": 5.25,
-          "unit": "%"
+          "unit": "%",
+          "value": 5.25
         },
         {
           "metric": "US30Y",
           "operator": ">=",
-          "value": 5.5,
-          "unit": "%"
+          "unit": "%",
+          "value": 5.5
         }
+      ]
+    },
+    "foreign_flow": {
+      "activate_if": "DAILY_NET_BUY<=-2000000000000_ON_2_ADDITIONAL_KR_TRADING_DAYS",
+      "consecutive_days_required": null,
+      "current_state": "NOT_YET_EVALUATED",
+      "evaluation_start_date": "2026-10-12",
+      "kospi_probability_shift": "BASE_TO_BEAR_3PP",
+      "metric": "KOSPI_FOREIGN_NET_BUY_KRW",
+      "note": "原文は2거래일 추가이며 연속 여부 미정. 실측 일별 수급 확인 전 자동 판정하지 않는다."
+    },
+    "kr_volatility": {
+      "amber_rule": "RECOMPUTE_EV_AFTER_BEAR_RETURN_REPLACEMENT",
+      "bear_return_pct_range": [
+        -6,
+        -8
       ],
-      "deep_if_all": true,
-      "deep_label": "BOND_STRESS_DEEP",
-      "deep_extra_probability_shift_pct": 0,
-      "current_state": "ON_REPORTED_TREASURY_H15_PENDING",
+      "bear_zone": "60_TO_75",
       "current_reference": {
-        "us10y_official_pct": 5.24,
-        "us30y_official_pct": 5.6,
-        "source_date": "2026-10-09",
-        "source": "V11_5_REPORTED_TREASURY_PAR_YIELD",
-        "confirmed": false,
-        "treasury_reported_on": true,
-        "h15_confirmation_status": "PENDING_RECHECK",
-        "note": "최종 합의는 Bond Stress 1개 점등으로 판정. 기존 H.15 확인 계약을 임의 변경하지 않으며 10/9 H.15 재확인 필요."
-      }
+        "status": "UNAVAILABLE",
+        "value": null
+      },
+      "existing_regime_rule": true,
+      "metric": "VKOSPI",
+      "note": "VKOSPI 60 이상에서는 BEAR 점추정 교체 후 EV 재계산. 기준 확률 33/32/35에서는 -0.62~-1.32%로 AMBER. 다른 확률에 무조건 동일 판정하지 않는다.",
+      "separate_vix_overlay": false,
+      "tail_zone": "75_PLUS"
     },
     "macro_stress": {
+      "activate_if_count_gte": 2,
       "conditions": [
         "BOND_STRESS_CONFIRMED",
         "CORE_PCE_YOY>=3.5",
         "NFP>=200000"
       ],
-      "activate_if_count_gte": 2,
-      "nasdaq_shift": {
-        "bull_pct": 29,
-        "base_pct": 40,
-        "bear_pct": 31,
-        "bull_return_pct": 2.5,
-        "base_return_pct": 0.3,
-        "bear_return_pct": -3.5,
-        "ev_pct": -0.24,
-        "band": "NEUTRAL"
-      },
-      "kospi_shift": {
-        "bull_pct": 32,
-        "base_pct": 30,
-        "bear_pct": 38,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.28,
-        "band": "NEUTRAL"
-      },
-      "relative_shift_pp": {
-        "bull": -1,
-        "base": -2,
-        "bear": 3
-      },
-      "current_state": "NOT_ACTIVATED_REPORTED",
       "current_reference": {
-        "reported_condition_count": 1,
         "core_pce_yoy_pct": 3.01,
         "nfp": 29000,
+        "reported_condition_count": 1,
         "source": "V11_5_REFERENCE_NOT_LIVE"
-      }
-    },
-    "oil_watch": {
-      "activate_if_any": [
-        "WTI_DEC_2027>=75_USD_FOR_3_TRADING_DAYS",
-        "BRENT_FRONT_MONTH_CLOSE>=110_USD"
-      ],
-      "nasdaq_probability_shift": "BASE_TO_BEAR_3PP",
-      "kospi_probability_shift": "BASE_TO_BEAR_3PP_PROVISIONAL",
-      "current_state": "NOT_ACTIVATED_REPORTED_WITH_MISSING_FUTURES",
-      "current_reference": {
-        "brent_front_month_usd": 104.72,
-        "source_date": "2026-10-09",
-        "wti_dec_2027_usd": null
       },
-      "additional_reported_condition": "BRENT_DECEMBER_CONTRACT>=105_USD_FOR_3_TRADING_DAYS",
-      "additional_condition_validation": "V11_5_REPORTED_CONDITION_CONTRACT_YEAR_NOT_SPECIFIED"
+      "current_state": "NOT_ACTIVATED_REPORTED",
+      "kospi_shift": {
+        "band": "NEUTRAL",
+        "base_pct": 30,
+        "base_return_pct": 0.5,
+        "bear_pct": 38,
+        "bear_return_pct": -4.5,
+        "bull_pct": 32,
+        "bull_return_pct": 4,
+        "ev_pct": -0.28
+      },
+      "nasdaq_shift": {
+        "band": "NEUTRAL",
+        "base_pct": 40,
+        "base_return_pct": 0.3,
+        "bear_pct": 31,
+        "bear_return_pct": -3.5,
+        "bull_pct": 29,
+        "bull_return_pct": 2.5,
+        "ev_pct": -0.24
+      },
+      "relative_shift_pp": {
+        "base": -2,
+        "bear": 3,
+        "bull": -1
+      }
     },
     "oil_structural": {
       "activate_if_all": [
@@ -195,265 +400,40 @@
       "horizon": "1M_6M",
       "probability_shift": "BASE_TO_BEAR_5PP"
     },
+    "oil_watch": {
+      "activate_if_any": [
+        "WTI_DEC_2027>=75_USD_FOR_3_TRADING_DAYS",
+        "BRENT_FRONT_MONTH_CLOSE>=110_USD"
+      ],
+      "additional_condition_validation": "V11_5_REPORTED_CONDITION_CONTRACT_YEAR_NOT_SPECIFIED",
+      "additional_reported_condition": "BRENT_DECEMBER_CONTRACT>=105_USD_FOR_3_TRADING_DAYS",
+      "current_reference": {
+        "brent_front_month_usd": 104.72,
+        "source_date": "2026-10-09",
+        "wti_dec_2027_usd": null
+      },
+      "current_state": "NOT_ACTIVATED_REPORTED_WITH_MISSING_FUTURES",
+      "kospi_probability_shift": "BASE_TO_BEAR_3PP_PROVISIONAL",
+      "nasdaq_probability_shift": "BASE_TO_BEAR_3PP"
+    },
     "us_volatility_shock": {
-      "metric": "VIX",
       "activate_if_any": [
         "CLOSE>20",
         "DAILY_CHANGE_PCT>=30"
       ],
-      "nasdaq_probability_shift": "BASE_TO_BEAR_5PP",
       "combine_with_oil_rule": "MAX_NOT_SUM",
+      "metric": "VIX",
+      "nasdaq_probability_shift": "BASE_TO_BEAR_5PP",
       "total_bear_adjustment_ceiling_pp": 8
-    },
-    "kr_volatility": {
-      "metric": "VKOSPI",
-      "existing_regime_rule": true,
-      "bear_zone": "60_TO_75",
-      "tail_zone": "75_PLUS",
-      "separate_vix_overlay": false,
-      "current_reference": {
-        "value": null,
-        "status": "UNAVAILABLE"
-      },
-      "bear_return_pct_range": [
-        -6,
-        -8
-      ],
-      "amber_rule": "RECOMPUTE_EV_AFTER_BEAR_RETURN_REPLACEMENT",
-      "note": "VKOSPI 60 이상에서는 BEAR 점추정 교체 후 EV 재계산. 기준 확률 33/32/35에서는 -0.62~-1.32%로 AMBER. 다른 확률에 무조건 동일 판정하지 않는다."
-    },
-    "foreign_flow": {
-      "metric": "KOSPI_FOREIGN_NET_BUY_KRW",
-      "activate_if": "DAILY_NET_BUY<=-2000000000000_ON_2_ADDITIONAL_KR_TRADING_DAYS",
-      "evaluation_start_date": "2026-10-12",
-      "consecutive_days_required": null,
-      "note": "原文は2거래일 추가이며 연속 여부 미정. 실측 일별 수급 확인 전 자동 판정하지 않는다.",
-      "kospi_probability_shift": "BASE_TO_BEAR_3PP",
-      "current_state": "NOT_YET_EVALUATED"
     }
   },
-  "semiconductor": {
-    "current_grade": "S",
-    "downgrade_conditions": [
-      {
-        "id": "DRAM_SLOWDOWN",
-        "definition": "범용 DRAM QoQ 상승률 +5% 미만 2개 분기 연속"
-      },
-      {
-        "id": "BOND_STRESS",
-        "definition": "Bond Stress CONFIRMED"
-      },
-      {
-        "id": "MU_MISS",
-        "definition": "Micron 실적이 매출 50.45B USD 미만 또는 EPS 31.16 USD 미만"
-      }
-    ],
-    "grade_rule": {
-      "0_1_conditions": "S",
-      "2_conditions": "S-",
-      "3_conditions": "A"
-    },
-    "semantics": {
-      "S": "강한 산업 구조 등급; 가격 상승추세 등급이나 추가매수 허가가 아님",
-      "S-": "강한 구조 유지 + 단기 경고",
-      "A": "정상 조정",
-      "C_or_below": "구조 추세 훼손"
-    },
-    "grade_axis": "STRUCTURAL",
-    "reported_condition_count": 1,
-    "grade_source": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
-    "price_trend": {
-      "status": "UPTREND_WITH_SHORT_TERM_WARNING",
-      "source": "OBSERVATORY_SECTOR_ETF_REFERENCE",
-      "observed_date": "2026-10-09",
-      "ticker": "SOXX",
-      "vs_ma20_pct": 0.48834352,
-      "vs_ma50_pct": 4.1004524,
-      "vs_ma120_pct": 3.51946204,
-      "vs_ma200_pct": null,
-      "history_sessions": 130,
-      "missing_policy": "MA200_UNAVAILABLE_NOT_ESTIMATED",
-      "label_ko": "상승 유지 · 단기 경고 · MA200 미확인"
-    },
-    "condition_caveats": {
-      "DRAM_SLOWDOWN": "4Q 가격은 전망치. 확정 실현값과 구분.",
-      "BOND_STRESS": "재무부 관측 ON 보고; H.15 재확인 대기.",
-      "MU_MISS": "v11.4.2 고정 판정선과 SEC 실적 비교. 컨센 출처 독립성은 별도."
-    }
-  },
-  "middle_east": {
-    "label": "SUPPLY_RISK_REPORTED_UNVERIFIED_EVENT_DETAILS",
-    "summary_ko": "v11.5는 호르무즈 공급위험 지속을 보고. 정치·공습 시점은 미확정 가설이며 OIL-STRUCTURAL 확인 전 장기 공급충격 고착으로 단정하지 않는다.",
-    "source": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit"
-  },
-  "checkpoints": [
-    {
-      "order": 1,
-      "label": "10/14 21:30 KST 미국 9월 CPI",
-      "market": "US",
-      "datetime_kst": "2026-10-14T21:30:00+09:00",
-      "purpose": "근원 MoM·금리 반응 확인 → 10/15 한국장"
-    },
-    {
-      "order": 2,
-      "label": "10/15 15:00 KST TSMC 실적 발표",
-      "market": "TW",
-      "datetime_kst": "2026-10-15T15:00:00+09:00",
-      "purpose": "4Q 가이던스·CAPEX 확인 → 10/15 장중·10/16"
-    },
-    {
-      "order": 3,
-      "label": "10/15~16 하이닉스 마지막 주문 예상",
-      "market": "KR",
-      "date_start": "2026-10-15",
-      "date_end": "2026-10-16",
-      "confirmed": false,
-      "purpose": "자사주 취득 완료 공시·일별 실제 체결 확인"
-    },
-    {
-      "order": 4,
-      "label": "기존 위험축소 신호 상시 우선",
-      "market": "ALL",
-      "purpose": "CPI·TSMC를 기다리며 기존 전략 신호를 유예하지 않는다."
-    }
-  ],
   "ui": {
     "headline_ko": "장기 코어 DCA·기존 규칙 유지 · 비정기 증액 보류 · 반도체 구조 S / 추세 경고",
     "primary_watch_ko": "CPI·TSMC·한국 수급 / Macro+OIL+외국인 3중 점등",
     "true_decision_day_ko": "10월 15~16일 재판정"
   },
-  "consumer_contract": {
-    "precedence": "MARKET_REGIME_GUIDANCE_ONLY",
-    "rule": "계좌·주문·체결 SSOT를 절대 대체하지 않는다. PB는 이 레짐을 시장판단 참고값으로 사용하고 실제 집행은 계좌 SSOT·전략규칙·실행안전장치를 우선한다. 기존 위험축소·TRI-POD 신호를 합의문이 덮어쓰지 않는다. 미확인 트리거는 false가 아니라 UNKNOWN/NOT_EVALUATED로 처리한다.",
-    "stale_rule": "start_kst 이전 PENDING; end_kst 이후 EXPIRED. 보고서 source_date를 최신 실측값으로 취급하지 않는다."
-  },
-  "generated_kst": "2026-10-11T09:44:22.647+09:00",
-  "kospi_cascade": {
-    "base_probabilities_pct": [
-      33,
-      32,
-      35
-    ],
-    "scenario_returns_pct": [
-      4,
-      0.5,
-      -4.5
-    ],
-    "amber_ev_threshold_pct": -0.5,
-    "probability_adjustment_ceiling_pp": null,
-    "rows": [
-      {
-        "macro": false,
-        "oil": false,
-        "foreign_flow": false,
-        "bull_pct": 33,
-        "base_pct": 32,
-        "bear_pct": 35,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.095,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": false,
-        "oil": false,
-        "foreign_flow": true,
-        "bull_pct": 33,
-        "base_pct": 29,
-        "bear_pct": 38,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.245,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": false,
-        "oil": true,
-        "foreign_flow": false,
-        "bull_pct": 33,
-        "base_pct": 29,
-        "bear_pct": 38,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.245,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": false,
-        "oil": true,
-        "foreign_flow": true,
-        "bull_pct": 33,
-        "base_pct": 26,
-        "bear_pct": 41,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.395,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": true,
-        "oil": false,
-        "foreign_flow": false,
-        "bull_pct": 32,
-        "base_pct": 30,
-        "bear_pct": 38,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.28,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": true,
-        "oil": false,
-        "foreign_flow": true,
-        "bull_pct": 32,
-        "base_pct": 27,
-        "bear_pct": 41,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.43,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": true,
-        "oil": true,
-        "foreign_flow": false,
-        "bull_pct": 32,
-        "base_pct": 27,
-        "bear_pct": 41,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.43,
-        "band": "NEUTRAL"
-      },
-      {
-        "macro": true,
-        "oil": true,
-        "foreign_flow": true,
-        "bull_pct": 32,
-        "base_pct": 24,
-        "bear_pct": 44,
-        "bull_return_pct": 4,
-        "base_return_pct": 0.5,
-        "bear_return_pct": -4.5,
-        "ev_pct": -0.58,
-        "band": "AMBER"
-      }
-    ],
-    "non_vkospi_amber_path": "MACRO_AND_OIL_AND_FOREIGN_FLOW",
-    "current_state": "REFERENCE_BASE_NO_LIVE_EVALUATION",
-    "unknown_is_not_false": true
-  },
   "validation": {
-    "status": "CONSENSUS_TRANSCRIBED_WITH_CAVEATS",
-    "weekly_ev_recomputed": true,
+    "data_not_refreshed_by_this_update": true,
     "kospi_cascade_rows": 8,
     "missing": [
       "VKOSPI",
@@ -464,30 +444,51 @@
       "WTI_DEC_2027",
       "H15_2026_10_09_CONFIRMATION"
     ],
-    "data_not_refreshed_by_this_update": true
+    "status": "CONSENSUS_TRANSCRIBED_WITH_CAVEATS",
+    "weekly_ev_recomputed": true
   },
-  "buyback_reference": {
-    "basis": "ORDER_QUANTITY_TIMES_2026_10_08_CLOSE_PROXY",
-    "samsung_order_quantity": 2000000,
-    "samsung_price_assumption_krw": 263000,
-    "samsung_estimated_order_krw": 526000000000,
-    "hynix_order_quantity_range": [
-      600000,
-      650000
-    ],
-    "hynix_price_assumption_krw": 1686000,
-    "hynix_estimated_order_krw_range": [
-      1011600000000,
-      1095900000000
-    ],
-    "actual_executed_cash_krw": null,
-    "actual_removed_demand_krw": null,
-    "index_impact_estimate": null,
-    "note": "약 2배는 추정 주문금액 비교에만 해당. 시장 충격 배수 아님."
-  },
-  "history": {
-    "previous_consensus_path": "./market-regime-history/20260928-v11.4.2.json",
-    "current_consensus_path": "./market-regime-history/20261012-v11.5.2.json",
-    "legacy_research_policy": "9/29 연구 오버레이는 이전 합의본 이력에 보존; 현재 화면의 최신 연구로 표시하지 않는다."
+  "weekly_ev": {
+    "kospi": {
+      "band": "NEUTRAL",
+      "base_pct": 32,
+      "base_return_pct": 0.5,
+      "bear_pct": 35,
+      "bear_return_pct": -4.5,
+      "bull_pct": 33,
+      "bull_return_pct": 4,
+      "ev_pct": -0.095
+    },
+    "nasdaq": {
+      "band": "NEUTRAL",
+      "base_pct": 42,
+      "base_return_pct": 0.3,
+      "bear_pct": 28,
+      "bear_return_pct": -3.5,
+      "bull_pct": 30,
+      "bull_return_pct": 2.5,
+      "ev_pct": -0.104
+    },
+    "one_month": {
+      "band": "NEUTRAL",
+      "base_pct": 37,
+      "base_return_pct": 0.5,
+      "bear_pct": 35,
+      "bear_return_pct": -5,
+      "bull_pct": 28,
+      "bull_return_pct": 4,
+      "ev_pct": -0.445,
+      "validation": "RECOMPUTED_FROM_V11_5_INPUTS"
+    },
+    "six_month": {
+      "base_pct": 40,
+      "bear_pct": 32,
+      "bull_pct": 28,
+      "conservative_ev_pct": null,
+      "ev_pct": null,
+      "note": "v11.5 승계값. 원문 점추정 부재로 재현 불가; 판단 입력에 사용하지 않는다.",
+      "reported_conservative_ev_pct": -0.66,
+      "reported_ev_pct": 3.64,
+      "validation": "UNVERIFIED_MISSING_SCENARIO_RETURNS"
+    }
   }
 }

@@ -1,4 +1,5 @@
 """Content-addressed reader views and immutable Daily Pulse observations."""
+from regime_validity import regime_state
 import hashlib
 import json
 from pathlib import Path
@@ -78,6 +79,12 @@ def write_market_reader(root, limit=800):
 
 def materialize(root, paths):
     added = []
+    regime_path=root/'market-observatory/data/market-regime.json'
+    if regime_path.exists():
+        regime=json.loads(regime_path.read_bytes())
+        regime.setdefault('declared_status',regime.get('status'))
+        regime['status']=regime_state(regime)
+        regime_path.write_bytes(encoded(regime));added.append(regime_path)
     if 'market-observatory/data/observatory.json' in paths:
         added.extend(write_market_reader(root))
     if 'market-observatory/data/economic-calendar-history.json' in paths:

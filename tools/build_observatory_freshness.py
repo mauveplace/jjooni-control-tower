@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from observatory_session import expected_completed_session
+from regime_validity import regime_state
 
 ROOT = Path(__file__).resolve().parents[1]
 KST = ZoneInfo('Asia/Seoul')
@@ -48,17 +49,6 @@ def _count_field(obj,count_key,list_key):
     if value is None:value=len(obj.get(list_key) or [])
     try:return int(value or 0)
     except Exception:return len(obj.get(list_key) or [])
-
-def regime_state(regime, now=None):
-    now = now or datetime.now(KST)
-    if now.tzinfo is None: now = now.replace(tzinfo=KST)
-    try:
-        window = regime['effective_window']
-        start = datetime.fromisoformat(window['start_kst'])
-        end = datetime.fromisoformat(window['end_kst'])
-        if start.tzinfo is None or end.tzinfo is None or end < start: return 'UNAVAILABLE'
-    except (KeyError, TypeError, ValueError): return 'UNAVAILABLE'
-    return 'PENDING' if now < start else 'EXPIRED' if now > end else 'LIVE'
 
 
 def build_status(root: Path = ROOT, now=None) -> dict:
