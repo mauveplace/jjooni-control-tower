@@ -2,18 +2,18 @@
   "schema": "CT_ARCHITECTURE_INVENTORY_V1",
   "scope": "STATIC_SOURCE_ONLY_NO_ACCOUNT_VALUES",
   "counts": {
-    "active_workflows": 34,
+    "active_workflows": 38,
     "archived_one_shots": 20,
     "scheduled_workflows": 11,
-    "browser_js_files": 69,
-    "required_boot_modules": 33,
-    "recurring_or_observer_sites": 39
+    "browser_js_files": 75,
+    "required_boot_modules": 34,
+    "recurring_or_observer_sites": 43
   },
   "violations": [],
   "required_boot_modules": [
     {
       "id": "ctFastRefreshV32Script",
-      "url": "fast-refresh-v32.js?v=32.2",
+      "url": "fast-refresh-v32.js?v=32.3",
       "label": "master-trade-bridge"
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "id": "ctUiRefactorV14Script",
-      "url": "ui-refactor.js?v=1.5",
+      "url": "ui-refactor.js?v=1.11-top-compact",
       "label": "ui-refactor"
     },
     {
@@ -48,7 +48,7 @@
     },
     {
       "id": "ctMobileStabilityV4Script",
-      "url": "mobile-stability-v4.js?v=4.4",
+      "url": "mobile-stability-v4.js?v=4.6-holdings",
       "label": "mobile-stability"
     },
     {
@@ -68,17 +68,17 @@
     },
     {
       "id": "ctTradeOutcomeV26Script",
-      "url": "trade-review-outcomes-v26.js?v=26.7",
+      "url": "trade-review-outcomes-v26.js?v=26.8",
       "label": "trade-outcomes"
     },
     {
       "id": "ctAccountSourceTruthV22Script",
-      "url": "account-source-truth-v22.js?v=22.1",
+      "url": "account-source-truth-v22.js?v=22.4-pnl-scope",
       "label": "account-source-truth"
     },
     {
       "id": "ctHumanUiV6Script",
-      "url": "human-ui-v6.js?v=6.3",
+      "url": "human-ui-v6.js?v=6.6-price-proof",
       "label": "human-ui"
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "id": "ctTabletAccountsV8Script",
-      "url": "tablet-accounts-v8.js?v=8.2",
+      "url": "tablet-accounts-v8.js?v=8.7-holdings",
       "label": "tablet-accounts"
     },
     {
@@ -108,17 +108,17 @@
     },
     {
       "id": "ctFxAttributionV16Script",
-      "url": "fx-attribution-v16.js?v=16.0",
+      "url": "fx-attribution-v16.js?v=16.2",
       "label": "fx-attribution"
     },
     {
       "id": "ctMetricDrillV12Script",
-      "url": "metric-drilldown-router-v12.js?v=12.1",
+      "url": "metric-drilldown-router-v12.js?v=12.4-holdings",
       "label": "metric-router"
     },
     {
       "id": "ctDailyPerformanceAliasV23Script",
-      "url": "daily-performance-alias-v23.js?v=23.0",
+      "url": "daily-performance-alias-v23.js?v=23.1",
       "label": "daily-performance-alias"
     },
     {
@@ -138,42 +138,47 @@
     },
     {
       "id": "ctDrilldownReadabilityV19Script",
-      "url": "drilldown-readability-v19.js?v=19.3",
+      "url": "drilldown-readability-v19.js?v=19.4",
       "label": "drilldown-readability"
     },
     {
       "id": "ctMarketContextV20Script",
-      "url": "market-context-v20.js?v=20.0",
+      "url": "market-context-v20.js?v=20.1-accounts-first",
       "label": "market-context"
     },
     {
+      "id": "ctPerformanceDayViewScript",
+      "url": "performance-day-view.js?v=1.3-account-comparisons",
+      "label": "performance-day-view"
+    },
+    {
       "id": "ctOverviewConsistencyV21Script",
-      "url": "overview-consistency-v21.js?v=21.1",
+      "url": "overview-consistency-v21.js?v=21.8-account-comparisons",
       "label": "overview-consistency"
     },
     {
       "id": "ctSourceAuthorityGuardV24Script",
-      "url": "source-authority-guard-v24.js?v=24.1",
+      "url": "source-authority-guard-v24.js?v=24.4",
       "label": "source-authority-guard"
     },
     {
       "id": "ctStrategyBooksV1Script",
-      "url": "strategy-books-v1.js?v=1.5",
+      "url": "strategy-books-v1.js?v=2.8-verified-krw",
       "label": "strategy-books"
     },
     {
       "id": "ctManualIntradayV1Script",
-      "url": "manual-intraday-v1.js?v=1.5",
+      "url": "manual-intraday-v1.js?v=2.1-touch",
       "label": "manual-intraday"
     },
     {
       "id": "ctPositionCompletenessV25Script",
-      "url": "position-completeness-v25.js?v=25.1.2",
+      "url": "position-completeness-v25.js?v=25.1.3",
       "label": "position-completeness"
     },
     {
       "id": "ctTabletStabilityV37Script",
-      "url": "tablet-stability-v37.js?v=37.9",
+      "url": "tablet-stability-v37.js?v=37.11-compact-touch",
       "label": "tablet-stability"
     }
   ],
@@ -236,6 +241,17 @@
       "publish_sites": []
     },
     {
+      "path": ".github/workflows/control-tower-ui-e2e.yml",
+      "name": "Control Tower Mobile First UI",
+      "triggers": [
+        "pull_request",
+        "push"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
       "path": ".github/workflows/economic-calendar-history-10y-backfill.yml",
       "name": "Economic Calendar 10Y History Backfill",
       "triggers": [
@@ -292,7 +308,7 @@
           "entry": "- tools/publish_observatory_data.py"
         },
         {
-          "line": 165,
+          "line": 167,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 10y history' \\"
         }
       ]
@@ -391,11 +407,11 @@
       ],
       "publish_sites": [
         {
-          "line": 266,
+          "line": 248,
           "entry": "python tools/publish_observatory_data.py \\"
         },
         {
-          "line": 341,
+          "line": 324,
           "entry": "python tools/publish_observatory_data.py \\"
         }
       ]
@@ -447,7 +463,7 @@
           "cron": "7,22,37,52 * * * *"
         },
         {
-          "cron": "10 20,21 * * 0-5"
+          "cron": "20 20,21 * * 0-5"
         },
         {
           "cron": "10 7 * * 1-5"
@@ -463,15 +479,15 @@
       ],
       "publish_sites": [
         {
-          "line": 10,
+          "line": 12,
           "entry": "- tools/publish_observatory_data.py"
         },
         {
-          "line": 167,
+          "line": 175,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): hourly market refresh' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json"
         },
         {
-          "line": 371,
+          "line": 390,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)"
         }
       ]
@@ -523,7 +539,7 @@
       ],
       "publish_sites": [
         {
-          "line": 140,
+          "line": 134,
           "entry": "python tools/publish_observatory_data.py \\"
         }
       ]
@@ -588,6 +604,7 @@
       "name": "Market Observatory Public Responsive E2E",
       "triggers": [
         "push",
+        "pull_request",
         "workflow_dispatch"
       ],
       "schedules": [],
@@ -697,8 +714,41 @@
       ]
     },
     {
+      "path": ".github/workflows/observatory-device-audit.yml",
+      "name": "Observatory Device Audit",
+      "triggers": [
+        "push",
+        "pull_request"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
       "path": ".github/workflows/observatory-hourly-refresh-contract.yml",
       "name": "Observatory Hourly Refresh Contract",
+      "triggers": [
+        "pull_request",
+        "push"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
+      "path": ".github/workflows/observatory-index-explorer.yml",
+      "name": "Observatory Index Explorer QA",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
+      "path": ".github/workflows/observatory-ui-assets-qa.yml",
+      "name": "Observatory UI Runtime Version Contract",
       "triggers": [
         "pull_request",
         "push"
@@ -794,10 +844,10 @@
     },
     {
       "path": "account-return-30d-v46.js",
-      "bytes": 6141,
+      "bytes": 6230,
       "recurring_or_observer_sites": [
         {
-          "line": 128,
+          "line": 129,
           "kinds": [
             "MutationObserver"
           ]
@@ -806,15 +856,8 @@
     },
     {
       "path": "account-source-truth-v22.js",
-      "bytes": 8059,
-      "recurring_or_observer_sites": [
-        {
-          "line": 99,
-          "kinds": [
-            "MutationObserver"
-          ]
-        }
-      ]
+      "bytes": 8170,
+      "recurring_or_observer_sites": []
     },
     {
       "path": "benchmark-excess-v1.js",
@@ -830,7 +873,7 @@
     },
     {
       "path": "boot-coordinator-v33.js",
-      "bytes": 6127,
+      "bytes": 6134,
       "recurring_or_observer_sites": [
         {
           "line": 79,
@@ -842,7 +885,7 @@
     },
     {
       "path": "canonical-metrics.js",
-      "bytes": 9522,
+      "bytes": 9609,
       "recurring_or_observer_sites": []
     },
     {
@@ -893,7 +936,7 @@
     },
     {
       "path": "daily-performance-alias-v23.js",
-      "bytes": 6274,
+      "bytes": 6283,
       "recurring_or_observer_sites": [
         {
           "line": 34,
@@ -905,7 +948,7 @@
     },
     {
       "path": "daily-pnl-attribution-v27.js",
-      "bytes": 11868,
+      "bytes": 14003,
       "recurring_or_observer_sites": []
     },
     {
@@ -932,15 +975,15 @@
     },
     {
       "path": "drilldown-readability-v19.js",
-      "bytes": 7088,
+      "bytes": 7519,
       "recurring_or_observer_sites": []
     },
     {
       "path": "fast-refresh-v32.js",
-      "bytes": 11416,
+      "bytes": 11495,
       "recurring_or_observer_sites": [
         {
-          "line": 119,
+          "line": 120,
           "kinds": [
             "setInterval"
           ]
@@ -949,12 +992,12 @@
     },
     {
       "path": "fx-attribution-v16.js",
-      "bytes": 9909,
+      "bytes": 10093,
       "recurring_or_observer_sites": []
     },
     {
       "path": "human-ui-v6.js",
-      "bytes": 12339,
+      "bytes": 13932,
       "recurring_or_observer_sites": []
     },
     {
@@ -976,7 +1019,7 @@
     },
     {
       "path": "lineage-guard.js",
-      "bytes": 13099,
+      "bytes": 13185,
       "recurring_or_observer_sites": [
         {
           "line": 225,
@@ -1000,22 +1043,22 @@
     },
     {
       "path": "live-bridge.js",
-      "bytes": 53578,
+      "bytes": 57339,
       "recurring_or_observer_sites": [
         {
-          "line": 352,
+          "line": 361,
           "kinds": [
             "MutationObserver"
           ]
         },
         {
-          "line": 415,
+          "line": 430,
           "kinds": [
             "setInterval"
           ]
         },
         {
-          "line": 495,
+          "line": 510,
           "kinds": [
             "setInterval"
           ]
@@ -1024,12 +1067,12 @@
     },
     {
       "path": "manual-intraday-v1.js",
-      "bytes": 33789,
+      "bytes": 45628,
       "recurring_or_observer_sites": []
     },
     {
       "path": "market-context-v20.js",
-      "bytes": 6143,
+      "bytes": 6266,
       "recurring_or_observer_sites": []
     },
     {
@@ -1039,7 +1082,7 @@
     },
     {
       "path": "market-observatory/analysis-lab-v1.js",
-      "bytes": 24348,
+      "bytes": 24919,
       "recurring_or_observer_sites": []
     },
     {
@@ -1066,8 +1109,20 @@
     },
     {
       "path": "market-observatory/data-refresh-v1.js",
-      "bytes": 6625,
+      "bytes": 8536,
       "recurring_or_observer_sites": []
+    },
+    {
+      "path": "market-observatory/device-ui-v1.js",
+      "bytes": 1587,
+      "recurring_or_observer_sites": [
+        {
+          "line": 23,
+          "kinds": [
+            "MutationObserver"
+          ]
+        }
+      ]
     },
     {
       "path": "market-observatory/fed-watch-v1.js",
@@ -1083,16 +1138,16 @@
     },
     {
       "path": "market-observatory/freshness-all-groups-v1.js",
-      "bytes": 2900,
+      "bytes": 3899,
       "recurring_or_observer_sites": [
         {
-          "line": 13,
+          "line": 28,
           "kinds": [
             "MutationObserver"
           ]
         },
         {
-          "line": 14,
+          "line": 29,
           "kinds": [
             "setInterval"
           ]
@@ -1101,10 +1156,10 @@
     },
     {
       "path": "market-observatory/freshness-watchdog-v1.js",
-      "bytes": 16406,
+      "bytes": 18809,
       "recurring_or_observer_sites": [
         {
-          "line": 56,
+          "line": 70,
           "kinds": [
             "setInterval"
           ]
@@ -1112,11 +1167,39 @@
       ]
     },
     {
+      "path": "market-observatory/index-explorer-core.js",
+      "bytes": 2097,
+      "recurring_or_observer_sites": []
+    },
+    {
+      "path": "market-observatory/index-explorer-v1.js",
+      "bytes": 8624,
+      "recurring_or_observer_sites": []
+    },
+    {
       "path": "market-observatory/latest-board-v1.js",
-      "bytes": 32566,
+      "bytes": 42247,
       "recurring_or_observer_sites": [
         {
-          "line": 170,
+          "line": 231,
+          "kinds": [
+            "setInterval"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "market-observatory/live-market-refresh-v1.js",
+      "bytes": 3942,
+      "recurring_or_observer_sites": [
+        {
+          "line": 31,
+          "kinds": [
+            "setInterval"
+          ]
+        },
+        {
+          "line": 34,
           "kinds": [
             "setInterval"
           ]
@@ -1125,12 +1208,24 @@
     },
     {
       "path": "market-observatory/market-regime-v1.js",
-      "bytes": 10581,
+      "bytes": 11230,
       "recurring_or_observer_sites": []
     },
     {
+      "path": "market-observatory/metric-detail-v1.js",
+      "bytes": 16955,
+      "recurring_or_observer_sites": [
+        {
+          "line": 83,
+          "kinds": [
+            "MutationObserver"
+          ]
+        }
+      ]
+    },
+    {
       "path": "market-observatory/morning-brief-v1.js",
-      "bytes": 10819,
+      "bytes": 10939,
       "recurring_or_observer_sites": [
         {
           "line": 59,
@@ -1142,10 +1237,10 @@
     },
     {
       "path": "market-observatory/observatory-v2.js",
-      "bytes": 27756,
+      "bytes": 28556,
       "recurring_or_observer_sites": [
         {
-          "line": 306,
+          "line": 314,
           "kinds": [
             "setInterval"
           ]
@@ -1154,10 +1249,10 @@
     },
     {
       "path": "market-observatory/official-macro-v1.js",
-      "bytes": 29723,
+      "bytes": 30931,
       "recurring_or_observer_sites": [
         {
-          "line": 197,
+          "line": 206,
           "kinds": [
             "setInterval"
           ]
@@ -1166,7 +1261,7 @@
     },
     {
       "path": "market-observatory/sector-etf-v1.js",
-      "bytes": 19078,
+      "bytes": 19012,
       "recurring_or_observer_sites": []
     },
     {
@@ -1206,15 +1301,15 @@
     },
     {
       "path": "metric-drilldown-router-v12.js",
-      "bytes": 17235,
+      "bytes": 18578,
       "recurring_or_observer_sites": []
     },
     {
       "path": "mobile-stability-v4.js",
-      "bytes": 11287,
+      "bytes": 11522,
       "recurring_or_observer_sites": [
         {
-          "line": 104,
+          "line": 105,
           "kinds": [
             "MutationObserver"
           ]
@@ -1223,15 +1318,20 @@
     },
     {
       "path": "overview-consistency-v21.js",
-      "bytes": 7851,
+      "bytes": 27557,
+      "recurring_or_observer_sites": []
+    },
+    {
+      "path": "performance-day-view.js",
+      "bytes": 11293,
       "recurring_or_observer_sites": []
     },
     {
       "path": "position-completeness-v25.js",
-      "bytes": 15606,
+      "bytes": 16902,
       "recurring_or_observer_sites": [
         {
-          "line": 51,
+          "line": 59,
           "kinds": [
             "MutationObserver"
           ]
@@ -1265,22 +1365,15 @@
     },
     {
       "path": "source-authority-guard-v24.js",
-      "bytes": 6154,
-      "recurring_or_observer_sites": [
-        {
-          "line": 82,
-          "kinds": [
-            "setInterval"
-          ]
-        }
-      ]
+      "bytes": 6172,
+      "recurring_or_observer_sites": []
     },
     {
       "path": "strategy-books-v1.js",
-      "bytes": 45881,
+      "bytes": 58540,
       "recurring_or_observer_sites": [
         {
-          "line": 127,
+          "line": 233,
           "kinds": [
             "MutationObserver"
           ]
@@ -1289,7 +1382,7 @@
     },
     {
       "path": "tablet-accounts-v8.js",
-      "bytes": 5484,
+      "bytes": 9378,
       "recurring_or_observer_sites": []
     },
     {
@@ -1299,10 +1392,10 @@
     },
     {
       "path": "tablet-stability-v37.js",
-      "bytes": 17391,
+      "bytes": 14997,
       "recurring_or_observer_sites": [
         {
-          "line": 190,
+          "line": 162,
           "kinds": [
             "MutationObserver"
           ]
@@ -1311,10 +1404,10 @@
     },
     {
       "path": "toss-account-basis-v43.js",
-      "bytes": 7245,
+      "bytes": 7750,
       "recurring_or_observer_sites": [
         {
-          "line": 151,
+          "line": 160,
           "kinds": [
             "MutationObserver"
           ]
@@ -1340,10 +1433,16 @@
     },
     {
       "path": "trade-review-loader.js",
-      "bytes": 10573,
+      "bytes": 12835,
       "recurring_or_observer_sites": [
         {
-          "line": 44,
+          "line": 79,
+          "kinds": [
+            "MutationObserver"
+          ]
+        },
+        {
+          "line": 83,
           "kinds": [
             "MutationObserver"
           ]
@@ -1352,12 +1451,12 @@
     },
     {
       "path": "trade-review-outcomes-v26.js",
-      "bytes": 18072,
+      "bytes": 18735,
       "recurring_or_observer_sites": []
     },
     {
       "path": "trade-review-readable-v3.js",
-      "bytes": 11345,
+      "bytes": 11353,
       "recurring_or_observer_sites": []
     },
     {
@@ -1379,8 +1478,15 @@
     },
     {
       "path": "ui-refactor.js",
-      "bytes": 10348,
-      "recurring_or_observer_sites": []
+      "bytes": 13350,
+      "recurring_or_observer_sites": [
+        {
+          "line": 156,
+          "kinds": [
+            "MutationObserver"
+          ]
+        }
+      ]
     },
     {
       "path": "viewport-bottom-guard-v5.js",
