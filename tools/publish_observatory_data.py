@@ -275,7 +275,7 @@ def publish(paths, message):
         git('fetch', 'origin', 'main')
         payloads = {}
         for path in paths:
-            if path in {DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv'}:
+            if path in {DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv',DATA+'observatory-recent.json'}:
                 # These are deterministic views, regenerated from the merged
                 # archive after rebase. Only these exact generated paths qualify.
                 remote_view=git('show','origin/main:'+path,check=False)

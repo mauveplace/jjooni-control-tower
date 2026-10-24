@@ -6,11 +6,24 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from observatory_history_views import archive_pulse, write_calendar_views
+from observatory_history_views import archive_pulse, write_calendar_views, materialize
 from publish_observatory_data import merge_generated
 
 
 class HistoryViewsTest(unittest.TestCase):
+    def test_recent_reader_keeps_facts_and_latest_rows_without_changing_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);data=root/'market-observatory/data';data.mkdir(parents=True)
+            source={'schema':'JJOONI_MARKET_OBSERVATORY_V1','latest':{'X':999},'tripod_latest':{'target':'TQQQ 100%'},'series':{'X':[{'date':str(i),'value':i} for i in range(1000)]}}
+            raw=json.dumps(source).encode();(data/'observatory.json').write_bytes(raw)
+            paths=materialize(root,['market-observatory/data/observatory.json'])
+            view=json.loads((data/'observatory-recent.json').read_bytes())
+            self.assertEqual(view['latest'],source['latest']);self.assertEqual(view['tripod_latest'],source['tripod_latest'])
+            self.assertEqual(view['series']['X'],source['series']['X'][-800:])
+            self.assertEqual((data/'observatory.json').read_bytes(),raw)
+            self.assertEqual(view['reader_view']['source_sha256'],hashlib.sha256(raw).hexdigest())
+            self.assertIn('market-observatory/data/observatory-recent.json',paths)
+
     def test_index_resolves_exact_shard_and_preserves_nulls(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

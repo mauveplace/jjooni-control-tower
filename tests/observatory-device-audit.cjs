@@ -71,8 +71,10 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
     await page.waitForFunction(()=>{const r=document.querySelector('#events [data-actual-status="OVERDUE"]')?.getBoundingClientRect();return r&&r.top>=0&&r.top<innerHeight});
    }
    await page.locator('.obsFreshDetails>summary').click();
-   await page.waitForFunction(()=>document.querySelectorAll('#obsFreshGrid .obsFreshTile').length===19);
-   assert.equal(await page.locator('#obsFreshGrid .obsFreshTile:visible').count(),19);
+   const expectedGroups=await page.evaluate(()=>window.__JJOONI_FRESHNESS_ALL_GROUPS.order.length+1);
+   await page.waitForFunction(n=>document.querySelectorAll('#obsFreshGrid .obsFreshTile').length===n,expectedGroups);
+   assert.equal(await page.locator('#obsFreshGrid .obsFreshTile:visible').count(),expectedGroups);
+   assert.equal(await page.locator('[data-fresh-key=market_regime]').count(),1);
    await page.locator('#obsWatchToggle').click();assert(await page.locator('#obsWatchAnalysis').isVisible());
    await page.locator('.obsFreshDetails>summary').click();assert.equal(await page.locator('#obsWatchAnalysis').isVisible(),false);
   }

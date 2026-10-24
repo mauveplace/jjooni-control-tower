@@ -44,8 +44,8 @@ test('UI module optimization preloads downloads but preserves sequential executi
   assert.match(loader,/function bootUrl\(src\)/);
   assert.match(loader,/function preloadModules\(modules\)/);
   assert.match(loader,/l\.rel='preload';l\.as='script';l\.href=bootUrl\(src\)/);
-  const preload=loader.indexOf('preloadModules(modules);');
-  const sequential=loader.indexOf("for(const [id,src,label] of modules){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}");
+  const preload=loader.indexOf('preloadModules(modules.filter');
+  const sequential=loader.indexOf("for(const [id,src,label] of modules.filter(x=>!DEFERRED_LABELS.has(x[2]))){bootText('필수 모듈 확인 · '+label);await loadRequired(id,src,label)}");
   assert.ok(preload>=0,'module preloading must be enabled');
   assert.ok(sequential>preload,'required modules must still execute sequentially after preload starts');
   assert.match(loader,/s\.src=bootUrl\(src\)/);
@@ -59,3 +59,11 @@ test('verified UI loader cache-busts the NAV race-fixed mobile runtime',()=>{
 });
 
 test('retired AUTOBOT module is absent from verified loader',()=>{const loader=read('trade-review-loader.js');assert.doesNotMatch(loader,/AI BOT|autobot-audit-board-v1|ctAutobotAuditBoardV1Script/);});
+
+test('optional loader failure cannot change ACTIVE boot state or stop later optional modules',async()=>{
+ const vm=require('node:vm'),window={},context={window,document:{head:{}},console:{warn(){}},Date};
+ const source=read('trade-review-loader.js');
+ const prefix=source.slice(0,source.indexOf('const LABELS='));
+ vm.runInNewContext(prefix+"BOOT.state='ACTIVE';let attempts=[];async function loadRequired(id,src,label){attempts.push(label);if(label==='decision-impact')throw Error('offline')}window.run=()=>loadDeferred([['a','a','decision-impact'],['b','b','manual-intraday']]);window.attempts=attempts;})();",context);
+ await window.run();assert.equal(window.__JJOONI_UI_BOOT_V14.state,'ACTIVE');assert.equal(window.__JJOONI_UI_BOOT_V14.optional_failures.length,1);assert.equal(window.attempts.join(','),'decision-impact,manual-intraday');
+});

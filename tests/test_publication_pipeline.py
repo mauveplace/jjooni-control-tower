@@ -40,9 +40,12 @@ class PublicationPipelineTest(unittest.TestCase):
                         'raw': {'ndx': 29187.55}, 'quality': {'status': 'LIVE'}}
             def derive(_paths):
                 pulse.write_text(json.dumps(expected))
+                (data / 'observatory.json').write_text(json.dumps({'series':{'NASDAQ100':[{'date':'2026-10-16','value':29187.55}]},'latest':{'NASDAQ100':29187.55}}))
             with patch.object(pub, 'ROOT', root), patch.object(pub, 'materialize_market_dependents', derive), \
                     patch.object(pub, 'materialize_health'):
                 paths = pub.materialize_publication(list(pub.MARKET_BUNDLE))
+            reader=json.loads((data/'observatory-recent.json').read_text())
+            self.assertEqual(reader['latest']['NASDAQ100'],29187.55)
             archive = {**expected, 'archive_contract': 'IMMUTABLE_FACTS_AND_RULES_NOT_AI_COMMENTARY_V1'}
             digest = hashlib.sha256(encoded(archive)).hexdigest()
             relative = pub.DATA + f'pulse-history/observations/{digest}.json'
