@@ -2,6 +2,11 @@ name: Market Observatory Calendar Focus E2E
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/market-observatory-calendar-focus-e2e.yml
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/data/calendar-manual-overrides.json
   push:
     branches: [main]
     paths:
@@ -47,16 +52,15 @@ jobs:
               const errors=[];page.on('pageerror',e=>errors.push(String(e)));
               try{
                 await page.goto(process.env.URL+`?calendar_focus_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
-                await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.mode==='SERVER_SEED_PLUS_LOCAL_OVERRIDE_NEXT7_FIRST',{timeout:15000});
+                await page.waitForFunction(()=>window.__JJOONI_CALENDAR_EDITOR?.mode==='SERVER_SEED_PLUS_LOCAL_OVERRIDE_NEXT7_FIRST_HISTORY_LOADER',null,{timeout:15000});
                 await page.click('button[data-tab="calendar"]');
                 await page.waitForTimeout(1200);
-                await page.waitForFunction(()=>document.querySelector('#obsCalFocusStatus')?.textContent.includes('향후 7일 우선'),{timeout:8000});
+                await page.waitForFunction(()=>document.querySelector('#obsCalFocusStatus')?.textContent.includes('향후 7일 우선'),null,{timeout:8000});
                 const x=await page.evaluate(()=>{
                   const events=(typeof CAL!=='undefined'&&CAL?.events)||[];
                   const ppi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-10')&&String(e.title||'').includes('Producer Price Index'));
                   const cpi=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-11')&&String(e.title||'').includes('Consumer Price Index'));
                   const fomc=events.find(e=>String(e.datetime_kst||e.date||'').startsWith('2026-09-17')&&String(e.title||'').includes('FOMC 정책결정'));
-                  const fomcCard=[...document.querySelectorAll('#events .event')].find(el=>el.querySelector('.event-title')?.textContent.includes('FOMC 정책결정'));
                   const first=document.querySelector('#events .event');
                   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
                   const windowStart=`${parts.year}-${parts.month}-${parts.day}`;
@@ -75,7 +79,6 @@ jobs:
                     ppi:ppi?.market_metrics||[],
                     cpi:cpi?.market_metrics||[],
                     fomc:fomc||null,
-                    fomcText:fomcCard?.innerText||'',
                     htmlWidth:document.documentElement.scrollWidth,
                     innerWidth:window.innerWidth
                   };
@@ -93,10 +96,22 @@ jobs:
                 assert(val(x.cpi,'core_cpi_mom')==='0.3%',`Core CPI MoM actual ${val(x.cpi,'core_cpi_mom')}`);
                 const fw=(x.fomc?.market_metrics||[]).find(m=>m.key==='fedwatch_hike_25bp')||{};
                 const rate=(x.fomc?.market_metrics||[]).find(m=>m.key==='fed_rate')||{};
-                assert(rate.previous==='3.75%'&&rate.consensus==='4.00%'&&rate.actual==null,`FOMC rate semantics ${JSON.stringify(rate)}`);
-                assert(fw.previous==='86.8%'&&fw.consensus==='92.8%'&&fw.actual==null&&fw.value_role==='market_forecast',`FedWatch semantics ${JSON.stringify(fw)}`);
-                assert(x.fomcText.includes('예정')&&!x.fomcText.includes('발표완료'),`FOMC status ${x.fomcText}`);
-                assert(x.fomcText.includes('1거래일 전')&&x.fomcText.includes('현재 시장예측'),`FedWatch labels ${x.fomcText}`);
+                // September's FOMC is now historical: verify the official released actual,
+                // never treat a market-probability snapshot as a released actual.
+                assert(x.fomc?.actual_status==='RELEASED'&&x.fomc?.source_tier==='OFFICIAL',`FOMC official release ${JSON.stringify(x.fomc)}`);
+                assert(rate.previous==='3.75%'&&rate.consensus==='4.00%'&&rate.actual==='4.00%',`FOMC released rate ${JSON.stringify(rate)}`);
+                assert(fw.actual==null,`FedWatch probability must not be official actual ${JSON.stringify(fw)}`);
+                // Keep a real public-UI assertion: navigate to the historical month
+                // rather than demanding a September card in today's calendar view.
+                const historicalMonth='2026-09';
+                for(let nav=0;nav<14;nav++){
+                  const month=(await page.locator('#calendarMonth').innerText()).trim();
+                  if(month===historicalMonth)break;
+                  assert(/^\d{4}-\d{2}$/.test(month),`invalid calendar month ${month}`);
+                  await page.click(month>historicalMonth?'#prevMonth':'#nextMonth');
+                }
+                assert((await page.locator('#calendarMonth').innerText()).trim()===historicalMonth,'historical month navigation failed');
+                await page.waitForFunction(()=>[...document.querySelectorAll('#events .event')].some(el=>el.querySelector('.event-title')?.textContent.includes('FOMC 정책결정')&&el.innerText.includes('4.00%')),null,{timeout:15000});
                 assert(errors.length===0,`page errors: ${errors.join(' | ')}`);
                 console.log(`CALENDAR_FOCUS_E2E=PASS first="${x.firstDate} ${x.firstTitle}" banner="${x.status}" PPI=${val(x.ppi,'ppi_mom')}/${val(x.ppi,'ppi_yoy')}/${val(x.ppi,'core_ppi_mom')}/${val(x.ppi,'core_ppi_yoy')} CPI=${val(x.cpi,'cpi_yoy')}/${val(x.cpi,'cpi_mom')}/${val(x.cpi,'core_cpi_yoy')}/${val(x.cpi,'core_cpi_mom')}`);
                 passed=true;
