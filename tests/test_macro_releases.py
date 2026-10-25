@@ -64,6 +64,75 @@ class MacroReleaseTests(unittest.TestCase):
         text = text.replace('10일','20일')
         self.assertEqual(release.parse_customs(soup(text),'https://www.customs.go.kr/test',early=True)[0]['release']['actual'],78.3)
 
+    def test_customs_monthly_independent_metric_failure(self):
+        # The latest KCS web body contains total exports but directs readers to
+        # the official attachment for the semiconductor breakdown.
+        body = ('2026년 9월 월간 수출입 현황 [확정치] 등록일 2026.10.15 '
+                '전년 동월 대비 수출 은 83.7% 증가한 1,211억 달러 '
+                '반도체 수출(605억 달러) 최초 600억 달러 돌파')
+        result = release.parse_customs(soup(body), 'https://www.customs.go.kr/test')
+        self.assertEqual(result[0]['release']['actual'], 83.7)
+        self.assertEqual(result[0]['status'], 'LIVE')
+        self.assertEqual(result[1]['status'], 'DEGRADED')
+        self.assertIsNone(result[1]['latest'])
+        self.assertIn('semiconductor export YoY', result[1]['error'])
+
+    def test_customs_pdf_is_period_bound_and_never_borrows_imports(self):
+        body = ('2026년 9월 월간 수출입 현황 [확정치] 등록일 2026.10.15 '
+                '전년 동월 대비 수출 은 83.7% 증가')
+        pdf = ('2026년 9월 월간 수출입 현황 [확정치] '
+               '메모리 반도체(전년동월대비 증감률 999.9%) '
+               '반도체(전년동월대비 증감률 260.3%)')
+        result = release.parse_customs(soup(body), 'https://www.customs.go.kr/test',
+                                       supplemental_text=pdf,
+                                       attachment_url='https://www.customs.go.kr/common/nttFileDownload.do?fileKey=test')
+        self.assertEqual([m['release']['actual'] for m in result], [83.7, 260.3])
+        self.assertIn('PDF attachment', result[1]['transport_source']['provider'])
+        mismatch = pdf.replace('2026년 9월', '2026년 8월')
+        bad = release.parse_customs(soup(body), 'https://www.customs.go.kr/test',
+                                    supplemental_text=mismatch)
+        self.assertEqual(bad[0]['status'], 'LIVE')
+        self.assertEqual(bad[1]['status'], 'DEGRADED')
+        self.assertIn('REFERENCE_PERIOD_MISMATCH', bad[1]['error'])
+
+    def test_customs_pdf_link_discovery_accepts_only_official_monthly_file(self):
+        html = ('<a href="/common/nttFileDownload.do?fileKey=abc">'
+                '261015 2026년 9월 월간 수출입 현황 [확정치].pdf [747 KB]</a>'
+                '<a href="https://example.com/evil.pdf">2026년 9월 월간 수출입 현황 [확정치].pdf</a>'
+                '<a href="/common/nttFileDownload.do?fileKey=other">인포그래픽.png</a>')
+        links = release.customs_pdf_links(soup(html), 'https://www.customs.go.kr/kcs/na/ntt/selectNttInfo.do')
+        self.assertEqual(links, ['https://www.customs.go.kr/common/nttFileDownload.do?fileKey=abc'])
+
+    def test_customs_collector_recovers_semiconductor_from_official_pdf(self):
+        body = ('2026년 9월 월간 수출입 현황 [확정치] 등록일 2026.10.15 '
+                '전년 동월 대비 수출 은 83.7% 증가 '
+                '<a href="/common/nttFileDownload.do?fileKey=abc">'
+                '261015 2026년 9월 월간 수출입 현황 [확정치].pdf</a>')
+        listing = ('<a data-id="10179763" data-url="94e483116f9b898190458b9bf79546a3">'
+                   '2026년 9월 월간 수출입 현황 [확정치]</a>'
+                   '<a data-id="10179999" data-url="aaaabbbb">'
+                   '2026년 9월 1일 ~ 9월 20일 수출입 현황 [잠정치]</a>')
+        early = ('2026년 9월 1일 ~ 9월 20일 수출입 현황 등록일 2026.09.21 '
+                 '전년동기대비 수출 45.6%')
+        pdf = ('2026년 9월 월간 수출입 현황 [확정치] '
+               '반도체(전년동월대비 증감률 260.3%)')
+        class Client:
+            def html(self, url):
+                return soup(listing if 'selectNttList' in url else
+                            body if '10179763' in url else early)
+            def read(self, url):
+                return b'%PDF-1.4'
+        class Reader:
+            pages = [type('Page', (), {'extract_text': lambda self: pdf})()]
+        with patch.object(release, 'SourceClient', return_value=Client()), \
+             patch.object(release, 'PdfReader', return_value=Reader()):
+            result = release.collect_customs()
+        self.assertEqual([(m['key'], m['status']) for m in result],
+                         [('KR_EXPORT_YOY', 'LIVE'),
+                          ('KR_SEMICON_EXPORT_YOY', 'LIVE'),
+                          ('KR_EXPORT_1_20', 'LIVE')])
+        self.assertEqual(result[1]['release']['actual'], 260.3)
+
     def test_sep_medians_are_forecasts_not_actuals(self):
         html = '<table>' + ''.join('<tr>'+''.join('<td>'+cell+'</td>' for cell in row)+'</tr>' for row in FIX['fed_table'])+'</table>'
         metric = release.parse_sep(soup(html),'https://www.federalreserve.gov/monetarypolicy/fomcprojtabl20260916.htm')
