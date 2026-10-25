@@ -11,10 +11,10 @@
     "regular_dca": "UNCHANGED_UNDER_EXISTING_PB_RULES",
     "risk_reduction_precedence": true,
     "semiconductor_core": "FOLLOW_EXISTING_RISK_RULES",
-    "summary_ko": "장기 코어 DCA와 기존 규칙매매 유지. 비정기 테마·레버리지 증액 보류. CPI·TSMC 이후 재판정하되 기존 위험축소 신호가 먼저 나오면 해당 규칙 우선.",
+    "summary_ko": "장기 코어 DCA와 기존 규칙매매 유지. 비정기 추가매수 EV 우위 없음. 주문·한도·매매 판단은 PB/전략 SSOT 우선.",
     "tripod_rule_trading": "UNCHANGED"
   },
-  "authority": "ANALYST_CONSENSUS_WEEKLY_SSOT",
+  "authority": "ANALYST_WEEKLY_PROVISIONAL_NOT_FINAL_CONSENSUS",
   "buyback_reference": {
     "actual_executed_cash_krw": null,
     "actual_removed_demand_krw": null,
@@ -36,33 +36,22 @@
   },
   "checkpoints": [
     {
-      "datetime_kst": "2026-10-14T21:30:00+09:00",
-      "label": "10/14 21:30 KST 미국 9월 CPI",
-      "market": "US",
-      "order": 1,
-      "purpose": "근원 MoM·금리 반응 확인 → 10/15 한국장"
-    },
-    {
-      "datetime_kst": "2026-10-15T15:00:00+09:00",
-      "label": "10/15 15:00 KST TSMC 실적 발표",
-      "market": "TW",
-      "order": 2,
-      "purpose": "4Q 가이던스·CAPEX 확인 → 10/15 장중·10/16"
-    },
-    {
-      "confirmed": false,
-      "date_end": "2026-10-16",
-      "date_start": "2026-10-15",
-      "label": "10/15~16 하이닉스 마지막 주문 예상",
+      "datetime_kst": "2026-10-28T00:00:00+09:00",
+      "label": "SK하이닉스 3Q (시간 미확정)",
       "market": "KR",
-      "order": 3,
-      "purpose": "자사주 취득 완료 공시·일별 실제 체결 확인"
+      "order": 1
     },
     {
-      "label": "기존 위험축소 신호 상시 우선",
-      "market": "ALL",
-      "order": 4,
-      "purpose": "CPI·TSMC를 기다리며 기존 전략 신호를 유예하지 않는다."
+      "datetime_kst": "2026-10-29T03:00:00+09:00",
+      "label": "FOMC 결정",
+      "market": "US",
+      "order": 2
+    },
+    {
+      "datetime_kst": "2026-10-29T10:00:00+09:00",
+      "label": "삼성전자 3Q 확정실적 컨콜",
+      "market": "KR",
+      "order": 3
     }
   ],
   "consumer_contract": {
@@ -70,22 +59,22 @@
     "rule": "계좌·주문·체결 SSOT를 절대 대체하지 않는다. PB는 이 레짐을 시장판단 참고값으로 사용하고 실제 집행은 계좌 SSOT·전략규칙·실행안전장치를 우선한다. 기존 위험축소·TRI-POD 신호를 합의문이 덮어쓰지 않는다. 미확인 트리거는 false가 아니라 UNKNOWN/NOT_EVALUATED로 처리한다.",
     "stale_rule": "start_kst 이전 PENDING; end_kst 이후 EXPIRED. 보고서 source_date를 최신 실측값으로 취급하지 않는다."
   },
-  "declared_status": "SCHEDULED",
+  "declared_status": "PROVISIONAL_ANALYST_REVISION",
   "effective_window": {
-    "end_kst": "2026-10-16T23:59:59+09:00",
-    "kr_lag_event_date": "2026-10-15",
-    "note": "CPI 10/14 21:30 KST → 10/15 KR; TSMC 10/15 15:00 KST → 10/15 장중 및 10/16. 하이닉스 자사주 종료는 예상, 완료 공시 미확인.",
+    "start_kst": "2026-10-26T00:00:00+09:00",
+    "end_kst": "2026-10-30T23:59:59+09:00",
+    "note": "v11.6.1 analyst revision; partial consensus pending (JJANGGU independent review not received). Not trading authority.",
     "reassessment_dates": [
-      "2026-10-15",
-      "2026-10-16"
-    ],
-    "start_kst": "2026-10-12T00:00:00+09:00"
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30"
+    ]
   },
-  "generated_kst": "2026-10-11T09:44:22.647+09:00",
+  "generated_kst": "2026-10-26T08:13:00+09:00",
   "history": {
-    "current_consensus_path": "./market-regime-history/20261012-v11.5.2.json",
+    "current_consensus_path": "./market-regime-history/20261026-v11.6.1.json",
     "legacy_research_policy": "9/29 연구 오버레이는 이전 합의본 이력에 보존; 현재 화면의 최신 연구로 표시하지 않는다.",
-    "previous_consensus_path": "./market-regime-history/20260928-v11.4.2.json"
+    "previous_consensus_path": "./market-regime-history/20261012-v11.5.2.json"
   },
   "kospi_cascade": {
     "amber_ev_threshold_pct": -0.5,
@@ -218,11 +207,11 @@
   "order_authority": false,
   "read_only": true,
   "regime": {
-    "broad_risk_on": false,
-    "code": "AI_LED_NARROW_RISK_ON_MACRO_STRESS_OVERLAY",
-    "label_ko": "AI 주도 좁은 위험선호 + 매크로 스트레스 오버레이",
-    "primary_risk": "LONG_REAL_RATE_AND_TERM_PREMIUM",
-    "summary_ko": "미국은 AI 내부 반도체에서 SW·보안으로, 일부 대형 방어주·발전사로 로테이션하는 좁은 장. 한국은 외국인 매도와 자사주 매입 종료 예상이 겹친 수급 경고 구간. 구조 등급과 가격 추세는 별도 축이며, 실제 집행은 기존 계좌·전략 규칙 우선."
+    "code": "HIGH_VOLATILITY_NEUTRAL_EV_DOWNTREND",
+    "label_ko": "주간 EV 중립·높은 변동성·가격 하락 추세",
+    "summary_ko": "나스닥 1주 EV -0.01%, 코스피 -0.31% 중립. 코스피는 추가 트리거 1개로 AMBER 경계. 기존 장기 코어 DCA·규칙매매 유지, 비정기 증액 EV 우위 없음. 부분 합의 대기.",
+    "primary_risk": "FOMC_CAPEX_MEMORY_EARNINGS",
+    "broad_risk_on": false
   },
   "schema": "JJOONI_MARKET_REGIME_V1",
   "semiconductor": {
@@ -254,17 +243,15 @@
     },
     "grade_source": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
     "price_trend": {
-      "history_sessions": 130,
-      "label_ko": "상승 유지 · 단기 경고 · MA200 미확인",
-      "missing_policy": "MA200_UNAVAILABLE_NOT_ESTIMATED",
-      "observed_date": "2026-10-09",
-      "source": "OBSERVATORY_SECTOR_ETF_REFERENCE",
-      "status": "UPTREND_WITH_SHORT_TERM_WARNING",
-      "ticker": "SOXX",
-      "vs_ma120_pct": 3.51946204,
+      "status": "DOWNTREND",
+      "label_ko": "구조 S / 추세 하락",
+      "observed_date": "2026-10-23",
+      "source": "WEEKLY_V11_6_1_SINGLE_SOURCE_PEERS",
+      "vs_ma20_pct": -11.7,
+      "vs_ma50_pct": -10.2,
+      "vs_ma120_pct": -12.3,
       "vs_ma200_pct": null,
-      "vs_ma20_pct": 0.48834352,
-      "vs_ma50_pct": 4.1004524
+      "missing_policy": "MA200_UNAVAILABLE_NOT_ESTIMATED"
     },
     "reported_condition_count": 1,
     "semantics": {
@@ -275,25 +262,22 @@
     }
   },
   "source": {
-    "consensus_status": "CLOSED",
-    "data_freshness": "CONSENSUS_REFERENCE_NOT_LIVE_MARKET",
-    "generated_kst": "2026-10-10T22:50:00+09:00",
+    "title": "[W] 261026 주간시황 v11.6.1",
+    "version": "v11.6.1",
+    "url": "https://docs.google.com/document/d/1KvxI5rByn2VylphRNiD7QsHyZfDZUlAE-ELIJAi49fA/edit",
+    "generated_kst": "2026-10-25T11:48:30+09:00",
+    "consensus_status": "PARTIAL_PENDING_JJANGGU",
+    "data_freshness": "MARKET_2026_10_23_NOT_LIVE",
     "source_dates": {
-      "kr_market": "2026-10-08",
-      "pb_snapshot": "20261010T080534+0900",
-      "us_market": "2026-10-09"
+      "kr_market": "2026-10-23",
+      "us_market": "2026-10-23"
     },
     "supersedes": [
-      "v11.4.2",
-      "v11.5",
-      "v11.5.1"
+      "v11.5.2"
     ],
-    "title": "[W] 261012 주간시황 v11.5.2 (쭈니·로이 최종합의·표현 보완)",
-    "unresolved_issues": 0,
-    "url": "https://docs.google.com/document/d/1vXkT2xcx26t1dxb5heFpWrFiG8KPiXMyQpgGJEMMqlk/edit",
-    "version": "v11.5.2"
+    "unresolved_issues": 1
   },
-  "status": "EXPIRED",
+  "status": "LIVE",
   "triggers": {
     "bond_stress": {
       "confirmation_source": "FED_H15",
@@ -428,67 +412,40 @@
     }
   },
   "ui": {
-    "headline_ko": "장기 코어 DCA·기존 규칙 유지 · 비정기 증액 보류 · 반도체 구조 S / 추세 경고",
-    "primary_watch_ko": "CPI·TSMC·한국 수급 / Macro+OIL+외국인 3중 점등",
-    "true_decision_day_ko": "10월 15~16일 재판정"
+    "headline_ko": "EV 중립·코스피 고변동 경계 · 반도체 구조 S/추세 하락",
+    "primary_watch_ko": "10/28 하이닉스 · 10/29 FOMC/삼성 · 10/29~30 CAPEX/PCE/BOJ",
+    "true_decision_day_ko": "10월 29~30일",
+    "consensus_notice_ko": "v11.6.1 부분 합의 대기 — 짱구 독립 검토 미완료"
   },
   "validation": {
+    "status": "PARTIAL_CONSENSUS_PENDING",
     "data_not_refreshed_by_this_update": true,
-    "kospi_cascade_rows": 8,
     "missing": [
-      "VKOSPI",
-      "SOXX_MA200",
-      "KRX_OFFICIAL_CLOSE",
-      "KOACT_COMPARABLE_TOTAL_RETURN",
-      "SIX_MONTH_SCENARIO_RETURNS",
-      "WTI_DEC_2027",
-      "H15_2026_10_09_CONFIRMATION"
+      "JJANGGU_INDEPENDENT_REVIEW",
+      "PEER_SECOND_SOURCE",
+      "PB_POSITION_RECONCILIATION"
     ],
-    "status": "CONSENSUS_TRANSCRIBED_WITH_CAVEATS",
-    "weekly_ev_recomputed": true
+    "weekly_ev_recomputed": false
   },
   "weekly_ev": {
-    "kospi": {
-      "band": "NEUTRAL",
-      "base_pct": 32,
-      "base_return_pct": 0.5,
-      "bear_pct": 35,
-      "bear_return_pct": -4.5,
-      "bull_pct": 33,
-      "bull_return_pct": 4,
-      "ev_pct": -0.095
-    },
     "nasdaq": {
+      "ev_pct": -0.01,
+      "band": "NEUTRAL"
+    },
+    "kospi": {
+      "ev_pct": -0.31,
       "band": "NEUTRAL",
-      "base_pct": 42,
-      "base_return_pct": 0.3,
-      "bear_pct": 28,
-      "bear_return_pct": -3.5,
-      "bull_pct": 30,
-      "bull_return_pct": 2.5,
-      "ev_pct": -0.104
+      "bear_pct": 37,
+      "base_pct": 28,
+      "bull_pct": 35
     },
     "one_month": {
-      "band": "NEUTRAL",
-      "base_pct": 37,
-      "base_return_pct": 0.5,
-      "bear_pct": 35,
-      "bear_return_pct": -5,
-      "bull_pct": 28,
-      "bull_return_pct": 4,
-      "ev_pct": -0.445,
-      "validation": "RECOMPUTED_FROM_V11_5_INPUTS"
+      "ev_pct": -0.02,
+      "band": "NEUTRAL"
     },
     "six_month": {
-      "base_pct": 40,
-      "bear_pct": 32,
-      "bull_pct": 28,
-      "conservative_ev_pct": null,
-      "ev_pct": null,
-      "note": "v11.5 승계값. 원문 점추정 부재로 재현 불가; 판단 입력에 사용하지 않는다.",
-      "reported_conservative_ev_pct": -0.66,
-      "reported_ev_pct": 3.64,
-      "validation": "UNVERIFIED_MISSING_SCENARIO_RETURNS"
+      "ev_pct": 1.2,
+      "band": "GREEN"
     }
   }
 }
