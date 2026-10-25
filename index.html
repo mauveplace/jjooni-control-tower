@@ -23,11 +23,11 @@
 <div class="foot">Encrypted static shell · AES-256-GCM · PBKDF2-SHA256<br>승인한 브라우저는 승인 해제 전까지 입력 없이 열립니다.<br>새 브라우저·저장정보 삭제 후에는 최초 승인이 필요합니다. 공용 기기는 승인 유지를 해제하세요.</div>
 </main>
 <script>
-window.__JJOONI_UI_RELEASE='20261025-r5-single-boot';
+window.__JJOONI_UI_RELEASE='20261025-r6-pnl-quality';
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const CT_PORTRAIT_HOTFIX=`<link id="ctResponsiveLayout" rel="stylesheet" href="responsive-layout.css?v=1.4-top-compact">`;
-const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=34.0-pure"><\/script><script src="ui-bootstrap-v1.js?v=1"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
+const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=34.1-quality"><\/script><script src="ui-bootstrap-v1.js?v=1"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
 let opening=false,retryPassword=null,retryTrusted=false;
 function showEnrollment(message){
   $('entryStatus').textContent='이 브라우저를 처음 한 번 승인하면 다음부터 바로 열립니다.';

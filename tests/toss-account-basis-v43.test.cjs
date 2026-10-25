@@ -35,7 +35,7 @@ test('canonical bootstrap loads Toss basis authority and encrypted shell cache-b
  const index=fs.readFileSync('index.html','utf8');
  assert.match(canonical,/__JJOONI_TOSS_ACCOUNT_BASIS_BOOTSTRAPPED/);
  assert.match(canonical,/toss-account-basis-v43\.js\?v=43\.3-compact/);
- assert.match(index,/canonical-metrics\.js\?v=34\.0-pure/);
+ assert.match(index,/canonical-metrics\.js\?v=34\.1-quality/);
 });
 
 
