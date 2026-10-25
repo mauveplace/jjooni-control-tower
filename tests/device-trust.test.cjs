@@ -7,11 +7,18 @@ function fixture(){
  const window={};vm.runInNewContext(fs.readFileSync('device-trust-v1.js','utf8'),{window,indexedDB,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,location,Date:{now:()=>clock.now}});
  return {api:window.JjooniTrustedDevice,records,clock,location};
 }
-test('trusted browser restores with nonextractable local key, without storing plaintext',async()=>{
- const f=fixture();await f.api.remember('test-only-password');const capsule=f.records.get('unlock');assert.equal(capsule.key.extractable,false);assert(!JSON.stringify(capsule).includes('test-only-password'));assert.equal(await f.api.restore(),'test-only-password');await f.api.forget();assert.equal(await f.api.restore(),null);
+test('approval survives 30 days and a year until explicitly revoked, without plaintext',async()=>{
+ const f=fixture();await f.api.remember('test-only-password');const capsule=f.records.get('unlock');assert.equal(capsule.key.extractable,false);assert(!JSON.stringify(capsule).includes('test-only-password'));assert.equal(capsule.expires,undefined);
+ f.clock.now+=366*86400000;assert.equal(await f.api.restore(),'test-only-password');await f.api.forget();assert.equal(await f.api.restore(),null);
 });
-test('expired, different-origin and tampered capsules fail closed',async()=>{
- const f=fixture();await f.api.remember('fixture');f.clock.now+=30*86400000;assert.equal(await f.api.restore(),null);
+test('valid legacy approvals migrate without requiring another login',async()=>{
+ const f=fixture();await f.api.remember('fixture');const legacy=f.records.get('unlock');delete legacy.version;legacy.expires=f.clock.now+86400000;f.records.set('unlock',legacy);
+ assert.equal(await f.api.restore(),'fixture');assert.equal(f.records.get('unlock').version,2);assert.equal(f.records.get('unlock').expires,undefined);
+ f.clock.now+=366*86400000;assert.equal(await f.api.restore(),'fixture');
+});
+test('expired legacy, unknown versions, different-origin and tampered approvals fail closed',async()=>{
+ const f=fixture();await f.api.remember('fixture');const legacy=f.records.get('unlock');delete legacy.version;legacy.expires=f.clock.now;f.records.set('unlock',legacy);assert.equal(await f.api.restore(),null);
+ await f.api.remember('fixture');f.records.get('unlock').version=99;assert.equal(await f.api.restore(),null);
  await f.api.remember('fixture');f.location.origin='https://other.test';assert.equal(await f.api.restore(),null);
  await f.api.remember('fixture');const r=f.records.get('unlock');r.iv[0]^=1;assert.equal(await f.api.restore(),null);
 });
