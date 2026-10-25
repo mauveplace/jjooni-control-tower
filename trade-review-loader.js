@@ -119,7 +119,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctDrilldownReadabilityV19Script','drilldown-readability-v19.js?v=19.4','drilldown-readability'],
 ['ctMarketContextV20Script','market-context-v20.js?v=20.1-accounts-first','market-context'],
 ['ctPerformanceDayViewScript','performance-day-view.js?v=1.3-account-comparisons','performance-day-view'],
-['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.8-account-comparisons','overview-consistency'],
+['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.9-quality','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.4','source-authority-guard'],
 ['ctStrategyBooksV1Script','strategy-books-v1.js?v=2.8-verified-krw','strategy-books'],
 ['ctManualIntradayV1Script','manual-intraday-v1.js?v=2.1-touch','manual-intraday'],

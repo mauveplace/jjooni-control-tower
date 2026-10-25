@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
 test('shell explicitly loads pure metrics then application bootstrap, without an eager UI loader',()=>{
  const index=read('index.html');
- assert.ok(index.indexOf('canonical-metrics.js?v=34.0-pure')<index.indexOf('ui-bootstrap-v1.js?v=1'));
+ assert.ok(index.indexOf('canonical-metrics.js?v=34.1-quality')<index.indexOf('ui-bootstrap-v1.js?v=1'));
  assert.doesNotMatch(index,/<script src="trade-review-loader/);
  assert.match(index,/legacyDocument.querySelectorAll/);
 });
