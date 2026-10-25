@@ -1,5 +1,6 @@
 (function(){
 'use strict';
+if(window.__JJOONI_VERIFIED_BOOT_OWNER&&window.__JJOONI_LIVE_READY!==true)return;
 if(['ACTIVE','WAITING_FOR_SSOT','LOADING_REQUIRED_UI'].includes(window.__JJOONI_UI_BOOT_V14?.state))return;
 
 const head=document.head||document.documentElement;
@@ -94,7 +95,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
 ['ctUiRefactorV14Script','ui-refactor.js?v=1.11-top-compact','ui-refactor'],
 ['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],
-['ctSecurityNamesV1Script','security-names-v1.js?v=1.0','security-names'],
+['ctSecurityNamesV1Script','security-names-held-v1.js?v=1.0','security-names'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
 ['ctTradeReviewReadableV3Script','trade-review-readable-v3.js?v=3.2','trade-readable'],
 ['ctMobileStabilityV4Script','mobile-stability-v4.js?v=4.6-holdings','mobile-stability'],

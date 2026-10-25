@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const {execFileSync}=require('node:child_process');
 
 const src=fs.readFileSync('investor-flow-v1.js','utf8');
-const metrics=fs.readFileSync('canonical-metrics.js','utf8');
+const metrics=fs.readFileSync('ui-bootstrap-v1.js','utf8');
 
 test('investor flow surface is valid JavaScript',()=>{
   execFileSync(process.execPath,['--check','investor-flow-v1.js'],{stdio:'pipe'});

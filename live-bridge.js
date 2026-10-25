@@ -522,7 +522,7 @@ injectResponsiveCss();ensureWatchlistUi();refresh();document.addEventListener('j
  if(document.getElementById('ctCostBridgeScript'))return;
  const x=document.createElement('script');
  x.id='ctCostBridgeScript';
- x.src='cost-bridge.js?v=2&_='+Date.now();
+ x.src='cost-bridge.js?v=2&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');
  x.async=true;
  (document.head||document.documentElement).appendChild(x);
 })();

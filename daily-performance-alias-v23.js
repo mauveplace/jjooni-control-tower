@@ -40,7 +40,7 @@ setTimeout(bind,0);setTimeout(bind,300);setTimeout(bind,900);
 if(window.__JJOONI_DAILY_PNL_ATTR_V27||document.getElementById('ctDailyPnlAttrV27Script'))return;
 const st={state:'LOADING',version:'27.0',started_at:new Date().toISOString()};
 window.__JJOONI_DAILY_PNL_ATTR_LOADER_V27=st;
-const s=document.createElement('script');s.id='ctDailyPnlAttrV27Script';s.src='daily-pnl-attribution-v27.js?v=27.6-holdings&t='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctDailyPnlAttrV27Script';s.src='daily-pnl-attribution-v27.js?v=27.6-holdings&t='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_DAILY_PNL_ATTR_V27?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('DAILY_PNL_ATTR_V27_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
@@ -51,7 +51,7 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 if(window.__JJOONI_TRADE_OPPORTUNITY_V28||document.getElementById('ctTradeOpportunityV28Script'))return;
 const st={state:'LOADING',version:'28.0',started_at:new Date().toISOString()};
 window.__JJOONI_TRADE_OPPORTUNITY_LOADER_V28=st;
-const s=document.createElement('script');s.id='ctTradeOpportunityV28Script';s.src='trade-opportunity-v28.js?v=28.0&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctTradeOpportunityV28Script';s.src='trade-opportunity-v28.js?v=28.0&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_TRADE_OPPORTUNITY_V28?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('TRADE_OPPORTUNITY_V28_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
@@ -62,7 +62,7 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 if(window.__JJOONI_CONSULTANT_MARKET_V29||document.getElementById('ctConsultantMarketV29Script'))return;
 const st={state:'LOADING',version:'29.1',started_at:new Date().toISOString()};
 window.__JJOONI_CONSULTANT_MARKET_LOADER_V29=st;
-const s=document.createElement('script');s.id='ctConsultantMarketV29Script';s.src='consultant-market-v29.js?v=29.1&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctConsultantMarketV29Script';s.src='consultant-market-v29.js?v=29.1&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_MARKET_V29?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_MARKET_V29_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
@@ -73,7 +73,7 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 if(window.__JJOONI_CONSULTANT_TAB_HOTFIX_V30||document.getElementById('ctConsultantTabHotfixV30Script'))return;
 const st={state:'LOADING',version:'30.0',started_at:new Date().toISOString()};
 window.__JJOONI_CONSULTANT_TAB_HOTFIX_LOADER_V30=st;
-const s=document.createElement('script');s.id='ctConsultantTabHotfixV30Script';s.src='consultant-tab-hotfix-v30.js?v=30.0&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctConsultantTabHotfixV30Script';s.src='consultant-tab-hotfix-v30.js?v=30.0&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_TAB_HOTFIX_V30?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_TAB_HOTFIX_V30_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
@@ -84,7 +84,7 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 if(window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31||document.getElementById('ctConsultantTabHotfixV31Script'))return;
 const st={state:'LOADING',version:'31.0',started_at:new Date().toISOString()};
 window.__JJOONI_CONSULTANT_TAB_HOTFIX_LOADER_V31=st;
-const s=document.createElement('script');s.id='ctConsultantTabHotfixV31Script';s.src='consultant-tab-hotfix-v31.js?v=31.0&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctConsultantTabHotfixV31Script';s.src='consultant-tab-hotfix-v31.js?v=31.0&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_CONSULTANT_TAB_HOTFIX_V31?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('CONSULTANT_TAB_HOTFIX_V31_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
@@ -95,7 +95,7 @@ s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();cons
 if(window.__JJOONI_ACCOUNT_RETURN_30D_V46||document.getElementById('ctAccountReturn30dV46Script'))return;
 const st={state:'LOADING',version:'46.0',started_at:new Date().toISOString()};
 window.__JJOONI_ACCOUNT_RETURN_30D_LOADER_V46=st;
-const s=document.createElement('script');s.id='ctAccountReturn30dV46Script';s.src='account-return-30d-v46.js?v=46.0&_='+Date.now();s.async=false;
+const s=document.createElement('script');s.id='ctAccountReturn30dV46Script';s.src='account-return-30d-v46.js?v=46.0&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;
 s.onload=()=>{st.state=window.__JJOONI_ACCOUNT_RETURN_30D_V46?.state||'LOADED';st.loaded_at=new Date().toISOString()};
 s.onerror=()=>{st.state='LOAD_FAILED';st.failed_at=new Date().toISOString();console.error('ACCOUNT_RETURN_30D_V46_LOAD_FAILED')};
 (document.head||document.documentElement).appendChild(s);
