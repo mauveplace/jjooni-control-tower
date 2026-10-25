@@ -53,12 +53,19 @@ def inventory(root=ROOT):
     for file in ('boot-coordinator-v33.js', 'fast-refresh-v32.js'):
         if re.search(r"dispatchEvent\(new Event\(['\"]visibilitychange", (root / file).read_text()):
             violations.append('SYNTHETIC_LIFECYCLE_REFRESH:' + file)
+    bootstrap = re.findall(r"['\"]([a-zA-Z0-9_-]+\.js)\?v=", (root / 'ui-bootstrap-v1.js').read_text())
+    deferred = re.search(r"DEFERRED_LABELS=new Set\(\[([^]]+)\]", loader)
+    deferred_labels = re.findall(r"'([^']+)'", deferred.group(1)) if deferred else []
     archived = list((root / 'ops/archive/workflows').glob('*.yml'))
     return {'schema': 'CT_ARCHITECTURE_INVENTORY_V1', 'scope': 'STATIC_SOURCE_ONLY_NO_ACCOUNT_VALUES',
             'counts': {'active_workflows': len(workflows), 'archived_one_shots': len(archived),
                        'scheduled_workflows': sum(bool(w['schedules']) for w in workflows),
-                       'browser_js_files': len(modules), 'required_boot_modules': len(required),
+                       'browser_js_files': len(modules), 'required_boot_modules': len(required), 'declared_ui_modules':len(required),
+                       'critical_ui_modules':sum(row[2] not in deferred_labels for row in required), 'bootstrap_modules':len(bootstrap),
                        'recurring_or_observer_sites': sum(len(m['recurring_or_observer_sites']) for m in modules)},
+            'bootstrap_modules': bootstrap, 'deferred_ui_labels':deferred_labels,
+            'lazy_assets':['security-names-v1.js'],
+            'inventory_note':'required_boot_modules retains the legacy declared-list count; critical_ui_modules excludes deferred features. Bootstrap and lazy assets are explicit.',
             'violations': violations, 'required_boot_modules': [dict(zip(('id', 'url', 'label'), row)) for row in required],
             'workflows': workflows, 'browser_modules': modules}
 

@@ -3,7 +3,7 @@
 if(typeof window!=='object'||typeof document!=='object')return;
 if(window.__JJOONI_BOOT_COORDINATOR_V33)return;
 
-const S={version:'33.2',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0,last_diag:null};
+const S={version:'34.0',state:'WAITING_FOR_LIVE',started_at:new Date().toISOString(),pulses:0,last_diag:null};
 window.__JJOONI_BOOT_COORDINATOR_V33=S;
 
 function factsReady(){return !!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD)}
@@ -55,7 +55,8 @@ function startVerifiedUi(){
  window.__JJOONI_UI_BOOT_V14=null;
  const s=document.createElement('script');
  s.id='ctVerifiedUiLoaderV33';
- s.src='trade-review-loader.js?v=14.20-v33.2-navfix&_='+Date.now();
+ document.getElementById('ctVerifiedUiLoaderV33')?.remove();
+ s.src='trade-review-loader.js?v=14.36&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');
  s.async=false;
  s.onload=()=>{S.state='UI_LOADER_STARTED';S.ui_loader_at=new Date().toISOString()};
  s.onerror=()=>{S.state='UI_LOADER_LOAD_FAILED';S.failed_at=new Date().toISOString();paint('UI 로더 파일을 불러오지 못했습니다. 새로고침 없이 재시도합니다.',true);setTimeout(startVerifiedUi,1500)};
@@ -69,10 +70,7 @@ S.retry=()=>{
  startVerifiedUi();return true;
 };
 
-// Hold the legacy eager loader. canonical-metrics runs before the legacy
-// trade-review-loader tag, so the old loader sees ACTIVE and returns. We only
-// clear this hold after verified live SSOT exists.
-if(!window.__JJOONI_UI_BOOT_V14)window.__JJOONI_UI_BOOT_V14={state:'ACTIVE',version:'V33_DEFERRED_BOOT_HOLD'};
+// Only the verified coordinator starts the UI loader. No fabricated ACTIVE hold.
 paint('저장된 검증 SSOT를 먼저 연결합니다. 최신 FAST 갱신은 화면 진입 후 이어집니다.',false);
 
 let lastPaint=0;

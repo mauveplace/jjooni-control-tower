@@ -23,11 +23,11 @@
 <div class="foot">Encrypted static shell · AES-256-GCM · PBKDF2-SHA256<br>승인한 브라우저는 승인 해제 전까지 입력 없이 열립니다.<br>새 브라우저·저장정보 삭제 후에는 최초 승인이 필요합니다. 공용 기기는 승인 유지를 해제하세요.</div>
 </main>
 <script>
-window.__JJOONI_UI_RELEASE='20261025-r4-device-entry';
+window.__JJOONI_UI_RELEASE='20261025-r5-single-boot';
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const CT_PORTRAIT_HOTFIX=`<link id="ctResponsiveLayout" rel="stylesheet" href="responsive-layout.css?v=1.4-top-compact">`;
-const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=33.9-shared-capital"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script><script src="trade-review-loader.js?v=14.54-compact"><\/script>`;
+const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=34.0-pure"><\/script><script src="ui-bootstrap-v1.js?v=1"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
 let opening=false,retryPassword=null,retryTrusted=false;
 function showEnrollment(message){
   $('entryStatus').textContent='이 브라우저를 처음 한 번 승인하면 다음부터 바로 열립니다.';
@@ -59,6 +59,14 @@ async function openTower(pw,fromTrusted=false){
       }catch(_){window.__CT_DEVICE_APPROVAL_WARNING='기기 승인 저장 불가 · 이번 세션만 열렸습니다.';}
     }else{try{await window.JjooniTrustedDevice?.forget()}catch(_){}}
     let html=new TextDecoder().decode(plain);
+    // Remove obsolete eager loader tags before parsing the decrypted legacy shell.
+    const legacyDocument=new DOMParser().parseFromString(html,'text/html');
+    for(const script of legacyDocument.querySelectorAll('script[src]')){
+      const file=new URL(script.getAttribute('src'),location.href).pathname.split('/').pop();
+      if(file==='trade-review-loader.js')script.remove();
+    }
+    html='<!doctype html>\n'+legacyDocument.documentElement.outerHTML;
+    window.__JJOONI_VERIFIED_BOOT_OWNER=true;
     html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
     html=html.replace('</body>',CT_POSTFIX+'</body>');
     const CT_LIVE_BOOT=`<script>(function(){
@@ -67,8 +75,8 @@ async function openTower(pw,fromTrusted=false){
       b.style.cssText='position:fixed;right:12px;bottom:72px;z-index:10001;padding:6px 9px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#b45309;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002';
       b.textContent='LINEAGE GUARD LOADING';document.body.appendChild(b);
       function blocked(msg){window.__LINEAGE_GUARD_ACTIVE=false;b.textContent='SSOT BLOCKED · '+msg;b.style.background='#fff1f2';b.style.borderColor='#fecdd3';b.style.color='#be123c';b.title='안전한 데이터 계보 보호기가 활성화되지 않아 live 숫자 갱신을 차단했습니다.';}
-      function loadLive(){var s=document.createElement('script');s.src='live-bridge.js?v=4&_='+Date.now();s.async=false;s.onerror=function(){blocked('FEED LOAD FAIL')};s.onload=function(){setTimeout(function(){if(window.__LINEAGE_GUARD_ACTIVE!==true)blocked('GUARD LOST')},1500)};(document.head||document.documentElement).appendChild(s);}
-      var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+Date.now();g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='LINEAGE GUARD ACTIVE';loadLive()};(document.head||document.documentElement).appendChild(g);
+      function loadLive(){var s=document.createElement('script');s.src='live-bridge.js?v=4&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;s.onerror=function(){blocked('FEED LOAD FAIL')};s.onload=function(){setTimeout(function(){if(window.__LINEAGE_GUARD_ACTIVE!==true)blocked('GUARD LOST')},1500)};(document.head||document.documentElement).appendChild(s);}
+      var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='LINEAGE GUARD ACTIVE';loadLive()};(document.head||document.documentElement).appendChild(g);
     }());<\/script>`;
     html=html.replace('</body>',CT_LIVE_BOOT+'</body>');document.open();document.write(html);document.close();
     return true;

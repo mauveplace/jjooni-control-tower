@@ -4,29 +4,23 @@ const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
-test('encrypted shell keeps canonical metrics before the legacy loader',()=>{
-  const index=read('index.html');
-  const canonical=index.search(/canonical-metrics\.js\?v=33\.(?:[2-9]|[1-9]\d+)/);
-  const legacy=index.search(/trade-review-loader\.js\?v=14\.\d+/);
-  assert.ok(canonical>=0,'canonical-metrics.js missing from decrypted postfix');
-  assert.ok(legacy>=0,'trade-review-loader.js missing from decrypted postfix');
-  assert.ok(canonical<legacy,'canonical metrics must install the deferred boot hold before legacy loader');
+test('shell explicitly loads pure metrics then application bootstrap, without an eager UI loader',()=>{
+ const index=read('index.html');
+ assert.ok(index.indexOf('canonical-metrics.js?v=34.0-pure')<index.indexOf('ui-bootstrap-v1.js?v=1'));
+ assert.doesNotMatch(index,/<script src="trade-review-loader/);
+ assert.match(index,/legacyDocument.querySelectorAll/);
 });
-
-test('canonical bootstrap owns verified boot and fast refresh bootstrap',()=>{
-  const canonical=read('canonical-metrics.js');
-  assert.match(canonical,/__JJOONI_BOOT_COORDINATOR_BOOTSTRAPPED/);
-  assert.match(canonical,/boot-coordinator-v33\.js/);
-  assert.match(canonical,/__JJOONI_CT_FAST_BOOTSTRAPPED/);
-  assert.match(canonical,/fast-refresh-v32\.js/);
+test('canonical calculation does not inject UI or mutate boot state',()=>{
+ const canonical=read('canonical-metrics.js'),bootstrap=read('ui-bootstrap-v1.js');
+ assert.doesNotMatch(canonical,/createElement|appendChild|BOOTSTRAPPED|__JJOONI_UI_BOOT/);
+ assert.match(bootstrap,/boot-coordinator-v33\.js/);assert.match(bootstrap,/fast-refresh-v32\.js/);
 });
-
-test('verified boot releases exactly one UI loader after SSOT and lineage are ready',()=>{
-  const boot=read('boot-coordinator-v33.js');
-  assert.match(boot,/function verifiedReady\(\)\{return factsReady\(\)&&lineageReady\(\)\}/);
-  assert.match(boot,/if\(S\.state==='UI_LOADING'\|\|S\.state==='ACTIVE'\|\|S\.state==='UI_LOADER_STARTED'\)return/);
-  assert.match(boot,/trade-review-loader\.js\?v=14\.20-v33\.2/);
-  assert.match(boot,/window\.__JJOONI_LIVE_READY=true/);
+test('verified coordinator owns a single real loader without fabricated ACTIVE',()=>{
+ const boot=read('boot-coordinator-v33.js');
+ assert.match(boot,/function verifiedReady\(\)\{return factsReady\(\)&&lineageReady\(\)\}/);
+ assert.match(boot,/trade-review-loader\.js\?v=14\.36/);
+ assert.doesNotMatch(boot,/V33_DEFERRED_BOOT_HOLD|state:'ACTIVE',version/);
+ assert.match(boot,/window\.__JJOONI_LIVE_READY=true/);
 });
 
 test('UI loader still requires detail-authority runtimes before showing the dashboard',()=>{

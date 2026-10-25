@@ -6,7 +6,7 @@ const {execFileSync}=require('node:child_process');
 const src=fs.readFileSync('consultant-tab-hotfix-v31.js','utf8');
 const daily=fs.readFileSync('tripod-daily-freshness-v35.js','utf8');
 const sidecar=fs.readFileSync('public-market-sidecar-v36.js','utf8');
-const metrics=fs.readFileSync('canonical-metrics.js','utf8');
+const metrics=fs.readFileSync('ui-bootstrap-v1.js','utf8');
 
 test('market-sector, sidecar and TRI-POD guard scripts are valid JavaScript',()=>{
   for(const file of ['consultant-tab-hotfix-v31.js','tripod-daily-freshness-v35.js','public-market-sidecar-v36.js','canonical-metrics.js']){

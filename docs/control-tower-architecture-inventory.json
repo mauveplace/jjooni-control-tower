@@ -2,13 +2,34 @@
   "schema": "CT_ARCHITECTURE_INVENTORY_V1",
   "scope": "STATIC_SOURCE_ONLY_NO_ACCOUNT_VALUES",
   "counts": {
-    "active_workflows": 38,
+    "active_workflows": 40,
     "archived_one_shots": 20,
     "scheduled_workflows": 11,
-    "browser_js_files": 78,
+    "browser_js_files": 80,
     "required_boot_modules": 34,
+    "declared_ui_modules": 34,
+    "critical_ui_modules": 32,
+    "bootstrap_modules": 8,
     "recurring_or_observer_sites": 43
   },
+  "bootstrap_modules": [
+    "boot-coordinator-v33.js",
+    "public-market-sidecar-v36.js",
+    "consultant-tab-hotfix-v31.js",
+    "toss-account-basis-v43.js",
+    "benchmark-excess-v1.js",
+    "investor-flow-v1.js",
+    "tripod-daily-freshness-v35.js",
+    "fast-refresh-v32.js"
+  ],
+  "deferred_ui_labels": [
+    "decision-impact",
+    "manual-intraday"
+  ],
+  "lazy_assets": [
+    "security-names-v1.js"
+  ],
+  "inventory_note": "required_boot_modules retains the legacy declared-list count; critical_ui_modules excludes deferred features. Bootstrap and lazy assets are explicit.",
   "violations": [],
   "required_boot_modules": [
     {
@@ -33,7 +54,7 @@
     },
     {
       "id": "ctSecurityNamesV1Script",
-      "url": "security-names-v1.js?v=1.0",
+      "url": "security-names-held-v1.js?v=1.0",
       "label": "security-names"
     },
     {
@@ -219,6 +240,18 @@
       "publish_sites": []
     },
     {
+      "path": ".github/workflows/calendar-stockchild-gap-qa.yml",
+      "name": "Calendar Optional Gap Review QA",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
       "path": ".github/workflows/canonical-contract.yml",
       "name": "Canonical data and module loading contract",
       "triggers": [
@@ -308,7 +341,7 @@
           "entry": "- tools/publish_observatory_data.py"
         },
         {
-          "line": 167,
+          "line": 169,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 10y history' \\"
         }
       ]
@@ -354,6 +387,7 @@
       "name": "Market Observatory Calendar Focus E2E",
       "triggers": [
         "workflow_dispatch",
+        "pull_request",
         "push"
       ],
       "schedules": [],
@@ -487,7 +521,7 @@
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): hourly market refresh' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json"
         },
         {
-          "line": 390,
+          "line": 394,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)"
         }
       ]
@@ -780,6 +814,17 @@
       ]
     },
     {
+      "path": ".github/workflows/official-macro-kcs-parser-qa.yml",
+      "name": "Official Macro KCS Parser QA",
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "schedules": [],
+      "upstreams": [],
+      "publish_sites": []
+    },
+    {
       "path": ".github/workflows/public-market-daily.yml",
       "name": "Public Market + TRI-POD Daily Sidecar",
       "triggers": [
@@ -873,10 +918,10 @@
     },
     {
       "path": "boot-coordinator-v33.js",
-      "bytes": 6134,
+      "bytes": 5999,
       "recurring_or_observer_sites": [
         {
-          "line": 79,
+          "line": 77,
           "kinds": [
             "setInterval"
           ]
@@ -885,7 +930,7 @@
     },
     {
       "path": "canonical-metrics.js",
-      "bytes": 10633,
+      "bytes": 6191,
       "recurring_or_observer_sites": []
     },
     {
@@ -936,7 +981,7 @@
     },
     {
       "path": "daily-performance-alias-v23.js",
-      "bytes": 6283,
+      "bytes": 6589,
       "recurring_or_observer_sites": [
         {
           "line": 34,
@@ -975,7 +1020,7 @@
     },
     {
       "path": "device-trust-v1.js",
-      "bytes": 1761,
+      "bytes": 2118,
       "recurring_or_observer_sites": []
     },
     {
@@ -1048,7 +1093,7 @@
     },
     {
       "path": "live-bridge.js",
-      "bytes": 57058,
+      "bytes": 57109,
       "recurring_or_observer_sites": [
         {
           "line": 361,
@@ -1092,7 +1137,7 @@
     },
     {
       "path": "market-observatory/calendar-editor-v1.js",
-      "bytes": 13058,
+      "bytes": 14699,
       "recurring_or_observer_sites": []
     },
     {
@@ -1333,7 +1378,7 @@
     },
     {
       "path": "pb-review-export-v1.js",
-      "bytes": 2858,
+      "bytes": 4927,
       "recurring_or_observer_sites": []
     },
     {
@@ -1371,6 +1416,11 @@
     {
       "path": "runtime-integrity-v15.js",
       "bytes": 7865,
+      "recurring_or_observer_sites": []
+    },
+    {
+      "path": "security-names-held-v1.js",
+      "bytes": 2064,
       "recurring_or_observer_sites": []
     },
     {
@@ -1448,16 +1498,16 @@
     },
     {
       "path": "trade-review-loader.js",
-      "bytes": 13432,
+      "bytes": 13519,
       "recurring_or_observer_sites": [
         {
-          "line": 85,
+          "line": 86,
           "kinds": [
             "MutationObserver"
           ]
         },
         {
-          "line": 89,
+          "line": 90,
           "kinds": [
             "MutationObserver"
           ]
@@ -1490,6 +1540,11 @@
           ]
         }
       ]
+    },
+    {
+      "path": "ui-bootstrap-v1.js",
+      "bytes": 4183,
+      "recurring_or_observer_sites": []
     },
     {
       "path": "ui-refactor.js",
