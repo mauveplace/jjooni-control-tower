@@ -226,17 +226,17 @@ def customs_pdf_links(soup, page_url):
 def customs_semiconductor_yoy(text, period):
     """Read the export semiconductor YoY, never the memory-semiconductor import YoY."""
     t = compact(text)
-    direct = re.search(r'(?<!메모리)반도체\\(전년동월대비증감률([+-]?\\d+(?:\\.\\d+)?)%', t)
+    direct = re.search(r'(?<!메모리)반도체\(전년동월대비증감률([+-]?\d+(?:\.\d+)?)%', t)
     if direct:
         return float(direct[1])
     # The official PDF also carries a dated monthly series. Require its final
     # observation to match the release month before using the value.
-    series = re.search(r'(?<!메모리)반도체전년동월대비증감률\\(%\\):\\[([’\\'‘]?\\d{2})\\.(\\d+)월\\]([^*○※]+)', t)
+    series = re.search(r'(?<!메모리)반도체전년동월대비증감률\(%\):\[([’\'‘]?\d{2})\.(\d+)월\]([^*○※]+)', t)
     if series:
-        year = 2000 + int(re.sub(r'\\D', '', series[1]))
+        year = 2000 + int(re.sub(r'\D', '', series[1]))
         fragment = '[' + series[2] + '월]' + series[3]
         points = [(f'{year}-{int(mm):02d}-01', float(vv))
-                  for mm, vv in re.findall(r'\\[(\\d{1,2})월\\]([+-]?\\d+(?:\\.\\d+)?)', fragment)]
+                  for mm, vv in re.findall(r'\[(\d{1,2})월\]([+-]?\d+(?:\.\d+)?)', fragment)]
         if points and points[-1][0] == period:
             return points[-1][1]
     raise ValueError('OFFICIAL_PARSE_MISSING:semiconductor export YoY')
@@ -254,19 +254,19 @@ def parse_customs(soup, url, early=False, supplemental_text=None, attachment_url
     period = period_from_title(text)
     published = publication_date(text)
     if early:
-        required(r'1일[~∼～-](?:\\d+월)?20일수출입현황', t, '1–20 window')
+        required(r'1일[~∼～-](?:\d+월)?20일수출입현황', t, '1–20 window')
         # Table header and period contract must not allow a 1–10 report here.
-        m = required(r'전년동기대비수출([+-]?\\d+(?:\\.\\d+)?)%', t, 'early export YoY')
+        m = required(r'전년동기대비수출([+-]?\d+(?:\.\d+)?)%', t, 'early export YoY')
         return [payload('KR_EXPORT_1_20', '1~20일 수출 YoY', 'exports', 'KCS', period, float(m[1]), url, published,
                         window='DAY_1_TO_20', revision_status='PRELIMINARY')]
-    required(r'월간수출입현황\\[확정치\\]', t, 'confirmed monthly window')
+    required(r'월간수출입현황\[확정치\]', t, 'confirmed monthly window')
     results = []
     for key, name, label in [('KR_EXPORT_YOY', '월간 수출 YoY', '수출'),
                              ('KR_SEMICON_EXPORT_YOY', '반도체 월간 수출 YoY', '반도체')]:
         try:
             source_text = t
             if key == 'KR_EXPORT_YOY':
-                value = float(required(r'전년동월대비수출은([+-]?\\d+(?:\\.\\d+)?)%', t, 'monthly export YoY')[1])
+                value = float(required(r'전년동월대비수출은([+-]?\d+(?:\.\d+)?)%', t, 'monthly export YoY')[1])
             else:
                 try:
                     value = customs_semiconductor_yoy(t, period)
@@ -286,12 +286,12 @@ def parse_customs(soup, url, early=False, supplemental_text=None, attachment_url
                 metric['attachment_url'] = attachment_url
                 metric['transport_source'] = dict(provider='Official KCS PDF attachment', url=attachment_url)
             # Only the official same-year, same-metric monthly series is accepted.
-            series = re.search(label + r'전년동월대비증감률\\(%\\):\\[([’\\'‘]?\\d{2})\\.(\\d+)월\\]([^*○※]+)', source_text)
+            series = re.search(label + r'전년동월대비증감률\(%\):\[([’\'‘]?\d{2})\.(\d+)월\]([^*○※]+)', source_text)
             if series:
-                year = 2000 + int(re.sub(r'\\D', '', series[1]))
+                year = 2000 + int(re.sub(r'\D', '', series[1]))
                 fragment = '[' + series[2] + '월]' + series[3]
                 points = [dict(metric['latest'], period=f'{year}-{int(mm):02d}-01', value=float(vv))
-                          for mm, vv in re.findall(r'\\[(\\d{1,2})월\\]([+-]?\\d+(?:\\.\\d+)?)', fragment)]
+                          for mm, vv in re.findall(r'\[(\d{1,2})월\]([+-]?\d+(?:\.\d+)?)', fragment)]
                 if points and points[-1]['period'] == period and points[-1]['value'] == value:
                     metric['history'] = points
             results.append(metric)
@@ -310,7 +310,7 @@ def collect_customs():
             t = compact(title)
             if '월간수출입현황[확정치]' in t:
                 found.setdefault('monthly', url)
-            if re.search(r'1일[~∼～-](?:\\d+월)?20일수출입현황', t):
+            if re.search(r'1일[~∼～-](?:\d+월)?20일수출입현황', t):
                 found.setdefault('early', url)
         if len(found) == 2:
             break
@@ -329,7 +329,7 @@ def collect_customs():
                         if not raw.startswith(b'%PDF'):
                             raise ValueError('OFFICIAL_ATTACHMENT_NOT_PDF')
                         reader = PdfReader(io.BytesIO(raw))
-                        attachment_text = '\\n'.join(page.extract_text() or '' for page in reader.pages[:15])
+                        attachment_text = '\n'.join(page.extract_text() or '' for page in reader.pages[:15])
                         candidate = parse_customs(soup, url, supplemental_text=attachment_text, attachment_url=pdf_url)
                         if next(m for m in candidate if m['key'] == 'KR_SEMICON_EXPORT_YOY').get('latest'):
                             parsed = candidate
