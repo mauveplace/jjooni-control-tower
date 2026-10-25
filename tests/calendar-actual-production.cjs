@@ -46,10 +46,19 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
     // the selected month. Scope the DOM assertion to the target release's verified
     // actual instead of requiring the title itself to be globally unique.
     const row=page.locator('#events .event').filter({hasText:title}).filter({has:page.locator('.date').filter({hasText:date.slice(5)})});
-    assert.equal(await row.count(),1,`${title} ${date} ${value}`);await row.scrollIntoViewIfNeeded();
+    assert.equal(await row.count(),1,`${title} ${date} ${value}`);
+    // Read the row first. The live calendar may replace DOM nodes during a poll,
+    // so scrolling a previously resolved element can race with that refresh.
     const text=await row.innerText();assert(text.includes(value),title+' actual not rendered');
     const metrics=await row.locator('.actual').allTextContents();assert(metrics.some(x=>x.includes(value)),title+' actual column missing');
-    await row.screenshot({path:`calendar-${width}-${event.country}.png`});
+    try {
+      await row.screenshot({path:`calendar-${width}-${event.country}.png`,timeout:4000});
+    } catch (error) {
+      // Screenshots are diagnostics, not the source-of-truth validation above.
+      // Preserve evidence even if a live poll detaches a row during auto-scroll.
+      console.warn('CALENDAR_ROW_SCREENSHOT_FALLBACK',String(error.message||error));
+      await page.screenshot({path:`calendar-${width}-${event.country}.png`});
+    }
     report.push({width,date,title,actual:event.actual,source_url:event.source_url,text});
    }
    const size=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));

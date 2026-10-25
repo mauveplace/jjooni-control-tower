@@ -72,5 +72,5 @@ test('an open mobile tab updates without reload, retains nodes when unchanged an
  const runtime=context.__JJOONI_OBSERVATORY_MARKET_REFRESH;
  assert.equal(await runtime.refresh(true),true);assert.equal(context.DATA.latest.NASDAQ100,101);assert.equal(paints,1);
  assert.equal(await runtime.refresh(true),false);assert.equal(paints,1,'unchanged polling cannot rebuild chart nodes');
- fail=true;const confirmed=context.DATA;await runtime.refresh(true);assert.equal(context.DATA,confirmed);assert.equal(runtime.status,'RETRY');assert.ok(listeners.visibilitychange);assert.ok(listeners.pageshow);assert.equal(reads,3);
+ fail=true;const confirmed=context.DATA;await runtime.refresh(true);assert.equal(context.DATA,confirmed);assert.equal(runtime.status,'RETRY');assert.ok(listeners.visibilitychange);assert.ok(listeners.pageshow);assert.equal(reads,4,'after the last-value poll fails, the recent source and full-history fallback must both be attempted');
 });

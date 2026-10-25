@@ -368,7 +368,10 @@ jobs:
               assert token in html,token
           assert "common(['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL'])" in html
           assert 'observatory-v2.js?v=' in html
-          assert "cache:'no-store'" in html and "'cb='+Date.now()" in html
+          # The optimized first load uses HTTP revalidation and lazy calendar reads.
+          # Do not require the retired cache-busting bootstrap on every data build.
+          assert "loadObsJson=u=>fetch(u,{cache:'no-cache'})" in html
+          assert "CAL_PROMISE=loadObsJson('./data/economic-calendar.json')" in html
           import re
           board_url_version=re.search(r'latest-board-v1\.js\?v=([0-9.]+)',html)
           board_runtime_version=re.search(r"version:'([0-9.]+)'",board)
