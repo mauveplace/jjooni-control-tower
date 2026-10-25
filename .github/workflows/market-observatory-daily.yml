@@ -222,40 +222,6 @@ jobs:
           from publish_observatory_data import materialize_market_dependents, MARKET_BUNDLE
           materialize_market_dependents(MARKET_BUNDLE)
           PY
-      - name: Install Observatory UI runtimes and optimize bootstrap
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('market-observatory/index.html')
-          s=p.read_text(encoding='utf-8')
-          zoom='<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>'
-          if 'chartjs-plugin-zoom@2.2.0' not in s:s=s.replace('</head>',zoom+'</head>',1)
-          bridge='<script src="./observatory-v2.js?v=2.12.2"></script>'
-          if 'observatory-v2.js' not in s:s=s.replace('</body>',bridge+'</body>',1)
-          editor='<script src="./calendar-editor-v1.js?v=1.2"></script>'
-          if 'calendar-editor-v1.js' not in s:s=s.replace('</body>',editor+'</body>',1)
-          board='<script src="./latest-board-v1.js?v=1.0"></script>'
-          if 'latest-board-v1.js' not in s:s=s.replace('</body>',board+'</body>',1)
-          sector='<script src="./sector-etf-v1.js?v=1.0"></script>'
-          if 'sector-etf-v1.js' not in s:s=s.replace('</body>',sector+'</body>',1)
-          fedwatch='<script src="./fed-watch-v1.js?v=2.1"></script>'
-          if 'fed-watch-v1.js' not in s:s=s.replace('</body>',fedwatch+'</body>',1)
-          s=s.replace('Macro · Rates · FX · Energy · Sector ETF · TRI-POD · Event Calendar','Macro · Rates · FedWatch · FX · Energy · Sector ETF · TRI-POD · Event Calendar')
-
-          old="Promise.all([fetch('./data/observatory.json?'+Date.now(),{cache:'no-store'}).then(r=>r.json()),fetch('./data/economic-calendar.json?'+Date.now(),{cache:'no-store'}).then(r=>r.json())]).then(([d,c])=>{DATA=d;CAL=c;render();renderCalendar()}).catch(e=>{console.error(e);$('#pulse').innerHTML='<span class=\"chip\">데이터 로딩 대기</span>'});"
-          new="const loadObsJson=u=>fetch(u,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);return r.json()});let CAL_PROMISE=null;function loadCalendar(){if(CAL)return Promise.resolve(CAL);if(CAL_PROMISE)return CAL_PROMISE;CAL_PROMISE=loadObsJson('./data/economic-calendar.json').then(c=>{CAL=c;renderCalendar();return c}).finally(()=>{CAL_PROMISE=null});return CAL_PROMISE}loadObsJson('./data/observatory.json').then(d=>{DATA=d;render()}).catch(e=>{console.error(e);$('#pulse').innerHTML='<span class=\"chip\">데이터 로딩 대기</span>'});$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b?.dataset.tab==='calendar')loadCalendar().catch(err=>console.error('calendar lazy load',err))});"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif "fetch('./data/observatory.json?'+Date.now(),{cache:'no-store'})" in s:
-              raise SystemExit('OBSERVATORY_BOOTSTRAP_OPTIMIZER_PATTERN_MISMATCH')
-          p.write_text(s,encoding='utf-8')
-          print('OBSERVATORY_UI_RUNTIME=PASS')
-          print('OBSERVATORY_BOOTSTRAP_CACHE_REVALIDATION=PASS')
-          print('OBSERVATORY_CALENDAR_LAZY_LOAD=PASS')
-          print('OBSERVATORY_FEDWATCH_RUNTIME=PASS')
-          PY
       - name: Acceptance contract
         shell: bash
         run: |
@@ -391,7 +357,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json $(find market-observatory/data/fedwatch-history -type f | sort)
 
 
 

@@ -11,7 +11,7 @@ const pct=v=>{const x=n(v);return x==null?'—':(x>=0?'+':'')+x.toFixed(2)+'%'};
 const cls=v=>{const x=n(v);return x==null?'flat':x>0?'up':x<0?'down':'flat'};
 const price=(v,market='US')=>{const x=n(v);return x==null?'—':(market==='KR'?'₩':'$')+x.toLocaleString(market==='KR'?'ko-KR':'en-US',{maximumFractionDigits:market==='KR'?0:2})};
 const H=[1,5,10,20,50,100];
-let DATA=null,rsChart=null;
+let DATA=null,rsChart=null;const openThemes=new Set();
 
 function ensureStyle(){
  if(q('#obsSectorEtfStyle'))return;
@@ -39,6 +39,7 @@ function ensureStyle(){
  #sectors .ticker{font-size:11px;font-weight:950;color:#101828}.name{font-size:8px;color:#8b97a6;margin-top:2px}
  #sectors .up{color:#d92d20}.down{color:#175cd3}.flat{color:#667085}
  #sectors .obsTheme{margin-top:13px}.obsTheme:first-child{margin-top:0}.obsThemeTitle{font-size:10px;font-weight:950;color:#526071;margin-bottom:7px}
+ #sectors details.obsTheme>summary{cursor:pointer;min-height:44px;padding:12px 4px;font-size:13px}#sectors details.obsTheme[open]>summary{border-bottom:1px solid #e4eaf1;margin-bottom:10px}
  #sectors .obsThemeRows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
  #sectors .obsEtfCard{border:1px solid #e6ebf1;border-radius:12px;padding:9px;background:#fff;min-width:0}
  #sectors .obsEtfTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:7px}
@@ -74,7 +75,8 @@ function ensureStyle(){
   #sectors tbody .obsClassicSparkCell{grid-column:1/-1;width:auto;min-width:0;padding:5px 7px 8px;overflow:hidden}
   #sectors tbody .obsClassicSparkCell::before{display:none}
   #sectors tbody .obsClassicSparkCell .obsSpark{width:100%;min-width:0;margin-top:0}
-  #sectors .obsThemeRows{grid-template-columns:minmax(0,1fr)}
+  #sectors details.obsTheme>summary{cursor:pointer;min-height:44px;padding:12px 4px;font-size:13px}#sectors details.obsTheme[open]>summary{border-bottom:1px solid #e4eaf1;margin-bottom:10px}
+ #sectors .obsThemeRows{grid-template-columns:minmax(0,1fr)}
   #sectors .obsEtfCard{width:100%;max-width:100%;overflow:hidden}
   #sectors .obsPeriodGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
   #sectors .obsSpark{width:100%;max-width:100%}
@@ -127,7 +129,7 @@ function sparkline(r){
 }
 function themeHtml(){
  const groups=(DATA?.groups||[]).filter(g=>g.key!=='classic');
- return groups.map(g=>`<div class="obsTheme"><div class="obsThemeTitle">${esc(g.label)} · ${(g.rows||[]).length}</div><div class="obsThemeRows">${(g.rows||[]).map(r=>`<div class="obsEtfCard"><div class="obsEtfTop"><div><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||r.ticker)}</div></div><div class="obsEtfPrice">${price(r.price,r.market)}</div></div>${periodGrid(r)}${sparkline(r)}<div class="obsRs20"><span>20일 RS vs SPY</span><b class="${cls(rsSpy(r,20))}">${pct(rsSpy(r,20))}</b></div></div>`).join('')}</div></div>`).join('');
+ return groups.map(g=>`<details class="obsTheme" data-theme="${esc(g.key)}" ${openThemes.has(g.key)?'open':''}><summary class="obsThemeTitle">${esc(g.label)} · ${(g.rows||[]).length}개 ETF · 펼쳐보기</summary><div class="obsThemeRows">${(g.rows||[]).map(r=>`<div class="obsEtfCard"><div class="obsEtfTop"><div><div class="ticker">${esc(r.ticker)}</div><div class="name">${esc(r.name||r.ticker)}</div></div><div class="obsEtfPrice">${price(r.price,r.market)}</div></div>${periodGrid(r)}${sparkline(r)}<div class="obsRs20"><span>20일 RS vs SPY</span><b class="${cls(rsSpy(r,20))}">${pct(rsSpy(r,20))}</b></div></div>`).join('')}</div></details>`).join('');
 }
 
 function classicTable(rows){
@@ -145,6 +147,7 @@ function drawRsChart(rows){
 
 function render(){
  const panel=q('#sectors');if(!panel||!DATA)return;
+ if(!panel.dataset.themeToggleBound){panel.dataset.themeToggleBound='1';panel.addEventListener('toggle',e=>{if(!e.target.matches?.('details[data-theme]'))return;const key=e.target.dataset.theme;if(e.target.open)openThemes.add(key);else openThemes.delete(key)},true)}
  const s=DATA.summary||{},rows=classicRows(),rank=ranked20(rows),leaders=rank.slice(0,3),laggards=rank.slice(-3).reverse(),quality=DATA.quality||{};
  const spread20=n(s.growth_defense_spread_20d_pct)??growthDefense20(rows),warning=n(quality.fetch_error_count)>0;
  panel.innerHTML=`<div class="obsSectorHead"><div><div class="obsSectorTitle">송팀장 Sector Observatory</div><div class="meta">완료 일봉 기준 · 수익률 구간을 1일·5일·10일·20일·50일·100일로 통일</div></div><div class="obsSectorBadge">국내·해외 ETF · 완료 일봉</div></div>

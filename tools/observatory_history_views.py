@@ -73,7 +73,7 @@ def write_market_reader(root, limit=800):
                            'source_sha256':hashlib.sha256(raw).hexdigest(),
                            'full_history_path':'./history-30y.json'}
     target = data / 'observatory-recent.json'
-    target.write_bytes(encoded(view))
+    target.write_bytes((json.dumps(view,ensure_ascii=False,separators=(',',':'))+'\n').encode())
     return [target]
 
 
