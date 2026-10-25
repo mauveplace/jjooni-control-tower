@@ -2,6 +2,11 @@ name: Market Observatory Calendar Focus E2E
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/market-observatory-calendar-focus-e2e.yml
+      - market-observatory/calendar-editor-v1.js
+      - market-observatory/data/calendar-manual-overrides.json
   push:
     branches: [main]
     paths:
