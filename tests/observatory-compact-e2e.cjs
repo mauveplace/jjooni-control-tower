@@ -3,7 +3,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
  const browser=await chromium.launch({headless:true});
  try{
   const page=await browser.newPage({viewport:{width:390,height:844}});
-  await page.setContent('<html><head></head><body style="margin:8px"><nav id="tabs"><button data-tab="sectors">섹터</button></nav><section id="sectors"></section></body></html>');
+  await page.setContent('<html><head></head><body style="margin:8px"><nav id="tabs"><button data-tab="sectors">섹터</button></nav><main class="wrap"><section id="sectors"></section></main></body></html>');
   await page.evaluate(data=>{window.JjooniDataReads={read:async()=>data}},JSON.parse(fs.readFileSync('market-observatory/data/sector-etf.json','utf8')));
   await page.addScriptTag({content:fs.readFileSync('market-observatory/sector-etf-v1.js','utf8')});
   await page.getByRole('button',{name:'섹터',exact:true}).click();await page.waitForFunction(()=>__JJOONI_OBSERVATORY_SECTOR_ETF_V1.loaded);
