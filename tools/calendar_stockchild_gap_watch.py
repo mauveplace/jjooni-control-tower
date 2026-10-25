@@ -27,8 +27,8 @@ SITE = 'https://stockchild.com'
 PINNED = SITE + '/10%ec%9b%94-5%ec%a3%bc-%ec%a6%9d%ec%8b%9c%ec%9d%bc%ec%a0%95-%ec%ba%98%eb%a6%b0%eb%8d%94-%eb%b9%85%ed%85%8c%ed%81%ac/'
 MAX_POSTS = 3
 INTERVAL_HOURS = 24
-DATE_TOKEN = re.compile(r'(?:(20\\d{2})\\s*[년./-]\\s*)?(\\d{1,2})\\s*[월./-]\\s*(\\d{1,2})\\s*일?(?!\\d)')
-CALENDAR_WORDS = re.compile(r'증시\\s*일정|경제\\s*일정|주간\\s*일정|캘린더|빅테크|실적\\s*발표', re.I)
+DATE_TOKEN = re.compile(r'(?:(20\d{2})\s*[년./-]\s*)?(\d{1,2})\s*[월./-]\s*(\d{1,2})\s*일?(?!\d)')
+CALENDAR_WORDS = re.compile(r'증시\s*일정|경제\s*일정|주간\s*일정|캘린더|빅테크|실적\s*발표', re.I)
 EVENT_WORDS = re.compile(r'실적|발표|FOMC|금리|GDP|CPI|PCE|고용|연준|회의|주주|배당|컨퍼런스|엔비디아|애플|마이크로소프트|메타|아마존|구글|테슬라|삼성|하이닉스|빅테크', re.I)
 
 
@@ -71,7 +71,7 @@ def extract_candidates(html: str, source_url: str, today: date) -> list[dict]:
     # Week-heading dates and inferred time zones are not sufficient.
     for el in root.select('li,p,tr'):
         raw = el.get_text(' ', strip=True)
-        raw = re.sub(r'\\s+', ' ', raw)
+        raw = re.sub(r'\s+', ' ', raw)
         if not (10 <= len(raw) <= 270 and EVENT_WORDS.search(raw)):
             continue
         match = DATE_TOKEN.search(raw)
@@ -84,8 +84,8 @@ def extract_candidates(html: str, source_url: str, today: date) -> list[dict]:
             continue
         if not (today <= d <= today + timedelta(days=21)):
             continue
-        title = re.sub(r'^[\\s:·|/—-]+|[\\s:·|/—-]+$', '', (raw[:match.start()] + ' ' + raw[match.end():]).strip())
-        title = re.sub(r'^[(（]?[월화수목금토일][)）]?\\s*', '', title).strip()
+        title = re.sub(r'^[\s:·|/—-]+|[\s:·|/—-]+$', '', (raw[:match.start()] + ' ' + raw[match.end():]).strip())
+        title = re.sub(r'^[(（]?[월화수목금토일][)）]?\s*', '', title).strip()
         if len(title) < 4 or len(title) > 150 or not EVENT_WORDS.search(title):
             continue
         out.append({'date': d.isoformat(), 'title': title, 'source_url': source_url,
@@ -151,7 +151,7 @@ def review(calendar: dict, now: datetime, fetcher=read_html) -> dict:
 def main():
     doc = json.loads(CAL.read_text(encoding='utf-8'))
     result = review(doc, datetime.now(KST))
-    CAL.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')
+    CAL.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('OPTIONAL_CALENDAR_GAP_REVIEW=PASS candidates=' + str(len(result.get('candidate_events', []))))
 
 
