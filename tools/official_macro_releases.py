@@ -209,7 +209,46 @@ def customs_links(soup):
     return out
 
 
-def parse_customs(soup, url, early=False):
+def customs_pdf_links(soup, page_url):
+    """Only the matching KCS monthly-confirmed PDF is eligible as a supplement."""
+    links = []
+    for a in soup.select('a[href]'):
+        label = compact(a.get_text(' ', strip=True) + ' ' + a.get('title', ''))
+        if not ('.pdf' in label.lower() and '월간수출입현황' in label and '확정치' in label):
+            continue
+        url = urllib.parse.urljoin(page_url, a['href'])
+        parsed = urllib.parse.urlparse(url)
+        if parsed.scheme == 'https' and parsed.hostname in ('customs.go.kr', 'www.customs.go.kr'):
+            links.append(url)
+    return list(dict.fromkeys(links))[:2]
+
+
+def customs_semiconductor_yoy(text, period):
+    """Read the export semiconductor YoY, never the memory-semiconductor import YoY."""
+    t = compact(text)
+    direct = re.search(r'(?<!메모리)반도체\(전년동월대비증감률([+-]?\d+(?:\.\d+)?)%', t)
+    if direct:
+        return float(direct[1])
+    # The official PDF also carries a dated monthly series. Require its final
+    # observation to match the release month before using the value.
+    series = re.search(r'(?<!메모리)반도체전년동월대비증감률\(%\):\[([’\'‘]?\d{2})\.(\d+)월\]([^*○※]+)', t)
+    if series:
+        year = 2000 + int(re.sub(r'\D', '', series[1]))
+        fragment = '[' + series[2] + '월]' + series[3]
+        points = [(f'{year}-{int(mm):02d}-01', float(vv))
+                  for mm, vv in re.findall(r'\[(\d{1,2})월\]([+-]?\d+(?:\.\d+)?)', fragment)]
+        if points and points[-1][0] == period:
+            return points[-1][1]
+    raise ValueError('OFFICIAL_PARSE_MISSING:semiconductor export YoY')
+
+
+def customs_degraded(key, error):
+    return dict(key=key, name=key, country='KR', group='exports', status='DEGRADED',
+                history=[], latest=None, primary_source=dict(institution='KCS'),
+                error=f'{type(error).__name__}:{error}')
+
+
+def parse_customs(soup, url, early=False, supplemental_text=None, attachment_url=None):
     text = soup.get_text(' ', strip=True)
     t = compact(text)
     period = period_from_title(text)
@@ -221,23 +260,44 @@ def parse_customs(soup, url, early=False):
         return [payload('KR_EXPORT_1_20', '1~20일 수출 YoY', 'exports', 'KCS', period, float(m[1]), url, published,
                         window='DAY_1_TO_20', revision_status='PRELIMINARY')]
     required(r'월간수출입현황\[확정치\]', t, 'confirmed monthly window')
-    total = float(required(r'전년동월대비수출은([+-]?\d+(?:\.\d+)?)%', t, 'monthly export YoY')[1])
-    semi = float(required(r'반도체\(전년동월대비증감률([+-]?\d+(?:\.\d+)?)%', t, 'semiconductor export YoY')[1])
     results = []
-    for key, name, value, label in [('KR_EXPORT_YOY', '월간 수출 YoY', total, '수출'), ('KR_SEMICON_EXPORT_YOY', '반도체 월간 수출 YoY', semi, '반도체')]:
-        metric = payload(key, name, 'exports', 'KCS', period, value, url, published, revision_status='MONTHLY_CONFIRMED')
-        # Official release's explicit same-year monthly series provides initial
-        # backfill; no interpolation or borrowing from another commodity.
-        series = re.search(label + r'전년동월대비증감률\(%\):\[([’\'‘]?\d{2})\.(\d+)월\]([^*○※]+)', t)
-        if series:
-            year = 2000 + int(re.sub(r'\D', '', series[1]))
-            fragment = '[' + series[2] + '월]' + series[3]
-            points = []
-            for mm, vv in re.findall(r'\[(\d{1,2})월\]([+-]?\d+(?:\.\d+)?)', fragment):
-                points.append(dict(metric['latest'], period=f'{year}-{int(mm):02d}-01', value=float(vv)))
-            if points and points[-1]['period'] == period and points[-1]['value'] == value:
-                metric['history'] = points
-        results.append(metric)
+    for key, name, label in [('KR_EXPORT_YOY', '월간 수출 YoY', '수출'),
+                             ('KR_SEMICON_EXPORT_YOY', '반도체 월간 수출 YoY', '반도체')]:
+        try:
+            source_text = t
+            if key == 'KR_EXPORT_YOY':
+                value = float(required(r'전년동월대비수출은([+-]?\d+(?:\.\d+)?)%', t, 'monthly export YoY')[1])
+            else:
+                try:
+                    value = customs_semiconductor_yoy(t, period)
+                except ValueError:
+                    if not supplemental_text:
+                        raise
+                    attachment = compact(supplemental_text)
+                    year, month = period[:4], str(int(period[5:7]))
+                    if not (re.search(rf'{year}년0?{month}월', attachment)
+                            and '월간수출입현황[확정치]' in attachment):
+                        raise ValueError('OFFICIAL_ATTACHMENT_REFERENCE_PERIOD_MISMATCH')
+                    value = customs_semiconductor_yoy(attachment, period)
+                    source_text = attachment
+            metric = payload(key, name, 'exports', 'KCS', period, value, url, published,
+                             revision_status='MONTHLY_CONFIRMED')
+            if source_text == compact(supplemental_text or '') and attachment_url:
+                metric['attachment_url'] = attachment_url
+                metric['transport_source'] = dict(provider='Official KCS PDF attachment', url=attachment_url)
+            # Only the official same-year, same-metric monthly series is accepted.
+            series = re.search(label + r'전년동월대비증감률\(%\):\[([’\'‘]?\d{2})\.(\d+)월\]([^*○※]+)', source_text)
+            if series:
+                year = 2000 + int(re.sub(r'\D', '', series[1]))
+                fragment = '[' + series[2] + '월]' + series[3]
+                points = [dict(metric['latest'], period=f'{year}-{int(mm):02d}-01', value=float(vv))
+                          for mm, vv in re.findall(r'\[(\d{1,2})월\]([+-]?\d+(?:\.\d+)?)', fragment)]
+                if points and points[-1]['period'] == period and points[-1]['value'] == value:
+                    metric['history'] = points
+            results.append(metric)
+        except ValueError as exc:
+            # A missing semiconductor figure must never hide verified total exports.
+            results.append(customs_degraded(key, exc))
     return results
 
 
@@ -259,14 +319,28 @@ def collect_customs():
         try:
             if kind not in found:
                 raise ValueError('OFFICIAL_DISCOVERY_EMPTY:customs ' + kind)
-            results.extend(parse_customs(client.html(found[kind]), found[kind], early=kind == 'early'))
+            url = found[kind]
+            soup = client.html(url)
+            parsed = parse_customs(soup, url, early=kind == 'early')
+            if kind == 'monthly' and any(m['key'] == 'KR_SEMICON_EXPORT_YOY' and not m.get('latest') for m in parsed):
+                for pdf_url in customs_pdf_links(soup, url):
+                    try:
+                        raw = client.read(pdf_url)
+                        if not raw.startswith(b'%PDF'):
+                            raise ValueError('OFFICIAL_ATTACHMENT_NOT_PDF')
+                        reader = PdfReader(io.BytesIO(raw))
+                        attachment_text = '\n'.join(page.extract_text() or '' for page in reader.pages[:15])
+                        candidate = parse_customs(soup, url, supplemental_text=attachment_text, attachment_url=pdf_url)
+                        if next(m for m in candidate if m['key'] == 'KR_SEMICON_EXPORT_YOY').get('latest'):
+                            parsed = candidate
+                            break
+                    except Exception as exc:
+                        print(f'OFFICIAL_CUSTOMS_ATTACHMENT_WARN error={type(exc).__name__}:{exc}', flush=True)
+            results.extend(parsed)
         except Exception as exc:
             keys = ['KR_EXPORT_1_20'] if kind == 'early' else ['KR_EXPORT_YOY', 'KR_SEMICON_EXPORT_YOY']
-            for key in keys:
-                results.append(dict(key=key, name=key, country='KR', group='exports', status='DEGRADED', history=[], latest=None,
-                                    primary_source=dict(institution='KCS'), error=f'{type(exc).__name__}:{exc}'))
+            results.extend(customs_degraded(key, exc) for key in keys)
     return results
-
 
 RELEASE_ADAPTERS = {
     'SEP': (collect_sep, [('US_SEP_DOT_PLOT', 'SEP / Dot Plot', 'FED')]),

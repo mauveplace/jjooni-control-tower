@@ -1,0 +1,44 @@
+name: Official Macro KCS Parser QA
+
+on:
+  pull_request:
+    paths:
+      - tools/official_macro_releases.py
+      - tests/test_macro_releases.py
+      - .github/workflows/official-macro-kcs-parser-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kcs-parser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install official parser dependencies
+        run: python -m pip install -r tools/requirements-observatory.txt
+      - name: Validate parser syntax and regression tests
+        run: |
+          python -m py_compile tools/official_macro_releases.py tests/test_macro_releases.py
+          python -m unittest discover -s tests -p test_macro_releases.py -v
+      - name: Verify current KCS release is parsed from official sources
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'tools')
+          from official_macro_releases import collect_customs
+          metrics = {m['key']: m for m in collect_customs()}
+          for key in ('KR_EXPORT_YOY', 'KR_SEMICON_EXPORT_YOY'):
+              m = metrics[key]
+              print(key, m.get('status'), (m.get('latest') or {}).get('period'),
+                    (m.get('latest') or {}).get('value'), m.get('error'),
+                    m.get('attachment_url'))
+              assert m.get('status') == 'LIVE' and (m.get('latest') or {}).get('value') is not None, (key, m.get('error'))
+              assert m.get('verification_status') == 'OFFICIAL_RELEASE_PARSED', key
+          print('KCS_OFFICIAL_LIVE_SMOKE=PASS')
+          PY
