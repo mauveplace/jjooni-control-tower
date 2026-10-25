@@ -36,6 +36,10 @@ def publication_paths(paths):
     sibling consumer. Thus a source merge cannot leave a stale TRI-POD/pulse.
     """
     paths = list(dict.fromkeys(paths))
+    for path in paths:
+        generated_view=path in (DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv')
+        if (not str(path).endswith('.json') and not generated_view) or '..' in Path(path).parts or not (str(path).startswith(DATA) or path=='public-market-daily.json'):
+            raise ValueError('DATA_PUBLISHER_REJECTED_NON_DATA_PATH: '+str(path))
     if set(paths).intersection(MARKET_BUNDLE[1:]):
         paths = list(dict.fromkeys([*paths, *MARKET_BUNDLE]))
     return paths

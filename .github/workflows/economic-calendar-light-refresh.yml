@@ -139,7 +139,7 @@ jobs:
               assert health['status'] != 'LIVE',event['title']
           print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'recent_recovery=',recovery,'official_macro_bridge=',bridge,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'),'coverage=',h.get('coverage_status'))
           PY
-      - name: Install calendar history UI runtime
+      - name: Verify calendar history UI runtime
         shell: bash
         run: |
           set -euo pipefail
@@ -147,8 +147,6 @@ jobs:
           from pathlib import Path
           index=Path('market-observatory/index.html')
           html=index.read_text(encoding='utf-8')
-          html=html.replace('calendar-editor-v1.js?v=1.2','calendar-editor-v1.js?v=1.3')
-          index.write_text(html,encoding='utf-8')
           assert 'calendar-editor-v1.js?v=1.3' in html
           editor=Path('market-observatory/calendar-editor-v1.js').read_text(encoding='utf-8')
           history=Path('market-observatory/calendar-history-v1.js').read_text(encoding='utf-8')
@@ -172,8 +170,7 @@ jobs:
             market-observatory/data/calendar-manual-overrides.json \
             market-observatory/data/calendar-official-release-cache.json \
             market-observatory/data/data-audit.json \
-            market-observatory/data/freshness-status.json \
-            market-observatory/index.html
+            market-observatory/data/freshness-status.json
 
       - name: Signal overdue major actuals
         shell: bash

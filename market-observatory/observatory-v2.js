@@ -337,7 +337,7 @@ async function hydrateHistory(force=false){
   historyPromise=(async()=>{
     try{
       await waitForMarketData();
-      const h=await fetch('./data/history-lite.json?v=1',{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject(new Error('history-lite '+r.status)));
+      const h=await (window.JjooniDataReads?window.JjooniDataReads.read('./data/history-lite.json'):fetch('./data/history-lite.json',{cache:'no-cache'}).then(r=>r.ok?r.json():Promise.reject(new Error('history-lite '+r.status))));
       if(h?.schema!=='JJOONI_MARKET_HISTORY_LITE_V1')throw new Error('history-lite schema');
       if(typeof DATA==='undefined'||!DATA)throw new Error('DATA unavailable');
       const merged={},hs=h.series||{},rs=DATA.series||{};

@@ -18,6 +18,7 @@ class HistoryViewsTest(unittest.TestCase):
             raw=json.dumps(source).encode();(data/'observatory.json').write_bytes(raw)
             paths=materialize(root,['market-observatory/data/observatory.json'])
             view=json.loads((data/'observatory-recent.json').read_bytes())
+            self.assertEqual((data/'observatory-recent.json').read_bytes().count(b'\n'),1)
             self.assertEqual(view['latest'],source['latest']);self.assertEqual(view['tripod_latest'],source['tripod_latest'])
             self.assertEqual(view['series']['X'],source['series']['X'][-800:])
             self.assertEqual((data/'observatory.json').read_bytes(),raw)
