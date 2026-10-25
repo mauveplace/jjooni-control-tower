@@ -1,0 +1,51 @@
+name: Calendar Optional Gap Review QA
+
+on:
+  pull_request:
+    paths:
+      - tools/calendar_stockchild_gap_watch.py
+      - tests/test_calendar_stockchild_gap_watch.py
+      - tools/refresh_calendar_pipeline.py
+      - market-observatory/calendar-editor-v1.js
+      - .github/workflows/calendar-stockchild-gap-qa.yml
+  push:
+    branches: [main]
+    paths:
+      - tools/calendar_stockchild_gap_watch.py
+      - tests/test_calendar_stockchild_gap_watch.py
+      - tools/refresh_calendar_pipeline.py
+      - market-observatory/calendar-editor-v1.js
+      - .github/workflows/calendar-stockchild-gap-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  optional-source-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install parser dependency
+        run: python -m pip install 'beautifulsoup4>=4.12,<5'
+      - name: Verify network-optional and source isolation contracts
+        run: |
+          python -m py_compile tools/calendar_stockchild_gap_watch.py tools/refresh_calendar_pipeline.py
+          python -m unittest discover -s tests -p 'test_calendar_stockchild_gap_watch.py' -v
+          node --check market-observatory/calendar-editor-v1.js
+          python - <<'PY'
+          from pathlib import Path
+          pipeline=Path('tools/refresh_calendar_pipeline.py').read_text()
+          assert "run('tools/calendar_stockchild_gap_watch.py')" in pipeline
+          editor=Path('market-observatory/calendar-editor-v1.js').read_text()
+          for token in ('obsStockchildGapReview','UNVERIFIED_SECONDARY_CANDIDATE','renderGapReview'):
+              assert token in editor
+          print('CALENDAR_STOCKCHILD_OPTIONAL_QA=PASS')
+          PY

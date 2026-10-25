@@ -81,6 +81,10 @@ selected month, pauses while hidden or editing, and preserves displayed values
 on errors. Canonical server data is not re-overridden by a stale browser copy of
 the server archive; explicit local user edits are still applied.
 
+## Optional Stockchild weekly schedule gap review
+
+The existing Light Refresh workflow runs `tools/calendar_stockchild_gap_watch.py` as a non-blocking, at-most-daily supplementary check. It reads the supplied Stockchild article and matching weekly RSS posts. Only future rows with explicit dates are eligible; source-only, unverified entries appear in the calendar's separate **일정 누락 확인 후보** area, not in official event rows, released actuals, or freshness obligations. Exact same-day title matches are filtered. An unavailable site, image-only post, empty weekly feed or no missed events produces no error notification, no fabricated value and no change to the calendar's official source priority. The optional source never blocks calendar publishing. The source link remains visible on each candidate for follow-up verification.
+
 ## Verification and extension
 
 Run `python -m unittest discover -s tests -p 'test*.py' -v` and

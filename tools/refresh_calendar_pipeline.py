@@ -75,6 +75,9 @@ def refresh(previous=None, seed=False):
         run('tools/fill_calendar_previous_from_history.py')
         run('tools/sync_calendar_representative_values.py')
         run('tools/build_calendar_history.py')
+        # Optional weekly blog source: review missing future events only.
+        # Never change official event/actual fields or fail for an unavailable blog.
+        run('tools/calendar_stockchild_gap_watch.py')
         run('tests/test_calendar_data_quality.py')
     data = json.loads(CAL.read_text(encoding='utf-8'))
     health = data['actual_freshness']

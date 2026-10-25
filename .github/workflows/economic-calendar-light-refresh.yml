@@ -22,6 +22,8 @@ on:
       - tools/refresh_official_central_bank_actuals.py
       - tools/publish_observatory_data.py
       - tools/refresh_calendar_pipeline.py
+      - tools/calendar_stockchild_gap_watch.py
+      - tests/test_calendar_stockchild_gap_watch.py
       - tools/persist_calendar_history.py
       - tools/archive_calendar_actuals.py
       - market-observatory/calendar-editor-v1.js
