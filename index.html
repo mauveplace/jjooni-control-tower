@@ -7,44 +7,57 @@
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08111c;color:#eaf2fb;min-height:100vh;display:grid;place-items:center}.box{width:min(92vw,430px);padding:30px;border:1px solid #263b52;border-radius:22px;background:linear-gradient(145deg,#111d2a,#0b1520);box-shadow:0 22px 70px #0008}.eyebrow{font-size:14px;letter-spacing:.16em;color:#7390ac;font-weight:800}.title{font-size:28px;line-height:1.14;font-weight:900;margin:10px 0 8px}.sub{font-size:16px;line-height:1.55;color:#91a6ba;margin-bottom:22px}.row{display:flex;gap:8px}.remember{display:flex;align-items:center;gap:8px;margin-top:12px;color:#91a6ba;font-size:14px;user-select:none}.remember input{width:16px;height:16px;min-width:16px;flex:none;accent-color:#2167d5}.sr-user{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important}input[type=password]{min-width:0;flex:1;background:#07101a;color:#fff;border:1px solid #30465c;border-radius:12px;padding:14px;font-size:16px;outline:none}input[type=password]:focus{border-color:#5b9af5}button{font-size:16px;min-height:44px;border:0;border-radius:12px;padding:0 18px;background:#2167d5;color:#fff;font-weight:850;cursor:pointer}.msg{min-height:22px;margin-top:12px;font-size:14px;color:#8ca1b5}.bad{color:#ff7186}.good{color:#56deb2}.foot{margin-top:22px;padding-top:15px;border-top:1px solid #1d2e40;font-size:14px;color:#9db1c8;line-height:1.5}
 </style>
-<script src="device-trust-v1.js?v=1"></script></head>
+<script src="device-trust-v1.js?v=2"></script></head>
 <body>
 <main class="box">
 <div class="eyebrow">PRIVATE VIEW · READ ONLY</div>
 <div class="title">JJOONI Investment<br>Control Tower</div>
-<div class="sub">Control Tower 전용 비밀번호를 입력하면 브라우저 안에서만 복호화합니다. 비밀번호는 서버로 전송되지 않습니다.</div>
-<form id="loginForm" autocomplete="on">
+<div class="sub" id="entryStatus">승인된 브라우저를 확인하고 있습니다…</div>
+<form id="loginForm" autocomplete="on" hidden>
 <input class="sr-user" id="ctUser" name="username" type="text" value="jjooni-control-tower" autocomplete="username" tabindex="-1" aria-hidden="true">
-<div class="row"><input id="pw" name="password" type="password" autocomplete="current-password" enterkeyhint="go" placeholder="Control Tower 비밀번호"><button id="go" type="submit">OPEN</button></div>
-<label class="remember"><input id="rememberDevice" type="checkbox" checked> 이 브라우저 신뢰 · 30일 동안 자동으로 열기</label>
+<div class="row"><input id="pw" name="password" type="password" autocomplete="current-password" enterkeyhint="go" placeholder="최초 기기 승인용 비밀번호"><button id="go" type="submit">기기 승인</button></div>
+<label class="remember"><input id="rememberDevice" type="checkbox" checked> 이 브라우저 승인 유지 · 다음부터 바로 열기</label>
 </form>
-<div id="msg" class="msg"></div>
-<div class="foot">Encrypted static shell · AES-256-GCM · PBKDF2-SHA256<br>신뢰한 브라우저는 30일 동안 자동으로 열립니다. 공용 기기에서는 선택을 해제하세요.</div>
+<div id="msg" class="msg" role="status" aria-live="polite"></div>
+<button id="retryOpen" type="button" hidden>다시 열기</button>
+<div class="foot">Encrypted static shell · AES-256-GCM · PBKDF2-SHA256<br>승인한 브라우저는 승인 해제 전까지 입력 없이 열립니다.<br>새 브라우저·저장정보 삭제 후에는 최초 승인이 필요합니다. 공용 기기는 승인 유지를 해제하세요.</div>
 </main>
 <script>
-window.__JJOONI_UI_RELEASE='20261025-r3';
+window.__JJOONI_UI_RELEASE='20261025-r4-device-entry';
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const CT_PORTRAIT_HOTFIX=`<link id="ctResponsiveLayout" rel="stylesheet" href="responsive-layout.css?v=1.4-top-compact">`;
-const CT_POSTFIX=`<script src="device-trust-v1.js?v=1"><\/script><script src="pb-review-export-v1.js?v=1"><\/script><script src="canonical-metrics.js?v=33.9-shared-capital"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script><script src="trade-review-loader.js?v=14.54-compact"><\/script>`;
+const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=33.9-shared-capital"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script><script src="trade-review-loader.js?v=14.54-compact"><\/script>`;
+let opening=false,retryPassword=null,retryTrusted=false;
+function showEnrollment(message){
+  $('entryStatus').textContent='이 브라우저를 처음 한 번 승인하면 다음부터 바로 열립니다.';
+  $('loginForm').hidden=false;$('retryOpen').hidden=true;
+  if(message){$('msg').className='msg bad';$('msg').textContent=message;}
+}
 async function openTower(pw,fromTrusted=false){
+  if(opening)return false;
+  opening=true;let stage='FETCH';retryPassword=pw;retryTrusted=fromTrusted;
+  $('loginForm').hidden=true;$('retryOpen').hidden=true;
   const msg=$('msg'); msg.className='msg'; msg.textContent='암호화된 Control Tower를 여는 중…';
   try{
     const p=await fetch('payload.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('payload');return r.json()});
+    stage='DECRYPT';
     const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(p.salt),iterations:p.iterations,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['decrypt']);
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(p.nonce),additionalData:b64(p.aad),tagLength:128},key,b64(p.ciphertext));
-    sessionStorage.setItem('jjooni_ct_session_pw',pw);
-    if($('rememberDevice')&&$('rememberDevice').checked){
-      try{if(!fromTrusted)await window.JjooniTrustedDevice?.remember(pw)}catch(_){msg.textContent='기기 승인 저장 불가 · 이번 세션만 엽니다.'}
-      localStorage.setItem('jjooni_ct_device_autofill','1');
+    stage='RENDER';
+    try{sessionStorage.setItem('jjooni_ct_session_pw',pw)}catch(_){}
+    if($('rememberDevice')?.checked){
       try{
-        if(window.PasswordCredential&&navigator.credentials&&navigator.credentials.store){
-          navigator.credentials.store(new PasswordCredential({id:'jjooni-control-tower',password:pw,name:'JJOONI Control Tower'})).catch(()=>{});
+        if(!fromTrusted){
+          if(!window.JjooniTrustedDevice)throw Error('approval storage unavailable');
+          await window.JjooniTrustedDevice.remember(pw);
         }
-      }catch(_e){}
-    }
-    if(!$('rememberDevice')?.checked){try{await window.JjooniTrustedDevice?.forget()}catch(_){}}
+        try{localStorage.setItem('jjooni_ct_device_autofill','1')}catch(_){}
+        // Best effort: browser storage may still be cleared by the user/OS.
+        try{navigator.storage?.persist?.().catch(()=>{})}catch(_){}
+      }catch(_){window.__CT_DEVICE_APPROVAL_WARNING='기기 승인 저장 불가 · 이번 세션만 열렸습니다.';}
+    }else{try{await window.JjooniTrustedDevice?.forget()}catch(_){}}
     let html=new TextDecoder().decode(plain);
     html=html.replace('</head>',CT_PORTRAIT_HOTFIX+'</head>');
     html=html.replace('</body>',CT_POSTFIX+'</body>');
@@ -58,26 +71,37 @@ async function openTower(pw,fromTrusted=false){
       var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+Date.now();g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='LINEAGE GUARD ACTIVE';loadLive()};(document.head||document.documentElement).appendChild(g);
     }());<\/script>`;
     html=html.replace('</body>',CT_LIVE_BOOT+'</body>');document.open();document.write(html);document.close();
+    return true;
   }catch(e){
-    sessionStorage.removeItem('jjooni_ct_session_pw'); try{await window.JjooniTrustedDevice?.forget()}catch(_){} msg.className='msg bad'; msg.textContent='비밀번호가 맞지 않거나 데이터가 손상되었습니다.';
-  }
-}
-$('loginForm').addEventListener('submit',e=>{e.preventDefault();openTower($('pw').value)});
-async function tryDeviceAutofill(){
-  try{const trusted=await window.JjooniTrustedDevice?.restore();if(trusted){await openTower(trusted,true);return}}catch(_){}
-  if(localStorage.getItem('jjooni_ct_device_autofill')!=='1')return;
-  if($('rememberDevice'))$('rememberDevice').checked=true;
-  try{
-    if(navigator.credentials&&navigator.credentials.get){
-      const cred=await navigator.credentials.get({password:true,mediation:'optional'});
-      if(cred&&cred.password){$('pw').value=cred.password;openTower(cred.password);return;}
+    if(stage==='DECRYPT'&&e.name==='OperationError'){
+      try{sessionStorage.removeItem('jjooni_ct_session_pw')}catch(_){}
+      try{await window.JjooniTrustedDevice?.forget()}catch(_){}
+      retryPassword=null;showEnrollment('기기 승인을 다시 확인해 주세요. 비밀번호가 변경됐거나 암호화 데이터가 손상됐습니다.');
+    }else{
+      // Connectivity, malformed publication and rendering failures never revoke an approval.
+      $('entryStatus').textContent='화면을 불러오지 못했습니다.';
+      msg.className='msg bad';msg.textContent='연결 또는 게시 데이터를 확인한 뒤 다시 열어 주세요. 기기 승인은 유지됩니다.';
+      $('retryOpen').hidden=false;
     }
-  }catch(_e){}
-  try{$('pw').focus()}catch(_e){}
+    return false;
+  }finally{opening=false;}
 }
-const saved=sessionStorage.getItem('jjooni_ct_session_pw');
-if(saved){$('pw').value=saved;if($('rememberDevice'))$('rememberDevice').checked=localStorage.getItem('jjooni_ct_device_autofill')==='1';openTower(saved,true)}
-else{tryDeviceAutofill()}
+$('loginForm').addEventListener('submit',e=>{e.preventDefault();if($('pw').value)openTower($('pw').value)});
+$('retryOpen').addEventListener('click',()=>{if(retryPassword)openTower(retryPassword,retryTrusted);else startDeviceEntry()});
+async function startDeviceEntry(){
+  try{
+    const trusted=await window.JjooniTrustedDevice?.restore();
+    if(trusted){await openTower(trusted,true);return;}
+  }catch(_){}
+  let saved=null;try{saved=sessionStorage.getItem('jjooni_ct_session_pw')}catch(_){}
+  if(saved){
+    // Upgrade an existing authenticated tab to a durable approval when selected.
+    try{if(localStorage.getItem('jjooni_ct_device_autofill')!=='1')$('rememberDevice').checked=false}catch(_){}
+    await openTower(saved);return;
+  }
+  showEnrollment();
+}
+startDeviceEntry();
 </script>
 </body>
 </html>
