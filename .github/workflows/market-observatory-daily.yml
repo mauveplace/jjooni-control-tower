@@ -351,7 +351,7 @@ jobs:
           assert "fetch('./data/observatory.json?'+Date.now(),{cache:'no-store'})" not in html
           assert "loadCalendar()" in html and "economic-calendar.json" in html
           sector=Path('market-observatory/sector-etf-v1.js').read_text(encoding='utf-8')
-          for token in ['송팀장 Sector Observatory','RS vs SPY 1M','sector-etf.json','READY_LAZY',"version:'1.7'","cache:'no-store'"]:
+          for token in ['송팀장 Sector Observatory','RS vs SPY 1M','sector-etf.json','READY_LAZY',"version:'1.7'","JjooniDataReads.read('./data/sector-etf.json')"]:
               assert token in sector,token
           from tools.observatory_ui_assets import require_runtime
           require_runtime(html, 'sector-etf-v1.js')
