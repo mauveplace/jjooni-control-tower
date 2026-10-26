@@ -50,6 +50,7 @@ test('custom day pending remains unknown in legacy accounting and uses the perfo
 });
 
 test('funded account cumulative authority overrides position PnL and keeps unknown accounts unknown',()=>{
+ assert.deepEqual(M.cumulative({id:'TOSS',total_return_pct:-15,nav:100}),{pnl:null,return_pct:null});
  assert.deepEqual(M.cumulative({id:'ISA',principal:60000000,nav:58000000,total_pnl:999}),{pnl:-2000000,return_pct:100*(-2000000)/60000000});
  assert.deepEqual(M.cumulative({id:'PENSION',principal:100,nav:110,total_pnl:-5}),{pnl:10,return_pct:10});
  assert.deepEqual(M.cumulative({id:'IRP',principal:100,nav:110}),{pnl:null,return_pct:null});
