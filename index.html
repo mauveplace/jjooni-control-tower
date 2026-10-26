@@ -25,7 +25,7 @@
 <script>
 (function(){
 'use strict';
-window.__JJOONI_UI_RELEASE='20261026-r8-screen-audit';
+window.__JJOONI_UI_RELEASE='20261026-r9-screen-audit';
 const entry=window.__JJOONI_ENTRY_DIAGNOSTICS={phase:'CHECKING_DEVICE',started_at:new Date().toISOString(),attempts:0,last_error:null};
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
@@ -35,8 +35,12 @@ let opening=false,retryPassword=null,retryTrusted=false;
 function prepareLegacyScript(source){
  // These retired comparison/BOT nodes were removed from the shell. Guard
  // only their legacy DOM writes, without hiding errors in active screens.
- return source.replace(/^(\s*)(cmpHuman|cmpAi|cmpAlpha|aiNav|aiMdd|aiTrades|aiPositions)\.(textContent|className|innerHTML)\s*=/gm,
+ return source.replace(/^(\s*)(cmpHuman|cmpAi|cmpAlpha|aiNav|aiMdd|aiTrades|aiPositions|overviewMovers)\.(textContent|className|innerHTML)\s*=/gm,
   (_,space,name,property)=>space+"if(typeof "+name+"!=='undefined'&&"+name+") "+name+'.'+property+'=')
+  // Once verified account facts own the screen, legacy session arithmetic must
+  // not overwrite canonical P&L with its historical zero/missing inputs.
+  .replace(/^(\s*)(overviewNavChange|overviewMarketPnl|overviewDailyReturn|overviewAccounts)\.(textContent|className|innerHTML)\s*=/gm,
+   (_,space,name,property)=>space+"if(window.__JJOONI_LIVE_READY!==true) "+name+'.'+property+'=')
   // No regular-session print after opening time means unknown, not premarket.
   .replace("phase:krLive?'LIVE':(krClose?'CLOSE':'PRE')", "phase:krLive?'LIVE':(krClose?'CLOSE':(kr.minuteOfDay<540?'PRE':'확인필요'))");
 }
