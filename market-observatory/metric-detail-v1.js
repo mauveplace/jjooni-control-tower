@@ -20,7 +20,7 @@ function model(key){
   TRIPOD_TREND:{title:'현재 상태 · NASDAQ 100과 MA250',lines:[line('NASDAQ 100','ndx'),line('MA250','ma250')],note:`현재 상태: ${t.regime||'미확인'} · 상승 진입 MA250 × 1.01 / 하락 진입 MA250 × 0.95`,thresholds:true},
   TRIPOD_TARGET:{title:'목표 노출 · 판단 근거',lines:[line('NASDAQ 100','ndx'),line('MA250','ma250')],note:`현재 목표: ${t.target||'미확인'} · 아래에서 VIX와 낙폭 근거도 확인하세요.`,thresholds:true},
   TRIPOD_MA:{title:'MA250 · 계산 참고값',lines:[line('MA250','ma250'),line('NASDAQ 100','ndx')],note:'MA250 자체는 레짐 전환선이 아닙니다. 상승 전환은 MA250 × 1.01 초과, 하락 전환은 MA250 × 0.95 미만 종가이며 사이에서는 이전 레짐을 유지합니다.'},
-  TRIPOD_BIPOD:{title:'BIPOD 전환가격 · 52주 고점 −9%',lines:[{label:'BIPOD 가격선',rows:clean(history.map(p=>({date:p.date,value:finite(p.ndx)&&finite(p.drawdown_52w_pct)&&Number(p.ndx)>0&&Number(p.drawdown_52w_pct)>-100?Number(p.ndx)/(1+Number(p.drawdown_52w_pct)/100)*.91:null})))},line('NASDAQ 100','ndx')],note:'상승 레짐에서 종가가 이 가격 미만이거나 VIX10 ≥ 28이면 감속합니다. MA250 × 1.01인 상승 복귀선과 구분합니다.'},
+  TRIPOD_BIPOD:{title:'BIPOD 전환가격 · 52주 고점 −9%',lines:[{label:'BIPOD 가격선',rows:clean(history.map(p=>({date:p.date,value:finite(p.ndx)&&finite(p.drawdown_52w_pct)&&Number(p.ndx)>0&&Number(p.drawdown_52w_pct)>-100?Number(p.ndx)/(1+Number(p.drawdown_52w_pct)/100)*.91:null})))},line('NASDAQ 100','ndx')],note:'BIPOD 가격선 = 최근 252거래일 최고 종가 × 0.91입니다. 전주 대비 0.00pt는 최고 종가가 지난주와 같아 전환선이 변하지 않았다는 뜻입니다. 상승 레짐에서 종가가 이 가격 미만이거나 VIX10 ≥ 28이면 감속하며, MA250 × 1.01 상승 복귀선과는 구분합니다.'},
   TRIPOD_FALL:{title:'NOPOD 가격선 · MA250 × 0.95',lines:[line('하락 전환선','ma250',.95),line('NASDAQ 100','ndx')],note:'이 가격선은 MA250 × 0.95이며 52주 고점 대비 낙폭 기준이 아닙니다. 종가가 이 선 미만이면 하락 레짐으로 전환하고, VIX10 ≥ 18이면 노팟(현금 100%), 18 미만이면 감속 목표입니다. 두 레짐 전환선 사이에서는 이전 레짐을 유지합니다. 카드의 거리는 현재 NDX 종가 대비입니다.'},
   TRIPOD_RISE:{title:'레짐 상승 전환선 · MA250 × 1.01',lines:[line('상승 전환선','ma250',1.01),line('NASDAQ 100','ndx')],note:'종가가 이 선을 초과하면 상승 레짐입니다. 실제 목표 노출은 VIX10과 52주 고점 대비 낙폭을 함께 판정합니다.'},
   TRIPOD_VIX:{title:'VIX와 10일 평균',lines:[line('VIX','vix'),line('VIX 10일 평균','vix10')],levels:[18,28],note:'레짐별 VIX10 경계: 하락 상태 18 / 상승 상태 28. 일일 VIX와 구분해 확인하세요.'},
@@ -63,9 +63,20 @@ function paint(){
  const datasets=lines.map((l,i)=>({label:l.label,data:l.rows.map(p=>({x:Date.parse(p.date+'T00:00:00Z'),y:p.value})),borderColor:colors[i%4],borderWidth:2,pointRadius:ctx=>ctx.dataIndex===l.rows.length-1?4:0,pointHitRadius:18,borderDash:l.dashed?[5,4]:[],spanGaps:false}));
  for(const level of m.levels||[])datasets.push({label:`판단 경계 ${level}`,data:[rows[0],rows.at(-1)].map(p=>({x:Date.parse(p.date+'T00:00:00Z'),y:level})),borderColor:'#9b789b',borderDash:[5,4],pointRadius:0});
  const compare=window.__JJOONI_LATEST_BOARD?.getComparison?.();
- const source=m.lines[0].rows,last=source.at(-1);let reference=null;
- if(last&&compare){const d=new Date(last.date+'T00:00:00Z');if(compare.mode==='prev')reference=source.at(-2);else{if(compare.days)d.setUTCDate(d.getUTCDate()-compare.days);if(compare.months)d.setUTCMonth(d.getUTCMonth()-compare.months);if(compare.years)d.setUTCFullYear(d.getUTCFullYear()-compare.years);reference=source.filter(p=>p.date<=d.toISOString().slice(0,10)).at(-1)}}
- if(reference&&reference.date>=rows[0].date){datasets.push({label:`${compare.label} 비교 기준 ${value(reference.value)}`,data:[rows[0],rows.at(-1)].map(p=>({x:Date.parse(p.date+'T00:00:00Z'),y:reference.value})),borderColor:'#7c8c9d',borderDash:[3,5],pointRadius:0})}
+ const source=m.lines[0].rows,last=source.at(-1);let reference=null,referenceLabel='';
+ if(selected==='TRIPOD_BIPOD'&&last){
+  // Match the BIPOD card: compare against the final completed close of the prior Mon-Sun week.
+  const monday=new Date(last.date+'T00:00:00Z');monday.setUTCDate(monday.getUTCDate()-((monday.getUTCDay()+6)%7));
+  const from=new Date(monday);from.setUTCDate(from.getUTCDate()-7);
+  reference=source.filter(p=>p.date>=from.toISOString().slice(0,10)&&p.date<monday.toISOString().slice(0,10)).at(-1)||null;
+  if(reference)referenceLabel=`전주 마지막 거래일 (${reference.date})`;
+ }else if(last&&compare){
+  const d=new Date(last.date+'T00:00:00Z');
+  if(compare.mode==='prev')reference=source.at(-2);
+  else{if(compare.days)d.setUTCDate(d.getUTCDate()-compare.days);if(compare.months)d.setUTCMonth(d.getUTCMonth()-compare.months);if(compare.years)d.setUTCFullYear(d.getUTCFullYear()-compare.years);reference=source.filter(p=>p.date<=d.toISOString().slice(0,10)).at(-1)}
+  referenceLabel=`${compare.label} 비교 기준`;
+ }
+ if(reference&&reference.date>=rows[0].date){datasets.push({label:`${referenceLabel} ${value(reference.value)}`,data:[rows[0],rows.at(-1)].map(p=>({x:Date.parse(p.date+'T00:00:00Z'),y:reference.value})),borderColor:'#7c8c9d',borderDash:[3,5],pointRadius:0})}
  const dateLabel=n=>new Date(Number(n)).toISOString().slice(0,10);
  chart=new Chart(canvas,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'nearest',axis:'x',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:12},boxWidth:16}},tooltip:{callbacks:{title:items=>items.length?dateLabel(items[0].parsed.x):'',label:c=>`${c.dataset.label}: ${value(c.parsed.y)}`}}},scales:{x:{type:'linear',min:Date.parse(rows[0].date+'T00:00:00Z'),max:Date.parse(rows.at(-1).date+'T00:00:00Z'),ticks:{maxTicksLimit:4,callback:v=>dateLabel(v).slice(2)}},y:{ticks:{maxTicksLimit:5,callback:v=>format(v,m.digits,m.suffix)}}}}});
 }
@@ -81,5 +92,5 @@ function linkExisting(){
  for(const el of document.querySelectorAll('#pulse .chip')){const item=window.__JJOONI_LATEST_BOARD?.items?.find(i=>el.textContent.startsWith(i.label+' '));if(item){el.dataset.metric=item.k;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-haspopup','dialog');el.setAttribute('aria-label',item.label+' 추이 보기');el.style.cursor='pointer'}}
 }
 const links=new MutationObserver(linkExisting);for(const id of ['overviewKpis','spreadKpis','pulse']){const el=document.getElementById(id);if(el)links.observe(el,{childList:true})}linkExisting();
-window.__JJOONI_METRIC_DETAIL={version:'1.5',clean,windowRows,position,model};
+window.__JJOONI_METRIC_DETAIL={version:'1.6-bipod-weekly',clean,windowRows,position,model};
 })();
