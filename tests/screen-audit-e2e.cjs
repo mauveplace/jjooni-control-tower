@@ -11,7 +11,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   });
   for(const name of ['canonical-metrics.js','overview-consistency-v21.js','fx-attribution-v16.js','tablet-accounts-v8.js'])await page.addScriptTag({content:fs.readFileSync(name,'utf8')});
   await page.locator('#ctCurrentPortfolio').waitFor();
-  const tossCard=page.locator('#ctDesktopAccountsV8 .ctA8Card').first();assert.doesNotMatch(await tossCard.innerText(),/-15.00%/);assert.match(await tossCard.innerText(),/누적수익률.*산정 대기/s);await page.locator('#ctFxAttrV16 tbody tr').waitFor();
+  const tossCard=page.locator('#ctDesktopAccountsV8 .ctA8Card').first();assert.doesNotMatch(await tossCard.innerText(),/-15.00%/);assert.equal(await tossCard.locator('.ctA8Line').filter({hasText:'누적수익률'}).locator('b').innerText(),'—');await page.locator('#ctFxAttrV16 tbody tr').waitFor();
   assert.match(await page.locator('#ctCurrentPortfolio').innerText(),/검수용 USD 종목/);assert.match(await page.locator('#ctCurrentPortfolio').innerText(),/펀드 · 좌수 별도 확인/);
   for(const id of ['accounts','risks','humanPositions','portfolio-extra'])assert.equal(await page.locator('#'+id).isVisible(),false);
   assert.equal(await page.locator('#market-sibling b').innerText(),'-1.46%');
