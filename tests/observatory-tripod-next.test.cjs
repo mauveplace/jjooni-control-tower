@@ -11,10 +11,15 @@ test('published snapshot and displayed target agree',()=>{const data=JSON.parse(
 test('compare transition prices across sessions rather than showing MA250 movement',()=>{
  const data=JSON.parse(fs.readFileSync('market-observatory/data/observatory.json'));
  const t=data.tripod_latest,prior=data.tripod_history.findLast(x=>x.date<t.date);
- const m=ctx.model(t,data.us_completed_session_date,prior),fall=m.gates.find(x=>x.key==='fall'),dd=m.gates.find(x=>x.key==='drawdown');
+ const currentMonday=new Date(t.date+'T00:00:00Z');currentMonday.setUTCDate(currentMonday.getUTCDate()-((currentMonday.getUTCDay()+6)%7));
+ const lastWeekStart=new Date(currentMonday);lastWeekStart.setUTCDate(lastWeekStart.getUTCDate()-7);
+ const priorWeek=data.tripod_history.filter(x=>x.date>=lastWeekStart.toISOString().slice(0,10)&&x.date<currentMonday.toISOString().slice(0,10)).at(-1);
+ assert(priorWeek,'Previous completed week must exist in fixture');
+ const m=ctx.model(t,data.us_completed_session_date,prior,priorWeek),fall=m.gates.find(x=>x.key==='fall'),dd=m.gates.find(x=>x.key==='drawdown');
  assert.equal(fall.previousBoundary,t.previous_ma250*.95);
  assert(Math.abs((fall.boundary-fall.previousBoundary)-(t.ma250-t.previous_ma250)*.95)<1e-8);
- assert.equal(dd.previousBoundary,prior.ndx/(1+prior.drawdown_52w_pct/100)*.91);
+ assert.equal(dd.previousBoundary,priorWeek.ndx/(1+priorWeek.drawdown_52w_pct/100)*.91);
+ assert.equal(dd.previousBoundaryDate,priorWeek.date);
  assert.match(fall.note,/VIX10 ≥ 18/);assert.match(fall.note,/18 미만이면 바이팟/);
 });
 test('missing prior threshold inputs never become fabricated daily changes',()=>{
