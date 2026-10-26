@@ -39,6 +39,22 @@ class ObservatoryRateAlignment(unittest.TestCase):
         self.assertEqual(sup.expected_jgb_business_date(early),'2026-10-26')
         self.assertEqual(sup.expected_jgb_business_date(late),'2026-10-27')
 
+    def test_japan_csv_fallback_selects_fresher_official_source(self):
+        stale=b'\u57fa\u6e96\u65e5,2\u5e74,5\u5e74,10\u5e74,20\u5e74,30\u5e74\\n2026-10-23,1.8,2.2,2.8,3.5,3.9\\n'
+        fresh=b'\u57fa\u6e96\u65e5,2\u5e74,5\u5e74,10\u5e74,20\u5e74,30\u5e74\\n2026-10-26,1.9,2.3,2.9,3.6,4.0\\n'
+        with patch.object(sup,'get_bytes',side_effect=[stale,fresh]) as getter, patch.object(sup,'expected_jgb_business_date',return_value='2026-10-26'):
+            rows,url=sup.fetch_current_jgb_rows()
+        self.assertEqual(rows[-1]['date'],'2026-10-26')
+        self.assertEqual(url,sup.JGB_CURRENT_URLS[1])
+        self.assertEqual(getter.call_count,2)
+
+    def test_japan_fresh_primary_avoids_unnecessary_second_request(self):
+        fresh='\u57fa\u6e96\u65e5,2\u5e74,5\u5e74,10\u5e74,20\u5e74,30\u5e74\\n2026-10-26,1.9,2.3,2.9,3.6,4.0\\n'.encode('utf-8')
+        with patch.object(sup,'get_bytes',return_value=fresh) as getter, patch.object(sup,'expected_jgb_business_date',return_value='2026-10-26'):
+            rows,url=sup.fetch_current_jgb_rows()
+        self.assertEqual(url,sup.JGB_CURRENT_URLS[0])
+        self.assertEqual(getter.call_count,1)
+
     def test_japan_previous_weekday_must_not_be_declared_live(self):
         date=datetime(2026,10,27,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
         keys=audit.EXPECTED_SERIES['jp_rates']
