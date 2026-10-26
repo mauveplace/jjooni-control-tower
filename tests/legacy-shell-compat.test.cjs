@@ -10,6 +10,7 @@ test('removed BOT/comparison writes cannot interrupt active account rendering',(
  aiMdd.textContent='retired';
  aiTrades.textContent='retired';
  aiPositions.innerHTML=true ? '<div>retired</div>' : '';
+ overviewMovers.innerHTML='old movers';
  active.value='CURRENT';
  }
  render();`;

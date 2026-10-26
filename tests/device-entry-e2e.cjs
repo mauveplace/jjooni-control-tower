@@ -6,7 +6,7 @@ const {webcrypto}=require('node:crypto'),{chromium}=require('playwright');
  const raw=await webcrypto.subtle.importKey('raw',Buffer.from(password),'PBKDF2',false,['deriveKey']);
  const key=await webcrypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:1000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt']);
  const html='<html><head><title>Approved fixture</title><script>const $=()=>null;const b64=()=>null;window.fixtureBootCount=(window.fixtureBootCount||0)+1;</script></head><body><main class="app"><h1>AUTHORIZED FIXTURE</h1><canvas width="120" height="80"></canvas><button onclick="alert(1)">old control</button></main></body></html>';
- const retiredFixture='<script>function retiredRender(){\n cmpHuman.textContent=\"retired\";\n aiNav.textContent=\"retired\";\n aiPositions.innerHTML=true ? \"retired\" : \"\";\n window.fixtureActiveRendered=true;\n} retiredRender();</script>';
+ const retiredFixture='<script>function retiredRender(){\n cmpHuman.textContent=\"retired\";\n aiNav.textContent=\"retired\";\n aiPositions.innerHTML=true ? \"retired\" : \"\";\n overviewMovers.innerHTML=\"old movers\";\n window.fixtureActiveRendered=true;\n} retiredRender();</script>';
  const fixtureHtml=html.replace('</body>',retiredFixture+'</body>');
  const ciphertext=await webcrypto.subtle.encrypt({name:'AES-GCM',iv:nonce,additionalData:aad},key,Buffer.from(fixtureHtml));
  const payload={salt:b64(salt),nonce:b64(nonce),aad:b64(aad),iterations:1000,ciphertext:b64(ciphertext)};
