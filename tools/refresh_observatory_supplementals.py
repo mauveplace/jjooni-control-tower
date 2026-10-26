@@ -36,12 +36,12 @@ YAHOO_SYMBOLS={
  'NASDAQ100':'^NDX','SP500':'^GSPC','VIX':'^VIX',
  'RUSSELL2000':'^RUT','DOW':'^DJI','NASDAQCOMPOSITE':'^IXIC',
  'DXY':'DX-Y.NYB','USDKRW':'KRW=X','USDJPY':'JPY=X','JPYKRW':'JPYKRW=X',
- 'WTI':'CL=F','BRENT':'BZ=F','NATGAS':'NG=F',
+ 'WTI':'CL=F','BRENT':'BZ=F','NATGAS':'NG=F','GASOLINE':'RB=F',
  'GOLD':'GC=F','SILVER':'SI=F','COPPER':'HG=F',
 }
 CORE=('NASDAQ100','SP500','VIX')
 US_SUP=('RUSSELL2000','DOW','NASDAQCOMPOSITE')
-CONTINUOUS=('DXY','USDKRW','USDJPY','JPYKRW','WTI','BRENT','NATGAS','GOLD','SILVER','COPPER')
+CONTINUOUS=('DXY','USDKRW','USDJPY','JPYKRW','WTI','BRENT','NATGAS','GASOLINE','GOLD','SILVER','COPPER')
 
 
 def get_bytes(url,accept='*/*'):
@@ -80,12 +80,12 @@ def refresh_yahoo(data):
     sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{});legacy=data.setdefault('market_supplement_quality',{})
     previous={k:list(sm.get(k) or []) for k in YAHOO_SYMBOLS}
     cutoff=completed_us_cutoff()
-    fetched={}
+    fetched={};failures={}
     for key,symbol in YAHOO_SYMBOLS.items():
         try:
             rows=yahoo_series(symbol);fetched[key]=rows
         except Exception as exc:
-            fetched[key]=[];quality[key]={'status':'STALE' if previous[key] else 'UNAVAILABLE','source':'Yahoo public daily','fetch_error':f'{type(exc).__name__}: {exc}'}
+            fetched[key]=[];failures[key]=f'{type(exc).__name__}: {exc}'
 
     date_sets=[]
     for key in CORE:
@@ -113,6 +113,13 @@ def refresh_yahoo(data):
         sm[key]=rows;latest[key]=rows[-1]['value'] if rows else None
         last=rows[-1]['date'] if rows else None
         quality[key]={'status':'LIVE' if last and (not common or last>=common) else ('LAGGING' if rows else 'UNAVAILABLE'),'source':'Yahoo public completed daily','last_date':last,'target_session':common}
+        if key in failures:
+            quality[key]['fetch_error']=failures[key]
+            quality[key]['status']='STALE' if rows else 'UNAVAILABLE'
+        if key=='GASOLINE':
+            quality[key]['instrument']='NYMEX_RBOB_FRONT_MONTH_CONTINUOUS_FUTURES'
+            quality[key]['symbol']='RB=F';quality[key]['unit']='USD_PER_GALLON'
+            quality[key]['data_kind']='YAHOO_DAILY_CLOSE_NOT_CME_SETTLEMENT'
     return common
 
 def _decode_csv(blob):
