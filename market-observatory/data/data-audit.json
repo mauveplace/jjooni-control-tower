@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T06:17:14+09:00",
+  "generated_kst": "2026-10-27T08:15:06+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-27T03:54:19+09:00",
+      "generated_kst": "2026-10-27T08:02:35+09:00",
       "session": "2026-10-26",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-27T05:39:56+09:00",
+      "generated_kst": "2026-10-27T08:03:03+09:00",
       "session": "2026-10-26",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-27T05:39:56+09:00",
+      "generated_kst": "2026-10-27T08:03:03+09:00",
       "session": "2026-10-26",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,17 +33,17 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-27T06:16:30+09:00",
+      "generated_kst": "2026-10-27T08:02:39+09:00",
       "events": 186,
-      "actual_freshness": "LIVE",
+      "actual_freshness": "PENDING",
       "overdue_count": 0,
-      "pending_count": 0,
+      "pending_count": 1,
       "collection_health": "LIVE",
       "failed_source_count": 0,
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-27T05:39:38+09:00",
+      "generated_kst": "2026-10-27T08:02:48+09:00",
       "as_of_date": "2026-10-26",
       "priced_count": 46
     },
@@ -67,10 +67,12 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T06:17:13+09:00",
+      "generated_kst": "2026-10-27T08:15:04+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
+        "energy",
+        "calendar",
         "audit",
         "market_regime"
       ]
@@ -219,7 +221,7 @@
       "latest_mismatch": []
     },
     "energy": {
-      "state": "LIVE",
+      "state": "UNAVAILABLE",
       "anchor": "2026-10-26",
       "allow_lag_days": 1,
       "critical": false,
@@ -247,9 +249,19 @@
           "group": "energy",
           "latest_value": 3.04099989,
           "latest_matches": true
+        },
+        "GASOLINE": {
+          "count": 0,
+          "last_date": null,
+          "last_value": null,
+          "group": "energy",
+          "latest_value": null,
+          "latest_matches": false
         }
       },
-      "missing": [],
+      "missing": [
+        "GASOLINE"
+      ],
       "latest_mismatch": []
     },
     "metals": {
@@ -293,51 +305,51 @@
       "critical": false,
       "items": {
         "US3M": {
-          "count": 953,
-          "last_date": "2026-10-23",
+          "count": 954,
+          "last_date": "2026-10-26",
           "last_value": 4.22,
           "group": "us_rates",
           "latest_value": 4.22,
           "latest_matches": true
         },
         "US2Y": {
-          "count": 953,
-          "last_date": "2026-10-23",
-          "last_value": 4.69,
+          "count": 954,
+          "last_date": "2026-10-26",
+          "last_value": 4.68,
           "group": "us_rates",
-          "latest_value": 4.69,
+          "latest_value": 4.68,
           "latest_matches": true
         },
         "US5Y_OFFICIAL": {
-          "count": 953,
-          "last_date": "2026-10-23",
-          "last_value": 4.82,
+          "count": 954,
+          "last_date": "2026-10-26",
+          "last_value": 4.84,
           "group": "us_rates",
-          "latest_value": 4.82,
+          "latest_value": 4.84,
           "latest_matches": true
         },
         "US10Y_OFFICIAL": {
-          "count": 953,
-          "last_date": "2026-10-23",
+          "count": 954,
+          "last_date": "2026-10-26",
           "last_value": 5.0,
           "group": "us_rates",
           "latest_value": 5.0,
           "latest_matches": true
         },
         "US30Y_OFFICIAL": {
-          "count": 953,
-          "last_date": "2026-10-23",
-          "last_value": 5.33,
+          "count": 954,
+          "last_date": "2026-10-26",
+          "last_value": 5.31,
           "group": "us_rates",
-          "latest_value": 5.33,
+          "latest_value": 5.31,
           "latest_matches": true
         },
         "US_2S10S": {
-          "count": 953,
-          "last_date": "2026-10-23",
-          "last_value": 0.31,
+          "count": 954,
+          "last_date": "2026-10-26",
+          "last_value": 0.32,
           "group": "us_rates",
-          "latest_value": 0.31,
+          "latest_value": 0.32,
           "latest_matches": true
         }
       },
@@ -461,17 +473,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-26",
-          "last_value": 79751.41,
+          "last_value": 79745.53,
           "group": "crypto",
-          "latest_value": 79751.41,
+          "latest_value": 79745.53,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-26",
-          "last_value": 2307.46,
+          "last_value": 2304.05,
           "group": "crypto",
-          "latest_value": 2307.46,
+          "latest_value": 2304.05,
           "latest_matches": true
         }
       },
@@ -515,16 +527,16 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-27T05:39:27+09:00",
-      "current_quote_age_seconds": 2267,
-      "captured_quote_age_seconds": 4
+      "quote_as_of_kst": "2026-10-27T08:02:44+09:00",
+      "current_quote_age_seconds": 742,
+      "captured_quote_age_seconds": 2
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-27T05:39:19+09:00",
-      "current_quote_age_seconds": 2275,
-      "captured_quote_age_seconds": 12
+      "quote_as_of_kst": "2026-10-27T08:02:41+09:00",
+      "current_quote_age_seconds": 745,
+      "captured_quote_age_seconds": 6
     }
   },
   "issues": [
@@ -532,6 +544,11 @@
       "code": "MARKET_REGIME_EXPIRED",
       "severity": "WARN",
       "detail": "No current analyst guidance; evaluate effective_window at read time"
+    },
+    {
+      "code": "GROUP_ENERGY_UNAVAILABLE",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-26 dates=WTI:2026-10-26,BRENT:2026-10-26,NATGAS:2026-10-26,GASOLINE:None"
     }
   ],
   "contracts": {
