@@ -7,7 +7,7 @@
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08111c;color:#eaf2fb;min-height:100vh;display:grid;place-items:center}.box{width:min(92vw,430px);padding:30px;border:1px solid #263b52;border-radius:22px;background:linear-gradient(145deg,#111d2a,#0b1520);box-shadow:0 22px 70px #0008}.eyebrow{font-size:14px;letter-spacing:.16em;color:#7390ac;font-weight:800}.title{font-size:28px;line-height:1.14;font-weight:900;margin:10px 0 8px}.sub{font-size:16px;line-height:1.55;color:#91a6ba;margin-bottom:22px}.row{display:flex;gap:8px}.remember{display:flex;align-items:center;gap:8px;margin-top:12px;color:#91a6ba;font-size:14px;user-select:none}.remember input{width:16px;height:16px;min-width:16px;flex:none;accent-color:#2167d5}.sr-user{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important}input[type=password]{min-width:0;flex:1;background:#07101a;color:#fff;border:1px solid #30465c;border-radius:12px;padding:14px;font-size:16px;outline:none}input[type=password]:focus{border-color:#5b9af5}button{font-size:16px;min-height:44px;border:0;border-radius:12px;padding:0 18px;background:#2167d5;color:#fff;font-weight:850;cursor:pointer}.msg{min-height:22px;margin-top:12px;font-size:14px;color:#8ca1b5}.bad{color:#ff7186}.good{color:#56deb2}.foot{margin-top:22px;padding-top:15px;border-top:1px solid #1d2e40;font-size:14px;color:#9db1c8;line-height:1.5}
 </style>
-<script src="device-trust-v1.js?v=2"></script></head>
+<script src="device-trust-v1.js?v=3"></script></head>
 <body>
 <main class="box">
 <div class="eyebrow">PRIVATE VIEW · READ ONLY</div>
@@ -23,12 +23,23 @@
 <div class="foot">Encrypted static shell · AES-256-GCM · PBKDF2-SHA256<br>승인한 브라우저는 승인 해제 전까지 입력 없이 열립니다.<br>새 브라우저·저장정보 삭제 후에는 최초 승인이 필요합니다. 공용 기기는 승인 유지를 해제하세요.</div>
 </main>
 <script>
-window.__JJOONI_UI_RELEASE='20261025-r6-pnl-quality';
+(function(){
+'use strict';
+window.__JJOONI_UI_RELEASE='20261026-r7-entry-state';
+const entry=window.__JJOONI_ENTRY_DIAGNOSTICS={phase:'CHECKING_DEVICE',started_at:new Date().toISOString(),attempts:0,last_error:null};
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const CT_PORTRAIT_HOTFIX=`<link id="ctResponsiveLayout" rel="stylesheet" href="responsive-layout.css?v=1.4-top-compact">`;
-const CT_POSTFIX=`<script src="device-trust-v1.js?v=2"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=34.1-quality"><\/script><script src="ui-bootstrap-v1.js?v=1"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
+const CT_POSTFIX=`<script src="device-trust-v1.js?v=3"><\/script><script src="pb-review-export-v1.js?v=2"><\/script><script src="canonical-metrics.js?v=34.1-quality"><\/script><script src="ui-bootstrap-v1.js?v=2"><\/script><script id="ct-static-status-compact">(function(){function compact(){var e=document.querySelector('.live');if(!e)return;var t=(e.textContent||'').trim();if(/STALE/i.test(t)&&t!=='● STALE'){e.title=t;e.textContent='● STALE';}}compact();try{new MutationObserver(compact).observe(document.documentElement,{subtree:true,childList:true,characterData:true});}catch(e){}})();<\/script>`;
 let opening=false,retryPassword=null,retryTrusted=false;
+function showEntryRetry(message){
+ const status=$('entryStatus'),retry=$('retryOpen');
+ if(status&&retry){status.textContent='화면을 불러오지 못했습니다.';const msg=$('msg');if(msg){msg.className='msg bad';msg.textContent=message}retry.hidden=false;return}
+ // Mounting may already have replaced the enrollment DOM. Never throw while
+ // reporting the original mount failure or revoke the successful approval.
+ let panel=$('ctEntryRecoveryNotice');if(!panel){panel=document.createElement('aside');panel.id='ctEntryRecoveryNotice';panel.setAttribute('role','status');panel.style.cssText='position:fixed;inset:16px 16px auto;z-index:200000;padding:16px;border:1px solid #d8a14e;border-radius:12px;background:#fff7e6;color:#442e0b;font:14px/1.5 system-ui';(document.body||document.documentElement).appendChild(panel)}
+ panel.textContent=message;const button=document.createElement('button');button.type='button';button.textContent='화면 다시 열기';button.style.cssText='display:block;margin-top:10px;min-height:44px';button.onclick=()=>location.reload();panel.appendChild(button);
+}
 function showEnrollment(message){
   $('entryStatus').textContent='이 브라우저를 처음 한 번 승인하면 다음부터 바로 열립니다.';
   $('loginForm').hidden=false;$('retryOpen').hidden=true;
@@ -36,16 +47,17 @@ function showEnrollment(message){
 }
 async function openTower(pw,fromTrusted=false){
   if(opening)return false;
-  opening=true;let stage='FETCH';retryPassword=pw;retryTrusted=fromTrusted;
+  opening=true;entry.attempts++;entry.last_error=null;window.__CT_DEVICE_APPROVAL_WARNING=null;let stage='FETCH';retryPassword=pw;retryTrusted=fromTrusted;
   $('loginForm').hidden=true;$('retryOpen').hidden=true;
   const msg=$('msg'); msg.className='msg'; msg.textContent='암호화된 Control Tower를 여는 중…';
   try{
-    const p=await fetch('payload.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('payload');return r.json()});
-    stage='DECRYPT';
+    entry.phase='FETCHING_SHELL';
+    const p=await fetch('payload.json',{cache:'no-store',signal:AbortSignal.timeout(20000)}).then(r=>{if(!r.ok)throw Error('PAYLOAD_HTTP_'+r.status);return r.json()});
+    stage='DECRYPT';entry.phase='DECRYPTING_SHELL';
     const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(p.salt),iterations:p.iterations,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['decrypt']);
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(p.nonce),additionalData:b64(p.aad),tagLength:128},key,b64(p.ciphertext));
-    stage='RENDER';
+    stage='RENDER';entry.phase='MOUNTING_DASHBOARD';
     try{sessionStorage.setItem('jjooni_ct_session_pw',pw)}catch(_){}
     if($('rememberDevice')?.checked){
       try{
@@ -73,23 +85,22 @@ async function openTower(pw,fromTrusted=false){
       var b=document.createElement('div');
       b.id='ctEncryptedLiveBadge';
       b.style.cssText='position:fixed;right:12px;bottom:72px;z-index:10001;padding:6px 9px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#b45309;font:800 10px/1.2 system-ui,-apple-system,sans-serif;box-shadow:0 4px 14px #0002';
-      b.textContent='LINEAGE GUARD LOADING';document.body.appendChild(b);
-      function blocked(msg){window.__LINEAGE_GUARD_ACTIVE=false;b.textContent='SSOT BLOCKED · '+msg;b.style.background='#fff1f2';b.style.borderColor='#fecdd3';b.style.color='#be123c';b.title='안전한 데이터 계보 보호기가 활성화되지 않아 live 숫자 갱신을 차단했습니다.';}
-      function loadLive(){var s=document.createElement('script');s.src='live-bridge.js?v=4&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;s.onerror=function(){blocked('FEED LOAD FAIL')};s.onload=function(){setTimeout(function(){if(window.__LINEAGE_GUARD_ACTIVE!==true)blocked('GUARD LOST')},1500)};(document.head||document.documentElement).appendChild(s);}
-      var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='LINEAGE GUARD ACTIVE';loadLive()};(document.head||document.documentElement).appendChild(g);
+      b.textContent='계좌 연결 준비 중';document.body.appendChild(b);
+      function blocked(msg){window.__LINEAGE_GUARD_ACTIVE=false;b.textContent='계좌 연결 확인 필요';b.dataset.ctConnectionState='BLOCKED';b.dataset.ctConnectionError=msg;b.style.background='#fff1f2';b.style.borderColor='#fecdd3';b.style.color='#be123c';b.title='안전한 데이터 계보 보호기가 활성화되지 않아 live 숫자 갱신을 차단했습니다.';}
+      function loadLive(){var s=document.createElement('script');s.src='live-bridge.js?v=4&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');s.async=false;s.onerror=function(){blocked('FEED LOAD FAIL')};s.onload=function(){var guard=window.__JJOONI_LINEAGE_GUARD;if(!guard||!guard.policy)blocked('GUARD LOST')};(document.head||document.documentElement).appendChild(s);}
+      var g=document.createElement('script');g.src='lineage-guard.js?v=3&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261025-r5');g.async=false;g.onerror=function(){blocked('GUARD LOAD FAIL')};g.onload=function(){var ok=!!(window.__JJOONI_LINEAGE_GUARD&&window.__JJOONI_LINEAGE_GUARD.policy);window.__LINEAGE_GUARD_ACTIVE=ok;if(!ok){blocked('GUARD INACTIVE');return;}b.textContent='계좌 원본 연결 중';loadLive()};(document.head||document.documentElement).appendChild(g);
     }());<\/script>`;
-    html=html.replace('</body>',CT_LIVE_BOOT+'</body>');document.open();document.write(html);document.close();
+    html=html.replace('</body>',CT_LIVE_BOOT+'</body>');entry.phase='CONNECTING_ACCOUNTS';document.open();document.write(html);document.close();
     return true;
   }catch(e){
+    entry.phase=stage==='DECRYPT'?'APPROVAL_REQUIRED':'RETRY_AVAILABLE';entry.last_error=stage==='FETCH'?'SHELL_FETCH_FAILED':stage==='DECRYPT'?'SHELL_DECRYPT_FAILED':'SHELL_MOUNT_FAILED';
     if(stage==='DECRYPT'&&e.name==='OperationError'){
       try{sessionStorage.removeItem('jjooni_ct_session_pw')}catch(_){}
       try{await window.JjooniTrustedDevice?.forget()}catch(_){}
       retryPassword=null;showEnrollment('기기 승인을 다시 확인해 주세요. 비밀번호가 변경됐거나 암호화 데이터가 손상됐습니다.');
     }else{
       // Connectivity, malformed publication and rendering failures never revoke an approval.
-      $('entryStatus').textContent='화면을 불러오지 못했습니다.';
-      msg.className='msg bad';msg.textContent='연결 또는 게시 데이터를 확인한 뒤 다시 열어 주세요. 기기 승인은 유지됩니다.';
-      $('retryOpen').hidden=false;
+      showEntryRetry('연결 또는 화면 구성을 확인한 뒤 다시 열어 주세요. 기기 승인 정보는 유지됩니다.');
     }
     return false;
   }finally{opening=false;}
@@ -110,6 +121,7 @@ async function startDeviceEntry(){
   showEnrollment();
 }
 startDeviceEntry();
+})();
 </script>
 </body>
 </html>

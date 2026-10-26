@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const M=require('../canonical-metrics.js');
 const acct=(nav=100)=>({nav,positions:[],cash_krw:0,cash_usd:0,today_pnl:1,today_return:1,net_flow:0,principal:90});
 const live=()=>({schema:'JJOONI_CT_LIVE_V5',snapshot_id:'fixture',generated_kst:'2026-09-07T21:03:00+09:00',observed_at:'2026-09-07T21:03:00+09:00',accounts:Object.fromEntries(M.IDS.map(id=>[id,acct()]))});
-function bridge(){const c={window:{JjooniMetrics:M},D:{human:{positions:[],performance:[]},ai:{}},console,Intl,Date,Number,TextEncoder,TextDecoder};vm.createContext(c);let s=fs.readFileSync(path.join(__dirname,'../live-bridge.js'),'utf8');s=s.slice(0,s.indexOf('injectResponsiveCss();ensureWatchlistUi();refresh();'));vm.runInContext(s+'window.test={makeCanonical,mergePositions,mergeTrades,syncLegacyMirrors,installCanonicalFunctions,applyLive,setCanon:x=>CANON=x,setLast:x=>LAST_LIVE=x,setQuotes:x=>TRADE_QUOTES=x,stubEffects:()=>{renderAll=()=>window.renders++;setBadge=()=>{};installCanonicalFunctions=()=>{}}};})();',c);return c}
+function bridge(metrics=M){const c={window:{JjooniMetrics:metrics},D:{human:{positions:[],performance:[]},ai:{}},console,Intl,Date,Number,TextEncoder,TextDecoder};vm.createContext(c);let s=fs.readFileSync(path.join(__dirname,'../live-bridge.js'),'utf8');s=s.slice(0,s.indexOf('injectResponsiveCss();ensureWatchlistUi();refresh();'));vm.runInContext(s+'window.test={makeCanonical,mergePositions,mergeTrades,syncLegacyMirrors,installCanonicalFunctions,applyLive,setCanon:x=>CANON=x,setLast:x=>LAST_LIVE=x,setQuotes:x=>TRADE_QUOTES=x,stubEffects:()=>{renderAll=()=>window.renders++;setBadge=()=>{};installCanonicalFunctions=()=>{}}};})();',c);return c}
 function router(C){const c={window:{JjooniMetrics:M,__JJOONI_CANONICAL_SSOT:C},document:{querySelector:()=>null,querySelectorAll:()=>[]},Intl,Number,console};vm.createContext(c);let s=fs.readFileSync(path.join(__dirname,'../metric-drilldown-router-v12.js'),'utf8');s=s.slice(0,s.indexOf("document.addEventListener('click',capture,true)"));vm.runInContext(s+'window.test={rowsAccount,mainRows,snap,contrib,contributionItems};})();',c);return c.window.test}
 test('missing is distinct from zero throughout numeric inputs',()=>{for(const x of [null,undefined,'', ' ',false,{},NaN,Infinity])assert.equal(M.number(x),null);assert.equal(M.number(0),0);assert.equal(M.sum([1,null]),null)});
 test('KRW canonical values are not converted twice and FX is account specific',()=>{const p={currency:'USD',market_value:13000};assert.equal(M.valueKrw(p,{fx:1500}),13000);assert.equal(M.valueKrw({currency:'USD',value:10},{fx:1400}),14000);assert.equal(M.valueKrw({currency:'USD',value:10},{}),null)});
@@ -55,4 +55,9 @@ test('funded account cumulative authority overrides position PnL and keeps unkno
  assert.deepEqual(M.cumulative({id:'IRP',principal:100,nav:110}),{pnl:null,return_pct:null});
  const r=M.aggregate({TOSS:{pnl:10},ISA:{pnl:-2},PENSION:{pnl:0},IRP:{pnl:null}});
  assert.equal(r.cum,null);assert.equal(r.known_cumulative_subtotal,8);assert.equal(r.known_cumulative,3);assert.deepEqual(r.missing_cumulative,['IRP']);
+});
+
+test('a cached pre-quality metrics API cannot turn a valid account snapshot into a login/feed error',()=>{
+ const legacy={...M,confirmedIrpPrincipal:undefined,aggregate(...args){const t=M.aggregate(...args);delete t.day_quality;return t}};
+ const c=bridge(legacy),C=c.window.test.makeCanonical(live());assert.equal(C.total.nav,400);assert.equal(C.total.today_quality_state,'UNKNOWN');
 });

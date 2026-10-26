@@ -264,22 +264,25 @@ function ensureShield(){
  s=document.createElement('div');
  s.id='ctSsotSafetyShield';
  s.style.cssText='position:fixed;inset:0;z-index:99998;display:grid;place-items:center;padding:24px;background:rgba(244,247,251,.96);backdrop-filter:blur(4px);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#10233d;text-align:center';
- s.innerHTML='<div style="width:min(92vw,420px);padding:24px;border:1px solid #d7e1ec;border-radius:18px;background:#fff;box-shadow:0 18px 60px #10233d22"><div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:#60758d">CONTROL TOWER · SSOT</div><div id="ctSsotSafetyTitle" style="margin-top:8px;font-size:20px;font-weight:900">실시간 데이터 연결 중</div><div id="ctSsotSafetyText" style="margin-top:8px;font-size:13px;line-height:1.55;color:#66788b">검증된 Canonical 데이터가 도착하기 전에는 금액을 표시하지 않습니다.</div><button id="ctSsotReload" type="button" style="display:none;margin:16px auto 0;padding:10px 14px;border:0;border-radius:10px;background:#0b3b70;color:#fff;font-weight:850;cursor:pointer">새로고침</button></div>';
+ s.innerHTML='<div style="width:min(100%,420px);box-sizing:border-box;padding:24px;border:1px solid #d7e1ec;border-radius:18px;background:#fff;box-shadow:0 18px 60px #10233d22"><div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:#60758d">CONTROL TOWER · SSOT</div><div id="ctSsotSafetyTitle" style="margin-top:8px;font-size:20px;font-weight:900">실시간 데이터 연결 중</div><div id="ctSsotSafetyText" style="margin-top:8px;font-size:13px;line-height:1.55;color:#66788b">계좌 원본이 확인되면 자산을 표시합니다.</div><button id="ctSsotReload" type="button" style="display:none;margin:16px auto 0;padding:10px 14px;border:0;border-radius:10px;background:#0b3b70;color:#fff;font-weight:850;cursor:pointer">새로고침</button></div>';
  document.body.appendChild(s);
  const btn=s.querySelector('#ctSsotReload');if(btn)btn.onclick=()=>location.reload();
  return s;
 }
 
-function blockShield(reason){
+let lastConnectionNotice=null;
+function blockShield(reason,hard=false){
+ const kind=hard?'BLOCKED':'RETRYING';if(lastConnectionNotice===kind)return;lastConnectionNotice=kind;
  const s=ensureShield(),t=s.querySelector('#ctSsotSafetyTitle'),x=s.querySelector('#ctSsotSafetyText'),b=s.querySelector('#ctSsotReload');
- if(t)t.textContent='실시간 데이터 없음';
- if(x)x.textContent='검증된 live SSOT를 받지 못해 숫자 표시를 차단했습니다. '+String(reason||'').slice(0,120);
+ if(t)t.textContent=hard?'계좌 원본 확인이 필요합니다':'계좌 연결이 지연되고 있습니다';
+ if(x)x.textContent=hard?'계좌 원본을 검증하지 못했습니다. 금액은 확인 후 표시합니다.':'다시 연결하고 있습니다. 기기 승인은 유지되며 계좌 원본이 확인되면 자동으로 열립니다.';
  if(b)b.style.display='inline-block';
  const badge=document.getElementById('ctEncryptedLiveBadge');
- if(badge){badge.textContent='SSOT BLOCKED · NO LIVE DATA';badge.style.background='#fff1f2';badge.style.borderColor='#fecdd3';badge.style.color='#be123c';}
+ if(badge){badge.textContent=hard?'계좌 원본 확인 필요':'계좌 연결 재시도 중';badge.dataset.ctConnectionState=kind;badge.style.background=hard?'#fff1f2':'#fff7ed';badge.style.borderColor=hard?'#fecdd3':'#fed7aa';badge.style.color=hard?'#be123c':'#b45309';}
 }
 
 function releaseShield(){
+ lastConnectionNotice=null;const badge=document.getElementById('ctEncryptedLiveBadge');if(badge?.dataset)delete badge.dataset.ctConnectionState;
  window.__JJOONI_LIVE_READY=true;
  const s=document.getElementById('ctSsotSafetyShield');if(s)s.remove();
 }
@@ -294,6 +297,9 @@ const legacyTimer=setInterval(()=>{
 const readyTimer=setInterval(()=>{
  const ok=!!(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD);
  if(ok){clearInterval(readyTimer);releaseShield();return;}
- if(Date.now()-started>25000){clearInterval(readyTimer);blockShield('LIVE_READY_TIMEOUT');}
+ if(window.__JJOONI_FEED_CONNECTION?.state==='BLOCKED')blockShield('SOURCE_VALIDATION',true);
+ else if(Date.now()-started>25000){clearInterval(readyTimer);blockShield('LIVE_READY_DELAY',false);}
 },100);
+// A slow first feed may arrive after the polling deadline. Keep recovery event-driven.
+document.addEventListener('jjooni:live-applied',()=>{if(window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD){clearInterval(readyTimer);releaseShield()}},{passive:true});
 })();

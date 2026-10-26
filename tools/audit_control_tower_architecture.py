@@ -15,6 +15,22 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def runtime_asset_graph(root=ROOT):
+    """Potential local executable graph, not evidence of runtime execution order."""
+    graph, pending = {}, ['index.html']
+    while pending:
+        name=pending.pop()
+        if name in graph:
+            continue
+        file=root/name
+        if not file.is_file():
+            continue
+        children=sorted({m for m in re.findall(r'([A-Za-z0-9_-]+[.]js)[?]',file.read_text()) if (root/m).is_file()})
+        graph[name]=children
+        pending.extend(child for child in children if child not in graph)
+    return graph
+
+
 def inventory(root=ROOT):
     workflows = []
     for path in sorted((root / '.github/workflows').glob('*.yml')):
@@ -56,13 +72,16 @@ def inventory(root=ROOT):
     bootstrap = re.findall(r"['\"]([a-zA-Z0-9_-]+\.js)\?v=", (root / 'ui-bootstrap-v1.js').read_text())
     deferred = re.search(r"DEFERRED_LABELS=new Set\(\[([^]]+)\]", loader)
     deferred_labels = re.findall(r"'([^']+)'", deferred.group(1)) if deferred else []
+    runtime_graph=runtime_asset_graph(root)
     archived = list((root / 'ops/archive/workflows').glob('*.yml'))
     return {'schema': 'CT_ARCHITECTURE_INVENTORY_V1', 'scope': 'STATIC_SOURCE_ONLY_NO_ACCOUNT_VALUES',
             'counts': {'active_workflows': len(workflows), 'archived_one_shots': len(archived),
                        'scheduled_workflows': sum(bool(w['schedules']) for w in workflows),
                        'browser_js_files': len(modules), 'required_boot_modules': len(required), 'declared_ui_modules':len(required),
-                       'critical_ui_modules':sum(row[2] not in deferred_labels for row in required), 'bootstrap_modules':len(bootstrap),
+                       'critical_ui_modules':sum(row[2] not in deferred_labels for row in required), 'bootstrap_modules':len(bootstrap), 'potential_runtime_js_assets':sum(name.endswith('.js') for name in runtime_graph),
                        'recurring_or_observer_sites': sum(len(m['recurring_or_observer_sites']) for m in modules)},
+            'potential_runtime_graph':runtime_graph,
+            'runtime_graph_contract':'STATIC_LOCAL_ASSET_CANDIDATES_INCLUDING_NESTED_LOADERS_NOT_MEASURED_EXECUTION',
             'bootstrap_modules': bootstrap, 'deferred_ui_labels':deferred_labels,
             'lazy_assets':['security-names-v1.js'],
             'inventory_note':'required_boot_modules retains the legacy declared-list count; critical_ui_modules excludes deferred features. Bootstrap and lazy assets are explicit.',
