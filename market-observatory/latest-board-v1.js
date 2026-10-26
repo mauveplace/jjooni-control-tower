@@ -98,13 +98,27 @@ function tripodBipodLevel(t){
  const px=Number(t.ndx),dd=Number(t.drawdown_52w_pct);
  return Number.isFinite(px)&&px>0&&Number.isFinite(dd)&&dd>-100?px/(1+dd/100)*.91:null;
 }
-function tripodBipodChange(t){
+// BIPOD is based on the rolling 252-trading-close high. For the reference
+// comparison show last week's completed close, never the previous trading day.
+function tripodPreviousWeekRow(t){
+ const current=utcDate(t?.session_date||t?.date);
+ if(!current)return null;
+ const monday=new Date(current);
+ monday.setUTCDate(monday.getUTCDate()-((monday.getUTCDay()+6)%7));
+ const prevMonday=new Date(monday);prevMonday.setUTCDate(prevMonday.getUTCDate()-7);
+ const from=prevMonday.toISOString().slice(0,10),to=monday.toISOString().slice(0,10);
  const history=typeof DATA!=='undefined'?(DATA?.tripod_history||[]):[];
- const prior=[...history].reverse().find(row=>row?.date&&row.date<(t.session_date||t.date));
- return ma250Change({ma250:tripodBipodLevel(t),previous_ma250:tripodBipodLevel(prior)});
+ return history.filter(row=>row?.date>=from&&row.date<to&&tripodBipodLevel(row)!=null)
+  .sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop()||null;
+}
+function tripodBipodChange(t){
+ const prior=tripodPreviousWeekRow(t);
+ if(!prior)return null;
+ const change=ma250Change({ma250:tripodBipodLevel(t),previous_ma250:tripodBipodLevel(prior)});
+ return change?{...change,label:'전주',refDate:prior.date}:null;
 }
 function tripodPriceDistance(level,price){return level==null||price==null||price<=0?'현재 종가 대비 —':`현재 종가 대비 ${level>=price?'+':''}${fmt((level/price-1)*100,2)}%`;}
-function customTile(group,label,value,foot='',tone='flat',time='',change=null,note=''){const key={REGIME:'TRIPOD_TREND',TARGET:'TRIPOD_TARGET',INDEX:'NASDAQ100',TREND:'TRIPOD_MA',FALL:'TRIPOD_FALL',RISE:'TRIPOD_RISE',BIPOD:'TRIPOD_BIPOD',NOPOD:'TRIPOD_FALL',RISK:'TRIPOD_VIX',DRAWDOWN:'TRIPOD_DD'}[group];return `<div class="latestTile" ${key?`data-metric="${key}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(label)} 추이 보기"`:''}><div class="latestTileTop"><span>${esc(group)}</span><b>${esc(label)}</b></div><strong class="${esc(tone)}">${esc(value)}</strong>${change?`<div class="latestMaChange ${esc(change.tone)}"><span>전일 ${esc(change.points)}pt</span><span>(${esc(change.percent)}%)</span></div>`:''}<div class="latestTileFoot"><span class="${esc(tone)}">${esc(foot||'')}</span><time>${esc(time||'')}</time></div>${note?`<div class="latestCryptoBasis">${esc(note)}</div>`:''}</div>`}
+function customTile(group,label,value,foot='',tone='flat',time='',change=null,note=''){const key={REGIME:'TRIPOD_TREND',TARGET:'TRIPOD_TARGET',INDEX:'NASDAQ100',TREND:'TRIPOD_MA',FALL:'TRIPOD_FALL',RISE:'TRIPOD_RISE',BIPOD:'TRIPOD_BIPOD',NOPOD:'TRIPOD_FALL',RISK:'TRIPOD_VIX',DRAWDOWN:'TRIPOD_DD'}[group];return `<div class="latestTile" ${key?`data-metric="${key}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(label)} 추이 보기"`:''}><div class="latestTileTop"><span>${esc(group)}</span><b>${esc(label)}</b></div><strong class="${esc(tone)}">${esc(value)}</strong>${change?`<div class="latestMaChange ${esc(change.tone)}"><span title="${esc(change.refDate?'기준: '+change.refDate:'')}">${esc(change.label||'전일')} ${esc(change.points)}pt</span><span>(${esc(change.percent)}%)</span></div>`:''}<div class="latestTileFoot"><span class="${esc(tone)}">${esc(foot||'')}</span><time>${esc(time||'')}</time></div>${note?`<div class="latestCryptoBasis">${esc(note)}</div>`:''}</div>`}
 function dataGenerated(){const d=typeof DATA!=='undefined'?DATA:null;const clock=[d?.generated_kst,d?.supplemental_refreshed_kst].filter(x=>Number.isFinite(Date.parse(x))).sort((a,b)=>Date.parse(b)-Date.parse(a))[0];return String(clock||'').replace('T',' ').slice(0,16)}
 function renderCompare(show=true){const host=ensure(),box=host?.querySelector('#latestCompare');if(!box)return;box.style.display=show?'flex':'none';if(!show)return;box.innerHTML=Object.entries(COMPARES).map(([k,v])=>`<button type="button" data-compare="${k}" class="${k===compareKey?'on':''}">${esc(v.label)}</button>`).join('');box.querySelectorAll('button[data-compare]').forEach(b=>b.onclick=()=>{compareKey=b.dataset.compare;renderBoard()})}
 function setHeader(title,sub,generated,showCompare=true){const host=ensure();if(!host)return;const t=host.querySelector('#latestBoardTitle'),s=host.querySelector('#latestBoardSub'),g=host.querySelector('#latestBoardGenerated');if(t)t.textContent=title;if(s)s.textContent=showCompare?`${sub} · 선택 기준: ${COMPARES[compareKey]?.label||'일간'} 대비`:sub;if(g)g.textContent=generated?`수집 ${generated} KST`:'';renderCompare(showCompare)}
@@ -151,7 +165,7 @@ function renderSector(){const d=SECTOR_DATA;if(!d){setHeader(TAB_CONFIG.sectors.
  const rows=[...base,...themes];
  setHeader(TAB_CONFIG.sectors.title,'S&P 500 11개 섹터 + 추가 테마·업종 ETF 전체 표시',String(d.generated_kst||'').replace('T',' ').slice(0,16),false);setGrid(rows.join(''),rows.length);pulseChips([`MA20 ${s.classic_above_ma20??'—'}/${s.classic_count??11}`,...((d.groups||[]).filter(g=>g.key!=='classic').map(g=>g.label||g.key))])}
 // Distances use the certified signal snapshot, never intraday quotes or comparison controls.
-function tripodNextModel(t,session,previous=null){
+function tripodNextModel(t,session,previous=null,previousWeek=null){
  const number=v=>v==null||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
  const ndx=number(t.ndx),ma=number(t.ma250),vix=number(t.vix10),dd=number(t.drawdown_52w_pct);
  const date=t.session_date||t.date;
@@ -169,10 +183,13 @@ function tripodNextModel(t,session,previous=null){
  // Compare the same rule boundaries across completed sessions, not MA250 itself.
  const previousMa=number(t.previous_ma250);
  if(previousMa!=null&&previousMa>0){fall.previousBoundary=previousMa*.95;rise.previousBoundary=previousMa*1.01;}
- if(previous&&previous.date<date){
-  const px=number(previous.ndx),decline=number(previous.drawdown_52w_pct);
+ if(previousWeek&&previousWeek.date<date){
+  const px=number(previousWeek.ndx),decline=number(previousWeek.drawdown_52w_pct);
   const priorHigh=px!=null&&decline!=null?px/(1+decline/100):null;
-  if(px>0&&priorHigh>0&&Number.isFinite(priorHigh))drawdown.previousBoundary=priorHigh*.91;
+  if(px>0&&priorHigh>0&&Number.isFinite(priorHigh)){
+   drawdown.previousBoundary=priorHigh*.91;
+   drawdown.previousBoundaryDate=previousWeek.date;
+  }
  }
 
  const max=target==='TQQQ 100%',cash=target==='현금 100%';
@@ -185,9 +202,10 @@ function tripodNextModel(t,session,previous=null){
 function tripodNextHtml(t,session){
  const history=typeof DATA!=='undefined'?(DATA?.tripod_history||[]):[];
  const previous=[...history].reverse().find(row=>row?.date&&row.date<session);
- const m=tripodNextModel(t,session,previous);
+ const previousWeek=tripodPreviousWeekRow(t);
+ const m=tripodNextModel(t,session,previous,previousWeek);
  if(!m.available)return '<section class="tripodNext"><h3>다음 스텝 · 판정 보류</h3><p>동일 완료세션의 검증된 NDX·MA250·VIX10·낙폭 데이터가 필요합니다.</p></section>';
- const comparison=g=>{if(g.previousBoundary==null)return '';const delta=g.boundary-g.previousBoundary,sign=delta>0?'+':delta<0?'-':'';return `<div class="tripodBoundaryChange"><span>전 거래일 ${fmt(g.previousBoundary,2)}</span><span>전일 ${sign}${fmt(Math.abs(delta),2)}pt (${sign}${fmt(Math.abs(delta/g.previousBoundary*100),3)}%)</span></div>`};
+ const comparison=g=>{if(g.previousBoundary==null)return '';const delta=g.boundary-g.previousBoundary,sign=delta>0?'+':delta<0?'-':'',weekly=g.key==='drawdown',label=weekly?'전주':'전일',date=weekly&&g.previousBoundaryDate?' ('+g.previousBoundaryDate+')':'';return `<div class="tripodBoundaryChange"><span>${label} 기준${date} ${fmt(g.previousBoundary,2)}</span><span>${label} ${sign}${fmt(Math.abs(delta),2)}pt (${sign}${fmt(Math.abs(delta/g.previousBoundary*100),3)}%)</span></div>`};
  const distance=g=>g.met?'조건 충족':g.key==='vix'?`${fmt(g.distance,2)}pt ${g.op==='<'?'하락':'상승'} 필요${g.op==='<'?' · 경계 미만':''}`:`${fmt(g.distance,2)}% ${g.boundary<m.ndx?'하락':'상승'} 시 경계${g.gapPctPoint!=null?' · 낙폭 차이 '+fmt(g.gapPctPoint,2)+'%p':''}`;
  return `<section class="tripodNext" data-tripod-next="ready"><header><h3>${esc(m.title)}</h3><span>완료세션 ${esc(m.date)}</span></header><p><b>현재 ${esc(m.state)}</b> · ${esc(m.target)}</p><div class="tripodGateGrid">${m.gates.map(g=>`<article data-gate="${esc(g.key)}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(g.label)} 추이 보기"><h4>${esc(g.label)}</h4><b>${esc(distance(g))}</b><p>현재 ${fmt(g.current,2)} → ${esc(g.op)} ${fmt(g.boundary,2)}</p>${comparison(g)}<small>${esc(g.note)}</small></article>`).join('')}</div><p>${esc(m.rule)}</p><small>판정: ${esc(t.action||'—')} · 종가 기준 조건까지의 거리이며 남은 일수 예측이 아닙니다. MA250·52주 고점·VIX10은 매일 변합니다. 상품 배수가 아닌 전략 전환 조건이며 계좌별 목표 구성은 다릅니다.</small></section>`;
 }
@@ -195,11 +213,11 @@ function tripodTiles(){const t=(typeof DATA!=='undefined'&&DATA?.tripod_latest)|
  customTile('REGIME','현재 상태',t.regime||'—','상승 ×1.01 / 하락 ×0.95'),
  customTile('TARGET','목표 노출',t.target||'—','송팀장 Tri-Pod'),
  customTile('INDEX','NASDAQ 100',ndx?fmt(ndx.value,2):'—',ndx?changeText(BY_KEY.NASDAQ100,ndx.change):'전일 대비 —',cls(ndx?.change),ndx?.date||''),
- customTile('BIPOD','BIPOD 전환가격',fmt(tripodBipodLevel(t),2),tripodPriceDistance(tripodBipodLevel(t),t.ndx),'flat',t.date||'',tripodBipodChange(t),'52주 고점 × 0.91 · VIX10 ≥ 28도 감속 조건'),
+ customTile('BIPOD','BIPOD 전환가격',fmt(tripodBipodLevel(t),2),tripodPriceDistance(tripodBipodLevel(t),t.ndx),'flat',t.date||'',tripodBipodChange(t),'52주 최고 종가 × 0.91 · 전주 마지막 거래일 대비 · VIX10 ≥ 28도 감속 조건'),
  customTile('NOPOD','NOPOD 가격선',ma==null?'—':fmt(ma*.95,2),tripodPriceDistance(ma==null?null:ma*.95,t.ndx),'flat',t.date||'',ma250Change(t,.95),'MA250 × 0.95 미만 + VIX10 ≥ 18 · 52주 낙폭 기준 아님'),
  customTile('TREND','MA250 · 계산 참고',ma250Display(t.ma250),'전환선 아님 · 250일 평균','flat',t.date||'',ma250Change(t)),
  customTile('RISK','VIX / VIX10',`${vix?fmt(vix.value,2):'—'} / ${v10==null?'—':fmt(v10,2)}`,'현재 / 10일 평균',cls(vix?.change),vix?.date||''),
- customTile('DRAWDOWN','52주 고점대비',dd==null?'—':`${dd.toFixed(2)}%`,'낙폭',dd<-9?'down':'flat',t.date||'')
+ customTile('DRAWDOWN','52주 고점대비',dd==null?'—':`${dd.toFixed(2)}%`,ma!=null&&tripodBipodLevel(t)!=null?`52주 최고 종가 ${fmt(tripodBipodLevel(t)/.91,2)}pt · 낙폭`:'낙폭',dd<-9?'down':'flat',t.date||'')
  ];rows.push(tripodNextHtml(t,typeof DATA!=='undefined'?DATA.us_completed_session_date:null));return rows}
 function renderTripod(){const rows=tripodTiles();setHeader(TAB_CONFIG.tripod.title,TAB_CONFIG.tripod.sub,dataGenerated(),false);setGrid(rows.join(''),rows.length);const t=(typeof DATA!=='undefined'&&DATA?.tripod_latest)||{};pulseChips([`Regime ${t.regime||'—'}`,`Target ${t.target||'—'}`])}
 
