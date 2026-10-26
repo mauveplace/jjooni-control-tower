@@ -14,16 +14,16 @@ import audit_observatory_data as audit
 
 
 class ObservatoryRateAlignment(unittest.TestCase):
-    def test_daily_us_rate_tiles_use_canonical_treasury_keys(self):
+    def test_daily_us_rate_tiles_preserve_market_yield_series_provenance(self):
         board=(ROOT/'market-observatory/latest-board-v1.js').read_text(encoding='utf-8')
         index=(ROOT/'market-observatory/index.html').read_text(encoding='utf-8')
-        for key in ('US10Y_OFFICIAL','US30Y_OFFICIAL'):
+        for key, market in (('US10Y_OFFICIAL','US10Y'),('US30Y_OFFICIAL','US30Y')):
             line=next(line for line in board.splitlines() if line.strip().startswith("{k:'"+key+"'"))
-            self.assertNotIn('seriesKey:',line)
+            self.assertIn("seriesKey:'"+market+"'",line)
             self.assertIn(key,board)
-        self.assertIn("['US10Y',p.US10Y_OFFICIAL]",index)
-        self.assertNotIn("['US10Y',p.US10Y]",index)
-        self.assertIn('미 재무부 공식 일별',board)
+        self.assertIn("['US10Y',p.US10Y]",index)
+        self.assertNotIn("['US10Y',p.US10Y_OFFICIAL]",index)
+        self.assertIn('Cboe 금리지수',board)
 
     def test_japan_monday_morning_uses_prior_friday(self):
         now=datetime(2026,10,26,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
