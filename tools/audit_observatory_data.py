@@ -23,7 +23,7 @@ EXPECTED_SERIES={
   'us_supplement':['RUSSELL2000','DOW','NASDAQCOMPOSITE'],
   'kr_equity':['KOSPI','KOSDAQ'],
   'fx':['DXY','USDKRW','USDJPY','JPYKRW'],
-  'energy':['WTI','BRENT','NATGAS'],
+  'energy':['WTI','BRENT','NATGAS','GASOLINE'],
   'metals':['GOLD','SILVER','COPPER'],
   'us_rates':['US3M','US2Y','US5Y_OFFICIAL','US10Y_OFFICIAL','US30Y_OFFICIAL','US_2S10S'],
   'kr_rates':['KR3Y','KR5Y','KR10Y','KR20Y','KR30Y','KR_3S10S'],
@@ -81,6 +81,13 @@ def build():
     make_group('kr_equity',EXPECTED_SERIES['kr_equity'],today,4,True)
     make_group('fx',EXPECTED_SERIES['fx'],session,1,False)
     make_group('energy',EXPECTED_SERIES['energy'],session,1,False)
+    gasoline_quality=(obs.get('cross_market_freshness_quality') or {}).get('GASOLINE') or {}
+    if gasoline_quality.get('status') in ('UNAVAILABLE','STALE','LAGGING'):
+        # Gasoline is optional. Never block unrelated energy feeds, but do not
+        # report the entire energy group LIVE after an individual source failed.
+        if groups['energy']['state']=='LIVE':groups['energy']['state']='LAGGING'
+        groups['energy']['gasoline_status']=gasoline_quality.get('status')
+        groups['energy']['gasoline_fetch_error']=gasoline_quality.get('fetch_error')
     make_group('metals',EXPECTED_SERIES['metals'],session,1,False)
     make_group('us_rates',EXPECTED_SERIES['us_rates'],session,3,False)
     make_group('kr_rates',EXPECTED_SERIES['kr_rates'],today,4,False)
