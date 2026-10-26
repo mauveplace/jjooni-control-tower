@@ -11,13 +11,18 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
   const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('OBS_PAGE_ERROR',e.message)});
   page.on('requestfailed',r=>console.error('OBS_REQUEST_FAILED',r.url(),r.failure()?.errorText));
   const expected=[...fs.readFileSync('market-observatory/index.html','utf8').matchAll(/src="(\.\/[^"?]+\.js\?v=[^"]+)"/g)].map(m=>m[1]);
-  for(let attempt=0;attempt<7;attempt++){
+  // On push, this public QA may start before GitHub Pages publishes the same
+  // commit. Wait for the exact versioned assets without lowering the contract:
+  // a missing deployment still fails after a bounded publication window.
+  for(let attempt=0;attempt<25;attempt++){
    const target=new URL(base);if(attempt)target.searchParams.set('ui_verify',Date.now());
    await page.goto(target.href,{waitUntil:'networkidle',timeout:90000});
    const scripts=await page.locator('script[src]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));
-   if(expected.every(src=>scripts.includes(src)))break;
-   assert(attempt<6,'Pages has not published the current UI asset versions');
-   console.log('OBS_UI_PUBLICATION_WAIT attempt='+attempt);await page.waitForTimeout(10000);
+   const missing=expected.filter(src=>!scripts.includes(src));
+   if(!missing.length){console.log('OBS_UI_PUBLICATION_MATCH attempt='+attempt);break;}
+   console.log('OBS_UI_PUBLICATION_WAIT attempt='+attempt+' missing='+JSON.stringify(missing));
+   assert(attempt<24,'Pages has not published the current UI asset versions: '+JSON.stringify(missing));
+   await page.waitForTimeout(10000);
   }
   await page.waitForSelector('body.obsDeviceUI');
   await page.waitForSelector('#latestMarketBoard .latestTile');
