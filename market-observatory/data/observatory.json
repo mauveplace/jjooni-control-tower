@@ -10,14 +10,14 @@
     "SP500": 7676.77001953,
     "VIX": 18.38999939,
     "DXY": 102.02999878,
-    "USDKRW": 1324.73999023,
-    "USDJPY": 157.51199341,
+    "USDKRW": 1325.05004883,
+    "USDJPY": 157.49099731,
     "JPYKRW": 8.38899994,
-    "WTI": 101.33000183,
-    "BRENT": 110.20999908,
+    "WTI": 101.30999756,
+    "BRENT": 110.13999939,
     "NATGAS": 3.03500009,
     "GASOLINE": 3.12470007,
-    "GOLD": 4025.60009766,
+    "GOLD": 4025.0,
     "COPPER": 6.546,
     "US3M": 4.22,
     "US5Y": 4.82400036,
@@ -40,7 +40,7 @@
     "JP30Y": 3.904,
     "JP_2S10S": 0.965,
     "BTCUSD": 79760.85,
-    "ETHUSD": 2306.52,
+    "ETHUSD": 2306.51,
     "KR_US_10Y": -0.926,
     "FEAR_GREED": 27.1,
     "FEAR_GREED_RATING": "FEAR",
@@ -49,7 +49,7 @@
     "RUSSELL2000": 2786.42407227,
     "DOW": 52361.578125,
     "NASDAQCOMPOSITE": 26169.38085938,
-    "SILVER": 53.93000031
+    "SILVER": 53.91999817
   },
   "series": {
     "NASDAQ100": [
@@ -15275,7 +15275,7 @@
       },
       {
         "date": "2026-10-25",
-        "value": 1324.73999023
+        "value": 1325.05004883
       }
     ],
     "USDJPY": [
@@ -18405,7 +18405,7 @@
       },
       {
         "date": "2026-10-25",
-        "value": 157.51199341
+        "value": 157.49099731
       }
     ],
     "JPYKRW": [
@@ -24565,7 +24565,7 @@
       },
       {
         "date": "2026-10-26",
-        "value": 101.33000183
+        "value": 101.30999756
       }
     ],
     "BRENT": [
@@ -27599,7 +27599,7 @@
       },
       {
         "date": "2026-10-26",
-        "value": 110.20999908
+        "value": 110.13999939
       }
     ],
     "NATGAS": [
@@ -36689,7 +36689,7 @@
       },
       {
         "date": "2026-10-26",
-        "value": 4025.60009766
+        "value": 4025.0
       }
     ],
     "COPPER": [
@@ -296304,7 +296304,7 @@
         "value": 79760.85,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-27T08:16:15+09:00"
+        "observed_kst": "2026-10-27T08:16:21+09:00"
       }
     ],
     "ETHUSD": [
@@ -302886,10 +302886,10 @@
       },
       {
         "date": "2026-10-26",
-        "value": 2306.52,
+        "value": 2306.51,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-10-27T08:16:16+09:00"
+        "observed_kst": "2026-10-27T08:16:23+09:00"
       }
     ],
     "FEAR_GREED": [
@@ -321727,7 +321727,7 @@
       },
       {
         "date": "2026-10-26",
-        "value": 53.93000031
+        "value": 53.91999817
       }
     ]
   },
@@ -327014,10 +327014,10 @@
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=3y&includePrePost=false",
       "price": 79760.85,
-      "quote_as_of_kst": "2026-10-27T08:16:15+09:00",
-      "captured_kst": "2026-10-27T08:16:22+09:00",
+      "quote_as_of_kst": "2026-10-27T08:16:21+09:00",
+      "captured_kst": "2026-10-27T08:16:25+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 7,
+      "quote_age_seconds": 4,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     },
@@ -327025,11 +327025,11 @@
       "symbol": "ETH-USD",
       "source": "Yahoo Finance spot crypto quote + UTC daily candles",
       "source_url": "https://query1.finance.yahoo.com/v8/finance/chart/ETH-USD?interval=1d&range=3y&includePrePost=false",
-      "price": 2306.52,
-      "quote_as_of_kst": "2026-10-27T08:16:16+09:00",
-      "captured_kst": "2026-10-27T08:16:22+09:00",
+      "price": 2306.51,
+      "quote_as_of_kst": "2026-10-27T08:16:23+09:00",
+      "captured_kst": "2026-10-27T08:16:25+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 6,
+      "quote_age_seconds": 2,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
       "market_hours": "24/7"
     }
@@ -327042,7 +327042,7 @@
       "item_code": "010200000",
       "last_date": "2026-10-26",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 10,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -327053,7 +327053,7 @@
       "item_code": "010200001",
       "last_date": "2026-10-26",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 10,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -327064,7 +327064,7 @@
       "item_code": "010210000",
       "last_date": "2026-10-26",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 10,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -327075,7 +327075,7 @@
       "item_code": "010220000",
       "last_date": "2026-10-26",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 10,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -327086,7 +327086,7 @@
       "item_code": "010230000",
       "last_date": "2026-10-26",
       "age_days": 1,
-      "verified_rows": 20,
+      "verified_rows": 10,
       "api_mode": "sample",
       "fetch_succeeded": true
     },
@@ -327233,7 +327233,7 @@
       "last_date": "2026-10-23"
     }
   },
-  "kr_rates_refreshed_kst": "2026-10-27T08:16:09+09:00",
+  "kr_rates_refreshed_kst": "2026-10-27T08:16:29+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -327334,7 +327334,7 @@
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
   "equity_enriched_kst": "2026-10-27T08:16:23+09:00",
-  "supplemental_refreshed_kst": "2026-10-27T08:15:19+09:00",
+  "supplemental_refreshed_kst": "2026-10-27T08:16:25+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "crypto_enriched_kst": "2026-10-13T05:12:54+09:00"
 }
