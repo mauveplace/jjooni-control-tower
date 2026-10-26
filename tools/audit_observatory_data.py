@@ -90,6 +90,21 @@ def build():
         groups['kr_rates']['fetch_succeeded']=False
         groups['kr_rates']['failed_series']=kr_fetch.get('failed_series') or {}
     make_group('jp_rates',EXPECTED_SERIES['jp_rates'],today,5,False)
+    # Historical dates within a five-calendar-day tolerance are not proof that
+    # the latest completed Tokyo business day was actually collected.
+    from refresh_observatory_supplementals import expected_jgb_business_date
+    jp_expected=expected_jgb_business_date(now)
+    jp_group=groups['jp_rates']
+    jp_last=min((v.get('last_date') or '') for v in jp_group['items'].values())
+    jp_quality=(obs.get('cross_market_freshness_quality') or {}).get('JP_RATES') or {}
+    jp_group['expected_latest_weekday']=jp_expected
+    jp_group['published_source_status']=jp_quality.get('status')
+    if jp_quality.get('status') in ('STALE','UNAVAILABLE'):
+        jp_group['state']=jp_quality['status']
+    elif jp_last and jp_last<jp_expected:
+        jp_group['state']='LAGGING'
+    elif not jp_last:
+        jp_group['state']='UNAVAILABLE'
     make_group('crypto',EXPECTED_SERIES['crypto'],None,0,False)
     # Sentiment is a latest published observation, not a completed cash close.
     # Accept today's published value, reject future dates and retain weekend tolerance.
