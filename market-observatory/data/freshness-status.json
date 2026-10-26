@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-27T08:15:35+09:00",
+  "generated_kst": "2026-10-27T08:15:38+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "energy",
     "calendar",
     "audit",
     "market_regime"
@@ -53,10 +54,10 @@
     },
     "energy": {
       "label": "Energy",
-      "state": "LIVE",
+      "state": "UNAVAILABLE",
       "generated_kst": "2026-10-27T08:15:19+09:00",
       "as_of": "2026-10-26",
-      "detail": "WTI 2026-10-26 · BRENT 2026-10-26 · NATGAS 2026-10-26 · GASOLINE 2026-10-26",
+      "detail": "WTI 2026-10-26 · BRENT 2026-10-26 · NATGAS 2026-10-26 · GASOLINE —",
       "source": "Yahoo CL=F / BZ=F / NG=F",
       "critical": false
     },
@@ -110,7 +111,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-27T08:15:19+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=19s · ETHUSD age=21s",
+      "detail": "BTCUSD age=22s · ETHUSD age=24s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -128,7 +129,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-27T08:15:34+09:00",
+      "generated_kst": "2026-10-27T08:15:38+09:00",
       "as_of": "2026-10-26",
       "detail": "snapshot=FINAL · Observatory session=2026-10-26",
       "source": "daily-market-pulse.json",
@@ -155,7 +156,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-27T08:15:34+09:00",
+      "generated_kst": "2026-10-27T08:15:38+09:00",
       "as_of": "2026-10-26",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -182,8 +183,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "PENDING",
-      "generated_kst": "2026-10-27T08:02:39+09:00",
-      "as_of": "2026-10-27T08:02:39+09:00",
+      "generated_kst": "2026-10-27T08:15:13+09:00",
+      "as_of": "2026-10-27T08:15:13+09:00",
       "detail": "events=186 · overdue=0 · pending=1 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
@@ -191,9 +192,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-27T08:15:35+09:00",
+      "generated_kst": "2026-10-27T08:15:38+09:00",
       "as_of": "2026-10-26",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     },

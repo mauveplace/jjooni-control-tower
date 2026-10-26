@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T08:15:35+09:00",
+  "generated_kst": "2026-10-27T08:15:38+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-27T08:15:34+09:00",
+      "generated_kst": "2026-10-27T08:15:38+09:00",
       "session": "2026-10-26",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-27T08:15:34+09:00",
+      "generated_kst": "2026-10-27T08:15:38+09:00",
       "session": "2026-10-26",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-27T08:02:39+09:00",
+      "generated_kst": "2026-10-27T08:15:13+09:00",
       "events": 186,
       "actual_freshness": "PENDING",
       "overdue_count": 0,
@@ -67,10 +67,11 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T06:17:14+09:00",
+      "generated_kst": "2026-10-27T08:15:35+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
+        "calendar",
         "audit",
         "market_regime"
       ]
@@ -219,7 +220,7 @@
       "latest_mismatch": []
     },
     "energy": {
-      "state": "LIVE",
+      "state": "UNAVAILABLE",
       "anchor": "2026-10-26",
       "allow_lag_days": 1,
       "critical": false,
@@ -249,15 +250,17 @@
           "latest_matches": true
         },
         "GASOLINE": {
-          "count": 755,
-          "last_date": "2026-10-26",
-          "last_value": 3.12470007,
+          "count": 0,
+          "last_date": null,
+          "last_value": null,
           "group": "energy",
-          "latest_value": 3.12470007,
-          "latest_matches": true
+          "latest_value": null,
+          "latest_matches": false
         }
       },
-      "missing": [],
+      "missing": [
+        "GASOLINE"
+      ],
       "latest_mismatch": []
     },
     "metals": {
@@ -524,14 +527,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T08:15:16+09:00",
-      "current_quote_age_seconds": 19,
+      "current_quote_age_seconds": 22,
       "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T08:15:14+09:00",
-      "current_quote_age_seconds": 21,
+      "current_quote_age_seconds": 24,
       "captured_quote_age_seconds": 5
     }
   },
@@ -540,6 +543,11 @@
       "code": "MARKET_REGIME_EXPIRED",
       "severity": "WARN",
       "detail": "No current analyst guidance; evaluate effective_window at read time"
+    },
+    {
+      "code": "GROUP_ENERGY_UNAVAILABLE",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-26 dates=WTI:2026-10-26,BRENT:2026-10-26,NATGAS:2026-10-26,GASOLINE:None"
     }
   ],
   "contracts": {
