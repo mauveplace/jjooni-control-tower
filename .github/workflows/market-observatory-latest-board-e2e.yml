@@ -32,7 +32,7 @@ jobs:
       - name: Syntax and period-sign regression check
         run: |
           node --check market-observatory/latest-board-v1.js
-          node --test tests/latest-board-period.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-bipod-weekly.test.cjs
+          node --test tests/latest-board-period.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-bipod-weekly.test.cjs tests/observatory-metric-bipod-weekly.test.cjs
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
