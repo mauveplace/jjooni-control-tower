@@ -167,6 +167,19 @@ def fetch_current_jgb_rows():
         except Exception as exc:errors.append(f'{url}:{type(exc).__name__}:{exc}')
     raise RuntimeError('JGB_CURRENT_ALL_SOURCES_FAILED|'+'|'.join(errors))
 
+def expected_jgb_business_date(now=None):
+    """Latest weekday whose Tokyo closing-day yield should be available.
+
+    Japan holidays/publication exceptions are nonfatal warnings, never filled
+    from US or futures proxies. Before 18:30 JST use the last weekday.
+    """
+    local=(now or datetime.now(KST)).astimezone(KST)
+    day=local.date()
+    if local.time()<time(18,30):day-=timedelta(days=1)
+    while day.weekday()>=5:day-=timedelta(days=1)
+    return day.isoformat()
+
+
 def refresh_jgb(data):
     sm=data.setdefault('series',{});latest=data.setdefault('latest',{});quality=data.setdefault('cross_market_freshness_quality',{})
     try:
@@ -176,13 +189,16 @@ def refresh_jgb(data):
             merged=merge_rows(sm.get(key),fresh);sm[key]=merged;latest[key]=merged[-1]['value'] if merged else None
         if sm.get('JP2Y') and sm.get('JP10Y'):
             a={x['date']:x['value'] for x in sm['JP10Y']};b={x['date']:x['value'] for x in sm['JP2Y']};sm['JP_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))];latest['JP_2S10S']=sm['JP_2S10S'][-1]['value'] if sm['JP_2S10S'] else None
-        last=max((sm.get(k) or [{}])[-1].get('date','') for k in mapping)
-        quality['JP_RATES']={'status':'LIVE','source':'Japan MOF current JGB yield CSV','source_url':source_url,'last_date':last}
+        dates=[(sm.get(k) or [{}])[-1].get('date','') for k in mapping]
+        last=min(dates) if all(dates) else None
+        expected=expected_jgb_business_date()
+        state='LIVE' if last and last>=expected else ('LAGGING' if last else 'UNAVAILABLE')
+        quality['JP_RATES']={'status':state,'source':'Japan MOF current JGB yield CSV','source_url':source_url,'last_date':last,'expected_latest_weekday':expected,'timing_note':'Japanese holidays or publication delays can cause a nonfatal LAGGING warning'}
         data.setdefault('sources',{})['JP_JGB_CURRENT']='Japan MOF current JGB yield CSV (jgbcm.csv primary) merged with historical series'
-        print('JGB_CURRENT_REFRESH=PASS last_date='+str(last)+' source='+source_url)
+        print('JGB_CURRENT_REFRESH='+state+' last_date='+str(last)+' expected='+expected+' source='+source_url)
     except Exception as exc:
         old=max(((sm.get(k) or [{}])[-1].get('date','') for k in ('JP2Y','JP5Y','JP10Y','JP30Y')),default='')
-        quality['JP_RATES']={'status':'STALE' if old else 'UNAVAILABLE','source':'Japan MOF current JGB yield CSV','source_urls':list(JGB_CURRENT_URLS),'last_date':old or None,'fetch_error':f'{type(exc).__name__}: {exc}'}
+        quality['JP_RATES']={'status':'STALE' if old else 'UNAVAILABLE','source':'Japan MOF current JGB yield CSV','source_urls':list(JGB_CURRENT_URLS),'last_date':old or None,'expected_latest_weekday':expected_jgb_business_date(),'fetch_error':f'{type(exc).__name__}: {exc}'}
         print('JGB_CURRENT_REFRESH=WARN',quality['JP_RATES'])
 
 def refresh_kr_and_sentiment_and_crypto(data):
