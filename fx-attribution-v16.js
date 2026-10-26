@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_FX_ATTR_V16)return;
-const STATE={state:'BOOTING',version:'16.1-usd-primary',rows:0,fx_state:'NO_DATA',updated_at:null};
+const STATE={state:'BOOTING',version:'16.2-verified-baseline',rows:0,fx_state:'NO_DATA',updated_at:null};
 window.__JJOONI_FX_ATTR_V16=STATE;
 const IDS=['TOSS','ISA','PENSION','IRP'];
 const NAME={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP',TRIPOD:'TRI-POD'};
@@ -22,15 +22,27 @@ function ensureStyle(){if(q('#ctFxAttrV16Style'))return;const s=document.createE
 `;(document.head||document.documentElement).appendChild(s)}
 function fxRef(){const L=window.__JJOONI_LIVE_PAYLOAD||{},f=L.fx_reference||{};return{state:String(f.state||'NO_DATA'),cur:n(f.krw_per_usd),prev:n(f.prev_close_krw_per_usd),as_of:f.as_of||f.observed_at||L.generated_kst||L.observed_at||null,source:f.source||'FX_REFERENCE_MISSING'}}
 function isUsd(p){return String(p?.currency||'').toUpperCase()==='USD'||String(p?.market||'').toUpperCase()==='US'}
+function baselineFor(a,p){
+ if(n(p.prev_close)>0)return n(p.prev_close);
+ // The current producer keeps verified reference closes in price-effect rows.
+ // Never infer a close from daily_return or borrow a different snapshot/period.
+ const ref=(a.holding_price_effect?.positions||[]).find(r=>
+  String(r.ticker||'').toUpperCase()===String(p.ticker||p.symbol||'').toUpperCase()&&
+  String(r.currency||'').toUpperCase()==='USD'&&r.state==='CALCULATED'&&
+  n(r.qty)===n(p.qty??p.quantity)&&n(r.current_price)===n(p.current_price??p.price)&&
+  r.baseline_session_date&&r.baseline_source&&n(r.baseline_price)>0);
+ return ref?n(ref.baseline_price):null;
+}
 function buildRows(){
  const C=window.__JJOONI_CANONICAL_SSOT||{},f=fxRef();
  if(!(f.cur>0&&f.prev>0))return{f,rows:[],price_usd:null,price_krw_live:null,price_krw_decomp:null,fx:null,total:null};
- const rows=[];
+ const rows=[];let usd_count=0;
  for(const id of IDS){
   const a=(C.accounts||{})[id]||{};
   for(const p of a.positions||[]){
    if(!isUsd(p)||String(p.record_type||'POSITION').toUpperCase()!=='POSITION')continue;
-   const qty=Math.abs(z(p.qty??p.quantity)),p1=n(p.current_price??p.price),p0=n(p.prev_close);
+   usd_count++;
+   const qty=n(p.qty??p.quantity),p1=n(p.current_price??p.price),p0=baselineFor(a,p);
    if(!(qty>0&&p1>0&&p0>0))continue;
    const priceEffectUsd=qty*(p1-p0);
    const priceEffectKrwLive=priceEffectUsd*f.cur;
@@ -41,22 +53,22 @@ function buildRows(){
   }
  }
  rows.sort((a,b)=>Math.abs(b.fx_effect_krw)-Math.abs(a.fx_effect_krw));
- if(!rows.length)return {f,rows,price_usd:null,price_krw_live:null,price_krw_decomp:null,fx:null,total:null};
- return{f,rows,price_usd:rows.reduce((s,x)=>s+x.price_effect_usd,0),price_krw_live:rows.reduce((s,x)=>s+x.price_effect_krw_live,0),price_krw_decomp:rows.reduce((s,x)=>s+x.price_effect_krw,0),fx:rows.reduce((s,x)=>s+x.fx_effect_krw,0),total:rows.reduce((s,x)=>s+x.total_effect_krw,0)};
+ if(!rows.length)return {f,rows,usd_count,price_usd:null,price_krw_live:null,price_krw_decomp:null,fx:null,total:null};
+ return{f,rows,usd_count,price_usd:rows.reduce((s,x)=>s+x.price_effect_usd,0),price_krw_live:rows.reduce((s,x)=>s+x.price_effect_krw_live,0),price_krw_decomp:rows.reduce((s,x)=>s+x.price_effect_krw,0),fx:rows.reduce((s,x)=>s+x.fx_effect_krw,0),total:rows.reduce((s,x)=>s+x.total_effect_krw,0)};
 }
 function enrichAccounts(calc){const C=window.__JJOONI_CANONICAL_SSOT||{};for(const id of IDS){const a=(C.accounts||{})[id];if(!a)continue;const xs=calc.rows.filter(x=>x.account===id);a.reference_usd_price_effect_usd=xs.length?xs.reduce((s,x)=>s+x.price_effect_usd,0):null;a.reference_usd_price_effect_krw=xs.length?xs.reduce((s,x)=>s+x.price_effect_krw,0):null;a.reference_usd_price_effect_krw_live=xs.length?xs.reduce((s,x)=>s+x.price_effect_krw_live,0):null;a.reference_usd_fx_effect_krw=xs.length?xs.reduce((s,x)=>s+x.fx_effect_krw,0):null;a.fx_attribution_position_count=xs.length;}window.__JJOONI_FX_ATTRIBUTION_ROWS=calc.rows}
 function ensureRoot(){ensureStyle();let e=q('#ctFxAttrV16');if(e)return e;e=document.createElement('section');e.id='ctFxAttrV16';const anchor=q('#overviewAccounts');if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(e,anchor.nextSibling);else{const panel=q('#panel-overview')||q('.app')||document.body;panel.appendChild(e)}return e}
 function cls(v){return Number(v)>0?'pos':Number(v)<0?'neg':''}
 function cellCls(v){return Number(v)>0?'ctFxPos':Number(v)<0?'ctFxNeg':''}
 function render(){
- const calc=buildRows(),root=ensureRoot(),f=calc.f;enrichAccounts(calc);STATE.fx_state=f.state;STATE.rows=calc.rows.length;STATE.updated_at=new Date().toISOString();
+ const calc=buildRows(),root=ensureRoot(),f=calc.f;enrichAccounts(calc);STATE.fx_state=f.state;STATE.rows=calc.rows.length;STATE.usd_count=calc.usd_count;STATE.coverage=calc.rows.length===calc.usd_count?"COMPLETE":"PARTIAL";STATE.updated_at=new Date().toISOString();
  if(!(f.cur>0&&f.prev>0)){
   const html=`<div class="ctFxHead"><div><div class="ctFxTitle">💱 종목별 환율 기여도</div><div class="ctFxSub">미국 종목은 달러를 기본 통화로 표시하고 실시간 USD/KRW로 원화 환산합니다.</div></div></div><div class="ctFxEmpty">USDKRW 현재값과 직전 종가가 아직 Feed에 없습니다. 임의 환율로 환산하지 않고 기준값 수집 대기 상태로 둡니다.</div>`;
   if(root.innerHTML!==html)root.innerHTML=html;STATE.state='WAIT_FX';return;
  }
  const fxMove=(f.cur/f.prev-1)*100,session=(window.__JJOONI_LIVE_PAYLOAD||{}).market_closed?'최근 완료 세션':'현재 세션';
- const body=calc.rows.length?calc.rows.map(x=>`<tr><td><div class="ctFxName">${x.name}</div><div class="ctFxMeta">${NAME[x.account]||x.account} · ${x.ticker||''} · USD</div></td><td class="${cellCls(x.fx_effect_krw)}">${signedKrw(x.fx_effect_krw)}</td><td><div class="ctFxPrimary ${cls(x.price_effect_usd)}">${signedUsd(x.price_effect_usd)}</div><div class="ctFxSecondary">현재환율 환산 ${signedKrw(x.price_effect_krw_live)}</div></td><td class="${cellCls(x.total_effect_krw)}">${signedKrw(x.total_effect_krw)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#98a2b3">계산 가능한 USD 보유종목이 없습니다.</td></tr>';
- const html=`<div class="ctFxHead"><div><div class="ctFxTitle">💱 종목별 환율 기여도</div><div class="ctFxSub">${session} · 미국 종목은 USD 원통화 손익을 우선 표시하고 현재 USD/KRW로 환산 원화를 함께 표시합니다.</div></div><div class="ctFxRef">USD/KRW 현재 ${fmtFx(f.cur)} · 전일 ${fmtFx(f.prev)} · ${pct(fxMove)}<small>${fmtAsOf(f.as_of)} · ${f.source}</small></div></div><div class="ctFxSummary"><div class="ctFxSum"><div class="ctFxSumLabel">가격 기여 · USD</div><div class="ctFxSumValue ${cls(calc.price_usd)}">${signedUsd(calc.price_usd)}</div><div class="ctFxSumSub">현재환율 환산 ${signedKrw(calc.price_krw_live)}</div></div><div class="ctFxSum"><div class="ctFxSumLabel">환율 효과 · KRW</div><div class="ctFxSumValue ${cls(calc.fx)}">${signedKrw(calc.fx)}</div><div class="ctFxSumSub">USD/KRW 변동분</div></div><div class="ctFxSum"><div class="ctFxSumLabel">원화 가치변동</div><div class="ctFxSumValue ${cls(calc.total)}">${signedKrw(calc.total)}</div><div class="ctFxSumSub">가격+환율 총효과</div></div></div><table class="ctFxTable"><thead><tr><th>종목 / 계좌</th><th>환율 기여 · KRW</th><th>가격 기여 · USD</th><th>원화 총효과</th></tr></thead><tbody>${body}</tbody></table>`;
+ const body=calc.rows.length?calc.rows.map(x=>`<tr><td><div class="ctFxName">${x.name}</div><div class="ctFxMeta">${NAME[x.account]||x.account} · ${x.ticker||''} · USD</div></td><td class="${cellCls(x.fx_effect_krw)}">${signedKrw(x.fx_effect_krw)}</td><td><div class="ctFxPrimary ${cls(x.price_effect_usd)}">${signedUsd(x.price_effect_usd)}</div><div class="ctFxSecondary">현재환율 환산 ${signedKrw(x.price_effect_krw_live)}</div></td><td class="${cellCls(x.total_effect_krw)}">${signedKrw(x.total_effect_krw)}</td></tr>`).join(''):`<tr><td colspan="4" style="text-align:center;color:#98a2b3">${calc.usd_count?"USD 보유종목의 검증된 기준가격을 확인 중입니다.":"USD 보유종목이 없습니다."}</td></tr>`;
+ const html=`<div class="ctFxHead"><div><div class="ctFxTitle">💱 종목별 환율 기여도</div><div class="ctFxSub">${session} · USD ${calc.rows.length}/${calc.usd_count}종목 확인 · 기준종가 대비 가격변동과 전일 환율 대비 효과를 분리합니다. 매매·배당·현금은 제외합니다.</div></div><div class="ctFxRef">USD/KRW 현재 ${fmtFx(f.cur)} · 전일 ${fmtFx(f.prev)} · ${pct(fxMove)}<small>${fmtAsOf(f.as_of)} · ${f.source}</small></div></div><div class="ctFxSummary"><div class="ctFxSum"><div class="ctFxSumLabel">가격 기여 · USD</div><div class="ctFxSumValue ${cls(calc.price_usd)}">${signedUsd(calc.price_usd)}</div><div class="ctFxSumSub">가격 분해 ${signedKrw(calc.price_krw_decomp)} · 현재환율 참고 ${signedKrw(calc.price_krw_live)}</div></div><div class="ctFxSum"><div class="ctFxSumLabel">환율 효과 · KRW</div><div class="ctFxSumValue ${cls(calc.fx)}">${signedKrw(calc.fx)}</div><div class="ctFxSumSub">USD/KRW 변동분</div></div><div class="ctFxSum"><div class="ctFxSumLabel">원화 가치변동</div><div class="ctFxSumValue ${cls(calc.total)}">${signedKrw(calc.total)}</div><div class="ctFxSumSub">가격+환율 총효과</div></div></div><table class="ctFxTable"><thead><tr><th>종목 / 계좌</th><th>환율 기여 · KRW</th><th>가격 기여 · USD</th><th>원화 총효과</th></tr></thead><tbody>${body}</tbody></table>`;
  if(root.innerHTML!==html)root.innerHTML=html;STATE.state='ACTIVE';STATE.currency_display='USD_PRIMARY_KRW_LIVE_CONVERTED';STATE.fx_rate=f.cur;STATE.fx_as_of=f.as_of;
 }
 let queued=false;function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render()})}

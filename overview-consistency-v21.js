@@ -124,7 +124,15 @@ function renderMovers(){
  if(!card.dataset.filterBound){card.dataset.filterBound='1';card.addEventListener('click',e=>{const b=e.target.closest('[data-cm-filter]');if(b){moverFilter=b.dataset.cmFilter;renderMovers()}})}
 }
 
-function commonViews(){if(!window.__JJOONI_CANONICAL_SSOT?.accounts)return;cleanLegacy();currentPerformance();qualityView();overviewCommon();renderMovers()}
+function currentPortfolio(){
+ const panel=qs('#panel-portfolio');if(!panel)return;
+ const {C,L,total,history}=commonModel(),root=ownedRoot(panel,'ctCurrentPortfolio');
+ for(const id of ['accounts','risks','humanPositions']){const old=qs('#'+id,panel);if(old){const card=old.closest('.card');if(card)card.hidden=true;else old.hidden=true}}
+ const extra=qs('#portfolio-extra');if(extra)extra.hidden=history.historyStale;
+ const positions=ACCOUNT_IDS.flatMap(id=>window.JjooniMetrics.positions(C.accounts?.[id]).map(p=>({id,p,value:window.JjooniMetrics.valueKrw(p,C.accounts[id])}))).sort((a,b)=>(b.value??-Infinity)-(a.value??-Infinity));
+ writeHtml(root,`<h2>현재 보유분석</h2><p>4계좌 동일 원본 · ${esc(stamp(L.generated_kst||L.observed_at))} · 전략 보유분 중복 합산 없음</p><div class="ctCommonMetrics"><article><span>총자산</span><strong>${money(total.nav)}</strong></article><article><span>보유 자료</span><strong>${positions.length}종목</strong></article></div><h3>계좌별 자산·보유 가격변동</h3>${ACCOUNT_IDS.map(id=>{const a=C.accounts?.[id]||{},day=window.JjooniPerformanceDay?.daily(a);return `<div class="ctCommonLine"><span>${ACCOUNT_NAMES[id]}<small> · ${day?.label||'오늘 손익'}</small></span><b>${money(a.nav)}<small> · ${signed(day?day.pnl:a.today_pnl)}</small></b></div>`}).join('')}<h3>현재 보유 평가액</h3><p>같은 종목도 계좌별 실제 보유분을 표시합니다. 가격변동은 계좌 전체 투자손익과 구분합니다.</p>${positions.map(x=>`<div class="ctCommonLine"><span>${esc(x.p.name||x.p.ticker)}<small> · ${ACCOUNT_NAMES[x.id]} · ${esc(x.p.qty??x.p.quantity??'미확인')}주</small></span><b>${money(x.value)}<small> · ${total.nav>0&&x.value!=null?(100*x.value/total.nav).toFixed(2)+'%':'비중 미확인'}</small></b></div>`).join('')}${history.historyStale?'<div class="ctCommonNotice">과거 성과 원장 검증 대기 · 이전 원장의 손익 0원·벤치마크·낙폭을 현재 성과로 표시하지 않습니다. 현재 보유수량·평가액과 일중 그래프는 별도 조회합니다.</div>':''}`);
+}
+function commonViews(){if(!window.__JJOONI_CANONICAL_SSOT?.accounts)return;cleanLegacy();currentPerformance();qualityView();overviewCommon();currentPortfolio();renderMovers()}
 
 function apply(){ensureStyle();commonViews();patchKospi();scrubCodes();patchHealth();guardDd();audit();STATE.applied++}
 let queued=false;function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply();setTimeout(apply,80)})}

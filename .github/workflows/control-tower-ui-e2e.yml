@@ -1,10 +1,10 @@
 name: Control Tower Mobile First UI
 on:
   pull_request:
-    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/device-entry-e2e.cjs', 'tests/boot-connection-e2e.cjs', 'tests/observatory-compact-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
+    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/device-entry-e2e.cjs', 'tests/boot-connection-e2e.cjs', 'tests/screen-audit-e2e.cjs', 'tests/observatory-compact-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
   push:
     branches: [main]
-    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/device-entry-e2e.cjs', 'tests/boot-connection-e2e.cjs', 'tests/observatory-compact-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
+    paths: ['*.js', '*.css', 'index.html', 'tests/*.test.cjs', 'tests/mobile-first-ui-e2e.cjs', 'tests/device-entry-e2e.cjs', 'tests/boot-connection-e2e.cjs', 'tests/screen-audit-e2e.cjs', 'tests/observatory-compact-e2e.cjs', 'tests/performance-comparisons-e2e.cjs', '.github/workflows/control-tower-ui-e2e.yml']
 permissions:
   contents: read
 concurrency:
@@ -24,6 +24,7 @@ jobs:
       - run: node --test tests/*.test.cjs
       - run: node tests/device-entry-e2e.cjs
       - run: node tests/boot-connection-e2e.cjs
+      - run: node tests/screen-audit-e2e.cjs
       - run: node tests/observatory-compact-e2e.cjs
       - run: node tests/navigation-owner-e2e.cjs
       - run: node tests/strategy-saved-cost-e2e.cjs

@@ -41,7 +41,7 @@ function cumulative(a){
  }
  if(['ISA','PENSION'].includes(String(a?.id||'').toUpperCase())&&principal>0){const pnl=nav==null?null:nav-principal;return {pnl,return_pct:pnl==null?null:100*pnl/principal};}
  const pnl=number(a?.total_pnl)??(nav!=null&&principal!=null?nav-principal:null);
- return {pnl,return_pct:number(a?.total_return_pct)??(pnl!=null&&principal>0?100*pnl/principal:null)};
+ return {pnl,return_pct:pnl==null?null:number(a?.total_return_pct)??(principal>0?100*pnl/principal:null)};
 }
 function dayQuality(accounts,ids=IDS){
  const groups={BROKER_MEASURED:{ids:[],subtotal:null},MODELED:{ids:[],subtotal:null},UNKNOWN:{ids:[],subtotal:null}},scopes=new Set();
