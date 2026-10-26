@@ -37,6 +37,10 @@ function prepareLegacyScript(source){
  // only their legacy DOM writes, without hiding errors in active screens.
  return source.replace(/^(\s*)(cmpHuman|cmpAi|cmpAlpha|aiNav|aiMdd|aiTrades|aiPositions|overviewMovers)\.(textContent|className|innerHTML)\s*=/gm,
   (_,space,name,property)=>space+"if(typeof "+name+"!=='undefined'&&"+name+") "+name+'.'+property+'=')
+  // Once verified account facts own the screen, legacy session arithmetic must
+  // not overwrite canonical P&L with its historical zero/missing inputs.
+  .replace(/^(\s*)(overviewNavChange|overviewMarketPnl|overviewDailyReturn|overviewAccounts)\.(textContent|className|innerHTML)\s*=/gm,
+   (_,space,name,property)=>space+"if(window.__JJOONI_LIVE_READY!==true) "+name+'.'+property+'=')
   // No regular-session print after opening time means unknown, not premarket.
   .replace("phase:krLive?'LIVE':(krClose?'CLOSE':'PRE')", "phase:krLive?'LIVE':(krClose?'CLOSE':(kr.minuteOfDay<540?'PRE':'확인필요'))");
 }
