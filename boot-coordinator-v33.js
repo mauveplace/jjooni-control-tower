@@ -17,7 +17,7 @@ function bridgeDiag(){
  const feed=window.__JJOONI_FEED_CONNECTION,b=document.getElementById('ctEncryptedLiveBadge');
  const text=String(b?.textContent||'').trim(),title=String(b?.title||'').trim();
  if(feed?.state==='BLOCKED'||b?.dataset?.ctConnectionState==='BLOCKED'||/SSOT BLOCKED/.test(text))return {kind:'blocked',message:feed?.last_error||title||text};
- if(feed?.state==='RETRYING'||feed?.state==='DEGRADED')return {kind:'retrying',message:feed.last_error||'계좌 연결 재시도 중'};
+ if(feed?.state==='RETRYING'||feed?.state==='DEGRADED'||b?.dataset?.ctConnectionState==='RETRYING')return {kind:'retrying',message:feed?.last_error||'계좌 연결 재시도 중'};
  // A legacy WAIT label (and its stale tooltip) is not proof of an auth failure.
  if(/WAIT|대기/i.test(text))return {kind:'retrying',message:title||'계좌 연결 대기'};
  return {kind:'pending',message:null};
