@@ -5,24 +5,24 @@ const {webcrypto}=require('node:crypto'),{chromium}=require('playwright');
  const salt=webcrypto.getRandomValues(new Uint8Array(16)),nonce=webcrypto.getRandomValues(new Uint8Array(12)),aad=Buffer.from('fixture');
  const raw=await webcrypto.subtle.importKey('raw',Buffer.from(password),'PBKDF2',false,['deriveKey']);
  const key=await webcrypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:1000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt']);
- const html='<html><head><title>Approved fixture</title></head><body><main class="app"><h1>AUTHORIZED FIXTURE</h1><canvas width="120" height="80"></canvas><button onclick="alert(1)">old control</button></main></body></html>';
+ const html='<html><head><title>Approved fixture</title><script>const $=()=>null;const b64=()=>null;window.fixtureBootCount=(window.fixtureBootCount||0)+1;</script></head><body><main class="app"><h1>AUTHORIZED FIXTURE</h1><canvas width="120" height="80"></canvas><button onclick="alert(1)">old control</button></main></body></html>';
  const ciphertext=await webcrypto.subtle.encrypt({name:'AES-GCM',iv:nonce,additionalData:aad},key,Buffer.from(html));
  const payload={salt:b64(salt),nonce:b64(nonce),aad:b64(aad),iterations:1000,ciphertext:b64(ciphertext)};
  const browser=await chromium.launch({headless:true});
  try{
-  const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true}),page=await context.newPage();let unavailable=false,wrong=false;
-  await page.route('https://ct.test/**',route=>{
+  const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true}),page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));let unavailable=false,wrong=false;
+  const routeHandler=route=>{
    const name=new URL(route.request().url()).pathname.slice(1);
    if(!name)return route.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')});
    if(name==='payload.json')return route.fulfill({status:unavailable?503:200,contentType:'application/json',body:JSON.stringify(wrong?{...payload,ciphertext:b64(Buffer.alloc(100))}:payload)});
    if(['device-trust-v1.js','pb-review-export-v1.js'].includes(name))return route.fulfill({contentType:'application/javascript',body:fs.readFileSync(name,'utf8')});
    return route.fulfill({contentType:name.endsWith('.css')?'text/css':'application/javascript',body:''});
-  });
+  };await page.route('https://ct.test/**',routeHandler);
   const approved=()=>page.getByRole('heading',{name:'AUTHORIZED FIXTURE'}).waitFor();
   const capsule=()=>page.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('jjooni-trusted-browser-v1',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return new Promise(resolve=>{const tx=db.transaction('capsule');const r=tx.objectStore('capsule').get('unlock');r.onsuccess=()=>resolve(r.result?{version:r.result.version,expires:r.result.expires}:null);tx.oncomplete=()=>db.close()})});
   await page.goto('https://ct.test/');await page.locator('#loginForm').waitFor({state:'visible'});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  await page.locator('#pw').fill(password);await page.getByRole('button',{name:'기기 승인',exact:true}).click();await approved();assert.equal((await capsule()).version,2);
+  await page.locator('#pw').fill(password);await page.getByRole('button',{name:'기기 승인',exact:true}).click();await approved();assert.equal((await capsule()).version,2);assert.equal(await page.evaluate(()=>window.fixtureBootCount),1);assert.deepEqual(errors,[],'entry helpers must not collide with decrypted shell globals');assert.equal(await page.evaluate(()=>typeof openTower),'undefined');
   // A new tab has no session password: the persisted approval alone must open it.
   await page.evaluate(()=>sessionStorage.clear());await page.reload();await approved();assert.equal(await page.locator('#loginForm').count(),0);
   unavailable=true;await page.reload();await page.locator('#retryOpen').waitFor({state:'visible'});assert.equal(await page.locator('#loginForm').isVisible(),false);assert.equal((await capsule()).version,2);
@@ -34,6 +34,11 @@ const {webcrypto}=require('node:crypto'),{chromium}=require('playwright');
   const fresh=await browser.newContext();const review=await fresh.newPage();await review.setContent(exported);assert.match(await review.locator('body').innerText(),/fixture-001/);assert.equal(await review.locator('script').count(),0);await fresh.close();
   wrong=true;await page.reload();await page.locator('#loginForm').waitFor({state:'visible'});assert.equal(await capsule(),null);
   wrong=false;await page.locator('#pw').fill(password);await page.getByRole('button',{name:'기기 승인',exact:true}).click();await approved();await page.getByRole('button',{name:'기기 승인 해제'}).click();await page.locator('#loginForm').waitFor({state:'visible'});assert.equal(await capsule(),null);
+  const mountContext=await browser.newContext({viewport:{width:390,height:844}}),mountPage=await mountContext.newPage();const mountErrors=[];mountPage.on('pageerror',e=>mountErrors.push(e.message));
+  await mountPage.route('https://ct.test/**',routeHandler);
+  await mountPage.addInitScript(()=>{const close=Document.prototype.close;Document.prototype.close=function(){const result=close.call(this);if(window.fixtureBootCount===1)throw Error('SYNTHETIC_MOUNT_FAILURE');return result}});
+  await mountPage.goto('https://ct.test/');await mountPage.locator('#loginForm').waitFor({state:'visible'});await mountPage.locator('#pw').fill(password);await mountPage.getByRole('button',{name:'기기 승인',exact:true}).click();
+  await mountPage.locator('#ctEntryRecoveryNotice').waitFor({state:'visible'});assert.match(await mountPage.locator('#ctEntryRecoveryNotice').innerText(),/승인 정보는 유지/);assert.deepEqual(mountErrors,[]);assert.equal(await mountPage.evaluate(()=>JjooniTrustedDevice.restore().then(Boolean)),true);await mountContext.close();
   await page.screenshot({path:'/tmp/ct-device-enrollment.png'});await context.close();
   console.log('PASS mobile enrollment; approved browser auto-open; transient retry retains approval; wrong key reapproval; revoke; credential-free PB review');
  }finally{await browser.close()}

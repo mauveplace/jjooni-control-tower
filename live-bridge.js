@@ -137,7 +137,7 @@ function legacyName(id,ticker){
 function makeCanonical(live){
  const A=live.accounts||{},out={};
  for(const r of REGISTRY){
-  const a=A[r.id]||{},id=r.id,nav=n(a.nav),principal=n(a.principal),funded=(['ISA','PENSION'].includes(id)&&principal>0)||(id==='IRP'&&M.confirmedIrpPrincipal(a));
+  const a=A[r.id]||{},id=r.id,nav=n(a.nav),principal=n(a.principal),funded=(['ISA','PENSION'].includes(id)&&principal>0)||(id==='IRP'&&M.confirmedIrpPrincipal?.(a));
   let ps=Array.isArray(a.positions)?a.positions:[];
   ps=ps.map(p=>{const nm=String(p.name||p.stock_name||legacyName(id,p.ticker||p.symbol)||'').trim();return {...p,name:nm||p.name,stock_name:p.stock_name||nm,account:id,account_type:id,market_value_krw:M.valueKrw(p,a),market_value_currency:'KRW'}});
   const day=n(a.today_pnl??(id==='TRIPOD'?a.today_change:null)),flow=n(a.net_flow??a.net_cash_flow);
@@ -155,7 +155,7 @@ function makeCanonical(live){
  const producerTotalTrusted=producerTotal!=null&&isFiveAccountNavSource(producerTotalSource,live);
  const authoritativeTotal=producerTotalTrusted?producerTotal:accountSum;
  const totalGap=producerTotalTrusted&&producerTotal!=null&&accountSum!=null?accountSum-producerTotal:null;
- return {snapshot_id:live.snapshot_id,performance_day:live.performance_day||null,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,account_ownership:{schema:'TOSS_OWNS_TRIPOD_V1',physical_accounts:REGISTRY.map(r=>r.id),strategy_parents:{TRIPOD:'TOSS'}},total_nav:authoritativeTotal,total_nav_source:producerTotalTrusted?producerTotalSource:'BROWSER_PHYSICAL_ACCOUNT_SUM',total:{day_quality:t.day_quality,today_quality_state:t.day_quality.state,nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
+ return {snapshot_id:live.snapshot_id,performance_day:live.performance_day||null,generated_kst:live.generated_kst,observed_at:live.observed_at,source_snapshot_kst:live.source_snapshot_kst,registry:REGISTRY,accounts:out,account_ownership:{schema:'TOSS_OWNS_TRIPOD_V1',physical_accounts:REGISTRY.map(r=>r.id),strategy_parents:{TRIPOD:'TOSS'}},total_nav:authoritativeTotal,total_nav_source:producerTotalTrusted?producerTotalSource:'BROWSER_PHYSICAL_ACCOUNT_SUM',total:{day_quality:t.day_quality,today_quality_state:t.day_quality?.state||'UNKNOWN',nav:authoritativeTotal,nav_source:producerTotalTrusted?'PRODUCER_'+producerTotalSource:'BROWSER_ACCOUNT_SUM',browser_account_sum:accountSum,producer_total_nav:producerTotal,reconciliation_gap:totalGap,principal:t.principal,pnl:t.cum,return_pct:t.return_pct,today_change:t.day!=null&&t.flow!=null?t.day+t.flow:null,today_pnl:t.day,known_today_subtotal:t.known_day_subtotal,net_flow:t.flow,today_complete:t.known_day===REGISTRY.length,flow_complete:t.flow!=null,known_today_count:t.known_day,known_flow_count:rows.filter(x=>n(x.net_flow)!=null).length,account_count:REGISTRY.length,missing_today:rows.filter(x=>n(x.today_pnl)==null).map(x=>x.id),missing_flow:rows.filter(x=>n(x.net_flow)==null).map(x=>x.id),position_count:rows.reduce((sum,x)=>sum+M.positions(x).length,0)}};
 }
 
 function mergePositions(live){
@@ -378,13 +378,18 @@ function applyLive(live){
 }
 
 // One in-flight encrypted read is shared by open/resume/manual/recovery.
+const CONNECTION=window.__JJOONI_FEED_CONNECTION={state:'IDLE',attempts:0,consecutive_failures:0,last_error:null,last_success_at:null};
 let refreshFlight=null,lastRecoveryRead=0;
 function refresh(){
  if(refreshFlight)return refreshFlight;
  refreshFlight=readEncryptedFeed().finally(()=>{refreshFlight=null});
  return refreshFlight;
 }
-async function readEncryptedFeed(){try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)return;const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};window.__JJOONI_COST_SIDECAR=null;let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live)}catch(e){setBadge('SSOT WAIT','warn',String(e&&e.message||e).slice(0,180));console.warn('CT SSOT bridge',e)}}
+async function readEncryptedFeed(){CONNECTION.state='CONNECTING';CONNECTION.attempts++;try{const pw=sessionStorage.getItem('jjooni_ct_session_pw');if(!pw)throw Error('SESSION_CREDENTIAL_UNAVAILABLE');const kv=await loadGviz();if(!String(kv.SCHEMA||'').startsWith('JJOONI_CT_LIVE_ENCRYPTED_'))throw new Error('ENVELOPE_SCHEMA_MISMATCH');try{TRADE_QUOTES=JSON.parse(kv.TRADE_QUOTES_JSON||'{}')}catch(_){TRADE_QUOTES={}};window.__JJOONI_COST_SIDECAR=null;let encoded=kv.ENCRYPTED_PAYLOAD||'';if(kv.ENVELOPE_CHUNK_COUNT){const count=Number(kv.ENVELOPE_CHUNK_COUNT);if(!Number.isInteger(count)||count<1||count>64)throw Error('CHUNK_COUNT_INVALID');encoded=Array.from({length:count},(_,i)=>{const part=kv['ENCRYPTED_PAYLOAD_'+String(i).padStart(3,'0')];if(typeof part!=='string'||!part)throw Error('ENVELOPE_CHUNK_MISSING');return part}).join('')}const live=await decryptEnvelope(JSON.parse(encoded||'{}'),pw);if(kv.SNAPSHOT_ID&&kv.SNAPSHOT_ID!==live.snapshot_id)throw Error('ENVELOPE_SNAPSHOT_MISMATCH');applyLive(live);CONNECTION.state='READY';CONNECTION.consecutive_failures=0;CONNECTION.last_error=null;CONNECTION.last_success_at=new Date().toISOString();if(window.__JJOONI_ENTRY_DIAGNOSTICS?.phase==='CONNECTING_ACCOUNTS')window.__JJOONI_ENTRY_DIAGNOSTICS.phase='ACCOUNTS_READY';}catch(e){
+ const message=String(e&&e.message||e).slice(0,180),blocked=e?.name==='OperationError'||/SCHEMA_MISMATCH|CHUNK_COUNT_INVALID|SNAPSHOT_MISMATCH|SNAPSHOT_ROLLBACK_REJECTED|INVALID_SNAPSHOT_TIME|INCOMPLETE_NAV_SNAPSHOT|SESSION_CREDENTIAL_UNAVAILABLE/.test(message);
+ CONNECTION.state=blocked?'BLOCKED':CANON?'DEGRADED':'RETRYING';CONNECTION.consecutive_failures++;CONNECTION.last_error=message;
+ setBadge(blocked?'SSOT BLOCKED':'SSOT RETRY',blocked?'bad':'warn',message);console.warn('CT account feed',e);
+}}
 function requestRefresh(reason){
  if(refreshFlight)return refreshFlight;
  if(document.hidden)return Promise.resolve();

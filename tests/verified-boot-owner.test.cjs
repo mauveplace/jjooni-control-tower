@@ -7,7 +7,7 @@ test('coordinator publishes no fake ACTIVE and starts one stable loader only aft
  vm.runInNewContext(fs.readFileSync('boot-coordinator-v33.js','utf8'),{window,document,Date,console,setInterval:fn=>(pulse=fn,1),clearInterval(){},setTimeout(){},encodeURIComponent,location:{reload(){}}});
  assert.equal(window.__JJOONI_UI_BOOT_V14,undefined);assert.equal(scripts.length,0);
  window.__JJOONI_CANONICAL_SSOT={};window.__JJOONI_LIVE_PAYLOAD={};pulse();assert.equal(scripts.length,0);
- window.__JJOONI_LINEAGE_GUARD={version:'verified'};pulse();listeners['jjooni:live-applied']();pulse();
+ window.__JJOONI_LINEAGE_GUARD={version:'verified',policy:'verified'};pulse();listeners['jjooni:live-applied']();pulse();
  assert.equal(scripts.length,1);assert.equal(scripts[0].src,'trade-review-loader.js?v=14.36&_=release-A');
  assert.equal(window.__JJOONI_LIVE_READY,true);
 });

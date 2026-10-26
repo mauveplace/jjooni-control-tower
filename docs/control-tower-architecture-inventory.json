@@ -10,8 +10,132 @@
     "declared_ui_modules": 34,
     "critical_ui_modules": 32,
     "bootstrap_modules": 8,
+    "potential_runtime_js_assets": 55,
     "recurring_or_observer_sites": 43
   },
+  "potential_runtime_graph": {
+    "index.html": [
+      "canonical-metrics.js",
+      "device-trust-v1.js",
+      "lineage-guard.js",
+      "live-bridge.js",
+      "pb-review-export-v1.js",
+      "ui-bootstrap-v1.js"
+    ],
+    "ui-bootstrap-v1.js": [
+      "benchmark-excess-v1.js",
+      "boot-coordinator-v33.js",
+      "consultant-tab-hotfix-v31.js",
+      "fast-refresh-v32.js",
+      "investor-flow-v1.js",
+      "public-market-sidecar-v36.js",
+      "toss-account-basis-v43.js",
+      "tripod-daily-freshness-v35.js"
+    ],
+    "tripod-daily-freshness-v35.js": [],
+    "toss-account-basis-v43.js": [],
+    "public-market-sidecar-v36.js": [],
+    "investor-flow-v1.js": [],
+    "fast-refresh-v32.js": [],
+    "consultant-tab-hotfix-v31.js": [],
+    "boot-coordinator-v33.js": [
+      "trade-review-loader.js"
+    ],
+    "trade-review-loader.js": [
+      "account-integrity-v17.js",
+      "account-source-truth-v22.js",
+      "canonical-valuation-fix-v13.js",
+      "daily-performance-alias-v23.js",
+      "data-integrity-v4.js",
+      "decision-impact-v5.js",
+      "drilldown-readability-v19.js",
+      "fast-refresh-v32.js",
+      "fx-attribution-v16.js",
+      "human-ui-v6.js",
+      "irp-trade-unit-guard-v18.js",
+      "manual-intraday-v1.js",
+      "market-context-v20.js",
+      "market-state-bridge.js",
+      "metric-drilldown-router-v12.js",
+      "mobile-stability-v4.js",
+      "overview-consistency-v21.js",
+      "performance-day-view.js",
+      "position-completeness-v25.js",
+      "realized-ledger-v7.js",
+      "recent-trade-metric-drilldown-v9.js",
+      "runtime-integrity-v15.js",
+      "security-names-held-v1.js",
+      "source-authority-guard-v24.js",
+      "strategy-books-v1.js",
+      "tablet-accounts-v8.js",
+      "tablet-runtime-v8.js",
+      "tablet-stability-v37.js",
+      "trade-money-v6.js",
+      "trade-review-outcomes-v26.js",
+      "trade-review-readable-v3.js",
+      "trade-review-v2.js",
+      "ui-refactor.js",
+      "viewport-bottom-guard-v5.js"
+    ],
+    "viewport-bottom-guard-v5.js": [],
+    "ui-refactor.js": [],
+    "trade-review-v2.js": [],
+    "trade-review-readable-v3.js": [],
+    "trade-review-outcomes-v26.js": [],
+    "trade-money-v6.js": [],
+    "tablet-stability-v37.js": [],
+    "tablet-runtime-v8.js": [],
+    "tablet-accounts-v8.js": [],
+    "strategy-books-v1.js": [],
+    "source-authority-guard-v24.js": [],
+    "security-names-held-v1.js": [
+      "security-names-v1.js"
+    ],
+    "security-names-v1.js": [],
+    "runtime-integrity-v15.js": [],
+    "recent-trade-metric-drilldown-v9.js": [],
+    "realized-ledger-v7.js": [],
+    "position-completeness-v25.js": [],
+    "performance-day-view.js": [],
+    "overview-consistency-v21.js": [],
+    "mobile-stability-v4.js": [],
+    "metric-drilldown-router-v12.js": [],
+    "market-state-bridge.js": [],
+    "market-context-v20.js": [],
+    "manual-intraday-v1.js": [],
+    "irp-trade-unit-guard-v18.js": [],
+    "human-ui-v6.js": [],
+    "fx-attribution-v16.js": [],
+    "drilldown-readability-v19.js": [],
+    "decision-impact-v5.js": [],
+    "data-integrity-v4.js": [],
+    "daily-performance-alias-v23.js": [
+      "account-return-30d-v46.js",
+      "consultant-market-v29.js",
+      "consultant-tab-hotfix-v30.js",
+      "consultant-tab-hotfix-v31.js",
+      "daily-pnl-attribution-v27.js",
+      "trade-opportunity-v28.js"
+    ],
+    "trade-opportunity-v28.js": [],
+    "daily-pnl-attribution-v27.js": [],
+    "consultant-tab-hotfix-v30.js": [],
+    "consultant-market-v29.js": [],
+    "account-return-30d-v46.js": [],
+    "canonical-valuation-fix-v13.js": [],
+    "account-source-truth-v22.js": [],
+    "account-integrity-v17.js": [],
+    "benchmark-excess-v1.js": [],
+    "pb-review-export-v1.js": [],
+    "live-bridge.js": [
+      "cost-bridge.js"
+    ],
+    "cost-bridge.js": [],
+    "lineage-guard.js": [],
+    "device-trust-v1.js": [],
+    "canonical-metrics.js": []
+  },
+  "runtime_graph_contract": "STATIC_LOCAL_ASSET_CANDIDATES_INCLUDING_NESTED_LOADERS_NOT_MEASURED_EXECUTION",
   "bootstrap_modules": [
     "boot-coordinator-v33.js",
     "public-market-sidecar-v36.js",
@@ -174,7 +298,7 @@
     },
     {
       "id": "ctOverviewConsistencyV21Script",
-      "url": "overview-consistency-v21.js?v=21.8-account-comparisons",
+      "url": "overview-consistency-v21.js?v=21.9-quality",
       "label": "overview-consistency"
     },
     {
@@ -341,7 +465,7 @@
           "entry": "- tools/publish_observatory_data.py"
         },
         {
-          "line": 169,
+          "line": 167,
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh all calendar values and 10y history' \\"
         }
       ]
@@ -521,8 +645,8 @@
           "entry": "python tools/publish_observatory_data.py --message 'data(observatory): hourly market refresh' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json"
         },
         {
-          "line": 394,
-          "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json market-observatory/index.html $(find market-observatory/data/fedwatch-history -type f | sort)"
+          "line": 360,
+          "entry": "python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json $(find market-observatory/data/fedwatch-history -type f | sort)"
         }
       ]
     },
@@ -557,6 +681,7 @@
       "triggers": [
         "push",
         "workflow_run",
+        "pull_request",
         "workflow_dispatch"
       ],
       "schedules": [],
@@ -573,7 +698,7 @@
       ],
       "publish_sites": [
         {
-          "line": 134,
+          "line": 123,
           "entry": "python tools/publish_observatory_data.py \\"
         }
       ]
@@ -918,10 +1043,10 @@
     },
     {
       "path": "boot-coordinator-v33.js",
-      "bytes": 5999,
+      "bytes": 6969,
       "recurring_or_observer_sites": [
         {
-          "line": 77,
+          "line": 79,
           "kinds": [
             "setInterval"
           ]
@@ -930,7 +1055,7 @@
     },
     {
       "path": "canonical-metrics.js",
-      "bytes": 6191,
+      "bytes": 7447,
       "recurring_or_observer_sites": []
     },
     {
@@ -1020,7 +1145,7 @@
     },
     {
       "path": "device-trust-v1.js",
-      "bytes": 2118,
+      "bytes": 2475,
       "recurring_or_observer_sites": []
     },
     {
@@ -1093,7 +1218,7 @@
     },
     {
       "path": "live-bridge.js",
-      "bytes": 57109,
+      "bytes": 58144,
       "recurring_or_observer_sites": [
         {
           "line": 361,
@@ -1102,13 +1227,13 @@
           ]
         },
         {
-          "line": 430,
+          "line": 435,
           "kinds": [
             "setInterval"
           ]
         },
         {
-          "line": 510,
+          "line": 515,
           "kinds": [
             "setInterval"
           ]
@@ -1132,12 +1257,12 @@
     },
     {
       "path": "market-observatory/analysis-lab-v1.js",
-      "bytes": 24836,
+      "bytes": 24753,
       "recurring_or_observer_sites": []
     },
     {
       "path": "market-observatory/calendar-editor-v1.js",
-      "bytes": 14699,
+      "bytes": 14690,
       "recurring_or_observer_sites": []
     },
     {
@@ -1223,12 +1348,12 @@
     },
     {
       "path": "market-observatory/index-explorer-v1.js",
-      "bytes": 8624,
+      "bytes": 8682,
       "recurring_or_observer_sites": []
     },
     {
       "path": "market-observatory/latest-board-v1.js",
-      "bytes": 42173,
+      "bytes": 42168,
       "recurring_or_observer_sites": [
         {
           "line": 231,
@@ -1287,7 +1412,7 @@
     },
     {
       "path": "market-observatory/observatory-v2.js",
-      "bytes": 28556,
+      "bytes": 28630,
       "recurring_or_observer_sites": [
         {
           "line": 314,
@@ -1311,7 +1436,7 @@
     },
     {
       "path": "market-observatory/sector-etf-v1.js",
-      "bytes": 18924,
+      "bytes": 19699,
       "recurring_or_observer_sites": []
     },
     {
@@ -1373,7 +1498,7 @@
     },
     {
       "path": "overview-consistency-v21.js",
-      "bytes": 28368,
+      "bytes": 29558,
       "recurring_or_observer_sites": []
     },
     {
@@ -1498,7 +1623,7 @@
     },
     {
       "path": "trade-review-loader.js",
-      "bytes": 13519,
+      "bytes": 13833,
       "recurring_or_observer_sites": [
         {
           "line": 86,

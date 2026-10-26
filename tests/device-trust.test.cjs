@@ -4,7 +4,7 @@ function fixture(){
  const records=new Map(),clock={now:1000000},location={origin:'https://example.test'};
  const db={close(){},transaction(){const tx={};tx.objectStore=()=>Object.fromEntries(['get','put','delete'].map(method=>[method,(a,b)=>{const q={};setImmediate(()=>{if(method==='get')q.result=structuredClone(records.get(a));if(method==='put')records.set(b,structuredClone(a));if(method==='delete')records.delete(a);q.onsuccess?.();tx.oncomplete?.()});return q}]));return tx}};
  const indexedDB={open(){const q={};setImmediate(()=>{q.result=db;q.onsuccess()});return q}};
- const window={};vm.runInNewContext(fs.readFileSync('device-trust-v1.js','utf8'),{window,indexedDB,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,location,Date:{now:()=>clock.now}});
+ const window={};vm.runInNewContext(fs.readFileSync('device-trust-v1.js','utf8'),{window,indexedDB,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,location,setTimeout,clearTimeout,Date:{now:()=>clock.now}});
  return {api:window.JjooniTrustedDevice,records,clock,location};
 }
 test('approval survives 30 days and a year until explicitly revoked, without plaintext',async()=>{
@@ -21,4 +21,11 @@ test('expired legacy, unknown versions, different-origin and tampered approvals 
  await f.api.remember('fixture');f.records.get('unlock').version=99;assert.equal(await f.api.restore(),null);
  await f.api.remember('fixture');f.location.origin='https://other.test';assert.equal(await f.api.restore(),null);
  await f.api.remember('fixture');const r=f.records.get('unlock');r.iv[0]^=1;assert.equal(await f.api.restore(),null);
+});
+test('blocked device storage rejects without deleting approval and closes late open connections',async()=>{
+ let request,timeout,closed=0;
+ const window={};vm.runInNewContext(fs.readFileSync('device-trust-v1.js','utf8'),{window,indexedDB:{open(){return request={}}},setTimeout:fn=>(timeout=fn,1),clearTimeout(){},crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,location:{origin:'https://fixture.test'},Date});
+ const restore=window.JjooniTrustedDevice.restore();timeout();await assert.rejects(restore,/DEVICE_STORAGE_TIMEOUT/);
+ request.result={close(){closed++}};request.onsuccess();assert.equal(closed,1);
+ const second=window.JjooniTrustedDevice.restore();request.onblocked();await assert.rejects(second,/DEVICE_STORAGE_BLOCKED/);
 });
