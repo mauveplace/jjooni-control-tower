@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-27T08:20:46+09:00",
+  "generated_kst": "2026-10-27T08:33:07+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "jp_rates",
     "calendar",
     "audit",
     "market_regime"
@@ -98,7 +99,7 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-27T08:20:28+09:00",
       "as_of": "2026-10-23",
       "detail": "JP2Y 2026-10-23 · JP5Y 2026-10-23 · JP10Y 2026-10-23 · JP30Y 2026-10-23 · JP_2S10S 2026-10-23",
@@ -110,7 +111,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-27T08:20:28+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=24s · ETHUSD age=23s",
+      "detail": "BTCUSD age=766s · ETHUSD age=765s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -191,9 +192,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-27T08:20:45+09:00",
+      "generated_kst": "2026-10-27T08:33:07+09:00",
       "as_of": "2026-10-26",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     },

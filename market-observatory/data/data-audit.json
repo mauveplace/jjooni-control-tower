@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T08:20:45+09:00",
+  "generated_kst": "2026-10-27T08:33:07+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
@@ -67,10 +67,11 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T08:20:42+09:00",
+      "generated_kst": "2026-10-27T08:33:07+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
+        "jp_rates",
         "calendar",
         "audit",
         "market_regime"
@@ -404,7 +405,7 @@
       "latest_mismatch": []
     },
     "jp_rates": {
-      "state": "LIVE",
+      "state": "LAGGING",
       "anchor": "2026-10-27",
       "allow_lag_days": 5,
       "critical": false,
@@ -451,7 +452,9 @@
         }
       },
       "missing": [],
-      "latest_mismatch": []
+      "latest_mismatch": [],
+      "expected_latest_weekday": "2026-10-26",
+      "published_source_status": "LIVE"
     },
     "crypto": {
       "state": "LIVE",
@@ -517,14 +520,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T08:20:21+09:00",
-      "current_quote_age_seconds": 24,
+      "current_quote_age_seconds": 766,
       "captured_quote_age_seconds": 7
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T08:20:22+09:00",
-      "current_quote_age_seconds": 23,
+      "current_quote_age_seconds": 765,
       "captured_quote_age_seconds": 6
     }
   },
@@ -533,6 +536,11 @@
       "code": "MARKET_REGIME_EXPIRED",
       "severity": "WARN",
       "detail": "No current analyst guidance; evaluate effective_window at read time"
+    },
+    {
+      "code": "GROUP_JP_RATES_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-27 dates=JP2Y:2026-10-23,JP5Y:2026-10-23,JP10Y:2026-10-23,JP30Y:2026-10-23,JP_2S10S:2026-10-23"
     }
   ],
   "contracts": {
