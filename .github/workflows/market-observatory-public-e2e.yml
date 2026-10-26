@@ -25,7 +25,8 @@ concurrency:
 jobs:
   public-responsive:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    # Public Pages publication can lag the source push by several minutes.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
