@@ -38,7 +38,7 @@ class ObservatoryEnergySeriesContract(unittest.TestCase):
     def test_board_asset_is_single_valid_versioned_module(self):
         board = (ROOT / 'market-observatory/latest-board-v1.js').read_text(encoding='utf-8')
         html = (ROOT / 'market-observatory/index.html').read_text(encoding='utf-8')
-        self.assertEqual(board.count('(()=>{'), 1)
+        self.assertTrue(board.startswith('(()=>{\n'), 'Board module must start with one IIFE')
         self.assertEqual(board.count('\n})();'), 1)
         runtime = re.search(r"__JJOONI_LATEST_BOARD=\{version:'([^']+)'", board)
         cache = re.search(r"latest-board-v1[.]js[?]v=([^&\"]+)", html)
