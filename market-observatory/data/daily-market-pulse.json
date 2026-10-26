@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
-  "generated_kst": "2026-10-27T08:38:44+09:00",
+  "generated_kst": "2026-10-27T08:47:30+09:00",
   "market_date_us": "2026-10-26",
   "snapshot_status": "FINAL",
   "read_only": true,
@@ -172,68 +172,68 @@
           "rank": 1,
           "ticker": "NVDA",
           "name": "Nvidia Corp",
-          "weight_pct": 12.37
+          "weight_pct": 12.55
         },
         {
           "rank": 2,
           "ticker": "AAPL",
           "name": "Apple Inc.",
-          "weight_pct": 12.32
+          "weight_pct": 12.04
         },
         {
           "rank": 3,
           "ticker": "MSFT",
           "name": "Microsoft Corp",
-          "weight_pct": 9.46
+          "weight_pct": 9.5
         },
         {
           "rank": 4,
           "ticker": "AMZN",
           "name": "Amazon.Com Inc",
-          "weight_pct": 6.5
+          "weight_pct": 6.46
         },
         {
           "rank": 5,
-          "ticker": "GOOGL",
-          "name": "Alphabet Inc. Class A Common Stock",
-          "weight_pct": 4.9
+          "ticker": "SPCX",
+          "name": "Space Exploration Technologies Corp. Class A Common Stock",
+          "weight_pct": 4.82
         },
         {
           "rank": 6,
-          "ticker": "SPCX",
-          "name": "Space Exploration Technologies Corp. Class A Common Stock",
-          "weight_pct": 4.86
+          "ticker": "GOOGL",
+          "name": "Alphabet Inc. Class A Common Stock",
+          "weight_pct": 4.81
         },
         {
           "rank": 7,
           "ticker": "GOOG",
           "name": "Alphabet Inc. Class C Capital Stock",
-          "weight_pct": 4.57
+          "weight_pct": 4.49
         },
         {
           "rank": 8,
           "ticker": "META",
           "name": "Meta Platforms, Inc. Class A Common Stock",
-          "weight_pct": 3.97
+          "weight_pct": 3.88
         },
         {
           "rank": 9,
           "ticker": "AVGO",
           "name": "Broadcom Inc. Common Stock",
-          "weight_pct": 3.73
+          "weight_pct": 3.82
         },
         {
           "rank": 10,
           "ticker": "TSLA",
           "name": "Tesla, Inc. Common Stock",
-          "weight_pct": 3.57
+          "weight_pct": 3.73
         }
       ],
-      "top3_weight_pct": 34.15,
-      "top10_weight_pct": 66.25,
+      "top3_weight_pct": 34.09,
+      "top10_weight_pct": 66.1,
       "source": "slickcharts_nasdaq100",
-      "status": "STALE_FALLBACK",
-      "observed_at_kst": "2026-10-26T07:29:35+09:00"
+      "status": "LIVE",
+      "observed_at_kst": "2026-10-27T08:47:28+09:00"
     },
     "fear_greed": {
       "score": 27.1,
@@ -593,7 +593,7 @@
     },
     {
       "market_date_us": "2026-10-26",
-      "generated_kst": "2026-10-27T08:38:44+09:00",
+      "generated_kst": "2026-10-27T08:47:30+09:00",
       "snapshot_status": "FINAL",
       "ndx": 29273.40429688,
       "dxy": 102.02999878,
@@ -603,7 +603,7 @@
       "vix": 18.38999939,
       "breadth_ratio": null,
       "breadth_proxy_ratio": 0.7272727272727273,
-      "top10_weight_pct": 66.25,
+      "top10_weight_pct": 66.1,
       "fear_greed": 27.1,
       "risk": "RISK_ON"
     }
@@ -621,7 +621,7 @@
       "finviz_sp500_map": "WEB_VERIFICATION_REQUIRED",
       "finviz_calendar": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
       "tradingview": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "slickcharts_nasdaq100": "STALE_FALLBACK",
+      "slickcharts_nasdaq100": "LIVE",
       "cnn_fear_greed": "OBSERVATORY_CANONICAL"
     },
     "missing_value_policy": "NULL_NOT_ESTIMATE"
@@ -630,27 +630,27 @@
     "finviz_sp500_map": {
       "url": "https://finviz.com/map?t=sec",
       "status": "WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-27T08:38:44+09:00"
+      "observed_at_kst": "2026-10-27T08:47:30+09:00"
     },
     "finviz_calendar": {
       "url": "https://finviz.com/calendar.ashx",
       "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
-      "observed_at_kst": "2026-10-27T08:38:44+09:00"
+      "observed_at_kst": "2026-10-27T08:47:30+09:00"
     },
     "tradingview": {
       "url": "https://kr.tradingview.com/",
       "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-27T08:38:44+09:00"
+      "observed_at_kst": "2026-10-27T08:47:30+09:00"
     },
     "slickcharts_nasdaq100": {
       "url": "https://www.slickcharts.com/nasdaq100",
-      "status": "STALE_FALLBACK",
-      "observed_at_kst": "2026-10-27T08:38:44+09:00"
+      "status": "LIVE",
+      "observed_at_kst": "2026-10-27T08:47:30+09:00"
     },
     "cnn_fear_greed": {
       "url": "https://edition.cnn.com/markets/fear-and-greed",
       "status": "OBSERVATORY_CANONICAL",
-      "observed_at_kst": "2026-10-27T08:38:44+09:00"
+      "observed_at_kst": "2026-10-27T08:47:30+09:00"
     }
   },
   "usage_contract": {
