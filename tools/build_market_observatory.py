@@ -20,7 +20,7 @@ YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
 SYMBOLS={
  'NASDAQ100':'^NDX','SP500':'^GSPC','VIX':'^VIX','DXY':'DX-Y.NYB',
  'USDKRW':'KRW=X','USDJPY':'JPY=X','JPYKRW':'JPYKRW=X',
- 'WTI':'CL=F','BRENT':'BZ=F','NATGAS':'NG=F','GASOLINE':'RB=F',
+ 'WTI':'CL=F','BRENT':'BZ=F','NATGAS':'NG=F',
  'GOLD':'GC=F','COPPER':'HG=F',
  'US3M':'^IRX','US5Y':'^FVX','US10Y':'^TNX','US30Y':'^TYX'
 }
