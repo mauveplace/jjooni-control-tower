@@ -161,10 +161,18 @@ def _parse_jgb_csv(blob):
     return sorted(rows,key=lambda x:x['date'])
 
 def fetch_current_jgb_rows():
-    errors=[]
+    # The Japanese and English MOF mirrors do not always refresh together.
+    # Prefer the newest *actual official observation* rather than accepting a
+    # successfully downloaded but lagging primary file as current.
+    errors=[];best=None;expected=expected_jgb_business_date()
     for url in JGB_CURRENT_URLS:
-        try:return _parse_jgb_csv(get_bytes(url,'text/csv,*/*')),url
+        try:
+            rows=_parse_jgb_csv(get_bytes(url,'text/csv,*/*'))
+            last=rows[-1]['date']
+            if best is None or last>best[0]:best=(last,rows,url)
+            if last>=expected:break
         except Exception as exc:errors.append(f'{url}:{type(exc).__name__}:{exc}')
+    if best:return best[1],best[2]
     raise RuntimeError('JGB_CURRENT_ALL_SOURCES_FAILED|'+'|'.join(errors))
 
 def expected_jgb_business_date(now=None):
