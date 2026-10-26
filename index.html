@@ -25,7 +25,7 @@
 <script>
 (function(){
 'use strict';
-window.__JJOONI_UI_RELEASE='20261026-r9-screen-audit';
+window.__JJOONI_UI_RELEASE='20261026-r10-screen-audit';
 const entry=window.__JJOONI_ENTRY_DIAGNOSTICS={phase:'CHECKING_DEVICE',started_at:new Date().toISOString(),attempts:0,last_error:null};
 const $=id=>document.getElementById(id);
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
@@ -41,6 +41,8 @@ function prepareLegacyScript(source){
   // not overwrite canonical P&L with its historical zero/missing inputs.
   .replace(/^(\s*)(overviewNavChange|overviewMarketPnl|overviewDailyReturn|overviewAccounts)\.(textContent|className|innerHTML)\s*=/gm,
    (_,space,name,property)=>space+"if(window.__JJOONI_LIVE_READY!==true) "+name+'.'+property+'=')
+  // The retired Human/BOT chart is removed by the current performance view.
+  .replace(/function drawCompare\(\)\s*\{/, "$&\n if(!document.getElementById('compareChart'))return;")
   // No regular-session print after opening time means unknown, not premarket.
   .replace("phase:krLive?'LIVE':(krClose?'CLOSE':'PRE')", "phase:krLive?'LIVE':(krClose?'CLOSE':(kr.minuteOfDay<540?'PRE':'확인필요'))");
 }

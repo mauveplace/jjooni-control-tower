@@ -32,3 +32,9 @@ test('verified canonical PnL survives a legacy render while initial shell still 
  vm.runInNewContext(src,ctx);assert.equal(ctx.overviewNavChange.textContent,'-100');assert.equal(ctx.overviewAccounts.innerHTML,'CURRENT');
  ctx.window.__JJOONI_LIVE_READY=false;vm.runInNewContext(src,ctx);assert.equal(ctx.overviewNavChange.textContent,'0');
 });
+
+test('removed Human/BOT chart does not abort later live UI rendering',()=>{
+ const src=prepare(`function drawCompare(){const s=document.getElementById('compareChart');s.innerHTML='old chart';}drawCompare();active.done=true;`);
+ const ctx={document:{getElementById(){return null}},active:{}};vm.runInNewContext(src,ctx);assert.equal(ctx.active.done,true);
+ const chart={};ctx.document.getElementById=()=>chart;vm.runInNewContext(src,ctx);assert.equal(chart.innerHTML,'old chart');
+});
