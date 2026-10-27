@@ -43,6 +43,23 @@ def test_jgb_current_parser_accepts_reiwa_and_japanese_tenors():
     assert rows[-1]['values']['30Y'] == 4.1
 
 
+def test_jgb_publication_expectation_uses_next_business_day_0930_jst():
+    mod = load_module('supplemental_jgb_publication_test', 'tools/refresh_observatory_supplementals.py')
+    # MOF: reference-date yield is published around 09:30 on the next
+    # business day. Do not treat the current Tokyo trading day as published.
+    cases = [
+        ('2026-10-27T19:05:00+09:00', '2026-10-26'),
+        ('2026-10-27T09:29:00+09:00', '2026-10-23'),
+        ('2026-10-27T09:30:00+09:00', '2026-10-26'),
+        ('2026-10-26T09:29:00+09:00', '2026-10-22'),
+        ('2026-10-26T09:30:00+09:00', '2026-10-23'),
+        ('2026-10-25T20:00:00+09:00', '2026-10-22'),
+        ('2026-10-31T12:00:00+09:00', '2026-10-29'),
+    ]
+    for stamp, expected in cases:
+        assert mod.expected_jgb_business_date(datetime.fromisoformat(stamp)) == expected, stamp
+
+
 def test_audit_contract_recomputes_age_and_checks_fedwatch():
     src = (ROOT / 'tools/audit_observatory_data.py').read_text(encoding='utf-8')
     for token in [
