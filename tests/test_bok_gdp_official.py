@@ -55,6 +55,37 @@ class BokGdpOfficialTest(unittest.TestCase):
         fetch.assert_not_called()
         self.assertEqual(checks[-1]["result"], "HISTORY_REF_QUARTER_MISMATCH")
 
+    def test_legacy_q4_ref_corrected_only_for_empty_verified_q3_event(self):
+        e = event("KR::2026년-4분기-실질-gdp")
+        e["market_metrics"] = [
+            {"key": "gdp_qoq", "actual": None, "previous": None,
+             "consensus": None,
+             "history_ref": "KR::2026년-4분기-실질-gdp::gdp_qoq"}
+        ]
+        checks = []
+        with patch.object(collectors, "text_fetch", return_value=OFFICIAL):
+            result = collectors.collect_bok_gdp(e, checks)
+        self.assertEqual(result[0][0]["actual"], "1.0%")
+        self.assertEqual(e["history_ref"], "KR::2026년-3분기-실질-gdp")
+        self.assertEqual(e["market_metrics"][0]["history_ref"],
+                         "KR::2026년-3분기-실질-gdp::gdp_qoq")
+        self.assertTrue(any(c["result"] == "EMPTY_HISTORY_REF_IDENTITY_CORRECTED"
+                            for c in checks))
+
+    def test_nonempty_q4_history_mismatch_still_fails_closed(self):
+        e = event("KR::2026년-4분기-실질-gdp")
+        e["market_metrics"] = [
+            {"key": "gdp_qoq", "actual": "9.9%",
+             "history_ref": "KR::2026년-4분기-실질-gdp::gdp_qoq"}
+        ]
+        checks = []
+        with patch.object(collectors, "text_fetch") as fetch:
+            result = collectors.collect_bok_gdp(e, checks)
+        self.assertIsNone(result)
+        fetch.assert_not_called()
+        self.assertEqual(e["history_ref"], "KR::2026년-4분기-실질-gdp")
+        self.assertEqual(checks[-1]["result"], "HISTORY_REF_QUARTER_MISMATCH")
+
     def test_verified_identity_can_fetch_exact_bok_page(self):
         checks = []
         with patch.object(collectors, "text_fetch", return_value=OFFICIAL) as fetch:
