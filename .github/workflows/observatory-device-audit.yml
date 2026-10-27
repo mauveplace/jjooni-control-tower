@@ -24,5 +24,6 @@ jobs:
       - run: python3 -m http.server 8123 >/tmp/obs-http.log 2>&1 &
       - run: node --test tests/observatory-display-contract.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-us-yield-source.test.cjs
       - run: node tests/observatory-status-e2e.cjs
+      - run: node tests/calendar-lazy-e2e.cjs
       - run: node tests/observatory-device-audit.cjs
       - run: node tests/observatory-metric-detail-e2e.cjs
