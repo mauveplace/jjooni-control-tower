@@ -30,8 +30,8 @@ function analysis(w,s){
  return {headline,explanation,action,issues,disagreement:oldFlags.length>0&&reportedLive};
 }
 function renderAnalysis(host){
- const w=WATCHDOG||{},s=STATUS||{},model=current(),a=analysis(w,s), current=w.current||{}, before=w.before||{};
- const rows=[['시장 SSOT',current.observatory_session,current.observatory_generated_kst,before.observatory_fresh],['Daily Pulse',current.pulse_session,current.pulse_generated_kst,before.daily_market_pulse_fresh],['TRI-POD',current.tripod_session,current.public_generated_kst,before.public_market_daily_fresh]];
+ const w=WATCHDOG||{},s=STATUS||{},model=current(),a=analysis(w,s), evidence=w.current||{}, before=w.before||{};
+ const rows=[['시장 SSOT',evidence.observatory_session,evidence.observatory_generated_kst,before.observatory_fresh],['Daily Pulse',evidence.pulse_session,evidence.pulse_generated_kst,before.daily_market_pulse_fresh],['TRI-POD',evidence.tripod_session,evidence.public_generated_kst,before.public_market_daily_fresh]];
  host.querySelector('#obsWatchAnalysisBody').innerHTML=`<div class="obsWatchConclusion ${tone(model.watchdog.state)}"><b>${esc(a.headline)} · 점검 당시 결과</b><p>${esc(a.explanation)}</p><p><strong>확인할 사항</strong> ${esc(a.action)}</p></div>
  ${loadErrors.length?`<p class="obsWatchAlert">${esc(loadErrors.join(' · '))} · 이전에 읽은 값이 있으면 그대로 표시합니다.</p>`:''}
  ${a.disagreement?'<p class="obsWatchAlert">판정 차이: 워치독의 점검 전 갱신 조건은 미충족인데, 별도 상태 파일은 주요 항목을 LIVE로 분류했습니다. 두 기록의 점검 시각·판정 기준이 다를 수 있어 원천 기준일 확인이 필요합니다.</p>':''}
