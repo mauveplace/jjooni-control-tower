@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T23:22:27+09:00",
-  "overall": "PASS",
+  "generated_kst": "2026-10-28T00:47:01+09:00",
+  "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 0,
+  "warning_count": 3,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-27T22:32:52+09:00",
+      "generated_kst": "2026-10-28T00:46:55+09:00",
       "events": 186,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -68,14 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T23:22:25+09:00",
+      "generated_kst": "2026-10-28T00:47:00+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
+        "crypto",
         "audit"
       ]
     },
@@ -156,7 +153,7 @@
     },
     "kr_equity": {
       "state": "LIVE",
-      "anchor": "2026-10-27",
+      "anchor": "2026-10-28",
       "allow_lag_days": 4,
       "critical": true,
       "items": {
@@ -350,7 +347,7 @@
     },
     "kr_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-27",
+      "anchor": "2026-10-28",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -408,7 +405,7 @@
     },
     "jp_rates": {
       "state": "LIVE",
-      "anchor": "2026-10-27",
+      "anchor": "2026-10-28",
       "allow_lag_days": 5,
       "critical": false,
       "items": {
@@ -459,7 +456,7 @@
       "published_source_status": "LIVE"
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -486,7 +483,7 @@
     },
     "sentiment": {
       "state": "LIVE",
-      "anchor": "2026-10-27",
+      "anchor": "2026-10-28",
       "allow_lag_days": 4,
       "critical": false,
       "items": {
@@ -519,21 +516,37 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T23:22:16+09:00",
-      "current_quote_age_seconds": 11,
+      "current_quote_age_seconds": 5085,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T23:22:19+09:00",
-      "current_quote_age_seconds": 8,
+      "current_quote_age_seconds": 5082,
       "captured_quote_age_seconds": 3
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-27,ETHUSD:2026-10-27"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:16+09:00', 'current_quote_age_seconds': 5085, 'captured_quote_age_seconds': 6}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:19+09:00', 'current_quote_age_seconds': 5082, 'captured_quote_age_seconds': 3}"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
