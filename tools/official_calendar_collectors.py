@@ -97,6 +97,78 @@ def parse_bok(text,year,month):
     if not out: raise ValueError('BOK_HEADLINE_PARSE_MISS')
     return out
 
+
+# Exact official release verified against the BOK statistics press release board.
+# This mapping is deliberately limited to the confirmed Q3 2026 preliminary vintage.
+BOK_GDP_RELEASES = {
+    (2026, 3): ('2026-10-27',
+        'https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11065944')
+}
+
+def parse_bok_gdp(text, year, quarter, publication_date):
+    compact = re.sub(r'\s+', '', text)
+    if not re.search(rf'{year}년{quarter}/4분기실질국내총생산\(속보\)', compact):
+        raise ValueError('BOK_GDP_REFERENCE_PERIOD_MISMATCH')
+    if '등록일' + publication_date.replace('-', '.') not in compact:
+        raise ValueError('BOK_GDP_PUBLICATION_DATE_MISMATCH')
+    # The first GDP headline is authoritative; GDI and YoY are different measures.
+    m = re.search(
+        r'◈실질국내총생산\(GDP\)은전기대비([0-9]+(?:\.[0-9]+)?)%'
+        r'(성장|증가|감소),?전년동기대비([0-9]+(?:\.[0-9]+)?)%(성장|증가|감소)',
+        compact)
+    if not m:
+        raise ValueError('BOK_GDP_QOQ_HEADLINE_PARSE_MISS')
+    qoq = ('-' if m[2] == '감소' else '') + m[1]
+    return [metric('gdp_qoq', 'Real GDP QoQ (preliminary)', qoq + '%')]
+
+def collect_bok_gdp(e, checks):
+    title = e.get('title', '')
+    match = re.fullmatch(r'(\d{4})년\s*([1-4])/4분기\s*실질\s*GDP\(속보\)', title)
+    if not match:
+        checks.append(dict(adapter='BOK_GDP', title=title, result='EVENT_IDENTITY_MISMATCH'))
+        return None
+    year, quarter = map(int, match.groups())
+    official = BOK_GDP_RELEASES.get((year, quarter))
+    if not official:
+        checks.append(dict(adapter='BOK_GDP', title=title, result='OFFICIAL_RELEASE_NOT_VERIFIED_FOR_PERIOD'))
+        return None
+    date, url = official
+    dt = release_time(e)
+    if not dt or dt.date().isoformat() != date:
+        checks.append(dict(adapter='BOK_GDP', title=title, result='RELEASE_DATE_MISMATCH'))
+        return None
+    # The 2026-Q3 seed carried a Q4 slug with no actual/previous/consensus
+    # observations. Repair only that exact empty, one-metric identity, with
+    # independently verified period/date. All other mismatches fail closed.
+    ref = e.get('history_ref', '')
+    expected_ref = f'KR::{year}년-{quarter}분기-실질-gdp'
+    wrong_q4_ref = 'KR::2026년-4분기-실질-gdp'
+    if ref == wrong_q4_ref and (year, quarter) == (2026, 3):
+        metrics = e.get('market_metrics') or []
+        metric_row = metrics[0] if len(metrics) == 1 else {}
+        all_empty = all(clean(e.get(k)) is None for k in ('previous', 'consensus', 'actual'))
+        metric_empty = all(clean(metric_row.get(k)) is None for k in ('previous', 'consensus', 'actual'))
+        if (all_empty and metric_empty and metric_row.get('key') == 'gdp_qoq'
+                and metric_row.get('history_ref') == wrong_q4_ref + '::gdp_qoq'):
+            e['history_ref'] = expected_ref
+            metric_row['history_ref'] = expected_ref + '::gdp_qoq'
+            checks.append(dict(adapter='BOK_GDP', title=title, url=url,
+                               result='EMPTY_HISTORY_REF_IDENTITY_CORRECTED',
+                               from_ref=wrong_q4_ref, to_ref=expected_ref))
+            ref = expected_ref
+    if ref and ref != expected_ref:
+        checks.append(dict(adapter='BOK_GDP', title=title, url=url,
+                           result='HISTORY_REF_QUARTER_MISMATCH', history_ref=ref))
+        return None
+    try:
+        rows = parse_bok_gdp(text_fetch(url), year, quarter, date)
+        checks.append(dict(adapter='BOK_GDP', title=title, url=url, result='PARSED'))
+        return rows, url
+    except Exception as exc:
+        checks.append(dict(adapter='BOK_GDP', title=title, url=url,
+                           result=type(exc).__name__, error=str(exc)[:200]))
+        return None
+
 def parse_ccsi(text,year,month):
     compact=re.sub(r'\s+','',text)
     if not re.search(rf'{year}년{month}월소비자동향조사',compact):
@@ -203,6 +275,7 @@ def adapter_id(e):
     if c=='US' and t in DEFS: return 'BLS_'+DEFS[t][0]
     if c=='US' and 'Initial Jobless Claims' in t: return 'DOL'
     if c=='KR' and t=='한국은행 통화정책방향 결정회의': return 'BOK_RATE'
+    if c=='KR' and re.fullmatch(r'\d{4}년\s*[1-4]/4분기\s*실질\s*GDP\(속보\)',t): return 'BOK_GDP'
     if c=='KR' and '생산자물가' in t: return 'BOK'
     if c=='KR' and '소비자동향조사' in t: return 'BOK_CCSI'
     if c=='KR' and re.search(r'고용동향',t): return 'KOSTAT_EMPLOYMENT'
@@ -216,6 +289,7 @@ from official_bls_actuals import DEFS as BLS_DEFS
 REGISTRY.update({'BLS_'+code:keys for code,keys in BLS_DEFS.values()})
 REGISTRY['BOK_RATE']=('bok_base_rate',)
 REGISTRY['BOK_CCSI']=('kr_ccsi',)
+REGISTRY['BOK_GDP']=('gdp_qoq',)
 REGISTRY['KOSTAT_EMPLOYMENT']=('kr_unemployment_sa',)
 
 def discover_bok(e):
@@ -235,6 +309,8 @@ def collect(e,kind,checks):
         return collect_kr_employment(e,checks)
     if kind=='BOK_CCSI':
         return collect_ccsi(e,checks)
+    if kind=='BOK_GDP':
+        return collect_bok_gdp(e,checks)
     if kind=='BOK_RATE':
         from official_bok_policy import collect_policy
         return collect_policy(e,checks)
