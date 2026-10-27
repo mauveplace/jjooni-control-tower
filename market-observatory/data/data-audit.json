@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-28T00:47:01+09:00",
+  "generated_kst": "2026-10-28T00:47:11+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 3,
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-28T00:47:00+09:00",
+      "generated_kst": "2026-10-28T00:47:01+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -519,14 +519,14 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T23:22:16+09:00",
-      "current_quote_age_seconds": 5085,
+      "current_quote_age_seconds": 5095,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T23:22:19+09:00",
-      "current_quote_age_seconds": 5082,
+      "current_quote_age_seconds": 5092,
       "captured_quote_age_seconds": 3
     }
   },
@@ -539,12 +539,12 @@
     {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:16+09:00', 'current_quote_age_seconds': 5085, 'captured_quote_age_seconds': 6}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:16+09:00', 'current_quote_age_seconds': 5095, 'captured_quote_age_seconds': 6}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:19+09:00', 'current_quote_age_seconds': 5082, 'captured_quote_age_seconds': 3}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-27T23:22:19+09:00', 'current_quote_age_seconds': 5092, 'captured_quote_age_seconds': 3}"
     }
   ],
   "contracts": {
