@@ -9,6 +9,24 @@ import publish_observatory_data as pub
 
 
 class ObservatoryPublisherCleanlinessTest(unittest.TestCase):
+    def test_market_source_always_publishes_atomic_health(self):
+        source = 'market-observatory/data/observatory.json'
+        audit = 'market-observatory/data/data-audit.json'
+        status = 'market-observatory/data/freshness-status.json'
+        # A crypto-only writer must not rely on a subsequent GitHub Actions
+        # push trigger to update the published quote timestamps and verdict.
+        self.assertEqual(pub.publication_paths([source]), [source, audit, status])
+        self.assertEqual(pub.publication_paths([source, status]), [source, status, audit])
+        self.assertEqual(len(pub.publication_paths([source, audit, status])), 3)
+        # The canonical market consumers must be derived from the same source.
+        bundle = pub.publication_paths(['public-market-daily.json'])
+        self.assertTrue({source, audit, status, 'public-market-daily.json',
+                         'market-observatory/data/daily-market-pulse.json'}.issubset(set(bundle)))
+
+    def test_calendar_only_does_not_claim_unrelated_market_health(self):
+        calendar = 'market-observatory/data/economic-calendar.json'
+        self.assertEqual(pub.publication_paths([calendar]), [calendar])
+
     def test_unselected_generated_json_is_restored_before_rebase(self):
         calls=[]
         old=pub.git
