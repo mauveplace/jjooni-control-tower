@@ -42,6 +42,12 @@ def publication_paths(paths):
             raise ValueError('DATA_PUBLISHER_REJECTED_NON_DATA_PATH: '+str(path))
     if set(paths).intersection(MARKET_BUNDLE[1:]):
         paths = list(dict.fromkeys([*paths, *MARKET_BUNDLE]))
+    # GitHub Actions bot commits do not reliably trigger downstream push workflows.
+    # Publish the audit and freshness verdict in the SAME commit as any canonical
+    # market-source update, including independent 24/7 BTC/ETH quote refreshes.
+    # materialize_health() recomputes both after every concurrent-source rebase.
+    if DATA + 'observatory.json' in paths:
+        paths = list(dict.fromkeys([*paths, DATA + 'data-audit.json', DATA + 'freshness-status.json']))
     return paths
 
 

@@ -89,8 +89,22 @@ class AtomicSessionTest(unittest.TestCase):
             git(remote, 'commit', '-m', 'concurrent producer')
             git(remote, 'push', 'origin', 'main')
             paths = [pub.DATA + 'observatory.json', pub.DATA + 'daily-market-pulse.json', 'public-market-daily.json']
-            with patch.object(pub, 'ROOT', local), patch.object(public, 'OUT'), patch.object(pulse, 'DATA'), patch.object(pulse, 'OUT'):
+            # This temporary Git fixture has no tools/ tree. Stub only the
+            # audit builder; the actual publication/rebase and its health-file
+            # inclusion remain exercised against a real local Git remote.
+            health = [pub.DATA + 'data-audit.json', pub.DATA + 'freshness-status.json']
+            def derive_test_health(selected):
+                if not set(health).issubset(set(selected)):
+                    return
+                source = json.loads((local / paths[0]).read_text())
+                for rel in health:
+                    (local / rel).write_text(json.dumps({'source_generated_kst': source['generated_kst']}))
+            with patch.object(pub, 'ROOT', local), patch.object(public, 'OUT'), \
+                 patch.object(pulse, 'DATA'), patch.object(pulse, 'OUT'), \
+                 patch.object(pub, 'materialize_health', side_effect=derive_test_health):
                 pub.publish(paths, 'repair market sources and consumers')
+            for rel in health:
+                self.assertEqual(json.loads((local / rel).read_text())['source_generated_kst'], newer['generated_kst'])
             obs = json.loads((local / paths[0]).read_text())
             report = json.loads((local / paths[1]).read_text())
             sidecar = json.loads((local / paths[2]).read_text())

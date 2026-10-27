@@ -25,15 +25,20 @@ class PublicationPipelineTest(unittest.TestCase):
         self.assertEqual(cached_concentration(previous, now)['status'], 'STALE_FALLBACK')
 
     def test_daily_consumer_closes_market_group_but_crypto_remains_independent(self):
+        health = {pub.DATA + 'data-audit.json', pub.DATA + 'freshness-status.json'}
         for consumer in pub.MARKET_BUNDLE[1:]:
-            self.assertEqual(set(pub.publication_paths([consumer])), set(pub.MARKET_BUNDLE))
-        self.assertEqual(pub.publication_paths([pub.MARKET_BUNDLE[0]]), [pub.MARKET_BUNDLE[0]])
+            self.assertEqual(set(pub.publication_paths([consumer])), set(pub.MARKET_BUNDLE) | health)
+        self.assertEqual(set(pub.publication_paths([pub.MARKET_BUNDLE[0]])),
+                         {pub.MARKET_BUNDLE[0]} | health)
 
     def test_data_publisher_refuses_ui_source_and_path_traversal(self):
         for path in ['market-observatory/index.html','index.html','market-observatory/sector-etf-v1.js','market-observatory/data/../index.json']:
             with self.assertRaisesRegex(ValueError,'DATA_PUBLISHER_REJECTED_NON_DATA_PATH'):
                 pub.publication_paths([path])
-        self.assertEqual(pub.publication_paths(['market-observatory/data/observatory.json']),['market-observatory/data/observatory.json'])
+        self.assertEqual(pub.publication_paths(['market-observatory/data/observatory.json']),
+                         ['market-observatory/data/observatory.json',
+                          'market-observatory/data/data-audit.json',
+                          'market-observatory/data/freshness-status.json'])
 
     def test_archive_records_the_derived_snapshot_not_the_input_placeholder(self):
         with tempfile.TemporaryDirectory() as directory:
