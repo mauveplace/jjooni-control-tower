@@ -118,8 +118,8 @@ def parse_bok_gdp(text, year, quarter, publication_date):
         compact)
     if not m:
         raise ValueError('BOK_GDP_QOQ_HEADLINE_PARSE_MISS')
-    qoq = float(m[1]) * (-1 if m[2] == '감소' else 1)
-    return [metric('gdp_qoq', 'Real GDP QoQ (preliminary)', f'{qoq:g}%')]
+    qoq = ('-' if m[2] == '감소' else '') + m[1]
+    return [metric('gdp_qoq', 'Real GDP QoQ (preliminary)', qoq + '%')]
 
 def collect_bok_gdp(e, checks):
     title = e.get('title', '')
