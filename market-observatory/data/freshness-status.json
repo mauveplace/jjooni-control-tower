@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-27T17:23:49+09:00",
+  "generated_kst": "2026-10-27T18:45:21+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,6 +9,8 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "jp_rates",
+    "crypto",
     "audit",
     "market_regime"
   ],
@@ -102,7 +104,7 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-27T17:20:40+09:00",
       "as_of": "2026-10-26",
       "detail": "JP2Y 2026-10-26 · JP5Y 2026-10-26 · JP10Y 2026-10-26 · JP30Y 2026-10-26 · JP_2S10S 2026-10-26",
@@ -111,19 +113,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-27T17:20:40+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=186s · ETHUSD age=188s",
+      "detail": "BTCUSD age=5078s · ETHUSD age=5080s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-27T17:20:43+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-27T17:20:41+09:00"
         }
       },
@@ -186,8 +188,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-10-27T17:22:59+09:00",
-      "as_of": "2026-10-27T17:22:59+09:00",
+      "generated_kst": "2026-10-27T18:45:15+09:00",
+      "as_of": "2026-10-27T18:45:15+09:00",
       "detail": "events=186 · overdue=0 · pending=0 · source_failures=0",
       "source": "economic-calendar.json",
       "critical": false
@@ -195,9 +197,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-27T17:23:49+09:00",
+      "generated_kst": "2026-10-27T18:45:21+09:00",
       "as_of": "2026-10-26",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=5",
       "source": "data-audit.json",
       "critical": true
     },
