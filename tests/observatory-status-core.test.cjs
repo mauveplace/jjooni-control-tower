@@ -17,7 +17,7 @@ test('missing or future metadata, empty groups and fetch failures never produce 
 });
 test('current group warnings downgrade an already-warned or originally green headline consistently',()=>{
  const s=status();s.groups.crypto={state:'LIVE',quotes:{BTCUSD:{status:'LIVE',quote_as_of_kst:iso(now-4000000)},ETHUSD:{status:'LIVE',quote_as_of_kst:iso(now)}}};
- s.groups.market_regime={state:'LIVE',consensus_status:'CLOSED',as_of:iso(now-1)};s.overall='LIVE_WITH_WARNINGS';
+ s.groups.market_regime={state:'LIVE',consensus_status:'CLOSED',as_of:iso(now-1),informational:true};s.overall='LIVE_WITH_WARNINGS';
  const m=evaluate(s,{},now);assert.equal(m.overall,'LIVE_WITH_WARNINGS');assert.equal(m.groups.crypto.state,'STALE');assert.equal(m.groups.market_regime.state,'EXPIRED');assert.equal(m.issues.length,1);
 });
 test('expired weekly analyst reference never downgrades healthy market data',()=>{
