@@ -1,17 +1,14 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-27T20:37:33+09:00",
+  "generated_kst": "2026-10-27T21:35:23+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE_WITH_WARNINGS",
+  "overall": "LIVE",
   "critical_bad": [],
-  "warnings": [
-    "audit",
-    "market_regime"
-  ],
+  "warnings": [],
   "watchdog_required": false,
   "session_alignment": {
     "expected_session": "2026-10-26",
@@ -114,7 +111,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-27T19:10:33+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=22s · ETHUSD age=22s",
+      "detail": "BTCUSD age=3492s · ETHUSD age=3492s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -194,21 +191,23 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-10-27T20:37:33+09:00",
+      "state": "PASS",
+      "generated_kst": "2026-10-27T21:35:23+09:00",
       "as_of": "2026-10-26",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     },
     "market_regime": {
-      "label": "합의 레짐",
+      "label": "과거 주간 분석 · 투자보드 관리",
       "state": "EXPIRED",
       "generated_kst": "2026-10-11T09:44:22.647+09:00",
       "as_of": "2026-10-16T23:59:59+09:00",
-      "detail": "유효기간·합의 상태 확인 · 미확정 또는 만료 문서는 현재 지침이 아닙니다",
+      "detail": "이력 참고용 · 최신 시장/계좌 판정과 별개 · 투자보드에서 주간 전략 관리",
       "source": "market-regime.json",
       "critical": false,
+      "informational": true,
+      "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY",
       "consensus_status": "CLOSED",
       "authority": "ANALYST_CONSENSUS_WEEKLY_SSOT",
       "valid_from_kst": "2026-10-12T00:00:00+09:00",

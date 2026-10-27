@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T20:37:33+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-10-27T21:35:23+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
@@ -64,20 +64,14 @@
         ],
         "start_kst": "2026-10-12T00:00:00+09:00"
       },
-      "source_generated_kst": "2026-10-10T22:50:00+09:00"
+      "source_generated_kst": "2026-10-10T22:50:00+09:00",
+      "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T20:37:30+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
+      "generated_kst": "2026-10-27T21:35:22+09:00",
+      "overall": "LIVE",
       "critical_bad": [],
-      "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
-        "audit",
-        "market_regime"
-      ]
+      "warnings": []
     },
     "watchdog": {
       "checked_kst": "2026-10-27T08:45:40+09:00",
@@ -522,24 +516,18 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T20:37:11+09:00",
-      "current_quote_age_seconds": 22,
+      "current_quote_age_seconds": 3492,
       "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-27T20:37:11+09:00",
-      "current_quote_age_seconds": 22,
+      "current_quote_age_seconds": 3492,
       "captured_quote_age_seconds": 6
     }
   },
-  "issues": [
-    {
-      "code": "MARKET_REGIME_EXPIRED",
-      "severity": "WARN",
-      "detail": "No current analyst guidance; evaluate effective_window at read time"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
