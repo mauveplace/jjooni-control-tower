@@ -30,7 +30,7 @@ class BokGdpOfficialTest(unittest.TestCase):
     def test_exact_q3_preliminary_qoq_not_yoy_or_gdi(self):
         self.assertEqual(
             collectors.parse_bok_gdp(OFFICIAL, 2026, 3, "2026-10-27"),
-            [{"key": "gdp_qoq", "label": "Real GDP QoQ (preliminary)", "actual": "1%"}],
+            [{"key": "gdp_qoq", "label": "Real GDP QoQ (preliminary)", "actual": "1.0%"}],
         )
 
     def test_wrong_quarter_or_publication_date_rejected(self):
@@ -59,7 +59,7 @@ class BokGdpOfficialTest(unittest.TestCase):
         checks = []
         with patch.object(collectors, "text_fetch", return_value=OFFICIAL) as fetch:
             result = collectors.collect_bok_gdp(event(), checks)
-        self.assertEqual(result[0][0]["actual"], "1%")
+        self.assertEqual(result[0][0]["actual"], "1.0%")
         self.assertIn("nttId=11065944", result[1])
         fetch.assert_called_once()
         self.assertEqual(checks[-1]["result"], "PARSED")
