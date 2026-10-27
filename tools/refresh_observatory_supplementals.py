@@ -115,6 +115,44 @@ def refresh_yahoo(data):
         quality[key]={'status':'LIVE' if last and (not common or last>=common) else ('LAGGING' if rows else 'UNAVAILABLE'),'source':'Yahoo public completed daily','last_date':last,'target_session':common}
     return common
 
+US_RATE_KEYS=('US2Y','US3M','US5Y_OFFICIAL','US10Y_OFFICIAL','US30Y_OFFICIAL','US5Y','US10Y','US30Y','US_2S10S')
+
+def refresh_us_rates(data):
+    """Refresh card sources independently of the heavy daily/calendar build."""
+    from build_market_observatory import treasury_rows
+    sm=data.setdefault('series',{});latest=data.setdefault('latest',{})
+    quality=data.setdefault('cross_market_freshness_quality',{})
+    cutoff=completed_us_cutoff()
+    target=str(data.get('us_completed_session_date') or cutoff)
+    def apply(key,fresh,source,error=None):
+        fresh=[r for r in fresh if r['date']<=cutoff and r.get('value') is not None and math.isfinite(float(r['value']))]
+        rows=merge_rows(sm.get(key),fresh)
+        sm[key]=rows;latest[key]=rows[-1]['value'] if rows else None
+        last=rows[-1]['date'] if rows else None
+        quality[key]={'source':source,'last_date':last,'target_session':target,
+                      'status':('STALE' if rows else 'UNAVAILABLE') if error else ('LIVE' if last and last>=target else 'LAGGING' if rows else 'UNAVAILABLE')}
+        if error:quality[key]['fetch_error']=str(error)
+    for key,symbol in {'US5Y':'^FVX','US10Y':'^TNX','US30Y':'^TYX'}.items():
+        try:apply(key,yahoo_series(symbol),'Cboe / Yahoo completed daily')
+        except Exception as exc:apply(key,[],'Cboe / Yahoo completed daily',exc)
+    mapping={'US3M':'3 Mo','US2Y':'2 Yr','US5Y_OFFICIAL':'5 Yr','US10Y_OFFICIAL':'10 Yr','US30Y_OFFICIAL':'30 Yr'}
+    try:
+        # The cutoff year also handles the New Year before the first US close.
+        rows=treasury_rows(int(cutoff[:4]))
+        if not rows:raise RuntimeError('EMPTY_TREASURY_CURVE')
+        for key,col in mapping.items():
+            apply(key,[{'date':r['date'],'value':r['values'].get(col)} for r in rows],'US Treasury official daily')
+    except Exception as exc:
+        for key in mapping:apply(key,[],'US Treasury official daily',exc)
+    a={r['date']:r['value'] for r in sm.get('US10Y_OFFICIAL',[])}
+    b={r['date']:r['value'] for r in sm.get('US2Y',[])}
+    sm['US_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))]
+    latest['US_2S10S']=sm['US_2S10S'][-1]['value'] if sm['US_2S10S'] else None
+    quality['US_2S10S']=dict(quality['US2Y'])
+    quality['US_2S10S']['last_date']=sm['US_2S10S'][-1]['date'] if sm['US_2S10S'] else None
+    data['us_rates_refreshed_kst']=datetime.now(KST).isoformat(timespec='seconds')
+
+
 def _decode_csv(blob):
     for enc in ('utf-8-sig','cp932','shift_jis','utf-8'):
         try:return blob.decode(enc)
@@ -225,6 +263,7 @@ def refresh_kr_and_sentiment_and_crypto(data):
 def main():
     data=json.loads(OBS.read_text(encoding='utf-8'))
     session=refresh_yahoo(data)
+    refresh_us_rates(data)
     refresh_jgb(data)
     refresh_kr_and_sentiment_and_crypto(data)
     data['supplemental_refreshed_kst']=datetime.now(KST).isoformat(timespec='seconds')

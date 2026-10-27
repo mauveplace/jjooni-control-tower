@@ -118,6 +118,15 @@ test('Japanese source fetch failure is disclosed without deleting last good pric
   {JP_RATES:{status:'STALE',expected_latest_weekday:'2026-10-26',fetch_error:'timeout'}});
  const html=api.standardTile(api.BY_KEY.JP2Y);
  assert.match(html,/1.872%/);
- assert.match(html,/공식 원천 조회 실패/);
+ assert.match(html,/원천 조회 실패/);
  assert.match(html,/실제 관측 2026-10-23/);
+});
+
+test('US rate labels distinguish local observation day and disclose failed refresh',()=>{
+ const api=board({US10Y:[{date:'2026-10-23',value:4.98}]},
+ {US10Y:{status:'STALE',target_session:'2026-10-26',fetch_error:'timeout'}});
+ const html=api.standardTile(api.BY_KEY.US10Y_OFFICIAL);
+ assert.match(html,/미국 현지 2026-10-23 기준 · 일별 확정값/);
+ assert.match(html,/자료 지연 · 2026-10-26 자료 미확인/);
+ assert.match(html,/원천 조회 실패/);
 });
