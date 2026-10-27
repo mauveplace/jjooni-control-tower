@@ -102,7 +102,9 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     }
     regime = load(data/'market-regime.json')
     window = regime.get('effective_window') or {}
-    groups['market_regime'] = group('합의 레짐', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '유효기간·합의 상태 확인 · 미확정 또는 만료 문서는 현재 지침이 아닙니다', 'market-regime.json', False)
+    groups['market_regime'] = group('과거 주간 분석 · 투자보드 관리', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '이력 참고용 · 최신 시장/계좌 판정과 별개 · 투자보드에서 주간 전략 관리', 'market-regime.json', False)
+    groups['market_regime']['informational'] = True
+    groups['market_regime']['monitoring_scope'] = 'INVESTMENT_BOARD_REFERENCE_ONLY'
     groups['market_regime']['consensus_status'] = (regime.get('source') or {}).get('consensus_status')
     groups['market_regime']['authority'] = regime.get('authority')
     groups['market_regime']['valid_from_kst'] = window.get('start_kst')
@@ -115,7 +117,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     }
     groups['crypto']['max_age_seconds'] = 3600
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK','EXPIRED'}
-    critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
+    critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if not v.get('informational') and (v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad))]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')
     return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':now.astimezone(KST).isoformat(timespec='seconds'),'freshness_policy':{'max_status_age_seconds':7200,'scope':'STATUS_ASSESSMENT_NOT_OBSERVATION_AGE','watchdog_scope':'US_CLOSE_RECOVERY_ONLY'},'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'expected_session':expected,'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
 
