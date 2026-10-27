@@ -2,10 +2,10 @@ name: Observatory Device Audit
 on:
   push:
     branches: [main]
-    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', '.github/workflows/observatory-device-audit.yml']
   pull_request:
     branches: [main]
-    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', '.github/workflows/observatory-device-audit.yml']
 concurrency:
   group: observatory-device-${{ github.ref }}
   cancel-in-progress: true
@@ -24,6 +24,7 @@ jobs:
       - run: python3 -m http.server 8123 >/tmp/obs-http.log 2>&1 &
       - run: node --test tests/observatory-display-contract.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-us-yield-source.test.cjs
       - run: node tests/observatory-status-e2e.cjs
+      - run: node tests/collector-schedule-e2e.cjs
       - run: node tests/regime-consensus-e2e.cjs
       - run: node tests/calendar-lazy-e2e.cjs
       - run: node tests/observatory-device-audit.cjs
