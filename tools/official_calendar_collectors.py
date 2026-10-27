@@ -413,7 +413,18 @@ def apply_official_actuals(calendar,now):
                                'official_adapter_status':'REGISTERED' if kind else 'NOT_REGISTERED',
                                'fallback_tiers':['SECONDARY','MARKET_FEED']})
         if not kind: continue
-        if not incomplete and e.get('source_tier')=='OFFICIAL': continue
+        if not incomplete and e.get('source_tier')=='OFFICIAL':
+            # An old NOT_PUBLISHED display flag must not survive a verified
+            # official GDP observation. Repair metadata, never the measured value.
+            if kind == 'BOK_GDP' and e.get('verification_status') == 'VERIFIED_OFFICIAL':
+                if clean(e.get('actual')) is not None:
+                    e['market_value_status'] = 'ACTUAL_AVAILABLE'
+                for row in old.values():
+                    if (row.get('key') == 'gdp_qoq' and
+                            row.get('source_tier') == 'OFFICIAL' and
+                            clean(row.get('actual')) is not None):
+                        row['market_value_status'] = 'ACTUAL_AVAILABLE'
+            continue
         if not cached and time.monotonic()>=stop_at:
             checks.append(dict(adapter=kind,title=e['title'],result='BUDGET_DEFERRED'))
             continue
@@ -429,9 +440,13 @@ def apply_official_actuals(calendar,now):
         provenance={'source_tier':'OFFICIAL','source_url':url,'official_url':url,'checked_kst':now.isoformat(timespec='seconds'),'verification_status':'VERIFIED_OFFICIAL','source':kind+' official release'}
         for m in rows:
             m={**provenance,**m}
+            if kind == 'BOK_GDP' and clean(m.get('actual')) is not None:
+                m['market_value_status'] = 'ACTUAL_AVAILABLE'
             old[m['key']]=merge_observation(old.get(m['key'],{}),m)
         representative=old[expected[0]]
         patch=dict(provenance,actual=representative['actual'],market_metrics=list(old.values()),actual_source=kind+' official release')
+        if kind == 'BOK_GDP' and clean(representative.get('actual')) is not None:
+            patch['market_value_status'] = 'ACTUAL_AVAILABLE'
         from calendar_actual_contract import PROVENANCE
         patch.update({k:representative[k] for k in PROVENANCE if k in representative})
         if clean(representative.get('previous')) is not None: patch['previous']=representative['previous']
