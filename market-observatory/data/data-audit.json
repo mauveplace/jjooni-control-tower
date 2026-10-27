@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-28T03:21:55+09:00",
+  "generated_kst": "2026-10-28T03:52:18+09:00",
   "overall": "PASS",
   "critical_count": 0,
   "warning_count": 0,
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-28T03:21:55+09:00",
+      "generated_kst": "2026-10-28T03:52:17+09:00",
       "session": "2026-10-26",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-28T03:21:55+09:00",
+      "generated_kst": "2026-10-28T03:52:17+09:00",
       "session": "2026-10-26",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-27T22:25:42+09:00",
+      "generated_kst": "2026-10-28T03:52:03+09:00",
       "as_of_date": "2026-10-27",
       "priced_count": 46
     },
@@ -68,16 +68,10 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-28T03:21:53+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
+      "generated_kst": "2026-10-28T03:21:55+09:00",
+      "overall": "LIVE",
       "critical_bad": [],
-      "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
-        "audit"
-      ]
+      "warnings": []
     },
     "watchdog": {
       "checked_kst": "2026-10-27T08:45:40+09:00",
@@ -197,25 +191,25 @@
         "USDKRW": {
           "count": 783,
           "last_date": "2026-10-26",
-          "last_value": 1327.2800293,
+          "last_value": 1326.5,
           "group": "fx",
-          "latest_value": 1327.2800293,
+          "latest_value": 1326.5,
           "latest_matches": true
         },
         "USDJPY": {
           "count": 783,
           "last_date": "2026-10-26",
-          "last_value": 157.81500244,
+          "last_value": 157.92399597,
           "group": "fx",
-          "latest_value": 157.81500244,
+          "latest_value": 157.92399597,
           "latest_matches": true
         },
         "JPYKRW": {
           "count": 783,
           "last_date": "2026-10-26",
-          "last_value": 8.38899994,
+          "last_value": 8.375,
           "group": "fx",
-          "latest_value": 8.38899994,
+          "latest_value": 8.375,
           "latest_matches": true
         }
       },
@@ -467,17 +461,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-27",
-          "last_value": 80538.61,
+          "last_value": 80514.85,
           "group": "crypto",
-          "latest_value": 80538.61,
+          "latest_value": 80514.85,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-27",
-          "last_value": 2345.35,
+          "last_value": 2341.58,
           "group": "crypto",
-          "latest_value": 2345.35,
+          "latest_value": 2341.58,
           "latest_matches": true
         }
       },
@@ -493,9 +487,9 @@
         "FEAR_GREED": {
           "count": 1566,
           "last_date": "2026-10-27",
-          "last_value": 28.1,
+          "last_value": 32.6,
           "group": "sentiment",
-          "latest_value": 28.1,
+          "latest_value": 32.6,
           "latest_matches": true
         }
       },
@@ -521,16 +515,16 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-28T03:21:43+09:00",
-      "current_quote_age_seconds": 12,
-      "captured_quote_age_seconds": 7
+      "quote_as_of_kst": "2026-10-28T03:51:52+09:00",
+      "current_quote_age_seconds": 26,
+      "captured_quote_age_seconds": 6
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-28T03:21:43+09:00",
-      "current_quote_age_seconds": 12,
-      "captured_quote_age_seconds": 7
+      "quote_as_of_kst": "2026-10-28T03:51:55+09:00",
+      "current_quote_age_seconds": 23,
+      "captured_quote_age_seconds": 3
     }
   },
   "issues": [],
