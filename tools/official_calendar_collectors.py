@@ -106,15 +106,15 @@ BOK_GDP_RELEASES = {
 }
 
 def parse_bok_gdp(text, year, quarter, publication_date):
-    compact = re.sub(r'\\s+', '', text)
-    if not re.search(rf'{year}년{quarter}/4분기실질국내총생산\\(속보\\)', compact):
+    compact = re.sub(r'\s+', '', text)
+    if not re.search(rf'{year}년{quarter}/4분기실질국내총생산\(속보\)', compact):
         raise ValueError('BOK_GDP_REFERENCE_PERIOD_MISMATCH')
     if '등록일' + publication_date.replace('-', '.') not in compact:
         raise ValueError('BOK_GDP_PUBLICATION_DATE_MISMATCH')
     # The first GDP headline is authoritative; GDI and YoY are different measures.
     m = re.search(
-        r'◈실질국내총생산\\(GDP\\)은전기대비([0-9]+(?:\\.[0-9]+)?)%'
-        r'(성장|증가|감소),?전년동기대비([0-9]+(?:\\.[0-9]+)?)%(성장|증가|감소)',
+        r'◈실질국내총생산\(GDP\)은전기대비([0-9]+(?:\.[0-9]+)?)%'
+        r'(성장|증가|감소),?전년동기대비([0-9]+(?:\.[0-9]+)?)%(성장|증가|감소)',
         compact)
     if not m:
         raise ValueError('BOK_GDP_QOQ_HEADLINE_PARSE_MISS')
@@ -123,7 +123,7 @@ def parse_bok_gdp(text, year, quarter, publication_date):
 
 def collect_bok_gdp(e, checks):
     title = e.get('title', '')
-    match = re.fullmatch(r'(\\d{4})년\\s*([1-4])/4분기\\s*실질\\s*GDP\\(속보\\)', title)
+    match = re.fullmatch(r'(\d{4})년\s*([1-4])/4분기\s*실질\s*GDP\(속보\)', title)
     if not match:
         checks.append(dict(adapter='BOK_GDP', title=title, result='EVENT_IDENTITY_MISMATCH'))
         return None
@@ -258,7 +258,7 @@ def adapter_id(e):
     if c=='US' and t in DEFS: return 'BLS_'+DEFS[t][0]
     if c=='US' and 'Initial Jobless Claims' in t: return 'DOL'
     if c=='KR' and t=='한국은행 통화정책방향 결정회의': return 'BOK_RATE'
-    if c=='KR' and re.fullmatch(r'\\d{4}년\\s*[1-4]/4분기\\s*실질\\s*GDP\\(속보\\)',t): return 'BOK_GDP'
+    if c=='KR' and re.fullmatch(r'\d{4}년\s*[1-4]/4분기\s*실질\s*GDP\(속보\)',t): return 'BOK_GDP'
     if c=='KR' and '생산자물가' in t: return 'BOK'
     if c=='KR' and '소비자동향조사' in t: return 'BOK_CCSI'
     if c=='KR' and re.search(r'고용동향',t): return 'KOSTAT_EMPLOYMENT'
