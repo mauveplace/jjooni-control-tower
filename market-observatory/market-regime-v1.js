@@ -9,7 +9,8 @@ function freshness(d){
   const end=Date.parse(d?.effective_window?.end_kst||'');
   if(!Number.isFinite(end)) return 'UNKNOWN';
   const start=Date.parse(d?.effective_window?.start_kst||'');
-  if(Number.isFinite(start) && Date.now()<start) return 'PENDING';
+  if(!Number.isFinite(start)||start>=end)return 'UNKNOWN';
+  if(Date.now()<start) return 'PENDING';
   if(Date.now()>end)return 'EXPIRED';
   const consensus=String(d?.source?.consensus_status||'').toUpperCase(),authority=String(d?.authority||'').toUpperCase();
   if(authority.includes('PROVISIONAL')||consensus.startsWith('PARTIAL')||['PENDING','PROVISIONAL','DRAFT'].includes(consensus))return 'PROVISIONAL';
