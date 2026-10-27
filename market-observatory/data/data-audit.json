@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-28T04:30:26+09:00",
-  "overall": "PASS",
-  "critical_count": 0,
-  "warning_count": 0,
+  "generated_kst": "2026-10-28T06:02:43+09:00",
+  "overall": "FAIL",
+  "critical_count": 1,
+  "warning_count": 5,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
@@ -28,12 +28,12 @@
       "source_as_of_kst": null,
       "market_data_as_of": "2026-10-26",
       "expected_market_data_date": "2026-10-26",
-      "audit_expected_market_data_date": "2026-10-26",
+      "audit_expected_market_data_date": "2026-10-27",
       "declared_freshness": "LIVE",
-      "audit_state": "LIVE"
+      "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-10-28T00:48:06+09:00",
+      "generated_kst": "2026-10-28T06:02:38+09:00",
       "events": 186,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -68,15 +68,20 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-28T04:30:25+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
-      "critical_bad": [],
-      "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
+      "generated_kst": "2026-10-28T06:02:42+09:00",
+      "overall": "DEGRADED",
+      "critical_bad": [
+        "market",
+        "pulse",
+        "tripod",
         "audit"
+      ],
+      "warnings": [
+        "market",
+        "crypto",
+        "pulse",
+        "fedwatch",
+        "tripod"
       ]
     },
     "watchdog": {
@@ -87,8 +92,8 @@
   },
   "groups": {
     "core_us": {
-      "state": "LIVE",
-      "anchor": "2026-10-26",
+      "state": "LAGGING",
+      "anchor": "2026-10-27",
       "allow_lag_days": 0,
       "critical": true,
       "items": {
@@ -459,7 +464,7 @@
       "published_source_status": "LIVE"
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -503,8 +508,8 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LIVE",
-      "anchor": "2026-10-26",
+      "state": "LAGGING",
+      "anchor": "2026-10-27",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
@@ -519,21 +524,52 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-28T04:30:17+09:00",
-      "current_quote_age_seconds": 9,
+      "current_quote_age_seconds": 5546,
       "captured_quote_age_seconds": 5
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-28T04:30:20+09:00",
-      "current_quote_age_seconds": 6,
+      "current_quote_age_seconds": 5543,
       "captured_quote_age_seconds": 3
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "code": "GROUP_CORE_US_LAGGING",
+      "severity": "CRITICAL",
+      "detail": "anchor=2026-10-27 dates=NASDAQ100:2026-10-26,SP500:2026-10-26,VIX:2026-10-26"
+    },
+    {
+      "code": "GROUP_CRYPTO_STALE",
+      "severity": "WARN",
+      "detail": "anchor=None dates=BTCUSD:2026-10-27,ETHUSD:2026-10-27"
+    },
+    {
+      "code": "GROUP_FEDWATCH_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-27 dates=FEDWATCH:2026-10-26"
+    },
+    {
+      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
+      "severity": "WARN",
+      "detail": "declared=LIVE audit=LAGGING expected=2026-10-27 asof=2026-10-26"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-28T04:30:17+09:00', 'current_quote_age_seconds': 5546, 'captured_quote_age_seconds': 5}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "WARN",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-10-28T04:30:20+09:00', 'current_quote_age_seconds': 5543, 'captured_quote_age_seconds': 3}"
+    }
+  ],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",
