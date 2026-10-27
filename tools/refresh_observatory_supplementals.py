@@ -214,16 +214,23 @@ def fetch_current_jgb_rows():
     raise RuntimeError('JGB_CURRENT_ALL_SOURCES_FAILED|'+'|'.join(errors))
 
 def expected_jgb_business_date(now=None):
-    """Latest weekday whose Tokyo closing-day yield should be available.
+    """Latest JGB observation expected under the MOF publication timetable.
 
-    Japan holidays/publication exceptions are nonfatal warnings, never filled
-    from US or futures proxies. Before 18:30 JST use the last weekday.
+    Japan MOF publishes a reference day's yield on the NEXT business day at
+    about 09:30 JST (MOF FAQ /faq/jgbs/04hf.htm). A current-day yield must
+    not be required after the Tokyo market closes. Holidays and exceptional
+    publication delays remain nonfatal source warnings, not proxy prices.
     """
     local=(now or datetime.now(KST)).astimezone(KST)
-    day=local.date()
-    if local.time()<time(18,30):day-=timedelta(days=1)
-    while day.weekday()>=5:day-=timedelta(days=1)
-    return day.isoformat()
+    release_day=local.date()
+    if local.time()<time(9,30) or release_day.weekday()>=5:
+        release_day-=timedelta(days=1)
+    while release_day.weekday()>=5:
+        release_day-=timedelta(days=1)
+    observation_day=release_day-timedelta(days=1)
+    while observation_day.weekday()>=5:
+        observation_day-=timedelta(days=1)
+    return observation_day.isoformat()
 
 
 def refresh_jgb(data):

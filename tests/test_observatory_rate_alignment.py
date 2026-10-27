@@ -25,19 +25,19 @@ class ObservatoryRateAlignment(unittest.TestCase):
         self.assertNotIn("['US10Y',p.US10Y_OFFICIAL]",index)
         self.assertIn('Cboe 금리지수',board)
 
-    def test_japan_monday_morning_uses_prior_friday(self):
+    def test_japan_monday_before_release_uses_prior_thursday(self):
         now=datetime(2026,10,26,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
+        self.assertEqual(sup.expected_jgb_business_date(now),'2026-10-22')
+
+    def test_japan_tuesday_before_release_expects_friday(self):
+        now=datetime(2026,10,27,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
         self.assertEqual(sup.expected_jgb_business_date(now),'2026-10-23')
 
-    def test_japan_tuesday_morning_expects_monday(self):
-        now=datetime(2026,10,27,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
-        self.assertEqual(sup.expected_jgb_business_date(now),'2026-10-26')
-
-    def test_japan_afternoon_targets_current_session_only_after_cutoff(self):
+    def test_japan_afternoon_still_expects_prior_business_day(self):
         early=datetime(2026,10,27,17,0,tzinfo=ZoneInfo('Asia/Seoul'))
         late=datetime(2026,10,27,19,0,tzinfo=ZoneInfo('Asia/Seoul'))
         self.assertEqual(sup.expected_jgb_business_date(early),'2026-10-26')
-        self.assertEqual(sup.expected_jgb_business_date(late),'2026-10-27')
+        self.assertEqual(sup.expected_jgb_business_date(late),'2026-10-26')
 
     def test_japan_csv_fallback_selects_fresher_official_source(self):
         stale='基準日,2年,5年,10年,20年,30年\n2026-10-23,1.8,2.2,2.8,3.5,3.9\n'.encode('utf-8')
@@ -56,7 +56,7 @@ class ObservatoryRateAlignment(unittest.TestCase):
         self.assertEqual(getter.call_count,1)
 
     def test_japan_previous_weekday_must_not_be_declared_live(self):
-        date=datetime(2026,10,27,8,20,tzinfo=ZoneInfo('Asia/Seoul'))
+        date=datetime(2026,10,27,19,0,tzinfo=ZoneInfo('Asia/Seoul'))
         keys=audit.EXPECTED_SERIES['jp_rates']
         observations={k:[{'date':'2026-10-23','value':2.1}] for k in keys}
         obs={'series':observations,'latest':{k:2.1 for k in keys},
