@@ -4,10 +4,10 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-function board(series) {
+function board(series, quality={}) {
   const src = fs.readFileSync(path.join(__dirname, '../market-observatory/latest-board-v1.js'), 'utf8');
   const context = {
-    DATA: {series}, window: {}, document: {createElement: () => ({}), head: {appendChild() {}}},
+    DATA: {series,cross_market_freshness_quality:quality}, window: {}, document: {createElement: () => ({}), head: {appendChild() {}}},
     setInterval() {}, clearInterval() {}, console,
   };
   vm.createContext(context);
@@ -84,4 +84,40 @@ test('daily and weekly each appear once while longer selected comparisons remain
   if(comparison==='M1')assert(text.includes('전월 ▲ 26.25%'));
   if(comparison==='Y1')assert.match(text,/전년 대비 —/);
  }
+});
+
+test('Japanese rate cards explicitly mark old official observations as delayed',()=>{
+ const api=board({
+   JP2Y:[{date:'2026-10-22',value:1.914},{date:'2026-10-23',value:1.872}],
+   JP10Y:[{date:'2026-10-22',value:2.914},{date:'2026-10-23',value:2.837}],
+   US2Y:[{date:'2026-10-23',value:4.69},{date:'2026-10-26',value:4.68}]
+ },{JP_RATES:{status:'LAGGING',last_date:'2026-10-23',expected_latest_weekday:'2026-10-26'}});
+ for(const key of ['JP2Y','JP10Y']){
+  const html=api.standardTile(api.BY_KEY[key]);
+  assert.match(html,/자료 지연 · 2026-10-26 자료 미확인/);
+  assert.match(html,/실제 관측 2026-10-23/);
+  assert.match(html,/직전 관측일 -[0-9]+\.[0-9]bp/);
+  assert.match(html,/오늘 등락이 아닙니다/);
+  assert.doesNotMatch(html,/일간 -[0-9]+\.[0-9]bp/);
+ }
+ const us=api.standardTile(api.BY_KEY.US2Y);
+ assert.doesNotMatch(us,/자료 지연/);
+ assert.match(us,/일간 -1.0bp/);
+});
+
+test('Japan official rate current to expected session has no false stale badge',()=>{
+ const api=board({JP10Y:[{date:'2026-10-23',value:2.83},{date:'2026-10-26',value:2.82}]},
+  {JP_RATES:{status:'LIVE',expected_latest_weekday:'2026-10-26'}});
+ const html=api.standardTile(api.BY_KEY.JP10Y);
+ assert.doesNotMatch(html,/자료 지연/);
+ assert.match(html,/일간 -1.0bp/);
+});
+
+test('Japanese source fetch failure is disclosed without deleting last good price',()=>{
+ const api=board({JP2Y:[{date:'2026-10-23',value:1.872}]},
+  {JP_RATES:{status:'STALE',expected_latest_weekday:'2026-10-26',fetch_error:'timeout'}});
+ const html=api.standardTile(api.BY_KEY.JP2Y);
+ assert.match(html,/1.872%/);
+ assert.match(html,/공식 원천 조회 실패/);
+ assert.match(html,/실제 관측 2026-10-23/);
 });
