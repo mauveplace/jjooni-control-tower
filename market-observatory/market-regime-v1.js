@@ -9,8 +9,12 @@ function freshness(d){
   const end=Date.parse(d?.effective_window?.end_kst||'');
   if(!Number.isFinite(end)) return 'UNKNOWN';
   const start=Date.parse(d?.effective_window?.start_kst||'');
-  if(Number.isFinite(start) && Date.now()<start) return 'PENDING';
-  return Date.now()<=end?'ACTIVE':'EXPIRED';
+  if(!Number.isFinite(start)||start>=end)return 'UNKNOWN';
+  if(Date.now()<start) return 'PENDING';
+  if(Date.now()>end)return 'EXPIRED';
+  const consensus=String(d?.source?.consensus_status||'').toUpperCase(),authority=String(d?.authority||'').toUpperCase();
+  if(authority.includes('PROVISIONAL')||consensus.startsWith('PARTIAL')||['PENDING','PROVISIONAL','DRAFT'].includes(consensus))return 'PROVISIONAL';
+  return consensus==='CLOSED'?'ACTIVE':'UNKNOWN';
 }
 function render(d){
   const root=el('#regimeRoot'); if(!root)return;
@@ -97,6 +101,21 @@ function render(d){
   const meta=el('.obsRegimeLoading');
   if(meta) meta.textContent='시장판단 SSOT · 계좌/주문 SSOT와 분리 · PB는 읽기 전용 참고';
 }
+let referencePromise=null;
+async function loadProvisionalReference(){
+ if(!referencePromise)referencePromise=fetch('./data/market-regime-provisional.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('reference '+r.status);return r.json()}).catch(()=>{referencePromise=null;return null});
+ return referencePromise.then(d=>{
+  if(!d)return;
+  if(d.schema!=='JJOONI_PROVISIONAL_ANALYST_REFERENCE_V1')throw Error('reference schema');
+  const root=el('#regimeRoot');if(!root||el('#mrProvisionalReference'))return;
+  const end=Date.parse(d.window_end_kst||''),expired=!Number.isFinite(end)||Date.now()>end;
+  const box=document.createElement('div');box.id='mrProvisionalReference';box.className='mrNote';
+  const u=new URL(d.source_url);const href=u.protocol==='https:'&&u.hostname==='docs.google.com'?esc(u.href):'';
+  box.innerHTML='<b>최신 분석 참고 · '+(expired?'기간 경과':'부분 합의 대기')+'</b><br>'+esc(d.title||'—')+' · 원천시장 '+esc(d.source_market_date||'확인 불가')+'<br>'+esc(d.description_ko||'')+(href?'<br><a target="_blank" rel="noopener noreferrer" href="'+href+'">보고서 원문 보기 ↗</a>':'');
+  root.prepend(box);
+ }).catch(()=>{});
+}
+document.addEventListener('click',e=>{if(e.target?.closest?.('button[data-tab="regime"]'))loadProvisionalReference()});
 async function load(){
   try{
     const r=await fetch(DATA_URL+'?cb='+Date.now(),{cache:'no-store'});
@@ -105,6 +124,7 @@ async function load(){
     if(d.schema!=='JJOONI_MARKET_REGIME_V1')throw new Error('schema mismatch');
     render(d);
     window.__JJOONI_MARKET_REGIME=d;
+    if(document.querySelector('#tabs button.on')?.dataset.tab==='regime')loadProvisionalReference();
   }catch(e){
     const root=el('#regimeRoot'); if(root) root.innerHTML='<div class="mrNote">Market Regime 데이터 연결을 확인 중입니다.</div>';
     console.warn(e);

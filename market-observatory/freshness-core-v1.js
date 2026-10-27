@@ -11,6 +11,7 @@ function effective(key,raw,now=Date.now()){
   if(!Number.isFinite(end)||g.valid_from_kst&&(!Number.isFinite(start)||start>=end))g.state='UNAVAILABLE';
   else if(now>end)g.state='EXPIRED';
   else if(Number.isFinite(start)&&now<start)g.state='PENDING';
+  else {const c=String(g.consensus_status||'').toUpperCase(),a=String(g.authority||'').toUpperCase();if(a.includes('PROVISIONAL')||c.startsWith('PARTIAL')||['PENDING','PROVISIONAL','DRAFT'].includes(c))g.state='PROVISIONAL';else if(c!=='CLOSED')g.state='UNAVAILABLE'}
   return g;
  }
  if(key!=='crypto')return g;

@@ -102,7 +102,9 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     }
     regime = load(data/'market-regime.json')
     window = regime.get('effective_window') or {}
-    groups['market_regime'] = group('합의 레짐', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '유효기간 기준 · 만료된 합의문은 현재 지침이 아닙니다', 'market-regime.json', False)
+    groups['market_regime'] = group('합의 레짐', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '유효기간·합의 상태 확인 · 미확정 또는 만료 문서는 현재 지침이 아닙니다', 'market-regime.json', False)
+    groups['market_regime']['consensus_status'] = (regime.get('source') or {}).get('consensus_status')
+    groups['market_regime']['authority'] = regime.get('authority')
     groups['market_regime']['valid_from_kst'] = window.get('start_kst')
     groups['market_regime']['valid_until_kst'] = window.get('end_kst')
     # Quote timestamps travel with the SSOT so a viewer can re-evaluate the age
