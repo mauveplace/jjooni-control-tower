@@ -13,9 +13,9 @@ class RegimeConsistency(unittest.TestCase):
         regime=json.loads((ROOT/'market-observatory/data/market-regime.json').read_text())
         report=audit.build()
         self.assertEqual(report['file_status']['market_regime']['status'],regime_state(regime))
-        if regime_state(regime)!='LIVE':
-            self.assertNotEqual(report['overall'],'PASS')
-            self.assertTrue(any(x['code'].startswith('MARKET_REGIME_') for x in report['issues']))
+        self.assertEqual(report['file_status']['market_regime']['monitoring_scope'], 'INVESTMENT_BOARD_REFERENCE_ONLY')
+        self.assertFalse(any(x['code'].startswith('MARKET_REGIME_') for x in report['issues']))
+        # Other genuine collection problems must still count as warnings/failures.
     def test_publication_updates_only_operational_status_not_report_dates(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);data=root/'market-observatory/data';data.mkdir(parents=True)

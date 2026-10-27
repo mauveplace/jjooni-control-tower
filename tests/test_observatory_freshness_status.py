@@ -41,7 +41,9 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertEqual(out['freshness_policy']['max_status_age_seconds'],7200)
             self.assertEqual(out['groups']['market_regime']['valid_from_kst'],'2026-10-12T00:00:00+09:00')
             self.assertEqual(out['groups']['market_regime']['state'],'EXPIRED')
-            self.assertIn('market_regime',out['warnings'])
+            self.assertNotIn('market_regime',out['warnings'])
+            self.assertTrue(out['groups']['market_regime']['informational'])
+            self.assertEqual(out['groups']['market_regime']['monitoring_scope'], 'INVESTMENT_BOARD_REFERENCE_ONLY')
             self.assertNotIn('market_regime',out['critical_bad'])
 
     def test_time_window_cannot_promote_provisional_or_unknown_consensus(self):

@@ -30,7 +30,7 @@ function evaluate(status,watchdog,now=Date.now(),errors=[]){
   return[key,g];
  }));
  const entries=Object.entries(groups),critical=entries.filter(([,g])=>g.critical&&(bad.has(g.state)||['LAGGING','STALE'].includes(g.state))).map(([k])=>k);
- const issues=entries.filter(([,g])=>!good.has(g.state));
+ const issues=entries.filter(([,g])=>!g.informational&&!good.has(g.state));
  let overall=critical.length||['DEGRADED','FAILED','ERROR'].includes(s.overall)?'DEGRADED':issues.length?'LIVE_WITH_WARNINGS':'LIVE';
  if(s.overall==='LIVE_WITH_WARNINGS'&&overall==='LIVE')overall='LIVE_WITH_WARNINGS';
  if(!Object.keys(s.groups||{}).length||!valid)overall='UNKNOWN';else if(stale)overall='STATUS_STALE';
