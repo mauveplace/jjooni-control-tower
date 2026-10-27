@@ -137,9 +137,26 @@ def collect_bok_gdp(e, checks):
     if not dt or dt.date().isoformat() != date:
         checks.append(dict(adapter='BOK_GDP', title=title, result='RELEASE_DATE_MISMATCH'))
         return None
-    # Do not attach a verified Q3 observation to an erroneously named Q4 history.
+    # The 2026-Q3 seed carried a Q4 slug with no actual/previous/consensus
+    # observations. Repair only that exact empty, one-metric identity, with
+    # independently verified period/date. All other mismatches fail closed.
     ref = e.get('history_ref', '')
-    if ref and f'{year}년-{quarter}분기-' not in ref:
+    expected_ref = f'KR::{year}년-{quarter}분기-실질-gdp'
+    wrong_q4_ref = 'KR::2026년-4분기-실질-gdp'
+    if ref == wrong_q4_ref and (year, quarter) == (2026, 3):
+        metrics = e.get('market_metrics') or []
+        metric_row = metrics[0] if len(metrics) == 1 else {}
+        all_empty = all(clean(e.get(k)) is None for k in ('previous', 'consensus', 'actual'))
+        metric_empty = all(clean(metric_row.get(k)) is None for k in ('previous', 'consensus', 'actual'))
+        if (all_empty and metric_empty and metric_row.get('key') == 'gdp_qoq'
+                and metric_row.get('history_ref') == wrong_q4_ref + '::gdp_qoq'):
+            e['history_ref'] = expected_ref
+            metric_row['history_ref'] = expected_ref + '::gdp_qoq'
+            checks.append(dict(adapter='BOK_GDP', title=title, url=url,
+                               result='EMPTY_HISTORY_REF_IDENTITY_CORRECTED',
+                               from_ref=wrong_q4_ref, to_ref=expected_ref))
+            ref = expected_ref
+    if ref and ref != expected_ref:
         checks.append(dict(adapter='BOK_GDP', title=title, url=url,
                            result='HISTORY_REF_QUARTER_MISMATCH', history_ref=ref))
         return None
