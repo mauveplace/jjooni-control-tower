@@ -5,6 +5,7 @@ const {ORDER}=require('../market-observatory/freshness-core-v1.js');
   const page=await browser.newPage({viewport:{width,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   const now=Date.parse('2026-10-27T12:00:00+09:00');let calls=0,offline=false;
   const groups=Object.fromEntries(ORDER.map(key=>[key,{label:key,state:key==='audit'?'PASS':'LIVE',critical:['market','audit'].includes(key),as_of:key==='market_regime'?new Date(now+86400000).toISOString():'2026-10-26'}]));
+  groups.market_regime.consensus_status='CLOSED';
   groups.crypto.quotes=Object.fromEntries(['BTCUSD','ETHUSD'].map(k=>[k,{status:'LIVE',quote_as_of_kst:new Date(now).toISOString()}]));
   const status={generated_kst:new Date(now).toISOString(),overall:'LIVE',groups};
   await page.route('https://obs.test/**',route=>{

@@ -76,8 +76,15 @@
       "path": "./market-regime.json",
       "role": "Analyst consensus and effective window",
       "required": true,
-      "usable_rule": "Use as current guidance only when start_kst <= current time <= end_kst AND freshness.groups.market_regime.state == LIVE. Stored SCHEDULED/LIVE alone is insufficient.",
+      "usable_rule": "Use as current guidance only when start_kst <= current time <= end_kst AND source.consensus_status == CLOSED AND authority does not indicate PROVISIONAL AND freshness.groups.market_regime.state == LIVE. Missing consensus, PROVISIONAL, and stored SCHEDULED/LIVE alone are insufficient.",
       "fallback": "State 현재 유효한 합의 레짐 없음. Treat expired contents as historical only; existing strategy rules keep precedence. Do not fabricate a new consensus."
+    },
+    {
+      "path": "./market-regime-provisional.json",
+      "role": "unapproved analyst report reference only",
+      "required": false,
+      "usable_rule": "Never treat as current consensus or order authority; check original report, consensus status, source dates and effective window.",
+      "fallback": "If unavailable or expired, continue without current analyst reference."
     }
   ],
   "fed_watch_policy": {

@@ -29,7 +29,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertFalse(out['session_alignment']['aligned']);self.assertTrue(out['watchdog_required'])
 
     def test_regime_expiry_boundaries_and_invalid_windows(self):
-        regime={'effective_window':{'start_kst':'2026-10-12T00:00:00+09:00','end_kst':'2026-10-16T23:59:59+09:00'}}
+        regime={'source':{'consensus_status':'CLOSED'},'effective_window':{'start_kst':'2026-10-12T00:00:00+09:00','end_kst':'2026-10-16T23:59:59+09:00'}}
         for stamp, expected in [('2026-10-11T23:59:59+09:00','PENDING'),('2026-10-12T00:00:00+09:00','LIVE'),('2026-10-16T23:59:59+09:00','LIVE'),('2026-10-17T00:00:00+09:00','EXPIRED')]:
             self.assertEqual(freshness.regime_state(regime,datetime.fromisoformat(stamp)),expected)
         self.assertEqual(freshness.regime_state({}), 'UNAVAILABLE')
@@ -43,6 +43,13 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertEqual(out['groups']['market_regime']['state'],'EXPIRED')
             self.assertIn('market_regime',out['warnings'])
             self.assertNotIn('market_regime',out['critical_bad'])
+
+    def test_time_window_cannot_promote_provisional_or_unknown_consensus(self):
+        now=datetime.fromisoformat('2026-10-27T12:00:00+09:00')
+        window={'start_kst':'2026-10-26T00:00:00+09:00','end_kst':'2026-10-30T23:59:59+09:00'}
+        self.assertEqual(freshness.regime_state({'effective_window':window,'source':{'consensus_status':'PARTIAL_PENDING_JJANGGU'}},now),'PROVISIONAL')
+        self.assertEqual(freshness.regime_state({'effective_window':window},now),'UNAVAILABLE')
+        self.assertEqual(freshness.regime_state({'effective_window':window,'authority':'ANALYST_PROVISIONAL','source':{'consensus_status':'CLOSED'}},now),'PROVISIONAL')
 
     def write(self, root: Path, rel: str, obj: dict):
         p = root / rel
@@ -59,7 +66,7 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
         }
 
     def write_v2_support(self, root: Path, fed_state='LIVE'):
-        self.write(root, 'market-observatory/data/market-regime.json', {'effective_window': {'start_kst':'2026-01-01T00:00:00+09:00', 'end_kst':'2026-12-31T23:59:59+09:00'}})
+        self.write(root, 'market-observatory/data/market-regime.json', {'source':{'consensus_status':'CLOSED'},'effective_window': {'start_kst':'2026-01-01T00:00:00+09:00', 'end_kst':'2026-12-31T23:59:59+09:00'}})
         groups = {
             name: {'state': 'LIVE', 'items': {}}
             for name in (

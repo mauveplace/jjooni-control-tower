@@ -7,7 +7,7 @@ const tone=s=>{s=String(s||'').toUpperCase();if(['LIVE','HEALTHY','HEALTHY_NOOP'
 const short=v=>String(v||'—').replace('T',' ').slice(0,16);
 const age=v=>{if(!v)return'—';const ms=Date.now()-Date.parse(v);if(!Number.isFinite(ms))return'—';const min=Math.max(0,Math.round(ms/60000));if(min<60)return`${min}분 전`;const h=Math.floor(min/60);if(h<48)return`${h}시간 전`;return`${Math.floor(h/24)}일 전`};
 let STATUS=null,WATCHDOG=null,promise=null,loadErrors=[],lastRead=null;
-const stateLabels={LIVE:'기준일 일치',LIVE_WITH_WARNINGS:'일부 항목 주의',HEALTHY_NOOP:'정상 · 복구 불필요',REPAIRED:'복구 완료',OUTSIDE_RECOVERY_WINDOW:'복구 시간대 밖 · 건너뜀',REPAIR_FAILED:'복구 실패',REPAIR_INCOMPLETE:'복구 미완료',STALE_NO_REPAIR:'지연 · 복구 미실행',STATUS_STALE:'상태 재점검 필요',CHECK_REQUIRED:'판정 재확인 필요',CHECK_OVERDUE:'예정 점검 지연',HISTORICAL_CHECK:'과거 점검 기록',STALE:'데이터 지연',LAGGING:'일부 지연',DEGRADED:'일부 수집 불완전',UNAVAILABLE:'확인 불가',UNKNOWN:'확인 대기',PENDING_FIRST_RUN:'점검 기록 없음',EXPIRED:'합의문 만료',PASS:'통과',MISALIGNED:'기준일 불일치'};
+const stateLabels={LIVE:'기준일 일치',LIVE_WITH_WARNINGS:'일부 항목 주의',HEALTHY_NOOP:'정상 · 복구 불필요',REPAIRED:'복구 완료',OUTSIDE_RECOVERY_WINDOW:'복구 시간대 밖 · 건너뜀',REPAIR_FAILED:'복구 실패',REPAIR_INCOMPLETE:'복구 미완료',STALE_NO_REPAIR:'지연 · 복구 미실행',STATUS_STALE:'상태 재점검 필요',CHECK_REQUIRED:'판정 재확인 필요',CHECK_OVERDUE:'예정 점검 지연',HISTORICAL_CHECK:'과거 점검 기록',STALE:'데이터 지연',LAGGING:'일부 지연',DEGRADED:'일부 수집 불완전',UNAVAILABLE:'확인 불가',UNKNOWN:'확인 대기',PENDING_FIRST_RUN:'점검 기록 없음',PROVISIONAL:'부분 합의 · 참고',EXPIRED:'합의문 만료',PASS:'통과',MISALIGNED:'기준일 불일치'};
 const label=s=>stateLabels[s]||s||'확인 불가';
 const yes=v=>v===true?'통과':v===false?'미충족':'확인 불가';
 const stepLabels={success:'완료',failure:'실패',cancelled:'취소',skipped:'건너뜀',unknown:'확인 불가'};
