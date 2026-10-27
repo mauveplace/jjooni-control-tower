@@ -101,6 +101,40 @@ class BokGdpOfficialTest(unittest.TestCase):
             self.assertIsNone(collectors.collect_bok_gdp(event(), checks))
         self.assertEqual(checks[-1]["result"], "OSError")
 
+    def test_published_official_gdp_repairs_stale_availability_flags(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        e = event()
+        e.update({"actual": "1.0%", "market_value_status": "NOT_PUBLISHED",
+                  "source_tier": "OFFICIAL", "verification_status": "VERIFIED_OFFICIAL",
+                  "market_metrics": [
+                      {"key": "gdp_qoq", "actual": "1.0%", "source_tier": "OFFICIAL",
+                       "market_value_status": "NOT_PUBLISHED",
+                       "history_ref": "KR::2026년-3분기-실질-gdp::gdp_qoq"}]})
+        with patch.object(collectors, "text_fetch") as fetch:
+            updates, checks = collectors.apply_official_actuals(
+                {"events": [e]}, datetime(2026, 10, 27, 15, 0, tzinfo=ZoneInfo("Asia/Seoul")))
+        self.assertEqual(updates, 0)
+        fetch.assert_not_called()
+        self.assertEqual(e["actual"], "1.0%")
+        self.assertEqual(e["market_value_status"], "ACTUAL_AVAILABLE")
+        self.assertEqual(e["market_metrics"][0]["market_value_status"], "ACTUAL_AVAILABLE")
+
+    def test_first_official_gdp_collection_sets_available_flags(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        e = event()
+        e["market_value_status"] = "NOT_PUBLISHED"
+        e["market_metrics"] = [{"key": "gdp_qoq", "actual": None,
+                               "market_value_status": "NOT_PUBLISHED"}]
+        with patch.object(collectors, "text_fetch", return_value=OFFICIAL):
+            updates, _ = collectors.apply_official_actuals(
+                {"events": [e]}, datetime(2026, 10, 27, 15, 0, tzinfo=ZoneInfo("Asia/Seoul")))
+        self.assertEqual(updates, 1)
+        self.assertEqual(e["actual"], "1.0%")
+        self.assertEqual(e["market_value_status"], "ACTUAL_AVAILABLE")
+        self.assertEqual(e["market_metrics"][0]["market_value_status"], "ACTUAL_AVAILABLE")
+
     def test_only_kr_q3_gdp_event_is_registered(self):
         self.assertEqual(collectors.adapter_id(event()), "BOK_GDP")
         other = event()
