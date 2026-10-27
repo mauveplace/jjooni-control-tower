@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -26,6 +26,22 @@ def read(path: Path):
         return json.loads(path.read_text(encoding='utf-8'))
     except Exception:
         return {}
+
+
+def next_check_due(checked):
+    # Exact UTC candidates in market-observatory-close-watchdog.yml. The grace
+    # includes the remaining close-window checks and delayed runner startup.
+    utc = checked.astimezone(timezone.utc)
+    for day in range(8):
+        date = utc + timedelta(days=day)
+        if date.weekday() == 5:  # UTC Saturday has no scheduled close candidate.
+            continue
+        for hour in (20, 21):
+            for minute in (10, 20, 35, 50):
+                candidate = date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                if candidate > utc:
+                    return (candidate + timedelta(hours=3)).astimezone(KST).isoformat(timespec='seconds')
+    raise ValueError('NO_NEXT_CLOSE_WATCHDOG_CANDIDATE')
 
 
 def main():
@@ -62,9 +78,13 @@ def main():
     workflow_url = f'{server}/{repository}/actions/workflows/market-observatory-close-watchdog.yml'
     run_url = f'{server}/{repository}/actions/runs/{run_id}' if run_id else None
 
+    checked = datetime.now(KST)
     payload = {
         'schema': 'JJOONI_OBSERVATORY_WATCHDOG_STATUS_V1',
-        'checked_kst': datetime.now(KST).isoformat(timespec='seconds'),
+        'checked_kst': checked.isoformat(timespec='seconds'),
+        'record_scope': 'US_CLOSE_RECOVERY_ONLY',
+        'next_check_due_kst': next_check_due(checked),
+        'check_result_is_current_health': False,
         'checked_ny': s('NY_NOW'),
         'event': s('EVENT_NAME'),
         'eligible': eligible,

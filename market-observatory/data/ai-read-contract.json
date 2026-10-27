@@ -69,8 +69,8 @@
       "path": "./freshness-status.json",
       "role": "Mandatory source validity and warning status before using any market family",
       "required": true,
-      "usable_rule": "Relevant group state must be LIVE; recheck timestamps and effective_window against current time. Overall LIVE_WITH_WARNINGS is not blanket permission.",
-      "fallback": "Report which groups are unusable and keep valid independent groups separate."
+      "usable_rule": "Before trusting its published verdict, require a valid non-future generated_kst and current age <= freshness_policy.max_status_age_seconds (default 7200). Then re-evaluate the relevant group timestamps and regime effective window at read time. LIVE_WITH_WARNINGS is not blanket permission.",
+      "fallback": "If the assessment is stale/missing, report STATUS_STALE/UNKNOWN; verify the specific underlying source independently before using it. Do not relabel an old completed-session observation as live streaming data."
     },
     {
       "path": "./market-regime.json",
@@ -139,5 +139,10 @@
     "alias": "US NFP exact aliases connect to canonical nfp; originals remain preserved.",
     "vintage": "BACKFILLED_VINTAGE_UNVERIFIED is historical market data, not necessarily first-release actual.",
     "source_precedence": "OFFICIAL > SECONDARY > MARKET_FEED; consensus provenance is separate."
+  },
+  "freshness_assessment_policy": {
+    "max_status_age_seconds": 7200,
+    "scope": "Validity of the status assessment, not the observation age of daily/monthly sources.",
+    "watchdog": "watchdog-status.json is a US close-recovery execution record, not continuous whole-market health; use checked_kst and next_check_due_kst when supplied."
   }
 }

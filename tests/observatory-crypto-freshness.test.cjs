@@ -18,21 +18,16 @@ const quotes = (btc, eth, status='LIVE') => ({
   max_age_seconds: 3600,
 });
 
-for (const file of sources) {
-  const code = fs.readFileSync(path.join(root, file), 'utf8');
-  // The UI scripts are browser IIFEs. Extract the deterministic pure
-  // freshness function without executing or mocking the entire DOM.
-  const match = code.match(/(?:const effective=\(key,raw\)=>|function effective\(key,raw\))\s*\{([\s\S]*?)\n\s*\};?\n(?:const tile|function analysis)/);
-  assert.ok(match, file+' should implement viewer-time quote freshness');
-  const effective = new Function('key', 'raw', match[1]);
-  assert.equal(effective('crypto', quotes(30, 45)).state, 'LIVE', file);
-  assert.equal(effective('crypto', quotes(61, 10)).state, 'STALE', file);
-  assert.equal(effective('crypto', quotes(10, 61)).state, 'STALE', file);
-  assert.equal(effective('crypto', quotes(5, 5, 'UNAVAILABLE')).state, 'STALE', file);
-  assert.equal(effective('crypto', {quotes:{}, max_age_seconds:3600}).state, 'UNAVAILABLE', file);
-  assert.equal(effective('market', {state:'LIVE'}).state, 'LIVE', file);
-  const d = effective('crypto', quotes(10, 20));
-  assert.match(d.detail, /BTCUSD/);
-  assert.match(d.detail, /ETHUSD/);
-  console.log('PASS '+file);
+const {effective}=require('../market-observatory/freshness-core-v1.js');
+for(const file of sources){
+ const code=fs.readFileSync(path.join(root,file),'utf8');
+ assert(!code.includes("key!=='crypto'"),file+' must not duplicate the evaluator');
 }
+assert.equal(effective('crypto',quotes(30,45),now).state,'LIVE');
+assert.equal(effective('crypto',quotes(61,10),now).state,'STALE');
+assert.equal(effective('crypto',quotes(10,61),now).state,'STALE');
+assert.equal(effective('crypto',quotes(5,5,'UNAVAILABLE'),now).state,'STALE');
+assert.equal(effective('crypto',{quotes:{}},now).state,'UNAVAILABLE');
+assert.equal(effective('market',{state:'LIVE'},now).state,'LIVE');
+assert.match(effective('crypto',quotes(10,20),now).detail,/BTCUSD.*ETHUSD/);
+console.log('PASS shared viewer-time quote freshness and consumer delegation');

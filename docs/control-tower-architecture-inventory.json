@@ -5,13 +5,13 @@
     "active_workflows": 40,
     "archived_one_shots": 20,
     "scheduled_workflows": 11,
-    "browser_js_files": 80,
+    "browser_js_files": 82,
     "required_boot_modules": 34,
     "declared_ui_modules": 34,
     "critical_ui_modules": 32,
     "bootstrap_modules": 8,
-    "potential_runtime_js_assets": 55,
-    "recurring_or_observer_sites": 43
+    "potential_runtime_js_assets": 56,
+    "recurring_or_observer_sites": 41
   },
   "potential_runtime_graph": {
     "index.html": [
@@ -20,6 +20,7 @@
       "lineage-guard.js",
       "live-bridge.js",
       "pb-review-export-v1.js",
+      "portfolio-tab-target-guard-v1.js",
       "ui-bootstrap-v1.js"
     ],
     "ui-bootstrap-v1.js": [
@@ -126,6 +127,7 @@
     "account-source-truth-v22.js": [],
     "account-integrity-v17.js": [],
     "benchmark-excess-v1.js": [],
+    "portfolio-tab-target-guard-v1.js": [],
     "pb-review-export-v1.js": [],
     "live-bridge.js": [
       "cost-bridge.js"
@@ -698,7 +700,7 @@
       ],
       "publish_sites": [
         {
-          "line": 123,
+          "line": 130,
           "entry": "python tools/publish_observatory_data.py \\"
         }
       ]
@@ -1313,28 +1315,20 @@
     },
     {
       "path": "market-observatory/freshness-all-groups-v1.js",
-      "bytes": 3773,
-      "recurring_or_observer_sites": [
-        {
-          "line": 28,
-          "kinds": [
-            "MutationObserver"
-          ]
-        },
-        {
-          "line": 29,
-          "kinds": [
-            "setInterval"
-          ]
-        }
-      ]
+      "bytes": 437,
+      "recurring_or_observer_sites": []
+    },
+    {
+      "path": "market-observatory/freshness-core-v1.js",
+      "bytes": 3879,
+      "recurring_or_observer_sites": []
     },
     {
       "path": "market-observatory/freshness-watchdog-v1.js",
-      "bytes": 18637,
+      "bytes": 18525,
       "recurring_or_observer_sites": [
         {
-          "line": 70,
+          "line": 73,
           "kinds": [
             "setInterval"
           ]
@@ -1353,10 +1347,10 @@
     },
     {
       "path": "market-observatory/latest-board-v1.js",
-      "bytes": 42168,
+      "bytes": 45507,
       "recurring_or_observer_sites": [
         {
-          "line": 231,
+          "line": 268,
           "kinds": [
             "setInterval"
           ]
@@ -1365,7 +1359,7 @@
     },
     {
       "path": "market-observatory/live-market-refresh-v1.js",
-      "bytes": 4358,
+      "bytes": 4587,
       "recurring_or_observer_sites": [
         {
           "line": 32,
@@ -1388,10 +1382,10 @@
     },
     {
       "path": "market-observatory/metric-detail-v1.js",
-      "bytes": 16955,
+      "bytes": 17740,
       "recurring_or_observer_sites": [
         {
-          "line": 83,
+          "line": 94,
           "kinds": [
             "MutationObserver"
           ]
@@ -1509,6 +1503,11 @@
     {
       "path": "performance-day-view.js",
       "bytes": 11293,
+      "recurring_or_observer_sites": []
+    },
+    {
+      "path": "portfolio-tab-target-guard-v1.js",
+      "bytes": 3146,
       "recurring_or_observer_sites": []
     },
     {

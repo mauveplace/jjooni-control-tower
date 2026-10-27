@@ -7,6 +7,7 @@ on:
       - tools/build_observatory_freshness.py
       - tools/audit_observatory_data.py
       - tools/fedwatch_trade_calendar.py
+      - market-observatory/freshness-core-v1.js
       - market-observatory/freshness-watchdog-v1.js
       - market-observatory/freshness-all-groups-v1.js
       - tests/observatory-crypto-freshness.test.cjs
@@ -34,6 +35,12 @@ on:
     types: [completed]
   pull_request:
     paths:
+      - tools/build_observatory_freshness.py
+      - market-observatory/freshness-core-v1.js
+      - market-observatory/freshness-watchdog-v1.js
+      - market-observatory/freshness-all-groups-v1.js
+      - tests/observatory-status-core.test.cjs
+      - tests/observatory-crypto-freshness.test.cjs
       - .github/workflows/market-observatory-freshness-ui.yml
   workflow_dispatch:
 

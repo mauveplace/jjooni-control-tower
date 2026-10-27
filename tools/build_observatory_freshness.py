@@ -52,6 +52,7 @@ def _count_field(obj,count_key,list_key):
 
 
 def build_status(root: Path = ROOT, now=None) -> dict:
+    now = now or datetime.now(KST)
     data=root/'market-observatory'/'data'
     obs=load(data/'observatory.json');pulse=load(data/'daily-market-pulse.json');fed=load(data/'fed-watch.json');cal=load(data/'economic-calendar.json');sector=load(data/'sector-etf.json');public=load(root/'public-market-daily.json');audit=load(data/'data-audit.json');macro=load(data/'official-macro.json')
 
@@ -102,6 +103,8 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     regime = load(data/'market-regime.json')
     window = regime.get('effective_window') or {}
     groups['market_regime'] = group('합의 레짐', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '유효기간 기준 · 만료된 합의문은 현재 지침이 아닙니다', 'market-regime.json', False)
+    groups['market_regime']['valid_from_kst'] = window.get('start_kst')
+    groups['market_regime']['valid_until_kst'] = window.get('end_kst')
     # Quote timestamps travel with the SSOT so a viewer can re-evaluate the age
     # against its own clock. The producer's LIVE verdict is only a point-in-time audit.
     groups['crypto']['quotes'] = {
@@ -112,7 +115,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK','EXPIRED'}
     critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad)]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')
-    return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':datetime.now(KST).isoformat(timespec='seconds'),'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'expected_session':expected,'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
+    return {'schema':'JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2','generated_kst':now.astimezone(KST).isoformat(timespec='seconds'),'freshness_policy':{'max_status_age_seconds':7200,'scope':'STATUS_ASSESSMENT_NOT_OBSERVATION_AGE','watchdog_scope':'US_CLOSE_RECOVERY_ONLY'},'overall':overall,'critical_bad':critical_bad,'warnings':warnings,'watchdog_required':bool(critical_bad),'session_alignment':{'expected_session':expected,'source_session':source_session,'market_aligned':market_aligned,'observatory':session,'daily_market_pulse':pulse_session,'tripod':tripod_session,'pulse_aligned':pulse_aligned,'tripod_aligned':tripod_aligned,'us_supplement_aligned':us_supplement_aligned,'kr_kospi':kr_kospi.get('last_date'),'kr_kosdaq':kr_kosdaq.get('last_date'),'aligned':aligned},'groups':groups,'audit_schema':audit.get('schema'),'contract':'DISPLAY_ALL_MARKET_FAMILY_SOURCE_ASOF_STATE_AND_WATCHDOG_DECISION_V3','read_only':True}
 
 def main():
     status=build_status(ROOT);OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_FRESHNESS_STATUS=PASS',status['overall'],'aligned=',status['session_alignment']['aligned'],'warnings=',status['warnings'])
