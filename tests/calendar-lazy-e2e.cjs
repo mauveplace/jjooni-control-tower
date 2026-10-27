@@ -21,8 +21,9 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
    await page.locator('#events .obsHistBtn').first().waitFor({timeout:30000});
    assert.equal(counts.index,0,'calendar entry must not request history until opened');
    assert.equal(counts.overrides,legacy?1:0,'only older calendar contracts need the server seed');
-   await page.locator('#events .obsHistBtn').first().click();
-   await page.waitForFunction(()=>!!document.querySelector('#events .obsHistPanel.on .obsHistMeta'),null,{timeout:30000});
+   const claims=page.locator('#events .event').filter({hasText:'U.S. Initial Jobless Claims'}).first();
+   await claims.locator('.obsHistBtn').click();
+   await claims.locator('.obsHistPanel.on .obsHistRow:not(.head)').first().waitFor({timeout:30000});
    assert.equal(counts.index,1,'opening history must fetch its index once');
    assert.deepEqual(errors,[]);
    console.log('CALENDAR_LAZY_PASS',legacy?'legacy':'canonical',counts);
