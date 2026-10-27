@@ -1,9 +1,10 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-27T11:02:31+09:00",
+  "generated_kst": "2026-10-27T12:14:13+09:00",
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "crypto",
     "calendar",
     "audit",
     "market_regime"
@@ -107,19 +108,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-27T09:38:28+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1477s · ETHUSD age=1479s",
+      "detail": "BTCUSD age=5780s · ETHUSD age=5782s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-27T10:37:53+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-27T10:37:51+09:00"
         }
       },
@@ -128,7 +129,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-27T10:38:02+09:00",
+      "generated_kst": "2026-10-27T12:13:29+09:00",
       "as_of": "2026-10-26",
       "detail": "snapshot=FINAL · Observatory session=2026-10-26",
       "source": "daily-market-pulse.json",
@@ -155,7 +156,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-27T10:38:02+09:00",
+      "generated_kst": "2026-10-27T12:13:29+09:00",
       "as_of": "2026-10-26",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -191,9 +192,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-27T11:02:30+09:00",
+      "generated_kst": "2026-10-27T12:14:13+09:00",
       "as_of": "2026-10-26",
-      "detail": "critical=0 · warnings=2",
+      "detail": "critical=0 · warnings=5",
       "source": "data-audit.json",
       "critical": true
     },
