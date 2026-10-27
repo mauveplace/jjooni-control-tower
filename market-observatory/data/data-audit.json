@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-27T08:48:10+09:00",
+  "generated_kst": "2026-10-27T09:21:53+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 3,
   "observatory_session": "2026-10-26",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-10-27T08:36:41+09:00",
+      "generated_kst": "2026-10-27T08:56:54+09:00",
       "session": "2026-10-26",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-27T08:47:32+09:00",
+      "generated_kst": "2026-10-27T08:57:30+09:00",
       "session": "2026-10-26",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-27T08:47:32+09:00",
+      "generated_kst": "2026-10-27T08:57:30+09:00",
       "session": "2026-10-26",
       "ok": true,
       "target": "TQQQ 100%"
@@ -33,17 +33,17 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-27T08:36:45+09:00",
+      "generated_kst": "2026-10-27T09:21:48+09:00",
       "events": 186,
-      "actual_freshness": "PENDING",
-      "overdue_count": 0,
-      "pending_count": 1,
+      "actual_freshness": "DEGRADED",
+      "overdue_count": 1,
+      "pending_count": 0,
       "collection_health": "LIVE",
       "failed_source_count": 0,
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-27T08:38:29+09:00",
+      "generated_kst": "2026-10-27T08:57:09+09:00",
       "as_of_date": "2026-10-26",
       "priced_count": 46
     },
@@ -67,11 +67,10 @@
       "source_generated_kst": "2026-10-10T22:50:00+09:00"
     },
     "freshness": {
-      "generated_kst": "2026-10-27T08:48:09+09:00",
+      "generated_kst": "2026-10-27T09:21:52+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "kr_rates",
         "jp_rates",
         "calendar",
         "audit",
@@ -348,7 +347,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": "2026-10-27",
       "allow_lag_days": 4,
       "critical": false,
@@ -403,15 +402,7 @@
         }
       },
       "missing": [],
-      "latest_mismatch": [],
-      "fetch_succeeded": false,
-      "failed_series": {
-        "KR3Y": "RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout",
-        "KR5Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR10Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR20Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR30Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN"
-      }
+      "latest_mismatch": []
     },
     "jp_rates": {
       "state": "LAGGING",
@@ -474,17 +465,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-26",
-          "last_value": 80032.84,
+          "last_value": 79985.47,
           "group": "crypto",
-          "latest_value": 80032.84,
+          "latest_value": 79985.47,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-26",
-          "last_value": 2319.7,
+          "last_value": 2319.67,
           "group": "crypto",
-          "latest_value": 2319.7,
+          "latest_value": 2319.67,
           "latest_matches": true
         }
       },
@@ -528,16 +519,16 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-27T08:37:39+09:00",
-      "current_quote_age_seconds": 631,
-      "captured_quote_age_seconds": 12
+      "quote_as_of_kst": "2026-10-27T08:57:01+09:00",
+      "current_quote_age_seconds": 1492,
+      "captured_quote_age_seconds": 7
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-27T08:37:34+09:00",
-      "current_quote_age_seconds": 636,
-      "captured_quote_age_seconds": 17
+      "quote_as_of_kst": "2026-10-27T08:57:03+09:00",
+      "current_quote_age_seconds": 1490,
+      "captured_quote_age_seconds": 5
     }
   },
   "issues": [
@@ -547,14 +538,14 @@
       "detail": "No current analyst guidance; evaluate effective_window at read time"
     },
     {
-      "code": "GROUP_KR_RATES_STALE",
-      "severity": "WARN",
-      "detail": "anchor=2026-10-27 dates=KR3Y:2026-10-26,KR5Y:2026-10-26,KR10Y:2026-10-26,KR20Y:2026-10-26,KR30Y:2026-10-26,KR_3S10S:2026-10-26"
-    },
-    {
       "code": "GROUP_JP_RATES_LAGGING",
       "severity": "WARN",
       "detail": "anchor=2026-10-27 dates=JP2Y:2026-10-23,JP5Y:2026-10-23,JP10Y:2026-10-23,JP30Y:2026-10-23,JP_2S10S:2026-10-23"
+    },
+    {
+      "code": "CALENDAR_ACTUAL_DEGRADED",
+      "severity": "WARN",
+      "detail": "overdue_count=1 pending_count=0"
     }
   ],
   "contracts": {
