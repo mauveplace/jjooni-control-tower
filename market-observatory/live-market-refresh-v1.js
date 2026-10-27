@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
-function marketClock(data){return [data?.generated_kst,data?.supplemental_refreshed_kst].filter(x=>Number.isFinite(Date.parse(x))).sort((a,b)=>Date.parse(b)-Date.parse(a))[0]||null}
-function revision(data){return JSON.stringify([data?.generated_kst,data?.supplemental_refreshed_kst,data?.kr_rates_refreshed_kst,data?.crypto_enriched_kst,data?.latest,data?.tripod_latest,data?.cross_market_freshness_quality])}
+function marketClock(data){return [data?.generated_kst,data?.supplemental_refreshed_kst,data?.us_rates_refreshed_kst,data?.kr_rates_refreshed_kst].filter(x=>Number.isFinite(Date.parse(x))).sort((a,b)=>Date.parse(b)-Date.parse(a))[0]||null}
+function revision(data){return JSON.stringify([data?.generated_kst,data?.supplemental_refreshed_kst,data?.kr_rates_refreshed_kst,data?.crypto_enriched_kst,data?.us_rates_refreshed_kst,Object.entries(data?.series||{}).map(([k,rows])=>[k,rows.at(-1)]),data?.latest,data?.tripod_latest,data?.cross_market_freshness_quality])}
 function canApply(current,next){return !!next&&next.schema==='JJOONI_MARKET_OBSERVATORY_V1'&&!!next.series&&!!next.latest&&Number.isFinite(Date.parse(marketClock(next)))&&String(next.us_completed_session_date||'')>=String(current?.us_completed_session_date||'')&&Date.parse(marketClock(next))>=Date.parse(marketClock(current)||0)}
 function retainHistory(current,next){if(!current?.history_loaded)return next;const series={...next.series};for(const [key,rows]of Object.entries(current.series||{})){const map=new Map(rows.map(r=>[r.date,r]));for(const row of next.series[key]||[])map.set(row.date,row);series[key]=[...map.values()].sort((a,b)=>a.date.localeCompare(b.date))}return {...next,series,history_loaded:true,history_sampling:current.history_sampling,history_base_generated_kst:current.history_base_generated_kst}}
 const api={marketClock,revision,canApply,retainHistory};
@@ -18,7 +18,7 @@ async function refresh(force=false){
  lastAttempt=Date.now();lastRevision??=revision(DATA);state.status='CHECKING';
  pending=(async()=>{try{
   // Revalidate the ETag instead of downloading a cache-busted 30Y payload each minute.
-  let next;for(const path of ['./data/observatory-recent.json','./data/observatory.json']){try{const r=await fetch(path,{cache:'no-cache',signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('HTTP '+r.status);const candidate=await r.json();if(!canApply(DATA,candidate))throw Error('INVALID_OR_OLDER_MARKET_SNAPSHOT');next=candidate;break}catch(error){if(path.endsWith('/observatory.json'))throw error}}
+  let next;for(const path of ['./data/observatory-recent.json','./data/observatory.json']){try{const r=await fetch(force?path+'?refresh='+Date.now():path,{cache:force?'no-store':'no-cache',signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('HTTP '+r.status);const candidate=await r.json();if(!canApply(DATA,candidate))throw Error('INVALID_OR_OLDER_MARKET_SNAPSHOT');next=candidate;break}catch(error){if(path.endsWith('/observatory.json'))throw error}}
   if(!canApply(DATA,next))throw Error('INVALID_OR_OLDER_MARKET_SNAPSHOT');
   const key=revision(next);state.checked_at=new Date().toISOString();state.market_collected_at=marketClock(next);
   if(key===lastRevision){state.status='UNCHANGED';if(force)note('게시값 확인 완료 · 새로 게시된 시장 데이터 없음 · 신규 원천 수집은 실행하지 않았습니다.');return false}
@@ -30,7 +30,7 @@ async function refresh(force=false){
  }catch(e){state.status='RETRY';state.error=String(e.message||e);note('최신 게시값 조회 재시도 중 · 마지막 확인 자료 유지');return false}finally{pending=null}})();return pending;
 }
 setInterval(()=>refresh(),state.interval_ms);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});root.addEventListener('pageshow',()=>refresh());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});root.addEventListener('pageshow',event=>refresh(!!event?.persisted));
 // Also cover a tab restored from the mobile browser back-forward cache.
 const start=setInterval(()=>{if(typeof DATA!=='undefined'&&DATA){clearInterval(start);lastRevision=revision(DATA);lastAttempt=Date.now();state.status='READY'}},200);
 })(typeof window==='object'?window:globalThis);

@@ -74,3 +74,13 @@ test('an open mobile tab updates without reload, retains nodes when unchanged an
  assert.equal(await runtime.refresh(true),false);assert.equal(paints,1,'unchanged polling cannot rebuild chart nodes');
  fail=true;const confirmed=context.DATA;await runtime.refresh(true);assert.equal(context.DATA,confirmed);assert.equal(runtime.status,'RETRY');assert.ok(listeners.visibilitychange);assert.ok(listeners.pageshow);assert.equal(reads,4,'after the last-value poll fails, the recent source and full-history fallback must both be attempted');
 });
+
+test('same yield on a new observation date still changes the displayed revision',()=>{
+ const next={...base,series:{NASDAQ100:[{date:'2026-10-21',value:100}]}};
+ assert.notEqual(live.revision(base),live.revision(next));
+});
+test('independent rate collection advances the market clock',()=>{
+ const next={...base,us_rates_refreshed_kst:'2026-10-21T08:00:00+09:00'};
+ assert.equal(live.marketClock(next),next.us_rates_refreshed_kst);
+ assert.equal(live.canApply(base,next),true);
+});

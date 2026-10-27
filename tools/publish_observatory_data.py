@@ -103,6 +103,18 @@ def merge_generated(path, local, remote):
                 if q is not None:result.setdefault('cross_market_freshness_quality',{})[key]=deepcopy(q)
             source=(kr_winner.get('sources') or {}).get('KR_RATES_CURRENT')
             if source:result.setdefault('sources',{})['KR_RATES_CURRENT']=source
+        # US card yields have their own attempt clock, independent of equities
+        # and the heavy daily producer. Preserve rows across concurrent writers.
+        us_winner=max((remote,local),key=lambda doc:str(doc.get('us_rates_refreshed_kst') or ''))
+        if us_winner.get('us_rates_refreshed_kst'):
+            result['us_rates_refreshed_kst']=us_winner['us_rates_refreshed_kst']
+            for key in ('US2Y','US3M','US5Y_OFFICIAL','US10Y_OFFICIAL','US30Y_OFFICIAL','US5Y','US10Y','US30Y','US_2S10S'):
+                rows={str(r['date']):deepcopy(r) for doc in (remote,local,us_winner) for r in (doc.get('series') or {}).get(key,[]) if r.get('date') and r.get('value') is not None}
+                if rows:
+                    result.setdefault('series',{})[key]=[rows[d] for d in sorted(rows)]
+                    result.setdefault('latest',{})[key]=result['series'][key][-1]['value']
+                q=(us_winner.get('cross_market_freshness_quality') or {}).get(key)
+                if q is not None:result.setdefault('cross_market_freshness_quality',{})[key]=deepcopy(q)
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result

@@ -68,7 +68,7 @@ jobs:
             tools/build_fed_watch.py \
             tools/audit_observatory_data.py \
             tools/build_observatory_sector_etf.py
-          python -m unittest tests.test_observatory_atomic_session tests.test_observatory_ecos_resilience tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status tests.test_observatory_fedwatch_publish_conflict -v
+          python -m unittest tests.test_observatory_us_rates_refresh tests.test_observatory_atomic_session tests.test_observatory_ecos_resilience tests.test_observatory_kr_rates_freshness tests.test_observatory_source_isolation tests.test_observatory_publish_cleanliness tests.test_observatory_freshness_status tests.test_observatory_fedwatch_publish_conflict -v
 
       - name: Refresh all public market families
         id: supplemental
