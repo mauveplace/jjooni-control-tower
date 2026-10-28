@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-29T01:33:48+09:00",
+  "generated_kst": "2026-10-29T01:46:07+09:00",
   "overall": "PASS",
   "critical_count": 0,
   "warning_count": 0,
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-29T01:33:47+09:00",
+      "generated_kst": "2026-10-29T01:46:06+09:00",
       "session": "2026-10-27",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-29T01:33:47+09:00",
+      "generated_kst": "2026-10-29T01:46:06+09:00",
       "session": "2026-10-27",
       "ok": true,
       "target": "TQQQ 100%"
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-10-28T23:00:35+09:00",
+      "generated_kst": "2026-10-29T01:45:49+09:00",
       "as_of_date": "2026-10-28",
       "priced_count": 46
     },
@@ -68,16 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-29T01:33:45+09:00",
+      "generated_kst": "2026-10-29T01:33:48+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
-        "calendar",
-        "audit"
+        "calendar"
       ]
     },
     "watchdog": {
@@ -198,25 +193,25 @@
         "USDKRW": {
           "count": 779,
           "last_date": "2026-10-27",
-          "last_value": 1338.77001953,
+          "last_value": 1343.52001953,
           "group": "fx",
-          "latest_value": 1338.77001953,
+          "latest_value": 1343.52001953,
           "latest_matches": true
         },
         "USDJPY": {
           "count": 779,
           "last_date": "2026-10-27",
-          "last_value": 157.85899353,
+          "last_value": 158.20899963,
           "group": "fx",
-          "latest_value": 157.85899353,
+          "latest_value": 158.20899963,
           "latest_matches": true
         },
         "JPYKRW": {
           "count": 779,
           "last_date": "2026-10-27",
-          "last_value": 8.45800018,
+          "last_value": 8.47500038,
           "group": "fx",
-          "latest_value": 8.45800018,
+          "latest_value": 8.47500038,
           "latest_matches": true
         }
       },
@@ -468,17 +463,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-28",
-          "last_value": 80420.46,
+          "last_value": 80341.15,
           "group": "crypto",
-          "latest_value": 80420.46,
+          "latest_value": 80341.15,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-28",
-          "last_value": 2330.96,
+          "last_value": 2326.97,
           "group": "crypto",
-          "latest_value": 2330.96,
+          "latest_value": 2326.97,
           "latest_matches": true
         }
       },
@@ -494,9 +489,9 @@
         "FEAR_GREED": {
           "count": 1567,
           "last_date": "2026-10-28",
-          "last_value": 34.3,
+          "last_value": 34.5,
           "group": "sentiment",
-          "latest_value": 34.3,
+          "latest_value": 34.5,
           "latest_matches": true
         }
       },
@@ -522,16 +517,16 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-29T01:33:40+09:00",
-      "current_quote_age_seconds": 8,
-      "captured_quote_age_seconds": 2
+      "quote_as_of_kst": "2026-10-29T01:45:41+09:00",
+      "current_quote_age_seconds": 26,
+      "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-29T01:33:37+09:00",
-      "current_quote_age_seconds": 11,
-      "captured_quote_age_seconds": 6
+      "quote_as_of_kst": "2026-10-29T01:45:39+09:00",
+      "current_quote_age_seconds": 28,
+      "captured_quote_age_seconds": 5
     }
   },
   "issues": [],
