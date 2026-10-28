@@ -369,7 +369,7 @@ function applyLive(live){
  // the quote sidecar so corrected quotes with the same snapshot are applied.
  const signature=JSON.stringify([live,TRADE_QUOTES]);
  if(signature!==lastAppliedSignature){
- const candidate=makeCanonical(live);if(candidate.total.nav==null)throw Error('INCOMPLETE_NAV_SNAPSHOT');LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=candidate;window.__JJOONI_CANONICAL_SSOT=CANON;mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();try{document.dispatchEvent(new CustomEvent('jjooni:live-applied',{detail:{snapshot_id:live.snapshot_id||null,observed_at:live.observed_at||null}}))}catch(_){};
+ const candidate=makeCanonical(live);if(candidate.total.nav==null)throw Error('INCOMPLETE_NAV_SNAPSHOT');LAST_LIVE=live;window.__JJOONI_LIVE_PAYLOAD=live;mergePositions(live);CANON=candidate;window.__JJOONI_CANONICAL_SSOT=CANON;try{const positions=REGISTRY.flatMap(r=>M.positions(CANON.accounts[r.id]||{}).map(p=>({symbol:String(p.ticker||p.symbol||''),name:String(p.name||'')})));localStorage.setItem('jjooni_private_earnings_symbols_v1',JSON.stringify({as_of:CANON.observed_at,positions}))}catch(_){};mergeTrades(live);syncTradeCurrentPrices();syncLegacyMirrors();installCanonicalFunctions();renderAll();try{document.dispatchEvent(new CustomEvent('jjooni:live-applied',{detail:{snapshot_id:live.snapshot_id||null,observed_at:live.observed_at||null}}))}catch(_){};
  lastAppliedSignature=signature;
  }
  const ts=Date.parse(String(live.observed_at||'')),age=Number.isFinite(ts)?Date.now()-ts:Infinity,t=String(live.observed_at||'').replace('T',' ').slice(5,16),miss=CANON.total.missing_today.join(',')||'none';
