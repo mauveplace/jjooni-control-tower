@@ -8,6 +8,13 @@ on:
       - tools/add_observatory_equities.py
       - .github/workflows/observatory-crypto-refresh.yml
   workflow_dispatch:
+  # Independent best-effort heartbeat: the Daily workflow's 15-minute
+  # schedule has been dropped for hours despite successful downstream runs.
+  # Stagger away from :00 and Daily's :07/:22/:37/:52 slots.
+  # This does not guarantee 60-minute quote freshness: GitHub schedules
+  # can be delayed/dropped. Runtime quote timestamps remain authoritative.
+  schedule:
+    - cron: '12,42 * * * *'
 
 permissions:
   contents: write
