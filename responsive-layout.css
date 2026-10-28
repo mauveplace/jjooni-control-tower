@@ -192,3 +192,12 @@ html[data-ct-layout="mobile-first"] body #ctDesktopTrustV8{display:none!importan
 @media(min-width:768px){html[data-ct-layout="mobile-first"] body .ctOvHero{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 
 html[data-ct-layout="mobile-first"] body #ctTodayNetStrip{display:none!important}
+
+/* Pin touch targets to named columns even when legacy code rewrites order. */
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"],html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{grid-row:1!important;transform:none!important;isolation:isolate;touch-action:manipulation}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="overview"]{grid-column:1!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="portfolio"]{grid-column:2!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="accounts"]{grid-column:3!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="tripod"]{grid-column:4!important}
+html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{grid-column:5!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"] *{pointer-events:none!important}
