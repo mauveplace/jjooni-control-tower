@@ -79,6 +79,17 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         aligned=False
     cal_fresh=cal.get('actual_freshness') or {};cal_collection=cal.get('collection_health') or {};cal_state=text(cal_fresh.get('status')) or ('LIVE' if cal.get('generated_kst') else 'UNAVAILABLE');sector_state='LIVE' if sector.get('as_of_date') else 'UNAVAILABLE'
     cal_overdue=_count_field(cal_fresh,'overdue_count','overdue_events');cal_pending=_count_field(cal_fresh,'pending_count','pending_events');cal_failed_sources=len(cal_collection.get('failed_sources') or [])
+    # Release-actual completeness and official-document accessibility are independent.
+    # Do not call a calendar wholly LIVE when its BLS release probes are blocked.
+    cal_official_checks=[c for c in (cal_fresh.get('official_checks') or []) if isinstance(c,dict)]
+    cal_probe_failures=[c for c in cal_official_checks if
+                        str(c.get('result') or '').startswith('HTTP_') or
+                        str(c.get('result') or '') in {'REFERENCE_PERIOD_MISSING','SERIES_NOT_CONFIGURED','PARTIAL'} or
+                        str(c.get('result') or '').endswith('Error')]
+    cal_probe_blocked=sorted({str(c.get('title') or c.get('adapter') or 'unknown') for c in cal_probe_failures})
+    cal_actual_state=cal_state
+    if cal_probe_blocked and cal_state=='LIVE':
+        cal_state='DEGRADED'
 
     groups={
         'market':group('Market SSOT',market_state,obs.get('generated_kst'),session,'미국 핵심 완료세션 NDX/SPX/VIX','observatory.json',True),
@@ -97,9 +108,13 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         'tripod':group('TRI-POD',tripod_state,public.get('generated_kst') or obs.get('generated_kst'),tripod_session,f"{tripod.get('regime') or public_tripod.get('regime') or '—'} · {tripod.get('target') or public_tripod.get('target') or '—'}",'public-market-daily.json + observatory.json',True),
         'sector':group('Sector ETF',sector_state,sector.get('generated_kst'),sector.get('as_of_date'),f"priced={(sector.get('summary') or {}).get('priced_count','—')}",'sector-etf.json',False),
         'official_macro':group('Official Macro','LIVE' if macro.get('generated_kst') else 'UNAVAILABLE',macro.get('generated_kst'),None,macro.get('schema'),'official-macro.json',False),
-        'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={cal_overdue} · pending={cal_pending} · source_failures={cal_failed_sources}",'economic-calendar.json',False),
+        'calendar':group('Economic Calendar',cal_state,cal.get('generated_kst'),cal_fresh.get('latest_released_at') or cal.get('generated_kst'),f"events={len(cal.get('events') or [])} · overdue={cal_overdue} · pending={cal_pending} · source_failures={cal_failed_sources} · official_probe_blocked={len(cal_probe_blocked)}",'economic-calendar.json',False),
         'audit':group('Full Data Audit',audit.get('overall') or 'UNAVAILABLE',audit.get('generated_kst'),session,f"critical={audit.get('critical_count','—')} · warnings={audit.get('warning_count','—')}",'data-audit.json',True),
     }
+    groups['calendar']['actual_completeness_state']=cal_actual_state
+    groups['calendar']['official_probe_state']='DEGRADED' if cal_probe_blocked else ('PASS' if cal_official_checks else 'NOT_CHECKED')
+    groups['calendar']['official_probe_failure_count']=len(cal_probe_failures)
+    groups['calendar']['official_probe_blocked_releases']=cal_probe_blocked
     regime = load(data/'market-regime.json')
     window = regime.get('effective_window') or {}
     groups['market_regime'] = group('과거 주간 분석 · 투자보드 관리', regime_state(regime, now), regime.get('generated_kst'), window.get('end_kst'), '이력 참고용 · 최신 시장/계좌 판정과 별개 · 투자보드에서 주간 전략 관리', 'market-regime.json', False)

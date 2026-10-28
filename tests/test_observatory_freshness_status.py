@@ -240,5 +240,47 @@ class ObservatoryFreshnessStatusTest(unittest.TestCase):
             self.assertFalse(out['watchdog_required'])
 
 
+    def test_official_bls_probe_failures_are_visible_despite_complete_actuals(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            self.write(root,'market-observatory/data/economic-calendar.json',{
+                'generated_kst':'2026-10-28T08:50:00+09:00',
+                'events':[],
+                'actual_freshness':{
+                    'status':'LIVE','overdue_count':0,'pending_count':0,
+                    'official_checks':[
+                        {'adapter':'BLS_cpi','title':'Consumer Price Index','result':'HTTP_403'},
+                        {'adapter':'BLS_API','title':'Consumer Price Index','result':'REFERENCE_PERIOD_MISSING'},
+                        {'adapter':'BLS_ppi','title':'Producer Price Index','result':'PARSED'},
+                    ]},
+                'collection_health':{'status':'LIVE','failed_sources':[]},
+            })
+            out=freshness.build_status(root,now=datetime.fromisoformat('2026-10-28T09:00:00+09:00'))
+            cal=out['groups']['calendar']
+            self.assertEqual(cal['state'],'DEGRADED')
+            self.assertEqual(cal['actual_completeness_state'],'LIVE')
+            self.assertEqual(cal['official_probe_state'],'DEGRADED')
+            self.assertEqual(cal['official_probe_failure_count'],2)
+            self.assertEqual(cal['official_probe_blocked_releases'],['Consumer Price Index'])
+            self.assertIn('calendar',out['warnings'])
+            self.assertFalse(cal['critical'])
+
+    def test_successful_official_probe_does_not_create_false_alarm(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            self.write(root,'market-observatory/data/economic-calendar.json',{
+                'generated_kst':'2026-10-28T08:50:00+09:00','events':[],
+                'actual_freshness':{'status':'LIVE','official_checks':[
+                    {'adapter':'BLS_cpi','title':'Consumer Price Index','result':'PARSED'}]},
+                'collection_health':{'failed_sources':[]},
+            })
+            out=freshness.build_status(root,now=datetime.fromisoformat('2026-10-28T09:00:00+09:00'))
+            cal=out['groups']['calendar']
+            self.assertEqual(cal['state'],'LIVE')
+            self.assertEqual(cal['official_probe_state'],'PASS')
+            self.assertEqual(cal['official_probe_failure_count'],0)
+            self.assertNotIn('calendar',out['warnings'])
+
+
 if __name__ == '__main__':
     unittest.main()
