@@ -4,7 +4,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
  for(const width of [390,900,1363]){
   const page=await browser.newPage({viewport:{width,height:1000},hasTouch:true,isMobile:width<768});
   const keys=['overview','portfolio','accounts','tripod','compare','decisions','trades','quality','consultant','watchlist','ai'];
-  await page.setContent('<html data-ct-layout="mobile-first"><head><style>'+fs.readFileSync('responsive-layout.css','utf8')+'</style></head><body><nav class="tabs"><div class="sideLabel">WATCHLIST</div>'+keys.map(key=>'<button class="tab" data-tab="'+key+'" style="display:none!important">'+key+'</button>').join('')+'<button class="tab" data-tab="accounts" data-primary="1">duplicate</button><button id="ctMoreTab" style="display:none!important">더보기</button></nav><nav id="ctMoreMenu"></nav></body></html>');
+  await page.setContent('<html data-ct-layout="mobile-first"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+fs.readFileSync('responsive-layout.css','utf8')+'</style></head><body><nav class="tabs"><div class="sideLabel">WATCHLIST</div>'+keys.map(key=>'<button class="tab" data-tab="'+key+'" style="display:none!important">'+key+'</button>').join('')+'<button class="tab" data-tab="accounts" data-primary="1">duplicate</button><button id="ctMoreTab" style="display:none!important">더보기</button></nav><nav id="ctMoreMenu"></nav></body></html>');
   let code=fs.readFileSync('trade-review-loader.js','utf8');
   code=code.slice(0,code.lastIndexOf('boot();'))+'window.testNav={canonicalizeNavigation,lockNavigation};})();';
   await page.addScriptTag({content:code});
@@ -25,7 +25,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   // Reproduce legacy order changes during mobile navigation; hit boxes must stay fixed.
   await page.evaluate(()=>{
    const ids=['overview','portfolio','accounts','tripod'];
-   ids.forEach((id,i)=>{const p=document.createElement('section');p.id='panel-'+id;p.style.display='none';document.body.append(p);
+   ids.forEach((id,i)=>{const p=document.createElement('section');p.id='panel-'+id;p.textContent=id;p.style.display='none';document.body.append(p);
     const tab=document.querySelector('.tabs .tab[data-tab="'+id+'"]');tab.style.setProperty('order',String(4-i),'important');tab.onclick=()=>{document.querySelectorAll('section[id^="panel-"]').forEach(x=>x.style.display=x.id==='panel-'+id?'block':'none')};
    });
   });
