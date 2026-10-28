@@ -242,7 +242,7 @@ function ensureNav(){
   if(window.innerWidth<=767){more.style.setProperty('display','flex','important');more.style.setProperty('order','5','important');more.style.setProperty('width','100%','important');more.style.setProperty('min-width','0','important');more.style.setProperty('justify-self','stretch','important');more.textContent='더보기'}else{for(const k of ['display','order','width','min-width','justify-self'])more.style.removeProperty(k)}
   const menuIds=qsa('button[data-tab]',menu).map(b=>b.dataset.tab);
   const menuOk=menuIds.length===CFG.secondary.length&&new Set(menuIds).size===CFG.secondary.length&&CFG.secondary.every(id=>menuIds.includes(id));
-  if(menu.dataset.tradeReviewMenu!=='v2'||!menuOk){
+  if(document.documentElement.dataset.ctNavOwner!=='v14'&&(menu.dataset.tradeReviewMenu!=='v2'||!menuOk)){
     menu.innerHTML='';
     const labels={trades:'거래내역',compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
     CFG.secondary.forEach(id=>{
