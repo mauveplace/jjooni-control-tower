@@ -1,0 +1,607 @@
+{
+  "schema": "OBS_EARNINGS_V1",
+  "updated_kst": "2026-10-29T08:15:59+09:00",
+  "universe": [
+    {
+      "symbol": "005930",
+      "name": "삼성전자",
+      "market": "KR",
+      "theme": "반도체",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "000660",
+      "name": "SK하이닉스",
+      "market": "KR",
+      "theme": "반도체",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "373220",
+      "name": "LG에너지솔루션",
+      "market": "KR",
+      "theme": "배터리",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "207940",
+      "name": "삼성바이오로직스",
+      "market": "KR",
+      "theme": "바이오",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "005380",
+      "name": "현대차",
+      "market": "KR",
+      "theme": "자동차",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "000270",
+      "name": "기아",
+      "market": "KR",
+      "theme": "자동차",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "105560",
+      "name": "KB금융",
+      "market": "KR",
+      "theme": "금융",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "035420",
+      "name": "NAVER",
+      "market": "KR",
+      "theme": "플랫폼",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "012450",
+      "name": "한화에어로스페이스",
+      "market": "KR",
+      "theme": "방산",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "010120",
+      "name": "LS ELECTRIC",
+      "market": "KR",
+      "theme": "전력",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "267260",
+      "name": "HD현대일렉트릭",
+      "market": "KR",
+      "theme": "전력",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "034020",
+      "name": "두산에너빌리티",
+      "market": "KR",
+      "theme": "전력",
+      "scope": "KOSPI_CORE"
+    },
+    {
+      "symbol": "NVDA",
+      "name": "NVIDIA",
+      "market": "US",
+      "theme": "AI반도체",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft",
+      "market": "US",
+      "theme": "클라우드",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple",
+      "market": "US",
+      "theme": "플랫폼",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet",
+      "market": "US",
+      "theme": "클라우드",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon",
+      "market": "US",
+      "theme": "클라우드",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "META",
+      "name": "Meta",
+      "market": "US",
+      "theme": "플랫폼",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "AVGO",
+      "name": "Broadcom",
+      "market": "US",
+      "theme": "AI반도체",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "TSLA",
+      "name": "Tesla",
+      "market": "US",
+      "theme": "로봇·자동차",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "AMD",
+      "name": "AMD",
+      "market": "US",
+      "theme": "AI반도체",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "MU",
+      "name": "Micron",
+      "market": "US",
+      "theme": "메모리",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "ASML",
+      "name": "ASML",
+      "market": "US",
+      "theme": "반도체장비",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "PLTR",
+      "name": "Palantir",
+      "market": "US",
+      "theme": "AI소프트웨어",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "NFLX",
+      "name": "Netflix",
+      "market": "US",
+      "theme": "플랫폼",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "COST",
+      "name": "Costco",
+      "market": "US",
+      "theme": "소비",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "ISRG",
+      "name": "Intuitive Surgical",
+      "market": "US",
+      "theme": "의료로봇",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "ARM",
+      "name": "Arm",
+      "market": "US",
+      "theme": "반도체설계",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "VRT",
+      "name": "Vertiv",
+      "market": "US",
+      "theme": "데이터센터전력",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "ETN",
+      "name": "Eaton",
+      "market": "US",
+      "theme": "전력",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    },
+    {
+      "symbol": "TSM",
+      "name": "TSMC",
+      "market": "US",
+      "theme": "파운드리",
+      "scope": "US_CORE_AND_SUPPLY_CHAIN"
+    }
+  ],
+  "events": [
+    {
+      "id": "005930:2026Q3",
+      "symbol": "005930",
+      "fiscal_period": "2026Q3",
+      "status": "SCHEDULED",
+      "date_kst": "2026-10-29",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": "2026-10-29T10:00:00+09:00",
+      "sources": [
+        {
+          "url": "https://www.samsung.com/global/ir/ir-events-presentations/events/",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [],
+      "facts": [
+        "공식 IR에서 3분기 실적 컨퍼런스콜 일정을 확인했습니다."
+      ],
+      "analysis": [],
+      "risks": [],
+      "next_checks": [
+        "실적 자료 공개 시 잠정치와 확정 발표 수치 구분",
+        "DS부문 이익·HBM 매출·CAPEX 확인"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "000660:2026Q3",
+      "symbol": "000660",
+      "fiscal_period": "2026Q3",
+      "status": "RELEASED",
+      "date_kst": "2026-10-28",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": null,
+      "sources": [
+        {
+          "url": "https://news.skhynix.com/en/q3-2026-business-results/",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "매출",
+          "actual": 104.6155,
+          "unit": "KRW_TRILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "영업이익",
+          "actual": 83.3338,
+          "unit": "KRW_TRILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "순이익",
+          "actual": 39.7756,
+          "unit": "KRW_TRILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        }
+      ],
+      "facts": [
+        "HBM4와 서버용 고부가 제품의 판매 확대를 발표했습니다.",
+        "2027~2028년 생산능력의 절반 이상에 장기계약을 확보했다고 밝혔습니다."
+      ],
+      "analysis": [
+        "해석: 수요 가시성 개선 신호로 읽히지만, 계약 조건과 증설 이후 수익성을 함께 확인해야 합니다."
+      ],
+      "risks": [
+        "회사 발표 기준 잠정 실적이며 외부 검토가 완료되지 않았습니다."
+      ],
+      "next_checks": [
+        "HBM4 공급 확대와 투자 지출의 현금흐름 영향"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "MSFT:FY2027Q1",
+      "symbol": "MSFT",
+      "fiscal_period": "FY2027Q1",
+      "status": "RELEASED",
+      "date_kst": "2026-10-29",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": null,
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2027-q1/press-release-webcast",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "매출",
+          "actual": 92.3,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 19,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "영업이익",
+          "actual": 45.9,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 21,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "EPS",
+          "actual": 4.92,
+          "unit": "USD_PER_SHARE",
+          "basis": "GAAP",
+          "yoy_pct": 32,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "EPS",
+          "actual": 4.89,
+          "unit": "USD_PER_SHARE",
+          "basis": "NON_GAAP",
+          "yoy_pct": 18,
+          "consensus": null,
+          "consensus_basis": null
+        }
+      ],
+      "facts": [
+        "Azure 매출 증가율은 48%로 발표했습니다.",
+        "조정 EPS는 OpenAI 투자 영향을 제외한 수치입니다."
+      ],
+      "analysis": [
+        "해석: 클라우드 성장과 AI 인프라 수요를 점검할 자료입니다. EPS는 GAAP와 조정 기준을 분리해 비교해야 합니다."
+      ],
+      "risks": [],
+      "next_checks": [
+        "CAPEX·자유현금흐름·다음 분기 가이던스 확인"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "GOOGL:2026Q3",
+      "symbol": "GOOGL",
+      "fiscal_period": "2026Q3",
+      "status": "RELEASED",
+      "date_kst": "2026-10-29",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": null,
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "매출",
+          "actual": 127.577,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 25,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "영업이익",
+          "actual": 40.576,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "순이익",
+          "actual": 26.17,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "EPS",
+          "actual": 2.12,
+          "unit": "USD_PER_SHARE",
+          "basis": "GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        }
+      ],
+      "facts": [
+        "Google Cloud 매출은 307억 달러, 전년 대비 증가율은 103%로 발표했습니다."
+      ],
+      "analysis": [
+        "해석: 본업 성장과 순이익 방향이 다릅니다. 투자 관련 손익과 운영 성과를 분리해 봐야 합니다."
+      ],
+      "risks": [],
+      "next_checks": [
+        "클라우드 성장의 구성·CAPEX·현금흐름 확인"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "AMZN:2026Q3",
+      "symbol": "AMZN",
+      "fiscal_period": "2026Q3",
+      "status": "SCHEDULED",
+      "date_kst": "2026-10-30",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": "2026-10-30T06:00:00+09:00",
+      "sources": [
+        {
+          "url": "https://press.aboutamazon.com/2026/10/amazon-com-to-webcast-third-quarter-2026-financial-results-conference-call",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [],
+      "facts": [
+        "공식 안내는 컨퍼런스콜 시간입니다. 결과 공개시각과 구분합니다."
+      ],
+      "analysis": [],
+      "risks": [],
+      "next_checks": [
+        "AWS 성장·영업이익·CAPEX·FCF 확인"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "NVDA:FY2027Q3",
+      "symbol": "NVDA",
+      "fiscal_period": "FY2027Q3",
+      "status": "SCHEDULED",
+      "date_kst": "2026-11-18",
+      "time_status": "APPROXIMATE",
+      "release_at_kst": "2026-11-18T06:20:00+09:00",
+      "call_at_kst": "2026-11-18T07:00:00+09:00",
+      "sources": [
+        {
+          "url": "https://nvidianews.nvidia.com/news/nvidia-sets-conference-call-for-third-quarter-financial-results-6928873",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:12:58+09:00"
+        }
+      ],
+      "metrics": [],
+      "facts": [
+        "회사는 결과 공개를 미 태평양시간 11/17 13:20경, 콜을 14:00으로 안내했습니다."
+      ],
+      "analysis": [],
+      "risks": [],
+      "next_checks": [
+        "매출·데이터센터·마진·차기 가이던스 확인"
+      ],
+      "updated_kst": "2026-10-29T08:12:58+09:00"
+    },
+    {
+      "id": "AMD:2026Q3",
+      "symbol": "AMD",
+      "fiscal_period": "2026Q3",
+      "status": "SCHEDULED",
+      "date_kst": "2026-11-04",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": "2026-11-04T07:00:00+09:00",
+      "sources": [
+        {
+          "url": "https://ir.amd.com/news-events/press-releases/detail/1300/amd-to-report-fiscal-third-quarter-2026-financial-results",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:15:59+09:00"
+        }
+      ],
+      "metrics": [],
+      "facts": [
+        "미국 현지 11/3 장 마감 후 실적 발표, 17:00 ET 컨퍼런스콜을 안내했습니다."
+      ],
+      "analysis": [],
+      "risks": [],
+      "next_checks": [
+        "데이터센터 매출·AI GPU 수요·차기 가이던스"
+      ],
+      "updated_kst": "2026-10-29T08:15:59+09:00"
+    },
+    {
+      "id": "META:2026Q3",
+      "symbol": "META",
+      "fiscal_period": "2026Q3",
+      "status": "RELEASED",
+      "date_kst": "2026-10-22",
+      "time_status": "DATE_ONLY",
+      "release_at_kst": null,
+      "call_at_kst": null,
+      "sources": [
+        {
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Third-Quarter-2026-Results/default.aspx",
+          "kind": "OFFICIAL",
+          "checked_kst": "2026-10-29T08:15:59+09:00"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "매출",
+          "actual": 64.601,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 26,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "영업이익",
+          "actual": 12.988,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": -37,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "EPS",
+          "actual": 3.83,
+          "unit": "USD_PER_SHARE",
+          "basis": "GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "FCF",
+          "actual": -2.12,
+          "unit": "USD_BILLION",
+          "basis": "NON_GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "CAPEX",
+          "actual": 34.91,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        }
+      ],
+      "facts": [
+        "법적 합의 관련 98.9억 달러 비용이 영업실적에 반영됐습니다.",
+        "회사는 2026년 CAPEX 전망을 1,350억~1,450억 달러로 제시했습니다."
+      ],
+      "analysis": [
+        "해석: 광고 성장과 투자·일회성 비용을 분리해 평가해야 합니다. FCF 적자는 AI 투자 회수기간을 확인할 필요성을 높입니다."
+      ],
+      "risks": [
+        "일회성 비용 제외 수치는 보고 EPS와 혼합하면 안 됩니다."
+      ],
+      "next_checks": [
+        "광고 성장 대비 CAPEX·FCF 전환 추세"
+      ],
+      "updated_kst": "2026-10-29T08:15:59+09:00"
+    }
+  ],
+  "coverage_note": "공식 확인된 일정만 게시합니다. 목록에 없는 일정은 미확인이며 예정 없음으로 해석하지 않습니다.",
+  "privacy": "PUBLIC_MARKET_INFORMATION_ONLY"
+}
