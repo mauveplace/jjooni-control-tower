@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-28T17:43:15+09:00",
+  "generated_kst": "2026-10-28T18:54:44+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,7 +9,9 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "calendar"
+    "kr_rates",
+    "calendar",
+    "audit"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -39,7 +41,7 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-28",
       "detail": "KOSPI 2026-10-28 · KOSDAQ 2026-10-28",
       "source": "Naver Finance primary",
@@ -48,7 +50,7 @@
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-27",
       "detail": "RUSSELL2000 2026-10-27 · DOW 2026-10-27 · NASDAQCOMPOSITE 2026-10-27",
       "source": "Yahoo completed cash-session daily",
@@ -57,7 +59,7 @@
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-27",
       "detail": "WTI 2026-10-27 · BRENT 2026-10-27 · NATGAS 2026-10-27",
       "source": "Yahoo CL=F / BZ=F / NG=F",
@@ -66,7 +68,7 @@
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-27",
       "detail": "DXY 2026-10-27 · USDKRW 2026-10-27 · USDJPY 2026-10-27 · JPYKRW 2026-10-27",
       "source": "Yahoo DXY / FX daily",
@@ -75,7 +77,7 @@
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-27",
       "detail": "GOLD 2026-10-27 · SILVER 2026-10-27 · COPPER 2026-10-27",
       "source": "Yahoo Gold / Silver / Copper",
@@ -92,17 +94,17 @@
     },
     "kr_rates": {
       "label": "KR Rates",
-      "state": "LIVE",
-      "generated_kst": "2026-10-28T17:43:06+09:00",
+      "state": "STALE",
+      "generated_kst": "2026-10-28T18:54:32+09:00",
       "as_of": "2026-10-28",
-      "detail": "KR3Y 2026-10-28 · KR5Y 2026-10-28 · KR10Y 2026-10-28 · KR20Y 2026-10-28 · KR30Y 2026-10-28 · KR_3S10S 2026-10-28",
+      "detail": "KR3Y 2026-10-28 · KR5Y 2026-10-28 · KR10Y 2026-10-28 · KR20Y 2026-10-28 · KR30Y 2026-10-28 · KR_3S10S 2026-10-28 · 수집 실패: KR3Y (RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout), KR5Y (RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN), KR10Y (RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN), KR20Y (RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN), KR30Y (RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN)",
       "source": "BOK ECOS",
       "critical": false
     },
     "jp_rates": {
       "label": "JP Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": "2026-10-27",
       "detail": "JP2Y 2026-10-27 · JP5Y 2026-10-27 · JP10Y 2026-10-27 · JP30Y 2026-10-27 · JP_2S10S 2026-10-27",
       "source": "Japan MOF current JGB CSV",
@@ -111,19 +113,19 @@
     "crypto": {
       "label": "Crypto",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=11s · ETHUSD age=14s",
+      "detail": "BTCUSD age=52s · ETHUSD age=59s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-28T17:43:04+09:00"
+          "quote_as_of_kst": "2026-10-28T18:53:52+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-28T17:43:01+09:00"
+          "quote_as_of_kst": "2026-10-28T18:53:45+09:00"
         }
       },
       "max_age_seconds": 3600
@@ -131,7 +133,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T17:43:14+09:00",
+      "generated_kst": "2026-10-28T18:54:43+09:00",
       "as_of": "2026-10-27",
       "detail": "snapshot=FINAL · Observatory session=2026-10-27",
       "source": "daily-market-pulse.json",
@@ -140,9 +142,9 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:42+09:00",
-      "as_of": "2026-10-27",
-      "detail": "33.6/100 · FEAR",
+      "generated_kst": "2026-10-28T18:53:54+09:00",
+      "as_of": "2026-10-28",
+      "detail": "34.3/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
@@ -158,7 +160,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T17:43:14+09:00",
+      "generated_kst": "2026-10-28T18:54:43+09:00",
       "as_of": "2026-10-27",
       "detail": "상승 · TQQQ 100%",
       "source": "public-market-daily.json + observatory.json",
@@ -167,8 +169,8 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-10-28T11:28:47+09:00",
-      "as_of": "2026-10-27",
+      "generated_kst": "2026-10-28T18:54:33+09:00",
+      "as_of": "2026-10-28",
       "detail": "priced=46",
       "source": "sector-etf.json",
       "critical": false
@@ -201,10 +203,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-28T17:43:15+09:00",
+      "state": "WARN",
+      "generated_kst": "2026-10-28T18:54:44+09:00",
       "as_of": "2026-10-27",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     },
