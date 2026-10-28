@@ -69,6 +69,13 @@ function freshness(l,now=Date.now()){
  return {kind:closed?'closed':'good',state:closed?'CLOSED':'LIVE',text:closed?'장 마감 · 다음 수집 대기':'최신 수집 기준',age_ms:now-t};
 }
 function positionDay(p,a){
+ const effect=a?.holding_price_effect;
+ if(effect){
+  const key=v=>String(v||'').toUpperCase().replace(/\.(KS|KQ)$/,'');
+  const rows=(effect.positions||[]).filter(r=>key(r.ticker)===key(p?.ticker||p?.symbol));
+  return rows.length===1?number(rows[0].price_effect_krw):null;
+ }
+ if(a?.today_pnl_scope==='CT_US_CLOSE_PERFORMANCE_DAY_V1')return null;
  const direct=first(p,['daily_pnl','day_pnl_krw','regular_pnl']);if(direct!=null)return direct;
  const native=number(p?.day_pnl),f=currency(p)==='USD'?fx(a,p):1;if(native!=null)return f==null?null:native*f;
  const q=first(p,['qty','quantity']),cur=first(p,['current_price','price']),prev=number(p?.prev_close);
