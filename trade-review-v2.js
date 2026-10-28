@@ -2,8 +2,8 @@
 'use strict';
 
 const CFG={
-  primary:['overview','trades','portfolio','accounts'],
-  secondary:['compare','tripod','decisions','quality','watchlist','cost'],
+  primary:['overview','portfolio','accounts','tripod'],
+  secondary:['trades','compare','decisions','quality','watchlist','cost'],
   recentDays:90,
   pendingDays:7
 };
@@ -200,7 +200,7 @@ function ensureStyle(){
 @media(max-width:767px){
  html.ctTouchTablet .tabs,html .tabs,.tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;height:56px!important;overflow:visible!important}
  html.ctTouchTablet .tabs>.tab[data-tab],html .tabs>.tab[data-tab],.tabs>.tab[data-tab]{display:none!important;font-size:11px!important;min-width:0!important;width:auto!important;height:48px!important;padding:4px 3px!important;flex:none!important}
- html.ctTouchTablet .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="overview"]{display:flex!important;order:1}html.ctTouchTablet .tabs>.tab[data-tab="trades"],.tabs>.tab[data-tab="trades"]{display:flex!important;order:2}html.ctTouchTablet .tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="portfolio"]{display:flex!important;order:3}html.ctTouchTablet .tabs>.tab[data-tab="accounts"],.tabs>.tab[data-tab="accounts"]{display:flex!important;order:4}#ctMoreTab{display:flex!important;order:5;font-size:11px!important;align-items:center;justify-content:center;min-width:0!important;width:auto!important;height:48px!important}
+ html.ctTouchTablet .tabs>.tab[data-tab="overview"],.tabs>.tab[data-tab="overview"]{display:flex!important;order:1}html.ctTouchTablet .tabs>.tab[data-tab="portfolio"],.tabs>.tab[data-tab="portfolio"]{display:flex!important;order:2}html.ctTouchTablet .tabs>.tab[data-tab="accounts"],.tabs>.tab[data-tab="accounts"]{display:flex!important;order:3}html.ctTouchTablet .tabs>.tab[data-tab="tripod"],.tabs>.tab[data-tab="tripod"]{display:flex!important;order:4}#ctMoreTab{display:flex!important;order:5;font-size:11px!important;align-items:center;justify-content:center;min-width:0!important;width:auto!important;height:48px!important}
  #ctTradeReviewV2{margin:4px 0 18px}.ctTrHead{margin:4px 0 10px}.ctTrTitle{font-size:18px;font-weight:900;color:#14243a}.ctTrSub{font-size:10px;color:#7d8b9d;margin-top:2px}.ctTrToolbar{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:9px}.ctTrFilters,.ctTrSorts{display:flex;gap:5px;flex-wrap:wrap}.ctTrChip{border:1px solid #d8e1ea;background:#fff;color:#475467;border-radius:999px;padding:7px 9px;font:800 10px/1 system-ui}.ctTrChip.on{background:#0b2f5d;color:#fff;border-color:#0b2f5d}
  .ctTicker{background:#fff;border:1px solid #e5eaf0;border-radius:11px;margin-bottom:5px;overflow:hidden;box-shadow:0 4px 12px rgba(12,31,54,.035)}.ctTickerHead{display:grid;grid-template-columns:minmax(72px,1fr) auto;gap:6px;padding:6px 9px;min-height:38px;align-items:center;cursor:pointer}.ctTickerName{font-size:12px;font-weight:900;color:#101828;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ctTickerMeta{display:none}.ctTickerRight{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;text-align:right}.ctTickerScore{font-size:10px;font-weight:900;color:#101828;white-space:nowrap}.ctTickerVerdict{font-size:9px;color:#667085;margin:0;white-space:nowrap;max-width:118px;overflow:hidden;text-overflow:ellipsis}.ctTickerBody{display:none;border-top:1px solid #edf1f5;background:#fbfcfe;padding:7px}.ctTicker.open .ctTickerBody{display:block}
  .ctSleeve{background:#fff;border:1px solid #e8edf2;border-radius:10px;margin-bottom:6px;overflow:hidden}.ctSleeve:last-child{margin-bottom:0}.ctSleeveHead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:9px 10px;align-items:center;cursor:pointer}.ctSleeveName{font-size:11px;font-weight:900;color:#101828}.ctSleeveMeta{font-size:8px;color:#7d8b9d;margin-top:2px}.ctSleeveRight{text-align:right}.ctSleeveRet{font-size:11px;font-weight:900}.ctSleeveRet.pos{color:#d92d20}.ctSleeveRet.neg{color:#175cd3}.ctSleeveVerdict{font-size:8px;color:#667085;margin-top:2px}.ctSleeveDetail{display:none;border-top:1px solid #edf1f5;background:#fbfcfe;padding:8px 9px}.ctSleeve.open .ctSleeveDetail{display:block}
@@ -242,9 +242,9 @@ function ensureNav(){
   if(window.innerWidth<=767){more.style.setProperty('display','flex','important');more.style.setProperty('order','5','important');more.style.setProperty('width','100%','important');more.style.setProperty('min-width','0','important');more.style.setProperty('justify-self','stretch','important');more.textContent='더보기'}else{for(const k of ['display','order','width','min-width','justify-self'])more.style.removeProperty(k)}
   const menuIds=qsa('button[data-tab]',menu).map(b=>b.dataset.tab);
   const menuOk=menuIds.length===CFG.secondary.length&&new Set(menuIds).size===CFG.secondary.length&&CFG.secondary.every(id=>menuIds.includes(id));
-  if(menu.dataset.tradeReviewMenu!=='v2'||!menuOk){
+  if(document.documentElement.dataset.ctNavOwner!=='v14'&&(menu.dataset.tradeReviewMenu!=='v2'||!menuOk)){
     menu.innerHTML='';
-    const labels={compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
+    const labels={trades:'거래내역',compare:'성과분석',tripod:'TRI-POD',decisions:'의사결정',quality:'데이터품질',watchlist:'시황/워치',cost:'COST'};
     CFG.secondary.forEach(id=>{
       const src=qs('.tab[data-tab="'+id+'"]');if(!src)return;
       const b=document.createElement('button');b.type='button';b.dataset.tab=id;b.textContent=labels[id]||src.textContent.trim()||id;
