@@ -32,6 +32,10 @@ function cash(a){
 function stock(a){const ps=positions(a);return ps.length?sum(ps.map(p=>valueKrw(p,a))):Array.isArray(a?.positions)?0:null}
 function previous(a){const explicit=first(a,['previous_nav','previous_nav_krw','baseline_nav']);if(explicit!=null)return explicit;const nav=number(a?.nav),day=number(a?.today_pnl),flow=number(a?.net_flow);return nav!=null&&day!=null&&flow!=null?nav-day-flow:null}
 function confirmedIrpPrincipal(a){return number(a?.principal)>0&&a?.principal_basis==='NET_CONTRIBUTED_CAPITAL'&&['BROKER_MEASURED','USER_CONFIRMED','RECONCILED'].includes(a?.principal_quality)}
+function tossHoldingPerformance(a){
+ const valid=a?.official_pnl_valid===true;
+ return {pnl:valid?number(a?.official_total_pnl_krw_equiv):null,return_pct:valid?number(a?.official_total_return_pct):null,source:valid?'TOSS_HOLDINGS':'UNAVAILABLE',observed_at:a?.observed_at||null};
+}
 function cumulative(a){
  const principal=number(a?.principal),nav=number(a?.nav);
  if(String(a?.id||'').toUpperCase()==='IRP'){
@@ -71,7 +75,7 @@ function positionDay(p,a){
  return q!=null&&cur>0&&prev>0&&f!=null?q*(cur-prev)*f:null;
 }
 function audit(c){const rows={};for(const id of IDS){const a=c.accounts?.[id]||{},s=stock(a),k=cash(a),nav=number(a.nav);rows[id]={stock:s,cash:k,nav,gap:s!=null&&k!=null&&nav!=null?nav-s-k:null,cash_kind:a.cash_kind||'CASH',position_count:positions(a).length}}return rows}
-const api={IDS,accountOwner,number,first,sum,positions,currency,fx,valueKrw,cash,stock,previous,confirmedIrpPrincipal,cumulative,dayQuality,aggregate,dayKey,parseMs,freshness,positionDay,audit};
+const api={IDS,accountOwner,number,first,sum,positions,currency,fx,valueKrw,cash,stock,previous,confirmedIrpPrincipal,cumulative,tossHoldingPerformance,dayQuality,aggregate,dayKey,parseMs,freshness,positionDay,audit};
 root.JjooniMetrics=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window==='object'?window:globalThis);
 
