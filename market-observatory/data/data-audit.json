@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-29T05:31:40+09:00",
+  "generated_kst": "2026-10-29T05:31:42+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 3,
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-10-29T05:31:39+09:00",
+      "generated_kst": "2026-10-29T05:31:41+09:00",
       "session": "2026-10-28",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-10-29T05:31:39+09:00",
+      "generated_kst": "2026-10-29T05:31:41+09:00",
       "session": "2026-10-28",
       "ok": true,
       "target": "TQQQ 100%"
@@ -68,11 +68,14 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-29T04:50:19+09:00",
+      "generated_kst": "2026-10-29T05:31:40+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "calendar"
+        "jp_rates",
+        "fedwatch",
+        "calendar",
+        "audit"
       ]
     },
     "watchdog": {
@@ -351,7 +354,7 @@
       "critical": false,
       "items": {
         "KR3Y": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 3.799,
           "group": "kr_rates",
@@ -359,7 +362,7 @@
           "latest_matches": true
         },
         "KR5Y": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 3.949,
           "group": "kr_rates",
@@ -367,7 +370,7 @@
           "latest_matches": true
         },
         "KR10Y": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 4.108,
           "group": "kr_rates",
@@ -375,7 +378,7 @@
           "latest_matches": true
         },
         "KR20Y": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 4.193,
           "group": "kr_rates",
@@ -383,7 +386,7 @@
           "latest_matches": true
         },
         "KR30Y": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 4.221,
           "group": "kr_rates",
@@ -391,7 +394,7 @@
           "latest_matches": true
         },
         "KR_3S10S": {
-          "count": 20,
+          "count": 276,
           "last_date": "2026-10-28",
           "last_value": 0.309,
           "group": "kr_rates",
@@ -518,14 +521,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T05:31:32+09:00",
-      "current_quote_age_seconds": 8,
+      "current_quote_age_seconds": 10,
       "captured_quote_age_seconds": 4
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T05:31:32+09:00",
-      "current_quote_age_seconds": 8,
+      "current_quote_age_seconds": 10,
       "captured_quote_age_seconds": 5
     }
   },
