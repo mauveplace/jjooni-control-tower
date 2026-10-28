@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-28T09:29:59+09:00",
+  "generated_kst": "2026-10-28T10:10:37+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,7 +9,10 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "calendar"
+    "jp_rates",
+    "crypto",
+    "calendar",
+    "audit"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -101,7 +104,7 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-28T08:02:19+09:00",
       "as_of": "2026-10-26",
       "detail": "JP2Y 2026-10-26 · JP5Y 2026-10-26 · JP10Y 2026-10-26 · JP30Y 2026-10-26 · JP_2S10S 2026-10-26",
@@ -110,19 +113,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-28T08:02:19+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=2392s · ETHUSD age=2390s",
+      "detail": "BTCUSD age=4830s · ETHUSD age=4828s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-28T08:50:07+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-28T08:50:09+09:00"
         }
       },
@@ -185,8 +188,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-28T09:27:15+09:00",
-      "as_of": "2026-10-28T09:27:15+09:00",
+      "generated_kst": "2026-10-28T10:10:32+09:00",
+      "as_of": "2026-10-28T10:10:32+09:00",
       "detail": "events=186 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=3",
       "source": "economic-calendar.json",
       "critical": false,
@@ -201,10 +204,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-28T09:29:59+09:00",
+      "state": "WARN",
+      "generated_kst": "2026-10-28T10:10:37+09:00",
       "as_of": "2026-10-27",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     },
