@@ -40,7 +40,7 @@ function activateTab(name){
 function ensureMobileNav(){
  const tabs=qs('.tabs');if(!tabs)return;
  document.documentElement.dataset.ctLayout='mobile-first';
- if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.4-top-compact';document.head.appendChild(link)}
+ if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.5-stable-touch&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261028-r14');document.head.appendChild(link)}
  qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase();t.dataset.primary=PRIMARY_TABS.includes(id)?'1':'0';t.setAttribute('role','button');t.tabIndex=0;t.setAttribute('aria-label',t.textContent.trim());if(!t.dataset.keyboardBound){t.dataset.keyboardBound='1';t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click()}})}});
  let more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');
  if(!more){more=document.createElement('button');more.id='ctMoreTab';more.type='button';more.textContent='더보기';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','ctMoreMenu');tabs.append(more)}
