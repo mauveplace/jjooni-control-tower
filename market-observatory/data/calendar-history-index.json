@@ -84,7 +84,7 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-28T10:10:34+09:00",
+  "generated_kst": "2026-10-28T17:00:31+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37796,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
@@ -12542,51 +12542,6 @@
       "ref": "KR::2026년-3분기-실질-gdp::gdp_qoq",
       "sha256": "76bafd2c8e9ec0674f8ef765770e9082c1d886eabbb9581afb3664833a6e39ea"
     },
-    "KR::2026년-4분기-실질-gdp": {
-      "available_from": null,
-      "available_to": null,
-      "category": "GDP",
-      "count": 0,
-      "country": "KR",
-      "event_title": "2026년 3/4분기 실질 GDP(속보)",
-      "kind": "event",
-      "label": "2026년 3/4분기 실질 GDP(속보)",
-      "path": "./calendar-history/series/ac6b5918f258f7520469ba3343b09758893b4e852a27f1907aac5a663e1d88a6.json",
-      "quality": {
-        "actual_count": 0,
-        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 0,
-        "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 0,
-        "rows_by_year": {},
-        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
-      },
-      "ref": "KR::2026년-4분기-실질-gdp",
-      "sha256": "ac6b5918f258f7520469ba3343b09758893b4e852a27f1907aac5a663e1d88a6"
-    },
-    "KR::2026년-4분기-실질-gdp::gdp_qoq": {
-      "available_from": null,
-      "available_to": null,
-      "category": "GDP",
-      "count": 0,
-      "country": "KR",
-      "event_title": "2026년 3/4분기 실질 GDP(속보)",
-      "kind": "metric",
-      "label": "GDP QoQ",
-      "metric_key": "gdp_qoq",
-      "path": "./calendar-history/series/b5197cfa7ce32eef7dcb27f878225920fc6c68ccc1ebc7e5f99f26ab768a5a3d.json",
-      "quality": {
-        "actual_count": 0,
-        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 0,
-        "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 0,
-        "rows_by_year": {},
-        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
-      },
-      "ref": "KR::2026년-4분기-실질-gdp::gdp_qoq",
-      "sha256": "b5197cfa7ce32eef7dcb27f878225920fc6c68ccc1ebc7e5f99f26ab768a5a3d"
-    },
     "KR::고용동향": {
       "available_from": "2026-09-09",
       "available_to": "2026-10-16",
@@ -12767,7 +12722,7 @@
       "event_title": "2026년 8월 산업활동동향",
       "kind": "event",
       "label": "2026년 8월 산업활동동향",
-      "path": "./calendar-history/series/583a22224d09f4dbbae5c17c7ce3d1fd5bdb84fad326075b609e9383cd617c04.json",
+      "path": "./calendar-history/series/c572dc93bc56d287affca250afc566b63a7e2c5c00b1f2f3da8a3fdfee0b4dfe.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12780,7 +12735,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::산업활동동향",
-      "sha256": "583a22224d09f4dbbae5c17c7ce3d1fd5bdb84fad326075b609e9383cd617c04"
+      "sha256": "c572dc93bc56d287affca250afc566b63a7e2c5c00b1f2f3da8a3fdfee0b4dfe"
     },
     "KR::생산자물가지수": {
       "available_from": "2026-09-18",
@@ -12914,7 +12869,7 @@
       "event_title": "2026년 8월 소비자물가동향",
       "kind": "event",
       "label": "2026년 8월 소비자물가동향",
-      "path": "./calendar-history/series/b967e0692c197daeb4a979ece15886ec3b5bcfa614eb7e407b213263326dd2d8.json",
+      "path": "./calendar-history/series/1a24ba4cec3daef9ebd28e7c46ef3615c478f6a08b77b714554a56f1e6c29a6e.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12927,7 +12882,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::소비자물가동향",
-      "sha256": "b967e0692c197daeb4a979ece15886ec3b5bcfa614eb7e407b213263326dd2d8"
+      "sha256": "1a24ba4cec3daef9ebd28e7c46ef3615c478f6a08b77b714554a56f1e6c29a6e"
     },
     "KR::소비자물가동향::kr_cpi_mom": {
       "available_from": "2026-09-02",
@@ -14811,9 +14766,9 @@
     }
   },
   "series_completeness_status": "NOT_VALIDATED",
-  "series_count": 437,
-  "snapshot_id": "1a9dd96b8a49a656045fa332fa59180f510f0118a50348e583a2666db9a9edd8",
-  "source_sha256": "1a9dd96b8a49a656045fa332fa59180f510f0118a50348e583a2666db9a9edd8",
+  "series_count": 435,
+  "snapshot_id": "1a33ece4f1565bbb95a30d2e026437d62ff39e565f7e4755b09e0e694bc1be03",
+  "source_sha256": "1a33ece4f1565bbb95a30d2e026437d62ff39e565f7e4755b09e0e694bc1be03",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
   "window_end": "2026-10-28",
