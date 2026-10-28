@@ -30,6 +30,8 @@ function style(){if(qs('#ctTabletAccountsV8Style'))return;const s=document.creat
  #ctDesktopAccountsV8 .ctHoldingDetail>summary .ctHoldingRate{font-size:15px!important;font-weight:800;white-space:nowrap!important}
  html[data-ct-layout="mobile-first"] body #ctDesktopAccountsV8 .ctHoldingDetail>summary .ctHoldingRate.gain{color:#d92d20!important}
  html[data-ct-layout="mobile-first"] body #ctDesktopAccountsV8 .ctHoldingDetail>summary .ctHoldingRate.loss{color:#175cd3!important}
+ html[data-ct-layout="mobile-first"] body #ctDesktopAccountsV8 .ctAccountHoldingRows .ctHoldingPeriod.gain{color:#d92d20!important}
+ html[data-ct-layout="mobile-first"] body #ctDesktopAccountsV8 .ctAccountHoldingRows .ctHoldingPeriod.loss{color:#175cd3!important}
  #ctDesktopAccountsV8 .ctHoldingDetail>summary .ctHoldingPeriod{font-size:11px!important;font-weight:700;white-space:nowrap!important}
  #ctDesktopAccountsV8 .ctHoldingDetail>summary .ctHoldingBasis{font-size:11px!important;color:#667085!important;white-space:nowrap!important}
 }
@@ -44,15 +46,23 @@ function holdingRate(p,fund,price,avg){
 }
 function periodData(id,ticker){
  const live=L(),d=live.performance_day,pc=d?.price_comparisons,now=Date.now(),start=Date.parse(d?.start_kst),end=Date.parse(d?.end_kst),at=Date.parse(d?.as_of_kst);
- if(d?.schema!=='CT_US_CLOSE_PERFORMANCE_DAY_V1'||!live.snapshot_id||d.snapshot_id!==live.snapshot_id||pc?.snapshot_id!==live.snapshot_id||pc?.schema!=='CT_HOLDING_PRICE_COMPARISONS_V1'||pc.current?.start_kst!==d.start_kst||![start,end,at].every(Number.isFinite)||!(start<=at&&at<end&&start<=now&&now<end))return {stale:true};
+ if(d?.schema!=='CT_US_CLOSE_PERFORMANCE_DAY_V1'||!live.snapshot_id||C().snapshot_id!==live.snapshot_id||d.snapshot_id!==live.snapshot_id||pc?.snapshot_id!==live.snapshot_id||pc?.schema!=='CT_HOLDING_PRICE_COMPARISONS_V1'||pc.current?.start_kst!==d.start_kst||![start,end,at].every(Number.isFinite)||!(start<=at&&at<end&&start<=now&&now<end))return {stale:true};
  const key=String(ticker||'').trim().toUpperCase();
- const get=period=>{const matches=(pc[period]?.accounts?.[id]?.positions||[]).filter(x=>String(x.ticker||'').trim().toUpperCase()===key);if(!key||matches.length!==1)return null;const p=matches[0],amount=n(p.price_effect_krw),base=n(p.baseline_value_krw);return p.state==='CALCULATED'&&amount!=null&&base>0?{amount,rate:100*amount/base,date:p.baseline_session_date,price:p.baseline_price}:null};
+ const get=period=>{if(pc[period]?.snapshot_id!==live.snapshot_id)return null;const matches=(pc[period]?.accounts?.[id]?.positions||[]).filter(x=>String(x.ticker||'').trim().toUpperCase()===key);if(!key||matches.length!==1)return null;const p=matches[0],amount=n(p.price_effect_krw),base=n(p.baseline_value_krw);return p.state==='CALCULATED'&&amount!=null&&base>0?{amount,rate:100*amount/base,date:p.baseline_session_date,price:p.baseline_price}:null};
  return {today:get('current'),week:get('week')};
+}
+function periodCoverage(id){
+ const live=L(),d=live.performance_day,pc=d?.price_comparisons;
+ if(periodData(id,'').stale)return '';
+ const label=key=>{const p=pc?.[key],a=p?.accounts?.[id];if(p?.snapshot_id!==live.snapshot_id||!a)return key==='current'?'오늘 확인 중':'전주 확인 중';
+ const rows=Array.isArray(a.positions)?a.positions:[],valid=rows.filter(x=>x.state==='CALCULATED'&&n(x.price_effect_krw)!=null),total=n(a.known_subtotal_krw),sum=valid.reduce((acc,x)=>acc+n(x.price_effect_krw),0),match=total!=null&&valid.length===n(a.known_count)&&Math.abs(sum-total)<1;
+ return (key==='current'?'오늘':'전주')+' '+valid.length+'/'+(n(a.position_count)??'?')+'종목 · '+(match?'합계 일치':'합계 확인 필요')+(n(a.excluded_funds_count)>0?' · 펀드 '+a.excluded_funds_count+'건 제외':'');};
+ return label('current')+' / '+label('week');
 }
 function holdingDetails(a,id){
  const M=window.JjooniMetrics,rows=M.positions(a);
  const metric=(label,value)=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
- return `<details class="ctAccountHoldings" data-disclosure-key="${id}"><summary>보유종목 ${rows.length}개 보기</summary><small>오늘·전주: 현재 보유수량·현재 환율 기준 가격변동 · 매매·배당·비용·환율변동 제외</small><div class="ctAccountHoldingRows">${rows.map((p,i)=>{
+ return `<details class="ctAccountHoldings" data-disclosure-key="${id}"><summary>보유종목 ${rows.length}개 보기</summary><small>오늘·전주: 현재 보유수량·현재 환율 기준 가격변동 · 매매·배당·비용·환율변동 제외<br>${esc(periodCoverage(id))}</small><div class="ctAccountHoldingRows">${rows.map((p,i)=>{
   const ticker=String(p.ticker||p.symbol||''),fund=String(p.record_type||'').toUpperCase()==='FUND'||/^F\d+$/i.test(ticker),qty=M.first(p,['qty','quantity','held_qty']),value=M.valueKrw(p,a),price=M.first(p,['current_price','price','last_price']),avg=M.first(p,['avg_price','average_price','purchase_price']),period=periodData(id,ticker),day=period.today?.amount,cum=M.first(p,['pnl_krw','total_pnl_krw','evaluation_pnl_krw','unrealized_pnl_krw']),unit=M.currency(p)==='USD'?' USD':'원',native=x=>x==null?'확인 필요':x.toLocaleString('ko-KR',{maximumFractionDigits:unit==='원'?0:4})+unit;
   const brokerRate=id==='TOSS'?n(p.broker_holding_return_pct):null,rate=brokerRate!=null?{value:brokerRate,basis:'토스 보유 기준'}:holdingRate(p,fund,price,avg);
   const periodLine=(label,v)=>`<span class="ctHoldingPeriod ${v?cls(v.amount):'neutral'}">${label} ${v?signed(v.amount)+' · '+pct(v.rate):(period.stale?'갱신 필요':'기준가 확인 필요')}</span>`;
