@@ -303,10 +303,14 @@ jobs:
               freshness=c.get('actual_freshness') or {}
               if rate.get('actual') is None:
                   assert freshness.get('status') in ['PENDING','DEGRADED'],(rate,freshness)
-          for key in ['previous','consensus','actual']:
+          # FedWatch is a dated market-probability snapshot, not a release with
+          # a prior-period actual. Its previous field is optional after FOMC rollover.
+          for key in ['consensus','actual','source','observed_date']:
               assert key in fw,(key,fw)
-          if not fw.get('previous') or not fw.get('consensus'):
-              print('MARKET_OBSERVATORY_WARN=FEDWATCH_REFERENCE_MISSING',fw)
+          if not fw.get('consensus'):
+              print('MARKET_OBSERVATORY_WARN=FEDWATCH_CONSENSUS_MISSING',fw)
+          else:
+              assert fw.get('source') and fw.get('observed_date'),fw
           assert fw.get('actual') is None,fw
           assert fw.get('metric_type')=='market_probability_snapshot' and fw.get('value_role')=='market_forecast',fw
           assert a.get('schema')=='JJOONI_MARKET_OBSERVATORY_AI_READ_CONTRACT_V1'
