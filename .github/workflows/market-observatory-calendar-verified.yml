@@ -73,7 +73,20 @@ jobs:
           fw_event=find(fw_kst,'FOMC 정책결정')
           fw=next((m for m in (fw_event or {}).get('market_metrics',[]) if m.get('key')=='fedwatch_hike_25bp'),None)
           assert fw and fw.get('metric_type')=='market_probability_snapshot',fw
-          assert fw.get('previous') and fw.get('consensus') and fw.get('actual') is None,fw
+          # Compare the snapshot to its source; do not fabricate a prior observation
+          # when the next meeting becomes the front contract after an FOMC roll.
+          assert fw.get('observed_date') == fwd.get('market_data_as_of'),fw
+          assert fw.get('consensus') == f"{float(fwd['hike_25bp_probability'])*100:.1f}%",fw
+          assert fw.get('actual') is None,fw
+          valid_history=sorted((x for x in (fwd.get('history') or [])
+              if x.get('trade_date') and x.get('trade_date') <= fwd['market_data_as_of']
+              and x.get('hike_25bp_probability') is not None),
+              key=lambda x:x['trade_date'])
+          if len(valid_history) >= 2:
+              assert fw.get('previous') == f"{float(valid_history[-2]['hike_25bp_probability'])*100:.1f}%",fw
+              assert fw.get('previous_observed_date') == valid_history[-2]['trade_date'],fw
+          else:
+              assert fw.get('previous') is None and fw.get('previous_observed_date') is None,fw
           assert fw.get('value_role')=='market_forecast',fw
           mich=find('2026-09-11','University of Michigan Consumer Sentiment')
           assert mich,mich
@@ -92,7 +105,7 @@ jobs:
           assert micron and micron['datetime_kst']=='2026-10-01T05:30+09:00',micron
           assert not find('2026-09-23','Micron')
           print('VERIFIED_CALENDAR_ACCEPTANCE=PASS')
-          print('FOMC=',fomc['datetime_kst'],'MICH=',mm['umich_sentiment']['actual'],'FEDWATCH_PREV/CURRENT=',fw['previous'],fw['consensus'],'BOE=',boe['datetime_kst'],'CLAIMS=',claims['datetime_kst'],'MICRON=',micron['datetime_kst'])
+          print('FOMC=',fomc['datetime_kst'],'MICH=',mm['umich_sentiment']['actual'],'FEDWATCH_PREV/CURRENT=',fw.get('previous'),fw['consensus'],'BOE=',boe['datetime_kst'],'CLAIMS=',claims['datetime_kst'],'MICRON=',micron['datetime_kst'])
           PY
       - name: Publish verified calendar
         shell: bash

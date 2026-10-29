@@ -29,6 +29,24 @@ assert metric['actual'] is None,metric
 assert metric['value_role']=='market_forecast',metric
 assert event.get('actual') is None,event
 assert MOD.merge_sources('A + B','B + C','A')=='A + B + C'
+# A newly front-month meeting may have no two-point verified history yet.
+# Keep the market forecast, never invent the missing previous observation.
+forward_calendar={'events':[{
+    'datetime_kst':'2026-12-10T04:00+09:00','title':'FOMC 정책결정','country':'US',
+    'market_metrics':[]
+}]}
+forward_fedwatch={
+    'meeting_date':'2026-12-09','market_data_as_of':'2026-10-28',
+    'hike_25bp_probability':0.794,'history':[],
+}
+assert MOD.apply_fedwatch_metric(forward_calendar,forward_fedwatch) is True
+forward_metric=forward_calendar['events'][0]['market_metrics'][0]
+assert forward_metric['previous'] is None,forward_metric
+assert forward_metric['previous_observed_date'] is None,forward_metric
+assert forward_metric['consensus']=='79.4%',forward_metric
+assert forward_metric['observed_date']=='2026-10-28',forward_metric
+assert forward_metric['actual'] is None,forward_metric
+
 print('CALENDAR_MARKET_SEMANTICS_TEST=PASS')
 
 
