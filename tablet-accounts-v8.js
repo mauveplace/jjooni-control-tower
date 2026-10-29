@@ -44,19 +44,26 @@ function holdingRate(p,fund,price,avg){
  if(!['KRW','USD'].includes(currency)||!(price>0&&avg>0))return null;
  const value=100*(price/avg-1);return Number.isFinite(value)?{value,basis:currency==='USD'?'달러 가격 기준':'가격 기준'}:null;
 }
+// Match the backend symbol contract; only Korean exchange suffixes are aliases.
+const periodSymbol=v=>String(v||'').trim().toUpperCase().replace(/\.(KS|KQ)$/,'');
 function periodData(id,ticker){
  const live=L(),d=live.performance_day,pc=d?.price_comparisons,now=Date.now(),start=Date.parse(d?.start_kst),end=Date.parse(d?.end_kst),at=Date.parse(d?.as_of_kst);
  if(d?.schema!=='CT_US_CLOSE_PERFORMANCE_DAY_V1'||!live.snapshot_id||C().snapshot_id!==live.snapshot_id||d.snapshot_id!==live.snapshot_id||pc?.snapshot_id!==live.snapshot_id||pc?.schema!=='CT_HOLDING_PRICE_COMPARISONS_V1'||pc.current?.start_kst!==d.start_kst||![start,end,at].every(Number.isFinite)||!(start<=at&&at<end&&start<=now&&now<end))return {stale:true};
- const key=String(ticker||'').trim().toUpperCase();
- const get=period=>{if(pc[period]?.snapshot_id!==live.snapshot_id)return null;const matches=(pc[period]?.accounts?.[id]?.positions||[]).filter(x=>String(x.ticker||'').trim().toUpperCase()===key);if(!key||matches.length!==1)return null;const p=matches[0],amount=n(p.price_effect_krw),base=n(p.baseline_value_krw);return p.state==='CALCULATED'&&amount!=null&&base>0?{amount,rate:100*amount/base,date:p.baseline_session_date,price:p.baseline_price}:null};
+ const key=periodSymbol(ticker);
+ const get=period=>{if(pc[period]?.snapshot_id!==live.snapshot_id)return null;const matches=(pc[period]?.accounts?.[id]?.positions||[]).filter(x=>periodSymbol(x.ticker||x.symbol)===key);if(!key||matches.length!==1)return null;const p=matches[0],amount=n(p.price_effect_krw),base=n(p.baseline_value_krw);return p.state==='CALCULATED'&&amount!=null&&base>0?{amount,rate:100*amount/base,date:p.baseline_session_date,price:p.baseline_price}:null};
  return {today:get('current'),week:get('week')};
 }
 function periodCoverage(id){
  const live=L(),d=live.performance_day,pc=d?.price_comparisons;
- if(periodData(id,'').stale)return '';
- const label=key=>{const p=pc?.[key],a=p?.accounts?.[id];if(p?.snapshot_id!==live.snapshot_id||!a)return key==='current'?'오늘 확인 중':'전주 확인 중';
- const rows=Array.isArray(a.positions)?a.positions:[],valid=rows.filter(x=>x.state==='CALCULATED'&&n(x.price_effect_krw)!=null),total=n(a.known_subtotal_krw),sum=valid.reduce((acc,x)=>acc+n(x.price_effect_krw),0),match=total!=null&&valid.length===n(a.known_count)&&Math.abs(sum-total)<1;
- return (key==='current'?'오늘':'전주')+' '+valid.length+'/'+(n(a.position_count)??'?')+'종목 · '+(match?'합계 일치':'합계 확인 필요')+(n(a.excluded_funds_count)>0?' · 펀드 '+a.excluded_funds_count+'건 제외':'');};
+ if(periodData(id,'').stale)return '오늘·전주 가격변동 갱신 필요';
+ const holdings=window.JjooniMetrics.positions(C().accounts?.[id]||{});
+ const label=key=>{const p=pc?.[key],a=p?.accounts?.[id],name=key==='current'?'오늘':'전주';
+ if(p?.snapshot_id!==live.snapshot_id||!a)return name+' 기준자료 확인 중';
+ const rows=holdings.map(h=>periodData(id,h.ticker||h.symbol)[key==='current'?'today':'week']),valid=rows.filter(Boolean),missing=rows.length-valid.length;
+ const total=n(a.known_subtotal_krw),sum=valid.reduce((acc,x)=>acc+x.amount,0),keys=holdings.map(h=>periodSymbol(h.ticker||h.symbol));
+ const complete=missing===0&&new Set(keys).size===keys.length&&valid.length===n(a.known_count)&&rows.length===n(a.position_count);
+ const match=complete&&total!=null&&Math.abs(sum-total)<1;
+ return name+' '+valid.length+'/'+rows.length+'종목 · '+(match?'합계 일치':missing?missing+'종목 기준자료 확인 필요':'합계 확인 필요')+(n(a.excluded_funds_count)>0?' · 펀드 '+a.excluded_funds_count+'건 제외':'');};
  return label('current')+' / '+label('week');
 }
 function holdingDetails(a,id){
@@ -65,7 +72,7 @@ function holdingDetails(a,id){
  return `<details class="ctAccountHoldings" data-disclosure-key="${id}"><summary>보유종목 ${rows.length}개 보기</summary><small>오늘·전주: 현재 보유수량·현재 환율 기준 가격변동 · 매매·배당·비용·환율변동 제외<br>${esc(periodCoverage(id))}</small><div class="ctAccountHoldingRows">${rows.map((p,i)=>{
   const ticker=String(p.ticker||p.symbol||''),fund=String(p.record_type||'').toUpperCase()==='FUND'||/^F\d+$/i.test(ticker),qty=M.first(p,['qty','quantity','held_qty']),value=M.valueKrw(p,a),price=M.first(p,['current_price','price','last_price']),avg=M.first(p,['avg_price','average_price','purchase_price']),period=periodData(id,ticker),day=period.today?.amount,cum=M.first(p,['pnl_krw','total_pnl_krw','evaluation_pnl_krw','unrealized_pnl_krw']),unit=M.currency(p)==='USD'?' USD':'원',native=x=>x==null?'확인 필요':x.toLocaleString('ko-KR',{maximumFractionDigits:unit==='원'?0:4})+unit;
   const brokerRate=id==='TOSS'?n(p.broker_holding_return_pct):null,rate=brokerRate!=null?{value:brokerRate,basis:'토스 보유 기준'}:holdingRate(p,fund,price,avg);
-  const periodLine=(label,v)=>`<span class="ctHoldingPeriod ${v?cls(v.amount):'neutral'}">${label} ${v?signed(v.amount)+' · '+pct(v.rate):(period.stale?'갱신 필요':'기준가 확인 필요')}</span>`;
+  const periodLine=(label,v)=>v?`<span class="ctHoldingPeriod ${v?cls(v.amount):'neutral'}">${label} ${signed(v.amount)+' · '+pct(v.rate)}</span>`:'';
   return `<article><details class="ctHoldingDetail" data-disclosure-key="${esc(id+'|'+ticker+'|'+i)}"><summary><b class="ctHoldingName">${esc(M.currency(p)==='USD'?ticker+' · '+(p.name||ticker):p.name||ticker)}</b><small class="ctHoldingMeta">${esc(ticker)} · ${fund?'펀드 · 좌수 기준 확인 필요':qty==null?'수량 확인 필요':qty.toLocaleString('ko-KR')+'주'} · 상세 보기</small><span class="ctHoldingRight"><strong>${won(value)}</strong><span class="ctHoldingRate ${rate?cls(rate.value):'neutral'}">${rate?pct(rate.value):'수익률 확인 필요'}</span><small class="ctHoldingBasis">${rate?esc(rate.basis):'매수 대비'}</small>${periodLine('오늘',period.today)}${periodLine('전주',period.week)}</span></summary><dl class="ctHoldingMetrics">${metric('현재가 · 원통화',native(price))}${metric('평균 매수가 · 원통화',native(avg))}${metric('오늘 보유 가격변동 · 원화',signed(day))}${metric('전주 보유 가격변동 · 원화',signed(period.week?.amount))}${metric('오늘 기준일 · 기준가',period.today?String(period.today.date||'확인 필요')+' · '+native(period.today.price):'확인 필요')}${metric('전주 기준일 · 기준가',period.week?String(period.week.date||'확인 필요')+' · '+native(period.week.price):'확인 필요')}${metric('누적 보유손익 · 원화',signed(cum))}${metric('계좌 내 비중',value!=null&&n(a.nav)>0?(value/a.nav*100).toFixed(2)+'%':'확인 필요')}${metric('평가액 · 원화',won(value))}</dl>${id==='TOSS'?`<small>토스 보유내역 기준 · 수집 ${esc(p.broker_holding_observed_at||'미확인')}<br>평가손익 ${signed(p.broker_holding_pnl_krw)} · 수익률 ${pct(p.broker_holding_return_pct)}<br>위 가격 기준 수익률과 기준 시점·환율 산식이 다를 수 있습니다.</small>`:''}${fund?'':`<button type="button" class="ctHoldingGraph" data-chart-symbol="${esc(ticker)}">일중 그래프 보기</button>`}<small>계좌 원본 기준 · 누락된 원가·손익은 임의 계산하지 않습니다.</small></details></article>`;
  }).join('')||'<p>원본에서 확인된 보유종목이 없습니다.</p>'}</div></details>`
 }
@@ -83,4 +90,5 @@ document.addEventListener('click',e=>{
 });
 setTimeout(render,0);setTimeout(render,700);document.addEventListener('jjooni:live-applied',render);window.addEventListener('resize',render);
 })();
+
 
