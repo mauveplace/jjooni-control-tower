@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-30T02:20:08+09:00",
+  "generated_kst": "2026-10-30T02:21:14+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -113,7 +113,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-30T01:17:49+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1993s · ETHUSD age=1994s",
+      "detail": "BTCUSD age=2059s · ETHUSD age=2060s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -185,8 +185,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-30T02:18:37+09:00",
-      "as_of": "2026-10-30T02:18:37+09:00",
+      "generated_kst": "2026-10-30T02:20:13+09:00",
+      "as_of": "2026-10-30T02:20:13+09:00",
       "detail": "events=186 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=1",
       "source": "economic-calendar.json",
       "critical": false,
@@ -200,7 +200,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "PASS",
-      "generated_kst": "2026-10-30T02:20:08+09:00",
+      "generated_kst": "2026-10-30T02:21:14+09:00",
       "as_of": "2026-10-28",
       "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
