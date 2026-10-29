@@ -187,6 +187,31 @@ def best_row(query, event, rows, threshold=58.0):
     return best, round(best_score, 2)
 
 
+def metric_identity_compatible(metric, row):
+    """Reject fuzzy matches that change the indicator, direction, or frequency.
+
+    Event titles often contain *both* import and export; fuzzy similarity alone
+    can otherwise copy the import observation into the export metric.  Likewise
+    PPI MoM must never be accepted as PPI YoY or as core PPI.
+    """
+    key = set(canonical(metric.get('key') or '').split())
+    observed = tokens(row.get('title'))
+    for qualifier in ('import', 'export', 'mom', 'yoy', 'qoq'):
+        if qualifier in key and qualifier not in observed:
+            return False
+    for a, opposite in (('import', 'export'), ('export', 'import'),
+                        ('mom', 'yoy'), ('yoy', 'mom'),
+                        ('mom', 'qoq'), ('qoq', 'mom'),
+                        ('yoy', 'qoq'), ('qoq', 'yoy')):
+        if a in key and opposite in observed:
+            return False
+    if 'core' in key and 'core' not in observed:
+        return False
+    if 'core' not in key and 'core' in observed and ('ppi' in key or 'cpi' in key):
+        return False
+    return True
+
+
 def patch_observation(target, row, now):
     before = {k: clean(target.get(k)) for k in ('previous','consensus','actual')}
     patch = {
@@ -243,9 +268,10 @@ def apply_all_event_enrichment(calendar, te, ff, now=None):
                 continue
             label = metric.get('label') or metric.get('key') or event.get('title')
             query = f"{label} {event.get('title') or ''}"
-            row, score = best_row(query, event, rows, threshold=57.0)
+            eligible_rows = [r for r in rows if metric_identity_compatible(metric, r)]
+            row, score = best_row(query, event, eligible_rows, threshold=57.0)
             if not row:
-                row, score = best_row(label, event, rows, threshold=57.0)
+                row, score = best_row(label, event, eligible_rows, threshold=57.0)
             if row:
                 updates += patch_observation(metric, row, checked)
                 metric['generic_match_score'] = score
