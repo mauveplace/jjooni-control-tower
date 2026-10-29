@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-29T09:53:54+09:00",
+  "generated_kst": "2026-10-29T10:13:27+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -116,17 +116,17 @@
       "state": "LIVE",
       "generated_kst": "2026-10-29T06:47:10+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=131s · ETHUSD age=137s",
+      "detail": "BTCUSD age=6s · ETHUSD age=2s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-29T09:51:43+09:00"
+          "quote_as_of_kst": "2026-10-29T10:13:21+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-29T09:51:37+09:00"
+          "quote_as_of_kst": "2026-10-29T10:13:25+09:00"
         }
       },
       "max_age_seconds": 3600
@@ -204,7 +204,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-10-29T09:53:54+09:00",
+      "generated_kst": "2026-10-29T10:13:27+09:00",
       "as_of": "2026-10-28",
       "detail": "critical=0 · warnings=3",
       "source": "data-audit.json",
