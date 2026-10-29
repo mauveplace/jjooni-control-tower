@@ -1,0 +1,27 @@
+name: Calendar Metric Identity Regression
+
+on:
+  pull_request:
+    paths:
+      - tools/enrich_calendar_all_events.py
+      - tests/test_calendar_all_events_history.py
+      - .github/workflows/calendar-metric-identity-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metric-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test BLS metric identity and existing calendar history
+        run: |
+          python -m pip install -r tools/requirements-observatory.txt
+          python -m py_compile tools/enrich_calendar_all_events.py tests/test_calendar_all_events_history.py
+          python -m unittest discover -s tests -p 'test_calendar_all_events_history.py' -v
