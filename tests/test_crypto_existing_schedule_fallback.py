@@ -10,7 +10,7 @@ WORKFLOW = ROOT / '.github/workflows/observatory-us-rates-intraday.yml'
 class ExistingRatesCryptoHeartbeatTests(unittest.TestCase):
     def test_no_new_schedule_or_runner_is_added(self):
         text = WORKFLOW.read_text(encoding='utf-8')
-        crons = re.findall(r"^\\s*- cron: '([^']+)'$", text, re.M)
+        crons = re.findall(r"^\s*- cron: '([^']+)'$", text, re.M)
         self.assertEqual(crons, ['17,47 * * * 1-5'])
         self.assertEqual(len(re.findall(r'^  collect:$', text, re.M)), 1)
 
