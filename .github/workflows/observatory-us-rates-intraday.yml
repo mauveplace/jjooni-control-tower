@@ -53,6 +53,20 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python tools/publish_observatory_data.py --message 'data(observatory): observed US yield intraday bars' market-observatory/data/us-rates-intraday.json
+      # Reuse this already-running weekday 30-minute runner when the independent
+      # crypto schedule is delayed. No additional cron, runner, or cloud service.
+      # Crypto failure must not alter the independent rates collection verdict.
+      - name: Best-effort BTC ETH quote refresh on existing rates heartbeat
+        if: github.event_name == 'schedule'
+        id: crypto
+        continue-on-error: true
+        run: python tools/refresh_observatory_crypto.py
+      - name: Publish fresh BTC ETH quotes only when source succeeded
+        if: github.event_name == 'schedule' && steps.crypto.outcome == 'success'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py --message 'data(observatory): crypto quotes via existing rates heartbeat' market-observatory/data/observatory.json
       - name: Expose partial source failures
         if: github.event_name != 'pull_request' && steps.source.outcome != 'success'
         run: |
