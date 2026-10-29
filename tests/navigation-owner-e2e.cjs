@@ -39,6 +39,37 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   }
   const bounds=await page.locator('.tabs .tab:visible').evaluateAll(xs=>xs.map(x=>({id:x.dataset.tab,x:x.getBoundingClientRect().x,y:x.getBoundingClientRect().y})));
   assert.deepEqual(bounds.sort((a,b)=>a.x-b.x).map(x=>x.id),['overview','portfolio','accounts','tripod'],'legacy order must not move touch targets');
+  // The portfolio capture guard must update the same route/title as legacy tabs.
+  await page.evaluate(()=>{
+   const header=document.createElement('header');header.className='top';header.innerHTML='<span class="brand">Overview</span>';document.body.prepend(header);
+   const style=document.createElement('style');style.textContent='.tabPanel{display:none}.tabPanel.on{display:block}';document.head.append(style);
+   for(const p of document.querySelectorAll('section[id^="panel-"]')){p.classList.add('tabPanel');p.style.removeProperty('display')}
+   for(const tab of document.querySelectorAll('.tabs .tab[data-tab]'))tab.onclick=()=>{
+    document.querySelectorAll('.tabPanel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+tab.dataset.tab));
+    document.querySelectorAll('.tabs .tab[data-tab]').forEach(t=>t.classList.toggle('on',t===tab));
+    document.querySelector('.brand').textContent=tab.dataset.tab;
+    history.replaceState(null,'','#'+tab.dataset.tab);
+   };
+  });
+  await page.addScriptTag({content:fs.readFileSync('portfolio-tab-target-guard-v1.js','utf8')});
+  await page.addScriptTag({content:fs.readFileSync('tablet-stability-v37.js','utf8')});
+  await page.locator('.tabs .tab[data-tab="portfolio"]').first().click();
+  assert(await page.locator('#panel-portfolio').isVisible());
+  assert.equal(await page.locator('.brand').innerText(),'보유분석');
+  assert.equal(await page.evaluate(()=>location.hash),'#portfolio');
+  await page.locator('.tabs .tab[data-tab="tripod"]').first().click();
+  await page.waitForTimeout(350);
+  assert(await page.locator('#panel-tripod').isVisible(),'last intentional destination wins');
+  assert.equal(await page.evaluate(()=>location.hash),'#tripod');
+  await page.locator('.tabs .tab[data-tab="portfolio"]').first().focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(300);
+  assert(await page.locator('#panel-portfolio').isVisible());
+  assert.equal(await page.locator('.brand').innerText(),'보유분석');
+  assert.equal(await page.evaluate(()=>location.hash),'#portfolio');
+  await page.setViewportSize({width:width+40,height:900});
+  await page.waitForTimeout(150);
+  assert(await page.locator('#panel-portfolio').isVisible(),'resize keeps the selected panel');
   console.log('NAVIGATION_OWNER_PASS',width,JSON.stringify(visible));
   await page.close();
  }

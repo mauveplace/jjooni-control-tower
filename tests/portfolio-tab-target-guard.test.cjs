@@ -9,17 +9,18 @@ function node(name){
 function setup(){
  const portfolio=node('portfolio'),tripod=node('tripod'),p=node('panel-portfolio'),t=node('panel-tripod');
  const listeners={},timers=[],storage={},events=[];
+ const brand={textContent:'Overview'},location={hash:'#overview'};
  const document={getElementById:id=>({'panel-portfolio':p,'panel-tripod':t,'ctMoreMenu':null,'ctMoreTab':null,'ctMoreBackdropV4':null}[id]||null),
-  querySelector:sel=>sel==='.tabs .tab[data-tab="portfolio"]'?portfolio:null,
+  querySelector:sel=>sel==='.tabs .tab[data-tab="portfolio"]'?portfolio:sel==='.top .brand'?brand:null,
   querySelectorAll:sel=>sel==='.tabPanel[id^="panel-"]'?[p,t]:sel==='.tabs .tab[data-tab]'?[portfolio,tripod]:[]};
- const root={document,sessionStorage:{setItem:(k,v)=>{storage[k]=v}},setTimeout:(fn,ms)=>timers.push({fn,ms}),
+ const root={document,location,history:{state:null,replaceState:(_state,_title,hash)=>{location.hash=hash}},sessionStorage:{setItem:(k,v)=>{storage[k]=v}},setTimeout:(fn,ms)=>timers.push({fn,ms}),
  addEventListener:(type,fn,capture)=>{(listeners[type]??=[]).push(fn);events.push({type,capture})}};
  const context={window:root};
  vm.createContext(context);vm.runInContext(src,context);
  const target=tab=>({closest:sel=>sel.includes('.tabs .tab')?tab:null});
  const event=tab=>({target:target(tab),defaultPrevented:false,stopped:false,immediate:false,
    preventDefault(){this.defaultPrevented=true},stopPropagation(){this.stopped=true},stopImmediatePropagation(){this.immediate=true}});
- return {root,portfolio,tripod,p,t,listeners,timers,storage,event,events};
+ return {root,brand,portfolio,tripod,p,t,listeners,timers,storage,event,events};
 }
 test('portfolio click forces matching panel and cancels legacy mismatched tab handlers',()=>{
  const a=setup();a.t.classList.toggle('on',true);a.tripod.classList.toggle('on',true);
@@ -44,6 +45,14 @@ test('switching away cancels outstanding portfolio repair timers',()=>{
 });
 test('guard is anchored in post-decrypt bootstrap',()=>{
  const html=fs.readFileSync('index.html','utf8');
- assert.match(html,/CT_POSTFIX=.*portfolio-tab-target-guard-v1[.]js[?]v=1[.]0/);
+ assert.match(html,/CT_POSTFIX=.*portfolio-tab-target-guard-v1[.]js[?]v=1[.]1/);
  assert.match(html,/CT_LIVE_BOOT=/);
+});
+
+test('portfolio capture keeps title and URL consistent with the visible panel',()=>{
+ const a=setup();a.listeners.click[0](a.event(a.portfolio));
+ assert.equal(a.brand.textContent,'보유분석');assert.equal(a.root.location.hash,'#portfolio');
+ a.listeners.pointerdown[0](a.event(a.tripod));a.root.location.hash='#tripod';a.brand.textContent='TRI-POD';
+ for(const timer of a.timers)timer.fn();
+ assert.equal(a.brand.textContent,'TRI-POD');assert.equal(a.root.location.hash,'#tripod');
 });
