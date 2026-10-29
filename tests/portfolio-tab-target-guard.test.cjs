@@ -4,7 +4,7 @@ const fs=require('node:fs'),vm=require('node:vm');
 const src=fs.readFileSync('portfolio-tab-target-guard-v1.js','utf8');
 function node(name){
  const set=new Set();
- return {name,dataset:{tab:name},classList:{toggle:(k,on)=>on?set.add(k):set.delete(k),contains:k=>set.has(k),remove:k=>set.delete(k)},style:{getPropertyPriority:()=>'',removeProperty:()=>{}},has:k=>set.has(k)};
+ return {name,attrs:{},setAttribute(k,v){this.attrs[k]=v},dataset:{tab:name},classList:{toggle:(k,on)=>on?set.add(k):set.delete(k),contains:k=>set.has(k),remove:k=>set.delete(k)},style:{getPropertyPriority:()=>'',removeProperty:()=>{}},has:k=>set.has(k)};
 }
 function setup(){
  const portfolio=node('portfolio'),tripod=node('tripod'),p=node('panel-portfolio'),t=node('panel-tripod');
@@ -45,7 +45,7 @@ test('switching away cancels outstanding portfolio repair timers',()=>{
 });
 test('guard is anchored in post-decrypt bootstrap',()=>{
  const html=fs.readFileSync('index.html','utf8');
- assert.match(html,/CT_POSTFIX=.*portfolio-tab-target-guard-v1[.]js[?]v=1[.]1/);
+ assert.match(html,/CT_POSTFIX=.*portfolio-tab-target-guard-v1[.]js[?]v=1[.]2/);
  assert.match(html,/CT_LIVE_BOOT=/);
 });
 
@@ -55,4 +55,11 @@ test('portfolio capture keeps title and URL consistent with the visible panel',(
  a.listeners.pointerdown[0](a.event(a.tripod));a.root.location.hash='#tripod';a.brand.textContent='TRI-POD';
  for(const timer of a.timers)timer.fn();
  assert.equal(a.brand.textContent,'TRI-POD');assert.equal(a.root.location.hash,'#tripod');
+});
+
+test('leaving portfolio updates the accessible current destination',()=>{
+ const a=setup();a.listeners.click[0](a.event(a.portfolio));
+ assert.equal(a.portfolio.attrs['aria-current'],'page');
+ a.listeners.click[0](a.event(a.tripod));
+ assert.equal(a.portfolio.attrs['aria-current'],'false');assert.equal(a.tripod.attrs['aria-current'],'page');
 });

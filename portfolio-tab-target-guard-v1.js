@@ -3,7 +3,7 @@
 // The Control Tower has multiple legacy navigation owners. A portfolio tab
 // tap must never be redirected to the neighboring TRI-POD strategy tab.
 if(root.__JJOONI_PORTFOLIO_TAB_GUARD_V1)return;
-const state={version:'1.1',bound:true,repairs:0,last_target:null,last_reason:null};
+const state={version:'1.2',bound:true,repairs:0,last_target:null,last_reason:null};
 root.__JJOONI_PORTFOLIO_TAB_GUARD_V1=state;
 if(!root.document)return;
 const doc=root.document;
@@ -67,7 +67,11 @@ root.addEventListener('keydown',e=>{
 },true);
 root.addEventListener('click',e=>{
  const tab=resolveTab(e.target);if(!tab)return;
- if(tab.dataset.tab!=='portfolio'){generation++;return}
+ if(tab.dataset.tab!=='portfolio'){
+  generation++;
+  for(const t of doc.querySelectorAll('.tabs .tab[data-tab]'))t.setAttribute?.('aria-current',t===tab?'page':'false');
+  return;
+ }
  // Handle exact tab ID before the legacy capture/bubble handlers. Avoid
  // synthetic .click(), which can re-enter an old tab-router mismatch.
  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation?.();
