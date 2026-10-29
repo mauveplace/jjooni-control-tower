@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import math
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -32,6 +32,19 @@ def _load_full_fomc_meetings() -> list[date]:
     """Keep the rolling Observatory calendar, but never truncate the FedWatch horizon to it."""
     calendar_meetings = core._load_fomc_meetings()
     return sorted(set(calendar_meetings) | set(KNOWN_FOMC_MEETINGS))
+
+
+def _required_official_horizon(meetings: list[date], now_et: datetime) -> set[str]:
+    """Require all future FOMC rows, including today's until the US close.
+
+    CME drops a concluded same-day meeting from its published forward matrix.
+    Keep requiring it before 16:30 ET, then require only strictly future dates.
+    Never manufacture a missing row or waive any future meeting.
+    """
+    today = now_et.date()
+    before_close = now_et.timetz().replace(tzinfo=None) < time(16, 30)
+    return {d.isoformat() for d in meetings
+            if d > today or (d == today and before_close)}
 
 
 def _normalize(weights: dict[int, float]) -> dict[int, float]:
@@ -233,9 +246,9 @@ def main() -> None:
         from collect_fedwatch_official import acquire
         official = acquire(cache=DATA_DIR / 'fedwatch-official.json', now=now_kst)
         if official.get('market_data_as_of', '') >= expected:
-            required = {d.isoformat() for d in _load_full_fomc_meetings() if d >= now_et.date()}
+            required = _required_official_horizon(_load_full_fomc_meetings(), now_et)
             actual = {r['meeting_date'] for r in official['meeting_probability_matrix']}
-            if not required.issubset(actual):
+            if not required or not required.issubset(actual):
                 raise ValueError('OFFICIAL_FOMC_HORIZON_INCOMPLETE')
             OUT.write_text(json.dumps(official, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
             from archive_fedwatch import archive_snapshot

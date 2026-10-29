@@ -39,6 +39,21 @@ class FedWatchMatrixTests(unittest.TestCase):
         self.assertEqual(fw._target_label_for_move(1, 3.75, 4.00), "4.00-4.25")
         self.assertEqual(fw._target_label_for_move(-1, 3.75, 4.00), "3.50-3.75")
 
+    def test_official_horizon_after_fomc_day_close(self):
+        from datetime import date, datetime
+        from zoneinfo import ZoneInfo
+        et = ZoneInfo("America/New_York")
+        meetings = [date(2026, 10, 28), date(2026, 12, 9), date(2027, 1, 27)]
+        before = datetime(2026, 10, 28, 13, 0, tzinfo=et)
+        after = datetime(2026, 10, 28, 17, 0, tzinfo=et)
+        self.assertEqual(fw._required_official_horizon(meetings, before),
+                         {"2026-10-28", "2026-12-09", "2027-01-27"})
+        self.assertEqual(fw._required_official_horizon(meetings, after),
+                         {"2026-12-09", "2027-01-27"})
+        self.assertEqual(fw._required_official_horizon(
+            meetings, datetime(2026, 10, 29, 10, 0, tzinfo=et)),
+            {"2026-12-09", "2027-01-27"})
+
     def test_business_gap_ignores_weekends(self):
         from datetime import date
         self.assertEqual(fw._business_gap(date(2026, 10, 5), date(2026, 10, 2)), 1)
