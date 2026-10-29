@@ -70,7 +70,7 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  const detailFonts=await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));assert(detailFonts[0]>=14);assert(detailFonts[1]>=12);assert.equal(detailFonts[2],32);
  await page.locator('#syntheticDetail').evaluate(e=>e.remove());
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
- assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),17);
+ assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
  // A profitable day must coexist with a loss since the confirmed deposit.
  await page.evaluate(()=>{const a=window.__JJOONI_CANONICAL_SSOT.accounts;Object.assign(a.ISA,{nav:54422276,principal:60000000,today_pnl:1515800,today_return:2.87,pnl:999999});Object.assign(a.PENSION,{nav:42221980,principal:38517414,today_pnl:820000,today_return:1.98});document.dispatchEvent(new Event('jjooni:live-applied'))});
  await page.waitForTimeout(220);

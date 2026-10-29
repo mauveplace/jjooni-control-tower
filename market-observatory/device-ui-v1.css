@@ -111,3 +111,7 @@
 .obsDeviceUI .tripodGateGrid article{min-width:0;background:#fff;border:1px solid #dde6f0;border-radius:10px;padding:12px}
 .obsDeviceUI .tripodGateGrid h4{font-size:12px;margin:0 0 8px}.obsDeviceUI .tripodGateGrid b{display:block;font-size:15px;line-height:1.5}
 @media(max-width:600px){.obsDeviceUI .tripodGateGrid{grid-template-columns:1fr}.obsDeviceUI .tripodNext{padding:12px}}
+
+/* Readable KPI labels on every device, including the original chart cards. */
+.obsDeviceUI .kpi small{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.obsDeviceUI .kpi b{font-size:18px;line-height:1.35;overflow-wrap:anywhere}
