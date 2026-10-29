@@ -105,6 +105,27 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/보유종목 가격변동/);assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/260,000/);assert.match(await closeDay.innerText(),/1\/2종목/);
  const priceDetails=closeDay.locator('[data-price-account="TOSS"]');await priceDetails.locator('summary').click();assert.match(await priceDetails.innerText(),/2026-10-21/);assert.match(await priceDetails.innerText(),/100 → 102/);
  await page.evaluate(()=>document.dispatchEvent(new Event('jjooni:live-applied')));await page.waitForTimeout(250);assert(await priceDetails.getAttribute('open')!==null);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'price evidence overflow at '+width);
+ // Exercise first paint and repeated producer writes in the actual overview.
+ // The old 80ms floor changed markup; innerHTML-based writers then recreated it.
+ const overviewStability=await page.evaluate(async()=>{
+  const host=document.createElement('section');host.id='overviewTypographyProbe';
+  document.querySelector('#panel-overview').append(host);
+  const samples=new Set();let replacements=0,styleWrites=0;
+  const observer=new MutationObserver(ms=>{styleWrites+=ms.filter(m=>m.type==='attributes'&&m.attributeName==='style').length});
+  observer.observe(host,{subtree:true,attributes:true});
+  for(let revision=0;revision<3;revision++){
+   const html='<div class="ctOvLabel">갱신 '+revision+'</div><div class="ctStrategySleeve"><div class="ctSleeveAmounts"><span>보유 원가 '+revision+'</span></div></div><div class="ctAcctComparisonRow"><span>전일 손익</span><strong>+₩1,000</strong><b>+1.00%</b></div>';
+   for(let frame=0;frame<14;frame++){
+    if(host.innerHTML!==html){host.innerHTML=html;replacements++}
+    samples.add(JSON.stringify([...host.querySelectorAll('.ctOvLabel,.ctSleeveAmounts span,.ctAcctComparisonRow strong')].map(e=>[getComputedStyle(e).fontSize,getComputedStyle(e).lineHeight])));
+    await new Promise(requestAnimationFrame);
+   }
+  }
+  observer.disconnect();host.remove();return {samples:[...samples],replacements,styleWrites};
+ });
+ assert.deepEqual(overviewStability.samples,[JSON.stringify([['14px','21px'],['14px','21px'],['14px','21px']])],'first-paint and live typography at '+width+': '+JSON.stringify(overviewStability));
+ assert.equal(overviewStability.replacements,3,'unchanged producer markup must settle at '+width);
+ assert.equal(overviewStability.styleWrites,0,'typography must not mutate overview markup at '+width);
  // Newly inserted migrated rows must be readable before the delayed font floor.
  const rowFonts=()=>page.locator('#typographyStabilityProbe').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));
  await page.evaluate(()=>{const row=document.createElement('div');row.id='typographyStabilityProbe';row.className='ctCommonLine';row.innerHTML='<span>새 종목</span><small>기준시각</small><b>123,456</b>';document.querySelector('.app').append(row)});

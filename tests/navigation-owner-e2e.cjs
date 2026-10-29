@@ -1,7 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true});
- for(const width of [390,900,1363]){
+ for(const width of [320,360,390,500,599,600,768,900,1363]){
   const page=await browser.newPage({viewport:{width,height:1000},hasTouch:true,isMobile:width<768});
   const keys=['overview','portfolio','accounts','tripod','compare','decisions','trades','quality','consultant','watchlist','ai'];
   await page.setContent('<html data-ct-layout="mobile-first"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+fs.readFileSync('responsive-layout.css','utf8')+'</style></head><body><nav class="tabs"><div class="sideLabel">WATCHLIST</div>'+keys.map(key=>'<button class="tab" data-tab="'+key+'" style="display:none!important">'+key+'</button>').join('')+'<button class="tab" data-tab="accounts" data-primary="1">duplicate</button><button id="ctMoreTab" style="display:none!important">더보기</button></nav><nav id="ctMoreMenu"></nav></body></html>');
@@ -33,12 +33,27 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
    const target=page.locator('.tabs .tab[data-tab="'+id+'"]').first(),r=await target.boundingBox();
    const actual=await page.evaluate(({x,y})=>document.elementFromPoint(x,y)?.closest('.tab')?.dataset.tab,{x:r.x+r.width/2,y:r.y+r.height/2});
    assert.equal(actual,id,'visible touch target must be the requested tab');
-   await page.touchscreen.tap(r.x+r.width/2,r.y+r.height/2);
-   assert(await page.locator('#panel-'+id).isVisible(),'touch opens '+id);
+   assert(r.width>=80&&r.height>=52,'usable touch area at '+width+': '+JSON.stringify(r));
+   for(const x of [r.x+3,r.x+r.width/2,r.x+r.width-3]){
+    await page.touchscreen.tap(x,r.y+r.height/2);
+    assert(await page.locator('#panel-'+id).isVisible(),'center and edge touches open '+id+' at '+width);
+   }
    if(id==='accounts')assert(!(await page.locator('#panel-tripod').isVisible()));
   }
   const bounds=await page.locator('.tabs .tab:visible').evaluateAll(xs=>xs.map(x=>({id:x.dataset.tab,x:x.getBoundingClientRect().x,y:x.getBoundingClientRect().y})));
-  assert.deepEqual(bounds.sort((a,b)=>a.x-b.x).map(x=>x.id),['overview','portfolio','accounts','tripod'],'legacy order must not move touch targets');
+  assert.deepEqual(bounds.sort((a,b)=>a.y-b.y||a.x-b.x).map(x=>x.id),['overview','portfolio','accounts','tripod'],'legacy order must not move touch targets');
+  const targets=await page.locator('.tabs>.tab:visible,.tabs>#ctMoreTab').evaluateAll(xs=>xs.map(e=>({id:e.dataset.tab||'more',...e.getBoundingClientRect().toJSON()})));
+  for(let i=0;i<targets.length;i++)for(let j=i+1;j<targets.length;j++){
+   const a=targets[i],b=targets[j];
+   const gapX=Math.max(b.x-a.right,a.x-b.right),gapY=Math.max(b.y-a.bottom,a.y-b.bottom);
+   assert(gapX>=7.9||gapY>=7.9,'touch targets must have 8px separation: '+JSON.stringify([a,b]));
+   if(Math.abs(a.y-b.y)<1&&b.x>a.x&&b.x-a.right<10){
+    const hit=await page.evaluate(({x,y})=>document.elementFromPoint(x,y)?.closest('.tab,button')?.dataset.tab||null,{x:(a.right+b.x)/2,y:a.y+a.height/2});
+    assert.equal(hit,null,'gap must not trigger a neighboring tab');
+   }
+  }
+  if(width<=599){assert(targets[3].y>targets[0].y,'phone uses two rows');assert(targets[0].width>=80)}
+  else assert(targets.every(t=>Math.abs(t.y-targets[0].y)<1),'tablet and desktop keep one row');
   // The portfolio capture guard must update the same route/title as legacy tabs.
   await page.evaluate(()=>{
    const header=document.createElement('header');header.className='top';header.innerHTML='<span class="brand">Overview</span>';document.body.prepend(header);
