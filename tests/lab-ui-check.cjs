@@ -15,11 +15,24 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?process.
   const rates=page.locator('.latestTile[data-metric="US10Y_OFFICIAL"] .latestTilePeriods');
   const rateTile=page.locator('.latestTile[data-metric="US10Y_OFFICIAL"]');
   const rateText=await rateTile.innerText();assert.equal((rateText.match(/일간/g)||[]).length,1);assert.equal((rateText.match(/주간/g)||[]).length,1);
-  const rateBefore=await rates.innerText();assert.match(rateBefore,/일간 .*bp/);assert.match(rateBefore,/주간 .*bp/);
+  // Change-first cards promote the selected comparison to the headline and hide
+  // its duplicate in the secondary period row. Verify both daily and weekly
+  // changes remain visible across the headline switch, rather than asserting
+  // that the secondary row is invariant.
+  const primary=rateTile.locator('.latestPrimaryChange');
+  const rateBefore=await rateTile.innerText();
+  assert.match(await primary.innerText(),/일간 대비[^]*bp/);
+  assert.match(await rates.innerText(),/주간 .*bp/);
   assert.match(await page.locator('.latestTile[data-metric="USDKRW"] .latestTilePeriods').innerText(),/주간 .*%/);
-  assert.match(await page.locator('.latestTile[data-metric="FEAR_GREED"] .latestTilePeriods').innerText(),/일간 .*pt/);
+  assert.match(await page.locator('.latestTile[data-metric="FEAR_GREED"] .latestPrimaryChange').innerText(),/일간 대비[^]*pt/);
   await page.locator('#latestCompare [data-compare="W1"]').click();
-  assert.equal(await rates.innerText(),rateBefore,'daily/weekly context remains visible independently of selected headline period');
+  assert.match(await primary.innerText(),/주간 대비[^]*bp/);
+  assert.match(await rates.innerText(),/일간 .*bp/);
+  const weeklyRateText=await rateTile.innerText();
+  assert.equal((weeklyRateText.match(/일간/g)||[]).length,1);
+  assert.equal((weeklyRateText.match(/주간/g)||[]).length,1);
+  await page.locator('#latestCompare [data-compare="D1"]').click();
+  assert.equal(await rateTile.innerText(),rateBefore,'daily/weekly headline switch must preserve both comparisons');
   await page.screenshot({path:'lab-overview-'+width+'.png',fullPage:true});
   await page.locator('[data-tab="analysis-lab"]').click();
   await page.waitForFunction(()=>window.__JJOONI_ANALYSIS_LAB?.loaded,{timeout:30000});
