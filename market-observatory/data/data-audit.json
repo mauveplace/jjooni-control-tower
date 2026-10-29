@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-29T09:04:05+09:00",
+  "generated_kst": "2026-10-29T09:47:54+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 2,
+  "warning_count": 3,
   "observatory_session": "2026-10-28",
   "file_status": {
     "observatory": {
@@ -33,7 +33,7 @@
       "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-10-29T09:03:36+09:00",
+      "generated_kst": "2026-10-29T09:47:48+09:00",
       "events": 186,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-29T09:04:02+09:00",
+      "generated_kst": "2026-10-29T09:47:53+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -406,7 +406,7 @@
       "latest_mismatch": []
     },
     "jp_rates": {
-      "state": "LIVE",
+      "state": "LAGGING",
       "anchor": "2026-10-29",
       "allow_lag_days": 5,
       "critical": false,
@@ -454,7 +454,7 @@
       },
       "missing": [],
       "latest_mismatch": [],
-      "expected_latest_weekday": "2026-10-27",
+      "expected_latest_weekday": "2026-10-28",
       "published_source_status": "LIVE"
     },
     "crypto": {
@@ -521,18 +521,23 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T09:03:43+09:00",
-      "current_quote_age_seconds": 22,
+      "current_quote_age_seconds": 2651,
       "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T09:03:42+09:00",
-      "current_quote_age_seconds": 23,
+      "current_quote_age_seconds": 2652,
       "captured_quote_age_seconds": 4
     }
   },
   "issues": [
+    {
+      "code": "GROUP_JP_RATES_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-29 dates=JP2Y:2026-10-27,JP5Y:2026-10-27,JP10Y:2026-10-27,JP30Y:2026-10-27,JP_2S10S:2026-10-27"
+    },
     {
       "code": "GROUP_FEDWATCH_LAGGING",
       "severity": "WARN",
