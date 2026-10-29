@@ -21,12 +21,12 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?process.
   // that the secondary row is invariant.
   const primary=rateTile.locator('.latestPrimaryChange');
   const rateBefore=await rateTile.innerText();
-  assert.match(await primary.innerText(),/일간 대비[\\s\\S]*bp/);
+  assert.match(await primary.innerText(),/일간 대비[^]*bp/);
   assert.match(await rates.innerText(),/주간 .*bp/);
   assert.match(await page.locator('.latestTile[data-metric="USDKRW"] .latestTilePeriods').innerText(),/주간 .*%/);
-  assert.match(await page.locator('.latestTile[data-metric="FEAR_GREED"] .latestPrimaryChange').innerText(),/일간 대비[\\s\\S]*pt/);
+  assert.match(await page.locator('.latestTile[data-metric="FEAR_GREED"] .latestPrimaryChange').innerText(),/일간 대비[^]*pt/);
   await page.locator('#latestCompare [data-compare="W1"]').click();
-  assert.match(await primary.innerText(),/주간 대비[\\s\\S]*bp/);
+  assert.match(await primary.innerText(),/주간 대비[^]*bp/);
   assert.match(await rates.innerText(),/일간 .*bp/);
   const weeklyRateText=await rateTile.innerText();
   assert.equal((weeklyRateText.match(/일간/g)||[]).length,1);
