@@ -41,7 +41,7 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
    await page.locator(`#tabs [data-tab="${tab}"]`).click();
    if(tab==='overview'){
     const card=page.locator('#latestMarketBoard .latestChangeFirst[data-metric="NASDAQ100"]');await card.waitFor();
-    const layout=await card.evaluate(e=>{const primary=e.querySelector('.latestPrimaryValue'),level=e.querySelector('.latestLevelValue');return {primary:parseFloat(getComputedStyle(primary).fontSize),level:parseFloat(getComputedStyle(level).fontSize),first:primary.getBoundingClientRect().top<level.getBoundingClientRect().top,label:e.querySelector('.latestPrimaryLabel').textContent,clipped:primary.scrollWidth>primary.clientWidth+1}});
+    const layout=await page.evaluate(()=>{const e=document.querySelector('#latestMarketBoard .latestChangeFirst[data-metric="NASDAQ100"]');const primary=e.querySelector('.latestPrimaryValue'),level=e.querySelector('.latestLevelValue');return {primary:parseFloat(getComputedStyle(primary).fontSize),level:parseFloat(getComputedStyle(level).fontSize),first:primary.getBoundingClientRect().top<level.getBoundingClientRect().top,label:e.querySelector('.latestPrimaryLabel').textContent,clipped:primary.scrollWidth>primary.clientWidth+1}});
     assert(layout.primary>=26&&layout.primary>layout.level,'change must dominate level '+JSON.stringify(layout));
     assert(layout.first&&!layout.clipped,'primary change must fit and precede level '+JSON.stringify(layout));
     assert.equal(layout.label,'일간 대비');
