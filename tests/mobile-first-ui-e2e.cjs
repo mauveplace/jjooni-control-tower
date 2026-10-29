@@ -70,7 +70,7 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  const detailFonts=await page.locator('#syntheticDetail').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));assert(detailFonts[0]>=14);assert(detailFonts[1]>=12);assert.equal(detailFonts[2],32);
  await page.locator('#syntheticDetail').evaluate(e=>e.remove());
  await page.evaluate(()=>document.querySelector('.tabs [data-tab="overview"]').click());await page.waitForTimeout(320);
- assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),17);
+ assert.equal(await page.locator('#ctCanonicalMovers .ctCommonLine>b').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),20);
  // A profitable day must coexist with a loss since the confirmed deposit.
  await page.evaluate(()=>{const a=window.__JJOONI_CANONICAL_SSOT.accounts;Object.assign(a.ISA,{nav:54422276,principal:60000000,today_pnl:1515800,today_return:2.87,pnl:999999});Object.assign(a.PENSION,{nav:42221980,principal:38517414,today_pnl:820000,today_return:1.98});document.dispatchEvent(new Event('jjooni:live-applied'))});
  await page.waitForTimeout(220);
@@ -105,6 +105,15 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/보유종목 가격변동/);assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/260,000/);assert.match(await closeDay.innerText(),/1\/2종목/);
  const priceDetails=closeDay.locator('[data-price-account="TOSS"]');await priceDetails.locator('summary').click();assert.match(await priceDetails.innerText(),/2026-10-21/);assert.match(await priceDetails.innerText(),/100 → 102/);
  await page.evaluate(()=>document.dispatchEvent(new Event('jjooni:live-applied')));await page.waitForTimeout(250);assert(await priceDetails.getAttribute('open')!==null);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'price evidence overflow at '+width);
+ // Newly inserted migrated rows must be readable before the delayed font floor.
+ const rowFonts=()=>page.locator('#typographyStabilityProbe').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));
+ await page.evaluate(()=>{const row=document.createElement('div');row.id='typographyStabilityProbe';row.className='ctCommonLine';row.innerHTML='<span>새 종목</span><small>기준시각</small><b>123,456</b>';document.querySelector('.app').append(row)});
+ assert.deepEqual(await rowFonts(),[16,14,20],'readable on first render at '+width);
+ await page.waitForTimeout(160);
+ assert.deepEqual(await rowFonts(),[16,14,20],'no delayed font jump at '+width);
+ await page.locator('#typographyStabilityProbe').evaluate(e=>{e.innerHTML='<span>갱신된 종목</span><small>새 기준시각</small><b>987,654</b>'});
+ assert.deepEqual(await rowFonts(),[16,14,20],'replacement nodes keep typography at '+width);
+ await page.locator('#typographyStabilityProbe').evaluate(e=>e.remove());
  await page.screenshot({path:'/tmp/ct-ui-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS mobile-first width='+width+' canonical=4000 missing=unknown fund=excluded nav=usable');await context.close();
 }await browser.close()})().catch(e=>{console.error(e);process.exit(1)});
 
