@@ -1,4 +1,5 @@
 /* One mobile-first layout contract. Loaded by ui-refactor after sign-in. */
+html[data-ct-layout="mobile-first"]{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html[data-ct-layout="mobile-first"] body{display:block!important;min-width:0;color:#172b45;background:#f4f7fb}
 html[data-ct-layout="mobile-first"] body .app{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:0 14px 24px!important;overflow-x:clip!important}
 html[data-ct-layout="mobile-first"] body .top{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:8px!important;height:auto!important;min-height:76px!important;width:auto!important;margin:0 -14px 10px!important;padding:14px!important;background:#071a33!important;isolation:isolate!important}
@@ -201,3 +202,30 @@ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="accounts"]{grid-co
 html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="tripod"]{grid-column:4!important}
 html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{grid-column:5!important}
 html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"] *{pointer-events:none!important}
+
+/* Overview is sized before paint, including replacement nodes on live refresh.
+   The legacy JS font floor deliberately does not own this panel. */
+html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctOvLabel,.ctOvMini,.ctOvMeta,.ctHumanAccountLineV6,.ctAcctComparisonNote,.ctAccountCapitalRow,.ctAcctTodayValue,.ctThin,.ctActionWho,.ctActionText,.ctActionState,.badge){font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview .ctOvMini b{font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctAcctComparisonRow,.ctAcctComparisonRow span,.ctAcctComparisonRow strong,.ctAcctComparisonRow b){font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview .ctAcctComparisonRow{grid-template-columns:90px minmax(0,1fr) 72px}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctSleeveAmounts,.ctSleeveAmounts span,.ctSleeveDay,.ctSleeveDay span,.ctStrategySleeve button,.sbHoldingPreview span){font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctFxSub,.ctFxRef,.ctFxRef small,.ctFxSumLabel,.ctFxSumSub,.ctFxMeta,.ctFxSecondary,.ctMcSub,.ctMcTime,.ctMcTag,.ctMcSrc,.ctMcNote){font-size:12px!important;line-height:1.5!important;white-space:normal;overflow-wrap:anywhere}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctFxTable th,.ctFxTable td,.ctFxName,.ctFxPrimary,.ctFxEmpty,.ctMcName,.ctMcMove){font-size:14px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview .ctFxSumValue{font-size:18px!important;line-height:1.5!important;overflow-wrap:anywhere}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(#ctHeroTrustStripV4 button,#ctHeroTrustStripV6 button,.ctTrustBadge,.ctNetLabel,.ctTrustDetailTitleV6,.ctTrustDetailSubV6,.ctTrustRowV6,.ctTrustRowV6 b,.ctTrustSourceV6,.ctTrustFootV6){font-size:12px!important;line-height:1.5!important}
+
+html[data-ct-layout="mobile-first"] body #panel-overview #ctHeroTrustStripV6 button{font-size:14px!important;line-height:1.5!important}
+
+/* Separate touch targets; a phone gets a balanced 3 + 2 arrangement. */
+html[data-ct-layout="mobile-first"] body .tabs{gap:8px!important;padding:8px!important;box-sizing:border-box!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"],html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{min-height:52px!important;font-size:14px!important;padding:10px 6px!important;box-sizing:border-box!important;margin:0!important}
+html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"]::before,html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"]::after{pointer-events:none!important}
+@media(max-width:599px){
+ html[data-ct-layout="mobile-first"] body .tabs{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="overview"]{grid-column:1/3!important;grid-row:1!important}
+ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="portfolio"]{grid-column:3/5!important;grid-row:1!important}
+ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="accounts"]{grid-column:5/7!important;grid-row:1!important}
+ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="tripod"]{grid-column:1/4!important;grid-row:2!important}
+ html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{grid-column:4/7!important;grid-row:2!important}
+}

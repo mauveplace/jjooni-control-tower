@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 if(window.__JJOONI_OVERVIEW_CONSISTENCY_V21)return;
-const STATE={state:'BOOTING',version:'21.5',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
+const STATE={state:'BOOTING',version:'21.6',applied:0,hero_kospi:null,context_kospi:null,codes_scrubbed:0,dd_guarded:0};
 window.__JJOONI_OVERVIEW_CONSISTENCY_V21=STATE;
 const qs=(s,r=document)=>{try{return r.querySelector(s)}catch(_){return null}};
 const qsa=(s,r=document)=>{try{return Array.from(r.querySelectorAll(s))}catch(_){return []}};
@@ -14,9 +14,9 @@ function stamp(v){const ms=parseMs(v);if(ms==null)return '시각 확인 필요';
 function setText(e,v){if(e&&String(e.textContent||'')!==String(v))e.textContent=String(v)}
 function ensureStyle(){if(qs('#ctOverviewConsistencyV21Style'))return;const s=document.createElement('style');s.id='ctOverviewConsistencyV21Style';s.textContent=`
 #ctSourceHealthBannerV15[data-v21="1"]{font-size:12px!important;line-height:1.45!important;padding:9px 12px!important}
-.ctPerformanceDay .loss,#overviewAccounts .loss{color:#175cd3!important}.ctPerformanceDay .gain,#overviewAccounts .gain{color:#b42318!important}.ctPerformanceDay .neutral{color:#475467!important}.ctAcctComparisons{grid-column:1/-1;width:100%;margin-top:8px;padding-top:8px;border-top:1px solid #e3e9f1}.ctAcctComparisonRow{display:grid;grid-template-columns:90px minmax(0,1fr) 65px;gap:6px;align-items:center;margin:6px 0;font-size:12px!important;line-height:1.5}.ctAcctComparisonRow strong,.ctAcctComparisonRow b{text-align:right;font-size:12px!important;white-space:nowrap}.ctAcctComparisonNote{display:block;color:#64748b;font-size:11px!important;line-height:1.5;word-break:keep-all}
+.ctPerformanceDay .loss,#overviewAccounts .loss{color:#175cd3!important}.ctPerformanceDay .gain,#overviewAccounts .gain{color:#b42318!important}.ctPerformanceDay .neutral{color:#475467!important}.ctAcctComparisons{grid-column:1/-1;width:100%;margin-top:8px;padding-top:8px;border-top:1px solid #e3e9f1}.ctAcctComparisonRow{display:grid;grid-template-columns:90px minmax(0,1fr) 65px;gap:6px;align-items:center;margin:6px 0;font-size:14px!important;line-height:1.5}.ctAcctComparisonRow strong,.ctAcctComparisonRow b{text-align:right;font-size:14px!important;white-space:nowrap}.ctAcctComparisonNote{display:block;color:#64748b;font-size:14px!important;line-height:1.5;word-break:keep-all}
 .ctDailyProfitChange{margin-top:10px;padding:10px;border-radius:8px;background:#f5f8fc}.ctDailyProfitChange strong{font-variant-numeric:tabular-nums}
-#panel-overview .ctOvMini,#panel-overview .ctOvLabel,#panel-overview .ctAcctStats,#panel-overview .ctAcctStats span,#panel-overview .ctAcctStats b,#panel-overview .ctHumanAccountLineV6{font-size:11px!important;line-height:1.45!important}
+#panel-overview .ctOvMini,#panel-overview .ctOvLabel,#panel-overview .ctAcctStats,#panel-overview .ctAcctStats span,#panel-overview .ctAcctStats b,#panel-overview .ctHumanAccountLineV6{font-size:14px!important;line-height:1.5!important}
 #panel-overview .ctOvValue{font-size:max(20px,1.35vw)!important}
 #panel-overview #overviewAccounts .ctAcctStats[data-periods]{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important}
 #panel-overview #overviewAccounts .ctAccountPeriodRow{display:grid!important;grid-template-columns:60px minmax(0,1fr) 76px!important;gap:8px!important;align-items:center!important;width:100%!important}

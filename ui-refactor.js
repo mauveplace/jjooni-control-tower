@@ -40,7 +40,7 @@ function activateTab(name){
 function ensureMobileNav(){
  const tabs=qs('.tabs');if(!tabs)return;
  document.documentElement.dataset.ctLayout='mobile-first';
- if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.6-readable&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261028-r14');document.head.appendChild(link)}
+ if(!qs('#ctResponsiveLayout')){const link=document.createElement('link');link.id='ctResponsiveLayout';link.rel='stylesheet';link.href='responsive-layout.css?v=1.7-stable-overview&_='+encodeURIComponent(window.__JJOONI_UI_RELEASE||'20261028-r14');document.head.appendChild(link)}
  qsa('.tab[data-tab]',tabs).forEach(t=>{const id=String(t.dataset.tab||'').toLowerCase();t.dataset.primary=PRIMARY_TABS.includes(id)?'1':'0';t.setAttribute('role','button');t.tabIndex=0;t.setAttribute('aria-label',t.textContent.trim());if(!t.dataset.keyboardBound){t.dataset.keyboardBound='1';t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click()}})}});
  let more=qs('#ctMoreTab'),menu=qs('#ctMoreMenu');
  if(!more){more=document.createElement('button');more.id='ctMoreTab';more.type='button';more.textContent='더보기';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','ctMoreMenu');tabs.append(more)}
@@ -137,13 +137,14 @@ function paginateTrades(){
  const group=candidateTradeGroup(panel);if(group)attachTradePager(group);else window.__JJOONI_TRADE_PAGINATION={state:'NO_REPEATED_GROUP'};
 }
 
-// One typography floor for legacy inline styles and late-rendered detail views.
-// Preserve larger KPI sizes; never shrink text to fit a card.
+// Overview typography is declarative in responsive-layout.css. Never mutate its
+// rendered markup: producers compare innerHTML and would recreate corrected nodes.
+// Keep the fallback only for unmigrated legacy panels and late detail dialogs.
 let typeTimer;
 function readableText(){
  const changes=[];
  for(const e of qsa('body *')){
-  if(['SCRIPT','STYLE','PATH','OPTION'].includes(e.tagName)||!visible(e))continue;
+  if(e.closest('#panel-overview')||['SCRIPT','STYLE','PATH','OPTION'].includes(e.tagName)||!visible(e))continue;
   if(!Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim()))continue;
   const css=getComputedStyle(e),size=parseFloat(css.fontSize);
   const secondary=e.matches('small,svg text,.tabs *,#ctMoreMenu *,[class*="Note"],[class*="Meta"],[class*="Badge"],[class*="Sub"],[class*="Eyebrow"],.mcNote');
@@ -153,14 +154,14 @@ function readableText(){
  for(const [e,size] of changes){e.style.setProperty('font-size',size+'px','important');e.style.setProperty('line-height','1.5','important')}
 }
 function scheduleTypography(){if(typeTimer)return;typeTimer=setTimeout(()=>{typeTimer=null;readableText()},80)}
-new MutationObserver(scheduleTypography).observe(document.body||document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden']});
+new MutationObserver(records=>{if(records.some(r=>!(r.target.nodeType===1?r.target:r.target.parentElement)?.closest('#panel-overview')))scheduleTypography()}).observe(document.body||document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden']});
 document.addEventListener('click',scheduleTypography);
 window.addEventListener('resize',scheduleTypography,{passive:true});
 document.addEventListener('jjooni:live-applied',scheduleTypography);
 scheduleTypography();
 
 let busy=false;
-function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.8',mobile_nav:'TOP_PRIMARY_WITH_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
+function enforce(){if(busy)return;busy=true;try{ensureStyle();ensureMobileNav();syncMoreState();compactHeroSources();compactAttribution();compactLeafCodes();normalizeFiveAccountLabels();paginateTrades();window.__JJOONI_UI_REFACTOR={version:'1.9-stable-overview',mobile_nav:'TOP_PRIMARY_WITH_MORE',primary_tabs:PRIMARY_TABS.slice(),secondary_tabs:SECONDARY_TABS.slice(),trust_badges:'SHAPE_ONLY',trade_pagination:window.__JJOONI_TRADE_PAGINATION||{state:'PENDING'}}}finally{busy=false}}
 ensureStyle();
 document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctMoreMenu button'))setTimeout(()=>{ensureMobileNav();syncMoreState()},120)});
 setTimeout(enforce,0);setTimeout(enforce,800);setTimeout(enforce,2200);

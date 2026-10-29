@@ -93,7 +93,7 @@ function lockNavigation(){
 async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot='waiting-ssot';try{bootText('Canonical SSOT 연결을 기다리는 중입니다.');await waitFor(()=>window.__JJOONI_LIVE_READY===true&&window.__JJOONI_CANONICAL_SSOT&&window.__JJOONI_LIVE_PAYLOAD,30000,'SSOT_READY');BOOT.state='LOADING_REQUIRED_UI';document.documentElement.dataset.ctBoot='loading-ui';const modules=[
 ['ctFastRefreshV32Script','fast-refresh-v32.js?v=32.3','master-trade-bridge'],
 ['ctMarketStateBridgeV14Script','market-state-bridge.js?v=2.2','market-state'],
-['ctUiRefactorV14Script','ui-refactor.js?v=1.11-top-compact','ui-refactor'],
+['ctUiRefactorV14Script','ui-refactor.js?v=1.12-stable-overview','ui-refactor'],
 ['ctDataIntegrityV4Script','data-integrity-v4.js?v=4','data-integrity'],
 ['ctSecurityNamesV1Script','security-names-held-v1.js?v=1.0','security-names'],
 ['ctTradeReviewV2Script','trade-review-v2.js?v=2.1','trade-review'],
@@ -119,7 +119,7 @@ async function boot(){ensureBootShield();document.documentElement.dataset.ctBoot
 ['ctDrilldownReadabilityV19Script','drilldown-readability-v19.js?v=19.4','drilldown-readability'],
 ['ctMarketContextV20Script','market-context-v20.js?v=20.1-accounts-first','market-context'],
 ['ctPerformanceDayViewScript','performance-day-view.js?v=1.3-account-comparisons','performance-day-view'],
-['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.9-quality','overview-consistency'],
+['ctOverviewConsistencyV21Script','overview-consistency-v21.js?v=21.10-stable-type','overview-consistency'],
 ['ctSourceAuthorityGuardV24Script','source-authority-guard-v24.js?v=24.4','source-authority-guard'],
 ['ctStrategyBooksV1Script','strategy-books-v1.js?v=2.8-verified-krw','strategy-books'],
 ['ctManualIntradayV1Script','manual-intraday-v1.js?v=2.1-touch','manual-intraday'],

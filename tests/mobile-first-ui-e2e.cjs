@@ -13,6 +13,21 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  await page.evaluate(()=>{const at=new Date().toISOString(),ids=['TOSS','ISA','PENSION','IRP'];const C={observed_at:at,snapshot_id:'synthetic',accounts:Object.fromEntries(ids.map((id,i)=>[id,{nav:1000,today_pnl:i+1,today_return:(i+1)/10,cash_krw:100,net_flow:0,positions:[],source:'FIXTURE',quality:'BROKER_DIRECT'}]))};C.accounts.TOSS.positions=[{ticker:'TQQQ',name:'TQQQ',currency:'USD',qty:2,current_price:73,avg_price:70,fx:1300,market_value_krw:189800,daily_pnl:2600}];C.total={nav:4000,today_pnl:10,account_count:4};window.__JJOONI_CANONICAL_SSOT=C;window.__JJOONI_LIVE_PAYLOAD={generated_kst:at,market_closed:true,stale_after_kst:new Date(Date.now()+86400000).toISOString(),source_health:{pb_history:{state:'REFERENCE',as_of:'2026-09-04T09:12:00+09:00'}}};window.D={human:{trades:[{account:'TOSS',ticker:'TQQQ',name:'TQQQ',side:'BUY',qty:2,price:70,current_price:67,currency:'USD',trade_date:'2026-10-15'},{account:'IRP',ticker:'F002',name:'마이다스 혼합자산 투자신탁',side:'BUY',qty:1,price:360000,current_price:17599696,trade_date:'2026-09-21'},{account:'IRP',ticker:'F002',name:'마이다스 혼합자산 투자신탁',side:'SELL',qty:1,price:400000,trade_date:'2026-09-22'}]}};document.querySelectorAll('.tabs .tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tabs .tab').forEach(x=>x.classList.toggle('on',x===t));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+t.dataset.tab))}));});
  for(const f of ['ui-refactor.js','toss-account-basis-v43.js','mobile-stability-v4.js','human-ui-v6.js','tablet-accounts-v8.js','trade-review-outcomes-v26.js','overview-consistency-v21.js','account-return-30d-v46.js','tablet-stability-v37.js'])await page.addScriptTag({content:read(f)});
  await page.waitForFunction(()=>document.querySelector('#ctDesktopAccountsV8')&&document.querySelector('#ctResponsiveLayout')?.sheet);await page.waitForTimeout(350);
+ // Real producers compare raw markup. Typography must not keep replacing their
+ // buttons/labels between refreshes, and first-paint sizes must already be final.
+ const heroStability=await page.evaluate(async()=>{
+  const strip=document.querySelector('#ctHeroTrustStripV6'),net=document.querySelector('#ctMobileNetSummaryV4');
+  const button=strip.querySelector('button'),label=net?.querySelector('.ctNetLabel');
+  const first=[getComputedStyle(button).fontSize,label?getComputedStyle(label).fontSize:null];
+  let writes=0;const observer=new MutationObserver(ms=>{writes+=ms.length});
+  observer.observe(strip,{subtree:true,childList:true,attributes:true,attributeFilter:['style']});
+  if(net)observer.observe(net,{subtree:true,childList:true,attributes:true,attributeFilter:['style']});
+  await new Promise(r=>setTimeout(r,900));observer.disconnect();
+  return {first,writes,sameButton:button===strip.querySelector('button'),sameLabel:!label||label===net.querySelector('.ctNetLabel')};
+ });
+ assert.equal(heroStability.first[0],'14px');if(heroStability.first[1])assert.equal(heroStability.first[1],'12px');
+ assert.equal(heroStability.writes,0,'live hero producers must settle at '+width+': '+JSON.stringify(heroStability));
+ assert(heroStability.sameButton&&heroStability.sameLabel,'hero nodes must survive unchanged refreshes at '+width);
  // Keep the Toss runtime AND typography guard active together: the old
  // unconditionally rewritten note cycled its bold font/line-wrap every 45ms.
  await page.locator('#overviewAccounts .ctTossBasisNoteV43 b').waitFor();
@@ -105,6 +120,28 @@ for(const width of [360,390,500,768,820,1024,1280,1363]){
  assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/보유종목 가격변동/);assert.match(await closeDay.locator('.ctPerformanceDayMetric').first().innerText(),/260,000/);assert.match(await closeDay.innerText(),/1\/2종목/);
  const priceDetails=closeDay.locator('[data-price-account="TOSS"]');await priceDetails.locator('summary').click();assert.match(await priceDetails.innerText(),/2026-10-21/);assert.match(await priceDetails.innerText(),/100 → 102/);
  await page.evaluate(()=>document.dispatchEvent(new Event('jjooni:live-applied')));await page.waitForTimeout(250);assert(await priceDetails.getAttribute('open')!==null);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'price evidence overflow at '+width);
+ // Exercise first paint and repeated producer writes in the actual overview.
+ // The old 80ms floor changed markup; innerHTML-based writers then recreated it.
+ const overviewStability=await page.evaluate(async()=>{
+  const host=document.createElement('section');host.id='overviewTypographyProbe';
+  document.querySelector('#panel-overview').append(host);
+  const samples=new Set();let replacements=0,styleWrites=0;
+  const observer=new MutationObserver(ms=>{styleWrites+=ms.filter(m=>m.type==='attributes'&&m.attributeName==='style').length});
+  observer.observe(host,{subtree:true,attributes:true});
+  for(let revision=0;revision<3;revision++){
+   const html='<div class="ctOvLabel">갱신 '+revision+'</div><div class="ctStrategySleeve"><div class="ctSleeveAmounts"><span>보유 원가 '+revision+'</span></div></div><div class="ctAcctComparisonRow"><span>전일 손익</span><strong>+₩1,000</strong><b>+1.00%</b></div>';
+   for(let frame=0;frame<14;frame++){
+    if(host.innerHTML!==html){host.innerHTML=html;replacements++}
+    samples.add(JSON.stringify([...host.querySelectorAll('.ctOvLabel,.ctSleeveAmounts span,.ctAcctComparisonRow strong')].map(e=>[getComputedStyle(e).fontSize,getComputedStyle(e).lineHeight])));
+    await new Promise(requestAnimationFrame);
+   }
+  }
+  observer.disconnect();host.remove();return {samples:[...samples],replacements,styleWrites};
+ });
+ assert.deepEqual(overviewStability.samples,[JSON.stringify([['14px','21px'],['14px','21px'],['14px','21px']])],'first-paint and live typography at '+width+': '+JSON.stringify(overviewStability));
+ assert.equal(overviewStability.replacements,3,'unchanged producer markup must settle at '+width);
+ assert.equal(overviewStability.styleWrites,0,'typography must not mutate overview markup at '+width);
+ assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).webkitTextSizeAdjust),'100%','mobile text autosizing is stable without disabling page zoom');
  // Newly inserted migrated rows must be readable before the delayed font floor.
  const rowFonts=()=>page.locator('#typographyStabilityProbe').evaluate(e=>Array.from(e.children).map(n=>parseFloat(getComputedStyle(n).fontSize)));
  await page.evaluate(()=>{const row=document.createElement('div');row.id='typographyStabilityProbe';row.className='ctCommonLine';row.innerHTML='<span>새 종목</span><small>기준시각</small><b>123,456</b>';document.querySelector('.app').append(row)});
