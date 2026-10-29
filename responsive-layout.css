@@ -1,4 +1,5 @@
 /* One mobile-first layout contract. Loaded by ui-refactor after sign-in. */
+html[data-ct-layout="mobile-first"]{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html[data-ct-layout="mobile-first"] body{display:block!important;min-width:0;color:#172b45;background:#f4f7fb}
 html[data-ct-layout="mobile-first"] body .app{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:0 14px 24px!important;overflow-x:clip!important}
 html[data-ct-layout="mobile-first"] body .top{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:8px!important;height:auto!important;min-height:76px!important;width:auto!important;margin:0 -14px 10px!important;padding:14px!important;background:#071a33!important;isolation:isolate!important}
@@ -212,7 +213,9 @@ html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctSleeveAmounts,.c
 html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctFxSub,.ctFxRef,.ctFxRef small,.ctFxSumLabel,.ctFxSumSub,.ctFxMeta,.ctFxSecondary,.ctMcSub,.ctMcTime,.ctMcTag,.ctMcSrc,.ctMcNote){font-size:12px!important;line-height:1.5!important;white-space:normal;overflow-wrap:anywhere}
 html[data-ct-layout="mobile-first"] body #panel-overview :is(.ctFxTable th,.ctFxTable td,.ctFxName,.ctFxPrimary,.ctFxEmpty,.ctMcName,.ctMcMove){font-size:14px!important;line-height:1.5!important}
 html[data-ct-layout="mobile-first"] body #panel-overview .ctFxSumValue{font-size:18px!important;line-height:1.5!important;overflow-wrap:anywhere}
-html[data-ct-layout="mobile-first"] body #panel-overview :is(#ctHeroTrustStripV4 button,.ctTrustBadge){font-size:12px!important;line-height:1.5!important}
+html[data-ct-layout="mobile-first"] body #panel-overview :is(#ctHeroTrustStripV4 button,#ctHeroTrustStripV6 button,.ctTrustBadge,.ctNetLabel,.ctTrustDetailTitleV6,.ctTrustDetailSubV6,.ctTrustRowV6,.ctTrustRowV6 b,.ctTrustSourceV6,.ctTrustFootV6){font-size:12px!important;line-height:1.5!important}
+
+html[data-ct-layout="mobile-first"] body #panel-overview #ctHeroTrustStripV6 button{font-size:14px!important;line-height:1.5!important}
 
 /* Separate touch targets; a phone gets a balanced 3 + 2 arrangement. */
 html[data-ct-layout="mobile-first"] body .tabs{gap:8px!important;padding:8px!important;box-sizing:border-box!important}
