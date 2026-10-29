@@ -77,7 +77,7 @@ test('daily and weekly each appear once while longer selected comparisons remain
  const api=board({WTI:[{date:'2026-09-01',value:80},{date:'2026-10-13',value:100},{date:'2026-10-19',value:102},{date:'2026-10-20',value:101}]});
  for(const comparison of ['D1','W1','M1','Y1']){
   api.setCompare(comparison);
-  const html=api.standardTile(api.BY_KEY.WTI),text=html.replace(/<[^>]*>/g,'');
+  const html=api.standardTile(api.BY_KEY.WTI),text=html.replace(/<div class="latestPrimaryChange[^"]*">.*?<\/div>/g,'').replace(/<[^>]*>/g,'');
   assert.equal((text.match(/일간/g)||[]).length,1,text);
   assert.equal((text.match(/주간/g)||[]).length,1,text);
   assert(text.includes('일간 -0.98%'));assert(text.includes('주간 +1.00%'));
@@ -129,4 +129,15 @@ test('US rate labels distinguish local observation day and disclose failed refre
  assert.match(html,/미국 현지 2026-10-23 기준 · 일별 확정값/);
  assert.match(html,/자료 지연 · 2026-10-26 자료 미확인/);
  assert.match(html,/원천 조회 실패/);
+});
+
+
+test('market cards place the selected-period change ahead of the level with native units',()=>{
+ const api=board({NASDAQ100:[{date:'2026-10-08',value:100},{date:'2026-10-09',value:98}],US2Y:[{date:'2026-10-08',value:4},{date:'2026-10-09',value:4.05}]});
+ for(const [key,value] of [['NASDAQ100','-2.00%'],['US2Y','+5.0bp']]){
+  const html=api.standardTile(api.BY_KEY[key]);
+  assert(html.includes('latestPrimaryValue">'+value));
+  assert(html.indexOf('latestPrimaryValue')<html.indexOf('latestLevelValue'));
+  assert.match(html,/일간 대비/);
+ }
 });
