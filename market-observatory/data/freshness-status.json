@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-29T21:50:23+09:00",
+  "generated_kst": "2026-10-29T23:31:24+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,7 +9,9 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "calendar"
+    "crypto",
+    "calendar",
+    "audit"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -110,19 +112,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-10-29T17:42:50+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=11s · ETHUSD age=7s",
+      "detail": "BTCUSD age=6072s · ETHUSD age=6068s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-29T21:50:12+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-10-29T21:50:16+09:00"
         }
       },
@@ -185,25 +187,24 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-10-29T19:51:33+09:00",
-      "as_of": "2026-10-29T19:51:33+09:00",
-      "detail": "events=186 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=2",
+      "generated_kst": "2026-10-29T23:30:32+09:00",
+      "as_of": "2026-10-29T23:30:32+09:00",
+      "detail": "events=186 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=1",
       "source": "economic-calendar.json",
       "critical": false,
       "actual_completeness_state": "LIVE",
       "official_probe_state": "DEGRADED",
-      "official_probe_failure_count": 8,
+      "official_probe_failure_count": 4,
       "official_probe_blocked_releases": [
-        "Producer Price Index",
         "U.S. Import and Export Price Indexes"
       ]
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-10-29T21:50:23+09:00",
+      "state": "WARN",
+      "generated_kst": "2026-10-29T23:31:24+09:00",
       "as_of": "2026-10-28",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=0 · warnings=3",
       "source": "data-audit.json",
       "critical": true
     },
