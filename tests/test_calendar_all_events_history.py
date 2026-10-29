@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 
-from enrich_calendar_all_events import text_score
+from enrich_calendar_all_events import text_score, apply_all_event_enrichment, metric_identity_compatible
 from build_calendar_history import canonical_title
 from sync_calendar_representative_values import primary_metric
 from backfill_calendar_history_forexfactory import best_catalog_match
@@ -22,6 +22,39 @@ class CalendarAllEventsHistoryTest(unittest.TestCase):
         yoy=text_score('Core CPI YoY Consumer Price Index','Core CPI y/y')
         mom=text_score('Core CPI YoY Consumer Price Index','Core CPI m/m')
         self.assertGreater(yoy,mom)
+
+    def test_import_and_export_are_distinct_metrics(self):
+        e = {'datetime_kst':'2026-10-16T21:30+09:00', 'title':'U.S. Import and Export Price Indexes',
+             'country':'US', 'market_metrics':[
+                 {'key':'us_import_price_mom','label':'U.S. Import Prices MoM'},
+                 {'key':'us_export_price_mom','label':'U.S. Export Prices MoM'}]}
+        rows = [{'country':'USD','date':'2026-10-16T08:30:00-04:00',
+                 'title':'Import Prices m/m','actual':'1.1%'}]
+        apply_all_event_enrichment({'events':[e]},None,rows)
+        m = {x['key']:x.get('actual') for x in e['market_metrics']}
+        self.assertEqual(m['us_import_price_mom'],'1.1%')
+        self.assertIsNone(m['us_export_price_mom'])
+        rows.append({'country':'USD','date':'2026-10-16T08:30:00-04:00',
+                     'title':'Export Prices m/m','actual':'2.2%'})
+        apply_all_event_enrichment({'events':[e]},None,rows)
+        m = {x['key']:x.get('actual') for x in e['market_metrics']}
+        self.assertEqual(m['us_export_price_mom'],'2.2%')
+
+    def test_ppi_mom_does_not_populate_yoy_or_core(self):
+        e = {'datetime_kst':'2026-10-15T21:30+09:00','title':'Producer Price Index',
+             'country':'US','market_metrics':[
+                 {'key':'ppi_mom','label':'PPI MoM'},
+                 {'key':'ppi_yoy','label':'PPI YoY'},
+                 {'key':'core_ppi_mom','label':'Core PPI MoM'}]}
+        rows = [{'country':'USD','date':'2026-10-15T08:30:00-04:00',
+                 'title':'PPI m/m','actual':'1.3%'}]
+        apply_all_event_enrichment({'events':[e]},None,rows)
+        m = {x['key']:x.get('actual') for x in e['market_metrics']}
+        self.assertEqual(m['ppi_mom'],'1.3%')
+        self.assertIsNone(m['ppi_yoy'])
+        self.assertIsNone(m['core_ppi_mom'])
+        self.assertTrue(metric_identity_compatible(
+            {'key':'core_ppi_yoy'},{'title':'Core PPI y/y'}))
 
     def test_reference_period_does_not_split_history_family(self):
         a=canonical_title('Personal Income and Outlays, August 2026')
