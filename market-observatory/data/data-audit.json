@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-29T11:24:02+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-10-29T11:48:59+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 2,
+  "warning_count": 0,
   "observatory_session": "2026-10-28",
   "file_status": {
     "observatory": {
@@ -23,14 +23,14 @@
       "target": "TQQQ 100%"
     },
     "fedwatch": {
-      "generated_kst": "2026-10-28T08:02:23+09:00",
+      "generated_kst": "2026-10-29T06:47:14+09:00",
       "source_kind": "CME_OFFICIAL_PUBLIC_TABLE",
       "source_as_of_kst": null,
-      "market_data_as_of": "2026-10-27",
-      "expected_market_data_date": "2026-10-27",
+      "market_data_as_of": "2026-10-28",
+      "expected_market_data_date": "2026-10-28",
       "audit_expected_market_data_date": "2026-10-28",
       "declared_freshness": "LIVE",
-      "audit_state": "LAGGING"
+      "audit_state": "LIVE"
     },
     "calendar": {
       "generated_kst": "2026-10-29T10:56:09+09:00",
@@ -68,13 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-29T11:24:01+09:00",
+      "generated_kst": "2026-10-29T11:48:58+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "fedwatch",
-        "calendar",
-        "audit"
+        "calendar"
       ]
     },
     "watchdog": {
@@ -501,13 +499,13 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LAGGING",
+      "state": "LIVE",
       "anchor": "2026-10-28",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
         "FEDWATCH": {
-          "last_date": "2026-10-27",
+          "last_date": "2026-10-28",
           "last_value": null
         }
       },
@@ -520,29 +518,18 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T10:53:55+09:00",
-      "current_quote_age_seconds": 1807,
+      "current_quote_age_seconds": 3304,
       "captured_quote_age_seconds": 7
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-29T10:53:58+09:00",
-      "current_quote_age_seconds": 1804,
+      "current_quote_age_seconds": 3301,
       "captured_quote_age_seconds": 4
     }
   },
-  "issues": [
-    {
-      "code": "GROUP_FEDWATCH_LAGGING",
-      "severity": "WARN",
-      "detail": "anchor=2026-10-28 dates=FEDWATCH:2026-10-27"
-    },
-    {
-      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
-      "severity": "WARN",
-      "detail": "declared=LIVE audit=LAGGING expected=2026-10-28 asof=2026-10-27"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",

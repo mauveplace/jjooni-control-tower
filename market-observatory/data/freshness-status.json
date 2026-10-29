@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-29T11:24:02+09:00",
+  "generated_kst": "2026-10-29T11:48:59+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,9 +9,7 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "fedwatch",
-    "calendar",
-    "audit"
+    "calendar"
   ],
   "watchdog_required": false,
   "session_alignment": {
@@ -115,7 +113,7 @@
       "state": "LIVE",
       "generated_kst": "2026-10-29T10:54:02+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1807s · ETHUSD age=1804s",
+      "detail": "BTCUSD age=3304s · ETHUSD age=3301s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
@@ -150,10 +148,10 @@
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-28T08:02:23+09:00",
-      "as_of": "2026-10-27",
-      "detail": "expected=2026-10-28 · FOMC 2026-10-28",
+      "state": "LIVE",
+      "generated_kst": "2026-10-29T06:47:14+09:00",
+      "as_of": "2026-10-28",
+      "detail": "expected=2026-10-28 · FOMC 2026-12-09",
       "source": "CME FedWatch official public probability tables (QuikStrike)",
       "critical": false
     },
@@ -202,10 +200,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-10-29T11:24:02+09:00",
+      "state": "PASS",
+      "generated_kst": "2026-10-29T11:48:59+09:00",
       "as_of": "2026-10-28",
-      "detail": "critical=0 · warnings=2",
+      "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     },
