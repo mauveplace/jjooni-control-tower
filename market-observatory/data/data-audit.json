@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-29T14:55:46+09:00",
+  "generated_kst": "2026-10-29T16:39:51+09:00",
   "overall": "PASS",
   "critical_count": 0,
   "warning_count": 0,
@@ -68,16 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-29T14:55:43+09:00",
+      "generated_kst": "2026-10-29T14:55:46+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "energy",
-        "fx",
-        "metals",
-        "jp_rates",
-        "calendar",
-        "audit"
+        "calendar"
       ]
     },
     "watchdog": {
@@ -466,19 +461,19 @@
       "critical": false,
       "items": {
         "BTCUSD": {
-          "count": 1096,
+          "count": 1097,
           "last_date": "2026-10-29",
-          "last_value": 80132.17,
+          "last_value": 79802.01,
           "group": "crypto",
-          "latest_value": 80132.17,
+          "latest_value": 79802.01,
           "latest_matches": true
         },
         "ETHUSD": {
-          "count": 1096,
+          "count": 1097,
           "last_date": "2026-10-29",
-          "last_value": 2320.7,
+          "last_value": 2305.65,
           "group": "crypto",
-          "latest_value": 2320.7,
+          "latest_value": 2305.65,
           "latest_matches": true
         }
       },
@@ -522,16 +517,16 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-29T14:55:34+09:00",
-      "current_quote_age_seconds": 12,
-      "captured_quote_age_seconds": 6
+      "quote_as_of_kst": "2026-10-29T16:39:47+09:00",
+      "current_quote_age_seconds": 4,
+      "captured_quote_age_seconds": 3
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-29T14:55:32+09:00",
-      "current_quote_age_seconds": 14,
-      "captured_quote_age_seconds": 8
+      "quote_as_of_kst": "2026-10-29T16:39:46+09:00",
+      "current_quote_age_seconds": 5,
+      "captured_quote_age_seconds": 4
     }
   },
   "issues": [],
