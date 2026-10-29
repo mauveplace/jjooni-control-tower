@@ -3,7 +3,7 @@
 // The Control Tower has multiple legacy navigation owners. A portfolio tab
 // tap must never be redirected to the neighboring TRI-POD strategy tab.
 if(root.__JJOONI_PORTFOLIO_TAB_GUARD_V1)return;
-const state={version:'1.0',bound:true,repairs:0,last_target:null,last_reason:null};
+const state={version:'1.1',bound:true,repairs:0,last_target:null,last_reason:null};
 root.__JJOONI_PORTFOLIO_TAB_GUARD_V1=state;
 if(!root.document)return;
 const doc=root.document;
@@ -25,7 +25,16 @@ function activatePortfolio(){
   // Clear only that old inline display override; CSS owns normal layout.
   if(p.style.getPropertyPriority('display')==='important')p.style.removeProperty('display');
  }
- for(const t of doc.querySelectorAll('.tabs .tab[data-tab]'))t.classList.toggle('on',t===tab);
+ for(const t of doc.querySelectorAll('.tabs .tab[data-tab]')){
+  const selected=t===tab;t.classList.toggle('on',selected);
+  t.setAttribute?.('aria-current',selected?'page':'false');
+ }
+ // The capture guard bypasses legacy click handlers, including their title and
+ // hash updates. Publish the complete destination, not just the panel class.
+ const brand=doc.querySelector('.top .brand');
+ if(brand&&brand.textContent!=='보유분석')brand.textContent='보유분석';
+ try{if(root.location?.hash!=='#portfolio')root.history?.replaceState(root.history.state,'','#portfolio')}catch(_){}
+
  const menu=doc.getElementById('ctMoreMenu'),button=doc.getElementById('ctMoreTab');
  menu?.classList.remove('open');
  doc.getElementById('ctMoreBackdropV4')?.classList.remove('open');

@@ -124,7 +124,8 @@ function enforceContentFontFloor(){
 }
 function scheduleContentFontFloor(delay=30){clearTimeout(fontFloorTimer);fontFloorTimer=setTimeout(enforceContentFontFloor,delay)}
 function forceTab(name){
- if(!isTablet()||!name)return false;
+ // Shared mobile-first navigation owns panel selection on touch devices too.
+ if(document.documentElement.dataset.ctLayout==='mobile-first'||!isTablet()||!name)return false;
  const tab=q('.tab[data-tab="'+CSS.escape(name)+'"]');
  const panel=document.getElementById('panel-'+name);
  if(!panel)return false;
