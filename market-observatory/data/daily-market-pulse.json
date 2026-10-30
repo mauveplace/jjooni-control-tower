@@ -1,7 +1,7 @@
 {
   "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
-  "generated_kst": "2026-10-31T04:56:37+09:00",
-  "market_date_us": "2026-10-29",
+  "generated_kst": "2026-10-31T06:14:28+09:00",
+  "market_date_us": "2026-10-30",
   "snapshot_status": "FINAL",
   "read_only": true,
   "contains_account_data": false,
@@ -136,23 +136,23 @@
     ],
     "tradingview_cross_asset": {
       "ndx": {
-        "value": 29402.50976562,
-        "market_date": "2026-10-29",
-        "change_pct": -1.3774131574036064,
+        "value": 28384.84570312,
+        "market_date": "2026-10-30",
+        "change_pct": -3.4611469245728888,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
       "dxy": {
-        "value": 102.04000092,
-        "market_date": "2026-10-29",
-        "change_pct": -0.1467868836661168,
+        "value": 101.96399689,
+        "market_date": "2026-10-30",
+        "change_pct": -0.07448454460480258,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
       "usdkrw": {
-        "value": 1333.59997559,
+        "value": 1333.43994141,
         "market_date": "2026-10-29",
-        "change_pct": -0.5028567678258211,
+        "change_pct": -0.5147965878775196,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
@@ -236,23 +236,23 @@
       "observed_at_kst": "2026-10-30T08:54:49+09:00"
     },
     "fear_greed": {
-      "score": 27.4,
+      "score": 33.9,
       "status": "OBSERVATORY_CANONICAL",
-      "market_date": "2026-10-30"
+      "market_date": "2026-10-28"
     },
     "calendar": [],
     "canonical_context": {
       "sp500": {
-        "value": 7720.39013672,
-        "market_date": "2026-10-29",
-        "change_pct": -0.3046217036910326,
+        "value": 7580.06982422,
+        "market_date": "2026-10-30",
+        "change_pct": -1.8175287778865457,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       },
       "vix": {
-        "value": 17.20000076,
-        "market_date": "2026-10-29",
-        "change_pct": 1.714966957850117,
+        "value": 19.42000008,
+        "market_date": "2026-10-30",
+        "change_pct": 12.90697222038959,
         "change_bp": null,
         "source": "OBSERVATORY_CANONICAL"
       }
@@ -642,6 +642,22 @@
       "top10_weight_pct": 65.45,
       "fear_greed": 27.4,
       "risk": "NEUTRAL"
+    },
+    {
+      "market_date_us": "2026-10-30",
+      "generated_kst": "2026-10-31T06:14:28+09:00",
+      "snapshot_status": "FINAL",
+      "ndx": 28384.84570312,
+      "dxy": 101.96399689,
+      "usdkrw": 1333.43994141,
+      "us10y": 4.94,
+      "sp500": 7580.06982422,
+      "vix": 19.42000008,
+      "breadth_ratio": null,
+      "breadth_proxy_ratio": 0.8181818181818182,
+      "top10_weight_pct": 65.45,
+      "fear_greed": 33.9,
+      "risk": "NEUTRAL"
     }
   ],
   "quality": {
@@ -666,27 +682,27 @@
     "finviz_sp500_map": {
       "url": "https://finviz.com/map?t=sec",
       "status": "WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-31T04:56:37+09:00"
+      "observed_at_kst": "2026-10-31T06:14:28+09:00"
     },
     "finviz_calendar": {
       "url": "https://finviz.com/calendar.ashx",
       "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
-      "observed_at_kst": "2026-10-31T04:56:37+09:00"
+      "observed_at_kst": "2026-10-31T06:14:28+09:00"
     },
     "tradingview": {
       "url": "https://kr.tradingview.com/",
       "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-10-31T04:56:37+09:00"
+      "observed_at_kst": "2026-10-31T06:14:28+09:00"
     },
     "slickcharts_nasdaq100": {
       "url": "https://www.slickcharts.com/nasdaq100",
       "status": "LIVE",
-      "observed_at_kst": "2026-10-31T04:56:37+09:00"
+      "observed_at_kst": "2026-10-31T06:14:28+09:00"
     },
     "cnn_fear_greed": {
       "url": "https://edition.cnn.com/markets/fear-and-greed",
       "status": "OBSERVATORY_CANONICAL",
-      "observed_at_kst": "2026-10-31T04:56:37+09:00"
+      "observed_at_kst": "2026-10-31T06:14:28+09:00"
     }
   },
   "usage_contract": {

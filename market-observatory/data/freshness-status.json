@@ -1,47 +1,40 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-31T06:12:48+09:00",
+  "generated_kst": "2026-10-31T06:14:29+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "DEGRADED",
-  "critical_bad": [
-    "market",
-    "pulse",
-    "tripod",
+  "overall": "LIVE_WITH_WARNINGS",
+  "critical_bad": [],
+  "warnings": [
+    "jp_rates",
+    "fedwatch",
+    "calendar",
     "audit"
   ],
-  "warnings": [
-    "market",
-    "us_rates",
-    "pulse",
-    "fedwatch",
-    "tripod",
-    "calendar"
-  ],
-  "watchdog_required": true,
+  "watchdog_required": false,
   "session_alignment": {
     "expected_session": "2026-10-30",
-    "source_session": "2026-10-29",
+    "source_session": "2026-10-30",
     "market_aligned": true,
-    "observatory": "2026-10-29",
-    "daily_market_pulse": "2026-10-29",
-    "tripod": "2026-10-29",
+    "observatory": "2026-10-30",
+    "daily_market_pulse": "2026-10-30",
+    "tripod": "2026-10-30",
     "pulse_aligned": true,
     "tripod_aligned": true,
     "us_supplement_aligned": true,
     "kr_kospi": "2026-10-30",
     "kr_kosdaq": "2026-10-30",
-    "aligned": false
+    "aligned": true
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-31T04:56:10+09:00",
-      "as_of": "2026-10-29",
+      "state": "LIVE",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
+      "as_of": "2026-10-30",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
       "critical": true
@@ -49,7 +42,7 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
+      "generated_kst": "2026-10-31T06:14:27+09:00",
       "as_of": "2026-10-30",
       "detail": "KOSPI 2026-10-30 · KOSDAQ 2026-10-30",
       "source": "Naver Finance primary",
@@ -58,43 +51,43 @@
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
-      "as_of": "2026-10-29",
-      "detail": "RUSSELL2000 2026-10-29 · DOW 2026-10-29 · NASDAQCOMPOSITE 2026-10-29",
+      "generated_kst": "2026-10-31T06:14:27+09:00",
+      "as_of": "2026-10-30",
+      "detail": "RUSSELL2000 2026-10-30 · DOW 2026-10-30 · NASDAQCOMPOSITE 2026-10-30",
       "source": "Yahoo completed cash-session daily",
       "critical": false
     },
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
-      "as_of": "2026-10-29",
-      "detail": "WTI 2026-10-29 · BRENT 2026-10-29 · NATGAS 2026-10-29",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
+      "as_of": "2026-10-30",
+      "detail": "WTI 2026-10-30 · BRENT 2026-10-30 · NATGAS 2026-10-30",
       "source": "Yahoo CL=F / BZ=F / NG=F",
       "critical": false
     },
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
       "as_of": "2026-10-29",
-      "detail": "DXY 2026-10-29 · USDKRW 2026-10-29 · USDJPY 2026-10-29 · JPYKRW 2026-10-29",
+      "detail": "DXY 2026-10-30 · USDKRW 2026-10-29 · USDJPY 2026-10-29 · JPYKRW 2026-10-29",
       "source": "Yahoo DXY / FX daily",
       "critical": false
     },
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
-      "as_of": "2026-10-29",
-      "detail": "GOLD 2026-10-29 · SILVER 2026-10-29 · COPPER 2026-10-29",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
+      "as_of": "2026-10-30",
+      "detail": "GOLD 2026-10-30 · SILVER 2026-10-30 · COPPER 2026-10-30",
       "source": "Yahoo Gold / Silver / Copper",
       "critical": false
     },
     "us_rates": {
       "label": "US Rates",
-      "state": "AHEAD_OF_ANCHOR",
-      "generated_kst": "2026-10-31T04:56:10+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
       "as_of": "2026-10-30",
       "detail": "US3M 2026-10-30 · US2Y 2026-10-30 · US5Y_OFFICIAL 2026-10-30 · US10Y_OFFICIAL 2026-10-30 · US30Y_OFFICIAL 2026-10-30 · US_2S10S 2026-10-30",
       "source": "U.S. Treasury official",
@@ -103,7 +96,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:10+09:00",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
       "as_of": "2026-10-30",
       "detail": "KR3Y 2026-10-30 · KR5Y 2026-10-30 · KR10Y 2026-10-30 · KR20Y 2026-10-30 · KR30Y 2026-10-30 · KR_3S10S 2026-10-30",
       "source": "BOK ECOS",
@@ -111,48 +104,48 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
-      "as_of": "2026-10-29",
-      "detail": "JP2Y 2026-10-29 · JP5Y 2026-10-29 · JP10Y 2026-10-29 · JP30Y 2026-10-29 · JP_2S10S 2026-10-29",
+      "state": "LAGGING",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
+      "as_of": "2026-09-30",
+      "detail": "JP2Y 2026-09-30 · JP5Y 2026-09-30 · JP10Y 2026-09-30 · JP30Y 2026-09-30 · JP_2S10S 2026-09-30",
       "source": "Japan MOF current JGB CSV",
       "critical": false
     },
     "crypto": {
       "label": "Crypto",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
+      "generated_kst": "2026-10-31T06:14:27+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1517s · ETHUSD age=1516s",
+      "detail": "BTCUSD age=5s · ETHUSD age=12s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-31T05:47:31+09:00"
+          "quote_as_of_kst": "2026-10-31T06:14:23+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-31T05:47:32+09:00"
+          "quote_as_of_kst": "2026-10-31T06:14:16+09:00"
         }
       },
       "max_age_seconds": 3600
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-31T04:56:37+09:00",
-      "as_of": "2026-10-29",
-      "detail": "snapshot=FINAL · Observatory session=2026-10-29",
+      "state": "LIVE",
+      "generated_kst": "2026-10-31T06:14:28+09:00",
+      "as_of": "2026-10-30",
+      "detail": "snapshot=FINAL · Observatory session=2026-10-30",
       "source": "daily-market-pulse.json",
       "critical": true
     },
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-10-31T04:56:04+09:00",
-      "as_of": "2026-10-30",
-      "detail": "27.4/100 · EXTREME FEAR",
+      "generated_kst": "2026-10-31T06:14:22+09:00",
+      "as_of": "2026-10-28",
+      "detail": "33.9/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
       "critical": false
     },
@@ -167,10 +160,10 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LAGGING",
-      "generated_kst": "2026-10-31T04:56:37+09:00",
-      "as_of": "2026-10-29",
-      "detail": "상승 · TQQQ 100%",
+      "state": "LIVE",
+      "generated_kst": "2026-10-31T06:14:28+09:00",
+      "as_of": "2026-10-30",
+      "detail": "상승 · QQQ 50% + QLD 50%",
       "source": "public-market-daily.json + observatory.json",
       "critical": true
     },
@@ -209,10 +202,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "FAIL",
-      "generated_kst": "2026-10-31T06:12:48+09:00",
-      "as_of": "2026-10-29",
-      "detail": "critical=1 · warnings=4",
+      "state": "WARN",
+      "generated_kst": "2026-10-31T06:14:28+09:00",
+      "as_of": "2026-10-30",
+      "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     },
