@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-31T04:58:03+09:00",
-  "overall": "WARN",
-  "critical_count": 0,
-  "warning_count": 2,
+  "generated_kst": "2026-10-31T05:47:33+09:00",
+  "overall": "FAIL",
+  "critical_count": 1,
+  "warning_count": 4,
   "observatory_session": "2026-10-29",
   "file_status": {
     "observatory": {
@@ -28,9 +28,9 @@
       "source_as_of_kst": null,
       "market_data_as_of": "2026-10-29",
       "expected_market_data_date": "2026-10-29",
-      "audit_expected_market_data_date": "2026-10-29",
+      "audit_expected_market_data_date": "2026-10-30",
       "declared_freshness": "LIVE",
-      "audit_state": "LIVE"
+      "audit_state": "LAGGING"
     },
     "calendar": {
       "generated_kst": "2026-10-31T04:56:15+09:00",
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-31T04:58:01+09:00",
+      "generated_kst": "2026-10-31T04:58:03+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -85,8 +85,8 @@
   },
   "groups": {
     "core_us": {
-      "state": "LIVE",
-      "anchor": "2026-10-29",
+      "state": "LAGGING",
+      "anchor": "2026-10-30",
       "allow_lag_days": 0,
       "critical": true,
       "items": {
@@ -465,17 +465,17 @@
         "BTCUSD": {
           "count": 1097,
           "last_date": "2026-10-30",
-          "last_value": 76827.05,
+          "last_value": 76818.73,
           "group": "crypto",
-          "latest_value": 76827.05,
+          "latest_value": 76818.73,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1097,
           "last_date": "2026-10-30",
-          "last_value": 2236.52,
+          "last_value": 2236.36,
           "group": "crypto",
-          "latest_value": 2236.52,
+          "latest_value": 2236.36,
           "latest_matches": true
         }
       },
@@ -501,8 +501,8 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LIVE",
-      "anchor": "2026-10-29",
+      "state": "LAGGING",
+      "anchor": "2026-10-30",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
@@ -519,23 +519,38 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-31T04:56:20+09:00",
-      "current_quote_age_seconds": 103,
+      "quote_as_of_kst": "2026-10-31T05:47:31+09:00",
+      "current_quote_age_seconds": 2,
       "captured_quote_age_seconds": 2
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-10-31T04:56:12+09:00",
-      "current_quote_age_seconds": 111,
-      "captured_quote_age_seconds": 10
+      "quote_as_of_kst": "2026-10-31T05:47:32+09:00",
+      "current_quote_age_seconds": 1,
+      "captured_quote_age_seconds": 1
     }
   },
   "issues": [
     {
+      "code": "GROUP_CORE_US_LAGGING",
+      "severity": "CRITICAL",
+      "detail": "anchor=2026-10-30 dates=NASDAQ100:2026-10-29,SP500:2026-10-29,VIX:2026-10-29"
+    },
+    {
       "code": "GROUP_US_RATES_AHEAD_OF_ANCHOR",
       "severity": "WARN",
       "detail": "anchor=2026-10-29 dates=US3M:2026-10-30,US2Y:2026-10-30,US5Y_OFFICIAL:2026-10-30,US10Y_OFFICIAL:2026-10-30,US30Y_OFFICIAL:2026-10-30,US_2S10S:2026-10-30"
+    },
+    {
+      "code": "GROUP_FEDWATCH_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-30 dates=FEDWATCH:2026-10-29"
+    },
+    {
+      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
+      "severity": "WARN",
+      "detail": "declared=LIVE audit=LAGGING expected=2026-10-30 asof=2026-10-29"
     },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",

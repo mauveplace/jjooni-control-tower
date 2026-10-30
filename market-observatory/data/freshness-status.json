@@ -1,21 +1,29 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-10-31T04:58:03+09:00",
+  "generated_kst": "2026-10-31T05:47:34+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE_WITH_WARNINGS",
-  "critical_bad": [],
-  "warnings": [
-    "us_rates",
-    "calendar",
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "market",
+    "pulse",
+    "tripod",
     "audit"
   ],
-  "watchdog_required": false,
+  "warnings": [
+    "market",
+    "us_rates",
+    "pulse",
+    "fedwatch",
+    "tripod",
+    "calendar"
+  ],
+  "watchdog_required": true,
   "session_alignment": {
-    "expected_session": "2026-10-29",
+    "expected_session": "2026-10-30",
     "source_session": "2026-10-29",
     "market_aligned": true,
     "observatory": "2026-10-29",
@@ -26,12 +34,12 @@
     "us_supplement_aligned": true,
     "kr_kospi": "2026-10-30",
     "kr_kosdaq": "2026-10-30",
-    "aligned": true
+    "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-31T04:56:10+09:00",
       "as_of": "2026-10-29",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
@@ -115,24 +123,24 @@
       "state": "LIVE",
       "generated_kst": "2026-10-31T04:56:04+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=103s · ETHUSD age=111s",
+      "detail": "BTCUSD age=2s · ETHUSD age=1s",
       "source": "Yahoo spot crypto quote",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-31T04:56:20+09:00"
+          "quote_as_of_kst": "2026-10-31T05:47:31+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-10-31T04:56:12+09:00"
+          "quote_as_of_kst": "2026-10-31T05:47:32+09:00"
         }
       },
       "max_age_seconds": 3600
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-31T04:56:37+09:00",
       "as_of": "2026-10-29",
       "detail": "snapshot=FINAL · Observatory session=2026-10-29",
@@ -150,16 +158,16 @@
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-30T06:16:30+09:00",
       "as_of": "2026-10-29",
-      "detail": "expected=2026-10-29 · FOMC 2026-12-09",
+      "detail": "expected=2026-10-30 · FOMC 2026-12-09",
       "source": "CME FedWatch official public probability tables (QuikStrike)",
       "critical": false
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-10-31T04:56:37+09:00",
       "as_of": "2026-10-29",
       "detail": "상승 · TQQQ 100%",
@@ -201,10 +209,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-10-31T04:58:03+09:00",
+      "state": "FAIL",
+      "generated_kst": "2026-10-31T05:47:33+09:00",
       "as_of": "2026-10-29",
-      "detail": "critical=0 · warnings=2",
+      "detail": "critical=1 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     },
