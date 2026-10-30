@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 const fs=require('fs');
 const assert=require('node:assert/strict');
 const base='https://mauveplace.github.io/jjooni-control-tower/market-observatory/';
-const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18','2026년 8월 생산자물가지수','0.2%'],['2026-09-18','BOJ 금융정책','1.25%'],['2026-09-17','Bank of England','3.75%']];
+const {targets,verifiedTargetActualsReady}=require('./calendar-actual-production-readiness.cjs');
 (async()=>{
  const browser=await chromium.launch({headless:true});
  const report=[];
@@ -15,12 +15,13 @@ const targets=[['2026-09-17','U.S. Initial Jobless Claims','196K'],['2026-09-18'
    const response=await probe.request.get(base+'data/economic-calendar.json?qa='+Date.now());
    if(response.ok()){
     const data=await response.json();
-    ready=data.actual_freshness?.overdue_count===0&&targets.every(([date,title,value])=>data.events.some(e=>e.datetime_kst.startsWith(date)&&e.title.includes(title)&&e.actual===value&&e.source_tier==='OFFICIAL'));
+    // An unrelated newly due release must not invalidate the already verified targets.
+    ready=verifiedTargetActualsReady(data);
     if(ready){console.log('DEPLOYED_CALENDAR',data.generated_kst,data.actual_freshness);break;}
    }
    if(attempt<12) await new Promise(resolve=>setTimeout(resolve,15000));
   }
-  await probe.close();assert(ready,'Pages did not publish the recovered official actuals within 180 seconds');
+  await probe.close();assert(ready,'Pages did not publish the target verified official actuals within 180 seconds');
   for(const width of [390,1280]){
    const page=await browser.newPage({viewport:{width,height:900}});
    await page.goto(base,{waitUntil:'networkidle',timeout:90000});
