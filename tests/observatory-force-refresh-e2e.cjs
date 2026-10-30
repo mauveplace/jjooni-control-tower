@@ -21,6 +21,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await button.click();await page.waitForFunction(()=>document.querySelector('#obsNowMessage')?.textContent.includes('시세 조회 완료'));
   assert.equal(reads,2);assert.match(await card.locator('.latestLevelValue').innerText(),/30,200/);
   assert.match(await card.locator('.latestPrimaryValue').innerText(),/\+0.67%/);
+  assert.match(await page.locator('#overviewKpis').innerText(),/NASDAQ100 · 최근 시세/);assert.match(await page.locator('#overviewKpis').innerText(),/30,200/);
   assert.equal(await page.evaluate(()=>JSON.stringify({series:DATA.series,tripod:DATA.tripod_latest})),before,'quotes never rewrite history or strategy inputs');
   await page.locator('#latestCompare [data-compare="W1"]').click();
   assert.equal(await card.locator('.latestQuoteContext').count(),0,'weekly comparison retains completed-close basis');

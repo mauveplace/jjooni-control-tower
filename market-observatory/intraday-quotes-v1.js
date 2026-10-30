@@ -25,8 +25,18 @@ const api={ENDPOINT,valid,merge,quality};
 if(typeof module==='object'&&module.exports){module.exports=api;return}
 if(!root.document)return;
 let quotes={},pending=null;
-const state={version:'1.0',status:'WAITING',result:null,get:key=>quotes[key]?{...quotes[key],display_status:quality(quotes[key])}:null,refresh};
+const state={version:'1.0',status:'WAITING',result:null,paintSummary,get:key=>quotes[key]?{...quotes[key],display_status:quality(quotes[key])}:null,refresh};
 root.__JJOONI_OBSERVATORY_QUOTES=state;
+function paintSummary(){
+ const host=document.getElementById?.('overviewKpis');if(!host)return;
+ for(const cell of host.querySelectorAll('.kpi')){
+  const label=cell.querySelector('small'),value=cell.querySelector('b'),key=label?.textContent.split(' · ')[0];
+  const q=state.get(key);if(!q||!value)continue;
+  const text=q.value.toLocaleString('ko-KR',{maximumFractionDigits:2});
+  if(value.textContent!==text)value.textContent=text;
+  const title=key+' · '+(q.refresh_status==='RETAINED'?'이전 관측':'최근 시세');if(label.textContent!==title)label.textContent=title;
+ }
+}
 async function refresh(force=false){
  if(pending)return pending;
  state.status='CHECKING';
