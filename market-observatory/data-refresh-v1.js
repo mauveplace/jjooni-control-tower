@@ -70,8 +70,23 @@ async function readPublished(){
     if(!pending)display(failed.length?'READ_PARTIAL':'READ_COMPLETE',failed.length?`${failed.join('·')} 게시값 조회 실패 · 성공한 자료는 반영, 실패한 자료는 직전 값 유지`:`게시값 확인 완료 · ${same?'시장에 새 게시값 없음':'시장 최신 게시값 확인'} · 경제일정 확인 완료 · 신규 원천 수집은 실행하지 않았습니다.`);
   }finally{readBusy=false;readButton.disabled=false;readButton.textContent='게시값 다시 확인';}
 }
+let nowBusy=false,nowButton,nowMessage;
+async function forceNow(){
+ if(nowBusy)return;
+ nowBusy=true;nowButton.disabled=true;nowButton.textContent='현재 시세 조회 중…';nowMessage.textContent='지수·환율·원자재·가상자산 원천 조회 중 · 마지막 검증값 유지';
+ try{
+  const runtime=root.__JJOONI_OBSERVATORY_QUOTES;
+  if(!runtime)throw Error('QUOTE_READER_NOT_READY');
+  const result=await runtime.refresh(true);
+  const count=result.fetched_count||0,total=result.expected_count||20,kept=Object.values(result.quotes||{}).filter(q=>q.refresh_status==='RETAINED').length;
+  nowMessage.dataset.state=result.status;
+  nowMessage.textContent=(result.cached?'최근 서버 조회 결과 확인':'시세 조회 완료')+' · '+count+'/'+total+'개 원천 응답'+(kept?' · '+kept+'개 이전 관측 유지':'')+(result.status!=='COMPLETE'?' · 일부 조회 실패':'')+' · 실제 시세 기준 시각은 각 카드에 표시';
+ }catch(error){nowMessage.dataset.state='FAILED';nowMessage.textContent='현재 시세 조회 실패 · 마지막 값 유지 · 잠시 후 다시 눌러 주세요. 완료로 처리하지 않았습니다.'}
+ finally{nowBusy=false;nowButton.disabled=false;nowButton.textContent='지금 최신화'}
+}
 function init(){
   const head=doc.querySelector('header.top');if(!head)return;
+  const primary=doc.createElement('div');primary.className='obsNowControls';primary.innerHTML='<button id="obsForceRefresh" type="button">지금 최신화</button><div><div id="obsNowMessage" role="status" aria-live="polite">현재 시세는 카드의 관측 시각을 확인하세요.</div><small>지수·환율·원자재·가상자산 조회 · 지연 가능 · 공식 금리·경제지표는 발표 기준</small></div>';head.appendChild(primary);nowButton=primary.querySelector('#obsForceRefresh');nowMessage=primary.querySelector('#obsNowMessage');nowButton.addEventListener('click',forceNow);
   const host=doc.createElement('div');host.className='obsCollectControls';
   host.innerHTML='<div class="obsCollectActions"><button type="button" id="obsCollectRefresh">시장 원천 수집 열기</button><button type="button" id="obsReadPublished">게시값 다시 확인</button><a data-run-link target="_blank" rel="noopener noreferrer">시장 실행 기록 ↗</a><a href="https://github.com/mauveplace/jjooni-control-tower/actions/workflows/economic-calendar-light-refresh.yml" target="_blank" rel="noopener noreferrer">경제일정 수집 열기 ↗</a></div><div id="obsCollectMessage" role="status" aria-live="polite">게시값 다시 확인: 시장·경제일정 재조회 · 원천 수집 열기: GitHub에서 Run workflow 실행 필요</div>';
   host.innerHTML='<details><summary style="cursor:pointer;min-height:44px;padding:10px 0;font-weight:700">데이터 관리 · 새로고침</summary>'+host.innerHTML+'</details>';
@@ -80,9 +95,9 @@ function init(){
   try{pending=JSON.parse(sessionStorage.getItem(KEY)||'null');const result=sessionStorage.getItem(KEY+'_RESULT');if(result){message.textContent=result+' 최신 게시 데이터를 다시 읽었습니다.';sessionStorage.removeItem(KEY+'_RESULT');}}catch(_){pending=null;}
   if(pending&&Number.isFinite(pending.started))poll();else pending=null;
   doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pending){if(timer)clearTimeout(timer);poll();}});
-  root.__JJOONI_DATA_REFRESH={version:'1.0',mode:'SCHEDULE_PLUS_AUTHENTICATED_MANUAL_COLLECTION',get pending(){return !!pending},start,poll};
+  root.__JJOONI_DATA_REFRESH={version:'1.1',mode:'SCHEDULE_PLUS_PUBLIC_ON_DEMAND_QUOTES',forceNow,get pending(){return !!pending},start,poll};
 }
-const style=doc.createElement('style');style.textContent='.obsCollectControls{margin-top:10px}.obsCollectActions{display:flex;flex-wrap:wrap;align-items:center;gap:7px}.obsCollectActions button,.obsCollectActions a{font:inherit;font-size:12px;font-weight:750;min-height:36px;border:1px solid #718faf;border-radius:8px;padding:7px 11px;color:#fff;background:#183959;cursor:pointer}.obsCollectActions #obsCollectRefresh{background:#e6f0ff;color:#123f71;border-color:#e6f0ff}.obsCollectActions a{background:transparent;text-decoration:none;display:inline-flex;align-items:center}#obsCollectMessage{font-size:11px;color:#c2d3e8;margin-top:6px;line-height:1.5}#obsCollectMessage[data-state=FAILED],#obsCollectMessage[data-state=CHECK_FAILED]{color:#ffd3aa}';doc.head.appendChild(style);
+const style=doc.createElement('style');style.textContent='.obsNowControls{display:flex;align-items:center;gap:12px;margin-top:12px}.obsNowControls>button{flex-shrink:0;min-height:48px;padding:10px 18px;background:#e6f0ff;color:#123f71;border:1px solid #e6f0ff;border-radius:10px;font:800 16px/1.4 system-ui;cursor:pointer}.obsNowControls>button:disabled{opacity:.65;cursor:wait}.obsNowControls>div{min-width:0}.obsNowControls small,#obsNowMessage{font-size:12px;line-height:1.5;color:#c2d3e8;overflow-wrap:anywhere}.obsNowControls small{display:block;margin-top:4px}#obsNowMessage[data-state=FAILED],#obsNowMessage[data-state=PARTIAL]{color:#ffd3aa}@media(max-width:599px){.obsNowControls{align-items:flex-start;flex-wrap:wrap}.obsNowControls>button{width:100%}}.obsCollectControls{margin-top:10px}.obsCollectActions{display:flex;flex-wrap:wrap;align-items:center;gap:7px}.obsCollectActions button,.obsCollectActions a{font:inherit;font-size:12px;font-weight:750;min-height:36px;border:1px solid #718faf;border-radius:8px;padding:7px 11px;color:#fff;background:#183959;cursor:pointer}.obsCollectActions #obsCollectRefresh{background:#e6f0ff;color:#123f71;border-color:#e6f0ff}.obsCollectActions a{background:transparent;text-decoration:none;display:inline-flex;align-items:center}#obsCollectMessage{font-size:11px;color:#c2d3e8;margin-top:6px;line-height:1.5}#obsCollectMessage[data-state=FAILED],#obsCollectMessage[data-state=CHECK_FAILED]{color:#ffd3aa}';doc.head.appendChild(style);
 init();
 })(typeof window!=='undefined'?window:globalThis);
 

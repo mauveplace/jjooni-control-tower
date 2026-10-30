@@ -4,10 +4,10 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-function board(series, quality={}) {
+function board(series, quality={}, quotes={}) {
   const src = fs.readFileSync(path.join(__dirname, '../market-observatory/latest-board-v1.js'), 'utf8');
   const context = {
-    DATA: {series,cross_market_freshness_quality:quality}, window: {}, document: {createElement: () => ({}), head: {appendChild() {}}},
+    DATA: {series,cross_market_freshness_quality:quality}, window: {__JJOONI_OBSERVATORY_QUOTES:{get:key=>quotes[key]||null}}, document: {createElement: () => ({}), head: {appendChild() {}}},
     setInterval() {}, clearInterval() {}, console,
   };
   vm.createContext(context);
@@ -140,4 +140,14 @@ test('market cards place the selected-period change ahead of the level with nati
   assert(html.indexOf('latestPrimaryValue')<html.indexOf('latestLevelValue'));
   assert.match(html,/일간 대비/);
  }
+});
+
+test('intraday overlay updates daily card only and leaves closed history and weekly returns intact',()=>{
+ const series={NASDAQ100:[{date:'2026-10-22',value:90},{date:'2026-10-29',value:99},{date:'2026-10-30',value:100}]},before=JSON.stringify(series);
+ const q={value:103,previous_close:100,change_pct:3,session_date:'2026-10-30',observed_at:'2026-10-30T16:00:00Z',display_status:'장중 관측 · 지연 가능'};
+ const api=board(series,{}, {NASDAQ100:q}),item=api.BY_KEY.NASDAQ100;
+ assert.equal(api.stat(item).value,103);assert.equal(api.stat(item).change,3);
+ assert.match(api.standardTile(item),/전일 종가 대비/);assert.match(api.standardTile(item),/10-31 01:00:00 KST/);
+ api.setCompare('W1');assert.equal(api.stat(item).value,100);assert.match(api.standardTile(item),/주간 대비/);
+ assert.doesNotMatch(api.standardTile(item),/장중 관측/);assert.equal(JSON.stringify(series),before);
 });

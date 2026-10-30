@@ -44,7 +44,7 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
     const layout=await page.evaluate(()=>{const e=document.querySelector('#latestMarketBoard .latestChangeFirst[data-metric="NASDAQ100"]');const primary=e.querySelector('.latestPrimaryValue'),level=e.querySelector('.latestLevelValue');return {primary:parseFloat(getComputedStyle(primary).fontSize),level:parseFloat(getComputedStyle(level).fontSize),first:primary.getBoundingClientRect().top<level.getBoundingClientRect().top,label:e.querySelector('.latestPrimaryLabel').textContent,clipped:primary.scrollWidth>primary.clientWidth+1}});
     assert(layout.primary>=26&&layout.primary>layout.level,'change must dominate level '+JSON.stringify(layout));
     assert(layout.first&&!layout.clipped,'primary change must fit and precede level '+JSON.stringify(layout));
-    assert.equal(layout.label,'일간 대비');
+    assert(['일간 대비','전일 종가 대비'].includes(layout.label),layout.label);
    }
    if(tab==='analysis-lab')await page.waitForFunction(()=>window.__JJOONI_ANALYSIS_LAB.loaded);
    if(tab==='sectors')await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_SECTOR_ETF_V1.loaded);
