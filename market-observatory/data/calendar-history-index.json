@@ -84,7 +84,7 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-10-31T04:20:17+09:00",
+  "generated_kst": "2026-10-31T06:12:36+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37820,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
@@ -12541,51 +12541,6 @@
       "ref": "KR::2026년-3분기-실질-gdp::gdp_qoq",
       "sha256": "76bafd2c8e9ec0674f8ef765770e9082c1d886eabbb9581afb3664833a6e39ea"
     },
-    "KR::2026년-4분기-실질-gdp": {
-      "available_from": null,
-      "available_to": null,
-      "category": "GDP",
-      "count": 0,
-      "country": "KR",
-      "event_title": "2026년 3/4분기 실질 GDP(속보)",
-      "kind": "event",
-      "label": "2026년 3/4분기 실질 GDP(속보)",
-      "path": "./calendar-history/series/ac6b5918f258f7520469ba3343b09758893b4e852a27f1907aac5a663e1d88a6.json",
-      "quality": {
-        "actual_count": 0,
-        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 0,
-        "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 0,
-        "rows_by_year": {},
-        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
-      },
-      "ref": "KR::2026년-4분기-실질-gdp",
-      "sha256": "ac6b5918f258f7520469ba3343b09758893b4e852a27f1907aac5a663e1d88a6"
-    },
-    "KR::2026년-4분기-실질-gdp::gdp_qoq": {
-      "available_from": null,
-      "available_to": null,
-      "category": "GDP",
-      "count": 0,
-      "country": "KR",
-      "event_title": "2026년 3/4분기 실질 GDP(속보)",
-      "kind": "metric",
-      "label": "GDP QoQ",
-      "metric_key": "gdp_qoq",
-      "path": "./calendar-history/series/b5197cfa7ce32eef7dcb27f878225920fc6c68ccc1ebc7e5f99f26ab768a5a3d.json",
-      "quality": {
-        "actual_count": 0,
-        "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 0,
-        "frequency_validation": "NOT_VALIDATED",
-        "max_observed_gap_days": 0,
-        "rows_by_year": {},
-        "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
-      },
-      "ref": "KR::2026년-4분기-실질-gdp::gdp_qoq",
-      "sha256": "b5197cfa7ce32eef7dcb27f878225920fc6c68ccc1ebc7e5f99f26ab768a5a3d"
-    },
     "KR::고용동향": {
       "available_from": "2026-09-09",
       "available_to": "2026-10-16",
@@ -13349,7 +13304,7 @@
       "event_title": "Employment Cost Index",
       "kind": "event",
       "label": "Employment Cost Index",
-      "path": "./calendar-history/series/33e2890eae7ee44ba5863d0fd066a280021906cd2be711b4d191bb71f49a7b8f.json",
+      "path": "./calendar-history/series/1fb20b5831596341110f53ef9a0e81d38daa4f552b434a394a52c404e32f9746.json",
       "quality": {
         "actual_count": 4,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13362,7 +13317,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::employment-cost-index",
-      "sha256": "33e2890eae7ee44ba5863d0fd066a280021906cd2be711b4d191bb71f49a7b8f"
+      "sha256": "1fb20b5831596341110f53ef9a0e81d38daa4f552b434a394a52c404e32f9746"
     },
     "US::employment-cost-index::eci": {
       "available_from": "2017-01-31",
@@ -13374,7 +13329,7 @@
       "kind": "metric",
       "label": "Employment Cost Index",
       "metric_key": "eci",
-      "path": "./calendar-history/series/c321b1bd6575c9df7f66b444da41853a041e6411460d96d94906d715fc39a9f2.json",
+      "path": "./calendar-history/series/6332815662e9845e33e18dea0b77ffa96a99597abcae8d3203404a1b95b85d0a.json",
       "quality": {
         "actual_count": 40,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13396,7 +13351,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::employment-cost-index::eci",
-      "sha256": "c321b1bd6575c9df7f66b444da41853a041e6411460d96d94906d715fc39a9f2"
+      "sha256": "6332815662e9845e33e18dea0b77ffa96a99597abcae8d3203404a1b95b85d0a"
     },
     "US::employment-situation": {
       "available_from": "2026-01-09",
@@ -13718,7 +13673,7 @@
       "event_title": "GDP (Advance Estimate), 3rd Quarter 2026",
       "kind": "event",
       "label": "GDP (Advance Estimate), 3rd Quarter 2026",
-      "path": "./calendar-history/series/8d176b50d7cba219a17766801862a038d8aa3bc5ded9dad96be31e72f4cf9d80.json",
+      "path": "./calendar-history/series/0e9383ccb385def0bb0c869d6ef692a0e195a40c3425966641fb498f81e0bf28.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13731,7 +13686,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::gdp-quarter",
-      "sha256": "8d176b50d7cba219a17766801862a038d8aa3bc5ded9dad96be31e72f4cf9d80"
+      "sha256": "0e9383ccb385def0bb0c869d6ef692a0e195a40c3425966641fb498f81e0bf28"
     },
     "US::gdp-quarter::gdp_qoq": {
       "available_from": "2026-10-29",
@@ -13743,7 +13698,7 @@
       "kind": "metric",
       "label": "GDP QoQ",
       "metric_key": "gdp_qoq",
-      "path": "./calendar-history/series/6ad55458b3e182fcdffb3038a3945b0ed63545d09fc0a6cf00d01e70ca0d7193.json",
+      "path": "./calendar-history/series/9838d5383acf377c55c742d45e4e7f16dbb2a6a5430b7afbeec53c3d8cbbfc55.json",
       "quality": {
         "actual_count": 1,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13756,7 +13711,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::gdp-quarter::gdp_qoq",
-      "sha256": "6ad55458b3e182fcdffb3038a3945b0ed63545d09fc0a6cf00d01e70ca0d7193"
+      "sha256": "9838d5383acf377c55c742d45e4e7f16dbb2a6a5430b7afbeec53c3d8cbbfc55"
     },
     "US::job-openings-and-labor-turnover": {
       "available_from": "2026-01-08",
@@ -13848,7 +13803,7 @@
       "event_title": "Personal Income and Outlays, August 2026",
       "kind": "event",
       "label": "Personal Income and Outlays, August 2026",
-      "path": "./calendar-history/series/c577449c3612bfbb587b9a0676facf481e9380f04a31b7bb447c5a3115a2a89c.json",
+      "path": "./calendar-history/series/4788eccf2aef072166bd0ac6af0f45ea3e908922722aea5eb41525a914f8ffb4.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13861,7 +13816,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::personal-income-and-outlays",
-      "sha256": "c577449c3612bfbb587b9a0676facf481e9380f04a31b7bb447c5a3115a2a89c"
+      "sha256": "4788eccf2aef072166bd0ac6af0f45ea3e908922722aea5eb41525a914f8ffb4"
     },
     "US::personal-income-and-outlays::core_pce_mom": {
       "available_from": "2016-11-30",
@@ -13873,7 +13828,7 @@
       "kind": "metric",
       "label": "Core PCE MoM",
       "metric_key": "core_pce_mom",
-      "path": "./calendar-history/series/fa1beb69a081afc32f0816ddd197917fd6610cb17a6bc62978a81fd7bdd679d2.json",
+      "path": "./calendar-history/series/4c1595301507c755df5a45f5e49eb311cc45ba4560e6398370c45bbade6f2044.json",
       "quality": {
         "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13896,7 +13851,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::personal-income-and-outlays::core_pce_mom",
-      "sha256": "fa1beb69a081afc32f0816ddd197917fd6610cb17a6bc62978a81fd7bdd679d2"
+      "sha256": "4c1595301507c755df5a45f5e49eb311cc45ba4560e6398370c45bbade6f2044"
     },
     "US::personal-income-and-outlays::pce_yoy": {
       "available_from": "2026-09-30",
@@ -13933,7 +13888,7 @@
       "kind": "metric",
       "label": "Personal Income MoM",
       "metric_key": "personal_income",
-      "path": "./calendar-history/series/05364064bb972303ed1e11db95ecae747dc2b0ba02e66aa0fd542c0fd4f84dfc.json",
+      "path": "./calendar-history/series/bbee2be742149dd80a5bcc3afc022b5d260f0cd174cc93cc26d563c733f2af34.json",
       "quality": {
         "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13956,7 +13911,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::personal-income-and-outlays::personal_income",
-      "sha256": "05364064bb972303ed1e11db95ecae747dc2b0ba02e66aa0fd542c0fd4f84dfc"
+      "sha256": "bbee2be742149dd80a5bcc3afc022b5d260f0cd174cc93cc26d563c733f2af34"
     },
     "US::personal-income-and-outlays::personal_spending": {
       "available_from": "2016-11-30",
@@ -13968,7 +13923,7 @@
       "kind": "metric",
       "label": "Personal Spending MoM",
       "metric_key": "personal_spending",
-      "path": "./calendar-history/series/a6fec01e720fb85801c8eb7c41fa4b65f8d8ea37d22e47c90842e00e479ed500.json",
+      "path": "./calendar-history/series/f6ecc911b06f1faab7e0e8c61abfe276cb838a75321323e956209483145b3922.json",
       "quality": {
         "actual_count": 234,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13991,7 +13946,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::personal-income-and-outlays::personal_spending",
-      "sha256": "a6fec01e720fb85801c8eb7c41fa4b65f8d8ea37d22e47c90842e00e479ed500"
+      "sha256": "f6ecc911b06f1faab7e0e8c61abfe276cb838a75321323e956209483145b3922"
     },
     "US::producer-price-index": {
       "available_from": "2026-01-14",
@@ -14859,9 +14814,9 @@
     }
   },
   "series_completeness_status": "NOT_VALIDATED",
-  "series_count": 439,
-  "snapshot_id": "3d8985dc307c55676675ef28f125be342a1946a332cbff35551c80783cca88d3",
-  "source_sha256": "3d8985dc307c55676675ef28f125be342a1946a332cbff35551c80783cca88d3",
+  "series_count": 437,
+  "snapshot_id": "211033476dfddca1263bffe1fe94c1d10d642cc359c5429ab898e270716c5fbc",
+  "source_sha256": "211033476dfddca1263bffe1fe94c1d10d642cc359c5429ab898e270716c5fbc",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
   "window_end": "2026-10-31",
