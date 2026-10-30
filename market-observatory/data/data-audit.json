@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-10-30T08:59:59+09:00",
+  "generated_kst": "2026-10-30T09:49:00+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-10-29",
   "file_status": {
     "observatory": {
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-10-30T08:59:31+09:00",
+      "generated_kst": "2026-10-30T09:48:54+09:00",
       "events": 186,
       "actual_freshness": "DEGRADED",
       "overdue_count": 1,
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-10-30T08:59:56+09:00",
+      "generated_kst": "2026-10-30T09:48:59+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -405,7 +405,7 @@
       "latest_mismatch": []
     },
     "jp_rates": {
-      "state": "LIVE",
+      "state": "LAGGING",
       "anchor": "2026-10-30",
       "allow_lag_days": 5,
       "critical": false,
@@ -453,7 +453,7 @@
       },
       "missing": [],
       "latest_mismatch": [],
-      "expected_latest_weekday": "2026-10-28",
+      "expected_latest_weekday": "2026-10-29",
       "published_source_status": "LIVE"
     },
     "crypto": {
@@ -520,18 +520,23 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-30T08:59:36+09:00",
-      "current_quote_age_seconds": 23,
+      "current_quote_age_seconds": 2964,
       "captured_quote_age_seconds": 4
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-10-30T08:59:38+09:00",
-      "current_quote_age_seconds": 21,
+      "current_quote_age_seconds": 2962,
       "captured_quote_age_seconds": 2
     }
   },
   "issues": [
+    {
+      "code": "GROUP_JP_RATES_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-10-30 dates=JP2Y:2026-10-28,JP5Y:2026-10-28,JP10Y:2026-10-28,JP30Y:2026-10-28,JP_2S10S:2026-10-28"
+    },
     {
       "code": "CALENDAR_ACTUAL_DEGRADED",
       "severity": "WARN",
