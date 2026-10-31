@@ -104,27 +104,64 @@ def treasury_rows(year):
     return sorted(rows,key=lambda x:x['date'])
 
 def jgb_rows():
-    url='https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/historical/jgbcme_all.csv'
-    txt=get_text(url,'cp932'); rows=[]
-    rd=list(csv.reader(io.StringIO(txt)))
-    header=None
-    for row in rd:
-        if not row:continue
-        if header is None and ('Date' in row[0] or '年月日' in row[0]):header=row;continue
-        if header is None:continue
-        raw=row[0].strip(); d=None
-        for f in ('%Y/%m/%d','%Y-%m-%d'):
-            try:d=datetime.strptime(raw,f).date().isoformat();break
-            except:pass
-        if not d:continue
-        vals={}
-        for i,h in enumerate(header[1:],1):
-            h=h.strip().replace('year','Y').replace('Year','Y').replace('years','Y')
-            if i>=len(row):continue
-            try:vals[h]=float(row[i])
-            except:vals[h]=None
-        rows.append({'date':d,'values':vals})
-    return sorted(rows,key=lambda x:x['date'])
+    """Merge MOF historical archive with its separate current daily CSV.
+
+    The historical jgbcme_all.csv is periodically archived and may stop at
+    the previous month.  Never infer a newer quote from its file timestamp.
+    """
+    urls = (
+        'https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/historical/jgbcme_all.csv',
+        'https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/jgbcme.csv',
+    )
+    by_date = {}
+    failures = []
+    today = datetime.now(KST).date().isoformat()
+    for url in urls:
+        source = url.rsplit('/', 1)[-1]
+        try:
+            rows = []
+            header = None
+            for row in csv.reader(io.StringIO(get_text(url, 'cp932'))):
+                if not row:
+                    continue
+                if header is None and ('Date' in row[0] or '年月日' in row[0]):
+                    header = row
+                    continue
+                if header is None:
+                    continue
+                raw = row[0].strip()
+                d = None
+                for fmt in ('%Y/%m/%d', '%Y-%m-%d'):
+                    try:
+                        d = datetime.strptime(raw, fmt).date().isoformat()
+                        break
+                    except ValueError:
+                        pass
+                if not d or d > today:
+                    continue
+                vals = {}
+                for i, h in enumerate(header[1:], 1):
+                    h = h.strip().replace('year', 'Y').replace('Year', 'Y').replace('years', 'Y')
+                    if i >= len(row):
+                        continue
+                    try:
+                        vals[h] = float(row[i])
+                    except (ValueError, TypeError):
+                        vals[h] = None
+                if any(v is not None for v in vals.values()):
+                    rows.append({'date': d, 'values': vals})
+            if not rows:
+                raise ValueError('JGB_MOF_NO_VALID_DATED_ROWS')
+            # Current official file takes precedence for overlapping dates.
+            by_date.update({item['date']: item for item in rows})
+            print(f'JGB_MOF_SOURCE=OK file={source} rows={len(rows)} latest={rows[-1]["date"]}')
+        except Exception as exc:
+            failures.append(f'{source}:{type(exc).__name__}')
+    if failures:
+        print('JGB_MOF_SOURCE=WARN ' + ','.join(failures))
+    if not by_date:
+        raise RuntimeError('JGB_MOF_NO_OFFICIAL_ROWS')
+    return [by_date[d] for d in sorted(by_date)]
 
 def nearest_snapshot(rows,target):
     xs=[x for x in rows if x['date']<=target]
