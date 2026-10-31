@@ -1,6 +1,6 @@
 {
   "schema": "OBS_EARNINGS_V1",
-  "updated_kst": "2026-10-29T08:15:59+09:00",
+  "updated_kst": "2026-11-01T05:51:00+09:00",
   "universe": [
     {
       "symbol": "005930",
@@ -446,28 +446,83 @@
       "id": "AMZN:2026Q3",
       "symbol": "AMZN",
       "fiscal_period": "2026Q3",
-      "status": "SCHEDULED",
+      "status": "RELEASED",
       "date_kst": "2026-10-30",
       "time_status": "DATE_ONLY",
       "release_at_kst": null,
       "call_at_kst": "2026-10-30T06:00:00+09:00",
       "sources": [
         {
-          "url": "https://press.aboutamazon.com/2026/10/amazon-com-to-webcast-third-quarter-2026-financial-results-conference-call",
+          "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-Third-Quarter-Results/default.aspx",
           "kind": "OFFICIAL",
-          "checked_kst": "2026-10-29T08:12:58+09:00"
+          "checked_kst": "2026-11-01T05:51:00+09:00"
         }
       ],
-      "metrics": [],
+      "metrics": [
+        {
+          "label": "Net sales",
+          "actual": 201.9,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 12,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "AWS sales",
+          "actual": 46,
+          "unit": "USD_BILLION",
+          "basis": "REPORTED",
+          "yoy_pct": 39,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "Operating income",
+          "actual": 28.1,
+          "unit": "USD_BILLION",
+          "basis": "GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "Net income",
+          "actual": 20.7,
+          "unit": "USD_BILLION",
+          "basis": "GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        },
+        {
+          "label": "Diluted EPS",
+          "actual": 1.89,
+          "unit": "USD_PER_SHARE",
+          "basis": "GAAP",
+          "yoy_pct": null,
+          "consensus": null,
+          "consensus_basis": null
+        }
+      ],
       "facts": [
-        "공식 안내는 컨퍼런스콜 시간입니다. 결과 공개시각과 구분합니다."
+        "2026년 3분기 순매출은 201.9B달러로 전년 대비 12% 증가했습니다.",
+        "AWS 매출은 46.0B달러로 전년 대비 39% 증가했습니다.",
+        "TTM 영업현금흐름은 168.3B달러, 잉여현금흐름은 -42.4B달러였습니다.",
+        "회사는 2026년 현금 CAPEX를 약 220B달러로 예상했습니다.",
+        "4분기 매출 가이던스는 240~247B달러, 영업이익은 28.5~33.5B달러입니다."
       ],
-      "analysis": [],
-      "risks": [],
+      "analysis": [
+        "AWS 성장 재가속과 동시에 AI 인프라 투자로 FCF가 악화해 수요 강도와 투자 회수기간을 함께 봐야 합니다."
+      ],
+      "risks": [
+        "CAPEX 선집행이 향후 매출·FCF로 전환되지 않으면 감가상각과 자본비용 부담이 확대될 수 있습니다."
+      ],
       "next_checks": [
-        "AWS 성장·영업이익·CAPEX·FCF 확인"
+        "AWS 성장률·CAPEX/매출·감가상각·FCF 회복 확인",
+        "공식 컨퍼런스콜 Q&A 추가 확인"
       ],
-      "updated_kst": "2026-10-29T08:12:58+09:00"
+      "updated_kst": "2026-11-01T05:51:00+09:00"
     },
     {
       "id": "NVDA:FY2027Q3",
