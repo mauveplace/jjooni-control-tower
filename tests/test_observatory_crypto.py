@@ -73,7 +73,7 @@ class CryptoObservationTest(unittest.TestCase):
         self.assertEqual(snapshot['quote_age_seconds'], 20)
         self.assertEqual(snapshot['status'], 'LIVE')
 
-    def test_coingecko_primary_keeps_historical_daily_rows_without_yahoo(self):
+    def test_coingecko_primary_keeps_historical_daily_rows_when_yahoo_unavailable(self):
         utc = ZoneInfo('UTC')
         now = datetime(2026, 11, 1, 9, 0, tzinfo=utc)
         payload = {
@@ -90,7 +90,7 @@ class CryptoObservationTest(unittest.TestCase):
             'latest': {}, 'crypto_market': {},
         }
         with patch.object(equities, 'coingecko_spot_observations', return_value=quotes), \
-             patch.object(equities, 'crypto_observation', side_effect=AssertionError('Yahoo should not be required')):
+             patch.object(equities, 'crypto_observation', side_effect=RuntimeError('Yahoo history unavailable')):
             equities.enrich_crypto(data)
         self.assertEqual(data['series']['BTCUSD'][0]['value'], 75000)
         self.assertEqual(data['series']['BTCUSD'][0]['session_status'], 'COMPLETED')
@@ -111,12 +111,40 @@ class CryptoObservationTest(unittest.TestCase):
         yahoo_snapshot = {'source': 'Yahoo Finance', 'price': 2199, 'status': 'LIVE',
                           'quote_as_of_kst': '2026-11-01T18:00:00+09:00'}
         data = {'series': {}, 'latest': {}, 'crypto_market': {}}
+        def yahoo_stub(symbol):
+            if symbol == 'BTC-USD':
+                raise RuntimeError('Yahoo daily history unavailable')
+            return yahoo_row, yahoo_snapshot
         with patch.object(equities, 'coingecko_spot_observations', return_value=quotes), \
-             patch.object(equities, 'crypto_observation', return_value=(yahoo_row, yahoo_snapshot)) as fallback:
+             patch.object(equities, 'crypto_observation', side_effect=yahoo_stub) as fallback:
             equities.enrich_crypto(data)
-        fallback.assert_called_once_with('ETH-USD')
+        self.assertEqual(fallback.call_count, 2)
+        self.assertEqual([call.args[0] for call in fallback.call_args_list], ['BTC-USD', 'ETH-USD'])
         self.assertEqual(data['latest']['BTCUSD'], 77700)
         self.assertEqual(data['latest']['ETHUSD'], 2199)
+
+    def test_coingecko_quote_preserves_yahoo_completed_history(self):
+        utc = ZoneInfo('UTC')
+        now = datetime(2026, 11, 1, 9, 0, tzinfo=utc)
+        payload = {
+            'bitcoin': {'usd': 77700, 'last_updated_at': int(now.timestamp())},
+            'ethereum': {'usd': 2200, 'last_updated_at': int(now.timestamp())},
+        }
+        with patch.object(equities, 'get_json', return_value=payload):
+            quotes = equities.coingecko_spot_observations(now)
+        daily = [
+            {'date': '2026-10-31', 'value': 74000, 'session_status': 'COMPLETED', 'date_basis': 'UTC'},
+            {'date': '2026-11-01', 'value': 76000, 'session_status': 'IN_PROGRESS', 'date_basis': 'UTC'},
+        ]
+        data = {'series': {'BTCUSD': [{'date': '2026-10-31', 'value': 73000, 'session_status': 'IN_PROGRESS'}]},
+                'latest': {}, 'crypto_market': {}}
+        with patch.object(equities, 'coingecko_spot_observations', return_value=quotes), \
+             patch.object(equities, 'crypto_observation', return_value=(daily, {'status': 'LIVE'})):
+            equities.enrich_crypto(data)
+        self.assertEqual(data['series']['BTCUSD'][0]['value'], 74000)
+        self.assertEqual(data['series']['BTCUSD'][0]['session_status'], 'COMPLETED')
+        self.assertEqual(data['series']['BTCUSD'][-1]['value'], 77700)
+        self.assertEqual(data['series']['BTCUSD'][-1]['observation_type'], 'SPOT_SNAPSHOT')
 
     def test_coingecko_rejects_missing_stale_future_or_invalid_timestamp(self):
         utc = ZoneInfo('UTC')
