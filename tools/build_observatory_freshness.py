@@ -66,7 +66,7 @@ def calendar_probe_health(checks: list[dict], events: list[dict]) -> dict:
                 str(c.get('result') or '').endswith('Error')]
 
     def release_id(url):
-        match = re.search(r'eci_(\\d{8})\\.(?:htm|pdf|txt)(?:$|\\?)', str(url or ''), re.I)
+        match = re.search(r'eci_(\d{8})\.(?:htm|pdf|txt)(?:$|\?)', str(url or ''), re.I)
         return match.group(1) if match else None
 
     verified = set()
