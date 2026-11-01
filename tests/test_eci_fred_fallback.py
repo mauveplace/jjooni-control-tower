@@ -73,5 +73,31 @@ class EciFredFallbackTests(unittest.TestCase):
         self.assertEqual(checks[-1]["result"], "OSError")
 
 
+    def test_end_to_end_calendar_merge_preserves_bls_and_fred_provenance(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from official_calendar_collectors import apply_official_actuals
+        e = event(actual="0.8%", source_tier="MARKET_FEED",
+                  verification_status="MARKET_REPORTED",
+                  market_metrics=[{"key": "eci", "actual": "0.8%",
+                                   "source_tier": "MARKET_FEED"}],
+                  importance=2)
+        calendar = {"events": [e]}
+        with patch("official_calendar_collectors.raw_fetch", side_effect=OSError("BLS 403")), \
+             patch("official_calendar_collectors.text_fetch", side_effect=OSError("BLS 403")), \
+             patch("official_eci_fred_fallback.fetch_csv", return_value=CSV):
+            updates, checks = apply_official_actuals(
+                calendar, datetime(2026, 11, 1, 23, tzinfo=ZoneInfo("Asia/Seoul")))
+        self.assertEqual(updates, 1)
+        self.assertEqual(e["source_tier"], "OFFICIAL")
+        self.assertEqual(e["verification_status"], "VERIFIED_OFFICIAL")
+        self.assertEqual(e["source_url"], __import__("official_eci_fred_fallback").FRED_URL)
+        self.assertEqual(e["official_url"], RELEASE["bls_url"])
+        self.assertIn("FRED ECIALLCIV", e["market_data_source"])
+        self.assertEqual(e["reference_period"], RELEASE["label"])
+        self.assertEqual(e["market_metrics"][0]["series_id"], "ECIALLCIV")
+        self.assertTrue(any(x.get("result") == "VERIFIED_BLS_TABLE1_FRED_MATCH"
+                            for x in checks))
+
 if __name__ == "__main__":
     unittest.main()
