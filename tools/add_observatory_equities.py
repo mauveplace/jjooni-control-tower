@@ -115,6 +115,7 @@ def coingecko_spot_observations(now=None):
             age=(now-observed).total_seconds()
             if age < -300:raise ValueError('COINGECKO_QUOTE_FUTURE_TIMESTAMP')
             if age>3600:raise ValueError('COINGECKO_QUOTE_STALE')
+            if observed.date()!=now.date():raise ValueError('COINGECKO_QUOTE_UTC_DATE_MISMATCH')
             date=observed.date().isoformat()
             observed_kst=observed.astimezone(KST).isoformat(timespec='seconds')
             row={'date':date,'value':round(price,8),'session_status':'IN_PROGRESS',
@@ -176,7 +177,15 @@ def enrich_crypto(data):
         try:
             if key in coingecko:
                 fresh,snapshot=coingecko[key]
-                rows=merge_rows(series_map.get(key,[]),fresh)
+                rows=series_map.get(key,[])
+                try:
+                    yahoo_rows,_=crypto_observation(symbol)
+                    completed=[r for r in yahoo_rows if r.get('date','')<fresh[0]['date']
+                               and r.get('session_status')=='COMPLETED']
+                    rows=merge_rows(rows,completed)
+                except Exception as history_exc:
+                    print('CRYPTO_DAILY_HISTORY=WARN',key,type(history_exc).__name__,str(history_exc))
+                rows=merge_rows(rows,fresh)
             else:
                 rows,snapshot=crypto_observation(symbol)
             if not rows:raise ValueError('CRYPTO_SERIES_EMPTY')
