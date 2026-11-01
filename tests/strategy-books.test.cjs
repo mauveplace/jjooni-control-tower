@@ -131,3 +131,18 @@ test('saved verified TQQQ cost renders without history and rejects changed evide
 test('FAST broker fills supplement the same strategy ledger as regular collector fills',()=>{const fill=tr('TOSS','fast-new','BUY',2,70.01,{source:'BROKER_DIRECT_TOSS_API_FAST',order_id:'fast-order'});const r=S.withBrokerTrades({status:'AVAILABLE',rows:[]},{recent_trades:[fill]});assert.equal(r.broker_added,1);assert.equal(r.rows[0].qty,2);});
 
 test('current explicit KRW cost or KRW average price takes priority over a broken historical ledger',()=>{const C=c();C.accounts.TOSS.positions=[p('TQQQ',230,21000000,{currency:'USD',cost_basis_krw:23800000,cost_basis_source:'TOSS_OPENAPI_HOLDINGS_KRW',cost_basis_qty:230})];const b=book(C);b.cost_basis_v1={policy:'CURRENT_FX_OPENING_THEN_TRADE_FX',at:old,positions:{'TOSS|TQQQ':{qty:1,cost_krw:1}}};assert.equal(S.build(C,b).accounts[0].groups[0].cost,23800000);delete C.accounts.TOSS.positions[0].cost_basis_krw;C.accounts.TOSS.positions[0].avg_price_krw=103000;assert.equal(S.build(C,b).accounts[0].groups[0].cost,23690000);});
+
+
+test('TRI-POD capital anchor cannot be rebased after strategy product rotation',()=>{
+ const fixed={baseline:{at:'2026-10-17T00:00:00+09:00',snapshot_id:'original-baseline'},cost_basis_v1:{at:'2026-10-17T00:00:00+09:00',snapshot_id:'opening-cost',policy:'CURRENT_FX_OPENING_THEN_TRADE_FX'},holding_costs_v1:{'TOSS|TQQQ':{cost_krw:250}}};
+ const rotation=structuredClone(fixed);
+ rotation.holding_costs_v1={'TOSS|QQQ':{cost_krw:160},'TOSS|QLD':{cost_krw:90}};
+ assert.equal(S.assertImmutableStrategyAnchor(fixed,rotation),true);
+ for(const [field,value] of [['baseline.at','2026-11-02T00:00:00+09:00'],['baseline.snapshot_id','replacement'],['cost_basis_v1.at','2026-11-02T00:00:00+09:00'],['cost_basis_v1.snapshot_id','replacement'],['cost_basis_v1.policy','REVALUED_USING_CURRENT_FX']]){
+  const attempt=structuredClone(rotation),[group,key]=field.split('.');
+  attempt[group][key]=value;
+  assert.throws(()=>S.assertImmutableStrategyAnchor(fixed,attempt),/STRATEGY_P0_ANCHOR_REBASE_BLOCKED/);
+ }
+ assert.throws(()=>S.assertImmutableStrategyAnchor(fixed,{cost_basis_v1:fixed.cost_basis_v1}),/STRATEGY_P0_ANCHOR_REBASE_BLOCKED/);
+ assert.equal(S.assertImmutableStrategyAnchor({},fixed),true);
+});
