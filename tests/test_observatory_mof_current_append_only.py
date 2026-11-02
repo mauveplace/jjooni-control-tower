@@ -33,6 +33,27 @@ class MofCurrentCsvTests(unittest.TestCase):
             rows = mod.jgb_rows()
         self.assertEqual(len(rows), 1)
 
+    def test_published_jp_observations_are_not_rewritten(self):
+        prior = {'series': {
+            'JP2Y': [{'date':'2026-10-29','value':1.901}],
+            'JP10Y': [{'date':'2026-10-29','value':2.876}],
+            'JP_2S10S': [{'date':'2026-10-29','value':0.975}],
+        }}
+        official = [
+            {'date':'2026-10-29','values':{'2Y':9.9,'5Y':2.285,'10Y':9.9,'30Y':3.956}},
+            {'date':'2026-10-30','values':{'2Y':1.875,'5Y':2.237,'10Y':2.817,'30Y':3.908}},
+        ]
+        with patch.object(mod, 'treasury_rows', return_value=[]), \
+             patch.object(mod, 'jgb_rows', return_value=official), \
+             patch.object(mod, 'load_prev', return_value=prior):
+            result = {}
+            mod.add_official_yields(result)
+        self.assertEqual(result['JP10Y'][-2]['value'], 2.876)
+        self.assertEqual(result['JP10Y'][-1], {'date':'2026-10-30','value':2.817})
+        self.assertEqual(result['JP2Y'][-2]['value'], 1.901)
+        self.assertEqual(result['JP_2S10S'][-2]['value'], 0.975)
+        self.assertAlmostEqual(result['JP_2S10S'][-1]['value'], 0.942)
+
     def test_future_dated_observations_are_ignored(self):
         future = 'Date,2Y,5Y,10Y,30Y\n2099/12/31,1,2,3,4\n'
         with patch.object(mod, 'get_text', side_effect=[HISTORICAL, future]):
