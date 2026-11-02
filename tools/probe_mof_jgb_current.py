@@ -20,9 +20,9 @@ by_date = {}
 for row in records:
     if not row:
         continue
-    date_key = row[0].strip().replace('/', '-')
+    raw_date = row[0].strip().replace('/', '-')
     try:
-        datetime.strptime(date_key, '%Y-%m-%d')
+        date_key = datetime.strptime(raw_date, '%Y-%m-%d').date().isoformat()
     except ValueError:
         continue
     date_values = by_date.setdefault(date_key, {})
