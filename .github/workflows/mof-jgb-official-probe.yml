@@ -22,6 +22,4 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify published MOF current CSV and expected observation date
-        env:
-          MOF_EXPECTED_OBSERVATION_DATE: '2026-10-30'
         run: python tools/probe_mof_jgb_current.py
