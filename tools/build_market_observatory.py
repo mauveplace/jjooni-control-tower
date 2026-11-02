@@ -232,10 +232,23 @@ def add_official_yields(series):
         return None
     if jp:
         k2=find_key(jp[-1],['2Y','2-year','2 years']);k5=find_key(jp[-1],['5Y','5-year','5 years']);k10=find_key(jp[-1],['10Y','10-year','10 years']);k30=find_key(jp[-1],['30Y','30-year','30 years'])
+        previous_jp = (load_prev().get('series') or {})
+        def append_jp(name, fresh):
+            # Existing published observations are immutable in this change.
+            # A changed official overlap must be reviewed as a separate revision.
+            existing = {x['date']: x for x in (previous_jp.get(name) or []) if x.get('date')}
+            conflicts = sum(1 for x in fresh if x['date'] in existing and existing[x['date']].get('value') != x['value'])
+            for x in fresh:
+                existing.setdefault(x['date'], x)
+            series[name] = [existing[d] for d in sorted(existing)]
+            if conflicts:
+                print(f'JGB_MOF_EXISTING_PRESERVED={name} conflicts={conflicts}')
         for name,k in [('JP2Y',k2),('JP5Y',k5),('JP10Y',k10),('JP30Y',k30)]:
-            if k:series[name]=[{'date':x['date'],'value':x['values'].get(k)} for x in jp if x['values'].get(k) is not None]
+            if k:
+                append_jp(name, [{'date':x['date'],'value':x['values'].get(k)} for x in jp if x['values'].get(k) is not None])
         if k2 and k10:
-            a={x['date']:x['value'] for x in series['JP10Y']};b={x['date']:x['value'] for x in series['JP2Y']};series['JP_2S10S']=[{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))]
+            a={x['date']:x['value'] for x in series['JP10Y']};b={x['date']:x['value'] for x in series['JP2Y']}
+            append_jp('JP_2S10S', [{'date':d,'value':round(a[d]-b[d],8)} for d in sorted(set(a)&set(b))])
     return us,jp
 
 def tripod_history(series):
