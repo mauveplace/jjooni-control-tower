@@ -284,5 +284,5 @@ const st=document.createElement('style');st.textContent=`
 .latestChangeFirst[data-comparison="D1"] .latestTilePeriods>span:first-child,.latestChangeFirst[data-comparison="W1"] .latestTilePeriods>span:nth-child(2){display:none}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10&&window.__JJOONI_OFFICIAL_MACRO_V1)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'20261101-crypto-runtime-stale',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'20261102-crypto-api-recovery',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
