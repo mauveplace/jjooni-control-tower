@@ -120,6 +120,12 @@ function assertImmutableStrategyAnchor(previous,next){
  if(!previous?.baseline?.at||!previous?.cost_basis_v1?.at)return true;
  const fields=[['baseline.at',previous.baseline?.at,next?.baseline?.at],['baseline.snapshot_id',previous.baseline?.snapshot_id,next?.baseline?.snapshot_id],['cost_basis_v1.at',previous.cost_basis_v1?.at,next?.cost_basis_v1?.at],['cost_basis_v1.snapshot_id',previous.cost_basis_v1?.snapshot_id,next?.cost_basis_v1?.snapshot_id],['cost_basis_v1.policy',previous.cost_basis_v1?.policy,next?.cost_basis_v1?.policy]];
  for(const [field,before,after] of fields)if(before!=null&&before!==after)throw Error('STRATEGY_P0_ANCHOR_REBASE_BLOCKED: '+field);
+ // A same-timestamp payload can still silently rewrite KRW opening principal.
+ // Existing opening lots and the original account baseline are append-never evidence.
+ if(previous.baseline?.accounts&&stableJson(previous.baseline.accounts)!==stableJson(next?.baseline?.accounts))throw Error('STRATEGY_P0_ANCHOR_REBASE_BLOCKED: baseline.accounts');
+ for(const [key,opening] of Object.entries(previous.cost_basis_v1?.positions||{})){
+  if(stableJson(opening)!==stableJson(next?.cost_basis_v1?.positions?.[key]))throw Error('STRATEGY_P0_ANCHOR_REBASE_BLOCKED: cost_basis_v1.positions.'+key);
+ }
  return true;
 }
 function requireRestoredStrategyBook(book){
