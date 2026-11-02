@@ -12,7 +12,9 @@ class JgbAtomicPublishTests(unittest.TestCase):
             'generated_kst':'2026-11-02T08:44:00+09:00',
             'supplemental_refreshed_kst':'2026-11-02T08:44:00+09:00',
             'series':{'JP2Y':[{'date':'2026-10-29','value':1.901}],
-                      'JP10Y':[{'date':'2026-10-29','value':2.876}]},
+                      'JP10Y':[{'date':'2026-10-29','value':2.876}],
+                      'JP5Y':[{'date':'2026-10-29','value':2.285}],
+                      'JP30Y':[{'date':'2026-10-29','value':3.956}]},
             'latest':{'JP2Y':1.901,'JP10Y':2.876},
             'cross_market_freshness_quality':{'JP_RATES':{'status':'LAGGING','last_date':'2026-10-29','expected_latest_weekday':'2026-10-30','source_url':'old-mirror'}},
         }
@@ -20,7 +22,9 @@ class JgbAtomicPublishTests(unittest.TestCase):
             'us_completed_session_date':'2026-10-30',
             'generated_kst':'2026-11-02T11:39:00+09:00',
             'series':{'JP2Y':[{'date':'2026-10-29','value':9.999},{'date':'2026-10-30','value':1.875}],
-                      'JP10Y':[{'date':'2026-10-29','value':9.999},{'date':'2026-10-30','value':2.817}]},
+                      'JP10Y':[{'date':'2026-10-29','value':9.999},{'date':'2026-10-30','value':2.817}],
+                      'JP5Y':[{'date':'2026-10-29','value':9.999},{'date':'2026-10-30','value':2.237}],
+                      'JP30Y':[{'date':'2026-10-29','value':9.999},{'date':'2026-10-30','value':3.908}]},
             'latest':{'JP2Y':1.875,'JP10Y':2.817},
         }
         result=merge_generated('market-observatory/data/observatory.json',local,remote)
