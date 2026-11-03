@@ -122,17 +122,17 @@ def _parse_kostat_cpi_release(page: str, expected_period: str, release_date: str
     year, month, day = map(int, expected_period.split('-'))
     if day != 1:
         raise ValueError('KOSTAT_CPI_REFERENCE_PERIOD_DAY_MISMATCH')
-    clean_page = re.sub(r'<(script|style)\\b[^>]*>.*?</\\1>', ' ', page, flags=re.I | re.S)
-    clean_page = re.sub(r'\\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', clean_page)))
-    if not re.search(rf'{year}년\\s*{month}월\\s*소비자물가동향', clean_page):
+    clean_page = re.sub(r'<(script|style)\b[^>]*>.*?</\1>', ' ', page, flags=re.I | re.S)
+    clean_page = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', clean_page)))
+    if not re.search(rf'{year}년\s*{month}월\s*소비자물가동향', clean_page):
         raise ValueError('KOSTAT_CPI_REFERENCE_PERIOD_MISMATCH')
-    if not re.search(rf'게시일\\s*{re.escape(release_date)}(?!\\d)', clean_page):
+    if not re.search(rf'게시일\s*{re.escape(release_date)}(?!\d)', clean_page):
         raise ValueError('KOSTAT_CPI_PUBLICATION_DATE_MISMATCH')
     # Headline CPI YoY only; never confuse MoM, core CPI or the index level.
     matches = re.findall(
-        rf'□\\s*{month}월\\s*소비자물가지수는\\s*전월대비\\s*'
-        r'[0-9]+(?:\\.[0-9]+)?\\s*%\\s*,?\\s*전년동월대비\\s*'
-        r'([0-9]+(?:\\.[0-9]+)?)\\s*%\\s*각각\\s*(상승|하락)',
+        rf'□\s*{month}월\s*소비자물가지수는\s*전월대비\s*'
+        r'[0-9]+(?:\.[0-9]+)?\s*%\s*,?\s*전년동월대비\s*'
+        r'([0-9]+(?:\.[0-9]+)?)\s*%\s*각각\s*(상승|하락)',
         clean_page,
     )
     if len(matches) != 1:
