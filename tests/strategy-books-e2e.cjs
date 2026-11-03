@@ -28,9 +28,9 @@ await page.evaluate(()=>{
 });
 await page.waitForFunction(()=>window.__JJOONI_STRATEGY_BOOKS_V1.performance?.accounts?.[1]?.masterRealized?.sales?.length===1);
 const isaText=await isa.locator('.ctStrategySleeve').innerText();
-assert.match(isaText,/바이팟.*-6\\.45%/);
-assert.match(isaText,/기록된 매도 실현손익 · 비용 전\\s+-₩258,278/);
-assert.match(isaText,/바이팟 잠정 합산손익 · 보유\\+매도\\s+-₩625,222/);
+assert.match(isaText,/바이팟.*-6\.45%/);
+assert.match(isaText,/기록된 매도 실현손익 · 비용 전\s+-₩258,278/);
+assert.match(isaText,/바이팟 잠정 합산손익 · 보유\+매도\s+-₩625,222/);
 assert.equal(await page.evaluate(()=>window.__JJOONI_STRATEGY_BOOKS_V1.snapshot.total.nav),54487296,'realized sale must not inflate asset NAV');
 await page.evaluate(()=>{
  const C=window.__JJOONI_CANONICAL_SSOT,S=window.__JJOONI_STRATEGY_BOOKS_V1,b=window.fixtureBipodBackup;
