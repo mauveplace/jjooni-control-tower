@@ -69,8 +69,44 @@ def calculate(values, year, month, lag, unit):
     return f'{value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP):f}{unit}'
 
 
+# Explicit BLS publication-to-reference-month identities, verified from the
+# official dated release schedule. No generic release-month-minus-one inference:
+# postponements and shutdowns invalidate that shortcut.
+BLS_SCHEDULE_OCT_2026 = 'https://www.bls.gov/schedule/2026/10_sched_list.htm'
+VERIFIED_RELEASE_MONTHS = {
+    ('cpi', '2026-10-14'): (2026, 9),
+    ('ppi', '2026-10-15'): (2026, 9),
+    ('ximpim', '2026-10-16'): (2026, 9),
+}
+RELEASE_TITLES = {
+    'cpi': 'Consumer Price Index',
+    'ppi': 'Producer Price Index',
+    'ximpim': 'U.S. Import and Export Price Indexes',
+}
+
+
+def verified_schedule_month(event, code):
+    from calendar_actual_contract import release_time
+    from zoneinfo import ZoneInfo
+    if event.get('title') != RELEASE_TITLES.get(code):
+        return None
+    release = release_time(event)
+    if release is None:
+        return None
+    return VERIFIED_RELEASE_MONTHS.get(
+        (code, release.astimezone(ZoneInfo('America/New_York')).date().isoformat())
+    )
+
+
 def collect_api(event, code, checks):
     period = reference_month(event.get('reference_period'))
+    if not period and not str(event.get('reference_period') or '').strip():
+        period = verified_schedule_month(event, code)
+        if period:
+            checks.append({'adapter': 'BLS_API', 'title': event['title'],
+                           'result': 'REFERENCE_PERIOD_VERIFIED_FROM_OFFICIAL_SCHEDULE',
+                           'reference_period': f'{period[0]}-{period[1]:02d}',
+                           'url': BLS_SCHEDULE_OCT_2026})
     if not period or code not in SERIES:
         checks.append({'adapter': 'BLS_API', 'title': event['title'],
                        'result': 'REFERENCE_PERIOD_MISSING' if not period else 'SERIES_NOT_CONFIGURED'})

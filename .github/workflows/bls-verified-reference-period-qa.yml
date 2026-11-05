@@ -1,0 +1,43 @@
+name: BLS Verified Reference Period QA
+
+on:
+  pull_request:
+    paths:
+      - tools/official_bls_api.py
+      - tests/test_bls_verified_release_period.py
+      - .github/workflows/bls-verified-reference-period-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-period-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify official BLS release identity and revision provenance (offline)
+        run: |
+          python -m py_compile tools/official_bls_api.py tests/test_bls_verified_release_period.py
+          PYTHONPATH=tools python -m unittest discover -s tests -p test_bls_verified_release_period.py -v
+      - name: Live official BLS API series and September 2026 reference-month verification (read-only)
+        run: |
+          PYTHONPATH=tools python - <<'PY'
+          from official_bls_api import SERIES, fetch_series, calculate, verified_schedule_month
+          cases = (
+              ('ppi', {'title': 'Producer Price Index', 'datetime_kst': '2026-10-15T21:30:00+09:00'}),
+              ('ximpim', {'title': 'U.S. Import and Export Price Indexes', 'datetime_kst': '2026-10-16T21:30:00+09:00'}),
+          )
+          for code, event in cases:
+              period = verified_schedule_month(event, code)
+              assert period == (2026, 9), (code, period)
+              for key, (series, lag, unit) in SERIES[code].items():
+                  values, source_url = fetch_series(series, 2026)
+                  assert period in values, (code, key, series, 'REFERENCE_PERIOD_MISSING')
+                  result = calculate(values, *period, lag, unit)
+                  print(f'BLS_LIVE_API=PASS metric={key} series={series} period=2026-09 value={result} vintage=LATEST_REVISION_NOT_AS_RELEASED source={source_url}')
+          PY
