@@ -1,0 +1,77 @@
+name: BLS Official Current Release Fallback QA
+
+on:
+  pull_request:
+    paths:
+      - tools/official_bls_actuals.py
+      - tests/test_bls_current_release_fallback.py
+      - .github/workflows/bls-current-release-fallback-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-date-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify blocked archive fallback and reject wrong publication dates
+        run: |
+          python -m py_compile tools/official_bls_actuals.py tests/test_bls_current_release_fallback.py
+          python -m unittest discover -s tests -p 'test_bls_current_release_fallback.py' -v
+      - name: Live official BLS transport and release-vintage smoke test (read-only)
+        run: |
+          PYTHONPATH=tools python - <<'PY'
+          from datetime import datetime
+          from urllib.request import Request, urlopen
+          from zoneinfo import ZoneInfo
+          from official_bls_actuals import parse_bls
+
+          ny = ZoneInfo('America/New_York')
+          cases = [
+              ('ppi', '2026-10-15', {'ppi_mom': '1.3%', 'ppi_yoy': '6.3%'}),
+              ('ximpim', '2026-10-16', {'us_import_price_mom': '1.1%', 'us_export_price_mom': '2.2%'}),
+          ]
+          for code, date, expected in cases:
+              url = f'https://www.bls.gov/news.release/{code}.nr0.htm'
+              request = Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; official-release-verification/1.0)'})
+              try:
+                  with urlopen(request, timeout=15) as response:
+                      raw = response.read(2_000_000).decode('utf-8', errors='replace')
+              except Exception as exc:
+                  raise RuntimeError(f'BLS_LIVE_TRANSPORT_FAILED code={code} url={url} error={exc}') from exc
+              rows, _ = parse_bls(raw, code, datetime.fromisoformat(date).replace(tzinfo=ny))
+              actual = {row['key']: row['actual'] for row in rows}
+              for key, value in expected.items():
+                  assert actual.get(key) == value, (code, key, actual.get(key), value)
+              print(f'BLS_LIVE_OFFICIAL_RELEASE=PASS code={code} publication={date} values={actual}')
+          PY
+      - name: Diagnose official BLS API series availability (read-only revised-vintage probe)
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import Request, urlopen
+
+          failures = []
+          for series in ('WPUFD4', 'EIUIR', 'EIUIQ'):
+              url = f'https://api.bls.gov/publicAPI/v2/timeseries/data/{series}?startyear=2025&endyear=2026'
+              try:
+                  with urlopen(Request(url, headers={'User-Agent': 'Mozilla/5.0'}), timeout=15) as response:
+                      payload = json.load(response)
+                  status = payload.get('status')
+                  series_rows = payload.get('Results', {}).get('series', [])
+                  september = [x for s in series_rows for x in s.get('data', [])
+                               if x.get('year') == '2026' and x.get('period') == 'M09']
+                  print(f'BLS_API_PROBE series={series} status={status} september_rows={len(september)} vintage=LATEST_REVISION_NOT_AS_RELEASED')
+                  if status != 'REQUEST_SUCCEEDED' or not september:
+                      failures.append(f'{series}: {status} or missing 2026-M09')
+              except Exception as exc:
+                  failures.append(f'{series}: {type(exc).__name__}: {exc}')
+          assert not failures, 'BLS_API_PROBE_FAILED ' + '; '.join(failures)
+          PY
