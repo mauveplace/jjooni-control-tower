@@ -105,7 +105,7 @@ test('equal to stop line is retained; below official boundary × 0.88 stops imme
   const below=model([...start,row('2026-10-05',stopLine-0.01,CASH)]);
   assert.equal(below.cycle.stopped,true);
 });
-test('missing original transition-day MA250 cannot fabricate a stop line from today's MA250',()=>{
+test('missing original transition-day MA250 cannot fabricate a stop line from current-session MA250',()=>{
   const start=[row('2026-10-01',100,TRI),{date:'2026-10-02',ndx:98,target:CASH},
     row('2026-10-05',97,CASH,200)];
   const r=model(start);
