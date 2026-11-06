@@ -124,3 +124,16 @@ test('second NO-POD cycle uses its own entry day official line, not the old one'
   assert.equal(r.status,'ACTIVE');
   assert.equal(r.lastCycle.stopNdx,100*.95*.88);
 });
+
+test('pre-entry projected stop is visible only as provisional and re-estimated from latest MA250',()=>{
+  const a=model([row('2026-10-01',100,TRI,100),row('2026-10-02',102,BI,120)]);
+  assert.equal(a.status,'BASE_STRATEGY');
+  assert.equal(a.cycle,null);
+  assert.equal(a.prospectiveNoPodLine,114);
+  assert(Math.abs(a.prospectiveStopNdx-100.32)<1e-9);
+  const b=model([row('2026-10-01',100,TRI,100),row('2026-10-02',102,BI,130)]);
+  assert.equal(b.prospectiveNoPodLine,123.5);
+  assert(Math.abs(b.prospectiveStopNdx-108.68)<1e-9);
+  const c=model([row('2026-10-01',100,TRI),row('2026-10-02',102,BI)],{ok:false});
+  assert.equal(c.prospectiveStopNdx,null);
+});
