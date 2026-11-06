@@ -25,6 +25,8 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
    await page.waitForTimeout(10000);
   }
   await page.waitForSelector('body.obsDeviceUI');
+  // TEMPORARY public-only diagnostic: verify containment does not disable inner scrolling.
+  await page.addStyleTag({content:'.obsDeviceUI .pulse{contain:paint;max-width:100%;min-width:0}'});
   await page.waitForSelector('#latestMarketBoard .latestTile');
   await page.waitForSelector('#tabs [data-tab="indices"]');
   await page.waitForSelector('[data-fresh-key="audit"]',{state:'attached'});
