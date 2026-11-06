@@ -72,7 +72,9 @@
       start.setUTCDate(Math.min(day, lastDay));
     }
     const date = start.toISOString().slice(0, 10);
-    return history.filter(row => row.date >= date);
+    // Use the preceding close when the calendar boundary is a market holiday.
+    const first = history.findLastIndex(row => period === 'YTD' ? row.date < date : row.date <= date);
+    return history.slice(Math.max(0, first));
   }
 
   function strips(rows) {
