@@ -17,8 +17,8 @@ def read(path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-def etf_bars(symbol):
-    query = urllib.parse.urlencode({'interval': '1d', 'range': 'max', 'includePrePost': 'false'})
+def etf_bars(symbol, range_='max'):
+    query = urllib.parse.urlencode({'interval': '1d', 'range': range_, 'includePrePost': 'false'})
     for host in ('query1.finance.yahoo.com', 'query2.finance.yahoo.com'):
         try:
             chart = get_json(f'https://{host}/v8/finance/chart/{symbol}?{query}')['chart']['result'][0]
@@ -54,18 +54,29 @@ def build(obs, archive, etfs):
     signals[session] = latest
     # Use the continuous common-date suffix. An interior data gap cannot be
     # treated as one trading session or silently filled with a proxy.
+    completed = [item['date'] for item in series['NASDAQ100']]
+    last_common = next((d for d in reversed(completed)
+                        if d in signals and all(d in etfs[key] for key in ETFS)), None)
+    coverage = {key: [min(etfs[key]), max(etfs[key]), len(etfs[key])] for key in ETFS}
+    print(f'TRI-POD comparison source coverage: canonical={session} '
+          f'last_common={last_common} ETF={coverage}')
+    if last_common is None:
+        raise ValueError('ETF and canonical signals share no completed sessions')
     rows = []
     for item in reversed(series['NASDAQ100']):
         day = item['date']
+        if day > last_common:
+            continue
         signal = signals.get(day)
         quotes = [etfs[key].get(day) for key in ETFS]
         if not signal or any(q is None for q in quotes):
             break
         rows.append([day, signal['ndx'], signal['ma250'], signal['target'], *quotes])
     rows.reverse()
-    if len(rows) < 2 or rows[-1][0] != session:
-        raise ValueError(f'ETF and canonical signal do not share a continuous window through {session}')
-    return {'schema': 'JJOONI_TRIPOD_COMPARISON_V1', 'session': session, 'rows': rows}
+    if len(rows) < 2:
+        raise ValueError(f'ETF and canonical signals lack a continuous window through {last_common}')
+    return {'schema': 'JJOONI_TRIPOD_COMPARISON_V1', 'session': last_common,
+            'canonical_session': session, 'rows': rows}
 
 
 def main():
@@ -77,8 +88,17 @@ def main():
             print('TRI-POD comparison already has the latest completed US session')
             return
     archive = read(DATA / 'history-30y.json')
+    def fetch(symbol):
+        bars = etf_bars(symbol)
+        if obs['us_completed_session_date'] not in bars:
+            try:
+                bars.update(etf_bars(symbol, '1mo'))
+            except RuntimeError as exc:
+                print(f'TRI-POD comparison recent check {symbol}: {exc}')
+        return bars
+
     with ThreadPoolExecutor(max_workers=len(ETFS)) as pool:
-        etfs = dict(zip(ETFS, pool.map(etf_bars, ETFS), strict=True))
+        etfs = dict(zip(ETFS, pool.map(fetch, ETFS), strict=True))
     payload = build(obs, archive, etfs)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
     print(f'TRI-POD comparison {payload["rows"][0][0]} through {payload["session"]}: {len(payload["rows"])} sessions')
