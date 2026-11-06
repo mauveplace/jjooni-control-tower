@@ -30,8 +30,11 @@
       latestIndex !== null && latestIndex > 0 && finite(t.ma250) > 0 &&
       finite(t.vix10) !== null && Number(t.vix_window_count) === 10 &&
       ['상승', '하락'].includes(t.regime) && stage(t) !== 'UNKNOWN';
+    const prospectiveNoPodLine = valid ? finite(t.ma250) * POLICY.noPodLineFactor : null;
     const basic = {policy: POLICY, session, date, officialTarget: t.target || null,
-      officialStage: stage(t), valid: !!valid, events: []};
+      officialStage: stage(t), valid: !!valid, events: [],
+      prospectiveNoPodLine,
+      prospectiveStopNdx: prospectiveNoPodLine === null ? null : prospectiveNoPodLine * 0.88};
     if (!valid) return Object.assign(basic, {status: 'UNCERTIFIED'});
     const rows = (Array.isArray(data.tripod_history) ? data.tripod_history : [])
       .filter(x => /^\d{4}-\d{2}-\d{2}$/.test(String(x && x.date || '')) &&
@@ -175,8 +178,10 @@
       card('QLD 누적 투입 가정',safe && c ? String(c.boughtPct)+'%' : (safe ? '0%' : '—'),'기준원금 대비 · 최대 25%'),
       card('다음 거래일 매수 대기',safe && c && c.pending ? '5%' : (safe ? '없음' : '—'),'신호 다음 완료거래일 종가 가정'),
       card('NO-POD 진입일',safe && c ? c.entryDate : '—', '공식 전환선 계산 기준일'),
-      card('공식 노팟 전환가격',safe && c ? fmt(c.noPodLine) : '—','진입일 MA250 × 0.95 · 사이클 내 고정'),
-      card('손절 판정선',safe && c ? fmt(c.stopNdx) : '—','NDX < 고정 노팟 전환가격 × 0.88'),
+      card('공식 노팟 전환가격',safe ? fmt(c ? c.noPodLine : m.prospectiveNoPodLine) : '—',
+        c ? '진입일 MA250 × 0.95 · 사이클 내 고정' : '예상 · 현재 MA250 × 0.95'),
+      card('손절 판정선',safe ? fmt(c ? c.stopNdx : m.prospectiveStopNdx) : '—',
+        c ? '확정 · NDX < 고정 전환가격 × 0.88' : '예상 · 노팟 미진입, 전환 시 재확정'),
       card('QLD 누적 분할 횟수',safe && c ? String(c.buyCount)+'회' : (safe ? '0회' : '—'),'매회 기준원금 5%p')
     ].join('');
     const flags = !safe ?
