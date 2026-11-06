@@ -25,8 +25,6 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
    await page.waitForTimeout(10000);
   }
   await page.waitForSelector('body.obsDeviceUI');
-  // TEMPORARY public-only diagnostic: verify containment does not disable inner scrolling.
-  await page.addStyleTag({content:'.obsDeviceUI .pulse{contain:paint;max-width:100%;min-width:0}'});
   await page.waitForSelector('#latestMarketBoard .latestTile');
   await page.waitForSelector('#tabs [data-tab="indices"]');
   await page.waitForSelector('[data-fresh-key="audit"]',{state:'attached'});
@@ -65,6 +63,23 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
    if(result.scroll>width+1||result.bodyScroll>width+1){
     const offenders=await page.evaluate(()=>[...document.body.querySelectorAll('*')].map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {tag:e.tagName,id:e.id,cls:String(e.className||'').slice(0,100),x:Math.round(r.x),right:Math.round(r.right),w:Math.round(r.width),scroll:e.scrollWidth,client:e.clientWidth,display:s.display,overflow:s.overflowX}}).filter(x=>x.right>innerWidth+1&&x.w>0).sort((a,b)=>b.right-a.right).slice(0,24));
     console.log('OBS_OVERFLOW_DIAG '+JSON.stringify(offenders));
+    const candidates=[
+      ['top-clip','.obsDeviceUI .top{overflow-x:clip}'],
+      ['top-hidden','.obsDeviceUI .top{overflow-x:hidden}'],
+      ['top-paint','.obsDeviceUI .top{contain:paint}'],
+      ['pulse-hidden','.obsDeviceUI .pulse{overflow-x:hidden}'],
+      ['pulse-none-scrollbar','.obsDeviceUI .pulse{scrollbar-width:none}'],
+      ['pulse-shrink','.obsDeviceUI .pulse{max-width:calc(100% - 8px)}'],
+      ['page-clip','.obsDeviceUI{overflow-x:clip}']
+    ];
+    const trials=await page.evaluate(candidates=>candidates.map(([name,css])=>{
+      const el=document.createElement('style');el.textContent=css;document.head.appendChild(el);
+      const value={name,body:document.body.scrollWidth,doc:document.documentElement.scrollWidth,
+        pulse:document.querySelector('#pulse')?.getBoundingClientRect().toJSON()};
+      el.remove();return {name,body:value.body,doc:value.doc,
+        pulse:value.pulse?{x:value.pulse.x,right:value.pulse.right,width:value.pulse.width}:null};
+    }),candidates);
+    console.log('OBS_OVERFLOW_CANDIDATES '+JSON.stringify(trials));
    }
    assert(result.scroll<=width+1&&result.bodyScroll<=width+1,'page overflow '+JSON.stringify(result));
    if(await page.locator('body.obsDeviceUI').count()){
