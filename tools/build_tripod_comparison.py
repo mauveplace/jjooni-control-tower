@@ -3,7 +3,7 @@ import json
 import math
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 from build_market_observatory import ET, get_json, tripod_history
@@ -17,11 +17,14 @@ def read(path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-def etf_bars(symbol, range_='max'):
-    query = urllib.parse.urlencode({'interval': '1d', 'range': range_, 'includePrePost': 'false'})
+def yahoo_daily(symbol, **window):
+    query = urllib.parse.urlencode({'interval': '1d', 'includePrePost': 'false', **window})
     for host in ('query1.finance.yahoo.com', 'query2.finance.yahoo.com'):
         try:
             chart = get_json(f'https://{host}/v8/finance/chart/{symbol}?{query}')['chart']['result'][0]
+            granularity = chart.get('meta', {}).get('dataGranularity')
+            if granularity and granularity != '1d':
+                raise ValueError(f'Expected 1d, received {granularity}')
             indicators = chart['indicators']
             closes = indicators['quote'][0]['close']
             adjusted = indicators['adjclose'][0]['adjclose']
@@ -36,6 +39,56 @@ def etf_bars(symbol, range_='max'):
         except (OSError, ValueError, KeyError, TypeError, IndexError) as exc:
             print(f'TRI-POD comparison {symbol} {host}: {exc}')
     raise RuntimeError(f'Completed close/adjusted-close history unavailable for {symbol}')
+
+
+def etf_bars(symbol, end):
+    # Yahoo may coarsen a max-range request to monthly observations even when
+    # interval=1d is requested. Collect bounded, overlapping daily windows.
+    start = date(2010, 1, 1)  # TQQQ sets the earliest possible six-series window.
+    bars = {}
+    right = end + timedelta(days=1)
+    while right > start:
+        left = max(start, right - timedelta(days=3 * 365))
+        try:
+            segment = yahoo_daily(
+                symbol, period1=int(datetime.combine(left, time.min, ET).timestamp()),
+                period2=int(datetime.combine(right, time.min, ET).timestamp()))
+            segment = {d: value for d, value in segment.items()
+                       if left.isoformat() <= d < right.isoformat()}
+            if len(segment) < (right - left).days * 0.50:
+                raise ValueError(f'Sparse daily window {left} to {right}: {len(segment)} rows')
+        except (RuntimeError, ValueError) as exc:
+            if not bars:
+                bars = yahoo_daily(symbol, range='3y')
+                print(f'TRI-POD comparison {symbol} used recent daily window: {exc}')
+            else:
+                print(f'TRI-POD comparison {symbol} ended older backfill: {exc}')
+            break
+        if not bars:
+            bars = segment
+        else:
+            overlap = set(bars).intersection(segment)
+            if not overlap:
+                break
+            anchor = max(overlap)
+            ratio = bars[anchor][1] / segment[anchor][1]
+            for d, (close, adjusted) in segment.items():
+                bars.setdefault(d, [close, adjusted * ratio])
+        if left == start:
+            break
+        right = left + timedelta(days=10)
+    if end.isoformat() not in bars:
+        try:
+            recent = yahoo_daily(symbol, range='1mo')
+            overlap = set(bars).intersection(recent)
+            if overlap:
+                anchor = max(overlap)
+                ratio = bars[anchor][1] / recent[anchor][1]
+                for d, (close, adjusted) in recent.items():
+                    bars.setdefault(d, [close, adjusted * ratio])
+        except RuntimeError as exc:
+            print(f'TRI-POD comparison recent check {symbol}: {exc}')
+    return bars
 
 
 def build(obs, archive, etfs):
@@ -88,17 +141,9 @@ def main():
             print('TRI-POD comparison already has the latest completed US session')
             return
     archive = read(DATA / 'history-30y.json')
-    def fetch(symbol):
-        bars = etf_bars(symbol)
-        if obs['us_completed_session_date'] not in bars:
-            try:
-                bars.update(etf_bars(symbol, '1mo'))
-            except RuntimeError as exc:
-                print(f'TRI-POD comparison recent check {symbol}: {exc}')
-        return bars
-
+    end = date.fromisoformat(obs['us_completed_session_date'])
     with ThreadPoolExecutor(max_workers=len(ETFS)) as pool:
-        etfs = dict(zip(ETFS, pool.map(fetch, ETFS), strict=True))
+        etfs = dict(zip(ETFS, pool.map(lambda key: etf_bars(key, end), ETFS), strict=True))
     payload = build(obs, archive, etfs)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
     print(f'TRI-POD comparison {payload["rows"][0][0]} through {payload["session"]}: {len(payload["rows"])} sessions')
