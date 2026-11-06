@@ -60,6 +60,10 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
      textMin:Math.min(...[...panel.querySelectorAll('.meta,.obsCoverage,.obsMacroCell span')].filter(visible).map(e=>parseFloat(getComputedStyle(e).fontSize))) };
    });
    console.log('DEVICE_AUDIT '+JSON.stringify(result));
+   if(result.scroll>width+1||result.bodyScroll>width+1){
+    const offenders=await page.evaluate(()=>[...document.body.querySelectorAll('*')].map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {tag:e.tagName,id:e.id,cls:String(e.className||'').slice(0,100),x:Math.round(r.x),right:Math.round(r.right),w:Math.round(r.width),scroll:e.scrollWidth,client:e.clientWidth,display:s.display,overflow:s.overflowX}}).filter(x=>x.right>innerWidth+1&&x.w>0).sort((a,b)=>b.right-a.right).slice(0,24));
+    console.log('OBS_OVERFLOW_DIAG '+JSON.stringify(offenders));
+   }
    assert(result.scroll<=width+1&&result.bodyScroll<=width+1,'page overflow '+JSON.stringify(result));
    if(await page.locator('body.obsDeviceUI').count()){
     assert.equal(result.smallTargets,0,'small touch targets '+JSON.stringify(result));
