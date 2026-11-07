@@ -1,0 +1,15 @@
+{
+  "task_id": "D-261107-COLLAB-TRIPOD-001",
+  "title": "6-series TRI-POD comparison — public-data-only pilot",
+  "objective": "Compare standard TRI-POD, proposed JJOONI TRI-POD, Nasdaq-100, QQQ, QLD and TQQQ with aligned sample dates, base=100, CAGR, MDD, costs, risk and no look-ahead. Do not fabricate performance.",
+  "security": "No actual accounts, holdings, PB snapshots, balances, credentials, private MAIOS, order placement or rule updates.",
+  "messages": [
+    {
+      "id": "D-261107-COLLAB-TRIPOD-001:proposal",
+      "role": "JJOONI",
+      "phase": "proposal",
+      "body": "Pilot methodology only: compare NDX, QQQ, QLD, TQQQ, standard TRI-POD and candidate JJOONI TRI-POD on identical common trading dates, starting NAV=100. Require versioned strategy rules before any result. Use unadjusted index for signals and distribution/split-adjusted total-return ETF series for holdings where available; EOD signal cannot trade at same EOD price. Account for market holidays, cash yield, fees, spread, FX as separate switches. Report CAGR, MDD, turnover, recovery time, and subperiod sensitivity. No backtest values asserted; public data only. ROY to challenge look-ahead and overfitting; JJANGGU to verify source timing and reproducibility.",
+      "ref": "public-methodology-v1; strategy-rules-pending-independent-confirmation"
+    }
+  ]
+}
