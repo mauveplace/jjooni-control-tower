@@ -18,7 +18,7 @@ Allow GPT/Codex (JJOONI), Claude Code (ROY) and Gemini/Antigravity (JJANGGU) to 
 
 1. Open this experiment as a **draft PR** in GitHub. The PR becomes the shared discussion thread; do not merge into production.
 2. In [Codex Cloud](https://chatgpt.com/codex), connect this GitHub repository. Ask it to read `ai-collab-pilot/task.json`, propose a verification methodology without inventing returns, and add the `JJOONI/proposal` message via `relay.py add` on the experiment branch.
-3. In [Claude Code Routines](https://claude.ai/code/routines), log in with the existing subscription, connect this repository, and create a **scoped GitHub PR trigger**. Prompt: 'On this pilot PR only: read ai-collab-pilot/task.json; when JJOONI proposal exists, independently review look-ahead, fees and data assumptions as ROY. Add only the risk_review message and an evidence ref; never deploy or place orders.' Verify an actual session started. Limit triggers to avoid repeated runs and quota drain.
+3. In [Claude Code Routines](https://claude.ai/code/routines), sign in with the subscription, grant the Claude GitHub App access to this repository only, and create a **read-only connection-test** routine for PR #302. **First run via Run now**, not an event: PR #302 was already opened. Fetch `refs/pull/302/head` explicitly because web routines clone the default branch. The first review must produce only a PR comment or a session report; **no task.json update, commits, pushes or deployments**. Read `CLAUDE.md` for the exact test steps. Only after this is verified should the account owner configure the PR event with filters: title contains `[AI-COLLAB]`, head branch equals `experiment/ai-collab-no-api-20261107`, base branch equals `main`, and draft=true. Do not subscribe to all PR actions. Exclude unnecessary connectors. Confirm extra usage billing is disabled.
 4. In Gemini/Antigravity, connect the same repo using the Google account and request the `JJANGGU/data_review` check. Automatic event-triggered Gemini runs are **not verified**; initially run this step manually.
 5. When both real reviews exist, have Codex run `JJOONI/synthesis`. Publish only the verified outcome to Control Tower/MAIOS after CIO review.
 
@@ -43,6 +43,6 @@ python -m unittest discover -s ai-collab-pilot -p 'test_*.py'
 
 1. The offline unit tests pass.
 2. JJOONI proposal has a real execution record and an explicit source.
-3. ROY and JJANGGU each append their **own** independent reply.
+3. ROY's first read-only connection run produces a verifiable test report or PR comment; a later explicitly approved phase may append `risk_review`. JJANGGU's real independent `data_review` requires separate authentication and execution.
 4. JJOONI synthesis includes unresolved disagreements and does not claim any unverified trading returns.
 5. Only the final verified summary is copied into any durable investment record after CIO review.
