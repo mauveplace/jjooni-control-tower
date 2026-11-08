@@ -106,6 +106,46 @@ class PipelineRegressionTests(unittest.TestCase):
             self.assertIsNone(collect_api({'title': 'Employment Situation'}, 'empsit', []))
             fetch.assert_not_called()
 
+    def test_api_latest_flag_resolves_reference_month_when_release_page_blocked(self):
+        # www.bls.gov returns 403 to automated clients; the API's own `latest`
+        # flag is the official reference month of the still-current release.
+        import official_bls_api as api
+        def rows(series, year):
+            data = [{'year': '2026', 'period': 'M10', 'value': '38.00', 'latest': 'true'},
+                    {'year': '2026', 'period': 'M09', 'value': '37.86'},
+                    {'year': '2025', 'period': 'M10', 'value': '36.60'},
+                    {'year': '2025', 'period': 'M09', 'value': '36.50'}]
+            if series in ('CES0000000001', 'LNS14000000'):
+                data = [dict(x, value={'M10': '160000', 'M09': '159835'}.get(x['period'], '1')) for x in data]
+            return tuple(data), f'{api.API}{series}'
+        event = {'title': 'Employment Situation', 'datetime_kst': '2026-11-06T22:30+09:00'}
+        checks = []
+        with patch('official_bls_api._series_rows', side_effect=rows):
+            result = collect_api(event, 'empsit', checks, now=datetime(2026, 11, 8, 12, tzinfo=KST))
+        self.assertIsNotNone(result)
+        self.assertEqual(event['reference_period'], 'October 2026')
+        self.assertEqual(event['reference_period_source'], 'BLS_API_LATEST_FLAG')
+        by_key = {r['key']: r for r in result[0]}
+        self.assertEqual(by_key['avg_hourly_yoy']['actual'], '3.8%')
+        self.assertEqual(by_key['avg_hourly_yoy']['reference_period'], '2026-10')
+        self.assertEqual(by_key['avg_hourly_yoy']['value_vintage'], 'LATEST_REVISION')
+
+    def test_api_latest_flag_not_trusted_for_superseded_or_implausible_release(self):
+        import official_bls_api as api
+        latest = lambda month: (lambda series, year: (({'year': '2026', 'period': month, 'value': '1', 'latest': 'true'},), 'u'))
+        old = {'title': 'Employment Situation', 'datetime_kst': '2026-10-02T21:30+09:00'}
+        with patch('official_bls_api._series_rows', side_effect=latest('M10')) as fetch:
+            # Older than one release cycle: a newer release may have moved `latest`.
+            self.assertIsNone(collect_api(dict(old), 'empsit', [], now=datetime(2026, 11, 8, tzinfo=KST)))
+            fetch.assert_not_called()
+        recent = {'title': 'Employment Situation', 'datetime_kst': '2026-11-06T22:30+09:00'}
+        with patch('official_bls_api._series_rows', side_effect=latest('M03')):
+            # Stale latest period (7 months before release) is rejected.
+            self.assertIsNone(api.api_reference_month(recent, 'empsit', datetime(2026, 11, 8, tzinfo=KST)))
+        with patch('official_bls_api._series_rows', side_effect=latest('M11')):
+            # Data for the release month itself cannot exist yet.
+            self.assertIsNone(api.api_reference_month(recent, 'empsit', datetime(2026, 11, 8, tzinfo=KST)))
+
     def test_api_calculation_and_vintage_priority(self):
         from decimal import Decimal
         values = {(2025, 12): Decimal('150000'), (2026, 1): Decimal('150130')}

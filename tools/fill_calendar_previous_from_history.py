@@ -25,6 +25,20 @@ def latest_actual(bucket,before_day):
     return rows[-1] if rows else None
 
 
+DERIVED='CALENDAR_HISTORY_LAST_ACTUAL'
+
+
+def refreshable(obj):
+    """A previous value this tool derived itself may be recomputed every run.
+
+    Provider-reported previous values (market feeds publish revised priors) are
+    left alone; only empty or self-derived values follow the history SSOT. The
+    old fill-only-if-empty rule froze derived values at their first fill, so an
+    upcoming release kept a prior that was several releases old.
+    """
+    return clean(obj.get('previous')) is None or obj.get('previous_source')==DERIVED
+
+
 def history_source(row):
     return clean((row or {}).get('source')) or 'Calendar history / captured prior actual'
 
@@ -42,10 +56,11 @@ def main():
         if not day:continue
         for m in e.get('market_metrics') or []:
             if not isinstance(m,dict) or m.get('metric_type')=='market_probability_snapshot':continue
-            if clean(m.get('previous')) is not None:continue
+            if not refreshable(m):continue
             ref=m.get('history_ref')
             row=latest_actual(series.get(ref),day) if ref else None
-            if row:
+            if row and (clean(m.get('previous')) is None or
+                        (m.get('previous'),m.get('previous_observed_date'))!=(row['actual'],row.get('date'))):
                 src=history_source(row)
                 m['previous']=row['actual']
                 m['previous_source']='CALENDAR_HISTORY_LAST_ACTUAL'
@@ -55,9 +70,11 @@ def main():
                 m.setdefault('source',src)
                 if m.get('market_value_status')=='NOT_PUBLISHED':m['market_value_status']='PREVIOUS_ONLY'
                 filled_metric+=1
-        if clean(e.get('previous')) is None:
+        if refreshable(e) or e.get('previous_source')=='METRIC_REPRESENTATIVE':
             primary=next((m for m in (e.get('market_metrics') or []) if isinstance(m,dict) and clean(m.get('previous')) is not None),None)
-            if primary:
+            if primary and (e.get('previous'),e.get('previous_observed_date'))==(primary['previous'],primary.get('previous_observed_date')):
+                pass
+            elif primary:
                 e['previous']=primary['previous']
                 e['previous_source']=primary.get('previous_source') or 'METRIC_REPRESENTATIVE'
                 e['previous_observed_date']=primary.get('previous_observed_date')
@@ -66,7 +83,7 @@ def main():
                 filled_event+=1
             else:
                 ref=e.get('history_ref');row=latest_actual(series.get(ref),day) if ref else None
-                if row:
+                if row and (e.get('previous'),e.get('previous_observed_date'))!=(row['actual'],row.get('date')):
                     src=history_source(row)
                     e['previous']=row['actual']
                     e['previous_source']='CALENDAR_HISTORY_LAST_ACTUAL'

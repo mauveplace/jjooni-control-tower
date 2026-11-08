@@ -26,6 +26,7 @@ jobs:
       - name: Capture released economic values
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: |
           set -euo pipefail
           python -m pip install -r tools/requirements-observatory.txt
