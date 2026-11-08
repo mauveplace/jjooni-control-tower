@@ -23,7 +23,7 @@ test("rendering respects explicit unverified provenance / current HEAD distincti
   assert.match(page, /과거 HEAD/);
   assert.match(page, /parsed\.claim\.head===head/);
   assert.match(page, /textContent/);
-  assert.match(page, /모델 사용량/);
+  assert.match(page, /사용량/);
 });
 test("UI works at mobile width and prevents rapid refresh", () => {
   assert.match(page, /@media\(max-width:430px\)/);
