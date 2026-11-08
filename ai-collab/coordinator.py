@@ -12,7 +12,8 @@ from pathlib import Path
 
 REPO = "mauveplace/jjooni-control-tower"
 ACTORS = frozenset(("ROY", "JJANGGU", "JJOONI"))
-REQUIRED_ACTORS = frozenset(("ROY", "JJANGGU"))
+REQUIRED_ACTORS = frozenset(("ROY", "JJANGGU", "JJOONI"))
+ALLOWED_ORIGINS = frozenset(("USER_TO_JJOONI", "USER_TO_ROY", "GITHUB_EVENT", "UNKNOWN"))
 ALLOWED_MODES = frozenset(("SYSTEM_REVIEW_ONLY",))
 TASK_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 SHA_RE = re.compile(r"^[a-f0-9]{40}$")
@@ -47,6 +48,16 @@ def validate_task(task):
         raise ValueError("Unsupported role")
     if set(required).intersection(optional):
         raise ValueError("Required and optional reviewers overlap")
+    origin = task.get("origin", "USER_TO_JJOONI")
+    if origin not in ALLOWED_ORIGINS:
+        raise ValueError("Unsupported task origin")
+    if origin == "USER_TO_ROY":
+        if "JJOONI" not in required:
+            raise ValueError("ROY-first tasks require independent JJOONI review")
+        if "ROY" in required or "ROY" in optional:
+            raise ValueError("ROY-first tasks cannot self-review")
+    elif "JJOONI" in required or "JJOONI" in optional:
+        raise ValueError("JJOONI reviewer requires explicit USER_TO_ROY origin")
     if not isinstance(task.get("acceptance"), list) or not task["acceptance"]:
         raise ValueError("Explicit acceptance checks are mandatory")
     if any(not isinstance(x, str) or not x.strip() for x in task["acceptance"]):
