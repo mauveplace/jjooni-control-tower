@@ -21,7 +21,8 @@ def evidence(actor, state, age=0, source=None, reset=None, verified=True):
 
 
 def route(origin="USER_TO_JJOONI", work_type="general", **kwargs):
-    return route_task(origin=origin, work_type=work_type, now=NOW, **kwargs)
+    return route_task(origin=origin, work_type=work_type, now=NOW,
+                      evidence_from_verified_runtime=True, **kwargs)
 
 
 class RoutingTests(unittest.TestCase):
@@ -72,25 +73,33 @@ class RoutingTests(unittest.TestCase):
 
     def test_stale_quota_evidence_is_not_current(self):
         rec = evidence("ROY", "RATE_LIMITED", age=122)
-        self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
 
     def test_expired_limit_reset_is_unconfirmed_not_available(self):
         rec = evidence("ROY", "RATE_LIMITED", reset=(NOW - timedelta(minutes=1)).isoformat())
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
+
+    def test_untrusted_pr_json_even_with_verified_true_cannot_enable_capacity(self):
+        rec = evidence("ROY", "AVAILABLE")
         self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        decision = route_task(origin="USER_TO_ROY", work_type="backend",
+                              capacities={"ROY": rec}, now=NOW)
+        self.assertEqual(decision["capacity"]["ROY"]["state"], "UNKNOWN")
+        self.assertEqual(decision["state"], "WAITING_EVENT")
 
     def test_unverified_owner_comment_cannot_claim_rate_limit(self):
         rec = evidence("ROY", "RATE_LIMITED", source="GITHUB_COMMENT")
-        self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
         rec = evidence("ROY", "AVAILABLE", verified=False)
-        self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
 
     def test_wrong_actor_evidence_rejected(self):
         rec = evidence("JJOONI", "AVAILABLE")
-        self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
 
     def test_future_timestamp_does_not_enable_agent(self):
         rec = evidence("ROY", "AVAILABLE", age=-7)
-        self.assertEqual(normalized_capacity("ROY", rec, now=NOW)["state"], "UNKNOWN")
+        self.assertEqual(normalized_capacity("ROY", rec, now=NOW, trusted_runtime=True)["state"], "UNKNOWN")
 
     def test_no_automatic_escalation_to_edit_mode(self):
         with self.assertRaises(ValueError):
