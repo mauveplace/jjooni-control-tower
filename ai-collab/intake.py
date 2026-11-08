@@ -55,7 +55,9 @@ def reconcile(new, existing):
     if not re.fullmatch(r"[a-f0-9]{64}", new["fingerprint"]):
         raise ValueError("Invalid fingerprint")
     for row in existing:
-        if not isinstance(row, dict):
+        if (not isinstance(row, dict) or not isinstance(row.get("key"), str)
+                or not isinstance(row.get("fingerprint"), str)
+                or not re.fullmatch(r"[a-f0-9]{64}", row["fingerprint"])):
             raise ValueError("Malformed existing intake")
         if row.get("key") == new["key"]:
             if row.get("fingerprint") != new["fingerprint"]:
