@@ -61,6 +61,7 @@ h2{font-size:16px;margin:22px 0 10px}.event{border-top:1px solid #e5eaf0;padding
  <section class="panel"><h2 class="section-title">GitHub 작업 목록</h2><div id="prs" class="pr-list"><div class="empty">공개 GitHub 데이터 조회 전</div></div><div class="foot">최근 업데이트된 열린 PR 최대 30개 · 자동 새로고침 없음 · GitHub 비인증 요청 한도에 따라 조회가 제한될 수 있습니다.</div></section>
  <section class="panel detail"><div id="details" class="empty">왼쪽에서 PR을 선택하면 역할별 회신과 활동 이력이 나타납니다.</div></section>
 </div>
+<section class="panel" style="margin-top:16px"><div class="row"><h2 class="section-title">로이 후속 검토 요청 이슈</h2><span class="tag">GitHub Issues · 실행 상태 아님</span></div><div id="followups" class="pr-list"><div class="empty">요청 이슈 조회 전</div></div><div class="foot">이슈가 열려 있어도 실제 Claude 세션이 시작됐다는 뜻은 아닙니다. 원본 이슈와 대상 PR의 현재 HEAD를 반드시 대조합니다.</div></section>
 <div class="foot">데이터 원천: <a href="https://github.com/mauveplace/jjooni-control-tower/pulls" target="_blank" rel="noopener noreferrer">mauveplace/jjooni-control-tower</a>. 모든 링크는 원문 GitHub 또는 Claude 세션으로 연결합니다. 이 현황판은 검토 승인, 모델 실행, 커밋, 배포, 거래를 수행하지 않습니다.</div>
 </main>
 <script>
@@ -69,7 +70,7 @@ h2{font-size:16px;margin:22px 0 10px}.event{border-top:1px solid #e5eaf0;padding
  const API="https://api.github.com/repos/mauveplace/jjooni-control-tower";
  const BASE="https://github.com/mauveplace/jjooni-control-tower";
  const $$=id=>document.getElementById(id);
- const state={prs:[],selected:null,details:new Map(),lastReload:0,loadToken:0};
+ const state={prs:[],issues:[],selected:null,details:new Map(),lastReload:0,loadToken:0};
  const short=s=>typeof s==="string"?s.slice(0,8):"—";
  const dt=s=>s?new Date(s).toLocaleString("ko-KR",{timeZone:"Asia/Seoul",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
  const e=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x;};
@@ -78,6 +79,20 @@ h2{font-size:16px;margin:22px 0 10px}.event{border-top:1px solid #e5eaf0;padding
  function isCollab(pr){return (pr.title||"").includes("[AI-COLLAB]")||/ai-collab-dispatch\/tasks\//.test(pr.body||"");}
  function setError(text){ $$("error").textContent=text||""; }
  async function read(path){const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),12000);try{const res=await fetch(API+path,{headers:{"Accept":"application/vnd.github+json"},signal:ctl.signal,cache:"no-store"});if(!res.ok){const reset=res.headers.get("x-ratelimit-reset");throw new Error("GitHub "+res.status+(res.status===403?" · 요청 한도 초과 또는 접근 제한"+(reset?" (reset Unix: "+reset+")":""):""));}return await res.json();}finally{clearTimeout(timer);}}
+ function renderFollowups(){
+  const target=$("followups");target.replaceChildren();
+  if(state.issues===null){target.append(e("div","empty","GitHub 이슈 조회 실패 · 사용량이나 ROY 실행 상태를 추정하지 않습니다."));return;}
+  const tickets=state.issues.filter(x=>!x.pull_request&&(x.title||"").startsWith("[AI-COLLAB][ROY-REQUEST] "));
+  if(!tickets.length){target.append(e("div","empty","열려 있는 후속 검토 요청 이슈가 없습니다."));return;}
+  for(const item of tickets){
+   const entry=e("div","pr");const hdr=e("div","row");hdr.append(tag("#"+item.number),tag("요청됨 · 실행 미확인","wait"));entry.append(hdr);
+   const label=e("div","pr-title");label.append(safeLink(item.html_url,item.title||"Follow-up request"));entry.append(label);
+   const m=(item.body||"").match(/(?:^|\n)Target-PR:[ \t]*([1-9][0-9]*)/);
+   const sh=(item.body||"").match(/(?:^|\n)Expected-HEAD:[ \t]*([a-f0-9]{40})/);
+   const foot=e("div","pr-meta","등록 "+dt(item.created_at)+" · 대상 PR "+(m?"#"+m[1]:"미확인")+" · 요청 SHA "+(sh?short(sh[1]):"미확인"));
+   entry.append(foot);target.append(entry);
+  }
+ }
  function renderList(){
   const needle=$$("search").value.trim().toLowerCase();const filter=$$("filter").value;
   const shown=state.prs.filter(pr=>(filter!=="collab"||isCollab(pr))&&(!needle||String(pr.number).includes(needle)||(pr.title||"").toLowerCase().includes(needle)));
@@ -165,13 +180,13 @@ h2{font-size:16px;margin:22px 0 10px}.event{border-top:1px solid #e5eaf0;padding
   if(Date.now()-state.lastReload<20000){setError("연속 API 조회를 줄이기 위해 20초 뒤 다시 시도해주세요.");return;}
   state.lastReload=Date.now();$$("reload").disabled=true;setError("");
   try{
-   const list=await read("/pulls?state=open&sort=updated&direction=desc&per_page=30");
-   state.prs=list;state.details.clear();
+   const [list,issues]=await Promise.all([read("/pulls?state=open&sort=updated&direction=desc&per_page=30"),read("/issues?state=open&sort=created&direction=desc&per_page=50").catch(()=>null)]);
+   state.prs=list;state.issues=issues;state.details.clear();
    $$("countAll").textContent=String(list.length);
    $$("countCollab").textContent=String(list.filter(isCollab).length);
    $$("countRoy").textContent="—";
    $$("checked").textContent=dt(new Date().toISOString());
-   renderList();
+   renderList();renderFollowups();
    const prev=list.find(x=>x.number===state.selected);
    const pick=prev||list.find(isCollab)||list[0];
    if(pick)await selectPR(pick.number);
