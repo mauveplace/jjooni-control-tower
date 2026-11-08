@@ -19,8 +19,8 @@ Allow GPT/Codex (JJOONI), Claude Code (ROY) and Gemini/Antigravity (JJANGGU) to 
 1. Open this experiment as a **draft PR** in GitHub. The PR becomes the shared discussion thread; do not merge into production.
 2. In [Codex Cloud](https://chatgpt.com/codex), connect this GitHub repository. Ask it to read `ai-collab-pilot/task.json`, propose a verification methodology without inventing returns, and add the `JJOONI/proposal` message via `relay.py add` on the experiment branch.
 3. In [Claude Code Routines](https://claude.ai/code/routines), sign in with the subscription, grant the Claude GitHub App access to this repository only, and create a **read-only connection-test** routine for PR #302. **First run via Run now**, not an event: PR #302 was already opened. Fetch `refs/pull/302/head` explicitly because web routines clone the default branch. The first review must produce only a PR comment or a session report; **no task.json update, commits, pushes or deployments**. Read `CLAUDE.md` for the exact test steps. Only after this is verified should the account owner configure the PR event with filters: title contains `[AI-COLLAB]`, head branch starts with `experiment/ai-collab-`, base branch equals `main`, and draft=true. Do not subscribe to all PR actions. Exclude unnecessary connectors. Confirm extra usage billing is disabled.
-4. In Gemini/Antigravity, connect the same repo using the Google account and request the `JJANGGU/data_review` check. Automatic event-triggered Gemini runs are **not verified**; initially run this step manually.
-5. When both real reviews exist, have Codex run `JJOONI/synthesis`. Publish only the verified outcome to Control Tower/MAIOS after CIO review.
+4. Open [Antigravity Remote Agents](https://antigravity.google.com) from the mobile browser with the Google AI Pro/Ultra personal account, create a remote project, attach **only** this GitHub repository, and use the `ai-collab-pilot/GEMINI.md` **read-only test** prompt. No Gemini API keys or Cloud billing. The initial run should produce a single PR comment (or report a permission failure), **not** write `data_review` to `task.json`. Consumer Gemini Code Assist GitHub app was discontinued in July 2026; do not try to install that retired service. Automatic GitHub event-triggered Gemini runs are **not yet implemented**.
+5. After a real JJANGGU comment appears, compare ROY and JJANGGU's independently authored PR comments with JJOONI's proposal. Moving them into `task.json` or invoking JJOONI synthesis automatically requires a **separately approved** write-authorized follow-up phase. Publish only verified outcomes to Control Tower/MAIOS after CIO review.
 
 ## Commands
 
@@ -43,6 +43,6 @@ python -m unittest discover -s ai-collab-pilot -p 'test_*.py'
 
 1. The offline unit tests pass.
 2. JJOONI proposal has a real execution record and an explicit source.
-3. ROY's first read-only connection run produces a verifiable test report or PR comment; a later explicitly approved phase may append `risk_review`. JJANGGU's real independent `data_review` requires separate authentication and execution.
+3. ROY's first verified PR comment succeeded (2026-11-08). JJANGGU's first independently authored test comment or session report still requires Google account authorization and execution. Neither pilot is currently authorized to write relay `risk_review` or `data_review` automatically.
 4. JJOONI synthesis includes unresolved disagreements and does not claim any unverified trading returns.
 5. Only the final verified summary is copied into any durable investment record after CIO review.
