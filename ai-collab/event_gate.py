@@ -35,13 +35,35 @@ def active_task_path(paths):
 
 
 def bound_task_path(paths, task):
-    """Reject task-id/file-name mismatch, including reused stale task JSON."""
+    """Reject task-id/file-name mismatch, including reused stale task JSON.
+
+    paths MUST be GitHub PR diff files, not all files in the branch. The
+    main-branch historical task and independent parallel PRs are not active
+    tasks of this PR. The caller must authenticate the diff API response.
+    """
     validate_task(task)
     path = active_task_path(paths)
     expected = TASK_DIR + task["task_id"] + ".json"
     if path != expected:
         raise ValueError("Task filename does not match declared task_id")
     return path
+
+
+def bound_task_from_pr_diff(pr_files, task):
+    """Select precisely one created/updated task in this PR's verified diff.
+
+    GitHub /pulls/{number}/files returns filename/status pairs. The caller
+    must fetch that API at the current PR HEAD, compare the HEAD again before
+    execution, and NEVER treat task origin or GitHub author as agent identity.
+    """
+    if not isinstance(pr_files, list) or len(pr_files) > 300:
+        raise ValueError("Missing or unbounded PR file-diff evidence")
+    changed = [
+        row["filename"] for row in pr_files
+        if isinstance(row, dict) and row.get("status") in ("added", "modified", "renamed")
+        and isinstance(row.get("filename"), str)
+    ]
+    return bound_task_path(changed, task)
 
 
 def get(obj, *keys):
@@ -159,6 +181,10 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
 
     if event_name == "pull_request":
         if action == "opened":
+            if task.get("origin") == "USER_TO_ROY" and "JJOONI" in task["required_reviewers"]:
+                return output("AWAIT_JJOONI", event_key=event_key, pr=number, head=head,
+                              reason="ROY-first PR requests independent JJOONI review; "
+                                     "GitHub event subscription and Work run provenance are NOT proven")
             if "ROY" not in task["required_reviewers"]:
                 return output("IGNORE", event_key=event_key, pr=number, head=head,
                               reason="ROY is not a required reviewer for this task")
