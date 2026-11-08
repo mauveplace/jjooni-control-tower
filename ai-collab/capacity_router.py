@@ -54,7 +54,7 @@ def _parse_time(value):
         return None
 
 
-def normalized_capacity(actor, record, *, now=None):
+def normalized_capacity(actor, record, *, now=None, trusted_runtime=False):
     """Only fresh verified first-party run evidence can establish capacity.
 
     A GitHub comment or an actor=ROY claim alone is not evidence.
@@ -67,7 +67,9 @@ def normalized_capacity(actor, record, *, now=None):
         raise ValueError("now must be timezone aware")
     default = {"actor": actor, "state": "UNKNOWN", "provenance": "NOT_VERIFIED",
                "checked_at": None, "limit_reset_at": None}
-    if not isinstance(record, dict) or record.get("actor") != actor:
+    # PR tasks/comments may contain forged verified:true. Only a caller that
+    # independently authenticated first-party run evidence can enable this gate.
+    if trusted_runtime is not True or not isinstance(record, dict) or record.get("actor") != actor:
         return default
     state = record.get("state")
     checked = _parse_time(record.get("checked_at"))
@@ -96,7 +98,7 @@ def check_transition(before, after):
 
 
 def route_task(*, origin, work_type, capacities=None, required_independent_review=True,
-               mode="SYSTEM_REVIEW_ONLY", now=None):
+               mode="SYSTEM_REVIEW_ONLY", now=None, evidence_from_verified_runtime=False):
     """Deterministic recommendation only. No network calls or autonomous dispatch.
 
     When the preferred agent is limited, the other may do read-only
@@ -109,7 +111,8 @@ def route_task(*, origin, work_type, capacities=None, required_independent_revie
     if mode != "SYSTEM_REVIEW_ONLY":
         raise ValueError("PR-controlled code-write approvals are not accepted")
     capacities = capacities or {}
-    status = {actor: normalized_capacity(actor, capacities.get(actor), now=now)
+    status = {actor: normalized_capacity(actor, capacities.get(actor), now=now,
+                                         trusted_runtime=evidence_from_verified_runtime)
               for actor in ROLES}
     preferred, alternate = WORK_TYPES[work_type]
     chosen = None
