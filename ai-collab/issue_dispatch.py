@@ -16,7 +16,11 @@ PERMITTED_FIELDS = ("Target-PR", "Task-ID", "Expected-HEAD", "Mode", "Requested-
 def parse_request(title, body):
     if not isinstance(title, str) or not title.startswith(TITLE_PREFIX):
         return None
-    if not isinstance(body, str) or not body.startswith(ISSUE_MARKER + "\n"):
+    if not isinstance(body, str):
+        raise ValueError("Missing exact task marker on first line")
+    # Normalize line endings without relaxing the exact first-line trust marker.
+    body = body.replace("\r\n", "\n").replace("\r", "\n")
+    if not body.startswith(ISSUE_MARKER + "\n"):
         raise ValueError("Missing exact task marker on first line")
     fields = {}
     for line in body.splitlines()[1:]:
@@ -51,7 +55,13 @@ def decide(event, target_pr, *, known_issue_ids=()):
 
     The issue creator must be repository owner. The target PR must be OPEN,
     target main and at the pinned HEAD. Dedupe requires a durable issue ledger
-    maintained by caller; this function does not store state.
+    maintained by caller; this function does not store state. A REQUEST_ROY_REVIEW
+    is only a candidate: caller MUST separately fetch and validate the exact
+    ai-collab-dispatch/tasks/<task_id>.json at pinned HEAD (task_id/filename,
+    repository/base/mode/required_reviewers and scope), authenticate the Claude
+    session, re-fetch the still-open non-draft non-merged PR before posting, and
+    check GitHub comments plus an external durable dedup ledger. Never treat
+    the return value alone as permission to execute, merge or deploy.
     """
     if not isinstance(event, dict) or not isinstance(target_pr, dict):
         return {"decision":"BLOCKED", "reason":"Missing event or target PR evidence"}
@@ -83,6 +93,8 @@ def decide(event, target_pr, *, known_issue_ids=()):
     head=target_pr.get("head",{}).get("sha")
     if (target_pr.get("number")!=task["pr_number"] or
             target_pr.get("state")!="open" or
+            target_pr.get("merged") is True or
+            target_pr.get("draft") is True or
             target_pr.get("base",{}).get("ref")!="main" or
             "[AI-COLLAB]" not in str(target_pr.get("title",""))):
         return {"decision":"BLOCKED","issue_id":issue_id,"reason":"PR target/opt-in mismatch"}
