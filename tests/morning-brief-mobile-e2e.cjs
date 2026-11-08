@@ -30,7 +30,7 @@ const assert=require('node:assert/strict');
    assert.match(result.badge,/마지막 게시본 · 2026-11-07/);
    assert.match(result.notice,/공식 종가 정정/);
    assert.doesNotMatch(result.notice,/CROSS_CHECKED/);
-   assert.match(result.notice,/원문.*재산출되지 않았습니다/);
+   assert.match(result.notice,/본문.*재산출되지 않았습니다/);
    assert.match(result.figures[0],/26,989\.99/);
    assert.match(result.figures[0],/1\.35%/);
    assert.match(result.figures[1],/9,390\.25/);
