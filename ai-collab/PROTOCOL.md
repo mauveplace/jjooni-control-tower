@@ -11,9 +11,9 @@
 
 ## Persistent PR task contract
 
-1. Create a task JSON under `ai-collab-dispatch/tasks/<task_id>.json` on the **PR branch**, using `ai-collab-dispatch/tasks/TEMPLATE.json` as a model. The current PR number and HEAD are discovered dynamically from the actual event and checked using GitHub, not stored as permanent routine settings.
+1. Create **exactly one active task JSON** under `ai-collab-dispatch/tasks/<task_id>.json` on the **PR branch**, using `ai-collab-dispatch/tasks/TEMPLATE.json` as a model. Ignore `TEMPLATE.json` when discovering active tasks, and fail closed on zero or multiple active task files. The current PR number and HEAD are discovered dynamically from the actual event and checked using GitHub, not stored as permanent routine settings.
 2. Opt in with PR title containing `[AI-COLLAB]` and target branch `main`. The preferred Claude Routine filters are repo=`mauveplace/jjooni-control-tower`, base=`main`, title contains `[AI-COLLAB]`; optional draft=false. A PR with an explicit task JSON but no title opt-in is not automatically sent to ROY until the event subscription is configured to include it.
-3. Role events: `pull_request.opened` requests first review; `pull_request.labeled` with explicit `ai-collab:roy` can request an additional ROY pass; `pull_request.synchronize` can request validation on a new code HEAD. Routines must filter out their own no-op commits / rebase-only changes. GitHub **issue_comment.created does not itself trigger this Claude PR-only Routine**. Do not pretend a GitHub comment is a Claude trigger.
+3. Role events: `pull_request.opened` requests first review; `pull_request.labeled` with explicit `ai-collab:roy-request` can request an additional ROY pass; `pull_request.synchronize` can request validation on a new code HEAD. Routines must filter out their own no-op commits / rebase-only changes. GitHub **issue_comment.created does not itself trigger this Claude PR-only Routine**. Do not pretend a GitHub comment is a Claude trigger.
 4. JJOONI Work receives supported PR/comment/review events, validates the true event payload including original ID, reads the current task at PR HEAD, verifies change, and performs a separate read-only audit. A Work event subscription currently scoped to a single PR must also be widened in the Work event UI; **updating a prompt alone cannot prove the webhook subscription changed**.
 5. The subscription-bound GitHub and Work settings live in the external products and **cannot be installed by merely merging this repository documentation**. Actual end-to-end status requires new real event → Claude session → GitHub ROY response → Work independent review.
 
@@ -45,6 +45,19 @@ Set the existing `ROY AI-COLLAB Pilot Review` Routine to respond to `pull_reques
 **JJOONI in ChatGPT Work**
 
 Use repository-wide relevant PR/comment/review/HEAD events, not a PR-number-specific webhook. Prompt: *Correlate the true webhook event and GitHub original ID; ignore self-comments and duplicate SHA; independently verify ROY's latest accepted HEAD; report BLOCKED/NEEDS_CHANGES/PASS; no GitHub writes while read-only*. The automation prompt and event subscription are separate configurations.
+
+## Provenance and event-gate boundaries
+
+- `ai-collab/event_gate.py` is a pure deterministic **decision aid** for previously authenticated webhook payloads and separately retrieved GitHub PR metadata. It cannot receive events, validate webhook signatures, authenticate Claude sessions, alter Work/Claude Routine subscriptions or persist a dedupe ledger. It never orders, deploys or merges.
+- Accept only repo-matching, **current-HEAD** event + PR pairs, immutable original comment/review IDs, allowed actions and trusted human-visible author names. Return `VERIFY_REVIEW`, **never** a blind PASS, on an apparently valid ROY marker; a role claim alone is not proof.
+- A PR may include `TEMPLATE.json` plus a single active task. Do not infer which task to run from a placeholder. Multiple active task files are ambiguous and must be rejected until the user or JJOONI creates a separate PR for each task.
+- Compare the actual Git tree before/after a synchronize event. A new commit SHA with unchanged tree does not justify a fresh review; if diff evidence is missing, return NEED_EVIDENCE rather than acting.
+- Work and Claude settings are independent. A GitHub `pull_request.opened` routine does **not** automatically re-fire on newly posted comments or synchronize unless those precise events are separately subscribed to and supported. Verify both subscription scopes through observed actual session records.
+
+## Writable work authorization (separate future phase)
+
+- **Only read-only review is authorized in V4.** `mode=PR_BRANCH_EDIT_APPROVED` in a PR JSON must be rejected even if it contains an owner-looking URL. To enable ROY development, introduce a separate, explicitly approved writer routine with real owner identity/permission verification from an authoritative channel, restricted branch write token, code/test checks and post-write audit. Do not silently expand this reviewer routine into a writer.
+- Request→review→rework does not imply permission to merge. Every production merge and deployment remains independently user-authorized.
 
 ## Lifecycle
 
