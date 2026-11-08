@@ -1,3 +1,14 @@
+# Current task (v0.2): ROY independent review of TRI-POD data repair
+
+**The initial read-only connection test is complete.** For this new collaboration task, follow the bounded procedure below and do not repeat the initial test comment:
+- Read `COLLABORATION.md`, `tasks/D-261108-TRIPOD-DQ-002.json` and PR #302's `JJOONI / COLLAB TASK` dispatch comment.
+- Review the **immutable historical source commit** `8836f699b1676bc015fe13032ee3e98198a57976` independently. This snapshot field is intentionally not the branch's moving HEAD.
+- Challenge data corruption claims, calendar/VIX alignment, historical NAV, benchmark apples-to-apples, exact repair acceptance criteria and test design. Do not write code.
+- Use `python3 ai-collab-pilot/coordinator.py template --task ai-collab-pilot/tasks/D-261108-TRIPOD-DQ-002.json --actor ROY` to generate a **short structured comment**. It must begin with the exact marker on the first line. Replace placeholders with actual findings and session link/UNKNOWN.
+- Check existing PR comments for this task+ROY+source SHA marker; if present, do not post a duplicate. If absent, post **one** PR Conversation comment only.
+- No `relay.py add`, Git commits, pushes, merges, deploy, paid APIs, sensitive data or brokerage orders. A comment is not an approval for source changes.
+
+## Historical read-only connection-test instructions (archived)
 # ROY (Claude Code) — pilot PR #302 only
 
 ## First connection test: READ-ONLY
