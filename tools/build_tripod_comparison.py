@@ -100,6 +100,24 @@ def is_trading_date(day):
     return stamp.weekday() < 5 and stamp not in MARKET_HOLIDAYS(stamp.year)
 
 
+def daily_suffix(rows, max_gap_days=5):
+    """The trailing part of an archive series that is truly daily.
+
+    history-30y.json is mixed: NASDAQ100 is quarterly and VIX monthly before
+    2023-09, and those bars are dated at the START of the period while holding
+    the period-END close (2020-04-01 carried the 2020-06-30 close). Mixed into
+    a daily replay they plant future prices: 33 fake |8%+| NDX days, a
+    one-day TQQQ->cash->TQQQ flicker, a 250-day MA and VIX10 built from the
+    future. Only the contiguous daily tail is usable for a daily replay.
+    """
+    rows = sorted(rows, key=lambda r: r['date'])
+    start = len(rows)
+    while start > 1 and (date.fromisoformat(rows[start - 1]['date']) -
+                         date.fromisoformat(rows[start - 2]['date'])).days <= max_gap_days:
+        start -= 1
+    return rows[start - 1:] if start < len(rows) else []
+
+
 def build(obs, archive, etfs, supplement=None):
     latest = obs['tripod_latest']
     session = obs['us_completed_session_date']
@@ -109,7 +127,8 @@ def build(obs, archive, etfs, supplement=None):
     etf_calendar = set.union(*(set(etfs[key]) for key in ETFS))
     for key in SIGNAL_SYMBOLS:
         merged = {d: {'date': d, 'value': quote[0]} for d, quote in (supplement or {}).get(key, {}).items()}
-        merged.update((r['date'], r) for source in (archive, obs) for r in source['series'].get(key, []))
+        merged.update((r['date'], r) for r in daily_suffix(archive['series'].get(key, [])))
+        merged.update((r['date'], r) for r in obs['series'].get(key, []))
         merged = {d: r for d, r in merged.items() if d <= session and (d in etf_calendar or is_trading_date(d))}
         series[key] = [merged[d] for d in sorted(merged)]
     replay, _ = tripod_history(series)
