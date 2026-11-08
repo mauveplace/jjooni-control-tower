@@ -40,6 +40,7 @@ The rules are explicit in `capacity_router.py` and can be overridden only by own
 ## Status machine / handoff
 
 - `NEW → TRIAGED → REQUESTED → IN_PROGRESS → AWAITING_INDEPENDENT_REVIEW → READY_FOR_HUMAN_APPROVAL → CLOSED` is the normal path. `WAITING_CAPACITY`, `WAITING_EVENT`, `NEEDS_CHANGES` and `BLOCKED` preserve incomplete work without silently treating it as done.
+- A PR can forge `verified=true`. `capacity_router.py` therefore ignores even well-formed capacity claims unless the calling runtime passes `evidence_from_verified_runtime=True` **after independently validating a first-party run**. That argument is a caller trust boundary, not an automated identity proof; a run ingestion connector is still required for real availability signals.
 - `capacity_router.py` never calls an agent. It produces a read-only suggested `assigned_agent`, `independent_reviewer`, `capacity`, `fallback_used`, `next_step` and an always-false safe-to-merge/deploy/trade gate.
 - `handoff_record()` makes a stable `task_id + full_head_sha + event_id + from_role + to_role + reason` receipt with `status=REQUESTED_NOT_CONFIRMED`. A request is not a completed handoff until the recipient acknowledges it with independently verifiable run metadata.
 - No self-approval: if ROY prepares work while JJOONI is unavailable, ROY's own review does not count as JJOONI's independent challenge, and vice versa.
