@@ -151,12 +151,32 @@ def parse_bls(raw,code,dt):
    vals={'state_jolts_annual_publication':year+' annual dataset released'}
  return [dict(key=k,label=LABELS.get(k,k),actual=v) for k,v in vals.items() if v is not None],t[:4000]
 
+def current_release_url(code, release_dt, now_et=None):
+ """Use a mutable current page only for a recent, exactly dated release.
+
+ The downstream parser requires the *full publication date* in the page body;
+ a newer release must never be mistaken for the requested historical vintage.
+ """
+ if code not in ('ppi', 'ximpim'):
+  return None
+ if now_et is None:
+  now_et=datetime.now(ZoneInfo('America/New_York'))
+ days=(now_et.date()-release_dt.date()).days
+ if not 0 <= days <= 45:
+  return None
+ return f'https://www.bls.gov/news.release/{code}.nr0.htm'
+
+
 def collect_bls(e,kind,checks):
  from official_calendar_collectors import raw_fetch,text_fetch
  from calendar_actual_contract import release_time
  code=kind.removeprefix('BLS_');dt=release_time(e).astimezone(ZoneInfo('America/New_York'))
  stem=f'{code}_{dt:%m%d%Y}'
  urls=[f'https://www.bls.gov/news.release/archives/{stem}.htm',f'https://www.bls.gov/news.release/archives/{stem}.pdf',f'https://www.bls.gov/news.release/history/{stem}.txt']
+ # Read-only fallback for blocked archive endpoints. Exact publication-date
+ # matching in parse_bls prevents a later current edition from being used.
+ current=current_release_url(code,dt)
+ if current:urls.append(current)
  cached=cached_document(urls[0])
  if cached:
   raw,record=cached
