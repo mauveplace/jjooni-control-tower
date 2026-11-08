@@ -65,6 +65,22 @@ class EventGateTests(unittest.TestCase):
     def decide(self, name, event, current_pr=None, **kwargs):
         return decide_event(name, event, current_pr or pr(), task(), **kwargs)
 
+    def test_roy_first_new_pr_routes_to_jjooni_not_roy(self):
+        roy_first=task(origin="USER_TO_ROY",required_reviewers=["JJOONI"],optional_reviewers=[])
+        out=decide_event("pull_request",pull_event("opened"),pr(),roy_first)
+        self.assertEqual(out["decision"],"REVIEW_JJOONI")
+        self.assertFalse(out["agent_authenticated"])
+        self.assertFalse(out["safe_to_merge"])
+        self.assertFalse(out["safe_to_deploy"])
+
+    def test_roy_first_event_wrong_repo_or_closed_pr_rejected(self):
+        roy_first=task(origin="USER_TO_ROY",required_reviewers=["JJOONI"],optional_reviewers=[])
+        bad=repo_event(action="opened",pull_request={"number":432,"head":{"sha":SHA_A}})
+        bad["repository"]["full_name"]="outsider/fork"
+        self.assertEqual(decide_event("pull_request",bad,pr(),roy_first)["decision"],"IGNORE")
+        closed=pr();closed["state"]="closed"
+        self.assertEqual(decide_event("pull_request",pull_event("opened"),closed,roy_first)["decision"],"IGNORE")
+
     def test_new_pr_waits_for_roy(self):
         out = self.decide("pull_request", pull_event("opened"))
         self.assertEqual(out["decision"], "WAIT_ROY")
