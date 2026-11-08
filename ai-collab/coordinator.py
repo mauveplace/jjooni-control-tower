@@ -27,7 +27,7 @@ MAX_COMMENT_SIZE = 16000
 def validate_task(task):
     if not isinstance(task, dict) or task.get("schema") != "JJOONI_COLLAB_V4":
         raise ValueError("Expected JJOONI_COLLAB_V4 task object")
-    if not TASK_RE.fullmatch(str(task.get("task_id", ""))) or str(task.get("task_id", "")).startswith("REPLACE-"):
+    if not isinstance(task.get("task_id"), str) or not TASK_RE.fullmatch(task["task_id"]) or task["task_id"].startswith("REPLACE-"):
         raise ValueError("Invalid or placeholder task_id")
     if task.get("repository") != REPO or task.get("base_branch") != "main":
         raise ValueError("Unexpected repository or target branch")
@@ -86,7 +86,7 @@ def parse_comment(comment):
 
 def summarize(task, comments, head_sha):
     validate_task(task)
-    if not SHA_RE.fullmatch(head_sha):
+    if not isinstance(head_sha, str) or not SHA_RE.fullmatch(head_sha):
         raise ValueError("Full 40-character PR HEAD is required")
     if not isinstance(comments, list):
         raise ValueError("Comments must be a JSON array")
@@ -121,7 +121,7 @@ def summarize(task, comments, head_sha):
 
 def template(task, actor, head_sha):
     validate_task(task)
-    if actor not in ACTORS or not SHA_RE.fullmatch(head_sha):
+    if actor not in ACTORS or not isinstance(head_sha, str) or not SHA_RE.fullmatch(head_sha):
         raise ValueError("Invalid actor or PR head")
     stage = "independent-review" if actor == "JJOONI" else "review"
     return (
