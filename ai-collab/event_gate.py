@@ -11,6 +11,7 @@ from pathlib import PurePosixPath
 from coordinator import REPO, SHA_RE, parse_comment, validate_task
 
 TASK_DIR = "ai-collab-dispatch/tasks/"
+PROBE_RE = re.compile(r"(?m)^<!-- JJOONI-COLLAB-PROBE-[A-Za-z0-9-]{1,80} -->$")
 REVIEW_LABEL = "ai-collab:roy-request"
 
 
@@ -31,6 +32,16 @@ def active_task_path(paths):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\.json", tasks[0][len(TASK_DIR):]):
         raise ValueError("Unsafe task file name")
     return tasks[0]
+
+
+def bound_task_path(paths, task):
+    """Reject task-id/file-name mismatch, including reused stale task JSON."""
+    validate_task(task)
+    path = active_task_path(paths)
+    expected = TASK_DIR + task["task_id"] + ".json"
+    if path != expected:
+        raise ValueError("Task filename does not match declared task_id")
+    return path
 
 
 def get(obj, *keys):
@@ -170,7 +181,7 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
                       reason="Review claim not authored by the allowed GitHub account")
 
     body = raw.get("body")
-    if isinstance(body, str) and "JJOONI-COLLAB-PROBE" in body:
+    if isinstance(body, str) and PROBE_RE.search(body):
         return output("PROBE", event_key=event_key, pr=number, head=head,
                       reason="Webhook receipt only; no actual code review")
     parsed = parse_comment(raw)
