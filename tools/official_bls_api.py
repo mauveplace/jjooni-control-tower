@@ -2,14 +2,25 @@
 
 A reference month must come from the official schedule/release. Never infer it
 from the announcement month: shutdowns and postponements break that assumption.
+
+When the release page is unreachable (www.bls.gov answers HTTP 403 to automated
+clients regardless of User-Agent), the reference month is taken from the BLS API
+itself: the observation BLS flags ``latest`` is, by BLS's own definition, the
+period of the most recent release. That is only trusted for a release that is
+still the most recent one (within RECENT_RELEASE_DAYS) and whose latest period
+sits 1-3 months before the release month; anything else stays unresolved.
 """
 import calendar
 import json
 import re
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 
 API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
+# Monthly BLS releases are >=27 days apart; inside this window no newer release
+# of the same report can have moved the API's ``latest`` flag.
+RECENT_RELEASE_DAYS = 25
 # key: (official series, comparison months, display unit)
 SERIES = {
     'cpi': {'cpi_yoy': ('CUUR0000SA0', 12, '%'),
@@ -40,7 +51,7 @@ def reference_month(value):
 
 
 @lru_cache(maxsize=32)
-def fetch_series(series, year):
+def _series_rows(series, year):
     from official_calendar_collectors import raw_fetch
     url = f'{API}{series}?startyear={year-1}&endyear={year}'
     data = json.loads(raw_fetch(url))
@@ -50,10 +61,48 @@ def fetch_series(series, year):
     if isinstance(results, list):
         results = results[0] if results else {}
     rows = next((x['data'] for x in results.get('series', []) if x.get('seriesID') == series), [])
+    return tuple(rows), url
+
+
+def fetch_series(series, year):
+    rows, url = _series_rows(series, year)
     values = {(int(x['year']), int(x['period'][1:])): Decimal(x['value'])
               for x in rows if re.fullmatch(r'M(?:0[1-9]|1[0-2])', x['period'])
               and re.fullmatch(r'-?\d+(?:\.\d+)?', x['value'])}
     return values, url
+
+
+def latest_period(series, year):
+    """(year, month) BLS flags as ``latest`` for this series, or None."""
+    rows, _ = _series_rows(series, year)
+    row = next((x for x in rows if str(x.get('latest')).lower() == 'true'), None)
+    if not row or not re.fullmatch(r'M(?:0[1-9]|1[0-2])', row.get('period', '')):
+        return None
+    return int(row['year']), int(row['period'][1:])
+
+
+def api_reference_month(event, code, now=None):
+    """Reference month of a still-current release, read from BLS's own ``latest`` flag."""
+    from calendar_actual_contract import release_time
+    if code not in SERIES:
+        return None
+    try:
+        released = release_time(event)
+    except Exception:
+        released = None
+    if not released:
+        return None
+    now = now or datetime.now(timezone.utc)
+    age = now - released
+    if age < timedelta(0) or age > timedelta(days=RECENT_RELEASE_DAYS):
+        return None
+    series = next(iter(SERIES[code].values()))[0]
+    period = latest_period(series, released.year)
+    if not period:
+        return None
+    gap = (released.year * 12 + released.month) - (period[0] * 12 + period[1])
+    # Monthly BLS reports always describe an earlier month (1-3 months back).
+    return period if 1 <= gap <= 3 else None
 
 
 def calculate(values, year, month, lag, unit):
@@ -69,8 +118,21 @@ def calculate(values, year, month, lag, unit):
     return f'{value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP):f}{unit}'
 
 
-def collect_api(event, code, checks):
+def collect_api(event, code, checks, now=None):
     period = reference_month(event.get('reference_period'))
+    if not period and code in SERIES:
+        try:
+            period = api_reference_month(event, code, now)
+        except Exception as exc:
+            checks.append({'adapter': 'BLS_API', 'title': event['title'],
+                           'result': 'LATEST_PERIOD_LOOKUP_FAILED', 'error': str(exc)[:200]})
+            period = None
+        if period:
+            event['reference_period'] = f'{calendar.month_name[period[1]]} {period[0]}'
+            event['reference_period_source'] = 'BLS_API_LATEST_FLAG'
+            checks.append({'adapter': 'BLS_API', 'title': event['title'],
+                           'result': 'REFERENCE_PERIOD_FROM_API_LATEST',
+                           'reference_period': f'{period[0]}-{period[1]:02d}'})
     if not period or code not in SERIES:
         checks.append({'adapter': 'BLS_API', 'title': event['title'],
                        'result': 'REFERENCE_PERIOD_MISSING' if not period else 'SERIES_NOT_CONFIGURED'})
