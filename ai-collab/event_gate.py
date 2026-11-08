@@ -159,6 +159,9 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
 
     if event_name == "pull_request":
         if action == "opened":
+            if task.get("origin") == "USER_TO_ROY" and "JJOONI" in task["required_reviewers"]:
+                return output("REVIEW_JJOONI", event_key=event_key, pr=number, head=head,
+                              reason="ROY-first PR: independent JJOONI review required; event delivery must be authenticated")
             if "ROY" not in task["required_reviewers"]:
                 return output("IGNORE", event_key=event_key, pr=number, head=head,
                               reason="ROY is not a required reviewer for this task")
