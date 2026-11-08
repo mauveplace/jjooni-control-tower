@@ -74,6 +74,16 @@ class EvergreenContractTests(unittest.TestCase):
         self.assertIsNone(parse_comment({"body": template(task(), "ROY", SHA_A).split("\n")[0] + "\n"}))
         self.assertIsNone(parse_comment({"body": template(task(), "ROY", SHA_A).replace("actor=ROY stage=review", "actor=ROY stage=independent-review")}))
 
+    def test_invalid_head_and_wrong_task_id_type_fail_closed(self):
+        for head in (None, 3, "", "a" * 39):
+            with self.subTest(head=head), self.assertRaises(ValueError):
+                summarize(task(), [], head)
+            with self.subTest(head=head), self.assertRaises(ValueError):
+                template(task(), "ROY", head)
+        for task_id in (3, None, ["bad"]):
+            with self.subTest(task_id=task_id), self.assertRaises(ValueError):
+                validate_task(task(task_id=task_id))
+
     def test_invalid_task_denied(self):
         for patch in (
             {"privacy": "PRIVATE_DATA"},
