@@ -13,7 +13,7 @@
 
 1. Create **exactly one active task JSON** under `ai-collab-dispatch/tasks/<task_id>.json` on the **PR branch**, using `ai-collab-dispatch/tasks/TEMPLATE.json` as a model. Ignore `TEMPLATE.json` when discovering active tasks, and fail closed on zero or multiple active task files. The current PR number and HEAD are discovered dynamically from the actual event and checked using GitHub, not stored as permanent routine settings.
 2. Opt in with PR title containing `[AI-COLLAB]` and target branch `main`. The preferred Claude Routine filters are repo=`mauveplace/jjooni-control-tower`, base=`main`, title contains `[AI-COLLAB]`; optional draft=false. A PR with an explicit task JSON but no title opt-in is not automatically sent to ROY until the event subscription is configured to include it.
-3. Role events: `pull_request.opened` requests first review; `pull_request.labeled` with explicit `ai-collab:roy-request` can request an additional ROY pass; `pull_request.synchronize` can request validation on a new code HEAD. Routines must filter out their own no-op commits / rebase-only changes. GitHub **issue_comment.created does not itself trigger this Claude PR-only Routine**. Do not pretend a GitHub comment is a Claude trigger.
+3. In the user's observed Claude Routines UI, `PR 열림` is available for initial ROY reviews, while PR synchronize/labeled/comment events are not offered. For later reviews of an existing PR, configure a **separate** `이슈 열림` Routine with an owner-authored `[AI-COLLAB][ROY-REQUEST]` issue and current full PR HEAD. See `ai-collab/FOLLOWUP_ISSUE_DISPATCH.md`. A PR comment does **not** trigger the PR-opened Routine.
 4. JJOONI Work receives supported PR/comment/review events, validates the true event payload including original ID, reads the current task at PR HEAD, verifies change, and performs a separate read-only audit. A Work event subscription currently scoped to a single PR must also be widened in the Work event UI; **updating a prompt alone cannot prove the webhook subscription changed**.
 5. The subscription-bound GitHub and Work settings live in the external products and **cannot be installed by merely merging this repository documentation**. Actual end-to-end status requires new real event → Claude session → GitHub ROY response → Work independent review.
 
@@ -40,7 +40,7 @@
 
 **ROY in Claude Code Routines**
 
-Set the existing `ROY AI-COLLAB Pilot Review` Routine to respond to `pull_request.opened`, and, if supported in the current UI, additional `pull_request.labeled` and `pull_request.synchronize`. Filters: repo, base `main`, title contains `[AI-COLLAB]` (and optional draft=false). Remove old `experiment/ai-collab-` head-branch prefix dependency if future task branches have other names. Prompt: *Read this PR's task JSON at HEAD; dynamically validate repo, task_id, HEAD, required_reviewers, permissions and acceptance criteria. Review or edit only as allowed. If already responded to same task+HEAD, exit. Return grounded evidence and session provenance in one response.*
+Keep the original `ROY AI-COLLAB Pilot Review` on `PR 열림`, generic `[AI-COLLAB]`/main filters, no permanent PR or branch-prefix restriction. Configure a **second** `ROY AI-COLLAB Follow-up` Routine on `이슈 열림` using `ai-collab/FOLLOWUP_ISSUE_DISPATCH.md`. The follow-up issue only requests an independent read-only review of a pinned target PR HEAD; it never grants code-write or merge rights.
 
 **JJOONI in ChatGPT Work**
 
