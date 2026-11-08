@@ -190,4 +190,6 @@ def collect_bls(e,kind,checks,release_calendar=None):
   result=collect_eci_fred(e,checks)
   if result:return result
  from official_bls_api import collect_api
- return collect_api(e,code,checks,release_calendar=release_calendar)
+ # Existing BLS API adapter already uses a guarded official latest-published reference.
+ # Release-calendar crosswalk is not implemented here; preserve its own API contract.
+ return collect_api(e,code,checks)
