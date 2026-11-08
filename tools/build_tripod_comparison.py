@@ -118,6 +118,38 @@ def daily_suffix(rows, max_gap_days=5):
     return rows[start - 1:] if start < len(rows) else []
 
 
+def verified_daily_signal_rows(feed, canonical):
+    """Only independently observed daily closes plus canonical daily bars.
+
+    The historic archive mixes monthly/quarterly period-END values on
+    period-START dates; no date-gap heuristic alone can authenticate a bar.
+    Never import that archive into the NDX or VIX replay (including VIX10).
+    """
+    merged = {d: {'date': d, 'value': quote[0]} for d, quote in feed.items()}
+    merged.update((r['date'], r) for r in canonical)
+    return merged
+
+
+def require_full_coverage(previous, candidate, *, allow_explicit_shrink=False):
+    """Fail closed before replacing a verified long-horizon comparison.
+
+    A deliberate period change requires an explicit operator-controlled
+    invocation, never an automatic Yahoo 3y fallback or scheduled refresh.
+    """
+    if not candidate or not candidate.get('rows'):
+        raise RuntimeError('TRIPOD_COMPARISON_DEGRADED: no new complete daily replay')
+    old = (previous or {}) if (previous or {}).get('schema') == 'JJOONI_TRIPOD_COMPARISON_V1' else {}
+    old_rows = old.get('rows') or []
+    new_rows = candidate['rows']
+    if (old_rows and not allow_explicit_shrink and
+            (new_rows[0][0] > old_rows[0][0] or len(new_rows) < len(old_rows))):
+        raise RuntimeError(
+            f'TRIPOD_COMPARISON_DEGRADED: refusing historical coverage regression '
+            f'{old_rows[0][0]}/{len(old_rows)} -> {new_rows[0][0]}/{len(new_rows)}; '
+            'existing verified publication must be preserved')
+    return candidate
+
+
 def build(obs, archive, etfs, supplement=None):
     latest = obs['tripod_latest']
     session = obs['us_completed_session_date']
@@ -126,9 +158,7 @@ def build(obs, archive, etfs, supplement=None):
     series = {}
     etf_calendar = set.union(*(set(etfs[key]) for key in ETFS))
     for key in SIGNAL_SYMBOLS:
-        merged = {d: {'date': d, 'value': quote[0]} for d, quote in (supplement or {}).get(key, {}).items()}
-        merged.update((r['date'], r) for r in daily_suffix(archive['series'].get(key, [])))
-        merged.update((r['date'], r) for r in obs['series'].get(key, []))
+        merged = verified_daily_signal_rows((supplement or {}).get(key, {}), obs['series'].get(key, []))
         merged = {d: r for d, r in merged.items() if d <= session and (d in etf_calendar or is_trading_date(d))}
         series[key] = [merged[d] for d in sorted(merged)]
     replay, _ = tripod_history(series)
@@ -168,8 +198,8 @@ def build(obs, archive, etfs, supplement=None):
 
 def main():
     obs = read(DATA / 'observatory.json')
-    if OUT.exists():
-        previous = read(OUT)
+    previous = read(OUT) if OUT.exists() else None
+    if previous is not None:
         if (previous.get('schema') == 'JJOONI_TRIPOD_COMPARISON_V1' and
                 previous.get('session', '') >= obs['us_completed_session_date']):
             print('TRI-POD comparison already has the latest completed US session')
@@ -200,6 +230,7 @@ def main():
                 if not payload:
                     raise
                 print(f'TRI-POD comparison retained verified coverage after backfill error: {exc}')
+    require_full_coverage(previous, payload)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
     print(f'TRI-POD comparison {payload["rows"][0][0]} through {payload["session"]}: {len(payload["rows"])} sessions')
 
