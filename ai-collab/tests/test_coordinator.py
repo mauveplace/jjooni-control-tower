@@ -123,6 +123,42 @@ class EvergreenContractTests(unittest.TestCase):
         self.assertIn("## ROY / REVIEW", template(task(), "ROY", SHA_A))
         self.assertIn("## JJOONI / INDEPENDENT REVIEW", template(task(), "JJOONI", SHA_A))
 
+    def test_roy_first_requires_jjooni_and_never_roy_as_reviewer(self):
+        independent = task(origin="USER_TO_ROY", required_reviewers=["JJOONI"],
+                           optional_reviewers=["JJANGGU"])
+        validate_task(independent)
+        status = summarize(independent, [comment("JJOONI")], SHA_A)
+        self.assertEqual(status["missing_reviewers"], [])
+        self.assertEqual(status["state"], "AWAITING_SOURCE_VERIFICATION")
+        self.assertFalse(status["authenticated_agent_origin"])
+        self.assertFalse(status["safe_to_merge"])
+
+        for patch in (
+            {"required_reviewers": ["JJANGGU"]},
+            {"required_reviewers": ["ROY", "JJOONI"]},
+            {"required_reviewers": ["JJOONI"], "optional_reviewers": ["ROY"]},
+        ):
+            with self.subTest(patch=patch), self.assertRaises(ValueError):
+                validate_task(task(origin="USER_TO_ROY", **patch))
+
+    def test_jjooni_first_cannot_require_own_review(self):
+        for origin in (None, "USER_TO_JJOONI"):
+            data = task(required_reviewers=["JJOONI"])
+            if origin:
+                data["origin"] = origin
+            with self.assertRaisesRegex(ValueError, "explicit USER_TO_ROY"):
+                validate_task(data)
+
+    def test_bad_origin_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "origin"):
+            validate_task(task(origin="NOT_A_REAL_SOURCE"))
+
+    def test_roy_first_jjooni_claim_still_needs_external_provenance(self):
+        data = task(origin="USER_TO_ROY", required_reviewers=["JJOONI"], optional_reviewers=[])
+        status = summarize(data, [comment("JJOONI")], SHA_A)
+        self.assertEqual(status["review_claims"][0]["provenance"], "UNVERIFIED_ROLE_CLAIM")
+        self.assertFalse(status["authenticated_agent_origin"])
+
     def test_reviewer_list_can_expand_later(self):
         t = task(required_reviewers=["ROY", "JJANGGU"], optional_reviewers=[])
         self.assertEqual(summarize(t, [comment("ROY")], SHA_A)["missing_reviewers"], ["JJANGGU"])
