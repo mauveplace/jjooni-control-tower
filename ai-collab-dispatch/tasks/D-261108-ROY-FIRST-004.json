@@ -1,0 +1,41 @@
+{
+  "schema": "JJOONI_COLLAB_V3",
+  "task_id": "D-261108-ROY-FIRST-004",
+  "title": "Two-agent Claude automatic-dispatch proof and scalable review contract",
+  "state": "REQUESTED",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "trigger": "pull_request.opened",
+  "run_policy": "ONE_SHOT_NO_RETRY",
+  "review_snapshot_sha": "53e4482fc5ccabe20bdf30c1dae2d0776b14bc09",
+  "review_snapshot_note": "Historical reference is PR #302's coordinator design, not this new PR's moving head.",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "future_optional_reviewers": [
+    "JJANGGU"
+  ],
+  "owner": "JJOONI",
+  "objective": "Validate that a new Draft PR's GitHub event triggers the existing Claude Code subscription Routine WITHOUT manual Run now, and review how to make existing coordinator.py accept required_reviewers=['ROY'] while leaving future JJANGGU extension possible.",
+  "expected_comment_marker": "<!-- JJOONI-COLLAB-V3 task=D-261108-ROY-FIRST-004 actor=ROY snapshot=53e4482fc5ccabe20bdf30c1dae2d0776b14bc09 -->",
+  "instructions": [
+    "Fetch and read the triggering PR's HEAD and the task file; do not use main as the task contents.",
+    "Verify Draft status, base main, branch experiment/ai-collab-, title [AI-COLLAB] and task mode.",
+    "Check existing PR issue comments for the exact marker; if already present, do not post.",
+    "Read pinned historical PR #302 coordinator.py only for a brief design review: support one reviewer now, two later, duplicate/missing/provenance/safe gate.",
+    "Post exactly one PR Conversation comment beginning with the exact marker and heading ## ROY / TWO-AGENT AUTO-TRIGGER REVIEW. Include original trigger type, automation vs manual run evidence or UNKNOWN, PR HEAD SHA, concise design findings, safety constraints and real Claude session link if available.",
+    "Do not claim automatic trigger unless actual Claude Routine metadata proves it; do not edit code or upload logs/private data."
+  ],
+  "limits": {
+    "max_review_comments": 1,
+    "model_api_calls": 0,
+    "cloud_resources": 0,
+    "allowed_github_writes": [
+      "one issue comment on this PR"
+    ],
+    "code_edit": false,
+    "merge": false,
+    "deploy": false,
+    "broker_orders": false
+  }
+}
