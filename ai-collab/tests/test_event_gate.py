@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from coordinator import template
-from event_gate import active_task_path, decide_event
+from event_gate import active_task_path, bound_task_path, decide_event
 
 SHA_A = "a" * 40
 SHA_B = "b" * 40
@@ -163,6 +163,17 @@ class EventGateTests(unittest.TestCase):
         e = pull_event("synchronize", head=SHA_A, before=SHA_A, after=SHA_C)
         self.assertEqual(self.decide("pull_request", e)["decision"], "NEED_EVIDENCE")
         self.assertEqual(self.decide("pull_request", e, current_pr=pr(SHA_C))["decision"], "STALE")
+
+    def test_probe_substring_is_not_accepted_as_probe(self):
+        ev = comment_event()
+        ev["comment"]["body"] = "Text containing JJOONI-COLLAB-PROBE but no valid marker"
+        self.assertEqual(self.decide("issue_comment", ev)["decision"], "IGNORE")
+
+    def test_task_file_must_match_task_id(self):
+        path = "ai-collab-dispatch/tasks/D-EXAMPLE.json"
+        self.assertEqual(bound_task_path([path], task()), path)
+        with self.assertRaises(ValueError):
+            bound_task_path([path], task(task_id="D-DIFFERENT"))
 
     def test_task_path_disambiguation(self):
         paths = ["ai-collab-dispatch/tasks/TEMPLATE.json",
