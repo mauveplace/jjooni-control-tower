@@ -43,7 +43,12 @@ function viewState(d,selected='latest',now=today()){
  let notice=d.content_status==='USER_PROVIDED_NOT_REVERIFIED'
   ?'사용자 제공 기록이며 본문 수치와 해석은 재검증되지 않았습니다.'
   :'미국장 '+d.market_date_us+' 기준에 작성한 공개 기록입니다. 실시간 시세 또는 주문 신호가 아닙니다.';
- if(conflicts.length)notice+=(revisedOn?' '+revisedOn+' 사후 정정: ':' 확인 보류: ')+conflicts.join('·')+' 확정 종가 불일치/미검증. 과거 본문 수익률과 전략선은 매매 판단에 사용하지 마세요.';
+ const nowVerified=d.editorial_contract?.interpretation_status==='HISTORIC_NARRATIVE_NOT_RECALCULATED_AFTER_EOD_CORRECTION';
+ if(nowVerified){
+  const closeText=(d.editorial_contract?.close_checks||[]).filter(c=>c.status==='VERIFIED'&&Number.isFinite(c.close)&&Number.isFinite(c.change_pct))
+   .map(c=>c.symbol+' '+Number(c.close).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ('+(c.change_pct>=0?'+':'')+Number(c.change_pct).toFixed(2)+'%)').join(' · ');
+  notice=(revisedOn||'사후')+' 공식 종가 정정: '+closeText+'. 최초 발행 본문에 남은 수익률·TRI-POD 경계선은 재산출되지 않았습니다. 원문은 보관 기록이며 매매 판단에 사용하지 마세요.';
+ }else if(conflicts.length)notice+=(revisedOn?' '+revisedOn+' 사후 정정: ':' 확인 보류: ')+conflicts.join('·')+' 확정 종가 불일치/미검증. 과거 본문 수익률과 전략선은 매매 판단에 사용하지 마세요.';
  if(latest&&!isToday&&monday)notice+=' 월요일 국내 개장 전 분석은 별도 투자보드에 기록되며, 이 공개 탭은 화~토 발행본을 표시합니다.';
  return {badge,warning:!isToday||conflicts.length>0,notice,revisedOn,conflicts};
 }
@@ -53,10 +58,10 @@ function render(d){
  const display=viewState(d,document.getElementById('briefHistory')?.value||'latest');
  document.querySelector('.briefEyebrow').textContent=editorial?'DAILY MARKET LETTER · 시장·AI산업 리서치':'SONG MORNING BRIEF · 지난 시황 기록';
  let figures=document.getElementById('briefKeyFigures');if(!figures){figures=document.createElement('div');figures.id='briefKeyFigures';figures.className='briefKeyFigures';document.getElementById('briefMeta').after(figures)}
- figures.innerHTML=editorial?(d.editorial_contract.close_checks||[]).map(c=>{const usable=['VERIFIED','CROSS_CHECKED'].includes(c.status)&&Number.isFinite(c.close)&&Number.isFinite(c.change_pct);const pct=usable?esc((c.change_pct>=0?'+':'')+Number(c.change_pct).toFixed(2)+'%'):'';const note=c.status==='VERIFIED'?pct:c.status==='CROSS_CHECKED'&&usable?pct+' · 비공식 교차 확인':c.status==='CONFLICT'?'확정 종가 출처 충돌':c.status==='MISSING'?'완료된 종가 미확인':'원천 검증 필요';return `<div class="briefFigure"><span>${esc(c.symbol)} · ${esc(c.session_date)} ${c.status==='CROSS_CHECKED'?'참고 종가':'정규장 종가'}</span><b>${usable?esc(Number(c.close).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):'확인 보류'}</b><small>${note}</small></div>`}).join(''):'';
+ figures.innerHTML=editorial?(d.editorial_contract.close_checks||[]).map(c=>{const usable=['VERIFIED','CROSS_CHECKED'].includes(c.status)&&Number.isFinite(c.close)&&Number.isFinite(c.change_pct);const pct=usable?esc((c.change_pct>=0?'+':'')+Number(c.change_pct).toFixed(2)+'%'):'';const note=c.status==='VERIFIED'?pct+' · 공식 EOD 확인':c.status==='CROSS_CHECKED'&&usable?pct+' · 비공식 교차 확인':c.status==='CONFLICT'?'확정 종가 출처 충돌':c.status==='MISSING'?'완료된 종가 미확인':'원천 검증 필요';return `<div class="briefFigure"><span>${esc(c.symbol)} · ${esc(c.session_date)} ${c.status==='CROSS_CHECKED'?'참고 종가':'정규장 종가'}</span><b>${usable?esc(Number(c.close).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):'확인 보류'}</b><small>${note}</small></div>`}).join(''):'';
  document.getElementById('briefMeta').innerHTML=`<span>브리핑 날짜 <b>${esc(d.report_date_kst)}</b></span><span>미국장 기준 <b>${esc(d.market_date_us)}</b></span><span>작성 <b>${esc(time(d.generated_kst))} KST</b></span><span>게시 <b>${esc(time(d.published_kst))} KST</b></span>`;
  const badge=document.getElementById('briefBadge');badge.textContent=display.badge;badge.className=display.warning?'briefBadge warning':'briefBadge';
- const noticeElement=document.getElementById('briefNotice');noticeElement.textContent=display.notice;noticeElement.classList.toggle('conflict',display.conflicts.length>0);
+ const noticeElement=document.getElementById('briefNotice');noticeElement.textContent=display.notice;noticeElement.classList.toggle('conflict',display.conflicts.length>0||!!display.revisedOn);
  let provenance=document.getElementById('briefSourceDetails');
  if(!provenance){provenance=document.createElement('details');provenance.id='briefSourceDetails';provenance.className='briefSourceDetails';noticeElement.after(provenance)}
  const wasOpen=provenance.open;provenance.innerHTML='<summary>검증 근거·정정 이력 펼쳐보기</summary><p></p>';
