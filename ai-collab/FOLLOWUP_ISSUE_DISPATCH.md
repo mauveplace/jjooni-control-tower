@@ -7,7 +7,7 @@ The user's current Claude Routines UI shows PR opened and Issue opened, but does
 ## One-time external Claude setup
 
 1. Keep the existing `ROY AI-COLLAB Pilot Review` routine with `PR 열림` on mauveplace/jjooni-control-tower.
-2. Create another Claude Routine: name `ROY AI-COLLAB Follow-up`, repo `mauveplace/jjooni-control-tower`, trigger `이슈 열림`. Add the prompt below; do **not** replace the PR-opened Routine.
+2. Create another Claude Routine: name `ROY AI-COLLAB Follow-up`, repo `mauveplace/jjooni-control-tower`, trigger `이슈 열림`. Add the prompt below; do **not** replace the PR-opened Routine. **If the Claude UI supports event filters, restrict the issue title to `[AI-COLLAB][ROY-REQUEST]`.** If not, unrelated new issues may still wake Claude and consume its Routine quota before the prompt can ignore them; review issue frequency and quota before enabling.
 3. Only after the new Issue-opened Routine is active should JJOONI create a follow-up issue, otherwise that GitHub event cannot be replayed automatically.
 
 ## Exact issue format
