@@ -73,6 +73,23 @@ class IssueDispatchTests(unittest.TestCase):
         x=pr();x["state"]="closed"
         self.assertEqual(decide(ev(),x)["decision"],"BLOCKED")
 
+    def test_crlf_issue_is_accepted_with_strict_marker(self):
+        original=ev()["issue"]["body"]
+        converted=original.replace("\\n","\\r\\n")
+        self.assertEqual(decide(ev(body=converted),pr())["decision"],"REQUEST_ROY_REVIEW")
+
+    def test_marker_must_remain_exact_first_line_with_crlf(self):
+        original=ev()["issue"]["body"].replace(ISSUE_MARKER, " " + ISSUE_MARKER)
+        self.assertEqual(decide(ev(body=original.replace("\\n","\\r\\n")),pr())["decision"],"BLOCKED")
+
+    def test_draft_pr_does_not_dispatch(self):
+        target=pr(); target["draft"]=True
+        self.assertEqual(decide(ev(),target)["decision"],"BLOCKED")
+
+    def test_merged_pr_does_not_dispatch_even_with_stale_open_state(self):
+        target=pr(); target["merged"]=True
+        self.assertEqual(decide(ev(),target)["decision"],"BLOCKED")
+
     def test_not_collab_pr_does_not_dispatch(self):
         x=pr();x["title"]="regular PR"
         self.assertEqual(decide(ev(),x)["decision"],"BLOCKED")
