@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from coordinator import template
-from event_gate import active_task_path, bound_task_path, decide_event
+from event_gate import active_task_path, bound_task_path, bound_task_from_pr_diff, decide_event
 
 SHA_A = "a" * 40
 SHA_B = "b" * 40
@@ -189,6 +189,37 @@ class EventGateTests(unittest.TestCase):
                     ["ai-collab-dispatch/tasks/../../evil.json"]):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 active_task_path(bad)
+
+    def test_roy_first_opened_event_is_jjooni_assignment_not_roy_review(self):
+        t=task(origin="USER_TO_ROY", required_reviewers=["JJOONI"],
+               optional_reviewers=["JJANGGU"])
+        outcome=decide_event("pull_request",pull_event("opened"),pr(),t)
+        self.assertEqual(outcome["decision"],"AWAIT_JJOONI")
+        self.assertFalse(outcome["agent_authenticated"])
+        self.assertFalse(outcome["safe_to_merge"])
+
+    def test_roy_first_does_not_reactivate_roy_on_label_event(self):
+        t=task(origin="USER_TO_ROY", required_reviewers=["JJOONI"])
+        e=pull_event("labeled", label={"name":"ai-collab:roy-request"})
+        self.assertEqual(decide_event("pull_request",e,pr(),t)["decision"],"IGNORE")
+
+    def test_old_main_task_does_not_shadow_new_pr_diff_task(self):
+        t=task(task_id="D-NEW-ROY-FIRST",origin="USER_TO_ROY",
+               required_reviewers=["JJOONI"],optional_reviewers=[])
+        old="ai-collab-dispatch/tasks/D-261108-EVERGREEN-COLLAB-006.json"
+        fresh="ai-collab-dispatch/tasks/D-NEW-ROY-FIRST.json"
+        with self.assertRaises(ValueError):
+            bound_task_path([old,fresh],t)
+        rows=[{"filename":fresh,"status":"added"},
+              {"filename":"ai-collab-dispatch/probes/ROY-FIRST.md","status":"added"},
+              {"filename":old,"status":"unchanged"}]
+        self.assertEqual(bound_task_from_pr_diff(rows,t),fresh)
+        with self.assertRaises(ValueError):
+            bound_task_from_pr_diff([{"filename":old,"status":"modified"},rows[0]],t)
+        with self.assertRaises(ValueError):
+            bound_task_from_pr_diff([],t)
+        with self.assertRaises(ValueError):
+            bound_task_from_pr_diff([{"filename":fresh,"status":"removed"}],t)
 
     def test_no_implicit_merge_or_trade_for_any_event(self):
         samples = [
