@@ -1,3 +1,13 @@
+# Current task (v0.2): JJANGGU independent data-integrity review
+
+**Initial GitHub read/comment test has succeeded.** The current collaboration task is a separate one:
+- Read `COLLABORATION.md`, `tasks/D-261108-TRIPOD-DQ-002.json` and PR #302's `JJOONI / COLLAB TASK` dispatch comment.
+- Review immutable historical source snapshot `8836f699b1676bc015fe13032ee3e98198a57976`; the experimental branch now contains coordinator-only changes, so do not confuse branch HEAD with frozen evidence snapshot.
+- Independently reproduce the NDX/VIX mixed interval contamination and suspicious dates using clean sources; propose daily-only rebuild with holiday filtering and data provenance. Distinguish confirmed cases from suspected issues.
+- Generate a **short comment** using `python3 ai-collab-pilot/coordinator.py template --task ai-collab-pilot/tasks/D-261108-TRIPOD-DQ-002.json --actor JJANGGU`. Fill all fields, include actual session evidence or UNKNOWN.
+- Ensure exact task+actor+SHA comment marker does not already exist before writing one PR Conversation comment. Do not edit code, run API-billed services, change live data or submit trades.
+
+## Historical connection-test instructions (archived)
 # JJANGGU (Gemini / Antigravity Remote Agents) — Pilot PR #302 only
 
 ## First connection test (read source + ONE PR comment; NO code writes)
