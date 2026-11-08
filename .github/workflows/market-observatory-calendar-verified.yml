@@ -44,6 +44,8 @@ jobs:
           python -m pip install -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test*.py' -v
       - name: Seed and merge verified key events
+        env:
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail

@@ -69,6 +69,7 @@ jobs:
       - name: Refresh consensus, actual, all-event matching and 10Y history
         env:
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail

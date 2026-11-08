@@ -12,6 +12,7 @@ sits 1-3 months before the release month; anything else stays unresolved.
 """
 import calendar
 import json
+import os
 import re
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timedelta, timezone
@@ -21,6 +22,8 @@ API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
 # Monthly BLS releases are >=27 days apart; inside this window no newer release
 # of the same report can have moved the API's ``latest`` flag.
 RECENT_RELEASE_DAYS = 25
+# How many later releases of the same report may separate an event from ``latest``.
+MAX_RELEASE_OFFSET = 3
 # key: (official series, comparison months, display unit)
 SERIES = {
     'cpi': {'cpi_yoy': ('CUUR0000SA0', 12, '%'),
@@ -50,13 +53,26 @@ def reference_month(value):
     return tuple(map(int, match.groups())) if match else None
 
 
+# Unregistered BLS API v2 access is capped per IP per day (~25 queries). A
+# free registration key (repository secret BLS_API_KEY) raises it to 500.
+# Once the cap is hit, every further call this run would fail the same way.
+_QUOTA = {'exhausted': False}
+
+
 @lru_cache(maxsize=32)
 def _series_rows(series, year):
     from official_calendar_collectors import raw_fetch
+    if _QUOTA['exhausted']:
+        raise ValueError('BLS_API_DAILY_QUOTA_EXHAUSTED')
     url = f'{API}{series}?startyear={year-1}&endyear={year}'
-    data = json.loads(raw_fetch(url))
+    key = os.getenv('BLS_API_KEY', '').strip()
+    data = json.loads(raw_fetch(f'{url}&registrationkey={key}' if key else url))
     if data.get('status') != 'REQUEST_SUCCEEDED':
-        raise ValueError('BLS_API_REQUEST_FAILED: ' + str(data.get('message')))
+        message = str(data.get('message'))
+        if 'threshold' in message.lower():
+            _QUOTA['exhausted'] = True
+            raise ValueError('BLS_API_DAILY_QUOTA_EXHAUSTED' + ('' if key else ' (set BLS_API_KEY)'))
+        raise ValueError('BLS_API_REQUEST_FAILED: ' + message)
     results = data.get('Results', {})
     if isinstance(results, list):
         results = results[0] if results else {}
@@ -81,8 +97,30 @@ def latest_period(series, year):
     return int(row['year']), int(row['period'][1:])
 
 
-def api_reference_month(event, code, now=None):
-    """Reference month of a still-current release, read from BLS's own ``latest`` flag."""
+def _later_releases(event, release_calendar, released, now):
+    """Release times of the same report published after ``event`` and up to now."""
+    from calendar_actual_contract import release_time
+    times = []
+    for other in (release_calendar or {}).get('events') or []:
+        if other is event or other.get('title') != event.get('title') or other.get('country') != event.get('country'):
+            continue
+        try:
+            t = release_time(other)
+        except Exception:
+            t = None
+        if t and released < t <= now:
+            times.append(t)
+    return sorted(times)
+
+
+def api_reference_month(event, code, now=None, release_calendar=None):
+    """Reference month read from BLS's own ``latest`` flag.
+
+    The flag marks the most recent release. For an older release, the calendar
+    supplies how many releases of the same report followed it; the reference
+    month is that many months before ``latest``. Every link in that chain must
+    be a normal monthly spacing (20-45 days) or nothing is inferred.
+    """
     from calendar_actual_contract import release_time
     if code not in SERIES:
         return None
@@ -93,13 +131,22 @@ def api_reference_month(event, code, now=None):
     if not released:
         return None
     now = now or datetime.now(timezone.utc)
-    age = now - released
-    if age < timedelta(0) or age > timedelta(days=RECENT_RELEASE_DAYS):
+    if released > now:
+        return None
+    later = _later_releases(event, release_calendar, released, now) if release_calendar else []
+    if len(later) > MAX_RELEASE_OFFSET:
+        return None
+    chain = [released, *later]
+    if any(not timedelta(days=20) <= b - a <= timedelta(days=45) for a, b in zip(chain, chain[1:])):
+        return None
+    if now - chain[-1] > timedelta(days=RECENT_RELEASE_DAYS):
         return None
     series = next(iter(SERIES[code].values()))[0]
-    period = latest_period(series, released.year)
-    if not period:
+    latest = latest_period(series, chain[-1].year)
+    if not latest:
         return None
+    index = latest[0] * 12 + latest[1] - 1 - len(later)
+    period = (index // 12, index % 12 + 1)
     gap = (released.year * 12 + released.month) - (period[0] * 12 + period[1])
     # Monthly BLS reports always describe an earlier month (1-3 months back).
     return period if 1 <= gap <= 3 else None
@@ -118,11 +165,11 @@ def calculate(values, year, month, lag, unit):
     return f'{value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP):f}{unit}'
 
 
-def collect_api(event, code, checks, now=None):
+def collect_api(event, code, checks, now=None, release_calendar=None):
     period = reference_month(event.get('reference_period'))
     if not period and code in SERIES:
         try:
-            period = api_reference_month(event, code, now)
+            period = api_reference_month(event, code, now, release_calendar)
         except Exception as exc:
             checks.append({'adapter': 'BLS_API', 'title': event['title'],
                            'result': 'LATEST_PERIOD_LOOKUP_FAILED', 'error': str(exc)[:200]})

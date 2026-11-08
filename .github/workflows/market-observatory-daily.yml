@@ -282,6 +282,7 @@ jobs:
         env:
           BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY || 'sample' }}
           TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail
