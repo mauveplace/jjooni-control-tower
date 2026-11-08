@@ -65,6 +65,21 @@ class EventGateTests(unittest.TestCase):
     def decide(self, name, event, current_pr=None, **kwargs):
         return decide_event(name, event, current_pr or pr(), task(), **kwargs)
 
+    def test_archived_old_task_cannot_block_new_roy_first_pr(self):
+        legacy_paths=[
+            "ai-collab-dispatch/archive/D-261108-EVERGREEN-COLLAB-006.json",
+            "ai-collab-dispatch/tasks/D-261109-ROY-FIRST-PR-PROBE-009.json",
+            "ai-collab-dispatch/tasks/TEMPLATE.json",
+        ]
+        self.assertEqual(active_task_path(legacy_paths),
+                         "ai-collab-dispatch/tasks/D-261109-ROY-FIRST-PR-PROBE-009.json")
+        duplicate_active=[
+            "ai-collab-dispatch/tasks/D-261108-EVERGREEN-COLLAB-006.json",
+            "ai-collab-dispatch/tasks/D-261109-ROY-FIRST-PR-PROBE-009.json",
+        ]
+        with self.assertRaisesRegex(ValueError, "exactly one"):
+            active_task_path(duplicate_active)
+
     def test_roy_first_new_pr_routes_to_jjooni_not_roy(self):
         roy_first=task(origin="USER_TO_ROY",required_reviewers=["JJOONI"],optional_reviewers=[])
         out=decide_event("pull_request",pull_event("opened"),pr(),roy_first)
