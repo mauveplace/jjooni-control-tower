@@ -159,9 +159,15 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
 
     if event_name == "pull_request":
         if action == "opened":
+            if "ROY" not in task["required_reviewers"]:
+                return output("IGNORE", event_key=event_key, pr=number, head=head,
+                              reason="ROY is not a required reviewer for this task")
             return output("WAIT_ROY", event_key=event_key, pr=number, head=head,
                           reason="First PR review belongs to ROY")
         if action == "labeled":
+            if "ROY" not in task["required_reviewers"]:
+                return output("IGNORE", event_key=event_key, pr=number, head=head,
+                              reason="ROY is not a required reviewer for this task")
             return output("REQUEST_ROY", event_key=event_key, pr=number, head=head,
                           reason="Explicit owner-origin request label")
         if tree_changed is None:
