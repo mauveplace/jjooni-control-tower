@@ -143,6 +143,12 @@ class EventGateTests(unittest.TestCase):
         ev["action"] = "edited"
         self.assertEqual(self.decide("issue_comment", ev)["decision"], "IGNORE")
 
+    def test_roy_is_not_dispatched_when_only_jjanggu_required(self):
+        jj = task(required_reviewers=["JJANGGU"], optional_reviewers=["ROY"])
+        self.assertEqual(decide_event("pull_request", pull_event("opened"), pr(), jj)["decision"], "IGNORE")
+        label = pull_event("labeled", label={"name": "ai-collab:roy-request"})
+        self.assertEqual(decide_event("pull_request", label, pr(), jj)["decision"], "IGNORE")
+
     def test_roy_label_only_from_owner(self):
         e = pull_event("labeled", label={"name": "ai-collab:roy-request"})
         self.assertEqual(self.decide("pull_request", e)["decision"], "REQUEST_ROY")
