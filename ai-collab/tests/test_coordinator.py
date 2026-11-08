@@ -88,10 +88,30 @@ class EvergreenContractTests(unittest.TestCase):
             with self.subTest(patch=patch), self.assertRaises(ValueError):
                 validate_task(task(**patch))
 
-    def test_branch_edit_requires_explicit_owner_evidence(self):
+    def test_untrusted_pr_task_never_authorizes_code_edits(self):
         with self.assertRaises(ValueError):
             validate_task(task(mode="PR_BRANCH_EDIT_APPROVED"))
-        validate_task(task(mode="PR_BRANCH_EDIT_APPROVED", owner_approval_evidence="https://github.com/mauveplace/jjooni-control-tower/issues/1"))
+        with self.assertRaises(ValueError):
+            validate_task(task(mode="PR_BRANCH_EDIT_APPROVED", owner_approval_evidence="https://github.com/mauveplace/jjooni-control-tower/issues/1"))
+
+    def test_outside_author_cannot_suppress_roy_review(self):
+        spoof = comment("ROY")
+        spoof["user"] = {"login": "random-outsider"}
+        status = summarize(task(), [spoof], SHA_A)
+        self.assertEqual(status["missing_reviewers"], ["ROY"])
+        self.assertEqual(len(status["review_claims"]), 0)
+        self.assertEqual(len(status["ignored_untrusted_claims"]), 1)
+
+    def test_placeholder_and_unhashable_reviewers_rejected(self):
+        for patch in ({"task_id": "REPLACE-WITH-UNIQUE-TASK-ID"},
+                      {"required_reviewers": [{}]},
+                      {"optional_reviewers": [{}]}):
+            with self.subTest(patch=patch), self.assertRaises(ValueError):
+                validate_task(task(**patch))
+
+    def test_marker_header_matches_roy_pr_contract(self):
+        self.assertIn("## ROY / REVIEW", template(task(), "ROY", SHA_A))
+        self.assertIn("## JJOONI / INDEPENDENT REVIEW", template(task(), "JJOONI", SHA_A))
 
     def test_reviewer_list_can_expand_later(self):
         t = task(required_reviewers=["ROY", "JJANGGU"], optional_reviewers=[])
