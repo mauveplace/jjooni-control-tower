@@ -13,7 +13,7 @@ from pathlib import Path
 REPO = "mauveplace/jjooni-control-tower"
 ACTORS = frozenset(("ROY", "JJANGGU", "JJOONI"))
 REQUIRED_ACTORS = frozenset(("ROY", "JJANGGU"))
-ALLOWED_MODES = frozenset(("SYSTEM_REVIEW_ONLY", "PR_BRANCH_EDIT_APPROVED"))
+ALLOWED_MODES = frozenset(("SYSTEM_REVIEW_ONLY",))
 TASK_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 SHA_RE = re.compile(r"^[a-f0-9]{40}$")
 MARKER_RE = re.compile(
@@ -27,8 +27,8 @@ MAX_COMMENT_SIZE = 16000
 def validate_task(task):
     if not isinstance(task, dict) or task.get("schema") != "JJOONI_COLLAB_V4":
         raise ValueError("Expected JJOONI_COLLAB_V4 task object")
-    if not TASK_RE.fullmatch(str(task.get("task_id", ""))):
-        raise ValueError("Invalid task_id")
+    if not TASK_RE.fullmatch(str(task.get("task_id", ""))) or str(task.get("task_id", "")).startswith("REPLACE-"):
+        raise ValueError("Invalid or placeholder task_id")
     if task.get("repository") != REPO or task.get("base_branch") != "main":
         raise ValueError("Unexpected repository or target branch")
     if not isinstance(task.get("objective"), str) or not task["objective"].strip():
@@ -39,9 +39,9 @@ def validate_task(task):
     if mode not in ALLOWED_MODES:
         raise ValueError("Unsupported task mode")
     required, optional = task.get("required_reviewers"), task.get("optional_reviewers", [])
-    if not isinstance(required, list) or not required or len(required) != len(set(map(str, required))):
+    if not isinstance(required, list) or not required or not all(isinstance(x, str) for x in required) or len(required) != len(set(required)):
         raise ValueError("Required reviewer list must be unique and non-empty")
-    if not isinstance(optional, list) or len(optional) != len(set(map(str, optional))):
+    if not isinstance(optional, list) or not all(isinstance(x, str) for x in optional) or len(optional) != len(set(optional)):
         raise ValueError("Optional reviewers must be a unique list")
     if any(role not in REQUIRED_ACTORS for role in required + optional):
         raise ValueError("Unsupported role")
@@ -54,10 +54,8 @@ def validate_task(task):
     source = task.get("source_sha")
     if source is not None and (not isinstance(source, str) or not SHA_RE.fullmatch(source)):
         raise ValueError("source_sha must be null or 40-char SHA")
-    if mode == "PR_BRANCH_EDIT_APPROVED":
-        evidence = task.get("owner_approval_evidence")
-        if not isinstance(evidence, str) or not evidence.startswith("https://github.com/"):
-            raise ValueError("Explicit owner approval evidence required for branch edits")
+    # A PR-authored task is untrusted and can never authorize agent code edits.
+    # Real owner-authenticated branch-edit approvals require a separate verified workflow.
     if task.get("release_gate") != "USER_APPROVAL_REQUIRED":
         raise ValueError("Human approval gate is mandatory")
     return task
@@ -97,7 +95,10 @@ def summarize(task, comments, head_sha):
         and parsed["task_id"] == task["task_id"] and parsed["head_sha"] == head_sha
     ]
     required = task["required_reviewers"]
-    counts = Counter(x["actor_claim"] for x in relevant)
+    owner_login = REPO.split("/", 1)[0]
+    trusted = [x for x in relevant if x["github_user"] == owner_login]
+    untrusted = [x for x in relevant if x["github_user"] != owner_login]
+    counts = Counter(x["actor_claim"] for x in trusted)
     missing = [actor for actor in required if not counts[actor]]
     duplicates = {k: v for k, v in counts.items() if v > 1}
     if duplicates:
@@ -110,7 +111,8 @@ def summarize(task, comments, head_sha):
         "task_id": task["task_id"], "pr_head_sha": head_sha,
         "required_reviewers": required, "missing_reviewers": missing,
         "duplicate_claims": duplicates, "state": state,
-        "review_claims": relevant, "authenticated_agent_origin": False,
+        "review_claims": trusted, "ignored_untrusted_claims": untrusted,
+        "authenticated_agent_origin": False,
         "safe_to_merge": False, "safe_to_deploy": False,
         "safe_to_trade": False,
         "provenance_note": "Check actual Claude/Work session events separately",
@@ -125,7 +127,7 @@ def template(task, actor, head_sha):
     return (
         f"<!-- JJOONI-COLLAB-V4 task={task['task_id']} actor={actor} "
         f"stage={stage} head={head_sha} -->\n"
-        f"## {actor} / INDEPENDENT REVIEW\n\n"
+        f"## {actor} / {'INDEPENDENT REVIEW' if actor == 'JJOONI' else 'REVIEW'}\n\n"
         "Verdict: [PASS / NEEDS_CHANGES / BLOCKED]\n"
         "Evidence: [reproducible source, tests or UNKNOWN]\n"
         "Risks: [impact and unresolved uncertainty]\n"
