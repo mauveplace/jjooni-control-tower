@@ -102,6 +102,9 @@ class EditorialAcceptanceTests(unittest.TestCase):
             'Plaud 녹취', 'Google Drive의 폴더', '토스증권의 계좌',
             'Toss 증권 계좌', '키움증권 계좌 잔고', 'decision-gate',
             'https://docs.google.com/spreadsheets/u/0/d/SECRET_PLACEHOLDER',
+            '구글 드라이브 폴더', 'decision gate', '카카오페이증권 계좌',
+            '대신증권 계좌', 'Toss Securities account', 'KB증권을 통한 계좌',
+            'https://drive.google.com/drive/folders/EXAMPLE',
         ]
         for value in leaking:
             for field in ('title', 'verification_note', 'body_markdown'):
@@ -123,5 +126,11 @@ class EditorialAcceptanceTests(unittest.TestCase):
                       verification_note='NDX 정규장 종가 독립 검증',
                       body_markdown='S&P500과 나스닥100, 주요 증권사 전망, FedWatch, 기업 IR, 글로벌 AI CAPEX')
         validate_public_content(normal)
+
+        # Broker analyst opinions and generic English text are not personal accounts.
+        for safe_text in ('한국투자증권 보유 의견', 'NH투자증권 평가 상향',
+                          '미래에셋증권 실현 가능성', 'CT live demo'):
+            with self.subTest(safe_text=safe_text):
+                validate_public_content(dict(normal, body_markdown=safe_text))
 
 if __name__=='__main__':unittest.main()
