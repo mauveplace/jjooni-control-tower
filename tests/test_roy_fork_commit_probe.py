@@ -28,6 +28,16 @@ class ProbeContract(unittest.TestCase):
         self.assertNotIn("tools/publish_observatory_data.py", self.src)
         self.assertNotIn("market-observatory/data/", self.src)
 
+    def test_compare_head_from_documented_response(self):
+        self.assertIn(".commits[-1].sha", self.src)
+        self.assertNotIn(".head_commit.sha", self.src)
+        self.assertIn(".ahead_by", self.src)
+        self.assertIn(".total_commits", self.src)
+
+    def test_probe_does_not_opt_into_ai_dispatch(self):
+        self.assertIn("[ROY-PROBE]", self.src)
+        self.assertNotIn("[AI-COLLAB][PROBE]", self.src)
+
     def test_no_user_impersonation(self):
         self.assertIn("354357400", self.src)
         self.assertIn("no owner-token fallback", self.src)

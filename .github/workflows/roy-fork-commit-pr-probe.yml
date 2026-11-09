@@ -139,14 +139,23 @@ jobs:
           [[ "$(jq -r '.files[0].status' <<< "$compare")" == added ]] || {
             echo '::error::Unapproved files in fork branch'; exit 1
           }
-          sha="$(jq -r '.head_commit.sha' <<< "$compare")"
+          # GitHub Compare API has commits[], not head_commit.
+          [[ "$(jq -r '.ahead_by' <<< "$compare")" == 1 ]] &&
+          [[ "$(jq -r '.total_commits' <<< "$compare")" == 1 ]] || {
+            echo '::error::Expected exactly one fork-only probe commit'; exit 1
+          }
+          sha="$(jq -r '.commits[-1].sha // empty' <<< "$compare")"
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]] &&
+          [[ "$sha" == "$(jq -r '.object.sha' <<< "$ref")" ]] || {
+            echo '::error::Fork branch SHA changed during preflight'; exit 1
+          }
           head="$(api "$fork_api/commits/$sha")"
           [[ "$(jq -r '.committer.id' <<< "$head")" == 354357400 ]] || {
             echo '::error::Fork branch head is not bot-committed'; exit 1
           }
           pr_body='Authentication test only. Bot fork commit, no production changes. DO NOT MERGE.'
           payload="$(jq -nc \
-            --arg title '[AI-COLLAB][PROBE] ROY fork-authored PR - DO NOT MERGE' \
+            --arg title '[ROY-PROBE] fork-authored PR - DO NOT MERGE' \
             --arg body "$pr_body" \
             --arg head 'mauvenation-crypto:roy/auth-probe-20261109' \
             --arg base 'main' \
