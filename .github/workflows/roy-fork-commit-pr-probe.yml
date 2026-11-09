@@ -29,8 +29,8 @@ jobs:
       - name: Verify bot and run selected diagnostic only
         shell: bash
         env:
-          ROY_FORK_TOKEN: ${ secrets.ROY_FORK_TOKEN }
-          PROBE_OPERATION: ${ inputs.operation }
+          ROY_FORK_TOKEN: ${{ secrets.ROY_FORK_TOKEN }}
+          PROBE_OPERATION: ${{ inputs.operation }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_REF" == 'refs/heads/main' ]] || {
