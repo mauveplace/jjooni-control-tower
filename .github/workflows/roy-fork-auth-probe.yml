@@ -1,0 +1,64 @@
+name: ROY Fork Authentication Probe
+
+# Explicit manual-only credential check. No PR, schedule or push triggers.
+on:
+  workflow_dispatch:
+    inputs:
+      test_fork_branch_write:
+        description: Create a harmless roy/auth-probe-20261109 branch in the fork after identity checks
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify-roy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Validate ROY GitHub identity and fork scope
+        shell: bash
+        env:
+          ROY_FORK_TOKEN: ${{ secrets.ROY_FORK_TOKEN }}
+          TEST_WRITE: ${{ inputs.test_fork_branch_write }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ROY_FORK_TOKEN:-}" ]]; then
+            echo '::error::ROY_FORK_TOKEN secret is not configured'
+            exit 1
+          fi
+          api() {
+            curl --fail --silent --show-error --retry 2 \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              -H "Authorization: Bearer ${ROY_FORK_TOKEN}" "$@"
+          }
+          login="$(api https://api.github.com/user | jq -r .login)"
+          if [[ "$login" != 'mauvenation-crypto' ]]; then
+            echo '::error::Token is not authenticated as mauvenation-crypto'
+            exit 1
+          fi
+          fork="$(api https://api.github.com/repos/mauvenation-crypto/roy-bot-jjooni)"
+          if [[ "$(jq -r .fork <<< "$fork")" != true ]] ||
+             [[ "$(jq -r .parent.full_name <<< "$fork")" != mauveplace/jjooni-control-tower ]] ||
+             [[ "$(jq -r .permissions.push <<< "$fork")" != true ]]; then
+            echo '::error::Fork relationship or fork write permission is invalid'
+            exit 1
+          fi
+          upstream="$(api https://api.github.com/repos/mauveplace/jjooni-control-tower)"
+          if [[ "$(jq -r .permissions.push <<< "$upstream")" == true ]]; then
+            echo '::error::ROY token unexpectedly has upstream write access'
+            exit 1
+          fi
+          echo 'IDENTITY_SCOPE=PASS: bot login, fork write, upstream non-write'
+
+          if [[ "$TEST_WRITE" == true ]]; then
+            fork_api=https://api.github.com/repos/mauvenation-crypto/roy-bot-jjooni
+            sha="$(api "$fork_api/git/ref/heads/main" | jq -r .object.sha)"
+            [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo '::error::Invalid base SHA'; exit 1; }
+            payload="$(jq -nc --arg ref 'refs/heads/roy/auth-probe-20261109' --arg sha "$sha" '{ref:$ref,sha:$sha}')"
+            api -X POST -d "$payload" "$fork_api/git/refs" >/dev/null
+            echo 'FORK_BRANCH_CREATE=PASS: created roy/auth-probe-20261109; upstream unchanged'
+          fi
