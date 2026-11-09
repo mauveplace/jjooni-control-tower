@@ -90,9 +90,9 @@ def read(path):
 # retain their existing append-only correction ledger. This is NOT full DLP.
 PUBLIC_PRIVACY_START = '2026-11-10'
 PUBLIC_PRIVATE_MARKERS = re.compile(
-    r'(?:\\bAI_BOARD\\b|\\bMAIOS\\b|\\bSONG_DB_[A-Z0-9_]+\\b|'
-    r'\\bdecision_gate\\b|\\bPB[ -]?View\\b|\\bCT[ ]+(?:LIVE|FRESH|STALE)\\b|'
-    r'docs\\.google\\.com/spreadsheets/d/|'
+    r'(?:\bAI_BOARD\b|\bMAIOS\b|\bSONG_DB_[A-Z0-9_]+\b|'
+    r'\bdecision_gate\b|\bPB[ -]?View\b|\bCT[ ]+(?:LIVE|FRESH|STALE)\b|'
+    r'docs\.google\.com/spreadsheets/d/|'
     r'(?:Google[ ]+Drive|Plaud)[ ]*(?:폴더|문서|시트|내부|원본|DB)|'
     r'(?:KB증권|토스증권|Toss)[ ]*(?:계좌|잔고|보유|평가|실현))',
     flags=re.IGNORECASE,
