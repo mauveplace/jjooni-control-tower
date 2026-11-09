@@ -153,3 +153,18 @@
 ### 4. 인수·검증
 - 첫 구현은 사용자 승인 전 배포·병합하지 않는 PR에서 문서 및 회귀 테스트를 검증하고, ROY의 독립 검토를 요청한다.
 - 향후 실제 미국장 완료 세션에 대한 `Daily Pulse → Daily Glance` 자동 갱신은 새 데이터 생성시각·미국장 날짜·공개 Pages 화면으로 검증한다. 시험 데이터 또는 단순 CI PASS만으로 다음 거래일 자동 갱신 성공을 주장하지 않는다.
+
+
+## 2026-11-10 반복 장애 보완: 핵심 지수 '참고 완료 일봉'과 '공식 확정 종가' 분리
+
+이번 장애에서 Observatory/Daily Glance는 11/09 NDX 27,907.63(+3.40%)를 표시했지만, 공개 모닝브리프는 Nasdaq 공식 동적 History·beta·Yahoo의 상이한 스냅샷 때문에 NDX/SOX 전체를 공란으로 게시했다. 이는 동일 세션 데이터가 없는 것이 아니라 **독립 공식 종가 증명(strict close gate)** 과 **일반 시장 참고 수치 표시(display layer)** 를 혼동한 보고서 작성 실패다. Nasdaq 웹페이지의 DATA AS OF와 장중/동적 값은 정규장 고정 최종 EOD를 의미하지 않는다.
+
+향후 작성자는 다음을 적용한다.
+
+1. **출발점:** 먼저 해당 미국 완료 세션의 `market-observatory/data/observatory.json`, `daily-market-pulse.json`, `daily-glance.json`을 함께 확인한다. 세션·값·생성시각·consistency를 맞춘 뒤 표/카드/본문에서 같은 원천을 사용한다. 카드의 OK는 원천 간 SSOT 합치만 의미하며 공식 EOD 독립 인증과 별개다.
+2. **두 개의 사실 레이어:** `editorial_contract.close_checks`의 `VERIFIED/CROSS_CHECKED/CONFLICT/MISSING` 엄격 게이트는 기존 그대로 유지한다. 단, `CONFLICT/MISSING`이라도 **동일 완료 미국 세션, 정규장 이후 확인시각, 숫자가 일치하는 제공자 화면 2개 이상**을 실제 확인했다면 `editorial_contract.reference_quotes`로 별도 기록한다. `status=PROVIDER_REFERENCE_ONLY`, `official_eod_verified=false`, `trade_signal_eligible=false`, 제공자별 URL·세션·마감 이후 quote_time_et·확인한 가격, 전일종가·산출 등락률, 한계(공통 원천 가능성·공식 불일치)를 필수로 남긴다. 참고 일봉은 공식 확정/검증 실패를 덮지 않는다.
+3. **보고서에서 공백 최소화:** 위 조건을 충족한 NDX/SOX 등 핵심지수는 ① 첫머리, ② 숫자 표, 핵심 이슈, 화면 상단에 **'참고 완료 일봉(공식 EOD 미검증)'** 이라고 눈에 띄게 표기한다. 1W/1M/3M, MA250/VIX10/DD는 Observatory의 동일 세션을 확인한 범위만 참고로 병기한다. 출처가 검증되지 않은 기간이나 세션 불일치·숫자 충돌을 임의로 보간하지 않는다. 제공자 참고값을 매매 신호로 사용하는 행위는 금지한다.
+4. **재검증·사후 수정:** 처음에는 참고값마저 부족해도 검증 가능 범위의 8섹션 보고서를 게시한다. 다른 제공자 완료 일봉이 들어오면 **같은 날짜 발행본을 원본 발행시각 보존·revisions에 최초 공란/사유 및 수정시각 기록**하여 latest/날짜별/index를 원자적으로 정정한다. 검증 후 수치가 변하면 다시 근거와 차이를 남긴다. 기록 없이 예전 수치를 교체하지 않는다.
+5. **방지 테스트:** validator에서 세션·post-close 근거·수익률 산술·서로 다른 호스트의 일치값을 확인하고 UI 회귀 테스트에서 공식 게이트 유지, 세션 불일치, 매매 신호 불허, 참고값 없는 CONFLICT 공란을 검증한다. 엄격 공식 EOD 검증은 별도로 유지한다.
+
+2026-11-10 오전의 NDX 27,907.63(+3.40%), SOX 10,033.93(+6.85%)는 Yahoo와 YCharts의 동일 날짜 완료 일봉이 일치해 **참고값으로 보완**했다. 두 제공자가 동일 기초 피드를 사용할 수 있으므로 독립적인 Nasdaq 공식 종가 확정이라고 주장하지 않는다. 원래 close_checks의 CONFLICT와 거래신호 보류는 계속 유효하다.
