@@ -1,6 +1,6 @@
-# JJOONI-first, ROY-on-demand operating policy (V5 proposal)
+# JJOONI-first, ROY-on-demand operating policy (V5 active policy)
 
-**Status: PROPOSED (not effective until main merge with owner approval).**
+**Status: ACTIVE — user-approved PR #338 merged into `main` on 2026-11-09 (commit `ad095142d95ca82c5607392e3c71ce6edf96694e`).** The policy applies to collaboration routing and documentation; Claude and Work external event subscriptions have not been changed by this merge.
 **Goal:** complete routine coding, debugging, testing, incident triage and documentation in JJOONI/ChatGPT Work without spending scarce Claude/ROY runs. ROY is an independent challenge resource, not the default implementation engine.
 
 ## Responsibilities and execution
