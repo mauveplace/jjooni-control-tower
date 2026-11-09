@@ -75,9 +75,9 @@ class PublicationPipelineTest(unittest.TestCase):
             (data / 'observatory.json').write_text(json.dumps(obs), encoding='utf-8')
             (data / 'morning-brief/latest.json').write_text(
                 json.dumps(brief(26989.99)), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \\
-                    patch.object(pub, 'materialize_market_dependents'), \\
-                    patch.object(pub, 'materialize', return_value=[]), \\
+            with patch.object(pub, 'ROOT', root), \
+                    patch.object(pub, 'materialize_market_dependents'), \
+                    patch.object(pub, 'materialize', return_value=[]), \
                     patch.object(pub, 'materialize_health'):
                 paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
             card_path = pub.DATA + 'daily-glance.json'
@@ -97,9 +97,9 @@ class PublicationPipelineTest(unittest.TestCase):
             data.mkdir(parents=True)
             (data / 'observatory.json').write_text(
                 json.dumps(observatory(tripod_latest={'ok': False})), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \\
-                    patch.object(pub, 'materialize_market_dependents'), \\
-                    patch.object(pub, 'materialize', return_value=[]), \\
+            with patch.object(pub, 'ROOT', root), \
+                    patch.object(pub, 'materialize_market_dependents'), \
+                    patch.object(pub, 'materialize', return_value=[]), \
                     patch.object(pub, 'materialize_health'):
                 paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
             self.assertNotIn(pub.DATA + 'daily-glance.json', paths)
