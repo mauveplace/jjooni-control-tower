@@ -43,7 +43,7 @@ investment-decisions/
 | 필드 | 필수 | 설명 |
 |---|---|---|
 | `decision_id` | ✅ | 평가 대상 판단 (원장에 존재해야 함) |
-| `horizon` | ✅ | 해당 판단의 `review_at`에 있는 값만 허용. 같은 판단·같은 시점의 평가는 1건만 |
+| `horizon` | ✅ | 해당 판단의 `review_at`에 있는 값만 허용. 같은 판단·같은 시점·같은 `outcome_basis` 평가는 1건만(실제와 가상은 각각 1건씩 가능) |
 | `asof_kst` | ✅ | 평가 시각. 판단 시각 이후이고, `T+N`이면 `matured_session_date` 장 마감(미국 16:00 ET, KRX 15:30 KST) 이후여야 함 |
 | `verdict` | ✅ | `CORRECT` / `INCORRECT` / `MIXED` / `NOT_EVALUABLE` |
 | `executed` | ✅ | 실제 집행 여부(boolean) |
@@ -51,7 +51,8 @@ investment-decisions/
 | `execution_evidence` | `ACTUAL`이면 ✅ | `PRIVATE_REF:<불투명 ID>` 형식만 허용. 실제 체결 내용은 비공개 원장에만 두고 여기엔 참조 ID만 남김 |
 | `market` | `T+N`이면 ✅ | `US` / `KRX` |
 | `matured_session_date` | `T+N`이면 ✅ | N번째 정규장 날짜(해당 시장 현지 날짜). 주말이거나, 판단 이후 N번째 평일보다 이르면 실패 |
-| `calendar_verified` | `T+N`이면 ✅ | 휴장일까지 반영해 날짜를 확인했으면 `true`. 검증기는 평일 기준 하한만 확인함 |
+| `calendar_basis` | `T+N`이면 ✅ | 정확한 N번째 세션을 어떻게 확정했는지. `AUTO_NYSE_RULES`(US 전용: 검증기가 NYSE 규칙 휴장일로 직접 재계산해 일치 여부 확인) / `DECLARED_WITH_SOURCE`(작성자 **선언**: `calendar_evidence`에 출처·확인자·건너뛴 휴장일을 적고, 검증기가 그 휴장일로 재계산해 일치 확인) / `UNVERIFIED`(평일 하한만 확인, **잠정**) |
+| `calendar_evidence` | `DECLARED_WITH_SOURCE`면 ✅ | `{source, checked_by, holidays_skipped:[날짜]}`. 규칙에 없는 임시 휴장은 `extra_closures:[날짜]` + `source`로 추가 |
 | `note` | ✅ | 평가 요약 |
 | `observed` / `counterfactual` / `lesson` / `reviewer` | | 관측 수치 / 반대 선택 시 결과 / 개선점 / 평가자 |
 
@@ -59,7 +60,8 @@ investment-decisions/
 
 1. **판단 당시 얻을 수 있던 정보만으로** 의사결정의 질을 평가합니다. 결과론으로 채점하지 않습니다.
    - `T+N` = 판단 시각 이후, 판단 대상 시장(미국 지수 판단이면 미국, 국내 판단이면 KRX)의 **N번째 완료된 정규장 거래일 종가** 기준입니다. 휴장일은 세지 않습니다.
-2. `ACTUAL`과 `COUNTERFACTUAL`은 **별도로 집계**하고 절대 합산하지 않습니다. `calendar_verified=false`인 평가는 성적표에서 "잠정"으로만 표시하고 확정 점수에서 제외합니다.
+2. `ACTUAL`과 `COUNTERFACTUAL`은 **별도로 집계**하고 절대 합산하지 않습니다. `calendar_basis=UNVERIFIED`인 평가는 "잠정"으로만 집계되고 확정 점수에서 제외됩니다(`python tools/decision_ledger.py --scorecard`).
+   - **어느 판단을 참조하나:** 형님이 승인·집행하면 원래 판단을 고치지 않고 `supersedes`로 연결된 새 판단(`owner_decision=APPROVED`, `execution=EXECUTED`, 같은 `review_at`)을 추가합니다. `ACTUAL` 평가는 이 **집행된 새 판단**을 참조하고, `COUNTERFACTUAL` 평가는 원래 판단을 참조합니다.
 3. 판단을 바꿀 때는 기존 줄을 고치지 않고 `supersedes`가 붙은 새 줄을 추가합니다. CI가 base 대비 기존 줄의 수정·삭제·파일 삭제를 차단합니다.
 4. 빈 원장은 PASS가 아닙니다. `daily-decisions.jsonl`이 하나도 없거나 판단이 0건이면 실패합니다.
 5. 이 원장은 어떤 주문·배포·규칙 변경 권한도 부여하지 않습니다. 매매는 형님만 결정합니다.
@@ -69,5 +71,6 @@ investment-decisions/
 ```bash
 python tools/decision_ledger.py                      # 원장 전체 검증
 python tools/decision_ledger.py --base origin/main   # + 기존 기록 수정·삭제 차단
+python tools/decision_ledger.py --scorecard          # 실제/가상 × 확정/잠정 집계
 python -m unittest tests/test_decision_ledger.py -v
 ```

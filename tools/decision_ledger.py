@@ -55,10 +55,16 @@ FIELD_META_REQUIRED = ("source", "observed_at_kst")
 
 REVIEW_REQUIRED = ("decision_id", "horizon", "asof_kst", "verdict", "executed", "outcome_basis", "note")
 OUTCOME_BASIS = {"ACTUAL", "COUNTERFACTUAL"}
-TN_REVIEW_REQUIRED = ("market", "matured_session_date", "calendar_verified")
+TN_REVIEW_REQUIRED = ("market", "matured_session_date", "calendar_basis")
+# How the exact Nth session was established. Only the first two count toward confirmed scores.
+#   AUTO_NYSE_RULES       US only: validator recomputes the Nth NYSE session from rule-based holidays.
+#   DECLARED_WITH_SOURCE  author declares the holidays skipped, with source + checker; validator recomputes.
+#   UNVERIFIED            weekday lower bound only; PROVISIONAL, excluded from confirmed scorecards.
+CALENDAR_BASIS = {"AUTO_NYSE_RULES", "DECLARED_WITH_SOURCE", "UNVERIFIED"}
+CONFIRMED_CALENDAR = {"AUTO_NYSE_RULES", "DECLARED_WITH_SOURCE"}
 REVIEW_VERDICT = {"CORRECT", "INCORRECT", "MIXED", "NOT_EVALUABLE"}
 REVIEW_ALLOWED = set(REVIEW_REQUIRED) | set(TN_REVIEW_REQUIRED) | {
-    "observed", "counterfactual", "lesson", "reviewer", "sources", "execution_evidence"}
+    "observed", "counterfactual", "lesson", "reviewer", "sources", "execution_evidence", "calendar_evidence"}
 
 # ---- public-ledger privacy guard -------------------------------------------------
 FORBIDDEN_KEYS = {
@@ -129,22 +135,86 @@ def _provenance_errors(meta: dict, decision_kst, label: str) -> list[str]:
     return errs
 
 
+def _date(s) -> date | None:
+    if not isinstance(s, str) or not DATE.match(s):
+        return None
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def _easter(y: int) -> date:
+    a, b, c = y % 19, y // 100, y % 100
+    d, e = b // 4, b % 4
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = c // 4, c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month = (h + l - 7 * m + 114) // 31
+    return date(y, month, (h + l - 7 * m + 114) % 31 + 1)
+
+
+def _nth_weekday(y: int, month: int, weekday: int, n: int) -> date:
+    d = date(y, month, 1)
+    d += timedelta(days=(weekday - d.weekday()) % 7)
+    return d + timedelta(weeks=n - 1)
+
+
+def _last_weekday(y: int, month: int, weekday: int) -> date:
+    d = date(y + (month == 12), month % 12 + 1, 1) - timedelta(days=1)
+    return d - timedelta(days=(d.weekday() - weekday) % 7)
+
+
+def nyse_holidays(y: int) -> set[date]:
+    """Rule-based NYSE full-day closures. Unscheduled closures (e.g. national mourning) are not
+    predictable and must be declared via calendar_evidence.extra_closures."""
+    def observed(d: date) -> date | None:
+        if d.weekday() == 5:
+            return d - timedelta(days=1)
+        if d.weekday() == 6:
+            return d + timedelta(days=1)
+        return d
+    out = {
+        _nth_weekday(y, 1, 0, 3),            # MLK Day
+        _nth_weekday(y, 2, 0, 3),            # Presidents Day
+        _easter(y) - timedelta(days=2),      # Good Friday
+        _last_weekday(y, 5, 0),              # Memorial Day
+        observed(date(y, 7, 4)),             # Independence Day
+        _nth_weekday(y, 9, 0, 1),            # Labor Day
+        _nth_weekday(y, 11, 3, 4),           # Thanksgiving
+        observed(date(y, 12, 25)),           # Christmas
+    }
+    ny = date(y, 1, 1)
+    if ny.weekday() != 5:                    # NYSE does not close Fri Dec 31 for a Saturday New Year
+        out.add(observed(ny))
+    if y >= 2022:
+        out.add(observed(date(y, 6, 19)))    # Juneteenth
+    return out
+
+
+def nth_session(market: str, decision_kst: datetime, n: int, skip: set[date]) -> date:
+    """Nth regular session (weekday, not in `skip`) whose close is after the decision time."""
+    d = decision_kst.astimezone(MARKET_CLOSE[market][0]).date()
+    count = 0
+    while True:
+        if d.weekday() < 5 and d not in skip and session_close_kst(market, d) > decision_kst:
+            count += 1
+            if count == n:
+                return d
+        d += timedelta(days=1)
+
+
 def session_close_kst(market: str, d: date) -> datetime:
     tz, close = MARKET_CLOSE[market]
     return datetime.combine(d, close, tzinfo=tz).astimezone(KST)
 
 
 def nth_weekday_session(market: str, decision_kst: datetime, n: int) -> date:
-    """Earliest possible date of the Nth regular session closing after the decision (weekdays only).
-    Holidays can only push the true T+N later, so this is a necessary (not sufficient) bound."""
-    d = decision_kst.astimezone(MARKET_CLOSE[market][0]).date()
-    count = 0
-    while True:
-        if d.weekday() < 5 and session_close_kst(market, d) > decision_kst:
-            count += 1
-            if count == n:
-                return d
-        d += timedelta(days=1)
+    """Weekday-only lower bound for the Nth session (holidays can only push the true date later)."""
+    return nth_session(market, decision_kst, n, set())
 
 
 def validate_decision(rec: dict, where: str) -> list[str]:
@@ -221,10 +291,32 @@ def validate_review(rec: dict, where: str) -> list[str]:
         errs += [f"{where}: T+N review missing '{k}'" for k in TN_REVIEW_REQUIRED if k not in rec]
         if "market" in rec and rec["market"] not in MARKET_CLOSE:
             errs.append(f"{where}: market must be one of {sorted(MARKET_CLOSE)}")
-        if "matured_session_date" in rec and not DATE.match(str(rec["matured_session_date"])):
-            errs.append(f"{where}: matured_session_date must be YYYY-MM-DD")
-        if "calendar_verified" in rec and not isinstance(rec["calendar_verified"], bool):
-            errs.append(f"{where}: calendar_verified must be boolean")
+        if "matured_session_date" in rec and _date(rec["matured_session_date"]) is None:
+            errs.append(f"{where}: matured_session_date must be a valid calendar date YYYY-MM-DD")
+        cb = rec.get("calendar_basis")
+        if "calendar_basis" in rec and cb not in CALENDAR_BASIS:
+            errs.append(f"{where}: calendar_basis must be one of {sorted(CALENDAR_BASIS)}")
+        if cb == "AUTO_NYSE_RULES" and rec.get("market") != "US":
+            errs.append(f"{where}: calendar_basis=AUTO_NYSE_RULES is only valid for market=US")
+        ev = rec.get("calendar_evidence")
+        if cb == "DECLARED_WITH_SOURCE":
+            if not isinstance(ev, dict):
+                errs.append(f"{where}: DECLARED_WITH_SOURCE requires calendar_evidence {{source, checked_by, holidays_skipped}}")
+            else:
+                for k in ("source", "checked_by"):
+                    if not isinstance(ev.get(k), str) or not ev.get(k, "").strip():
+                        errs.append(f"{where}: calendar_evidence.{k} must be a non-empty string")
+                if not isinstance(ev.get("holidays_skipped"), list):
+                    errs.append(f"{where}: calendar_evidence.holidays_skipped must be a list (empty if none)")
+        if ev is not None and isinstance(ev, dict):
+            for k in ("holidays_skipped", "extra_closures"):
+                for x in ev.get(k, []) if isinstance(ev.get(k), list) else []:
+                    if _date(x) is None:
+                        errs.append(f"{where}: calendar_evidence.{k} has invalid date {x!r}")
+            if ev.get("extra_closures") and not (isinstance(ev.get("source"), str) and ev["source"].strip()):
+                errs.append(f"{where}: calendar_evidence.extra_closures requires a non-empty source")
+        if cb == "UNVERIFIED" and ev is not None:
+            errs.append(f"{where}: calendar_basis=UNVERIFIED must not carry calendar_evidence")
     return errs + privacy_errors(rec, where)
 
 
@@ -232,17 +324,28 @@ def maturity_errors(rec: dict, dec: dict, where: str) -> list[str]:
     """For T+N: the matured session must be at least the Nth weekday session after the decision,
     and the review must be written after that session's close."""
     m = T_N.match(str(rec.get("horizon", "")))
-    if not m or rec.get("market") not in MARKET_CLOSE or not DATE.match(str(rec.get("matured_session_date", ""))):
+    session = _date(rec.get("matured_session_date"))
+    if not m or rec.get("market") not in MARKET_CLOSE or session is None:
         return []
     t_dec, t_rev = _ts(dec.get("kst")), _ts(rec.get("asof_kst"))
     if not t_dec or not t_rev:
         return []
-    n, market = int(m.group(1)), rec["market"]
-    session = date.fromisoformat(rec["matured_session_date"])
+    n, market, cb = int(m.group(1)), rec["market"], rec.get("calendar_basis")
     errs = []
     earliest = nth_weekday_session(market, t_dec, n)
     if session < earliest:
         errs.append(f"{where}: {rec['horizon']} cannot mature on {session} ({market}); earliest possible session is {earliest}")
+    ev = rec.get("calendar_evidence") if isinstance(rec.get("calendar_evidence"), dict) else {}
+    extra = {d for d in (_date(x) for x in ev.get("extra_closures", []) or []) if d}
+    skip = None
+    if cb == "AUTO_NYSE_RULES" and market == "US":
+        skip = set().union(*(nyse_holidays(y) for y in range(t_dec.year, t_dec.year + 2))) | extra
+    elif cb == "DECLARED_WITH_SOURCE" and isinstance(ev.get("holidays_skipped"), list):
+        skip = {d for d in (_date(x) for x in ev["holidays_skipped"]) if d} | extra
+    if skip is not None:
+        exact = nth_session(market, t_dec, n, skip)
+        if session != exact:
+            errs.append(f"{where}: {rec['horizon']} ({market}, {cb}) is {exact}, not {session}")
     if session.weekday() >= 5:
         errs.append(f"{where}: matured_session_date {session} is a weekend")
     close = session_close_kst(market, session)
@@ -300,7 +403,7 @@ def validate_tree(root: Path) -> list[str]:
     for where, target in supersedes:
         if target not in decisions:
             errs.append(f"{where}: supersedes unknown decision_id {target}")
-    seen_reviews: dict[tuple[str, str], str] = {}
+    seen_reviews: dict[tuple, str] = {}
     for f in sorted(root.glob("*/*/outcome-reviews.jsonl")):
         rows, e = _parse_lines(f.read_text(encoding="utf-8"), str(f))
         errs += e
@@ -316,9 +419,9 @@ def validate_tree(root: Path) -> list[str]:
                 continue
             if hz and isinstance(dec.get("review_at"), list) and hz not in dec["review_at"]:
                 errs.append(f"{where}: horizon {hz} is not in decision {did} review_at {dec['review_at']}")
-            key = (did, hz)
+            key = (did, hz, rec.get("outcome_basis"))
             if key in seen_reviews:
-                errs.append(f"{where}: duplicate review for {did} {hz} (first at {seen_reviews[key]})")
+                errs.append(f"{where}: duplicate {key[2]} review for {did} {hz} (first at {seen_reviews[key]})")
             else:
                 seen_reviews[key] = where
             t_dec, t_rev = _ts(dec.get("kst")), _ts(rec.get("asof_kst"))
@@ -386,11 +489,29 @@ def _is_json(s: str) -> bool:
         return False
 
 
+def scorecard(root: Path) -> dict:
+    """Aggregate outcome reviews. ACTUAL and COUNTERFACTUAL are never mixed.
+    A review counts as CONFIRMED only if its horizon is event-based or its calendar_basis is verified;
+    UNVERIFIED-calendar reviews are reported separately as PROVISIONAL."""
+    out = {b: {"confirmed": {v: 0 for v in sorted(REVIEW_VERDICT)}, "provisional": {v: 0 for v in sorted(REVIEW_VERDICT)}}
+           for b in sorted(OUTCOME_BASIS)}
+    for f in sorted(root.glob("*/*/outcome-reviews.jsonl")):
+        rows, _ = _parse_lines(f.read_text(encoding="utf-8"), str(f))
+        for _, rec in rows:
+            b, v = rec.get("outcome_basis"), rec.get("verdict")
+            if b not in OUTCOME_BASIS or v not in REVIEW_VERDICT:
+                continue
+            confirmed = not T_N.match(str(rec.get("horizon", ""))) or rec.get("calendar_basis") in CONFIRMED_CALENDAR
+            out[b]["confirmed" if confirmed else "provisional"][v] += 1
+    return out
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("root", nargs="?", default=None)
     ap.add_argument("--root", dest="root_opt", default=None)
     ap.add_argument("--base", default=None, help="git ref to enforce append-only against (e.g. origin/main)")
+    ap.add_argument("--scorecard", action="store_true", help="print confirmed/provisional counts per outcome basis")
     a = ap.parse_args(argv[1:])
     repo = Path(__file__).resolve().parent.parent
     root = Path(a.root_opt or a.root or repo / "investment-decisions")
@@ -399,6 +520,8 @@ def main(argv: list[str]) -> int:
         errs += append_only_errors(repo, root, a.base)
     for e in errs:
         print(f"ERROR {e}")
+    if a.scorecard and not errs:
+        print(json.dumps(scorecard(root), ensure_ascii=False, indent=2))
     print(f"decision ledger: {'FAIL' if errs else 'PASS'} ({len(errs)} errors){' [append-only vs ' + a.base + ']' if a.base else ''}")
     return 1 if errs else 0
 

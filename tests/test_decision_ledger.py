@@ -21,7 +21,7 @@ GOOD = {
 # which closes 2026-11-14 06:00 KST.
 REVIEW = {"decision_id": "2026-11-09-01", "horizon": "T+5", "asof_kst": "2026-11-16T07:00+09:00",
           "verdict": "CORRECT", "executed": False, "outcome_basis": "COUNTERFACTUAL",
-          "market": "US", "matured_session_date": "2026-11-13", "calendar_verified": True,
+          "market": "US", "matured_session_date": "2026-11-13", "calendar_basis": "AUTO_NYSE_RULES",
           "note": "신호 유지 맞음"}
 EXECUTED_DEC = dict(GOOD, execution="EXECUTED", owner_decision="APPROVED")
 
@@ -149,7 +149,7 @@ class ReviewTest(unittest.TestCase):
         self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, executed="no")]), "executed must be boolean"))
 
     def test_duplicate_review(self):
-        self.assertTrue(has(errs_for([GOOD], [REVIEW, REVIEW]), "duplicate review"))
+        self.assertTrue(has(errs_for([GOOD], [REVIEW, REVIEW]), "duplicate COUNTERFACTUAL review"))
 
     def test_horizon_must_be_scheduled(self):
         self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, horizon="T+20")]), "not in decision"))
@@ -173,15 +173,17 @@ class ReviewTest(unittest.TestCase):
         self.assertEqual(errs_for([GOOD], [t1]), [])
 
     def test_krx_market(self):
-        krx = dict(REVIEW, horizon="T+1", market="KRX", matured_session_date="2026-11-09", asof_kst="2026-11-09T16:00+09:00")
+        krx = dict(REVIEW, horizon="T+1", market="KRX", matured_session_date="2026-11-09", asof_kst="2026-11-09T16:00+09:00",
+                   calendar_basis="DECLARED_WITH_SOURCE",
+                   calendar_evidence={"source": "KRX 휴장일 공지", "checked_by": "ROY", "holidays_skipped": []})
         self.assertEqual(errs_for([GOOD], [krx]), [])
         early = dict(krx, asof_kst="2026-11-09T15:00+09:00")
         self.assertTrue(has(errs_for([GOOD], [early]), "before the KRX close"))
 
     def test_tn_requires_session_fields(self):
-        bare = {k: v for k, v in REVIEW.items() if k not in ("market", "matured_session_date", "calendar_verified")}
+        bare = {k: v for k, v in REVIEW.items() if k not in ("market", "matured_session_date", "calendar_basis")}
         e = errs_for([GOOD], [bare])
-        for k in ("market", "matured_session_date", "calendar_verified"):
+        for k in ("market", "matured_session_date", "calendar_basis"):
             self.assertTrue(has(e, f"missing '{k}'"), k)
 
     def test_actual_vs_counterfactual(self):
@@ -196,6 +198,68 @@ class ReviewTest(unittest.TestCase):
         self.assertTrue(has(errs_for([GOOD], [mismatch]), "COUNTERFACTUAL requires executed=false"))
         # a counterfactual comparison on an executed decision is allowed and kept separate
         self.assertEqual(errs_for([EXECUTED_DEC], [REVIEW]), [])
+
+    # --- JJOONI round 3 ---------------------------------------------------------------
+    def test_actual_and_counterfactual_same_horizon(self):
+        actual = dict(REVIEW, executed=True, outcome_basis="ACTUAL", execution_evidence="PRIVATE_REF:test001")
+        self.assertEqual(errs_for([EXECUTED_DEC], [REVIEW, actual]), [])
+        self.assertTrue(has(errs_for([EXECUTED_DEC], [actual, dict(actual)]), "duplicate ACTUAL review"))
+        self.assertTrue(has(errs_for([EXECUTED_DEC], [REVIEW, dict(REVIEW)]), "duplicate COUNTERFACTUAL review"))
+
+    def test_actual_references_superseding_executed_decision(self):
+        original = dict(GOOD, owner_decision="PENDING", execution="NOT_EXECUTED")
+        executed = dict(GOOD, decision_id="2026-11-09-02", kst="2026-11-09T22:00+09:00", supersedes="2026-11-09-01",
+                        owner_decision="APPROVED", execution="EXECUTED", status="ADOPTED",
+                        inputs_meta=dict(GOOD["inputs_meta"]))
+        cf = dict(REVIEW)  # counterfactual on the original pending decision
+        act = dict(REVIEW, decision_id="2026-11-09-02", executed=True, outcome_basis="ACTUAL",
+                   execution_evidence="PRIVATE_REF:test001")
+        self.assertEqual(errs_for([original, executed], [cf, act]), [])
+        wrong = dict(act, decision_id="2026-11-09-01")
+        self.assertTrue(has(errs_for([original, executed], [wrong]), "ACTUAL outcome but decision"))
+
+    def test_exact_us_session_enforced(self):
+        late = dict(REVIEW, matured_session_date="2026-11-16", asof_kst="2026-11-17T07:00+09:00")
+        self.assertTrue(has(errs_for([GOOD], [late]), "is 2026-11-13, not 2026-11-16"))
+
+    def test_us_holiday_skipped(self):
+        # decision Wed 2026-11-25 10:00 KST: US T+1 = Wed 11/25, T+2 skips Thanksgiving 11/26 -> Fri 11/27
+        dec = dict(GOOD, decision_id="2026-11-25-01", kst="2026-11-25T10:00+09:00", review_at=["T+2"],
+                   inputs_meta=dict(GOOD["inputs_meta"], observed_at_kst="2026-11-25T09:00+09:00"))
+        root = tempfile.mkdtemp()
+        rv = dict(REVIEW, decision_id="2026-11-25-01", horizon="T+2", matured_session_date="2026-11-27",
+                  asof_kst="2026-11-28T07:00+09:00")
+        self.assertEqual(errs_for([dec], [rv]), [])
+        self.assertTrue(has(errs_for([dec], [dict(rv, matured_session_date="2026-11-26")]), "is 2026-11-27"))
+
+    def test_declared_calendar_requires_evidence(self):
+        krx = dict(REVIEW, horizon="T+1", market="KRX", matured_session_date="2026-11-09",
+                   asof_kst="2026-11-09T16:00+09:00", calendar_basis="DECLARED_WITH_SOURCE")
+        self.assertTrue(has(errs_for([GOOD], [krx]), "requires calendar_evidence"))
+        blank = dict(krx, calendar_evidence={"source": " ", "checked_by": "", "holidays_skipped": []})
+        e = errs_for([GOOD], [blank])
+        self.assertTrue(has(e, "calendar_evidence.source must be"))
+        self.assertTrue(has(e, "calendar_evidence.checked_by must be"))
+        self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, market="KRX")]), "only valid for market=US"))
+
+    def test_unverified_calendar_is_provisional(self):
+        prov = dict(REVIEW, calendar_basis="UNVERIFIED", matured_session_date="2026-11-16", asof_kst="2026-11-17T07:00+09:00")
+        root = write_tree([GOOD], [prov])
+        self.assertEqual(dl.validate_tree(root), [])  # lower bound only, allowed
+        sc = dl.scorecard(root)
+        self.assertEqual(sc["COUNTERFACTUAL"]["provisional"]["CORRECT"], 1)
+        self.assertEqual(sum(sc["COUNTERFACTUAL"]["confirmed"].values()), 0)
+        root2 = write_tree([GOOD], [REVIEW])
+        self.assertEqual(dl.scorecard(root2)["COUNTERFACTUAL"]["confirmed"]["CORRECT"], 1)
+        self.assertEqual(sum(dl.scorecard(root2)["ACTUAL"]["confirmed"].values()), 0)
+
+    def test_invalid_calendar_date_is_structured_error(self):
+        bad = dict(REVIEW, matured_session_date="2026-11-99")
+        e = errs_for([GOOD], [bad])  # must not raise
+        self.assertTrue(has(e, "valid calendar date"))
+        ev = dict(REVIEW, calendar_basis="DECLARED_WITH_SOURCE",
+                  calendar_evidence={"source": "x", "checked_by": "y", "holidays_skipped": ["2026-02-30"]})
+        self.assertTrue(has(errs_for([GOOD], [ev]), "invalid date '2026-02-30'"))
 
 
 class AppendOnlyTest(unittest.TestCase):
