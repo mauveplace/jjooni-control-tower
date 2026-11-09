@@ -91,14 +91,17 @@ def read(path):
 PUBLIC_PRIVACY_START = '2026-11-10'
 PUBLIC_PRIVATE_MARKERS = re.compile(
     r'(?:\bAI_BOARD\b|\bMAIOS\b|\bSONG_DB_[A-Z0-9_]+\b|'
-    r'\bdecision[-_]gate\b|\bPB[ -]?View\b|\bCT[ ]+(?:LIVE|FRESH|STALE)\b|'
+    r'\bdecision[-_ ]gate\b|\bPB[ -]?View\b|\bCT[ ]+(?:LIVE|FRESH|STALE)\b|'
     r'docs\.google\.com/spreadsheets/(?:u/[0-9]+/)?d/|'
-    r'(?:Google[ ]+Drive|Plaud)(?:[ ]*(?:의|에서|내|상|에|가))?[ ]*'
+    r'drive\.google\.com/drive/folders/|'
+    r'(?i:Google[ ]+Drive|Plaud)(?:[ ]*(?:의|에서|내|상|에|가))?[ ]*'
     r'(?:폴더|문서|시트|내부|원본|DB|녹취|파일|계정|연동)|'
-    r'(?:KB증권|토스증권|Toss(?:[ ]*증권)?|키움증권|삼성증권|'
-    r'미래에셋증권|NH투자증권|한국투자증권|신한투자증권|하나증권)'
-    r'(?:의|에서|내)?[ ]*(?:계좌|잔고|보유|평가|실현))',
-    flags=re.IGNORECASE,
+    r'구글[ ]*드라이브(?:의|에서|내)?[ ]*(?:폴더|문서|시트|파일|계정|연동)|'
+    r'(?:KB증권|토스증권|Toss(?:[ ]*(?:증권|Securities))?|'
+    r'키움증권|삼성증권|미래에셋증권|NH투자증권|한국투자증권|'
+    r'신한투자증권|하나증권|카카오페이증권|대신증권)'
+    r'(?:[ ]*(?:의|을[ ]*통한|를[ ]*통한|에서|내))?[ ]*'
+    r'(?:계좌|잔고|account\b|balance\b))',
 )
 
 
