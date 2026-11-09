@@ -2,9 +2,9 @@
 
 These product-side settings must be installed **once** in their respective accounts. Merging this file or changing an automation prompt is **not** proof that a webhook subscription was changed. Do not provision a model API key or paid server.
 
-## V5 quota-conserving override (merged in PR #338)
+## V5.1 balanced collaboration guidance (proposed)
 
-JJOONI is now the default executor for ordinary development, CI fixes and operational incidents; see [JJOONI_FIRST.md](./JJOONI_FIRST.md). **Do not trigger ROY for generic `[JJOONI-DEV]` PRs or a frequent GitHub error-mail sweep.** Keep any existing Claude `PR 열림` Routine limited to explicit `[AI-COLLAB]` review tasks. If the event UI does not actually filter before triggering a Claude session, confirm its behavior before adding broad events; a prompt that exits early can still consume a run. Use one HEAD-pinned ROY request after JJOONI has code+tests ready for high-assurance review. This repo documentation cannot configure Claude subscription filters by itself. Do not enable extra paid usage or broaden GitHub permissions.
+JJOONI is the primary coder for ordinary work. ROY should meaningfully review significant features, repeated root causes and high-assurance code, or lead when the owner directly addresses ROY; see [JJOONI_FIRST.md](./JJOONI_FIRST.md). Keep the **existing** `PR 열림` and `이슈 열림` Claude Routines; **do not disable them** to save usage. Use `[AI-COLLAB]` opt-in and one pinned HEAD for substantive ROY review; do not issue repeated review tickets for simple fixes. If the Claude UI does not filter before launch, prompt-only checks may still consume a run. No extra paid usage, wider GitHub write permissions or implied automatic approval.
 
 ## Claude: ROY AI-COLLAB Pilot Review → Evergreen Review
 
