@@ -141,7 +141,8 @@ def route_task(*, origin, work_type, capacities=None, required_independent_revie
     preferred, alternate = ("ROY", "JJOONI") if owner_directed_roy else WORK_TYPES[work_type]
 
     mandatory_type = work_type in HIGH_ASSURANCE_TYPES
-    review_required = bool(required_independent_review) or mandatory_type
+    # ROY-led work always needs an independent JJOONI challenge, even when routine.
+    review_required = bool(required_independent_review) or mandatory_type or owner_directed_roy
     review_suggested = (review_required or complexity in ("SUBSTANTIVE", "CRITICAL")
                         or repeated_failure)
     review_policy = ("MANDATORY_HIGH_ASSURANCE" if mandatory_type
@@ -176,7 +177,10 @@ def route_task(*, origin, work_type, capacities=None, required_independent_revie
     # A ROY-first user request is NOT silently reassigned just because ROY is
     # unavailable. JJOONI may prepare separate work only after user direction.
     fallback = chosen is not None and chosen != preferred
-    independent = alternate
+    # Never assign self-review: for a ROY fallback, JJOONI is the reviewer.
+    # If no actor is running yet, set the counterpart of the preferred lead.
+    effective_lead = chosen or preferred
+    independent = "JJOONI" if effective_lead == "ROY" else "ROY"
     next_step = ("VERIFY_ACTUAL_RUN_EVENT" if chosen
                  else "WAIT_FOR_ROY_OR_OWNER_REASSIGNMENT" if owner_directed_roy
                  else "PRESERVE_AND_RETRY_WHEN_VERIFIED")
