@@ -1,0 +1,54 @@
+name: Market Observatory Daily Glance
+
+# 30-second market card built only from already-published Observatory data.
+# Runs after the Daily Pulse publishes; no web scraping, LLM, account data or trading.
+on:
+  workflow_run:
+    workflows: ["Market Observatory Daily Pulse"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - market-observatory/data/morning-brief/latest.json
+      - tools/build_daily_glance.py
+      - .github/workflows/market-observatory-daily-glance.yml
+  pull_request:
+    paths:
+      - tools/build_daily_glance.py
+      - market-observatory/daily-glance-v1.js
+      - tests/test_daily_glance.py
+      - .github/workflows/market-observatory-daily-glance.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-observatory-daily-glance
+  cancel-in-progress: false
+
+jobs:
+  glance:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contract tests
+        run: python -m unittest tests.test_daily_glance -v
+      - name: Build glance
+        run: python tools/build_daily_glance.py
+      - name: Publish glance
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh 30-second daily glance' market-observatory/data/daily-glance.json
