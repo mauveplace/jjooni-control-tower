@@ -335,7 +335,7 @@ def materialize_daily_glance(paths):
         brief = json.loads(brief_path.read_text(encoding='utf-8')) if brief_path.exists() else None
         payload = glance.build(obs, brief)
         card = ROOT / (DATA + 'daily-glance.json')
-        card.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + '\\n', encoding='utf-8')
+        card.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
         print('DAILY_GLANCE_ATOMIC=PASS source=' + str(payload.get('source_generated_kst')))
         return [DATA + 'daily-glance.json']
     except (ValueError, KeyError, TypeError, OSError) as exc:
