@@ -49,19 +49,31 @@ def bound_task_path(paths, task):
     return path
 
 
-def bound_task_from_pr_diff(pr_files, task):
-    """Select precisely one created/updated task in this PR's verified diff.
+def bound_task_from_pr_diff(pr_files, task, *, expected_changed_files):
+    """Select one task from a COMPLETE GitHub PR changed-file diff.
 
-    GitHub /pulls/{number}/files returns filename/status pairs. The caller
-    must fetch that API at the current PR HEAD, compare the HEAD again before
-    execution, and NEVER treat task origin or GitHub author as agent identity.
+    A caller must fetch *all pages* of /pulls/{number}/files for a pinned
+    current HEAD, independently read the PR's changed_files count, and
+    confirm the HEAD has not moved. Merely receiving a list of some files
+    is NOT completeness proof. Mismatch fails closed before routing.
+    The PR, task JSON, source marker and GitHub account do not authenticate
+    a model or authorize writes.
     """
-    if not isinstance(pr_files, list) or len(pr_files) > 300:
-        raise ValueError("Missing or unbounded PR file-diff evidence")
+    if (not isinstance(expected_changed_files, int)
+            or isinstance(expected_changed_files, bool)
+            or not 1 <= expected_changed_files <= 3000):
+        raise ValueError("Verified nonzero PR changed_files count is required")
+    if not isinstance(pr_files, list) or len(pr_files) != expected_changed_files:
+        raise ValueError("Incomplete or mismatched PR file pagination")
+    if any(not isinstance(row, dict) or not isinstance(row.get("filename"), str)
+           or not isinstance(row.get("status"), str) for row in pr_files):
+        raise ValueError("Malformed GitHub PR file evidence")
+    paths = [row["filename"] for row in pr_files]
+    if len(paths) != len(set(paths)):
+        raise ValueError("Duplicate GitHub PR diff filenames")
     changed = [
         row["filename"] for row in pr_files
-        if isinstance(row, dict) and row.get("status") in ("added", "modified", "renamed")
-        and isinstance(row.get("filename"), str)
+        if row["status"] in ("added", "modified", "renamed")
     ]
     return bound_task_path(changed, task)
 
@@ -220,9 +232,11 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
     if not parsed:
         return output("IGNORE", event_key=event_key, pr=number, head=head,
                       reason="No valid versioned review marker")
-    if parsed["actor_claim"] == "JJOONI":
+    if parsed["actor_claim"] == "JJOONI" and not (
+            task.get("origin") == "USER_TO_ROY"
+            and "JJOONI" in task["required_reviewers"]):
         return output("IGNORE", event_key=event_key, pr=number, head=head,
-                      reason="Self-comment must not trigger feedback loop")
+                      reason="Non-required JJOONI comment must not trigger feedback loop")
     if parsed["actor_claim"] not in task["required_reviewers"]:
         return output("IGNORE", event_key=event_key, pr=number, head=head,
                       reason="Actor not required for this task")
@@ -231,4 +245,5 @@ def decide_event(event_name, event, current_pr, task, *, known_event_keys=(),
                       reason="Wrong task ID or obsolete review HEAD")
     return output("VERIFY_ROY" if parsed["actor_claim"] == "ROY" else "VERIFY_REVIEWER",
                   event_key=event_key, pr=number, head=head,
-                  reason="Review claim received; agent session verification REQUIRED")
+                  reason="Required independent reviewer claim; Work/Claude session "
+                         "verification REQUIRED. Caller must suppress agent self-event feedback.")
