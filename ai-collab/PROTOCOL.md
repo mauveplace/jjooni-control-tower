@@ -2,9 +2,9 @@
 
 **Scope:** all future explicitly opted-in GitHub PR tasks in `mauveplace/jjooni-control-tower`. There is **NO hardcoded PR number, dated task ID, moving HEAD, or named incident** in the dispatcher. The current production observatory, trading and account systems are out of scope.
 
-## Execution track and ROY budget (V5 proposal)
+## Execution track and ROY budget (V5 active policy)
 
-For regular code/automation/UI/tests/incident work, use the **JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md): JJOONI develops and tests, normal PR title `[JJOONI-DEV]`, no `[AI-COLLAB]` opt-in and **no automatic ROY run**. Consequential strategy/data/security changes or explicit owner requests use the existing V4 dual-agent track with one ROY independent review of the current HEAD. The `capacity_router.py` defaults to JJOONI for all work types. This is a PR proposal and does not alter current external subscriptions or release permissions until approved/merged.
+For regular code/automation/UI/tests/incident work, use the **JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md): JJOONI develops and tests, normal PR title `[JJOONI-DEV]`, no `[AI-COLLAB]` opt-in and **no automatic ROY run**. Consequential strategy/data/security changes or explicit owner requests use the existing V4 dual-agent track with one ROY independent review of the current HEAD. The `capacity_router.py` defaults to JJOONI for all work types. The policy has been approved and merged in PR #338. It does not change external Claude/Work subscriptions or release permissions.
 
 The V4 rules below remain strict **when the dual-agent track is opted into**, including task JSON validation, role provenance, review dedupe and release gates.
 
