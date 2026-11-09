@@ -46,11 +46,14 @@ def validate_editorial(d, created):
         close, previous, pct = ref.get('close'), ref.get('previous_close'), ref.get('change_pct')
         assert all(isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v < float('inf') for v in (close, previous)), 'REFERENCE_VALUE'
         assert isinstance(pct, (int, float)) and abs((close / previous - 1)*100 - pct) < .015, 'REFERENCE_RETURN'
+        official_previous = close_by_symbol[ref['symbol']].get('previous_close')
+        assert isinstance(official_previous, (int, float)) and abs(official_previous - previous) <= 0.02, 'REFERENCE_PREVIOUS_CLOSE_MISMATCH'
         checked = datetime.fromisoformat(ref['checked_at_kst'])
         assert checked.utcoffset() == timedelta(hours=9) and checked >= created, 'REFERENCE_CHECK_CLOCK'
         obs = ref.get('source_observations') or []
         assert len(obs) >= 2, 'REFERENCE_SOURCE_COUNT'
         domains = set()
+        late_postclose_count = 0
         for item in obs:
             url = item.get('url') or ''
             parsed = urlparse(url)
@@ -58,9 +61,11 @@ def validate_editorial(d, created):
             assert abs(float(item.get('close', 0)) - close) <= 0.02, 'REFERENCE_SOURCE_DISAGREEMENT'
             stamp = datetime.fromisoformat(item['quote_time_et'])
             ny = stamp.astimezone(ZoneInfo('America/New_York'))
-            assert stamp.tzinfo and ny.date().isoformat() == d['market_date_us'] and ny.time() >= time(16), 'REFERENCE_NOT_POST_CLOSE'
+            assert stamp.tzinfo and ny.date().isoformat() == d['market_date_us'] and ny.time() >= time(16) and stamp <= checked, 'REFERENCE_NOT_POST_CLOSE'
+            if ny.time() >= time(16, 30):
+                late_postclose_count += 1
             domains.add(parsed.hostname)
-        assert len(domains) >= 2 and ref.get('limitations'), 'REFERENCE_PROVENANCE'
+        assert len(domains) >= 2 and late_postclose_count >= 1 and ref.get('limitations'), 'REFERENCE_PROVENANCE'
     for check in checks:
         assert check.get('session_date') == d['market_date_us'], 'CLOSE_SESSION_MISMATCH'
         post_audit=check.get('post_publication_verified_at_kst')
