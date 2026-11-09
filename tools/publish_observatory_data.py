@@ -335,10 +335,26 @@ def materialize_daily_glance(paths):
         brief = json.loads(brief_path.read_text(encoding='utf-8')) if brief_path.exists() else None
         payload = glance.build(obs, brief)
         card = ROOT / (DATA + 'daily-glance.json')
+        # A no-op source refresh must not create a fresh card timestamp that
+        # turns OBSERVATORY_PUBLISH=NO_CHANGE into an unnecessary commit.
+        # Compare complete card content (excluding only its generation clock),
+        # not just source_generated_kst: corrections may retain the same clock.
+        old = None
+        if card.is_file():
+            try:
+                old = json.loads(card.read_text(encoding='utf-8'))
+            except (OSError, ValueError, UnicodeError):
+                pass
+        if isinstance(old, dict):
+            comparable_old = {k: v for k, v in old.items() if k != 'generated_kst'}
+            comparable_new = {k: v for k, v in payload.items() if k != 'generated_kst'}
+            if comparable_old == comparable_new:
+                print('DAILY_GLANCE_ATOMIC=NO_CHANGE source=' + str(payload.get('source_generated_kst')))
+                return []
         card.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
         print('DAILY_GLANCE_ATOMIC=PASS source=' + str(payload.get('source_generated_kst')))
         return [DATA + 'daily-glance.json']
-    except (ValueError, KeyError, TypeError, OSError) as exc:
+    except Exception as exc:
         # A missing/invalid TRI-POD may be safe for the market publisher but
         # cannot be certified as a valid card. Preserve the last known card,
         # report explicit degraded status, and allow canonical source updates.
