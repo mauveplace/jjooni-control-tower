@@ -99,6 +99,9 @@ class EditorialAcceptanceTests(unittest.TestCase):
             'https://docs.google.com/spreadsheets/d/SECRET_PLACEHOLDER',
             'Google Drive 폴더 위치', 'Plaud 내부 자료',
             '토스증권 계좌 보유액', 'KB증권 잔고', 'Toss 계좌 보유 종목',
+            'Plaud 녹취', 'Google Drive의 폴더', '토스증권의 계좌',
+            'Toss 증권 계좌', '키움증권 계좌 잔고', 'decision-gate',
+            'https://docs.google.com/spreadsheets/u/0/d/SECRET_PLACEHOLDER',
         ]
         for value in leaking:
             for field in ('title', 'verification_note', 'body_markdown'):
