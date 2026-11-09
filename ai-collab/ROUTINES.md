@@ -2,7 +2,7 @@
 
 These product-side settings must be installed **once** in their respective accounts. Merging this file or changing an automation prompt is **not** proof that a webhook subscription was changed. Do not provision a model API key or paid server.
 
-## V5.1 balanced collaboration guidance (proposed)
+## V5.1 balanced collaboration guidance (applies after merge)
 
 JJOONI is the primary coder for ordinary work. ROY should meaningfully review significant features, repeated root causes and high-assurance code, or lead when the owner directly addresses ROY; see [JJOONI_FIRST.md](./JJOONI_FIRST.md). Keep the **existing** `PR 열림` and `이슈 열림` Claude Routines; **do not disable them** to save usage. Use `[AI-COLLAB]` opt-in and one pinned HEAD for substantive ROY review; do not issue repeated review tickets for simple fixes. If the Claude UI does not filter before launch, prompt-only checks may still consume a run. No extra paid usage, wider GitHub write permissions or implied automatic approval.
 
