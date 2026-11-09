@@ -86,6 +86,34 @@ def validate_editorial(d, created):
 def read(path):
     return json.loads(path.read_text(encoding='utf-8'))
 
+# Future-facing static leak prevention. Historical reports remain unchanged and
+# retain their existing append-only correction ledger. This is NOT full DLP.
+PUBLIC_PRIVACY_START = '2026-11-10'
+PUBLIC_PRIVATE_MARKERS = re.compile(
+    r'(?:\\bAI_BOARD\\b|\\bMAIOS\\b|\\bSONG_DB_[A-Z0-9_]+\\b|'
+    r'\\bdecision_gate\\b|\\bPB[ -]?View\\b|\\bCT[ ]+(?:LIVE|FRESH|STALE)\\b|'
+    r'docs\\.google\\.com/spreadsheets/d/|'
+    r'(?:Google[ ]+Drive|Plaud)[ ]*(?:폴더|문서|시트|내부|원본|DB)|'
+    r'(?:KB증권|토스증권|Toss)[ ]*(?:계좌|잔고|보유|평가|실현))',
+    flags=re.IGNORECASE,
+)
+
+
+def validate_public_content(d):
+    """Reject recognizably internal workflow references in future public prose.
+
+    Keep old dated archives accessible, and retain stronger human/source review:
+    natural-language leaks cannot be exhaustively detected with regex.
+    """
+    if d['report_date_kst'] < PUBLIC_PRIVACY_START:
+        return
+    fields = ('title', 'verification_note', 'body_markdown')
+    for field in fields:
+        text = d.get(field) or ''
+        if PUBLIC_PRIVATE_MARKERS.search(text):
+            raise AssertionError('PUBLIC_INTERNAL_REFERENCE:' + field)
+
+
 def validate_report(d):
     assert d.get('schema') == 'JJOONI_MORNING_BRIEF_V1', 'BRIEF_SCHEMA'
     assert d.get('read_only') is True and d.get('contains_account_data') is False, 'BRIEF_PUBLIC_BOUNDARY'
@@ -104,6 +132,7 @@ def validate_report(d):
     assert re.search(r'\[[^\]\n]+\]\(https?://[^\s)]+\)', body), 'SOURCE_LINKS'
     assert '' not in body, 'CHAT_ONLY_CITATION_TOKEN'
     validate_editorial(d, created)
+    validate_public_content(d)
     return d
 
 def validate_directory(directory):
