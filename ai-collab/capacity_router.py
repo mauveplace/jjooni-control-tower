@@ -27,6 +27,7 @@ WORK_TYPES = {
 # Independent review remains mandatory on these consequential subjects.
 # This router never triggers Claude or asserts that such review occurred.
 HIGH_ASSURANCE_TYPES = frozenset(("strategy_analysis", "data_integrity", "security_review"))
+COMPLEXITY_LEVELS = frozenset(("ROUTINE", "SUBSTANTIVE", "CRITICAL"))
 STATES = frozenset((
     "NEW", "TRIAGED", "REQUESTED", "IN_PROGRESS", "NEEDS_CHANGES",
     "WAITING_CAPACITY", "WAITING_EVENT", "AWAITING_INDEPENDENT_REVIEW",
@@ -104,58 +105,101 @@ def check_transition(before, after):
 
 def route_task(*, origin, work_type, capacities=None, required_independent_review=None,
                mode="SYSTEM_REVIEW_ONLY", now=None, evidence_from_verified_runtime=False,
-               owner_verified_roy_fallback=False):
-    """Quota-conserving recommendation: JJOONI implements, ROY reviews selectively.
+               owner_verified_roy_fallback=False, owner_verified_roy_lead=False,
+               complexity="ROUTINE", repeated_failure=False):
+    """Plan balanced collaboration without invoking or authorizing an agent.
 
-    This is a pure decision aid. It does not invoke an agent or authorize
-    code edits, a PR, merging, deployment or trading. The invoking runtime,
-    not a PR body/issue/comment, must authenticate any owner delegation.
+    JJOONI handles routine implementation. ROY is recommended for substantive
+    designs and recurring incidents, mandatory as an independent reviewer for
+    consequential security/data/strategy changes, and may lead when the owner
+    has independently requested ROY specifically. No input here grants writes.
     """
     if origin not in ORIGINS:
         raise ValueError("Invalid task origin")
     if work_type not in WORK_TYPES:
         raise ValueError("Unknown work type")
+    if complexity not in COMPLEXITY_LEVELS:
+        raise ValueError("Unknown task complexity")
+    if not isinstance(repeated_failure, bool):
+        raise ValueError("repeated_failure must be boolean")
     if mode != "SYSTEM_REVIEW_ONLY":
         raise ValueError("PR-controlled code-write approvals are not accepted")
-    if owner_verified_roy_fallback and evidence_from_verified_runtime is not True:
-        raise ValueError("ROY fallback requires independently verified runtime authority")
+    # These flags must come from the independently authenticated user/runtime.
+    # Neither a PR JSON field nor a claimed Github actor is enough.
+    if (owner_verified_roy_fallback or owner_verified_roy_lead) and evidence_from_verified_runtime is not True:
+        raise ValueError("ROY routing requires independently verified owner authority")
+    if owner_verified_roy_fallback and owner_verified_roy_lead:
+        raise ValueError("Cannot mix ROY lead and fallback")
+    if owner_verified_roy_lead and origin != "USER_TO_ROY":
+        raise ValueError("A verified ROY lead requires USER_TO_ROY origin")
+
     capacities = capacities or {}
     status = {actor: normalized_capacity(actor, capacities.get(actor), now=now,
                                          trusted_runtime=evidence_from_verified_runtime)
               for actor in ROLES}
-    preferred, alternate = WORK_TYPES[work_type]
-    review_required = bool(required_independent_review) or work_type in HIGH_ASSURANCE_TYPES
+    owner_directed_roy = bool(owner_verified_roy_lead)
+    preferred, alternate = ("ROY", "JJOONI") if owner_directed_roy else WORK_TYPES[work_type]
+
+    mandatory_type = work_type in HIGH_ASSURANCE_TYPES
+    review_required = bool(required_independent_review) or mandatory_type
+    review_suggested = (review_required or complexity in ("SUBSTANTIVE", "CRITICAL")
+                        or repeated_failure)
+    review_policy = ("MANDATORY_HIGH_ASSURANCE" if mandatory_type
+                     else "OWNER_REQUESTED" if review_required
+                     else "RECOMMENDED_COMPLEXITY" if review_suggested
+                     else "OPTIONAL_NO_AUTO_ROY")
     chosen = None
     state = "WAITING_CAPACITY"
-    reason = "JJOONI is not currently verified available; keep work pending"
+    reason = "Primary agent has no verified availability"
+    preferred_status = status[preferred]["state"]
 
-    # Unknown JJOONI capacity is NOT a reason to spend a scarce ROY run.
-    # Only an independently owner-authorized fallback may route to ROY.
-    if status[preferred]["state"] == "AVAILABLE":
-        chosen, state, reason = preferred, "REQUESTED", "JJOONI-first verified capacity"
-    elif status[preferred]["state"] == "UNKNOWN":
-        chosen, state, reason = preferred, "WAITING_EVENT", "Verify JJOONI run before claiming work started"
-    elif owner_verified_roy_fallback is True:
-        if status[alternate]["state"] == "AVAILABLE":
-            chosen, state, reason = alternate, "REQUESTED", "Owner-authorized ROY fallback; read-only preparation"
-        elif status[alternate]["state"] == "UNKNOWN":
-            chosen, state, reason = alternate, "WAITING_EVENT", "Verify explicitly authorized ROY fallback availability"
+    if preferred_status == "AVAILABLE":
+        chosen = preferred
+        state = "REQUESTED"
+        reason = "Owner-directed ROY lead" if owner_directed_roy else "JJOONI-first verified capacity"
+    elif preferred_status == "UNKNOWN":
+        chosen = preferred
+        state = "WAITING_EVENT"
+        reason = "Verify first-party primary-agent run before claiming work started"
+    elif not owner_directed_roy and owner_verified_roy_fallback:
+        # This is a prepared suggestion only; never automatic Claude invocation.
+        other_status = status[alternate]["state"]
+        if other_status == "AVAILABLE":
+            chosen = alternate
+            state = "REQUESTED"
+            reason = "Owner-authorized ROY fallback; read-only preparation"
+        elif other_status == "UNKNOWN":
+            chosen = alternate
+            state = "WAITING_EVENT"
+            reason = "Verify owner-authorized ROY fallback run"
 
-    fallback = chosen == alternate
-    independent = alternate if chosen != alternate else preferred
+    # A ROY-first user request is NOT silently reassigned just because ROY is
+    # unavailable. JJOONI may prepare separate work only after user direction.
+    fallback = chosen is not None and chosen != preferred
+    independent = alternate
+    next_step = ("VERIFY_ACTUAL_RUN_EVENT" if chosen
+                 else "WAIT_FOR_ROY_OR_OWNER_REASSIGNMENT" if owner_directed_roy
+                 else "PRESERVE_AND_RETRY_WHEN_VERIFIED")
     return {
         "origin": origin, "work_type": work_type, "preferred_agent": preferred,
         "assigned_agent": chosen, "independent_reviewer": independent,
         "state": state, "reason": reason,
-        "fallback_used": fallback, "fallback_scope": "READ_ONLY_PREPARATION" if fallback else "NONE",
+        "fallback_used": fallback,
+        "fallback_scope": "READ_ONLY_PREPARATION" if fallback else "NONE",
         "required_independent_review": review_required,
         "independent_review_completed": False,
-        "review_policy": "MANDATORY_HIGH_ASSURANCE" if work_type in HIGH_ASSURANCE_TYPES
-                         else ("OWNER_REQUESTED" if review_required else "OPTIONAL_NO_AUTO_ROY"),
+        "review_policy": review_policy,
+        "review_recommended": review_suggested,
+        "review_reason": ("HIGH_ASSURANCE" if mandatory_type else
+                          "OWNER_REQUESTED" if review_required else
+                          "COMPLEXITY" if complexity != "ROUTINE" else
+                          "REPEATED_FAILURE" if repeated_failure else "NONE"),
+        "review_stage": "AFTER_IMPLEMENTATION_AND_TESTS" if review_suggested else "NONE",
+        "review_duplicate_key": "TASK_ID_AND_CURRENT_HEAD" if review_suggested else "NONE",
         "roy_auto_invocation": False,
         "capacity": status, "owner_approval_required": True,
         "safe_to_merge": False, "safe_to_deploy": False, "safe_to_trade": False,
-        "next_step": ("VERIFY_ACTUAL_RUN_EVENT" if chosen else "PRESERVE_AND_RETRY_WHEN_VERIFIED"),
+        "next_step": next_step,
     }
 
 
