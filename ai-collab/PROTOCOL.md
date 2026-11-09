@@ -2,11 +2,17 @@
 
 **Scope:** all future explicitly opted-in GitHub PR tasks in `mauveplace/jjooni-control-tower`. There is **NO hardcoded PR number, dated task ID, moving HEAD, or named incident** in the dispatcher. The current production observatory, trading and account systems are out of scope.
 
+## Execution track and ROY budget (V5 proposal)
+
+For regular code/automation/UI/tests/incident work, use the **JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md): JJOONI develops and tests, normal PR title `[JJOONI-DEV]`, no `[AI-COLLAB]` opt-in and **no automatic ROY run**. Consequential strategy/data/security changes or explicit owner requests use the existing V4 dual-agent track with one ROY independent review of the current HEAD. The `capacity_router.py` defaults to JJOONI for all work types. This is a PR proposal and does not alter current external subscriptions or release permissions until approved/merged.
+
+The V4 rules below remain strict **when the dual-agent track is opted into**, including task JSON validation, role provenance, review dedupe and release gates.
+
 ## Ownership and agents
 
 - **User:** owns objectives, budget constraints and final approval for main merges/deploys.
-- **JJOONI / ChatGPT Work:** translates objectives to task contracts, optionally requests ROY work, independently audits each new actual PR HEAD, reports PASS / NEEDS_CHANGES / BLOCKED, never merges without user approval.
-- **ROY / Claude Code Routine:** independently reviews authorized public code, or, in a later separately approved editor workflow, may edit a non-main PR branch. **This V4 pilot itself is review-only.** It posts one structured report per (task, current HEAD, stage).
+- **JJOONI / ChatGPT Work:** primary developer and incident responder (code, UI, automation, tests, GitHub triage); creates a dual-agent task only when needed, independently audits current PR HEAD, and never merges/deploys without user approval.
+- **ROY / Claude Code Routine:** scarce independent reviewer for consequential changes or an explicit owner request. Does not run for normal JJOONI PRs. A separately authorized future fork-only editor is possible, but this V4 review mode itself is read-only and cannot bypass the current fork-PR 403 permission gate.
 - **JJANGGU / Gemini:** optional only. If/when enabled, add to `required_reviewers`; default required list is `['ROY']`.
 
 ## Persistent PR task contract
