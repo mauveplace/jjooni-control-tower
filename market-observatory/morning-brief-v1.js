@@ -52,13 +52,33 @@ function viewState(d,selected='latest',now=today()){
  if(latest&&!isToday&&monday)notice+=' 월요일 국내 개장 전 분석은 별도 투자보드에 기록되며, 이 공개 탭은 화~토 발행본을 표시합니다.';
  return {badge,warning:!isToday||conflicts.length>0,notice,revisedOn,conflicts};
 }
+function figureQuote(c,d){
+ const official=['VERIFIED','CROSS_CHECKED'].includes(c.status)&&Number.isFinite(c.close)&&Number.isFinite(c.change_pct);
+ if(official)return {value:c.close,pct:c.change_pct,reference:false,kind:c.status};
+ const q=(d.editorial_contract?.reference_quotes||[]).find(q=>
+  q.symbol===c.symbol&&q.session_date===d.market_date_us&&q.status==='PROVIDER_REFERENCE_ONLY'&&
+  q.official_eod_verified===false&&q.trade_signal_eligible===false&&
+  Number.isFinite(q.close)&&Number.isFinite(q.change_pct)&&
+  Array.isArray(q.source_observations)&&q.source_observations.length>=2);
+ if(c.status==='CONFLICT'&&q)return {value:q.close,pct:q.change_pct,reference:true,kind:c.status};
+ return {value:null,pct:null,reference:false,kind:c.status};
+}
 function render(d){
  const p=ensure();if(!p)return;document.getElementById('briefTitle').textContent=d.title||'송팀장 아침 시황 브리핑';
  const editorial=d.editorial_contract?.version==='SONG_INSPIRED_DAILY_V1';
  const display=viewState(d,document.getElementById('briefHistory')?.value||'latest');
  document.querySelector('.briefEyebrow').textContent=editorial?'DAILY MARKET LETTER · 시장·AI산업 리서치':'SONG MORNING BRIEF · 지난 시황 기록';
  let figures=document.getElementById('briefKeyFigures');if(!figures){figures=document.createElement('div');figures.id='briefKeyFigures';figures.className='briefKeyFigures';document.getElementById('briefMeta').after(figures)}
- figures.innerHTML=editorial?(d.editorial_contract.close_checks||[]).map(c=>{const usable=['VERIFIED','CROSS_CHECKED'].includes(c.status)&&Number.isFinite(c.close)&&Number.isFinite(c.change_pct);const pct=usable?esc((c.change_pct>=0?'+':'')+Number(c.change_pct).toFixed(2)+'%'):'';const note=c.status==='VERIFIED'?pct+' · 공식 EOD 확인':c.status==='CROSS_CHECKED'&&usable?pct+' · 비공식 교차 확인':c.status==='CONFLICT'?'확정 종가 출처 충돌':c.status==='MISSING'?'완료된 종가 미확인':'원천 검증 필요';return `<div class="briefFigure"><span>${esc(c.symbol)} · ${esc(c.session_date)} ${c.status==='CROSS_CHECKED'?'참고 종가':'정규장 종가'}</span><b>${usable?esc(Number(c.close).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):'확인 보류'}</b><small>${note}</small></div>`}).join(''):'';
+ figures.innerHTML=editorial?(d.editorial_contract.close_checks||[]).map(c=>{
+  const figure=figureQuote(c,d),usable=Number.isFinite(figure.value),ref=figure.reference;
+  const pct=usable?(figure.pct>=0?'+':'')+Number(figure.pct).toFixed(2)+'%':'';
+  const note=ref?pct+' · 참고 완료 일봉 / 공식 종가 미검증 (매매 신호 사용 금지)':
+   c.status==='VERIFIED'?pct+' · 공식 EOD 확인':
+   c.status==='CROSS_CHECKED'&&usable?pct+' · 비공식 교차 확인':
+   c.status==='CONFLICT'?'확정 종가 출처 충돌':
+   c.status==='MISSING'?'완료된 종가 미확인':'원천 검증 필요';
+  return `<div class="briefFigure"><span>${esc(c.symbol)} · ${esc(c.session_date)} ${ref?'참고 완료 일봉':c.status==='CROSS_CHECKED'?'참고 종가':'정규장 종가'}</span><b>${usable?esc(Number(figure.value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):'확인 보류'}</b><small>${esc(note)}</small></div>`;
+ }).join(''):'';
  document.getElementById('briefMeta').innerHTML=`<span>브리핑 날짜 <b>${esc(d.report_date_kst)}</b></span><span>미국장 기준 <b>${esc(d.market_date_us)}</b></span><span>작성 <b>${esc(time(d.generated_kst))} KST</b></span><span>게시 <b>${esc(time(d.published_kst))} KST</b></span>`;
  const badge=document.getElementById('briefBadge');badge.textContent=display.badge;badge.className=display.warning?'briefBadge warning':'briefBadge';
  const noticeElement=document.getElementById('briefNotice');noticeElement.textContent=display.notice;noticeElement.classList.toggle('conflict',display.conflicts.length>0||!!display.revisedOn);
