@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261109-ATOMIC-GLANCE-013",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently verify that canonical Observatory publication co-derives Daily Glance from the exact merged source on each publication, including retry/rebase, and that stale independent card runs cannot override newer source snapshots.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Review tools/publish_observatory_data.py and tests/test_publication_pipeline.py diff; ensure no redundant commit loops or GITHUB_TOKEN recursive Actions, no new broad permissions.",
+    "Review fail-safe behavior if TRI-POD source missing, malformed or stale and make sure unrelated canonical market data remains publishable.",
+    "Confirm card source_generated_kst ties to canonical source after initial commit and after rebase; concurrent publisher cannot overwrite with stale card; identify any race or timestamp ordering risk.",
+    "Validate exact current-HEAD contract CI, `python -m unittest tests.test_publication_pipeline tests.test_daily_glance -v` and market/source publication tests.",
+    "Report PASS/NEEDS_CHANGES/BLOCKED on exact 40-char current HEAD with source/line evidence, no edits, merge, deploy or trading."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets/private account/consumer data",
+    "No automatic merge/deploy/trading",
+    "No paid model API and no expanded workflow permissions"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "User approved JJOONI to merge morning-brief #328 and improve Observatory Daily Glance linkage. Request ROY independent review only for central market publisher change; avoid repeated issues or review triggers on unchanged HEAD."
+}
