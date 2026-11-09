@@ -166,6 +166,13 @@ def merge_generated(path, local, remote):
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result
+    if path.endswith('/daily-glance.json'):
+        # Prefer the snapshot behind a card, never a newer build timestamp
+        # created from an older Observatory revision. In-flight refreshes can
+        # otherwise roll back KR/FX values while showing a fresh "generated" date.
+        return deepcopy(max((remote, local), key=lambda doc: (
+            str(doc.get('source_generated_kst') or ''),
+            str(doc.get('generated_kst') or ''))))
     if path.endswith('/fed-watch.json') or path.endswith('/fedwatch-official.json'):
         # An older fallback cannot replace a newer official observation.
         return deepcopy(max((remote, local), key=lambda doc: (str(doc.get('market_data_as_of') or ''), doc.get('source_kind') == 'CME_OFFICIAL_PUBLIC_TABLE', str(doc.get('source_as_of_ct') or ''), str(doc.get('generated_kst') or ''))))
@@ -310,8 +317,37 @@ def materialize_health(paths):
                            check=True, capture_output=True, text=True)
 
 
+def materialize_daily_glance(paths):
+    """Derive the read-only card from the same canonical source being published.
+
+    GITHUB_TOKEN commits do not normally fire new push-triggered workflows.
+    A separate downstream workflow therefore cannot guarantee the KR/FX card
+    reflects an intraday source refresh. Co-commit only on canonical updates.
+    No fresh market data is fetched here, and failure cannot block publishing
+    the source/audit (the existing independent Glance job remains a fallback).
+    """
+    if DATA + 'observatory.json' not in paths:
+        return []
+    try:
+        import build_daily_glance as glance
+        obs = json.loads((ROOT / (DATA + 'observatory.json')).read_text(encoding='utf-8'))
+        brief_path = ROOT / DATA / 'morning-brief/latest.json'
+        brief = json.loads(brief_path.read_text(encoding='utf-8')) if brief_path.exists() else None
+        payload = glance.build(obs, brief)
+        card = ROOT / (DATA + 'daily-glance.json')
+        card.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + '\\n', encoding='utf-8')
+        print('DAILY_GLANCE_ATOMIC=PASS source=' + str(payload.get('source_generated_kst')))
+        return [DATA + 'daily-glance.json']
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        # A missing/invalid TRI-POD may be safe for the market publisher but
+        # cannot be certified as a valid card. Preserve the last known card,
+        # report explicit degraded status, and allow canonical source updates.
+        print('DAILY_GLANCE_ATOMIC=DEGRADED ' + type(exc).__name__ + ': ' + str(exc), file=sys.stderr)
+        return []
+
+
 def materialize_publication(paths):
-    """One order before commit AND after every rebase: derive, archive, audit."""
+    """Derive consumers, archive and audit from the same source after rebase."""
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
     if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
@@ -320,6 +356,9 @@ def materialize_publication(paths):
         paths = list(dict.fromkeys([*paths, *(str(p.relative_to(ROOT)) for p in
                      (ROOT/(DATA+'fedwatch-history')).rglob('*') if p.is_file())]))
     materialize_health(paths)
+    # Always last: the card sees the final merged source, never the pre-rebase
+    # worktree. The same publication commit carries both source and card.
+    paths = list(dict.fromkeys([*paths, *materialize_daily_glance(paths)]))
     return paths
 
 
