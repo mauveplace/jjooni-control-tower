@@ -2,7 +2,7 @@
 
 These product-side settings must be installed **once** in their respective accounts. Merging this file or changing an automation prompt is **not** proof that a webhook subscription was changed. Do not provision a model API key or paid server.
 
-## V5 quota-conserving override (proposed)
+## V5 quota-conserving override (merged in PR #338)
 
 JJOONI is now the default executor for ordinary development, CI fixes and operational incidents; see [JJOONI_FIRST.md](./JJOONI_FIRST.md). **Do not trigger ROY for generic `[JJOONI-DEV]` PRs or a frequent GitHub error-mail sweep.** Keep any existing Claude `PR 열림` Routine limited to explicit `[AI-COLLAB]` review tasks. If the event UI does not actually filter before triggering a Claude session, confirm its behavior before adding broad events; a prompt that exits early can still consume a run. Use one HEAD-pinned ROY request after JJOONI has code+tests ready for high-assurance review. This repo documentation cannot configure Claude subscription filters by itself. Do not enable extra paid usage or broaden GitHub permissions.
 

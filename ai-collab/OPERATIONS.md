@@ -2,7 +2,7 @@
 
 ## Objective
 
-> **V5 JJOONI-FIRST cost policy (proposal):** [JJOONI_FIRST.md](./JJOONI_FIRST.md) governs ordinary development. Default executor is JJOONI, including Python/JS code, automation and testing. ROY is reserved for mandatory high-assurance review or a specific owner request. Existing V4 dual-agent rules apply only to explicitly opted-in `[AI-COLLAB]` PRs. These changes require owner-approved merge before becoming effective.
+> **V5 JJOONI-FIRST cost policy (active; owner-approved PR #338):** [JJOONI_FIRST.md](./JJOONI_FIRST.md) governs ordinary development. Default executor is JJOONI, including Python/JS code, automation and testing. ROY is reserved for mandatory high-assurance review or a specific owner request. Existing V4 dual-agent rules apply only to explicitly opted-in `[AI-COLLAB]` PRs. External Claude/Work subscriptions and release permissions are unchanged.
 
 Either agent may receive a request first. Both follow the same task/PR contract regardless of origin, expertise or temporary model subscription limits. **No assumption that GitHub can read ChatGPT or Claude usage meters.** The two subscription services are independent and can drop event deliveries; no paid model API, external webhook relay or persistent server is introduced.
 
