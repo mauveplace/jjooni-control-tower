@@ -10,18 +10,23 @@ from datetime import datetime, timedelta, timezone
 ROLES = ("JJOONI", "ROY")
 CAPACITY = frozenset(("AVAILABLE", "BUSY", "RATE_LIMITED", "UNAVAILABLE", "UNKNOWN"))
 ORIGINS = frozenset(("USER_TO_JJOONI", "USER_TO_ROY", "GITHUB_EVENT", "UNKNOWN"))
+# JJOONI is the implementation owner for every routine work type.
+# ROY is a scarce independent reviewer, not the default developer.
 WORK_TYPES = {
     "architecture": ("JJOONI", "ROY"),
     "product": ("JJOONI", "ROY"),
     "strategy_analysis": ("JJOONI", "ROY"),
     "data_integrity": ("JJOONI", "ROY"),
-    "security_review": ("ROY", "JJOONI"),
-    "backend": ("ROY", "JJOONI"),
-    "frontend": ("ROY", "JJOONI"),
-    "testing": ("ROY", "JJOONI"),
+    "security_review": ("JJOONI", "ROY"),
+    "backend": ("JJOONI", "ROY"),
+    "frontend": ("JJOONI", "ROY"),
+    "testing": ("JJOONI", "ROY"),
     "documentation": ("JJOONI", "ROY"),
     "general": ("JJOONI", "ROY"),
 }
+# Independent review remains mandatory on these consequential subjects.
+# This router never triggers Claude or asserts that such review occurred.
+HIGH_ASSURANCE_TYPES = frozenset(("strategy_analysis", "data_integrity", "security_review"))
 STATES = frozenset((
     "NEW", "TRIAGED", "REQUESTED", "IN_PROGRESS", "NEEDS_CHANGES",
     "WAITING_CAPACITY", "WAITING_EVENT", "AWAITING_INDEPENDENT_REVIEW",
@@ -97,12 +102,14 @@ def check_transition(before, after):
     return True
 
 
-def route_task(*, origin, work_type, capacities=None, required_independent_review=True,
-               mode="SYSTEM_REVIEW_ONLY", now=None, evidence_from_verified_runtime=False):
-    """Deterministic recommendation only. No network calls or autonomous dispatch.
+def route_task(*, origin, work_type, capacities=None, required_independent_review=None,
+               mode="SYSTEM_REVIEW_ONLY", now=None, evidence_from_verified_runtime=False,
+               owner_verified_roy_fallback=False):
+    """Quota-conserving recommendation: JJOONI implements, ROY reviews selectively.
 
-    When the preferred agent is limited, the other may do read-only
-    preparation. It never satisfies an independent dual-review gate by itself.
+    This is a pure decision aid. It does not invoke an agent or authorize
+    code edits, a PR, merging, deployment or trading. The invoking runtime,
+    not a PR body/issue/comment, must authenticate any owner delegation.
     """
     if origin not in ORIGINS:
         raise ValueError("Invalid task origin")
@@ -110,39 +117,42 @@ def route_task(*, origin, work_type, capacities=None, required_independent_revie
         raise ValueError("Unknown work type")
     if mode != "SYSTEM_REVIEW_ONLY":
         raise ValueError("PR-controlled code-write approvals are not accepted")
+    if owner_verified_roy_fallback and evidence_from_verified_runtime is not True:
+        raise ValueError("ROY fallback requires independently verified runtime authority")
     capacities = capacities or {}
     status = {actor: normalized_capacity(actor, capacities.get(actor), now=now,
                                          trusted_runtime=evidence_from_verified_runtime)
               for actor in ROLES}
     preferred, alternate = WORK_TYPES[work_type]
+    review_required = bool(required_independent_review) or work_type in HIGH_ASSURANCE_TYPES
     chosen = None
     state = "WAITING_CAPACITY"
-    reason = "Both agents have verified capacity limitations"
-    for actor in (preferred, alternate):
-        if status[actor]["state"] == "AVAILABLE":
-            chosen = actor
-            state = "REQUESTED"
-            reason = "Selected a verified available agent"
-            break
-    if chosen is None:
-        for actor in (preferred, alternate):
-            if status[actor]["state"] == "UNKNOWN":
-                chosen = actor
-                state = "WAITING_EVENT"
-                reason = "Capacity is unknown; request may be queued but not called running"
-                break
-    if chosen is None and any(status[x]["state"] == "BUSY" for x in ROLES):
-        state = "WAITING_CAPACITY"
-        reason = "Known busy agents; preserve task for a later attempt"
-    fallback = chosen is not None and chosen != preferred
-    independent = alternate if chosen == preferred else preferred
+    reason = "JJOONI is not currently verified available; keep work pending"
+
+    # Unknown JJOONI capacity is NOT a reason to spend a scarce ROY run.
+    # Only an independently owner-authorized fallback may route to ROY.
+    if status[preferred]["state"] == "AVAILABLE":
+        chosen, state, reason = preferred, "REQUESTED", "JJOONI-first verified capacity"
+    elif status[preferred]["state"] == "UNKNOWN":
+        chosen, state, reason = preferred, "WAITING_EVENT", "Verify JJOONI run before claiming work started"
+    elif owner_verified_roy_fallback is True:
+        if status[alternate]["state"] == "AVAILABLE":
+            chosen, state, reason = alternate, "REQUESTED", "Owner-authorized ROY fallback; read-only preparation"
+        elif status[alternate]["state"] == "UNKNOWN":
+            chosen, state, reason = alternate, "WAITING_EVENT", "Verify explicitly authorized ROY fallback availability"
+
+    fallback = chosen == alternate
+    independent = alternate if chosen != alternate else preferred
     return {
         "origin": origin, "work_type": work_type, "preferred_agent": preferred,
         "assigned_agent": chosen, "independent_reviewer": independent,
         "state": state, "reason": reason,
         "fallback_used": fallback, "fallback_scope": "READ_ONLY_PREPARATION" if fallback else "NONE",
-        "required_independent_review": bool(required_independent_review),
+        "required_independent_review": review_required,
         "independent_review_completed": False,
+        "review_policy": "MANDATORY_HIGH_ASSURANCE" if work_type in HIGH_ASSURANCE_TYPES
+                         else ("OWNER_REQUESTED" if review_required else "OPTIONAL_NO_AUTO_ROY"),
+        "roy_auto_invocation": False,
         "capacity": status, "owner_approval_required": True,
         "safe_to_merge": False, "safe_to_deploy": False, "safe_to_trade": False,
         "next_step": ("VERIFY_ACTUAL_RUN_EVENT" if chosen else "PRESERVE_AND_RETRY_WHEN_VERIFIED"),
