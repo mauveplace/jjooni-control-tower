@@ -1,7 +1,7 @@
 # JJOONI × ROY balanced collaboration policy (V5.1)
 
 **Status: ACTIVE — user-approved PR #338 merged into `main` on 2026-11-09 (commit `ad095142d95ca82c5607392e3c71ce6edf96694e`).** The policy applies to collaboration routing and documentation; Claude and Work external event subscriptions have not been changed by this merge.
-**Goal:** make JJOONI the primary developer while using ROY meaningfully as a specialist reviewer, architecture partner, incident challenger and independently owner-directed lead. Think roughly 70:30 by *work contribution*, not as a fabricated measurement of token usage or an enforced call quota. **This is a proposed V5.1 change until merged**; V5 remains the active baseline.
+**Goal:** make JJOONI the primary developer while using ROY meaningfully as a specialist reviewer, architecture partner, incident challenger and independently owner-directed lead. Think roughly 70:30 by *work contribution*, not as a fabricated measurement of token usage or an enforced call quota. **Operational status:** the effective policy is the version currently present on `main`; this branch is a reviewable V5.1 update and does not alter external Claude/Work subscriptions before merger.
 
 ## Responsibilities and execution
 
