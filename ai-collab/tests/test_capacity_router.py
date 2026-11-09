@@ -29,13 +29,13 @@ class RoutingTests(unittest.TestCase):
     def test_origin_does_not_lock_preferred_specialist(self):
         for origin in ("USER_TO_JJOONI", "USER_TO_ROY", "GITHUB_EVENT"):
             with self.subTest(origin=origin):
-                self.assertEqual(route(origin, "backend")["preferred_agent"], "ROY")
+                self.assertEqual(route(origin, "backend")["preferred_agent"], "JJOONI")
                 self.assertEqual(route(origin, "strategy_analysis")["preferred_agent"], "JJOONI")
 
     def test_known_available_specialist_selected(self):
-        r = route(work_type="backend", capacities={"ROY": evidence("ROY", "AVAILABLE")})
+        r = route(work_type="backend", capacities={"JJOONI": evidence("JJOONI", "AVAILABLE")})
         self.assertEqual(r["state"], "REQUESTED")
-        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertEqual(r["assigned_agent"], "JJOONI")
         self.assertFalse(r["fallback_used"])
         self.assertFalse(r["safe_to_merge"])
 
@@ -45,23 +45,70 @@ class RoutingTests(unittest.TestCase):
         r = route(work_type="backend", origin="USER_TO_ROY", capacities=a)
         self.assertEqual(r["assigned_agent"], "JJOONI")
         self.assertEqual(r["independent_reviewer"], "ROY")
-        self.assertTrue(r["fallback_used"])
-        self.assertEqual(r["fallback_scope"], "READ_ONLY_PREPARATION")
+        self.assertFalse(r["fallback_used"])
+        self.assertEqual(r["fallback_scope"], "NONE")
         self.assertFalse(r["independent_review_completed"])
 
     def test_jjooni_rate_limited_handoff_to_roy_read_only(self):
         a = {"JJOONI": evidence("JJOONI", "RATE_LIMITED"),
              "ROY": evidence("ROY", "AVAILABLE")}
         r = route(work_type="strategy_analysis", capacities=a)
-        self.assertEqual(r["assigned_agent"], "ROY")
-        self.assertTrue(r["fallback_used"])
+        self.assertIsNone(r["assigned_agent"])
+        self.assertEqual(r["state"], "WAITING_CAPACITY")
+        self.assertFalse(r["fallback_used"])
         self.assertTrue(r["owner_approval_required"])
 
     def test_no_evidence_is_unknown_not_available(self):
         r = route(work_type="backend")
         self.assertEqual(r["state"], "WAITING_EVENT")
-        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertEqual(r["assigned_agent"], "JJOONI")
         self.assertEqual(r["capacity"]["ROY"]["state"], "UNKNOWN")
+
+    def test_roy_is_not_used_just_because_it_is_available(self):
+        a = {"JJOONI": evidence("JJOONI", "BUSY"),
+             "ROY": evidence("ROY", "AVAILABLE")}
+        r = route(work_type="frontend", capacities=a)
+        self.assertEqual(r["state"], "WAITING_CAPACITY")
+        self.assertIsNone(r["assigned_agent"])
+        self.assertFalse(r["roy_auto_invocation"])
+
+    def test_owner_verified_fallback_is_read_only(self):
+        a = {"JJOONI": evidence("JJOONI", "RATE_LIMITED"),
+             "ROY": evidence("ROY", "AVAILABLE")}
+        r = route(work_type="backend", capacities=a, owner_verified_roy_fallback=True)
+        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertTrue(r["fallback_used"])
+        self.assertEqual(r["fallback_scope"], "READ_ONLY_PREPARATION")
+        self.assertFalse(r["safe_to_merge"])
+
+    def test_untrusted_owner_claim_cannot_route_to_roy(self):
+        with self.assertRaises(ValueError):
+            route_task(origin="USER_TO_ROY", work_type="backend", now=NOW,
+                       owner_verified_roy_fallback=True)
+
+    def test_routine_changes_do_not_require_roy(self):
+        r = route(work_type="testing",
+                  capacities={"JJOONI": evidence("JJOONI", "AVAILABLE")})
+        self.assertEqual(r["assigned_agent"], "JJOONI")
+        self.assertFalse(r["required_independent_review"])
+        self.assertEqual(r["review_policy"], "OPTIONAL_NO_AUTO_ROY")
+
+    def test_consequential_work_still_needs_independent_review(self):
+        for work_type in ("security_review", "data_integrity", "strategy_analysis"):
+            with self.subTest(work_type=work_type):
+                r = route(work_type=work_type, required_independent_review=False,
+                          capacities={"JJOONI": evidence("JJOONI", "AVAILABLE")})
+                self.assertTrue(r["required_independent_review"])
+                self.assertEqual(r["independent_reviewer"], "ROY")
+                self.assertEqual(r["review_policy"], "MANDATORY_HIGH_ASSURANCE")
+                self.assertFalse(r["independent_review_completed"])
+                self.assertFalse(r["roy_auto_invocation"])
+
+    def test_user_origin_roy_does_not_spend_roy_by_default(self):
+        r = route(origin="USER_TO_ROY", work_type="backend")
+        self.assertEqual(r["preferred_agent"], "JJOONI")
+        self.assertEqual(r["state"], "WAITING_EVENT")
+        self.assertFalse(r["roy_auto_invocation"])
 
     def test_no_available_agents_keeps_task_pending(self):
         a = {"ROY": evidence("ROY", "RATE_LIMITED"),
