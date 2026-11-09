@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from validate_morning_brief import validate_report
+from validate_morning_brief import validate_report, validate_public_content
 
 class EditorialAcceptanceTests(unittest.TestCase):
     def setUp(self):
@@ -89,5 +89,48 @@ class EditorialAcceptanceTests(unittest.TestCase):
         close['post_publication_verified_at_kst']='2026-11-07T06:30:00+09:00'
         with self.assertRaisesRegex(AssertionError,'POST_PUBLICATION_CLOCK'):
             validate_report(revised)
+
+    def test_new_public_content_rejects_internal_markers(self):
+        base = dict(report_date_kst='2026-11-10', title='시장 데이터', verification_note='공식 원천 검증',
+                    body_markdown='미국 나스닥 완료장과 산업 실적의 검증된 분석')
+        leaking = [
+            '내부 AI_BOARD 링크', 'MAIOS 내부 작업', 'SONG_DB_FACTCHECK 구체 테이블',
+            'decision_gate LIMITED', 'PB View 화면', 'CT LIVE 상태',
+            'https://docs.google.com/spreadsheets/d/SECRET_PLACEHOLDER',
+            'Google Drive 폴더 위치', 'Plaud 내부 자료',
+            '토스증권 계좌 보유액', 'KB증권 잔고', 'Toss 계좌 보유 종목',
+            'Plaud 녹취', 'Google Drive의 폴더', '토스증권의 계좌',
+            'Toss 증권 계좌', '키움증권 계좌 잔고', 'decision-gate',
+            'https://docs.google.com/spreadsheets/u/0/d/SECRET_PLACEHOLDER',
+            '구글 드라이브 폴더', 'decision gate', '카카오페이증권 계좌',
+            '대신증권 계좌', 'Toss Securities account', 'KB증권을 통한 계좌',
+            'https://drive.google.com/drive/folders/EXAMPLE',
+        ]
+        for value in leaking:
+            for field in ('title', 'verification_note', 'body_markdown'):
+                sample = dict(base, **{field: value})
+                with self.subTest(value=value, field=field):
+                    with self.assertRaisesRegex(AssertionError, 'PUBLIC_INTERNAL_REFERENCE'):
+                        validate_public_content(sample)
+
+    def test_public_privacy_guard_is_forward_only_not_archive_rewrite(self):
+        historic = dict(report_date_kst='2026-11-07', title='원본 보관',
+                        verification_note='내부 AI_BOARD 인용 포함', body_markdown='CT LIVE')
+        validate_public_content(historic)
+        future = dict(historic, report_date_kst='2026-11-10')
+        with self.assertRaisesRegex(AssertionError, 'PUBLIC_INTERNAL_REFERENCE'):
+            validate_public_content(future)
+
+    def test_public_market_data_does_not_trigger_false_private_block(self):
+        normal = dict(report_date_kst='2026-11-10', title='미국 완료장 시장 시황',
+                      verification_note='NDX 정규장 종가 독립 검증',
+                      body_markdown='S&P500과 나스닥100, 주요 증권사 전망, FedWatch, 기업 IR, 글로벌 AI CAPEX')
+        validate_public_content(normal)
+
+        # Broker analyst opinions and generic English text are not personal accounts.
+        for safe_text in ('한국투자증권 보유 의견', 'NH투자증권 평가 상향',
+                          '미래에셋증권 실현 가능성', 'CT live demo'):
+            with self.subTest(safe_text=safe_text):
+                validate_public_content(dict(normal, body_markdown=safe_text))
 
 if __name__=='__main__':unittest.main()
