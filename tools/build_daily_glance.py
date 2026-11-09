@@ -24,6 +24,7 @@ SCHEMA = "JJOONI_DAILY_GLANCE_V1"
 MA_UP, MA_DOWN, DD_LIMIT, VIX_TRI, VIX_NO = 1.01, 0.95, -9.0, 28.0, 18.0
 POD = {"TQQQ 100%": "TRIPOD", "QQQ 50% + QLD 50%": "BIPOD", "현금 100%": "NOPOD"}
 BRIEF_TOLERANCE_PCT = 0.10
+SIGNAL_PRICE_TOLERANCE_PCT = 0.01
 
 GROUPS = [
     ("미국", [("NASDAQ100", "나스닥100"), ("SP500", "S&P500"), ("NASDAQCOMPOSITE", "나스닥종합"),
@@ -158,11 +159,28 @@ def brief_check(brief, by_key, us_session):
     obs = by_key.get("NASDAQ100", {})
     if not ndx or not isinstance(ndx.get("close"), (int, float)) or obs.get("date") != us_session:
         return {**result, "status": "NOT_COMPARABLE"}
+    if ndx.get("status") != "VERIFIED" or ndx.get("official_status") not in (None, "VERIFIED"):
+        return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
+                "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
     diff = round((ndx["close"] / obs["value"] - 1) * 100, 3)
     status = "MATCH" if abs(diff) <= BRIEF_TOLERANCE_PCT else "MISMATCH"
     return {**result, "status": status, "brief_ndx": ndx["close"], "pipeline_ndx": obs["value"], "diff_pct": diff,
             "text": ("아침 시황의 NDX 종가가 파이프라인 확정치와 일치합니다." if status == "MATCH" else
                      f"아침 시황 NDX {ndx['close']:,.2f}가 파이프라인 확정치 {obs['value']:,.2f}와 {diff:+.3f}% 다릅니다. 카드 수치를 우선하세요.")}
+
+
+def signal_consistency(tri, ndx, us_session):
+    """Signal, completed session and NDX bar must describe the same close."""
+    reasons = []
+    if tri.get("session") != us_session:
+        reasons.append(f"signal_session {tri.get('session')} != us_session {us_session}")
+    if ndx.get("date") != us_session:
+        reasons.append(f"ndx_bar {ndx.get('date')} != us_session {us_session}")
+    if ndx.get("value") and abs(tri["ndx"] / ndx["value"] - 1) * 100 > SIGNAL_PRICE_TOLERANCE_PCT:
+        reasons.append(f"signal_ndx {tri['ndx']} != bar {ndx['value']}")
+    if ndx.get("d1_pct") is None:
+        reasons.append("ndx_d1_missing")
+    return {"status": "OK" if not reasons else "CONFLICT", "reasons": reasons}
 
 
 def build(obs, brief=None, now=None):
@@ -180,14 +198,19 @@ def build(obs, brief=None, now=None):
         groups.append({"name": name, "items": rows})
     tri = tripod_block(sig)
     ndx = by_key.get("NASDAQ100", {})
-    headline = (f"{tri['pod']}{' 전환' if tri['changed'] else ' 유지'} · NDX {tri['ndx']:,.0f}"
-                f"({ndx.get('d1_pct', 0):+.2f}%) · VIX10 {tri['vix10']:.1f} · DD {tri['drawdown_52w_pct']:.1f}%")
+    consistency = signal_consistency(tri, ndx, us_session)
+    if consistency["status"] == "OK":
+        headline = (f"{tri['pod']}{' 전환' if tri['changed'] else ' 유지'} · NDX {tri['ndx']:,.0f}"
+                    f"({ndx['d1_pct']:+.2f}%) · VIX10 {tri['vix10']:.1f} · DD {tri['drawdown_52w_pct']:.1f}%")
+    else:
+        headline = (f"⚠️ 신호·시세 불일치 — TRI-POD {tri['pod']}({tri['session']}) 기준, "
+                    f"시세 표는 {ndx.get('date', '—')} · 전환선은 참고만")
     missing = [r["key"] for r in by_key.values() if r.get("status") == "MISSING"]
     return {
         "schema": SCHEMA, "generated_kst": now.isoformat(timespec="seconds"),
         "us_session": us_session, "source_generated_kst": obs.get("generated_kst"),
         "read_only": True, "contains_account_data": False, "no_trade": True,
-        "headline": headline, "tripod": tri, "groups": groups,
+        "headline": headline, "tripod": tri, "consistency": consistency, "groups": groups,
         "cross_read": asia_read(by_key, us_session),
         "brief_check": brief_check(brief, by_key, us_session),
         "quality": {"missing": missing, "number_source": "market-observatory/data/observatory.json only",

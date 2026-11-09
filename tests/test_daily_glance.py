@@ -36,9 +36,10 @@ def observatory(**over):
     return obs
 
 
-def brief(close, market_date="2026-11-06"):
+def brief(close, market_date="2026-11-06", status="VERIFIED", official="VERIFIED"):
     return {"report_date_kst": "2026-11-07", "market_date_us": market_date,
-            "editorial_contract": {"close_checks": [{"symbol": "NDX", "close": close}]}}
+            "editorial_contract": {"close_checks": [{"symbol": "NDX", "close": close, "status": status,
+                                                     "official_status": official}]}}
 
 
 class DailyGlance(unittest.TestCase):
@@ -73,6 +74,31 @@ class DailyGlance(unittest.TestCase):
         self.assertEqual(ok["status"], "MATCH")
         other = glance.build(observatory(), brief(26000, "2026-11-05"))["brief_check"]
         self.assertEqual(other["status"], "NOT_SAME_SESSION")
+
+    def test_unverified_brief_close_is_never_certified(self):
+        for status, official in (("CONFLICT", "NOT_VERIFIED"), ("CROSS_CHECKED", "DELAYED"),
+                                 ("VERIFIED", "NOT_VERIFIED"), (None, None)):
+            check = glance.build(observatory(), brief(26989.99, status=status, official=official))["brief_check"]
+            self.assertEqual(check["status"], "UNVERIFIED", (status, official))
+
+    def test_stale_signal_is_isolated_from_current_bar(self):
+        stale = dict(observatory()["tripod_latest"], date="2026-11-05", session_date="2026-11-05", ndx=26629.81)
+        g = glance.build(observatory(tripod_latest=stale))
+        self.assertEqual(g["consistency"]["status"], "CONFLICT")
+        self.assertIn("불일치", g["headline"])
+        self.assertNotIn("26,630(+1.35%)", g["headline"])
+        price_only = dict(observatory()["tripod_latest"], ndx=27154.71)
+        self.assertEqual(glance.build(observatory(tripod_latest=price_only))["consistency"]["status"], "CONFLICT")
+        self.assertEqual(glance.build(observatory())["consistency"]["status"], "OK")
+
+    def test_workflow_write_token_only_in_publish_job(self):
+        wf = (ROOT / ".github/workflows/market-observatory-daily-glance.yml").read_text(encoding="utf-8")
+        top = wf.split("jobs:")[0]
+        self.assertIn("contents: read", top)
+        self.assertNotIn("contents: write", top)
+        publish = wf.split("  publish:")[1]
+        self.assertIn("contents: write", publish)
+        self.assertIn("github.event_name != 'pull_request'", publish)
 
     def test_refuses_without_signal_and_never_carries_account_data(self):
         with self.assertRaises(ValueError):

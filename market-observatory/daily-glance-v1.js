@@ -1,7 +1,7 @@
 /* JJOONI Daily Glance — 30-second market card. Read-only; numbers come from daily-glance.json. */
 (function () {
   'use strict';
-  var VERSION = '20261109-glance1';
+  var VERSION = '20261109-glance2';
   var main = document.querySelector('main.wrap');
   if (!main || document.getElementById('dailyGlance')) return;
   var host = document.createElement('section');
@@ -56,13 +56,15 @@
     var bc = g.brief_check || {};
     var brief = bc.status === 'MISMATCH' ? '<div class="dgWarn">⚠️ ' + esc(bc.text) + '</div>' :
       bc.status === 'MATCH' ? '<div class="dgOk">✓ ' + esc(bc.text) + '</div>' :
+      bc.status === 'UNVERIFIED' ? '<div class="dgWarn">' + esc(bc.text) + '</div>' :
       bc.text ? '<div class="dgMeta">' + esc(bc.text) + '</div>' : '';
+    var cons = g.consistency && g.consistency.status !== 'OK' ? '<div class="dgWarn">⚠️ TRI-POD 신호와 시세 날짜·종가가 맞지 않아 전환선 거리는 참고용입니다.</div>' : '';
     host.innerHTML =
       '<div class="dgHead" role="button" tabindex="0" aria-expanded="' + (collapsed === '1' ? 'false' : 'true') + '">' +
         '<span class="dgPod ' + esc(t.pod) + '">' + esc(t.pod) + '</span>' +
         '<span class="dgTitle">' + esc(g.headline) + '</span>' +
         '<span class="dgMeta">미국 ' + esc(g.us_session) + ' 완료장 · 30초 시황</span></div>' +
-      '<div class="dgBody">' +
+      '<div class="dgBody">' + cons +
         '<ul><li>▲ ' + esc(t.next_up) + '</li><li>▼ ' + esc(t.next_down) + '</li>' +
         (g.cross_read || []).map(function (c) { return '<li>' + esc(c.text) + '</li>'; }).join('') + '</ul>' +
         brief + '<div class="dgGrid">' + tables + '</div>' +
