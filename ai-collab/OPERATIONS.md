@@ -13,16 +13,16 @@ Either agent may receive a request first. Both follow the same task/PR contract 
 - If the request starts with **JJOONI**, JJOONI creates the contract and ROY gets the review task. If it starts with **ROY**, ROY creates/updates the same kind of contract with `origin=USER_TO_ROY`, `required_reviewers=["JJOONI"]` and no ROY reviewer (no self-review). `JJANGGU` is optional, never a fake required placeholder. JJOONI checks the new PR/HEAD when the repo-wide Work PR.opened subscription is actually proven; a user-directed manual review or hourly scan is labelled as such, never called an automatic event receipt. The model contacted first does **not** gain merge authority.
 - A task contract in an untrusted PR controls only the public read-only *subject*. It cannot authorize new writes, secret access, production deployment or a budget increase.
 
-## Cost-aware JJOONI-first routing (policy, not model dispatch)
+## Balanced JJOONI-first routing (V5.1; policy, not model dispatch)
 
 | Work type | Primary implementer | ROY engagement |
 | --- | --- | --- |
-| Architecture, product, UI, backend, scripts, automation, tests, docs, incident fixes | **JJOONI** | No ROY by default |
+| Architecture, product, UI, backend, scripts, automation, tests, docs, incident fixes | **JJOONI** | One ROY challenge for substantial architecture/feature changes or recurring root-cause problems; routine fixes do not require it |
 | Strategy analysis, market/account data integrity, security, identity or credentials | **JJOONI** | Independent ROY challenge is mandatory before final acceptance |
-| Explicitly owner-requested second opinion | **JJOONI** | ROY reviews only the pinned relevant HEAD |
+| Explicitly owner-requested ROY-led work | **ROY**, after independently verified owner direction | JJOONI performs the separate review of the current HEAD; ROY may lead design/analysis |
 | ROY unavailable or rate-limited | **JJOONI continues** | Preserve review as pending where mandatory; do not repeatedly invoke ROY |
 
-`capacity_router.py` returns JJOONI first for **all** work types; it does not invoke a model. ROY fallback for the first pass requires separately verified owner delegation and remains read-only. A PR-authored assertion is not such delegation. See [JJOONI_FIRST.md](./JJOONI_FIRST.md).
+`capacity_router.py` returns JJOONI first for **ordinary** work, and explicitly authenticated USER_TO_ROY tasks may be ROY-led. For substantial features/repeated failures it recommends a targeted independent ROY review, while high-assurance changes require one. It **does not invoke a model**. ROY fallback/lead requires separately verified owner intent; a PR-authored assertion is not authority. See [JJOONI_FIRST.md](./JJOONI_FIRST.md).
 
 ## Quota / outage / asynchronous handoff
 
@@ -34,7 +34,7 @@ Either agent may receive a request first. Both follow the same task/PR contract 
 | One agent busy | Queue or assign a read-only preparatory task to the other with a handoff receipt | Duplicate writes and racing branches |
 | Missing expected webhook or no reply | `WAITING_EVENT`/`UNKNOWN` and inspect event filters, GitHub logs and platform session history | Diagnose usage exhaustion solely from silence |
 | Quota reset timestamp passed | Set availability to `UNKNOWN`, re-verify with actual provider run | Assume the agent is AVAILABLE or relaunch many times |
-| User starts request directly with ROY | ROY may intake/independently analyze the request; JJOONI does routine implementation. Use an opt-in `[AI-COLLAB]` task only when independent ROY work is explicitly needed | Require a second user chat or silently claim ROY ran |
+| User starts request directly with ROY | ROY can lead with verified owner intent; JJOONI independently reviews, while ROY remains subject to fork-only write constraints | Silently force handoff to JJOONI or treat PR `origin` as authentication |
 | User starts request directly with JJOONI | JJOONI implements on a normal `[JJOONI-DEV]` PR; Claude is not invoked for routine work. High-assurance tasks opt in separately | Automatically spend a ROY run for each ordinary PR |
 
 **Why conservative:** Anthropic routines consume account subscription + daily run allowances. GitHub event caps may drop deliveries; missing output can mean quota, unsupported trigger, webhook filters or execution failure. Only source-verified run evidence may set `AVAILABLE`, `BUSY`, `RATE_LIMITED` or `UNAVAILABLE`. Verified records expire after 120 minutes; expired reset time becomes UNKNOWN rather than automatically AVAILABLE. See https://code.claude.com/docs/ko/routines.

@@ -2,9 +2,9 @@
 
 **Scope:** all future explicitly opted-in GitHub PR tasks in `mauveplace/jjooni-control-tower`. There is **NO hardcoded PR number, dated task ID, moving HEAD, or named incident** in the dispatcher. The current production observatory, trading and account systems are out of scope.
 
-## Execution track and ROY budget (V5 active policy)
+## Execution track and ROY collaboration (V5.1 balanced policy)
 
-For regular code/automation/UI/tests/incident work, use the **JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md): JJOONI develops and tests, normal PR title `[JJOONI-DEV]`, no `[AI-COLLAB]` opt-in and **no automatic ROY run**. Consequential strategy/data/security changes or explicit owner requests use the existing V4 dual-agent track with one ROY independent review of the current HEAD. The `capacity_router.py` defaults to JJOONI for all work types. The policy has been approved and merged in PR #338. It does not change external Claude/Work subscriptions or release permissions.
+Use the **balanced JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md): JJOONI owns most coding, tests and incident fixes. Invite ROY for substantive design/code reviews, repeated unclear failures and mandatory security/data/strategy verification. An independently authenticated `USER_TO_ROY` owner request can select ROY as the initial lead, with JJOONI as independent reviewer. Routine PRs use `[JJOONI-DEV]`; the V4 `[AI-COLLAB]` opt-in remains the supported channel for actual ROY collaboration. Approximate 70:30 refers to the *desired division of substantive work*, not tracked usage. Repo policy never changes Claude/Work event subscriptions or release permissions.
 
 The V4 rules below remain strict **when the dual-agent track is opted into**, including task JSON validation, role provenance, review dedupe and release gates.
 
@@ -12,7 +12,7 @@ The V4 rules below remain strict **when the dual-agent track is opted into**, in
 
 - **User:** owns objectives, budget constraints and final approval for main merges/deploys.
 - **JJOONI / ChatGPT Work:** primary developer and incident responder (code, UI, automation, tests, GitHub triage); creates a dual-agent task only when needed, independently audits current PR HEAD, and never merges/deploys without user approval.
-- **ROY / Claude Code Routine:** scarce independent reviewer for consequential changes or an explicit owner request. Does not run for normal JJOONI PRs. A separately authorized future fork-only editor is possible, but this V4 review mode itself is read-only and cannot bypass the current fork-PR 403 permission gate.
+- **ROY / Claude Code Routine:** specialist partner for significant architecture/feature review, recurring bugs, mandatory critical-code challenge, and owner-directed ROY-first work. Do not call for every minor change; this V4 Routine remains read-only and cannot bypass the existing fork-PR 403 permission gate.
 - **JJANGGU / Gemini:** optional only. If/when enabled, add to `required_reviewers`; default required list is `['ROY']`.
 
 ## Persistent PR task contract

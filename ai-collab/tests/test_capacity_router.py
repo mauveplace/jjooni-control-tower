@@ -79,6 +79,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(r["assigned_agent"], "ROY")
         self.assertTrue(r["fallback_used"])
         self.assertEqual(r["fallback_scope"], "READ_ONLY_PREPARATION")
+        self.assertEqual(r["independent_reviewer"], "JJOONI")
         self.assertFalse(r["safe_to_merge"])
 
     def test_untrusted_owner_claim_cannot_route_to_roy(self):
@@ -108,6 +109,94 @@ class RoutingTests(unittest.TestCase):
         r = route(origin="USER_TO_ROY", work_type="backend")
         self.assertEqual(r["preferred_agent"], "JJOONI")
         self.assertEqual(r["state"], "WAITING_EVENT")
+        self.assertFalse(r["roy_auto_invocation"])
+
+    def test_substantive_backend_gets_one_roy_review_recommendation(self):
+        r = route(work_type="backend", complexity="SUBSTANTIVE",
+                  capacities={"JJOONI": evidence("JJOONI", "AVAILABLE")})
+        self.assertEqual(r["assigned_agent"], "JJOONI")
+        self.assertFalse(r["required_independent_review"])
+        self.assertTrue(r["review_recommended"])
+        self.assertEqual(r["review_policy"], "RECOMMENDED_COMPLEXITY")
+        self.assertEqual(r["review_duplicate_key"], "TASK_ID_AND_CURRENT_HEAD")
+        self.assertEqual(r["independent_reviewer"], "ROY")
+        self.assertFalse(r["roy_auto_invocation"])
+
+    def test_repeated_failure_recommends_roy_challenge(self):
+        r = route(work_type="frontend", repeated_failure=True)
+        self.assertEqual(r["review_policy"], "RECOMMENDED_COMPLEXITY")
+        self.assertEqual(r["review_reason"], "REPEATED_FAILURE")
+        self.assertFalse(r["required_independent_review"])
+
+    def test_minor_ui_change_does_not_spend_roy(self):
+        r = route(work_type="frontend", complexity="ROUTINE")
+        self.assertFalse(r["review_recommended"])
+        self.assertEqual(r["review_policy"], "OPTIONAL_NO_AUTO_ROY")
+
+    def test_user_to_roy_can_lead_with_verified_owner_intent(self):
+        r = route(origin="USER_TO_ROY", work_type="backend",
+                  owner_verified_roy_lead=True,
+                  capacities={"ROY": evidence("ROY", "AVAILABLE"),
+                              "JJOONI": evidence("JJOONI", "AVAILABLE")})
+        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertEqual(r["preferred_agent"], "ROY")
+        self.assertEqual(r["independent_reviewer"], "JJOONI")
+        self.assertTrue(r["required_independent_review"])
+        self.assertTrue(r["review_recommended"])
+        self.assertEqual(r["review_stage"], "AFTER_IMPLEMENTATION_AND_TESTS")
+        self.assertFalse(r["roy_auto_invocation"])
+        self.assertFalse(r["safe_to_merge"])
+
+    def test_roy_first_pending_still_requires_jjooni_review(self):
+        r = route(origin="USER_TO_ROY", work_type="documentation",
+                  owner_verified_roy_lead=True)
+        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertEqual(r["state"], "WAITING_EVENT")
+        self.assertTrue(r["required_independent_review"])
+        self.assertEqual(r["independent_reviewer"], "JJOONI")
+        self.assertFalse(r["independent_review_completed"])
+
+    def test_roy_fallback_never_self_reviews_high_assurance(self):
+        a = {"JJOONI": evidence("JJOONI", "RATE_LIMITED"),
+             "ROY": evidence("ROY", "AVAILABLE")}
+        r = route(work_type="data_integrity", capacities=a,
+                  owner_verified_roy_fallback=True)
+        self.assertEqual(r["assigned_agent"], "ROY")
+        self.assertEqual(r["independent_reviewer"], "JJOONI")
+        self.assertTrue(r["required_independent_review"])
+        self.assertFalse(r["independent_review_completed"])
+        self.assertFalse(r["safe_to_merge"])
+
+    def test_owner_directed_roy_does_not_silently_fall_back(self):
+        r = route(origin="USER_TO_ROY", work_type="backend",
+                  owner_verified_roy_lead=True,
+                  capacities={"ROY": evidence("ROY", "RATE_LIMITED"),
+                              "JJOONI": evidence("JJOONI", "AVAILABLE")})
+        self.assertIsNone(r["assigned_agent"])
+        self.assertEqual(r["next_step"], "WAIT_FOR_ROY_OR_OWNER_REASSIGNMENT")
+
+    def test_forged_owner_roy_lead_is_rejected(self):
+        with self.assertRaises(ValueError):
+            route_task(origin="USER_TO_ROY", work_type="backend",
+                       owner_verified_roy_lead=True, now=NOW)
+        with self.assertRaises(ValueError):
+            route(origin="USER_TO_JJOONI", work_type="backend",
+                  owner_verified_roy_lead=True)
+        with self.assertRaises(ValueError):
+            route(origin="USER_TO_ROY", work_type="backend",
+                  owner_verified_roy_lead=True, owner_verified_roy_fallback=True)
+
+    def test_invalid_complexity_fails_closed(self):
+        with self.assertRaises(ValueError):
+            route(work_type="frontend", complexity="freeform")
+        with self.assertRaises(ValueError):
+            route(work_type="frontend", repeated_failure="yes")
+
+    def test_high_assurance_cannot_be_waived_for_simple_task(self):
+        r = route(work_type="security_review", complexity="ROUTINE",
+                  required_independent_review=False)
+        self.assertTrue(r["required_independent_review"])
+        self.assertTrue(r["review_recommended"])
         self.assertFalse(r["roy_auto_invocation"])
 
     def test_no_available_agents_keeps_task_pending(self):
