@@ -2,6 +2,10 @@
 
 These product-side settings must be installed **once** in their respective accounts. Merging this file or changing an automation prompt is **not** proof that a webhook subscription was changed. Do not provision a model API key or paid server.
 
+## V5 quota-conserving override (proposed)
+
+JJOONI is now the default executor for ordinary development, CI fixes and operational incidents; see [JJOONI_FIRST.md](./JJOONI_FIRST.md). **Do not trigger ROY for generic `[JJOONI-DEV]` PRs or a frequent GitHub error-mail sweep.** Keep any existing Claude `PR 열림` Routine limited to explicit `[AI-COLLAB]` review tasks. If the event UI does not actually filter before triggering a Claude session, confirm its behavior before adding broad events; a prompt that exits early can still consume a run. Use one HEAD-pinned ROY request after JJOONI has code+tests ready for high-assurance review. This repo documentation cannot configure Claude subscription filters by itself. Do not enable extra paid usage or broaden GitHub permissions.
+
 ## Claude: ROY AI-COLLAB Pilot Review → Evergreen Review
 
 Location: https://claude.ai/code/routines (user account). Keep the existing `PR 열림` trigger for new opted-in PRs. The user's current event picker does **not** offer PR labeled/synchronize/comment triggers, so create a **separate** `이슈 열림` Routine for follow-up requests per `ai-collab/FOLLOWUP_ISSUE_DISPATCH.md`. Keep both read-only. Do not use a temporary PR-number/branch-prefix restriction.
