@@ -61,10 +61,11 @@ TN_REVIEW_REQUIRED = ("market", "matured_session_date", "calendar_basis")
 #   DECLARED_WITH_SOURCE  author declares the holidays skipped, with source + checker; validator recomputes.
 #   UNVERIFIED            weekday lower bound only; PROVISIONAL, excluded from confirmed scorecards.
 CALENDAR_BASIS = {"AUTO_NYSE_RULES", "DECLARED_WITH_SOURCE", "UNVERIFIED"}
-CONFIRMED_CALENDAR = {"AUTO_NYSE_RULES", "DECLARED_WITH_SOURCE"}
 REVIEW_VERDICT = {"CORRECT", "INCORRECT", "MIXED", "NOT_EVALUABLE"}
 REVIEW_ALLOWED = set(REVIEW_REQUIRED) | set(TN_REVIEW_REQUIRED) | {
-    "observed", "counterfactual", "lesson", "reviewer", "sources", "execution_evidence", "calendar_evidence"}
+    "observed", "counterfactual", "lesson", "reviewer", "sources", "execution_evidence", "calendar_evidence",
+    "event_evidence"}
+EVENT_EVIDENCE_REQUIRED = ("source", "occurred_at_kst")
 
 # ---- public-ledger privacy guard -------------------------------------------------
 FORBIDDEN_KEYS = {
@@ -119,14 +120,19 @@ def _ts(s: str) -> datetime | None:
         return None
 
 
+def _kst_ok(s) -> bool:
+    """Format AND real calendar/clock value (rejects 2026-11-99, T99:00)."""
+    return isinstance(s, str) and bool(KST_TS.match(s)) and _ts(s) is not None
+
+
 def _provenance_errors(meta: dict, decision_kst, label: str) -> list[str]:
     """Inputs must be non-empty-sourced and observable at or before the decision time (no look-ahead)."""
     errs = []
     if "source" in meta and (not isinstance(meta["source"], str) or not meta["source"].strip()):
         errs.append(f"{label}.source must be a non-empty string")
     if "observed_at_kst" in meta:
-        if not KST_TS.match(str(meta["observed_at_kst"])):
-            errs.append(f"{label}.observed_at_kst must be ISO-8601 with +09:00")
+        if not _kst_ok(meta["observed_at_kst"]):
+            errs.append(f"{label}.observed_at_kst must be a real ISO-8601 time with +09:00")
         else:
             t_obs, t_dec = _ts(meta["observed_at_kst"]), _ts(decision_kst)
             if t_obs and t_dec and t_obs > t_dec:
@@ -195,6 +201,16 @@ def nyse_holidays(y: int) -> set[date]:
     return out
 
 
+def nyse_early_closes(y: int) -> set[date]:
+    """Rule-based NYSE 13:00 ET early closes: July 3 (Mon-Thu, when not itself the observed
+    holiday), the day after Thanksgiving, and Dec 24 (Mon-Thu)."""
+    out = {_nth_weekday(y, 11, 3, 4) + timedelta(days=1)}
+    for d in (date(y, 7, 3), date(y, 12, 24)):
+        if d.weekday() < 4 and d not in nyse_holidays(y):
+            out.add(d)
+    return out
+
+
 def nth_session(market: str, decision_kst: datetime, n: int, skip: set[date]) -> date:
     """Nth regular session (weekday, not in `skip`) whose close is after the decision time."""
     d = decision_kst.astimezone(MARKET_CLOSE[market][0]).date()
@@ -209,6 +225,8 @@ def nth_session(market: str, decision_kst: datetime, n: int, skip: set[date]) ->
 
 def session_close_kst(market: str, d: date) -> datetime:
     tz, close = MARKET_CLOSE[market]
+    if market == "US" and d in nyse_early_closes(d.year):
+        close = time(13, 0)
     return datetime.combine(d, close, tzinfo=tz).astimezone(KST)
 
 
@@ -222,8 +240,8 @@ def validate_decision(rec: dict, where: str) -> list[str]:
     errs += [f"{where}: unknown field '{k}'" for k in rec if k not in DECISION_ALLOWED]
     if "decision_id" in rec and not DECISION_ID.match(str(rec["decision_id"])):
         errs.append(f"{where}: decision_id must be YYYY-MM-DD-NN")
-    if "kst" in rec and not KST_TS.match(str(rec["kst"])):
-        errs.append(f"{where}: kst must be ISO-8601 with +09:00")
+    if "kst" in rec and not _kst_ok(rec["kst"]):
+        errs.append(f"{where}: kst must be a real ISO-8601 time with +09:00")
     if "decision_id" in rec and "kst" in rec and not str(rec["kst"]).startswith(str(rec["decision_id"])[:10]):
         errs.append(f"{where}: decision_id date must match kst date")
     for field, allowed in (("status", DECISION_STATUS), ("consensus", CONSENSUS),
@@ -268,8 +286,8 @@ def validate_review(rec: dict, where: str) -> list[str]:
     errs += [f"{where}: unknown field '{k}'" for k in rec if k not in REVIEW_ALLOWED]
     if "horizon" in rec and not HORIZON.match(str(rec["horizon"])):
         errs.append(f"{where}: horizon must look like T+5 or 'next NO-POD'")
-    if "asof_kst" in rec and not KST_TS.match(str(rec["asof_kst"])):
-        errs.append(f"{where}: asof_kst must be ISO-8601 with +09:00")
+    if "asof_kst" in rec and not _kst_ok(rec["asof_kst"]):
+        errs.append(f"{where}: asof_kst must be a real ISO-8601 time with +09:00")
     if "verdict" in rec and rec["verdict"] not in REVIEW_VERDICT:
         errs.append(f"{where}: verdict must be one of {sorted(REVIEW_VERDICT)}")
     if "executed" in rec and not isinstance(rec["executed"], bool):
@@ -308,16 +326,43 @@ def validate_review(rec: dict, where: str) -> list[str]:
                         errs.append(f"{where}: calendar_evidence.{k} must be a non-empty string")
                 if not isinstance(ev.get("holidays_skipped"), list):
                     errs.append(f"{where}: calendar_evidence.holidays_skipped must be a list (empty if none)")
-        if ev is not None and isinstance(ev, dict):
+        if ev is not None and not isinstance(ev, dict):
+            errs.append(f"{where}: calendar_evidence must be an object")
+        if isinstance(ev, dict):
             for k in ("holidays_skipped", "extra_closures"):
-                for x in ev.get(k, []) if isinstance(ev.get(k), list) else []:
+                if k in ev and not isinstance(ev[k], list):
+                    errs.append(f"{where}: calendar_evidence.{k} must be a list of YYYY-MM-DD strings")
+                    continue
+                for x in ev.get(k, []):
                     if _date(x) is None:
                         errs.append(f"{where}: calendar_evidence.{k} has invalid date {x!r}")
             if ev.get("extra_closures") and not (isinstance(ev.get("source"), str) and ev["source"].strip()):
                 errs.append(f"{where}: calendar_evidence.extra_closures requires a non-empty source")
         if cb == "UNVERIFIED" and ev is not None:
             errs.append(f"{where}: calendar_basis=UNVERIFIED must not carry calendar_evidence")
+    elif "event_evidence" in rec:
+        ee = rec["event_evidence"]
+        if not isinstance(ee, dict):
+            errs.append(f"{where}: event_evidence must be an object {{source, occurred_at_kst}}")
+        else:
+            if not isinstance(ee.get("source"), str) or not ee.get("source", "").strip():
+                errs.append(f"{where}: event_evidence.source must be a non-empty string")
+            if not _kst_ok(ee.get("occurred_at_kst")):
+                errs.append(f"{where}: event_evidence.occurred_at_kst must be a real ISO-8601 time with +09:00")
     return errs + privacy_errors(rec, where)
+
+
+def event_errors(rec: dict, dec: dict, where: str) -> list[str]:
+    ee = rec.get("event_evidence")
+    if T_N.match(str(rec.get("horizon", ""))) or not isinstance(ee, dict) or not _kst_ok(ee.get("occurred_at_kst")):
+        return []
+    t_ev, t_dec, t_rev = _ts(ee["occurred_at_kst"]), _ts(dec.get("kst")), _ts(rec.get("asof_kst"))
+    errs = []
+    if t_dec and t_ev <= t_dec:
+        errs.append(f"{where}: event occurred_at_kst must be after the decision time {dec.get('kst')}")
+    if t_rev and t_ev > t_rev:
+        errs.append(f"{where}: event occurred_at_kst is after the review asof_kst")
+    return errs
 
 
 def maturity_errors(rec: dict, dec: dict, where: str) -> list[str]:
@@ -336,7 +381,8 @@ def maturity_errors(rec: dict, dec: dict, where: str) -> list[str]:
     if session < earliest:
         errs.append(f"{where}: {rec['horizon']} cannot mature on {session} ({market}); earliest possible session is {earliest}")
     ev = rec.get("calendar_evidence") if isinstance(rec.get("calendar_evidence"), dict) else {}
-    extra = {d for d in (_date(x) for x in ev.get("extra_closures", []) or []) if d}
+    extra_raw = ev.get("extra_closures", [])
+    extra = {d for d in (_date(x) for x in extra_raw) if d} if isinstance(extra_raw, list) else set()
     skip = None
     if cb == "AUTO_NYSE_RULES" and market == "US":
         skip = set().union(*(nyse_holidays(y) for y in range(t_dec.year, t_dec.year + 2))) | extra
@@ -430,6 +476,7 @@ def validate_tree(root: Path) -> list[str]:
             if rec.get("outcome_basis") == "ACTUAL" and dec.get("execution") != "EXECUTED":
                 errs.append(f"{where}: ACTUAL outcome but decision {did} execution is {dec.get('execution')}; append a superseding decision first")
             errs += maturity_errors(rec, dec, where)
+            errs += event_errors(rec, dec, where)
     errs += markdown_privacy_errors(root)
     return errs
 
@@ -489,10 +536,20 @@ def _is_json(s: str) -> bool:
         return False
 
 
+def is_confirmed(rec: dict) -> bool:
+    """CONFIRMED only when the validator itself recomputed the maturity:
+    T+N on US with AUTO_NYSE_RULES and no declared extra closures. Declared calendars (incl. KRX),
+    declared extra closures, UNVERIFIED calendars and event horizons stay PROVISIONAL; event horizons
+    additionally need event_evidence even to be listed."""
+    if T_N.match(str(rec.get("horizon", ""))):
+        ev = rec.get("calendar_evidence") if isinstance(rec.get("calendar_evidence"), dict) else {}
+        return rec.get("calendar_basis") == "AUTO_NYSE_RULES" and not ev.get("extra_closures")
+    return False
+
+
 def scorecard(root: Path) -> dict:
     """Aggregate outcome reviews. ACTUAL and COUNTERFACTUAL are never mixed.
-    A review counts as CONFIRMED only if its horizon is event-based or its calendar_basis is verified;
-    UNVERIFIED-calendar reviews are reported separately as PROVISIONAL."""
+    See is_confirmed(); everything else is reported separately as PROVISIONAL."""
     out = {b: {"confirmed": {v: 0 for v in sorted(REVIEW_VERDICT)}, "provisional": {v: 0 for v in sorted(REVIEW_VERDICT)}}
            for b in sorted(OUTCOME_BASIS)}
     for f in sorted(root.glob("*/*/outcome-reviews.jsonl")):
@@ -501,7 +558,7 @@ def scorecard(root: Path) -> dict:
             b, v = rec.get("outcome_basis"), rec.get("verdict")
             if b not in OUTCOME_BASIS or v not in REVIEW_VERDICT:
                 continue
-            confirmed = not T_N.match(str(rec.get("horizon", ""))) or rec.get("calendar_basis") in CONFIRMED_CALENDAR
+            confirmed = is_confirmed(rec)
             out[b]["confirmed" if confirmed else "provisional"][v] += 1
     return out
 

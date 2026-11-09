@@ -262,6 +262,68 @@ class ReviewTest(unittest.TestCase):
         self.assertTrue(has(errs_for([GOOD], [ev]), "invalid date '2026-02-30'"))
 
 
+class Round4Test(unittest.TestCase):
+    """JJOONI round-4 regressions (synthetic data)."""
+
+    def test_declared_holiday_cannot_confirm(self):
+        fake = dict(REVIEW, matured_session_date="2026-11-16", asof_kst="2026-11-17T07:00+09:00",
+                    calendar_basis="DECLARED_WITH_SOURCE",
+                    calendar_evidence={"source": "synthetic", "checked_by": "x", "holidays_skipped": ["2026-11-13"]})
+        root = write_tree([GOOD], [fake])
+        self.assertEqual(dl.validate_tree(root), [])  # recorded, but...
+        sc = dl.scorecard(root)["COUNTERFACTUAL"]
+        self.assertEqual(sum(sc["confirmed"].values()), 0)   # ...never confirmed
+        self.assertEqual(sc["provisional"]["CORRECT"], 1)
+
+    def test_extra_closure_makes_auto_provisional(self):
+        fake = dict(REVIEW, matured_session_date="2026-11-16", asof_kst="2026-11-17T07:00+09:00",
+                    calendar_evidence={"source": "synthetic", "extra_closures": ["2026-11-13"]})
+        root = write_tree([GOOD], [fake])
+        self.assertEqual(dl.validate_tree(root), [])
+        self.assertEqual(sum(dl.scorecard(root)["COUNTERFACTUAL"]["confirmed"].values()), 0)
+
+    def test_nyse_early_close(self):
+        # decision 2026-11-28 04:15 KST = 11/27 14:15 ET, after the 13:00 ET early close
+        dec = dict(GOOD, decision_id="2026-11-28-01", kst="2026-11-28T04:15+09:00", review_at=["T+1"],
+                   inputs_meta=dict(GOOD["inputs_meta"], observed_at_kst="2026-11-28T04:00+09:00"))
+        rv = dict(REVIEW, decision_id="2026-11-28-01", horizon="T+1", matured_session_date="2026-11-30",
+                  asof_kst="2026-12-01T07:00+09:00")
+        self.assertEqual(errs_for([dec], [rv]), [])
+        self.assertTrue(has(errs_for([dec], [dict(rv, matured_session_date="2026-11-27", asof_kst="2026-11-28T07:00+09:00")]),
+                            "is 2026-11-30"))
+        self.assertEqual(sorted(x.isoformat() for x in dl.nyse_early_closes(2025)), ["2025-07-03", "2025-11-28", "2025-12-24"])
+
+    def test_impossible_timestamps_rejected(self):
+        self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, asof_kst="2026-11-99T07:00+09:00")]), "asof_kst must be a real"))
+        meta = dict(GOOD["inputs_meta"], observed_at_kst="2026-11-09T99:00+09:00")
+        self.assertTrue(has(errs_for([dict(GOOD, inputs_meta=meta)]), "observed_at_kst must be a real"))
+        self.assertTrue(has(errs_for([dict(GOOD, kst="2026-11-09T25:00+09:00")]), "kst must be a real"))
+
+    def test_event_horizon_never_confirmed_and_needs_valid_evidence(self):
+        dec = dict(GOOD, review_at=["next NO-POD"])
+        bare = {k: v for k, v in REVIEW.items() if k not in ("market", "matured_session_date", "calendar_basis")}
+        ev = dict(bare, horizon="next NO-POD", asof_kst="2026-11-09T10:41+09:00")
+        root = write_tree([dec], [ev])
+        self.assertEqual(dl.validate_tree(root), [])
+        self.assertEqual(sum(dl.scorecard(root)["COUNTERFACTUAL"]["confirmed"].values()), 0)
+        early = dict(ev, asof_kst="2026-12-01T07:00+09:00",
+                     event_evidence={"source": "TRI-POD log", "occurred_at_kst": "2026-11-09T10:00+09:00"})
+        self.assertTrue(has(errs_for([dec], [early]), "must be after the decision time"))
+        bad = dict(ev, event_evidence={"source": "", "occurred_at_kst": "2026-11-99T00:00+09:00"})
+        e = errs_for([dec], [bad])
+        self.assertTrue(has(e, "event_evidence.source"))
+        self.assertTrue(has(e, "event_evidence.occurred_at_kst"))
+
+    def test_malformed_calendar_evidence_is_structured(self):
+        for ev in ({"source": "synthetic", "extra_closures": 1},
+                   {"source": "synthetic", "extra_closures": "2026-11-13"},
+                   {"source": "s", "checked_by": "c", "holidays_skipped": 5}):
+            rv = dict(REVIEW, calendar_evidence=ev)
+            e = errs_for([GOOD], [rv])  # must not raise
+            self.assertTrue(has(e, "must be a list"), ev)
+        self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, calendar_evidence="x")]), "must be an object"))
+
+
 class AppendOnlyTest(unittest.TestCase):
     def _repo(self):
         repo = Path(tempfile.mkdtemp())
