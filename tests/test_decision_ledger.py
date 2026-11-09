@@ -17,8 +17,13 @@ GOOD = {
                     "verification": "INDEPENDENTLY_VERIFIED"},
     "roy": "52주 고점 대비 -13.56%",
 }
+# Decision 2026-11-09 10:40 KST (= 11/08 20:40 ET). US T+1 = 11/09 session ... T+5 = 11/13 session,
+# which closes 2026-11-14 06:00 KST.
 REVIEW = {"decision_id": "2026-11-09-01", "horizon": "T+5", "asof_kst": "2026-11-16T07:00+09:00",
-          "verdict": "CORRECT", "executed": False, "note": "신호 유지 맞음"}
+          "verdict": "CORRECT", "executed": False, "outcome_basis": "COUNTERFACTUAL",
+          "market": "US", "matured_session_date": "2026-11-13", "calendar_verified": True,
+          "note": "신호 유지 맞음"}
+EXECUTED_DEC = dict(GOOD, execution="EXECUTED", owner_decision="APPROVED")
 
 
 def lines(objs):
@@ -96,12 +101,43 @@ class PrivacyTest(unittest.TestCase):
         self.assertTrue(has(errs_for([dict(GOOD, final="평단 기준 보유")]), "forbidden private phrase"))
 
     def test_free_text_amounts_blocked(self):
-        for text in ("삼성전자 15주 매도", "300만원 추가매수", "₩5,000,000 투입", "sell 230 shares"):
+        for text in ("삼성전자 15주 매도", "300만원 추가매수", "₩5,000,000 투입", "sell 230 shares",
+                     "52주 매도", "52 주 보유", "52주, 매수"):
             self.assertTrue(has(errs_for([dict(GOOD, final=text)]), "possible private"), text)
 
     def test_market_terms_not_false_positive(self):
-        for text in ("52주 고점 대비 -13.56%", "환율 1,361원", "NDX 26,079 하회", "3주간 박스권", "QLD 5%씩 상한 25%"):
+        for text in ("52주 고점 대비 -13.56%", "52주 신고가", "52주 낙폭", "환율 1,361원", "NDX 26,079 하회",
+                     "3주간 박스권", "QLD 5%씩 상한 25%"):
             self.assertEqual(errs_for([dict(GOOD, final=text)]), [], text)
+
+
+    def test_markdown_scorecards_scanned(self):
+        root = write_tree([GOOD])
+        (root / "weekly").mkdir()
+        (root / "weekly" / "2026-W46.md").write_text("이번 주 삼성전자 15주 매도\n", encoding="utf-8")
+        self.assertTrue(has(dl.validate_tree(root), "weekly/2026-W46.md:1: possible private"))
+        (root / "weekly" / "2026-W46.md").write_text("예수금 확인\n", encoding="utf-8")
+        self.assertTrue(has(dl.validate_tree(root), "forbidden private phrase '예수금'"))
+
+
+class ProvenanceTest(unittest.TestCase):
+    def test_lookahead_observation_blocked(self):
+        meta = dict(GOOD["inputs_meta"], observed_at_kst="2027-01-01T10:00+09:00")
+        self.assertTrue(has(errs_for([dict(GOOD, inputs_meta=meta)]), "look-ahead"))
+
+    def test_empty_source_blocked(self):
+        for src in ("", "   "):
+            meta = dict(GOOD["inputs_meta"], source=src)
+            self.assertTrue(has(errs_for([dict(GOOD, inputs_meta=meta)]), "source must be a non-empty string"), repr(src))
+
+    def test_per_field_provenance(self):
+        ok_fields = {"vix10": {"source": "Yahoo ^VIX", "observed_at_kst": "2026-11-09T10:20+09:00"}}
+        meta = dict(GOOD["inputs_meta"], fields=ok_fields)
+        self.assertEqual(errs_for([dict(GOOD, inputs_meta=meta)]), [])
+        bad_key = dict(GOOD["inputs_meta"], fields={"sox": {"source": "x", "observed_at_kst": "2026-11-09T10:20+09:00"}})
+        self.assertTrue(has(errs_for([dict(GOOD, inputs_meta=bad_key)]), "no matching inputs key"))
+        late = dict(GOOD["inputs_meta"], fields={"vix10": {"source": "x", "observed_at_kst": "2026-11-09T11:00+09:00"}})
+        self.assertTrue(has(errs_for([dict(GOOD, inputs_meta=late)]), "look-ahead"))
 
 
 class ReviewTest(unittest.TestCase):
@@ -121,8 +157,45 @@ class ReviewTest(unittest.TestCase):
     def test_review_after_decision(self):
         self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, asof_kst="2026-11-09T09:00+09:00")]), "must be after"))
 
-    def test_executed_review_needs_executed_decision(self):
-        self.assertTrue(has(errs_for([GOOD], [dict(REVIEW, executed=True)]), "executed=true but decision"))
+    def test_t0_not_a_horizon(self):
+        self.assertTrue(has(errs_for([dict(GOOD, review_at=["T+0"])]), "review_at must be"))
+
+    def test_review_before_maturity_blocked(self):
+        early = dict(REVIEW, asof_kst="2026-11-09T10:41+09:00")
+        self.assertTrue(has(errs_for([GOOD], [early]), "before the US close"))
+        too_soon = dict(REVIEW, matured_session_date="2026-11-11", asof_kst="2026-11-12T07:00+09:00")
+        self.assertTrue(has(errs_for([GOOD], [too_soon]), "cannot mature on 2026-11-11"))
+        weekend = dict(REVIEW, matured_session_date="2026-11-14", asof_kst="2026-11-16T07:00+09:00")
+        self.assertTrue(has(errs_for([GOOD], [weekend]), "is a weekend"))
+
+    def test_t1_us_same_day_close(self):
+        t1 = dict(REVIEW, horizon="T+1", matured_session_date="2026-11-09", asof_kst="2026-11-10T06:30+09:00")
+        self.assertEqual(errs_for([GOOD], [t1]), [])
+
+    def test_krx_market(self):
+        krx = dict(REVIEW, horizon="T+1", market="KRX", matured_session_date="2026-11-09", asof_kst="2026-11-09T16:00+09:00")
+        self.assertEqual(errs_for([GOOD], [krx]), [])
+        early = dict(krx, asof_kst="2026-11-09T15:00+09:00")
+        self.assertTrue(has(errs_for([GOOD], [early]), "before the KRX close"))
+
+    def test_tn_requires_session_fields(self):
+        bare = {k: v for k, v in REVIEW.items() if k not in ("market", "matured_session_date", "calendar_verified")}
+        e = errs_for([GOOD], [bare])
+        for k in ("market", "matured_session_date", "calendar_verified"):
+            self.assertTrue(has(e, f"missing '{k}'"), k)
+
+    def test_actual_vs_counterfactual(self):
+        actual = dict(REVIEW, executed=True, outcome_basis="ACTUAL", execution_evidence="PRIVATE_REF:ct-2026-11-10-a1")
+        self.assertEqual(errs_for([EXECUTED_DEC], [actual]), [])
+        self.assertTrue(has(errs_for([GOOD], [actual]), "ACTUAL outcome but decision"))
+        no_ev = {k: v for k, v in actual.items() if k != "execution_evidence"}
+        self.assertTrue(has(errs_for([EXECUTED_DEC], [no_ev]), "requires execution_evidence"))
+        raw_ev = dict(actual, execution_evidence="230 shares @59.78")
+        self.assertTrue(has(errs_for([EXECUTED_DEC], [raw_ev]), "requires execution_evidence"))
+        mismatch = dict(REVIEW, executed=True)
+        self.assertTrue(has(errs_for([GOOD], [mismatch]), "COUNTERFACTUAL requires executed=false"))
+        # a counterfactual comparison on an executed decision is allowed and kept separate
+        self.assertEqual(errs_for([EXECUTED_DEC], [REVIEW]), [])
 
 
 class AppendOnlyTest(unittest.TestCase):

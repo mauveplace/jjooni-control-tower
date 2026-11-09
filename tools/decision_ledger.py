@@ -23,12 +23,18 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path, PurePosixPath
 
 DECISION_ID = re.compile(r"^\d{4}-\d{2}-\d{2}-\d{2}$")
 KST_TS = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?\+09:00$")
-HORIZON = re.compile(r"^T\+\d{1,3}$|^next [A-Z-]+$")
+HORIZON = re.compile(r"^T\+[1-9]\d{0,2}$|^next [A-Z-]+$")  # T+0 is not a horizon
+T_N = re.compile(r"^T\+([1-9]\d{0,2})$")
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PRIVATE_REF = re.compile(r"^PRIVATE_REF:[A-Za-z0-9_-]{4,64}$")
+KST = ZoneInfo("Asia/Seoul")
+MARKET_CLOSE = {"US": (ZoneInfo("America/New_York"), time(16, 0)), "KRX": (KST, time(15, 30))}
 
 # Lifecycle of the idea itself. Owner approval and execution are SEPARATE fields.
 DECISION_STATUS = {"ADOPTED", "RESEARCH", "REJECTED", "SUPERSEDED", "HOLD"}
@@ -44,10 +50,15 @@ DECISION_ALLOWED = set(DECISION_REQUIRED) | {
     "sources", "source_issue",
 }
 INPUTS_META_REQUIRED = ("source", "observed_at_kst", "verification")
+INPUTS_META_ALLOWED = set(INPUTS_META_REQUIRED) | {"fields", "note"}
+FIELD_META_REQUIRED = ("source", "observed_at_kst")
 
-REVIEW_REQUIRED = ("decision_id", "horizon", "asof_kst", "verdict", "executed", "note")
+REVIEW_REQUIRED = ("decision_id", "horizon", "asof_kst", "verdict", "executed", "outcome_basis", "note")
+OUTCOME_BASIS = {"ACTUAL", "COUNTERFACTUAL"}
+TN_REVIEW_REQUIRED = ("market", "matured_session_date", "calendar_verified")
 REVIEW_VERDICT = {"CORRECT", "INCORRECT", "MIXED", "NOT_EVALUABLE"}
-REVIEW_ALLOWED = set(REVIEW_REQUIRED) | {"observed", "counterfactual", "lesson", "reviewer", "sources"}
+REVIEW_ALLOWED = set(REVIEW_REQUIRED) | set(TN_REVIEW_REQUIRED) | {
+    "observed", "counterfactual", "lesson", "reviewer", "sources", "execution_evidence"}
 
 # ---- public-ledger privacy guard -------------------------------------------------
 FORBIDDEN_KEYS = {
@@ -61,7 +72,8 @@ FORBIDDEN_PHRASES = (
 )
 # Free-text numeric patterns typical of personal position data.
 FORBIDDEN_PATTERNS = (
-    (re.compile(r"(?<![\d,.])(?!52\s*주)\d[\d,.]*\s*주(?=[\s,.)·/]|$)"), "share count (N주)"),
+    (re.compile(r"(?<![\d,.])(?!52\s*주\s*(?:고점|저점|최고|최저|신고|신저|고가|저가|낙폭|범위|high|low))\d[\d,.]*\s*주(?=[\s,.)·/]|$)"),
+     "share count (N주)"),
     (re.compile(r"\d[\d,.]*\s*(만\s*원|억\s*원|만원|억원|천만|백만)"), "KRW amount (만원/억원)"),
     (re.compile(r"₩\s*\d"), "KRW amount (₩)"),
     (re.compile(r"\d[\d,.]*\s*shares?\b", re.I), "share count (shares)"),
@@ -101,6 +113,40 @@ def _ts(s: str) -> datetime | None:
         return None
 
 
+def _provenance_errors(meta: dict, decision_kst, label: str) -> list[str]:
+    """Inputs must be non-empty-sourced and observable at or before the decision time (no look-ahead)."""
+    errs = []
+    if "source" in meta and (not isinstance(meta["source"], str) or not meta["source"].strip()):
+        errs.append(f"{label}.source must be a non-empty string")
+    if "observed_at_kst" in meta:
+        if not KST_TS.match(str(meta["observed_at_kst"])):
+            errs.append(f"{label}.observed_at_kst must be ISO-8601 with +09:00")
+        else:
+            t_obs, t_dec = _ts(meta["observed_at_kst"]), _ts(decision_kst)
+            if t_obs and t_dec and t_obs > t_dec:
+                errs.append(f"{label}.observed_at_kst {meta['observed_at_kst']} is after the decision time {decision_kst} "
+                            "(look-ahead); record later data in an outcome review or a superseding decision")
+    return errs
+
+
+def session_close_kst(market: str, d: date) -> datetime:
+    tz, close = MARKET_CLOSE[market]
+    return datetime.combine(d, close, tzinfo=tz).astimezone(KST)
+
+
+def nth_weekday_session(market: str, decision_kst: datetime, n: int) -> date:
+    """Earliest possible date of the Nth regular session closing after the decision (weekdays only).
+    Holidays can only push the true T+N later, so this is a necessary (not sufficient) bound."""
+    d = decision_kst.astimezone(MARKET_CLOSE[market][0]).date()
+    count = 0
+    while True:
+        if d.weekday() < 5 and session_close_kst(market, d) > decision_kst:
+            count += 1
+            if count == n:
+                return d
+        d += timedelta(days=1)
+
+
 def validate_decision(rec: dict, where: str) -> list[str]:
     errs = [f"{where}: missing '{k}'" for k in DECISION_REQUIRED if k not in rec]
     errs += [f"{where}: unknown field '{k}'" for k in rec if k not in DECISION_ALLOWED]
@@ -126,10 +172,24 @@ def validate_decision(rec: dict, where: str) -> list[str]:
             errs.append(f"{where}: 'inputs' requires 'inputs_meta' with {list(INPUTS_META_REQUIRED)}")
         else:
             errs += [f"{where}: inputs_meta missing '{k}'" for k in INPUTS_META_REQUIRED if k not in meta]
-            if "observed_at_kst" in meta and not KST_TS.match(str(meta["observed_at_kst"])):
-                errs.append(f"{where}: inputs_meta.observed_at_kst must be ISO-8601 with +09:00")
+            errs += [f"{where}: inputs_meta unknown field '{k}'" for k in meta if k not in INPUTS_META_ALLOWED]
             if "verification" in meta and meta["verification"] not in VERIFICATION:
                 errs.append(f"{where}: inputs_meta.verification must be one of {sorted(VERIFICATION)}")
+            errs += _provenance_errors(meta, rec.get("kst"), f"{where}: inputs_meta")
+            fields = meta.get("fields")
+            if fields is not None:
+                inputs = rec.get("inputs") if isinstance(rec.get("inputs"), dict) else {}
+                if not isinstance(fields, dict):
+                    errs.append(f"{where}: inputs_meta.fields must map input keys to provenance")
+                else:
+                    for k, fm in fields.items():
+                        if k not in inputs:
+                            errs.append(f"{where}: inputs_meta.fields.{k} has no matching inputs key")
+                        if not isinstance(fm, dict):
+                            errs.append(f"{where}: inputs_meta.fields.{k} must be an object")
+                            continue
+                        errs += [f"{where}: inputs_meta.fields.{k} missing '{x}'" for x in FIELD_META_REQUIRED if x not in fm]
+                        errs += _provenance_errors(fm, rec.get("kst"), f"{where}: inputs_meta.fields.{k}")
     return errs + privacy_errors(rec, where)
 
 
@@ -144,7 +204,51 @@ def validate_review(rec: dict, where: str) -> list[str]:
         errs.append(f"{where}: verdict must be one of {sorted(REVIEW_VERDICT)}")
     if "executed" in rec and not isinstance(rec["executed"], bool):
         errs.append(f"{where}: executed must be boolean (keeps hypothetical and realized outcomes separate)")
+    basis = rec.get("outcome_basis")
+    if "outcome_basis" in rec and basis not in OUTCOME_BASIS:
+        errs.append(f"{where}: outcome_basis must be one of {sorted(OUTCOME_BASIS)}")
+    if basis == "ACTUAL":
+        if rec.get("executed") is not True:
+            errs.append(f"{where}: outcome_basis=ACTUAL requires executed=true")
+        if not PRIVATE_REF.match(str(rec.get("execution_evidence", ""))):
+            errs.append(f"{where}: outcome_basis=ACTUAL requires execution_evidence 'PRIVATE_REF:<opaque id>' (never raw trade data)")
+    if basis == "COUNTERFACTUAL":
+        if rec.get("executed") is not False:
+            errs.append(f"{where}: outcome_basis=COUNTERFACTUAL requires executed=false")
+        if "execution_evidence" in rec:
+            errs.append(f"{where}: COUNTERFACTUAL reviews must not carry execution_evidence")
+    if T_N.match(str(rec.get("horizon", ""))):
+        errs += [f"{where}: T+N review missing '{k}'" for k in TN_REVIEW_REQUIRED if k not in rec]
+        if "market" in rec and rec["market"] not in MARKET_CLOSE:
+            errs.append(f"{where}: market must be one of {sorted(MARKET_CLOSE)}")
+        if "matured_session_date" in rec and not DATE.match(str(rec["matured_session_date"])):
+            errs.append(f"{where}: matured_session_date must be YYYY-MM-DD")
+        if "calendar_verified" in rec and not isinstance(rec["calendar_verified"], bool):
+            errs.append(f"{where}: calendar_verified must be boolean")
     return errs + privacy_errors(rec, where)
+
+
+def maturity_errors(rec: dict, dec: dict, where: str) -> list[str]:
+    """For T+N: the matured session must be at least the Nth weekday session after the decision,
+    and the review must be written after that session's close."""
+    m = T_N.match(str(rec.get("horizon", "")))
+    if not m or rec.get("market") not in MARKET_CLOSE or not DATE.match(str(rec.get("matured_session_date", ""))):
+        return []
+    t_dec, t_rev = _ts(dec.get("kst")), _ts(rec.get("asof_kst"))
+    if not t_dec or not t_rev:
+        return []
+    n, market = int(m.group(1)), rec["market"]
+    session = date.fromisoformat(rec["matured_session_date"])
+    errs = []
+    earliest = nth_weekday_session(market, t_dec, n)
+    if session < earliest:
+        errs.append(f"{where}: {rec['horizon']} cannot mature on {session} ({market}); earliest possible session is {earliest}")
+    if session.weekday() >= 5:
+        errs.append(f"{where}: matured_session_date {session} is a weekend")
+    close = session_close_kst(market, session)
+    if t_rev < close:
+        errs.append(f"{where}: asof_kst {rec['asof_kst']} is before the {market} close of {session} ({close.isoformat()})")
+    return errs
 
 
 def _parse_lines(text: str, label: str) -> tuple[list[tuple[int, dict]], list[str]]:
@@ -220,8 +324,24 @@ def validate_tree(root: Path) -> list[str]:
             t_dec, t_rev = _ts(dec.get("kst")), _ts(rec.get("asof_kst"))
             if t_dec and t_rev and t_rev <= t_dec:
                 errs.append(f"{where}: asof_kst must be after the decision time {dec.get('kst')}")
-            if isinstance(rec.get("executed"), bool) and rec["executed"] and dec.get("execution") != "EXECUTED":
-                errs.append(f"{where}: executed=true but decision {did} execution is {dec.get('execution')}; append a superseding decision first")
+            if rec.get("outcome_basis") == "ACTUAL" and dec.get("execution") != "EXECUTED":
+                errs.append(f"{where}: ACTUAL outcome but decision {did} execution is {dec.get('execution')}; append a superseding decision first")
+            errs += maturity_errors(rec, dec, where)
+    errs += markdown_privacy_errors(root)
+    return errs
+
+
+def markdown_privacy_errors(root: Path) -> list[str]:
+    """Scorecards and docs are public too: apply phrase and free-text pattern checks to every .md file."""
+    errs = []
+    for f in sorted(root.rglob("*.md")):
+        for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+            for phrase in FORBIDDEN_PHRASES:
+                if phrase in line:
+                    errs.append(f"{f}:{n}: forbidden private phrase '{phrase}'")
+            for pattern, label in FORBIDDEN_PATTERNS:
+                if pattern.search(line):
+                    errs.append(f"{f}:{n}: possible private {label}")
     return errs
 
 
