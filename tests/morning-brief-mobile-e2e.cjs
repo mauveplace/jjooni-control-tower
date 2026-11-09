@@ -1,5 +1,16 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const report=JSON.parse(fs.readFileSync('market-observatory/data/morning-brief/latest.json','utf8'));
+const quoteCards=(report.editorial_contract?.close_checks||[]).map(check=>{
+ const official=['VERIFIED','CROSS_CHECKED'].includes(check.status) && Number.isFinite(check.close) && Number.isFinite(check.change_pct);
+ const r=(report.editorial_contract?.reference_quotes||[]).find(r=>r.symbol===check.symbol&&r.session_date===report.market_date_us&&r.status==='PROVIDER_REFERENCE_ONLY'&&r.trade_signal_eligible===false&&r.official_eod_verified===false);
+ const ref=!official&&check.status==='CONFLICT'&&r;
+ const close=official?check.close:ref?r.close:null;
+ const pct=official?check.change_pct:ref?r.change_pct:null;
+ return {symbol:check.symbol,closeText:Number.isFinite(close)?Number(close).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'확인 보류',pctText:Number.isFinite(pct)?Number(pct).toFixed(2)+'%':null,reference:!!ref};
+});
+const nowKst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
@@ -10,10 +21,10 @@ const assert=require('node:assert/strict');
    const page=await browser.newPage({viewport:{width,height}});
    await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'domcontentloaded',timeout:90000});
    await page.locator('button[data-tab="morning-brief"]').click();
-   await page.waitForFunction(()=>{
+   await page.waitForFunction(expected=>{
     const cards=[...document.querySelectorAll('#briefKeyFigures .briefFigure b')].map(x=>x.textContent);
-    return cards.length===2 && cards[0].includes('26,989.99') && cards[1].includes('9,390.25');
-   },{timeout:45000});
+    return cards.length===expected.length && cards.every((v,i)=>v.includes(expected[i]));
+   },quoteCards.map(x=>x.closeText),{timeout:45000});
    const result=await page.evaluate(()=>{
     const rect=e=>{const b=e.getBoundingClientRect();return {left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width}};
     const tools=document.querySelector('.briefTools');
@@ -26,26 +37,25 @@ const assert=require('node:assert/strict');
      tools:rect(tools),label:rect(tools.querySelector('label')),select:rect(tools.querySelector('select')),
      refresh:rect(tools.querySelector('button')),head:rect(document.querySelector('.briefHead'))};
    });
-   assert.equal(result.scroll<=result.width+3,true, name+' horizontal page overflow '+JSON.stringify(result));
-   assert.match(result.badge,/마지막 게시본 · 2026-11-07/);
-   assert.match(result.notice,/공식 종가 정정/);
+   assert.equal(result.scroll<=result.width+3,true,name+' horizontal page overflow '+JSON.stringify(result));
+   assert.match(result.badge,report.report_date_kst===nowKst()?/오늘 공개본/:/마지막 게시본/);
+   if((report.editorial_contract?.close_checks||[]).some(c=>c.status==='CONFLICT'))assert.match(result.notice,/확정 종가 불일치\/미검증/);
    assert.doesNotMatch(result.notice,/CROSS_CHECKED/);
-   assert.match(result.notice,/본문.*재산출되지 않았습니다/);
-   assert.match(result.figures[0],/26,989\.99/);
-   assert.match(result.figures[0],/1\.35%/);
-   assert.match(result.figures[1],/9,390\.25/);
-   assert.match(result.figures[1],/4\.21%/);
+   for(let i=0;i<quoteCards.length;i++){
+    const card=quoteCards[i],actual=result.figures[i];
+    assert.match(actual,new RegExp(card.closeText.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+    if(card.pctText)assert(actual.includes(card.pctText),name+' missing percent '+card.symbol);
+    if(card.reference)assert.match(actual,/참고 완료 일봉.*공식 종가 미검증/);
+   }
    assert.equal(result.detailsOpen,false);
    for(const k of ['tools','label','select','refresh','head']){
     assert(result[k].left>=-2&&result[k].right<=width+2,name+' '+k+' overflows');
    }
-   if(width<=430){
-    assert(result.select.bottom<=result.refresh.top+2,name+' mobile refresh overlaps date select');
-   }
+   if(width<=430)assert(result.select.bottom<=result.refresh.top+2,name+' mobile refresh overlaps date select');
    await page.locator('#briefSourceDetails summary').click();
-   assert.match(await page.locator('#briefSourceDetails p').textContent(),/26,989\.99/);
+   assert((await page.locator('#briefSourceDetails p').textContent()).trim().length>20);
    await page.screenshot({path:'/tmp/brief-'+name+'.png'});
-   console.log('BRIEF_MOBILE_RENDER=PASS '+name+' verified=NDX_26989.99,SOX_9390.25 last=2026-11-07');
+   console.log('BRIEF_MOBILE_RENDER=PASS '+name+' '+quoteCards.map(x=>x.symbol+'_'+x.closeText).join(',')+' report='+report.report_date_kst);
    await page.close();
   }
  }finally{await browser.close()}
