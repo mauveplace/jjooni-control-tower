@@ -79,6 +79,7 @@ jobs:
           obs_path=Path('market-observatory/data/observatory.json')
           pulse_path=Path('market-observatory/data/daily-market-pulse.json')
           public_path=Path('public-market-daily.json')
+          glance_path=Path('market-observatory/data/daily-glance.json')
 
           def load(path):
               try:
@@ -98,6 +99,7 @@ jobs:
           obs=load(obs_path)
           pulse=load(pulse_path)
           public=load(public_path)
+          glance=load(glance_path)
           sig=public.get('tripod_signal') or {}
           obs_dt=parsed(obs.get('generated_kst'))
           pulse_dt=parsed(pulse.get('generated_kst'))
@@ -115,11 +117,14 @@ jobs:
           health_mode='EXPECTED_COMPLETED_SESSION'
 
           should_repair=eligible and (force_repair or not healthy)
+          glance_fresh=bool(glance.get('us_session')==session_health['expected_session'] and glance.get('source_generated_kst')==obs.get('generated_kst'))
+          should_refresh_glance=eligible and healthy and not glance_fresh
 
           outputs={
               'eligible': 'true' if eligible else 'false',
               'force_repair': 'true' if force_repair else 'false',
               'should_repair': 'true' if should_repair else 'false',
+              'should_refresh_glance': 'true' if should_refresh_glance else 'false',
               'ny_now': now.isoformat(),
               'obs_fresh': str(obs_fresh).lower(),
               'pulse_fresh': str(pulse_fresh).lower(),
@@ -147,6 +152,7 @@ jobs:
               'tripod_session': sig.get('date'),
               'healthy': healthy,
               'should_repair': should_repair,
+              'should_refresh_glance': should_refresh_glance,
           }, ensure_ascii=False))
           PY
 
@@ -257,6 +263,7 @@ jobs:
             market-observatory/data/daily-market-pulse.json \
             market-observatory/data/data-audit.json \
             market-observatory/data/freshness-status.json \
+            market-observatory/data/daily-glance.json \
             public-market-daily.json
 
       - id: verify_repair
@@ -277,14 +284,41 @@ jobs:
           p=from_main('market-observatory/data/daily-market-pulse.json')
           t=from_main('public-market-daily.json')
           f=from_main('market-observatory/data/freshness-status.json')
+          g=from_main('market-observatory/data/daily-glance.json')
           assert p.get('market_date_us')==o.get('us_completed_session_date')
           assert (t.get('tripod_signal') or {}).get('date')==o.get('us_completed_session_date')
           assert (f.get('session_alignment') or {}).get('aligned') is True
+          assert g.get('us_session')==o.get('us_completed_session_date')
+          assert g.get('source_generated_kst')==o.get('generated_kst')
           print('OBSERVATORY_CLOSE_WATCHDOG_PUBLISH_VERIFY=PASS session='+str(o.get('us_completed_session_date')))
           PY
 
+      # GitHub-token commits do not normally trigger downstream push workflows.
+      # If the market SSOT is already current, repair only the derived glance;
+      # never re-fetch years of market data for a stale presentation file.
+      - id: publish_glance
+        name: Repair stale Daily Glance without a full market rebuild
+        if: steps.gate.outputs.should_refresh_glance == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py --message 'data(observatory): sync 30-second daily glance' market-observatory/data/daily-glance.json
+          git fetch origin main
+          python - <<'PY'
+          import json, subprocess
+          def remote(path):
+              return json.loads(subprocess.check_output(['git','show','origin/main:'+path], text=True))
+          obs=remote('market-observatory/data/observatory.json')
+          glance=remote('market-observatory/data/daily-glance.json')
+          assert glance.get('us_session')==obs.get('us_completed_session_date'), 'GLANCE_SESSION_STALE'
+          assert glance.get('source_generated_kst')==obs.get('generated_kst'), 'GLANCE_SOURCE_VINTAGE_STALE'
+          print('OBSERVATORY_WATCHDOG_GLANCE_SYNC=PASS session='+str(glance['us_session']))
+          PY
+
       - name: Healthy no-op
-        if: steps.gate.outputs.should_repair != 'true'
+        if: steps.gate.outputs.should_repair != 'true' && steps.gate.outputs.should_refresh_glance != 'true'
         run: |
           echo "OBSERVATORY_CLOSE_WATCHDOG=NOOP"
           echo "eligible=${{ steps.gate.outputs.eligible }}"

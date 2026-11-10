@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-WATCHDOG-GLANCE-022",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Prevent 30-second Daily Glance from remaining one session behind after a successful GitHub_TOKEN close-watchdog canonical source repair. The canonical SSOT moved from 11/09 to 11/10 on 2026-11-11 08:03 KST while daily-glance.json still showed 11/09. Amend canonical repair publication to include Daily Glance atomically, and cover healthy SSOT / stale glance-only refresh without expensive market rebuild.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "After stale market repair, publisher includes daily-glance.json in the same rebased atomic commit derived from canonical Observatory; verify main same session and generated vintage.",
+    "If canonical Observatory/Pulse/TRI-POD already healthy, but glance is stale or missing, run a glance-only publish without expensive full market rebuild or new 5-minute cron.",
+    "One GitHub workflow job under existing concurrency lock; no recursion or GITHUB_TOKEN event dependency.",
+    "Check Python tests/test_watchdog_glance_atomic.py plus CI and live post-merge glance session; ROY exact-HEAD independent verdict PASS/NEEDS_CHANGES/BLOCKED."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No new timed 5-min quote collection, trading, external fees, secrets or account data",
+    "No bypassing official close/trading strict gates",
+    "No ROY edits, auto merge or deployment"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "Follow-up to merged PR #380 and watchdog success run #42919844917. 11/10 canonical updated but derived 30s card remained 11/09 due downstream GITHUB_TOKEN events not firing."
+}
