@@ -17,9 +17,11 @@ Many data commits could cause unnecessary Pages builds even with no user viewing
   polling per minute and no automatic whole-page reload.
 - Keep US-close and KR-close official capture, US-close freshness recovery,
   completed-close TRI-POD and Daily Pulse, and official calendar releases.
-- BTC/ETH archives are captured daily, with user-visible 24-hour live spot
-  quotes fetched on demand through the API. Daily archival is not a substitute
-  for current live quotes.
+- BTC/ETH remain an explicit once-hourly, source-attributed exception because
+  the existing on-demand quote endpoint excludes BTCUSD/ETHUSD and has no
+  approved USDT/USD quote-currency/previous-close reconciliation. Do not claim
+  live crypto from that API. Show the true crypto observation time and stale
+  status, and retire the hourly fallback only after a verified on-demand source.
 - US rates are archived once per post-US-close weekday, not every 30 minutes.
   This intentionally reduces new 5-minute rate history observations.
 - Cross-market supplemental facts are archived after KR and US closing only.
