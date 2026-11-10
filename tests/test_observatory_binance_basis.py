@@ -37,7 +37,7 @@ class BinanceBasisTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'NOT_COMPLETE'):
                 crypto.binance_completed_utc_day('BTCUSD','2026-11-10',now)
 
-    def test_native_previous_close_overrides_legacy_fiat_history(self):
+    def test_native_usdt_reference_preserves_fiat_usd_history(self):
         today=datetime.now(UTC).date()
         day=today.isoformat()
         prev=(today-timedelta(days=1)).isoformat()
@@ -53,8 +53,10 @@ class BinanceBasisTest(unittest.TestCase):
             stack.enter_context(patch.object(crypto,'binance_completed_utc_day',return_value=bar))
             stack.enter_context(patch.object(crypto,'crypto_observation',side_effect=OSError('Yahoo unavailable')))
             crypto.enrich_crypto(data)
-        self.assertEqual(data['series']['BTCUSD'][-2]['value'],100)
-        self.assertEqual(data['series']['BTCUSD'][-2]['quote_currency'],'USDT')
+        self.assertEqual(data['series']['BTCUSD'][-2]['value'],99)
+        self.assertEqual(data['series']['BTCUSD'][-2]['quote_currency'],'USD')
+        self.assertEqual(data['crypto_market']['BTCUSD']['previous_close_value'],100)
+        self.assertEqual(data['crypto_market']['BTCUSD']['previous_close_currency'],'USDT')
         self.assertTrue(data['crypto_market']['BTCUSD']['daily_change_safe'])
         item=glance.metric('BTCUSD','비트코인',data['series']['BTCUSD'],data['crypto_market']['BTCUSD'])
         self.assertEqual(item['d1_pct'],1.0)
@@ -90,6 +92,41 @@ class BinanceBasisTest(unittest.TestCase):
         self.assertEqual(item['value'],101)
         self.assertIsNone(item['d1_pct'])
         self.assertEqual(item['comparison_status'],'CURRENCY_BASIS_UNAVAILABLE')
+
+
+    def test_utc_weekly_comparison_requires_exact_seven_day_same_currency(self):
+        rows=[
+            {'date':'2026-11-01','value':90,'session_status':'COMPLETED','quote_currency':'USD'},
+            {'date':'2026-11-02','value':95,'session_status':'COMPLETED','quote_currency':'USD'},
+            {'date':'2026-11-08','value':100,'session_status':'COMPLETED','quote_currency':'USD'},
+            {'date':'2026-11-10','value':101,'session_status':'COMPLETED','quote_currency':'USD'},
+        ]
+        item=glance.metric('BTCUSD','비트코인',rows)
+        self.assertIsNone(item['w1_pct'], '2026-11-03 USD close does not exist')
+        self.assertIsNone(item['d1_pct'], '2026-11-09 USD close does not exist')
+        rows.insert(-1,{'date':'2026-11-03','value':92,'session_status':'COMPLETED','quote_currency':'USD'})
+        rows.sort(key=lambda x:x['date'])
+        item=glance.metric('BTCUSD','비트코인',rows)
+        self.assertAlmostEqual(item['w1_pct'],round((101/92-1)*100,2))
+        rows[1]['quote_currency']='USDT'
+        rows[1],rows[2]=rows[2],rows[1]
+        rows.sort(key=lambda x:x['date'])
+        # 2026-11-03 date is the only correct 7-day reference.
+        for row in rows:
+            if row['date']=='2026-11-03':row['quote_currency']='USDT'
+        item=glance.metric('BTCUSD','비트코인',rows)
+        self.assertIsNone(item['w1_pct'])
+
+    def test_fiat_completed_history_and_native_usdt_reference_do_not_mix(self):
+        rows=[
+            {'date':'2026-11-09','value':74500,'session_status':'COMPLETED','quote_currency':'USD'},
+            {'date':'2026-11-10','value':75000,'session_status':'IN_PROGRESS','quote_currency':'USDT'}]
+        spot={'status':'LIVE','source':'Binance','quote_currency':'USDT',
+              'daily_change_safe':True,'previous_close_currency':'USDT',
+              'previous_close_utc_date':'2026-11-09','previous_close_value':74800}
+        item=glance.metric('BTCUSD','비트코인',rows,spot)
+        self.assertEqual(item['d1_pct'],round((75000/74800-1)*100,2))
+        self.assertEqual(rows[0]['value'],74500,'USD history must remain intact')
 
     def test_coingecko_quotes_explicitly_fiat_usd(self):
         now=datetime(2026,11,10,3,tzinfo=UTC)
