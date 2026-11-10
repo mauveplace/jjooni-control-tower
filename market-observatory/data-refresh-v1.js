@@ -74,22 +74,28 @@ let nowBusy=false,nowButton,nowMessage;
 async function forceNow(){
  if(nowBusy)return;
  nowBusy=true;nowButton.disabled=true;nowButton.textContent='현재 시세 조회 중…';nowMessage.textContent='지수·환율·원자재 현재 시세 조회 중 · BTC·ETH는 바이낸스 거래 시세 조회 중';
+ const runtime=root.__JJOONI_OBSERVATORY_QUOTES;
+ const crypto=root.__JJOONI_CRYPTO_ON_VIEW;
+ let cryptoMessage='';
  try{
-  const runtime=root.__JJOONI_OBSERVATORY_QUOTES;
-  if(!runtime)throw Error('QUOTE_READER_NOT_READY');
-  const cryptoPromise=root.__JJOONI_CRYPTO_ON_VIEW?.refresh(true);
-  const result=await runtime.refresh(true);
-  const cryptoStatus=await cryptoPromise;
+  const [marketResult,cryptoResult]=await Promise.allSettled([
+   runtime?runtime.refresh(true):Promise.reject(Error('QUOTE_READER_NOT_READY')),
+   crypto?.refresh(true)
+  ]);
+  const cryptoStatus=cryptoResult.value;
+  cryptoMessage=crypto?' · BTC·ETH '+(cryptoStatus==='COMPLETE'?'조회 완료':cryptoStatus==='PARTIAL'?'일부 조회 실패':'조회 실패'):'';
+  if(marketResult.status==='rejected')throw marketResult.reason;
+  const result=marketResult.value;
   const count=result.fetched_count||0,total=result.expected_count||20,counts=runtime.summary?.()||{delayed:Object.values(result.quotes||{}).filter(q=>q.quality==='STALE').length,retained:Object.values(result.quotes||{}).filter(q=>q.refresh_status==='RETAINED').length},kept=counts.retained;
-  nowMessage.dataset.state=(counts.delayed||kept||counts.missing)?'PARTIAL':result.status;
-  nowMessage.textContent=(result.cached?'최근 서버 조회 결과 확인':'시세 조회 완료')+' · '+count+'/'+total+'개 원천 응답'+(counts.delayed?' · '+counts.delayed+'개 관측 지연':'')+(kept?' · '+kept+'개 이전 관측 유지':'')+(counts.missing?' · '+counts.missing+'개 값 미확인':'')+(result.status!=='COMPLETE'?' · 일부 조회 실패':'')+' · BTC·ETH '+(cryptoStatus==='COMPLETE'?'조회 완료':cryptoStatus==='PARTIAL'?'일부 조회 실패':'조회 실패')+' · 실제 시세 기준 시각은 각 카드에 표시';
+  nowMessage.dataset.state=(counts.delayed||kept||counts.missing||(crypto&&cryptoStatus!=='COMPLETE'))?'PARTIAL':result.status;
+  nowMessage.textContent=(result.cached?'최근 서버 조회 결과 확인':'시세 조회 완료')+' · '+count+'/'+total+'개 원천 응답'+(counts.delayed?' · '+counts.delayed+'개 관측 지연':'')+(kept?' · '+kept+'개 이전 관측 유지':'')+(counts.missing?' · '+counts.missing+'개 값 미확인':'')+(result.status!=='COMPLETE'?' · 일부 조회 실패':'') +cryptoMessage+' · 실제 시세 기준 시각은 각 카드에 표시';
  }catch(error){
-  nowMessage.dataset.state='FAILED';nowMessage.textContent='현재 시세 조회 실패 · 마지막 값 유지 · 잠시 후 다시 눌러 주세요. 완료로 처리하지 않았습니다.';
+  nowMessage.dataset.state='FAILED';nowMessage.textContent='지수·환율·원자재 시세 조회 실패 · 마지막 값 유지'+cryptoMessage+' · 지금 최신화로 다시 시도할 수 있습니다.';
   const published=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;
   if(published){
    try{const updated=await published.refresh(true);if(published.status!=='RETRY'){
     nowMessage.dataset.state='API_FAILED_PUBLISHED';
-    nowMessage.textContent='시세 API 조회 실패 · '+(updated?'최신 게시값을 대신 반영했습니다.':'게시값 재확인 · 새 게시값 없음.')+' 신규 원천 조회 완료가 아니며 코인별 관측 시각을 확인하세요.';
+    nowMessage.textContent='시세 API 조회 실패 · '+(updated?'최신 게시값을 대신 반영했습니다.':'게시값 재확인 · 새 게시값 없음.')+' 지수·환율·원자재 신규 원천 조회 완료가 아니며 각 카드의 관측 시각을 확인하세요.'+cryptoMessage;
    }}catch(_){}
   }
  }
