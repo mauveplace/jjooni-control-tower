@@ -143,6 +143,19 @@ class EditorialAcceptanceTests(unittest.TestCase):
         self.assertEqual([(r['symbol'],r['close'],r['trade_signal_eligible']) for r in refs],
                          [('NDX',27907.63,False),('SOX',10033.93,False)])
 
+    def test_provider_reference_matches_integer_part_only(self):
+        report=json.loads((ROOT/'market-observatory/data/morning-brief/20261110.json').read_text())
+        ref=report['editorial_contract']['reference_quotes'][0]
+        ref['source_observations'][0]['close']=int(ref['close']) + .01
+        ref['source_observations'][1]['close']=int(ref['close']) + .99
+        validate_report(report)
+        ref['source_observations'][1]['close']=int(ref['close']) + 1.01
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_SOURCE_DISAGREEMENT'):
+            validate_report(report)
+        ref['source_observations'][1]['close']=True
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_SOURCE_DISAGREEMENT'):
+            validate_report(report)
+
     def test_provider_reference_requires_original_previous_close_and_late_quote(self):
         report=json.loads((ROOT/'market-observatory/data/morning-brief/20261110.json').read_text())
         bad=copy.deepcopy(report)

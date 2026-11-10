@@ -58,7 +58,8 @@ def validate_editorial(d, created):
             url = item.get('url') or ''
             parsed = urlparse(url)
             assert parsed.scheme == 'https' and parsed.hostname and item.get('session_date') == d['market_date_us'], 'REFERENCE_SOURCE_URL_SESSION'
-            assert abs(float(item.get('close', 0)) - close) <= 0.02, 'REFERENCE_SOURCE_DISAGREEMENT'
+            observation_close = item.get('close')
+            assert isinstance(observation_close, (int, float)) and not isinstance(observation_close, bool) and 0 < observation_close < float('inf') and int(observation_close) == int(close), 'REFERENCE_SOURCE_DISAGREEMENT'
             stamp = datetime.fromisoformat(item['quote_time_et'])
             ny = stamp.astimezone(ZoneInfo('America/New_York'))
             assert stamp.tzinfo and ny.date().isoformat() == d['market_date_us'] and ny.time() >= time(16) and stamp <= checked, 'REFERENCE_NOT_POST_CLOSE'

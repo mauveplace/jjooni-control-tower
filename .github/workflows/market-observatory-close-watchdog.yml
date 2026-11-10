@@ -8,6 +8,10 @@ on:
       - tools/write_observatory_watchdog_status.py
       - tools/build_observatory_freshness.py
       - tools/observatory_session.py
+      # The daily brief may publish after a delayed/missed US-close cron.
+      # Recheck the independent completed-session gate once on that event;
+      # when already current this is a no-op, not a quote polling loop.
+      - market-observatory/data/morning-brief/latest.json
   workflow_run:
     workflows:
       - "Market Observatory Daily + Calendar"
