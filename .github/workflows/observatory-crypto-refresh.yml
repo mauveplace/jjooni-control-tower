@@ -24,7 +24,7 @@ on:
   # USDT/USD and previous-close contract; do not present its API as live crypto.
   # Retain an hourly safe publishing fallback until an authenticated source is ready.
   schedule:
-    - cron: '35 * * * *'
+    - cron: '20 * * * *'
 
 permissions:
   contents: write
