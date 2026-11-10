@@ -157,8 +157,35 @@ def brief_check(brief, by_key, us_session):
         return {**result, "status": "NOT_SAME_SESSION",
                 "text": f"아침 시황은 미국 {brief.get('market_date_us')} 기준, 카드는 {us_session} 기준입니다."}
     obs = by_key.get("NASDAQ100", {})
+    # A reported source conflict is not the same as a missing NDX observation.
+    # Keep the official-close gate strict, while independently acknowledging
+    # an explicitly labeled, session-matched provider reference in the brief.
+    # A reference MATCH is *never* an official EOD verification or trading signal.
+    references = (brief.get("editorial_contract") or {}).get("reference_quotes") or []
+    if ndx and ndx.get("status") in ("CONFLICT", "MISSING") and obs.get("date") == us_session:
+        reference = next((q for q in references if q.get("symbol") == "NDX"
+                          and q.get("session_date") == us_session
+                          and q.get("status") == "PROVIDER_REFERENCE_ONLY"
+                          and q.get("official_eod_verified") is False
+                          and q.get("trade_signal_eligible") is False), None)
+        price = reference.get("close") if reference else None
+        canonical = obs.get("value")
+        if (isinstance(price, (int, float)) and not isinstance(price, bool)
+                and isinstance(canonical, (int, float)) and not isinstance(canonical, bool)
+                and 0 < price < float("inf") and 0 < canonical < float("inf")):
+            diff = round((price / canonical - 1) * 100, 3)
+            matched = abs(diff) <= BRIEF_TOLERANCE_PCT
+            return {**result, "status": "REFERENCE_MATCH" if matched else "REFERENCE_MISMATCH",
+                    "reference_ndx": price, "pipeline_ndx": canonical, "diff_pct": diff,
+                    "official_status": ndx.get("status"), "official_eod_verified": False,
+                    "trade_signal_eligible": False,
+                    "text": (f"NDX 제공자 참고 완료 일봉 {price:,.2f}와 옵저버토리 "
+                             f"{canonical:,.2f}은 {'일치' if matched else f'{diff:+.3f}% 불일치'}합니다. "
+                             "공식 확정 종가 검증은 별도이며 매매 신호로 승격하지 않습니다.")}
     if not ndx or not isinstance(ndx.get("close"), (int, float)) or obs.get("date") != us_session:
-        return {**result, "status": "NOT_COMPARABLE"}
+        return {**result, "status": "NOT_COMPARABLE",
+                "text": "NDX 공식 종가 교차검증에 필요한 값 또는 완료 세션이 부족합니다. "
+                        "옵저버토리 저장값은 별도로 표시합니다."}
     if ndx.get("status") != "VERIFIED" or ndx.get("official_status") not in (None, "VERIFIED"):
         return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
                 "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
