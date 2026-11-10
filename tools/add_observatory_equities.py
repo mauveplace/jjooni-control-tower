@@ -294,6 +294,7 @@ def enrich_crypto(data):
             print('COINGECKO_FETCH=WARN',type(exc).__name__,str(exc))
     for key,symbol in CRYPTO_SYMBOLS.items():
         try:
+            usdt_close=None  # Extra benchmark, never replaces fiat-USD historical rows.
             # Previous collectors stored Yahoo BTC-USD/ETH-USD history without
             # currency annotations. The legacy completed rows are fiat USD.
             # Never upgrade an unfinished historical snapshot to a close.
@@ -311,17 +312,14 @@ def enrich_crypto(data):
                 # Only repair missing completed daily history. A successful spot
                 # refresh must not download three years twice every heartbeat.
                 previous_day=(datetime.fromisoformat(fresh[0]['date']).date()-timedelta(days=1)).isoformat()
-                # Prefer native Binance USDT previous-day close when the live
-                # quote is USDT; never compare Binance USDT against Yahoo USD.
+                # Binance native-USDT close is a SEPARATE comparison reference.
+                # Never merge it into BTCUSD/ETHUSD's Yahoo fiat-USD archive:
+                # date-only de-duplication would erase historical USD closes.
                 if key in binance:
-                    matching=any(r.get('date')==previous_day and r.get('session_status')=='COMPLETED'
-                                 and r.get('quote_currency')=='USDT' for r in rows)
-                    if not matching:
-                        try:
-                            candle=binance_completed_utc_day(key,previous_day)
-                            rows=merge_rows(rows,[candle])
-                        except Exception as candle_exc:
-                            print('BINANCE_PREVIOUS_CLOSE=WARN',key,type(candle_exc).__name__,str(candle_exc))
+                    try:
+                        usdt_close=binance_completed_utc_day(key,previous_day)
+                    except Exception as candle_exc:
+                        print('BINANCE_PREVIOUS_CLOSE=WARN',key,type(candle_exc).__name__,str(candle_exc))
                 history_ready=any(r.get('date')==previous_day and r.get('session_status')=='COMPLETED' for r in rows)
                 try:
                     # Stored history only needs the recent gap repaired; a full
@@ -330,11 +328,8 @@ def enrich_crypto(data):
                     yahoo_rows=[] if history_ready else crypto_observation(symbol,history_range=repair_range)[0]
                     completed=[r for r in yahoo_rows if r.get('date','')<fresh[0]['date']
                                and r.get('session_status')=='COMPLETED']
-                    # Yahoo fiat USD backfill cannot replace a verified
-                    # Binance USDT close; it only repairs missing history.
-                    rows=merge_rows(rows,[r for r in completed if not any(
-                        old.get('date')==r.get('date') and old.get('session_status')=='COMPLETED'
-                        and old.get('quote_currency')=='USDT' for old in rows)])
+                    # Yahoo repairs only the fiat-USD historical series.
+                    rows=merge_rows(rows,completed)
                 except Exception as history_exc:
                     print('CRYPTO_DAILY_HISTORY=WARN',key,type(history_exc).__name__,str(history_exc))
                 rows=merge_rows(rows,fresh)
@@ -342,17 +337,37 @@ def enrich_crypto(data):
                 rows,snapshot=crypto_observation(symbol)
             if not rows:raise ValueError('CRYPTO_SERIES_EMPTY')
             series_map[key]=rows;latest[key]=rows[-1]['value'];snapshots[key]=snapshot
-            snapshot['daily_change_basis']='SAME_CURRENCY_COMPLETED_UTC_OR_UNAVAILABLE'
-            snapshot['previous_close_currency']=next(
-                (r.get('quote_currency') for r in reversed(rows[:-1]) if r.get('session_status')=='COMPLETED' and r.get('date')==(datetime.fromisoformat(rows[-1]['date']).date()-timedelta(days=1)).isoformat()), None)
-            snapshot['daily_change_safe']=bool(snapshot.get('quote_currency')
-                and snapshot.get('previous_close_currency')==snapshot['quote_currency'])
+            # Price and historical fiat USD observations are separate units.
+            # The comparable reference is a Binance USDT kline, or an actual
+            # previous UTC day's completed fiat-USD bar for USD fallback.
+            current_day=rows[-1]['date']
+            previous_day=(datetime.fromisoformat(current_day).date()-timedelta(days=1)).isoformat()
+            fallback_usd=next((r for r in reversed(rows[:-1])
+                if r.get('date')==previous_day and r.get('session_status')=='COMPLETED'
+                and r.get('quote_currency')=='USD'),None)
+            reference=usdt_close if snapshot.get('quote_currency')=='USDT' else fallback_usd
+            source_currency=snapshot.get('quote_currency')
+            safe=bool(snapshot.get('status')=='LIVE' and source_currency in ('USD','USDT')
+                and reference and reference.get('date')==previous_day
+                and reference.get('session_status')=='COMPLETED'
+                and reference.get('quote_currency')==source_currency
+                and isinstance(reference.get('value'),(int,float))
+                and math.isfinite(reference['value']) and reference['value']>0
+                and rows[-1].get('session_status')=='IN_PROGRESS'
+                and rows[-1].get('quote_currency')==source_currency)
+            snapshot['daily_change_basis']='SEPARATE_NATIVE_USDT_KLINE_OR_COMPLETED_FIAT_USD'
+            snapshot['previous_close_value']=reference.get('value') if safe else None
+            snapshot['previous_close_currency']=source_currency if safe else None
+            snapshot['previous_close_utc_date']=previous_day if safe else None
+            snapshot['previous_close_source']=reference.get('source') if safe else None
+            snapshot['daily_change_safe']=safe
+            snapshot['daily_change_pct']=round((snapshot['price']/reference['value']-1)*100,4) if safe else None
             print('CRYPTO_QUOTE=PASS',key,snapshot['status'],'price=',snapshot['price'],'as_of=',snapshot['quote_as_of_kst'],'source=',snapshot['source'])
         except Exception as exc:
             old=dict(snapshots.get(key) or {});old.update(status='STALE' if series_map.get(key) else 'UNAVAILABLE',fetch_error=f'{type(exc).__name__}: {exc}',last_attempt_kst=datetime.now(KST).isoformat(timespec='seconds'));snapshots[key]=old
             print('CRYPTO_QUOTE=WARN',key,old['status'],old['fetch_error'])
     data.setdefault('sources',{})['CRYPTO_SPOT']='Binance last-trade USDT primary (USD proxy, explicitly tagged); CoinGecko fiat USD fallback; Yahoo Finance USD fallback and UTC daily history; provider timestamps preserved'
-    data['crypto_contract']='SOURCE_CURRENCY_GUARDED_UTC_DAILY_COMPARISON_V2'
+    data['crypto_contract']='PRESERVED_USD_HISTORY_SEPARATE_USDT_REFERENCE_V3'
     data['crypto_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
 
 
