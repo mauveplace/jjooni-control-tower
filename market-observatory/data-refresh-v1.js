@@ -73,7 +73,7 @@ async function readPublished(){
 let nowBusy=false,nowButton,nowMessage;
 async function forceNow(){
  if(nowBusy)return;
- nowBusy=true;nowButton.disabled=true;nowButton.textContent='현재 시세 조회 중…';nowMessage.textContent='지수·환율·원자재·가상자산 원천 조회 중 · 마지막 검증값 유지';
+ nowBusy=true;nowButton.disabled=true;nowButton.textContent='현재 시세 조회 중…';nowMessage.textContent='지수·환율·원자재 현재 시세 조회 중 · BTC·ETH는 별도 게시된 관측 시각 기준';
  try{
   const runtime=root.__JJOONI_OBSERVATORY_QUOTES;
   if(!runtime)throw Error('QUOTE_READER_NOT_READY');
