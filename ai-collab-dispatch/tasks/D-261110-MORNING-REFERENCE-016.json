@@ -1,0 +1,33 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-MORNING-REFERENCE-016",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Fix recurring morning brief NDX/SOX blank-values issue using non-trading provider reference quotes that retain strict Nasdaq official EOD gate. Independently review this code and source evidence against Observatory SSOT, published Nov 10 2026 brief and future editorial contract.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Current HEAD only: validate 2026-11-10 NDX 27,907.63 (+3.40%) vs 11-06 26,989.99, SOX 10,033.93 (+6.85%) vs 9,390.25; Yahoo/YCharts linked with real post-close session and common-feed caveat",
+    "Close_checks remain CONFLICT with canonical close/change_pct=null; provider reference is prominently labeled non-official non-tradable; no BIPOD->TRIPOD automatic change",
+    "Check src market-observatory/morning-brief-v1.js, tools/validate_morning_brief.py, tests/morning-brief-ui-contract.test.cjs, docs/song-daily-editorial-contract.md, and corrected latest/20261110/index. Reject stale/unmatched reference and XSS leakage",
+    "Execute python tools/validate_morning_brief.py, Python editorial regression suite, node --check market-observatory/morning-brief-v1.js, node --test tests/morning-brief-ui-contract.test.cjs; review current HEAD CI and Pages latest after authorized deploy",
+    "Identify any current-source provenance weakness or provider-source shared-feed issue; return PASS/NEEDS_CHANGES/BLOCKED with exact HEAD and tested steps",
+    "No production merge/deploy, no account data, no trades, no market-source history rewrite"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets/private data",
+    "No trading signal promotion or investment orders",
+    "No permission, billing, Cloud Run or Claude API changes",
+    "No unsolicited merge or production deploy"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "testing",
+  "coordination_notes": "User specifically requested immediate recurrence fix and ROY independent collaboration, not mere code style review. This is initial source-first test request. PR-opened Claude Routine is external and execution must be evidenced."
+}

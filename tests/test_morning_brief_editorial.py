@@ -133,4 +133,40 @@ class EditorialAcceptanceTests(unittest.TestCase):
             with self.subTest(safe_text=safe_text):
                 validate_public_content(dict(normal, body_markdown=safe_text))
 
+    def test_20261110_reference_restores_readability_without_official_gate_promotion(self):
+        report=json.loads((ROOT/'market-observatory/data/morning-brief/20261110.json').read_text())
+        validate_report(report)
+        checks=report['editorial_contract']['close_checks']
+        self.assertEqual([(c['status'],c['close'],c['change_pct']) for c in checks],
+                         [('CONFLICT',None,None),('CONFLICT',None,None)])
+        refs=report['editorial_contract']['reference_quotes']
+        self.assertEqual([(r['symbol'],r['close'],r['trade_signal_eligible']) for r in refs],
+                         [('NDX',27907.63,False),('SOX',10033.93,False)])
+
+    def test_provider_reference_requires_original_previous_close_and_late_quote(self):
+        report=json.loads((ROOT/'market-observatory/data/morning-brief/20261110.json').read_text())
+        bad=copy.deepcopy(report)
+        bad['editorial_contract']['reference_quotes'][0]['previous_close']+=10
+        bad['editorial_contract']['reference_quotes'][0]['change_pct']=round(
+            100*(bad['editorial_contract']['reference_quotes'][0]['close']/
+                 bad['editorial_contract']['reference_quotes'][0]['previous_close']-1),2)
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_PREVIOUS_CLOSE_MISMATCH'):
+            validate_report(bad)
+        early=copy.deepcopy(report)
+        for item in early['editorial_contract']['reference_quotes'][0]['source_observations']:
+            item['quote_time_et']='2026-11-09T16:10:00-05:00'
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_PROVENANCE'):
+            validate_report(early)
+
+    def test_provider_reference_cannot_be_trade_signal_or_wrong_session(self):
+        report=json.loads((ROOT/'market-observatory/data/morning-brief/20261110.json').read_text())
+        unsafe=copy.deepcopy(report)
+        unsafe['editorial_contract']['reference_quotes'][0]['trade_signal_eligible']=True
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_TRADE_BOUNDARY'):
+            validate_report(unsafe)
+        stale=copy.deepcopy(report)
+        stale['editorial_contract']['reference_quotes'][0]['session_date']='2026-11-06'
+        with self.assertRaisesRegex(AssertionError,'REFERENCE_SESSION'):
+            validate_report(stale)
+
 if __name__=='__main__':unittest.main()

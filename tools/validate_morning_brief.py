@@ -31,6 +31,41 @@ def validate_editorial(d, created):
     assert d['market_date_us'] <= expected_completed_session(checked), 'UNFINISHED_US_SESSION'
     checks = contract.get('close_checks') or []
     assert {x.get('symbol') for x in checks} == {'NDX', 'SOX'}, 'CORE_CLOSE_COVERAGE'
+    # A cited price reference may appear alongside a CONFLICT, but must never
+    # change the strict official-close/trading gate.
+    references = contract.get('reference_quotes') or []
+    assert len(references) <= 2, 'REFERENCE_SCOPE'
+    assert len({r.get('symbol') for r in references}) == len(references), 'REFERENCE_DUPLICATES'
+    close_by_symbol = {c['symbol']: c for c in checks}
+    for ref in references:
+        assert ref.get('symbol') in close_by_symbol, 'REFERENCE_SYMBOL'
+        assert close_by_symbol[ref['symbol']].get('status') in {'CONFLICT', 'MISSING'}, 'REFERENCE_OFFICIAL_GATE'
+        assert ref.get('session_date') == d['market_date_us'], 'REFERENCE_SESSION'
+        assert ref.get('status') == 'PROVIDER_REFERENCE_ONLY', 'REFERENCE_STATUS'
+        assert ref.get('official_eod_verified') is False and ref.get('trade_signal_eligible') is False, 'REFERENCE_TRADE_BOUNDARY'
+        close, previous, pct = ref.get('close'), ref.get('previous_close'), ref.get('change_pct')
+        assert all(isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v < float('inf') for v in (close, previous)), 'REFERENCE_VALUE'
+        assert isinstance(pct, (int, float)) and abs((close / previous - 1)*100 - pct) < .015, 'REFERENCE_RETURN'
+        official_previous = close_by_symbol[ref['symbol']].get('previous_close')
+        assert isinstance(official_previous, (int, float)) and abs(official_previous - previous) <= 0.02, 'REFERENCE_PREVIOUS_CLOSE_MISMATCH'
+        checked = datetime.fromisoformat(ref['checked_at_kst'])
+        assert checked.utcoffset() == timedelta(hours=9) and checked >= created, 'REFERENCE_CHECK_CLOCK'
+        obs = ref.get('source_observations') or []
+        assert len(obs) >= 2, 'REFERENCE_SOURCE_COUNT'
+        domains = set()
+        late_postclose_count = 0
+        for item in obs:
+            url = item.get('url') or ''
+            parsed = urlparse(url)
+            assert parsed.scheme == 'https' and parsed.hostname and item.get('session_date') == d['market_date_us'], 'REFERENCE_SOURCE_URL_SESSION'
+            assert abs(float(item.get('close', 0)) - close) <= 0.02, 'REFERENCE_SOURCE_DISAGREEMENT'
+            stamp = datetime.fromisoformat(item['quote_time_et'])
+            ny = stamp.astimezone(ZoneInfo('America/New_York'))
+            assert stamp.tzinfo and ny.date().isoformat() == d['market_date_us'] and ny.time() >= time(16) and stamp <= checked, 'REFERENCE_NOT_POST_CLOSE'
+            if ny.time() >= time(16, 30):
+                late_postclose_count += 1
+            domains.add(parsed.hostname)
+        assert len(domains) >= 2 and late_postclose_count >= 1 and ref.get('limitations'), 'REFERENCE_PROVENANCE'
     for check in checks:
         assert check.get('session_date') == d['market_date_us'], 'CLOSE_SESSION_MISMATCH'
         post_audit=check.get('post_publication_verified_at_kst')
