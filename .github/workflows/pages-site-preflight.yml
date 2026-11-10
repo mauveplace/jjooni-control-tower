@@ -1,0 +1,30 @@
+name: Pages Site Artifact Preflight
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/pages-controlled-deploy.yml
+      - .github/workflows/pages-site-preflight.yml
+      - scripts/pages_deploy_plan.py
+      - scripts/pages_site_stage.sh
+      - scripts/pages_site_audit.py
+      - tests/test_pages_controlled_deploy_contract.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  site:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run behavior regressions and local asset audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_pages_controlled_deploy_contract -v
+          bash scripts/pages_site_stage.sh "$RUNNER_TEMP/jjooni-pages-preflight"
+          test -s "$RUNNER_TEMP/jjooni-pages-preflight/index.html"
