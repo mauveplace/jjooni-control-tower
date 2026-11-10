@@ -26,6 +26,9 @@ Many data commits could cause unnecessary Pages builds even with no user viewing
   rather than every 30 minutes around the clock. Existing historical 5-minute
   data remain available; new intraday bars are less dense, with source times
   shown. No unverified live-yield price is substituted from the quote API.
+  The US-session rate job may backfill BTC/ETH only when their last published
+  source observation exceeds 45 minutes; fresh crypto quotes cause no extra
+  provider API requests.
 - Cross-market supplemental facts are archived after KR and US closing only.
 - Previous five-minute relay is a manual read-only health diagnostic only:
   no chained runner, writes, issue alerts or privileged job dispatch.
