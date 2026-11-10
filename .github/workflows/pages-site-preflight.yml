@@ -9,6 +9,7 @@ on:
       - scripts/pages_deploy_plan.py
       - scripts/pages_site_stage.sh
       - scripts/pages_site_audit.py
+      - scripts/pages_calendar_prune.py
       - tests/test_pages_controlled_deploy_contract.py
   workflow_dispatch:
 
