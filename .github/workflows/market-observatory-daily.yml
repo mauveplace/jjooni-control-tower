@@ -33,8 +33,11 @@ on:
     # Opportunistic heartbeats from already-running workflows.
     # A failed calendar/optional source must still trigger the independent freshness check.
     # The gate below rebuilds only when the market snapshot itself is stale.
+    # Pages publishes the snapshot but is not an upstream data source.
+    # Listening to every Pages deployment creates an avoidable deployment ->
+    # freshness-check feedback loop during frequent data-only commits.
+    # Schedule, relay, and actual source refreshes remain as independent gates.
     workflows:
-      - "pages build and deployment"
       - "Economic Calendar Light Refresh"
       - "Market Observatory Calendar Actual Capture"
       - "Market Observatory Verified Calendar"
