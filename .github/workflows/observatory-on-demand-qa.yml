@@ -1,0 +1,76 @@
+name: Observatory On-Demand Architecture QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/observatory-on-demand-qa.yml
+      - .github/workflows/observatory-heartbeat.yml
+      - .github/workflows/market-observatory-daily.yml
+      - .github/workflows/observatory-crypto-refresh.yml
+      - .github/workflows/observatory-us-rates-intraday.yml
+      - .github/workflows/market-observatory-supplemental-freshness.yml
+      - .github/workflows/market-observatory-close-watchdog.yml
+      - .github/workflows/pages-controlled-deploy.yml
+      - market-observatory/intraday-quotes-v1.js
+      - market-observatory/live-market-refresh-v1.js
+      - market-observatory/freshness-watchdog-v1.js
+      - market-observatory/data-refresh-v1.js
+      - market-observatory/official-macro-v1.js
+      - market-observatory/us-rates-intraday-v1.js
+      - market-observatory/fed-watch-v1.js
+      - market-observatory/index.html
+      - tests/test_observatory_on_demand_contract.py
+      - tests/test_observatory_heartbeat.py
+      - tests/test_crypto_existing_schedule_fallback.py
+      - tests/observatory-quotes.test.cjs
+      - tests/test_observatory_data_refresh.cjs
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/observatory-on-demand-qa.yml
+      - market-observatory/intraday-quotes-v1.js
+      - market-observatory/live-market-refresh-v1.js
+      - market-observatory/fed-watch-v1.js
+      - .github/workflows/observatory-heartbeat.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install YAML parser only for workflow assertions
+        run: python -m pip install --quiet PyYAML
+      - name: Verify source publication and on-demand contracts
+        run: |
+          set -euo pipefail
+          python -m unittest tests.test_observatory_heartbeat tests.test_observatory_on_demand_contract tests.test_crypto_existing_schedule_fallback -v
+          python tests/test_observatory_hourly_refresh_contract.py
+          node --test tests/observatory-quotes.test.cjs tests/test_observatory_data_refresh.cjs tests/us-rates-intraday.test.cjs
+      - name: Verify no client-side timed API polling
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          paths = [
+            'market-observatory/intraday-quotes-v1.js',
+            'market-observatory/live-market-refresh-v1.js',
+            'market-observatory/freshness-watchdog-v1.js',
+            'market-observatory/official-macro-v1.js',
+            'market-observatory/us-rates-intraday-v1.js',
+            'market-observatory/fed-watch-v1.js',
+          ]
+          for path in paths:
+              s=Path(path).read_text()
+              assert 'setInterval(resume,120000)' not in s
+              assert 'setInterval(autoRefreshTick' not in s
+          print('ON_DEMAND_API_POLLING=DISABLED')
+          PY
