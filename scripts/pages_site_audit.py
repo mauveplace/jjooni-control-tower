@@ -44,6 +44,9 @@ def local_ref(root, origin, raw):
     target = target.resolve()
     if not target.is_relative_to(root.resolve()):
         return "path escapes site root: " + raw
+    # Literal "./data/" can be the prefix for a dynamic asset URL.
+    if path.endswith("/") and target.is_dir():
+        return None
     if target.is_file() or (target.is_dir() and (target / "index.html").is_file()):
         return None
     return f"{origin.relative_to(root)} -> {raw}"
