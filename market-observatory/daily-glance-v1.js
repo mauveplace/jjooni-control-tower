@@ -54,8 +54,9 @@
       }).join('') + '</table>';
     }).join('');
     var bc = g.brief_check || {};
-    var brief = bc.status === 'MISMATCH' ? '<div class="dgWarn">⚠️ ' + esc(bc.text) + '</div>' :
+    var brief = (bc.status === 'MISMATCH' || bc.status === 'REFERENCE_MISMATCH') ? '<div class="dgWarn">⚠️ ' + esc(bc.text) + '</div>' :
       bc.status === 'MATCH' ? '<div class="dgOk">✓ ' + esc(bc.text) + '</div>' :
+      bc.status === 'REFERENCE_MATCH' ? '<div class="dgMeta">ⓘ ' + esc(bc.text) + '</div>' :
       bc.status === 'UNVERIFIED' ? '<div class="dgWarn">' + esc(bc.text) + '</div>' :
       bc.text ? '<div class="dgMeta">' + esc(bc.text) + '</div>' : '';
     var cons = g.consistency && g.consistency.status !== 'OK' ? '<div class="dgWarn">⚠️ TRI-POD 신호와 시세 날짜·종가가 맞지 않아 전환선 거리는 참고용입니다.</div>' : '';
