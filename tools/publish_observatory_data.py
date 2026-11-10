@@ -314,6 +314,14 @@ def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
+    # A data-only Daily Glance writer may start before a concurrent crypto
+    # writer and finish later. Recompute *after every source rebase*, not from
+    # its old checkout; generated_kst alone cannot prove the source is newer.
+    # This also keeps the new atomic crypto+glance publication consistent with
+    # whichever canonical Observatory source won the concurrent merge.
+    if DATA+'daily-glance.json' in paths:
+        import build_daily_glance
+        build_daily_glance.main()
     if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
         from archive_fedwatch import archive_snapshot
         archive_snapshot(json.loads((ROOT/(DATA+'fed-watch.json')).read_text()), ROOT/DATA)
