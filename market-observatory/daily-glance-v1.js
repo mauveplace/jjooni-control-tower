@@ -50,7 +50,7 @@
         if (it.status === 'MISSING') return '<tr><td>' + esc(it.label) + '</td><td class="n old">자료 없음</td><td></td></tr>';
         var old = it.key !== 'BTCUSD' && it.date !== latestDates[grp.name] ? ' old' : '';
         var dp = it.d1_bp != null ? 3 : it.value > 1000 ? 0 : 2;
-        return '<tr><td class="' + old + '">' + esc(it.label) + (old ? ' (' + esc(it.date.slice(5)) + ')' : '') + '</td><td class="n">' + num(it.value, dp) + '</td>' + chg(it) + '</tr>';
+        return '<tr><td class="' + old + '">' + esc(it.label) + (old ? ' (' + esc(it.date.slice(5)) + ')' : '') + (it.quote_currency ? ' · ' + esc(it.quote_currency) : '') + (it.comparison_status === 'CURRENCY_BASIS_UNAVAILABLE' ? ' (등락 기준 통화 불명·혼용)' : '') + '</td><td class="n">' + num(it.value, dp) + '</td>' + chg(it) + '</tr>';
       }).join('') + '</table>';
     }).join('');
     var bc = g.brief_check || {};

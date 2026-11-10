@@ -207,7 +207,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
     if cal_probe_blocked and cal_state=='LIVE':
         cal_state='DEGRADED'
 
-    # The crypto provider can switch per symbol (CoinGecko primary / Yahoo fallback).
+    # The crypto provider can switch per symbol (Binance USDT -> CoinGecko USD -> Yahoo USD).
     # Never hard-code Yahoo or substitute a market-wide timestamp for the quote writer.
     crypto_quotes=obs.get('crypto_market') or {}
     crypto_sources=' · '.join(

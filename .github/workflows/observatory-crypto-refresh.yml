@@ -5,6 +5,8 @@ on:
     paths:
       - tools/add_observatory_equities.py
       - tests/test_observatory_crypto.py
+      - tests/test_observatory_binance_basis.py
+      - tools/refresh_observatory_crypto.py
       - tools/probe_observatory_runtime.py
       - tests/test_observatory_runtime_probe.py
       - .github/workflows/observatory-crypto-refresh.yml
@@ -46,19 +48,21 @@ jobs:
       - name: Validate BTC ETH source timestamps and fallback contracts
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
+          python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
-      - name: Verify actual CoinGecko USD spot and provider timestamps
+      - name: Verify Binance market-data endpoint and timestamped BTC ETH quotes
         run: |
           python - <<'PY'
           import sys
           sys.path.insert(0, 'tools')
-          from add_observatory_equities import coingecko_spot_observations
-          observations = coingecko_spot_observations()
-          assert set(observations) == {'BTCUSD', 'ETHUSD'}, 'COINGECKO_LIVE_PROBE_INCOMPLETE'
+          from add_observatory_equities import binance_spot_observations
+          observations = binance_spot_observations()
+          assert set(observations) == {'BTCUSD', 'ETHUSD'}, 'BINANCE_LIVE_PROBE_INCOMPLETE'
           for key, (rows, snapshot) in observations.items():
               assert snapshot['status'] == 'LIVE', (key, snapshot)
+              assert snapshot['quote_currency'] == 'USDT', key
               assert rows[-1]['value'] == snapshot['price'], key
-              print('COINGECKO_LIVE_PROBE=PASS', key, snapshot['quote_as_of_kst'])
+              print('BINANCE_LIVE_PROBE=PASS', key, snapshot['quote_as_of_kst'])
           PY
 
   crypto:
@@ -76,6 +80,7 @@ jobs:
       - name: Validate crypto time basis and source failure retention
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
+          python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
       - name: Collect and validate actual BTC ETH quotes
         id: collect

@@ -3,7 +3,7 @@
 if(window.__JJOONI_ANALYSIS_LAB)return;
 const C=window.JJOONIAnalysisCore,colors=['#175cd3','#d92d20','#087443','#9333ea','#c27803','#0891b2'];
 const modes={raw:'원값',index:'시작값=100',cumulative:'시작 대비 변화율 %',return:'관측 간 변화율 %',change:'관측 간 차이',zscore:'표준화 Z-score',drawdown:'조회기간 고점 대비 낙폭 %'};
-const names={NASDAQ100:'나스닥100',NASDAQCOMPOSITE:'나스닥 종합',SP500:'S&P500',RUSSELL2000:'러셀2000',DOW:'다우',VIX:'VIX',USDKRW:'원/달러',USDJPY:'달러/엔',DXY:'달러지수',BTCUSD:'비트코인 USD',ETHUSD:'이더리움 USD',US3M:'미국 3개월 금리',US2Y:'미국 2년 금리',US10Y_OFFICIAL:'미국 10년 금리',US30Y_OFFICIAL:'미국 30년 금리',GOLD:'금',SILVER:'은',WTI:'WTI',BRENT:'브렌트',NATGAS:'천연가스',FEAR_GREED:'Fear & Greed'};
+const names={NASDAQ100:'나스닥100',NASDAQCOMPOSITE:'나스닥 종합',SP500:'S&P500',RUSSELL2000:'러셀2000',DOW:'다우',VIX:'VIX',USDKRW:'원/달러',USDJPY:'달러/엔',DXY:'달러지수',BTCUSD:'비트코인 USD 완료 일봉(현물 USDT 별도)',ETHUSD:'이더리움 USD 완료 일봉(현물 USDT 별도)',US3M:'미국 3개월 금리',US2Y:'미국 2년 금리',US10Y_OFFICIAL:'미국 10년 금리',US30Y_OFFICIAL:'미국 30년 금리',GOLD:'금',SILVER:'은',WTI:'WTI',BRENT:'브렌트',NATGAS:'천연가스',FEAR_GREED:'Fear & Greed'};
 const fields={value:'대표값',raw:'원지수·원수준',yoy:'전년비 %',mom:'전월비 %',qoq:'전분기비 %',ann_3m:'3개월 연율 %',ann_6m:'6개월 연율 %',avg_3m:'3개월 평균',avg_6m:'6개월 평균',yoy_change:'전년 대비 차이',lower:'금리 하단',upper:'금리 상단'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const q=s=>document.querySelector(s),iso=d=>d.toISOString().slice(0,10);
@@ -17,7 +17,7 @@ function buildCatalog(){
  catalog=out;
 }
 function rowsFor(item){
- if(item.kind==='market')return (market()?.series?.[item.key]||[]).filter(r=>r.session_status!=='IN_PROGRESS').map(r=>({date:r.date,value:C.number(r.value)})).filter(r=>r.value!=null);
+ if(item.kind==='market')return (market()?.series?.[item.key]||[]).filter(r=>r.session_status!=='IN_PROGRESS'&&(!['BTCUSD','ETHUSD'].includes(item.key)||r.quote_currency==='USD')).map(r=>({date:r.date,value:C.number(r.value)})).filter(r=>r.value!=null);
  const m=macro.metrics[item.key];return (m.history||[]).map(r=>{const release=r.published_date||r.release_date||r.released_at;const date=options.basis==='release'?(release?String(release).slice(0,10):null):C.periodEnd(r.period,m.frequency);return {date,value:C.number(r[item.field])};}).filter(r=>r.date&&r.value!=null);
 }
 function entry(id){return catalog.find(x=>x.id===id);}
@@ -51,7 +51,7 @@ function draw(){
  }
  chart=new Chart(q('#labChart'),{plugins:[{id:'labCanvasBackground',beforeDraw:c=>{const ctx=c.ctx;ctx.save();ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.restore();}}],type:options.type==='scatter'?'scatter':'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},tooltip:{callbacks:{title:items=>{const p=items[0]?.raw;if(!p)return '';return options.type==='scatter'?p.date:new Date(p.x).toISOString().slice(0,10);},afterLabel:ctx=>ctx.raw?.sourceDate?'원관측일 '+ctx.raw.sourceDate+(ctx.raw.partial?' · 진행 중 기간':''):''}},zoom:{pan:{enabled:true,mode:'x'},zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x'}},decimation:{enabled:true,algorithm:'lttb',samples:1000}},scales}});
  sourceTable();const notes=[];if(current.some(s=>s.item.kind==='macro'))notes.push(options.basis==='reference'?'거시는 대상기간 말일에 배치한 사후 분석입니다. 과거 수정값이 포함될 수 있어 당시 매매 판단의 재현값은 아닙니다.':'거시는 각 이력에 발표일이 확인된 관측만 사용합니다. 발표일이 없는 이력은 제외하며, 최초 발표값 여부는 별도 확인이 필요합니다.');
- notes.push('빈 기간은 채우지 않습니다. 미완료 가상자산 일봉은 제외합니다. 현재 주·월은 진행 중 관측일 수 있습니다.');
+ notes.push('빈 기간은 채우지 않습니다. 가상자산 분석 Lab은 USD 완료 일봉만 사용하며 Binance USDT 현물·USDT 완료 일봉과 혼합하지 않습니다. 현재 주·월은 진행 중 관측일 수 있습니다.');
  if(configs.some(c=>c.mode==='raw'))notes.push('원값 상관은 공통 추세의 영향을 받을 수 있습니다. 변화율·차이와 함께 비교하세요.');if(options.type==='line'&&options.lag)notes.push('겹쳐 보기는 원래 관측기간을 유지하며, 시차는 산점도·상관계수 계산에 적용됩니다.');notes.push('상관은 인과관계·하락장 예측 확률이 아닙니다. 시차는 공통 관측 순서 기준이며 달력 기간과 다를 수 있습니다.');q('#labNotes').textContent=notes.join(' ');
  notify(`시장 원천 ${market().generated_kst||'미확인'} · 거시 원천 ${macro?.generated_kst||'미확인'} · ${current.reduce((n,s)=>n+s.rows.length,0).toLocaleString()}개 관측 표시`);
 }

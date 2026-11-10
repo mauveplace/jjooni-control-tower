@@ -10,6 +10,12 @@ import add_observatory_equities as equities
 
 
 class CryptoObservationTest(unittest.TestCase):
+    def setUp(self):
+        # Existing CoinGecko/Yahoo contract tests must not hit live Binance.
+        mock_binance=patch.object(equities,'binance_spot_observations',return_value={})
+        mock_binance.start()
+        self.addCleanup(mock_binance.stop)
+
     def test_weekend_candles_use_utc_and_current_quote_keeps_timestamp(self):
         utc = ZoneInfo('UTC')
         now = datetime(2026, 10, 11, 23, 15, tzinfo=utc)
@@ -195,6 +201,88 @@ class CryptoObservationTest(unittest.TestCase):
             saved=json.loads(obs.read_text())
             self.assertEqual(saved['latest']['BTCUSD'],100)
             self.assertEqual(saved['crypto_market']['ETHUSD']['status'],'STALE')
+
+
+class BinancePrimaryObservationTest(unittest.TestCase):
+    def setUp(self):
+        patcher=patch.object(equities,'binance_completed_utc_day',side_effect=OSError('TEST_NO_NETWORK'))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_binance_trade_uses_provider_timestamp_and_usdt_provenance(self):
+        now=datetime(2026,11,10,0,30,tzinfo=ZoneInfo('UTC'))
+        payloads={
+            'BTCUSDT':[{'price':'75071.57','time':int(now.timestamp()*1000)-10000}],
+            'ETHUSDT':[{'price':'2126.64','time':int(now.timestamp()*1000)-12000}],
+        }
+        def fetch(url):
+            pair='BTCUSDT' if 'BTCUSDT' in url else 'ETHUSDT'
+            return payloads[pair]
+        with patch.object(equities,'get_json',side_effect=fetch) as getter:
+            observations=equities.binance_spot_observations(now)
+        self.assertEqual(getter.call_count,2)
+        self.assertEqual(set(observations),{'BTCUSD','ETHUSD'})
+        row,quote=observations['BTCUSD']
+        self.assertEqual(row[0]['date'],'2026-11-10')
+        self.assertEqual(row[0]['quote_currency'],'USDT')
+        self.assertEqual(quote['quote_currency'],'USDT')
+        self.assertTrue(quote['usd_proxy'])
+        self.assertEqual(quote['quote_age_seconds'],10)
+        self.assertEqual(quote['price'],75071.57)
+        self.assertIn('Binance',quote['source'])
+        self.assertEqual(quote['status'],'LIVE')
+
+    def test_binance_rejects_stale_future_and_invalid_trade(self):
+        now=datetime(2026,11,10,1,0,tzinfo=ZoneInfo('UTC'))
+        for response in (
+            [{'price':'100','time':int(now.timestamp()*1000)-3601000}],
+            [{'price':'100','time':int(now.timestamp()*1000)+301000}],
+            [{'price':'nan','time':int(now.timestamp()*1000)}],
+            [{'price':'100'}], {'price':'100','time':int(now.timestamp()*1000)}
+        ):
+            with self.subTest(response=response),patch.object(equities,'get_json',return_value=response):
+                self.assertEqual(equities.binance_spot_observations(now),{})
+
+    def test_binance_primary_skips_coingecko_when_both_pairs_healthy(self):
+        now=datetime.now(ZoneInfo('UTC'))
+        quotes={}
+        for key,pair in equities.BINANCE_PAIRS.items():
+            observed=now.astimezone(ZoneInfo('Asia/Seoul')).isoformat(timespec='seconds')
+            quotes[key]=([{'date':now.date().isoformat(),'value':100,'session_status':'IN_PROGRESS',
+                           'source':'Binance','quote_currency':'USDT'}],
+                         {'price':100,'source':'Binance','status':'LIVE',
+                          'quote_as_of_kst':observed,'quote_currency':'USDT'})
+        yesterday=(now.date()-__import__('datetime').timedelta(days=1)).isoformat()
+        data={'series':{key:[{'date':yesterday,'value':99,'session_status':'COMPLETED'}]
+                        for key in equities.CRYPTO_SYMBOLS}}
+        with patch.object(equities,'binance_spot_observations',return_value=quotes), \
+             patch.object(equities,'coingecko_spot_observations',
+                          side_effect=AssertionError('redundant fallback')) as backup, \
+             patch.object(equities,'crypto_observation',
+                          side_effect=AssertionError('redundant history')):
+            equities.enrich_crypto(data)
+        backup.assert_not_called()
+        self.assertEqual(data['latest']['BTCUSD'],100)
+        self.assertEqual(data['crypto_market']['ETHUSD']['quote_currency'],'USDT')
+
+    def test_binance_partial_failure_uses_coingecko_per_symbol(self):
+        today=datetime.now(ZoneInfo('UTC')).date().isoformat()
+        yesterday=(datetime.now(ZoneInfo('UTC')).date()-__import__('datetime').timedelta(days=1)).isoformat()
+        btc=([{'date':today,'value':100,'session_status':'IN_PROGRESS'}],
+             {'price':100,'source':'Binance','status':'LIVE'})
+        eth=([{'date':today,'value':200,'session_status':'IN_PROGRESS'}],
+             {'price':200,'source':'CoinGecko','status':'LIVE'})
+        data={'series':{key:[{'date':yesterday,'value':99,'session_status':'COMPLETED'}]
+                        for key in equities.CRYPTO_SYMBOLS}}
+        with patch.object(equities,'binance_spot_observations',return_value={'BTCUSD':btc}), \
+             patch.object(equities,'coingecko_spot_observations',return_value={'ETHUSD':eth}), \
+             patch.object(equities,'crypto_observation',
+                          side_effect=AssertionError('redundant history')):
+            equities.enrich_crypto(data)
+        self.assertEqual(data['crypto_market']['BTCUSD']['source'],'Binance')
+        self.assertEqual(data['crypto_market']['ETHUSD']['source'],'CoinGecko')
+        self.assertEqual(data['latest']['ETHUSD'],200)
+
 
 
 if __name__ == '__main__':
