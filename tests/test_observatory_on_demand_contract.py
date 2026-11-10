@@ -94,6 +94,18 @@ class LowFrequencyWriterTests(unittest.TestCase):
                          ["40 7 * * 1-5", "50 21 * * 0-5"])
         self.assertNotIn("  workflow_run:", read(".github/workflows/market-observatory-supplemental-freshness.yml"))
 
+    def test_official_economic_actuals_have_independent_publication_path(self):
+        light = read(".github/workflows/economic-calendar-light-refresh.yml")
+        verified = read(".github/workflows/market-observatory-calendar-verified.yml")
+        macro = read(".github/workflows/market-observatory-official-macro.yml")
+        html = read("market-observatory/index.html")
+        self.assertIn("market-observatory/data/economic-calendar.json", light)
+        self.assertIn("Economic Calendar Light Refresh", verified)
+        self.assertIn("market-observatory/data/economic-calendar.json", verified)
+        self.assertIn("market-observatory/data/official-macro.json", macro)
+        self.assertIn("loadObsJson('./data/economic-calendar.json')", html)
+        self.assertIn("market-observatory-daily-pulse.yml", read(".github/workflows/market-observatory-daily-pulse.yml"))
+
     def test_official_release_capture_still_scheduled(self):
         content = read(".github/workflows/economic-calendar-light-refresh.yml")
         self.assertIn("*/15 10-14 * * 1-5", content)
