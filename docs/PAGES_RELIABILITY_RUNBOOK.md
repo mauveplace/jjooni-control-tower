@@ -33,3 +33,18 @@ After passing the blockers, change GitHub repository Settings > Pages > Build an
 To roll back: set PAGES_ACTIONS_ENABLED=false AND restore the previous Deploy from a branch source setting. Verify an actually served page; toggling only the variable is not rollback.
 
 No settings have been changed, no error emails suppressed, and no claim is made that remote syncing_files timeouts are eliminated.
+
+
+## Measured staged artifact reduction (no source-data deletion)
+
+Pages Site Artifact Preflight #42736037050 measured the original assembled
+site as 368M. The calendar-index-preserving prune reduced the staged site
+to 108M, retaining all 439 current indexed series files and excluding 2,922
+unreferenced content-addressed historical revisions (266,506,645 bytes).
+The immutable Git repository still contains every original file.
+
+This is a measured local *staged uncompressed directory* reduction, not
+yet a successful production Pages deployment or a proven fix for the
+GitHub-owned syncing_files stall. A smaller artifact is an informed
+hypothesis for reducing deployment pressure; the controlled source switch
+and live monitoring remain separate acceptance gates.
