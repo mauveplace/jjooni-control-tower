@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from calendar_market_events import representative_metric, sync_representative_values
+from calendar_actual_contract import apply_known_official_nonpublication
 
 ROOT = Path(__file__).resolve().parents[1]
 CAL = ROOT / 'market-observatory' / 'data' / 'economic-calendar.json'
@@ -33,6 +34,7 @@ def main():
     synced = 0
     policy_guarded = 0
     for event in data.get('events') or []:
+        apply_known_official_nonpublication(event)
         before = tuple(clean(event.get(k)) for k in ('previous', 'consensus', 'actual'))
         primary = primary_metric(event)
         if primary:
