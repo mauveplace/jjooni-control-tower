@@ -53,6 +53,8 @@ class HeartbeatWorkflowContractTest(unittest.TestCase):
         self.assertEqual(wf['permissions'], {'contents': 'read'})
         self.assertIn('diagnose', wf['jobs'])
         self.assertNotIn('schedule:', text)
+        self.assertIn('cancel-in-progress: true', text)
+        self.assertIn('    paths:\n      - .github/workflows/observatory-heartbeat.yml', text)
         self.assertNotIn('gh workflow run', text)
         self.assertNotIn('sleep "$INTERVAL_SECONDS"', text)
         self.assertNotIn('Hand over to the next relay run', text)
