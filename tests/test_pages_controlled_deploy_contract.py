@@ -70,6 +70,13 @@ class PagesDeployGateBehavior(unittest.TestCase):
                     run=mock_gh(deployments, statuses))
                 self.assertTrue(should)
 
+    def test_malformed_provider_objects_also_retry(self):
+        should, why = plan.decide(
+            "mauveplace/jjooni-control-tower", SHA,
+            run=mock_gh(["not-a-deployment-object"], [status()]))
+        self.assertTrue(should)
+        self.assertEqual(why, "STATUS_CHECK_UNAVAILABLE")
+
     def test_gh_failure_never_hides_a_needed_deploy(self):
         should, why = plan.decide(
             "mauveplace/jjooni-control-tower", SHA,
