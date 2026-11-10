@@ -5,8 +5,9 @@ name: Pages Controlled Deployment
 # PAGES_ACTIONS_ENABLED=true. Do not silence real build/deploy failures.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 * * * *'
+  # Disabled automatic deploy cadence: branch-source Pages still publishes
+  # genuine code/data commits; live browser price views never need a deploy.
+  # Do not switch Pages Source until a future demand-aware deployment is reviewed.
 
 permissions:
   contents: read
