@@ -19,13 +19,11 @@ on:
       - tools/add_observatory_equities.py
       - .github/workflows/observatory-crypto-refresh.yml
   workflow_dispatch:
-  # Independent best-effort heartbeat: the Daily workflow's 15-minute
-  # schedule has been dropped for hours despite successful downstream runs.
-  # Stagger away from :00 and Daily's :07/:22/:37/:52 slots.
-  # This does not guarantee 60-minute quote freshness: GitHub schedules
-  # can be delayed/dropped. Runtime quote timestamps remain authoritative.
+  # One daily archived BTC/ETH source snapshot; current live prices are fetched
+  # directly by the visible browser via the existing public quote service.
+  # 21:35 UTC = 06:35 KST next day. Keep manual repair entrypoint.
   schedule:
-    - cron: '12,42 * * * *'
+    - cron: '35 21 * * *'
 
 permissions:
   contents: write
