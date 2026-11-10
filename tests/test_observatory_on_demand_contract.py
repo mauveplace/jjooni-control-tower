@@ -86,7 +86,7 @@ class LowFrequencyWriterTests(unittest.TestCase):
         self.assertEqual(schedules(".github/workflows/observatory-crypto-refresh.yml"),
                          ["35 * * * *"])
         self.assertEqual(schedules(".github/workflows/observatory-us-rates-intraday.yml"),
-                         ["45 21 * * 1-5"])
+                         ["45 12-22 * * 1-5"])
         self.assertEqual(schedules(".github/workflows/market-observatory-supplemental-freshness.yml"),
                          ["40 7 * * 1-5", "50 21 * * 0-5"])
         self.assertNotIn("  workflow_run:", read(".github/workflows/market-observatory-supplemental-freshness.yml"))
