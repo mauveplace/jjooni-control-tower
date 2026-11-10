@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import pages_deploy_plan as plan
 import pages_site_audit as audit
+import pages_calendar_prune as prune
 
 SHA = "a" * 40
 OTHER_SHA = "b" * 40
@@ -129,6 +130,48 @@ class PagesAssetAuditBehavior(unittest.TestCase):
             self.assertEqual(missing, [])
 
 
+
+class PagesCalendarPruneBehavior(unittest.TestCase):
+    def test_only_index_referenced_revisions_are_published(self):
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp)
+            data = site / "market-observatory/data"
+            files = data / "calendar-history/series"
+            files.mkdir(parents=True)
+            keep = files / "current.json"
+            orphan = files / "old-revision.json"
+            keep.write_text('{"v":1}', encoding="utf-8")
+            orphan.write_text('{"v":0}', encoding="utf-8")
+            (data / "calendar-history-index.json").write_text(
+                json.dumps({
+                    "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
+                    "series": {"x": {"path": "./calendar-history/series/current.json"}}
+                }), encoding="utf-8",
+            )
+            indexed, kept, removed, saved = prune.prune(site)
+            self.assertEqual((indexed, kept, removed), (1, 1, 1))
+            self.assertGreater(saved, 0)
+            self.assertTrue(keep.is_file())
+            self.assertFalse(orphan.exists())
+
+    def test_invalid_index_fails_closed_without_deleting_history(self):
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp)
+            data = site / "market-observatory/data"
+            files = data / "calendar-history/series"
+            files.mkdir(parents=True)
+            original = files / "keep.json"
+            original.write_text("{}", encoding="utf-8")
+            (data / "calendar-history-index.json").write_text(
+                json.dumps({
+                    "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
+                    "series": {"x": {"path": "./calendar-history/series/missing.json"}}
+                }), encoding="utf-8",
+            )
+            with self.assertRaises(RuntimeError):
+                prune.prune(site)
+            self.assertTrue(original.is_file())
+
 class PagesWorkflowContract(unittest.TestCase):
     def test_deployment_and_retry_gates(self):
         src = WORKFLOW.read_text(encoding="utf-8")
@@ -146,6 +189,7 @@ class PagesWorkflowContract(unittest.TestCase):
     def test_preserves_public_market_data_and_excludes_dev_sources(self):
         src = (ROOT / "scripts/pages_site_stage.sh").read_text(encoding="utf-8")
         self.assertIn("python3 scripts/pages_site_audit.py", src)
+        self.assertIn("python3 scripts/pages_calendar_prune.py", src)
         for name in ("market-observatory/data/observatory.json",
                      "market-observatory/data/economic-calendar-history.json",
                      "public-market-daily.json", "index.html"):
