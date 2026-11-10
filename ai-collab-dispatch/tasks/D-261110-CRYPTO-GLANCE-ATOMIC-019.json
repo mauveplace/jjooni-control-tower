@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-CRYPTO-GLANCE-ATOMIC-019",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Repair stale 30-second Daily Glance crypto quote after Binance source deployment by publishing updated Observatory source, matching Daily Glance consumer, and derived health in one atomic data commit; preserve quote provenance, NDX strict gate, and failure isolation.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "On live Binance BTC/ETH refresh, the published Daily Glance BTC row has same UTC quote date and USDT currency as refreshed observatory snapshot, not stale CoinGecko reference",
+    "The crypto writer calls build_daily_glance AFTER collection and commits observatory.json and daily-glance.json atomically via existing data publisher without additional Pages job",
+    "Partial or stale source is clearly flagged; failed optional glance build cannot hide a crypto collection failure or prevent healthy crypto publication",
+    "Concurrent publication and rebase behavior cannot claim a card is newer than its source; errors/warnings remain observable",
+    "All applicable source, architecture and UI CI pass and ROY independent review contains latest HEAD; production verification after owner-approved merge"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User approved fixing, ROY validation and deployment on 2026-11-10 in this conversation; code review and runtime proof still required",
+  "forbidden": [
+    "No Binance private account keys or secrets",
+    "No trades or investment signal changes",
+    "No Cloud Run redeploy or paid infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "Created after #350 #352 deployed. Old reviewer issue #363 targets superseded HEAD; request fresh issue on changed HEAD, one ROY review only. Current symptom: 2026-11-10 12:44 KST canonical Binance LIVE and Daily Glance BTC 11/08 outdated."
+}
