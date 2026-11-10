@@ -19,11 +19,12 @@ on:
       - tools/add_observatory_equities.py
       - .github/workflows/observatory-crypto-refresh.yml
   workflow_dispatch:
-  # One daily archived BTC/ETH source snapshot; current live prices are fetched
-  # directly by the visible browser via the existing public quote service.
-  # 21:35 UTC = 06:35 KST next day. Keep manual repair entrypoint.
+  # One hourly provenanced BTC/ETH snapshot, rather than twice per hour.
+  # The public on-demand quotes API currently EXCLUDES BTC/ETH pending a verified
+  # USDT/USD and previous-close contract; do not present its API as live crypto.
+  # Retain an hourly safe publishing fallback until an authenticated source is ready.
   schedule:
-    - cron: '35 21 * * *'
+    - cron: '35 * * * *'
 
 permissions:
   contents: write
