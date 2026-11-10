@@ -1,15 +1,17 @@
 name: Pages Controlled Deployment
 
-# Staged migration: remains SKIPPED until repository variable
-# PAGES_ACTIONS_ENABLED=true and Settings > Pages > Source = GitHub Actions.
-# Do not replace the existing branch deployment before switching the source.
+# Release from one pinned source SHA at most once per 15-minute window.
+# Disabled until the owner switches Pages Source to GitHub Actions and sets
+# PAGES_ACTIONS_ENABLED=true. Do not silence real build/deploy failures.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 * * * *'
+  # Disabled automatic deploy cadence: branch-source Pages still publishes
+  # genuine code/data commits; live browser price views never need a deploy.
+  # Do not switch Pages Source until a future demand-aware deployment is reviewed.
 
 permissions:
   contents: read
+  deployments: read
   pages: write
   id-token: write
 
@@ -18,24 +20,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  plan:
     if: ${{ vars.PAGES_ACTIONS_ENABLED == 'true' }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      target_sha: ${{ steps.check.outputs.target_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Check latest completed Pages deployment against pinned source
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          echo "target_sha=$sha" >> "$GITHUB_OUTPUT"
+          python3 scripts/pages_deploy_plan.py --repo "$GH_REPO" --sha "$sha" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: plan
+    if: ${{ needs.plan.outputs.should_deploy == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout latest main once for this deployment
+      - name: Checkout pinned source commit
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ needs.plan.outputs.target_sha }}
           fetch-depth: 1
+      - name: Stage and audit exact public site assets
+        shell: bash
+        run: bash scripts/pages_site_stage.sh "$RUNNER_TEMP/jjooni-pages-site"
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload same root content as current branch build
+      - name: Upload curated public artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: ${{ runner.temp }}/jjooni-pages-site
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4

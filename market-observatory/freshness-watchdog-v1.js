@@ -70,7 +70,9 @@ const st=document.createElement('style');st.textContent=`
 @media(max-width:760px){.obsFreshHead{flex-wrap:wrap}.obsFreshHead>div:first-child{flex-wrap:wrap}.obsWatchSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.obsWatchAnalysis{padding:12px}.obsWatchFacts{flex-direction:column;gap:5px}}
 `;document.head.appendChild(st);
 ensure();load();
-const timer=setInterval(()=>{if(!document.hidden)load()},60000);
+// Read the published quality snapshot on page open, returning to the page or
+// explicit '상태 다시 읽기'. Do not fetch status JSON every minute while idle.
+const timer=null;
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
 window.addEventListener('pageshow',()=>load());
 document.querySelector('.obsFreshDetails')?.addEventListener('toggle',e=>{if(e.target.open)load()});

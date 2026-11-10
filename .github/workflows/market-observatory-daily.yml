@@ -29,22 +29,9 @@ on:
       - market-observatory/data/ai-read-contract.json
       - market-observatory/data/calendar-manual-overrides.json
       - .github/workflows/market-observatory-daily.yml
-  workflow_run:
-    # Opportunistic heartbeats from already-running workflows.
-    # A failed calendar/optional source must still trigger the independent freshness check.
-    # The gate below rebuilds only when the market snapshot itself is stale.
-    workflows:
-      - "pages build and deployment"
-      - "Economic Calendar Light Refresh"
-      - "Market Observatory Calendar Actual Capture"
-      - "Market Observatory Verified Calendar"
-      - "Public Market + TRI-POD Daily Sidecar"
-      - "Market Observatory Official Macro"
-    types: [completed]
   schedule:
-    # Redundant hourly watchdog. GitHub scheduled runs can be delayed/dropped,
-    # so check four off-peak minutes per hour and rebuild only when data is stale.
-    - cron: '7,22,37,52 * * * *'
+    # No intraday heartbeat: public quotes use on-demand API reads.
+    # Keep official US and Korea close publication only.
     # US regular-session close +20m, DST-safe candidate slots.
     # Sunday ET candidate refreshes the last completed US session for Monday KST.
     # 20:20 UTC = 05:20 KST while New York is on EDT; 21:20 UTC = 06:20 KST while on EST.
@@ -93,7 +80,7 @@ jobs:
           fi
 
   hourly_gate:
-    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '7,22,37,52 * * * *') || (github.event_name == 'workflow_dispatch' && inputs.heartbeat) || (github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.heartbeat }}
     runs-on: ubuntu-latest
     outputs:
       should_refresh: ${{ steps.fresh.outputs.should_refresh }}
@@ -441,7 +428,7 @@ jobs:
           board_runtime_version=re.search(r"version:'([0-9A-Za-z._-]+)'",board)
           assert board_url_version and board_runtime_version,'latest board runtime/cache version missing'
           assert board_url_version[1]==board_runtime_version[1],(board_url_version[1],board_runtime_version[1])
-          assert 'fed-watch-v1.js?v=2.1' in html
+          require_runtime(html, 'fed-watch-v1.js')
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))

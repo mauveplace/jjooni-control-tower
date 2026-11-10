@@ -1,0 +1,33 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-OBS-ONDEMAND-019",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently challenge JJOONI's user-requested conversion from five-minute autonomous heartbeat and high-frequency archival schedules to user-driven visible quote reads, while preserving US/KR close, official-calendar and canonical TRI-POD publication. Identify missing UI network polling, workflow dependency breaks and morning-brief freshness regressions.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Confirm the existing public market quote API is read-only and accessible on page open/return/manual Now Refresh without a GitHub Actions token, duplicate requests, or background network polling.",
+    "Inspect former Observatory Heartbeat Relay 5-minute loop: manual diagnostics must not chain, dispatch writers, or hide genuine close errors.",
+    "Confirm US-close/KR-close, Daily Pulse/TRI-POD final, independent US-close watchdog and high-impact official macro/calendar release tasks still execute, including DST candidates.",
+    "Inspect whether eliminating hourly crypto, rates, supplemental and market triggers damages required history series or 06:30 KST morning brief. Flag any blocking loss of data density or module regression.",
+    "Verify actual CI for exact PR HEAD including on-demand architecture QA, original quote UI regression, source heartbeat tests, and no permission/secrets/portfolio/strategy changes.",
+    "Verdict PASS/NEEDS_CHANGES/BLOCKED with concrete references; independent read-only review only, no code push, merge/deploy or trading."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No new secrets, tokens or permissions",
+    "No account or trading access",
+    "No unapproved Pages Source migration",
+    "No muting of true deployment or official close errors"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "User explicitly requested JJOONI to coordinate with ROY and apply on-demand Observatory refresh. JJOONI primary coder, ROY independent reviewer. Consider preserving serious close/official publication reliability while suppressing obsolete 5m heartbeat and idle browser polling."
+}

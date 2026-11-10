@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -52,13 +52,50 @@ def pct(a, b):
     return round((a / b - 1) * 100, 2) if a and b else None
 
 
-def metric(key, label, series):
+def metric(key, label, series, crypto=None):
     rows = completed(series)
+    # A 24/7 spot observation may be current but is not a completed UTC day.
+    # Publish the spot price with its original quote currency, never a USD
+    # return computed against a USDT observation (or vice versa).
+    if key in ("BTCUSD", "ETHUSD") and crypto and crypto.get("status")=="LIVE":
+        current=(series or [{}])[-1]
+        currency=crypto.get("quote_currency")
+        if (currency in ("USD","USDT") and current.get("quote_currency")==currency
+                and current.get("session_status")=="IN_PROGRESS"
+                and isinstance(current.get("value"), (int,float))
+                and current["value"]>0 and current.get("date")):
+            expected_prev=(date.fromisoformat(current["date"])-timedelta(days=1)).isoformat()
+            # For Binance, the verified USDT close is kept on the snapshot,
+            # not written over the original Yahoo fiat-USD daily series.
+            reference=crypto.get("previous_close_value")
+            same=bool(crypto.get("daily_change_safe") is True
+                      and crypto.get("previous_close_currency")==currency
+                      and crypto.get("previous_close_utc_date")==expected_prev
+                      and isinstance(reference,(int,float)) and not isinstance(reference,bool)
+                      and 0 < reference < float("inf"))
+            result={"key":key,"label":label,"date":current["date"],
+                    "value":round(current["value"],4),"quote_currency":currency,
+                    "source":crypto.get("source"),"observed_kst":crypto.get("quote_as_of_kst"),
+                    "comparison_status":"SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE",
+                    "d1_pct":pct(current["value"],reference) if same else None,
+                    "w1_pct":None}
+            return result
     if len(rows) < 2:
         return {"key": key, "label": label, "status": "MISSING"}
     last, prev = rows[-1], rows[-2]
     week = rows[-6] if len(rows) >= 6 else None
     item = {"key": key, "label": label, "date": last["date"], "value": round(last["value"], 4)}
+    if key in ("BTCUSD","ETHUSD"):
+        currency=last.get("quote_currency")
+        same=(currency in ("USD","USDT") and prev.get("quote_currency")==currency
+              and prev.get("date")==(date.fromisoformat(last['date'])-timedelta(days=1)).isoformat())
+        item.update(quote_currency=currency,source=last.get("source"),
+                    comparison_status="SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE")
+        item["d1_pct"]=pct(last["value"],prev["value"]) if same else None
+        seven_days_ago=(date.fromisoformat(last["date"])-timedelta(days=7)).isoformat()
+        prior_week=next((r for r in reversed(rows[:-1]) if r.get("date")==seven_days_ago),None)
+        item["w1_pct"]=pct(last["value"],prior_week["value"]) if prior_week and prior_week.get("quote_currency")==currency else None
+        return item
     if key in RATE_KEYS:
         item["d1_bp"] = round((last["value"] - prev["value"]) * 100, 1)
         item["w1_bp"] = round((last["value"] - week["value"]) * 100, 1) if week else None
@@ -157,8 +194,35 @@ def brief_check(brief, by_key, us_session):
         return {**result, "status": "NOT_SAME_SESSION",
                 "text": f"아침 시황은 미국 {brief.get('market_date_us')} 기준, 카드는 {us_session} 기준입니다."}
     obs = by_key.get("NASDAQ100", {})
+    # A reported source conflict is not the same as a missing NDX observation.
+    # Keep the official-close gate strict, while independently acknowledging
+    # an explicitly labeled, session-matched provider reference in the brief.
+    # A reference MATCH is *never* an official EOD verification or trading signal.
+    references = (brief.get("editorial_contract") or {}).get("reference_quotes") or []
+    if ndx and ndx.get("status") in ("CONFLICT", "MISSING") and obs.get("date") == us_session:
+        reference = next((q for q in references if q.get("symbol") == "NDX"
+                          and q.get("session_date") == us_session
+                          and q.get("status") == "PROVIDER_REFERENCE_ONLY"
+                          and q.get("official_eod_verified") is False
+                          and q.get("trade_signal_eligible") is False), None)
+        price = reference.get("close") if reference else None
+        canonical = obs.get("value")
+        if (isinstance(price, (int, float)) and not isinstance(price, bool)
+                and isinstance(canonical, (int, float)) and not isinstance(canonical, bool)
+                and 0 < price < float("inf") and 0 < canonical < float("inf")):
+            diff = round((price / canonical - 1) * 100, 3)
+            matched = abs(diff) <= BRIEF_TOLERANCE_PCT
+            return {**result, "status": "REFERENCE_MATCH" if matched else "REFERENCE_MISMATCH",
+                    "reference_ndx": price, "pipeline_ndx": canonical, "diff_pct": diff,
+                    "official_status": ndx.get("status"), "official_eod_verified": False,
+                    "trade_signal_eligible": False,
+                    "text": (f"NDX 제공자 참고 완료 일봉 {price:,.2f}와 옵저버토리 "
+                             f"{canonical:,.2f}은 {'일치' if matched else f'{diff:+.3f}% 불일치'}합니다. "
+                             "공식 확정 종가 검증은 별도이며 매매 신호로 승격하지 않습니다.")}
     if not ndx or not isinstance(ndx.get("close"), (int, float)) or obs.get("date") != us_session:
-        return {**result, "status": "NOT_COMPARABLE"}
+        return {**result, "status": "NOT_COMPARABLE",
+                "text": "NDX 공식 종가 교차검증에 필요한 값 또는 완료 세션이 부족합니다. "
+                        "옵저버토리 저장값은 별도로 표시합니다."}
     if ndx.get("status") != "VERIFIED" or ndx.get("official_status") not in (None, "VERIFIED"):
         return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
                 "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
@@ -192,7 +256,7 @@ def build(obs, brief=None, now=None):
     series = obs.get("series", {})
     groups, by_key = [], {}
     for name, items in GROUPS:
-        rows = [metric(k, label, series.get(k)) for k, label in items]
+        rows = [metric(k, label, series.get(k), (obs.get('crypto_market') or {}).get(k)) for k, label in items]
         for r in rows:
             by_key[r["key"]] = r
         groups.append({"name": name, "items": rows})

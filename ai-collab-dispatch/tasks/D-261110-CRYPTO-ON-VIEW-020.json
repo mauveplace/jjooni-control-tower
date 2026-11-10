@@ -1,0 +1,24 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-CRYPTO-ON-VIEW-020",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review on-view BTC/ETH Binance public trade display, provenance, UTC previous-close currency matching, stale fallback and isolation from persisted archives.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": ["ROY"],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Verify Binance browser access, CORS and provider timestamp validation, per-symbol failure, freshness and single-flight on open, resume and manual refresh.",
+    "Check all displayed prices and changes use correct USD or USDT currency and the preceding completed UTC-day same-currency baseline; no invented comparisons or historical writes.",
+    "Challenge UI behavior on partial, timeout, stale, failed requests and newer published data; verify tests and exact HEAD CI, identify omissions.",
+    "Provide independent PASS, NEEDS_CHANGES or BLOCKED with evidence; do not merge, deploy, modify code or trade."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": ["No secrets, accounts or trading", "No production writes or deployment", "No new paid services"],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "User requested ROY independent review. Include device/browser network limitations and truthful fallback as explicit review points."
+}

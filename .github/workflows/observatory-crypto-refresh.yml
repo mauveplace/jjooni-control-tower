@@ -5,6 +5,9 @@ on:
     paths:
       - tools/add_observatory_equities.py
       - tests/test_observatory_crypto.py
+      - tests/test_observatory_binance_basis.py
+      - tests/test_crypto_glance_atomic.py
+      - tools/refresh_observatory_crypto.py
       - tools/probe_observatory_runtime.py
       - tests/test_observatory_runtime_probe.py
       - .github/workflows/observatory-crypto-refresh.yml
@@ -16,13 +19,12 @@ on:
       - tools/add_observatory_equities.py
       - .github/workflows/observatory-crypto-refresh.yml
   workflow_dispatch:
-  # Independent best-effort heartbeat: the Daily workflow's 15-minute
-  # schedule has been dropped for hours despite successful downstream runs.
-  # Stagger away from :00 and Daily's :07/:22/:37/:52 slots.
-  # This does not guarantee 60-minute quote freshness: GitHub schedules
-  # can be delayed/dropped. Runtime quote timestamps remain authoritative.
+  # One hourly provenanced BTC/ETH snapshot, rather than twice per hour.
+  # The public on-demand quotes API currently EXCLUDES BTC/ETH pending a verified
+  # USDT/USD and previous-close contract; do not present its API as live crypto.
+  # Retain an hourly safe publishing fallback until an authenticated source is ready.
   schedule:
-    - cron: '12,42 * * * *'
+    - cron: '20 * * * *'
 
 permissions:
   contents: write
@@ -46,19 +48,22 @@ jobs:
       - name: Validate BTC ETH source timestamps and fallback contracts
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
+          python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
+          python -m unittest discover -s tests -p 'test_crypto_glance_atomic.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
-      - name: Verify actual CoinGecko USD spot and provider timestamps
+      - name: Verify Binance market-data endpoint and timestamped BTC ETH quotes
         run: |
           python - <<'PY'
           import sys
           sys.path.insert(0, 'tools')
-          from add_observatory_equities import coingecko_spot_observations
-          observations = coingecko_spot_observations()
-          assert set(observations) == {'BTCUSD', 'ETHUSD'}, 'COINGECKO_LIVE_PROBE_INCOMPLETE'
+          from add_observatory_equities import binance_spot_observations
+          observations = binance_spot_observations()
+          assert set(observations) == {'BTCUSD', 'ETHUSD'}, 'BINANCE_LIVE_PROBE_INCOMPLETE'
           for key, (rows, snapshot) in observations.items():
               assert snapshot['status'] == 'LIVE', (key, snapshot)
+              assert snapshot['quote_currency'] == 'USDT', key
               assert rows[-1]['value'] == snapshot['price'], key
-              print('COINGECKO_LIVE_PROBE=PASS', key, snapshot['quote_as_of_kst'])
+              print('BINANCE_LIVE_PROBE=PASS', key, snapshot['quote_as_of_kst'])
           PY
 
   crypto:
@@ -76,16 +81,34 @@ jobs:
       - name: Validate crypto time basis and source failure retention
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
+          python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
+          python -m unittest discover -s tests -p 'test_crypto_glance_atomic.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
       - name: Collect and validate actual BTC ETH quotes
         id: collect
         continue-on-error: true
         run: python tools/refresh_observatory_crypto.py
-      - name: Publish crypto observations with concurrent quote merge
+      # The 30-second card must not be older than the crypto snapshot when
+      # they share a release. One producer builds both from the same local
+      # observation and the publisher commits both in a single source update.
+      # A broken unrelated TRI-POD/card must not prevent crypto collection.
+      - name: Rebuild Daily Glance using just-collected crypto observations
+        id: glance
+        continue-on-error: true
+        run: python tools/build_daily_glance.py
+      - name: Publish crypto and matching card in one atomic commit
+        env:
+          GLANCE_OUTCOME: ${{ steps.glance.outcome }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh BTC ETH spot quotes' market-observatory/data/observatory.json
+          files=(market-observatory/data/observatory.json)
+          if [ "$GLANCE_OUTCOME" = success ]; then
+            files+=(market-observatory/data/daily-glance.json)
+          else
+            echo "::warning title=Daily Glance unavailable::Crypto is published independently; Daily Glance rebuild failed."
+          fi
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh BTC ETH and same-snapshot glance' "${files[@]}"
       # Deployment visibility is monitored, not a collection failure. With many
       # data writers pushing to main, GitHub Pages builds are queued/superseded
       # and routinely exceed the probe's 150s budget even though the quotes were

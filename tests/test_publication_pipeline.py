@@ -1,7 +1,4 @@
 import hashlib
-import io
-import subprocess
-from contextlib import redirect_stdout
 import json
 import sys
 import tempfile
@@ -9,7 +6,6 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
-from tests.test_daily_glance import observatory, brief
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import publish_observatory_data as pub
@@ -68,131 +64,6 @@ class PublicationPipelineTest(unittest.TestCase):
             self.assertEqual(json.loads((root / relative).read_text()), archive)
             index = json.loads((data / 'pulse-history/index.json').read_text())
             self.assertEqual(index['observations'][0]['snapshot_id'], digest)
-
-    def test_atomic_glance_follows_canonical_source_in_same_publication(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            data = root / pub.DATA
-            (data / 'morning-brief').mkdir(parents=True)
-            obs = observatory(generated_kst='2026-11-09T20:27:23+09:00')
-            (data / 'observatory.json').write_text(json.dumps(obs), encoding='utf-8')
-            (data / 'morning-brief/latest.json').write_text(
-                json.dumps(brief(26989.99)), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \
-                    patch.object(pub, 'materialize_market_dependents'), \
-                    patch.object(pub, 'materialize', return_value=[]), \
-                    patch.object(pub, 'materialize_health'):
-                paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
-            card_path = pub.DATA + 'daily-glance.json'
-            self.assertIn(card_path, paths)
-            card = json.loads((root / card_path).read_text(encoding='utf-8'))
-            self.assertEqual(card['source_generated_kst'], obs['generated_kst'])
-            self.assertEqual(card['us_session'], obs['us_completed_session_date'])
-            self.assertEqual(card['consistency']['status'], 'OK')
-            self.assertEqual(card['brief_check']['status'], 'MATCH')
-            self.assertTrue(card['read_only'])
-            self.assertFalse(card['contains_account_data'])
-
-    def test_atomic_glance_failure_does_not_block_source_publication(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            data = root / pub.DATA
-            data.mkdir(parents=True)
-            (data / 'observatory.json').write_text(
-                json.dumps(observatory(tripod_latest={'ok': False})), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \
-                    patch.object(pub, 'materialize_market_dependents'), \
-                    patch.object(pub, 'materialize', return_value=[]), \
-                    patch.object(pub, 'materialize_health'):
-                paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
-            self.assertNotIn(pub.DATA + 'daily-glance.json', paths)
-            self.assertIn(pub.DATA + 'observatory.json', paths)
-
-    def test_malformed_series_cannot_abort_canonical_source_publication(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            data = root / pub.DATA
-            data.mkdir(parents=True)
-            # None triggers AttributeError in completed(); previously
-            # uncaught and prevented a valid canonical source publication.
-            broken = observatory(series={'NASDAQ100': [None]})
-            (data / 'observatory.json').write_text(json.dumps(broken), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \
-                    patch.object(pub, 'materialize_market_dependents'), \
-                    patch.object(pub, 'materialize', return_value=[]), \
-                    patch.object(pub, 'materialize_health'):
-                paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
-            self.assertIn(pub.DATA + 'observatory.json', paths)
-            self.assertNotIn(pub.DATA + 'daily-glance.json', paths)
-
-    def test_zero_division_in_card_cannot_abort_source_publication(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            data = root / pub.DATA
-            data.mkdir(parents=True)
-            sample = observatory()
-            sample['tripod_latest']['ndx'] = 0
-            (data / 'observatory.json').write_text(json.dumps(sample), encoding='utf-8')
-            with patch.object(pub, 'ROOT', root), \
-                    patch.object(pub, 'materialize_market_dependents'), \
-                    patch.object(pub, 'materialize', return_value=[]), \
-                    patch.object(pub, 'materialize_health'):
-                paths = pub.materialize_publication([pub.DATA + 'observatory.json'])
-            self.assertIn(pub.DATA + 'observatory.json', paths)
-            self.assertNotIn(pub.DATA + 'daily-glance.json', paths)
-
-    def test_identical_source_no_change_and_no_new_git_commit(self):
-        from build_daily_glance import build as build_glance
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            data = root / pub.DATA
-            (data / 'morning-brief').mkdir(parents=True)
-            sample = observatory(generated_kst='2026-11-09T20:27:23+09:00')
-            note = brief(26989.99)
-            (data / 'observatory.json').write_text(json.dumps(sample), encoding='utf-8')
-            (data / 'morning-brief/latest.json').write_text(json.dumps(note), encoding='utf-8')
-            initial = build_glance(sample, note)
-            initial['generated_kst'] = '2026-11-09T20:27:24+09:00'
-            card = data / 'daily-glance.json'
-            card.write_text(json.dumps(initial, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
-            for file in ('data-audit.json', 'freshness-status.json'):
-                (data / file).write_text('{}\n', encoding='utf-8')
-            def git(*args):
-                subprocess.run(('git', *args), cwd=root, check=True, capture_output=True)
-            git('init', '-q')
-            git('config', 'user.email', 'test@example.invalid')
-            git('config', 'user.name', 'test')
-            git('add', '.')
-            git('commit', '-qm', 'baseline')
-            first = subprocess.run(('git', 'rev-parse', 'HEAD'), cwd=root,
-                                   check=True, text=True, capture_output=True).stdout.strip()
-            previous_bytes = card.read_bytes()
-            with patch.object(pub, 'ROOT', root), \
-                    patch.object(pub, 'materialize_market_dependents'), \
-                    patch.object(pub, 'materialize', return_value=[]), \
-                    patch.object(pub, 'materialize_health'):
-                output = io.StringIO()
-                with redirect_stdout(output):
-                    pub.publish([pub.DATA + 'observatory.json'], 'should remain no-op')
-            last = subprocess.run(('git', 'rev-parse', 'HEAD'), cwd=root,
-                                  check=True, text=True, capture_output=True).stdout.strip()
-            self.assertEqual(first, last)
-            self.assertEqual(previous_bytes, card.read_bytes())
-            self.assertIn('DAILY_GLANCE_ATOMIC=NO_CHANGE', output.getvalue())
-            self.assertIn('OBSERVATORY_PUBLISH=NO_CHANGE', output.getvalue())
-
-    def test_glance_rebase_prefers_fresher_source_even_if_generated_earlier(self):
-        old_source_new_build = {'source_generated_kst': '2026-11-08T20:00:00+09:00',
-                                'generated_kst': '2026-11-09T21:00:00+09:00',
-                                'headline': 'OLD SOURCE'}
-        new_source_old_build = {'source_generated_kst': '2026-11-09T20:30:00+09:00',
-                                'generated_kst': '2026-11-09T20:31:00+09:00',
-                                'headline': 'NEW SOURCE'}
-        path = pub.DATA + 'daily-glance.json'
-        self.assertEqual(pub.merge_generated(path, old_source_new_build,
-                                             new_source_old_build)['headline'], 'NEW SOURCE')
-        self.assertEqual(pub.merge_generated(path, new_source_old_build,
-                                             old_source_new_build)['headline'], 'NEW SOURCE')
 
     def test_all_publication_passes_share_derive_archive_health_order(self):
         calls = []

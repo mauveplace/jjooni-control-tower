@@ -1,7 +1,9 @@
 (function(root){
 'use strict';
 const ENDPOINT='https://jjooni-ct-fast-apgynr7pea-du.a.run.app/observatory/quotes';
-const KEYS=new Set(['NASDAQ100','NASDAQCOMPOSITE','SP500','DOW','RUSSELL2000','VIX','KOSPI','KOSDAQ','USDKRW','USDJPY','JPYKRW','DXY','WTI','BRENT','NATGAS','GOLD','SILVER','COPPER','BTCUSD','ETHUSD']);
+// Crypto BTCUSD/ETHUSD must use the published, provenance-tagged Binance/CoinGecko snapshots.
+// The intraday API currently has no validated quote_currency/previous_close_currency contract.
+const KEYS=new Set(['NASDAQ100','NASDAQCOMPOSITE','SP500','DOW','RUSSELL2000','VIX','KOSPI','KOSDAQ','USDKRW','USDJPY','JPYKRW','DXY','WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']);
 function valid(row,key,now=Date.now()){
  return !!row&&KEYS.has(key)&&row.key===key&&typeof row.value==='number'&&Number.isFinite(row.value)&&row.value>0&&Number.isFinite(Date.parse(row.observed_at))&&Date.parse(row.observed_at)<=now+120000;
 }
@@ -87,9 +89,9 @@ async function refresh(force=false){
   finally{pending=null}
  })();return pending;
 }
-// Reuse the server-coalesced public read while visible, with a bounded cadence.
-// Hidden tabs do not fetch; lifecycle bursts share one flight and a 60-second gate.
-// Manual refresh remains available and bypasses the lifecycle gate.
+// On-demand prices: read once on opening the page, returning to the tab, or pressing
+// the manual refresh button. No background market-data network polling. Existing
+// 60-second activation guard and single-flight request protect Cloud Run quota.
 function resume(){return refresh(false).catch(()=>{})}
 if(typeof root.setInterval==='function')root.setInterval(()=>{
  if(document.hidden)return;
@@ -103,7 +105,6 @@ if(typeof root.setInterval==='function')root.setInterval(()=>{
  }
  paintSummary();
 },60000);
-if(typeof root.setInterval==='function')root.setInterval(resume,120000);
 document.addEventListener?.('visibilitychange',resume);
 root.addEventListener?.('pageshow',resume);
 resume();

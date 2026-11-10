@@ -48,6 +48,35 @@ test('mobile reader has correction detail, consistent latest-publication wording
  assert.match(src,/briefSourceDetails/);
  assert.match(src,/briefTools\{display:grid/);
  assert.match(src,/공식 EOD 확인/);
- assert.match(html,/morning-brief-v1\.js\?v=20261109-mobile-correction-v2/);
+ assert.match(html,/morning-brief-v1\.js\?v=20261110-reference-prices-v1/);
  assert.match(html,/<option value="latest">최신 공개본<\/option>/);
+});
+
+const quoteStart=src.indexOf('function figureQuote('),quoteEnd=src.indexOf('\nfunction render(d){',quoteStart);
+assert.ok(quoteStart>=0&&quoteEnd>quoteStart,'reference quote projection helper must exist');
+const quoteFn=src.slice(quoteStart,quoteEnd);
+function quote(c,ref,session='2026-11-09'){
+ const d={market_date_us:session,editorial_contract:{reference_quotes:ref?[ref]:[]}};
+ return vm.runInNewContext(quoteFn+'\nfigureQuote(c,d)',{c,d});
+}
+const ndxRef={symbol:'NDX',session_date:'2026-11-09',status:'PROVIDER_REFERENCE_ONLY',
+ official_eod_verified:false,trade_signal_eligible:false,close:27907.63,change_pct:3.40,
+ source_observations:[{url:'https://finance.yahoo.com/'},{url:'https://ycharts.com/'}]};
+test('strict CONFLICT can show a clearly labeled provider reference, not an authoritative close',()=>{
+ const x=quote({symbol:'NDX',status:'CONFLICT',close:null,change_pct:null},ndxRef);
+ assert.equal(x.value,27907.63);assert.equal(x.pct,3.40);assert.equal(x.reference,true);
+ assert.match(src,/참고 완료 일봉 \/ 공식 종가 미검증/);
+ assert.match(src,/매매 신호 사용 금지/);
+});
+test('reference never overrides VERIFIED, another session, or a live trading signal',()=>{
+ const official=quote({symbol:'NDX',status:'VERIFIED',close:28000,change_pct:1},ndxRef);
+ assert.equal(official.value,28000);assert.equal(official.reference,false);
+ const other=quote({symbol:'NDX',status:'CONFLICT',close:null,change_pct:null},ndxRef,'2026-11-06');
+ assert.equal(other.value,null);
+ const unsafe=quote({symbol:'NDX',status:'CONFLICT',close:null,change_pct:null},{...ndxRef,trade_signal_eligible:true});
+ assert.equal(unsafe.value,null);
+});
+test('missing reference never turns CONFLICT into an invented value',()=>{
+ const x=quote({symbol:'SOX',status:'CONFLICT',close:null,change_pct:null},null);
+ assert.equal(x.value,null);assert.equal(x.reference,false);
 });

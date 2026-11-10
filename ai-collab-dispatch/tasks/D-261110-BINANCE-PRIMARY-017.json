@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-BINANCE-PRIMARY-017",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent read-only review of Observatory BTC/ETH quote source migration to Binance public market-data-only last trades, with CoinGecko and Yahoo fallback. Validate timestamp freshness, USDT-vs-USD disclosure, daily history preservation, request failure behavior and existing tests; do not merge or deploy.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Binance spot API observed as reachable from GitHub Actions runner for BTCUSDT and ETHUSDT, with source timestamps not fabricated",
+    "Fallback remains per-symbol Binance -> CoinGecko -> Yahoo without downgrading a good quote on other-symbol failure",
+    "Legacy BTCUSD/ETHUSD consumers explicitly disclose USDT quote currency and keep prior historical rows and STALE safety",
+    "All python source and runtime tests, overall architecture CI, and Pages quote publication gate pass before owner-approved release",
+    "ROY independently reviews actual PR current HEAD and identifies data-integrity risks"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or private account data",
+    "No automated production deploy, merge or trade",
+    "No paid model API or new cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "Repeated crypto freshness issues. One substantive ROY review requested at opened PR, avoid duplicate runs. This PR uses only public endpoints and zero private Binance API keys."
+}

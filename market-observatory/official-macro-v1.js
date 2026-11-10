@@ -203,5 +203,7 @@ async function load(){
 function boot(){if(!inject()){setTimeout(boot,200);return}if(q('#tabs button.on')?.dataset.tab==='official-macro')load()}
 document.addEventListener('click',e=>{if(e.target.closest('button[data-tab="official-macro"]'))load()});
 boot();
-setInterval(()=>{if(!document.hidden&&q('#tabs button.on')?.dataset.tab==='official-macro')load()},120000);
+// Official facts change on releases, not every 2 minutes. User tab opens
+// and page returns perform the only follow-up reads.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&q('#tabs button.on')?.dataset.tab==='official-macro')load();});
 })();

@@ -4,10 +4,10 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-function board(series, quality={}, quotes={}, crypto_market={}) {
+function board(series, quality={}, quotes={}, crypto_market={}, cryptoQuotes={}) {
   const src = fs.readFileSync(path.join(__dirname, '../market-observatory/latest-board-v1.js'), 'utf8');
   const context = {
-    DATA: {series,cross_market_freshness_quality:quality,crypto_market}, window: {__JJOONI_OBSERVATORY_QUOTES:{get:key=>quotes[key]||null}}, document: {createElement: () => ({}), head: {appendChild() {}}},
+    DATA: {series,cross_market_freshness_quality:quality,crypto_market}, window: {__JJOONI_OBSERVATORY_QUOTES:{get:key=>quotes[key]||null},__JJOONI_CRYPTO_ON_VIEW:{get:key=>cryptoQuotes[key]||null}}, document: {createElement: () => ({}), head: {appendChild() {}}},
     setInterval() {}, clearInterval() {}, console,
   };
   vm.createContext(context);
@@ -166,4 +166,11 @@ test('crypto cards recompute LIVE status from the actual quote timestamp',()=>{
  }
  const noStamp=board(series,{}, {}, {BTCUSD:{status:'LIVE'}});
  assert.match(noStamp.standardTile(noStamp.BY_KEY.BTCUSD),/이전 시세 · 갱신 지연/);
+});
+
+
+test('crypto live D1 requires matching USDT previous UTC close and date',()=>{
+ const rows={BTCUSD:[{date:'2026-11-09',value:100,quote_currency:'USD'}]},live={BTCUSD:{value:110,session_date:'2026-11-10',observed_at:'2026-11-10T10:00:00Z',quote_currency:'USDT',source:'Binance BTCUSDT'}};
+ const base={status:'LIVE',daily_change_safe:true,quote_currency:'USDT',previous_close_currency:'USDT',previous_close_utc_date:'2026-11-09',previous_close_value:100};
+ for(const [meta,expected] of [[base,10],[{...base,previous_close_utc_date:'2026-11-08'},null],[{...base,previous_close_currency:'USD'},null],[{...base,previous_close_value:null},null]]){const api=board(rows,{}, {},{BTCUSD:meta},live);const result=api.stat(api.BY_KEY.BTCUSD,'D1');assert.equal(result.change===null?null:Math.round(result.change),expected);assert.equal(result.quote_currency,'USDT')}
 });

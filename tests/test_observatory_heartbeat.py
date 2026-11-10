@@ -47,14 +47,20 @@ class HeartbeatDecisionTest(unittest.TestCase):
 
 
 class HeartbeatWorkflowContractTest(unittest.TestCase):
-    def test_relay_never_writes_and_hands_over(self):
-        wf = yaml.safe_load((ROOT / '.github/workflows/observatory-heartbeat.yml').read_text())
-        self.assertEqual(wf['permissions'], {'contents': 'read', 'actions': 'write', 'issues': 'write'})
-        self.assertIn('gh issue close', steps_text := wf['jobs']['relay']['steps'][2]['run'])
-        self.assertIn('[STALE]', steps_text)
-        steps = wf['jobs']['relay']['steps']
-        self.assertIn('gh workflow run observatory-heartbeat.yml', steps[-1]['run'])
-        self.assertLess(int(wf['jobs']['relay']['env']['LOOP_SECONDS']) / 60, wf['jobs']['relay']['timeout-minutes'])
+    def test_manual_diagnostic_has_no_background_runner_or_writer(self):
+        text = (ROOT / '.github/workflows/observatory-heartbeat.yml').read_text()
+        wf = yaml.safe_load(text)
+        self.assertEqual(wf['permissions'], {'contents': 'read'})
+        self.assertIn('diagnose', wf['jobs'])
+        self.assertNotIn('schedule:', text)
+        self.assertIn('cancel-in-progress: true', text)
+        self.assertIn('    paths:\n      - .github/workflows/observatory-heartbeat.yml', text)
+        self.assertNotIn('gh workflow run', text)
+        self.assertNotIn('sleep "$INTERVAL_SECONDS"', text)
+        self.assertNotIn('Hand over to the next relay run', text)
+        self.assertIn('python tools/observatory_heartbeat_decision.py',
+                      wf['jobs']['diagnose']['steps'][-1]['run'])
+
 
     def test_heartbeat_dispatch_runs_only_hourly_gate(self):
         text = (ROOT / '.github/workflows/market-observatory-daily.yml').read_text()

@@ -137,11 +137,10 @@ const st=document.createElement('style');st.textContent=`
 const tabs=document.getElementById('tabs');if(tabs)tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b?.dataset.tab==='rates')setTimeout(run,0)});
 if(active()==='rates')run();
 
-const AUTO_REFRESH_MS=60*60*1000;
-const AUTO_REFRESH_HEARTBEAT_MS=60*1000;
+// Latest official FedWatch facts are re-read on tab open or page return,
+// never via hourly page reload. Preserve legacy view restoration after a
+// previous-version reload, but do not start another timed reload loop.
 const AUTO_REFRESH_STATE_KEY='JJOONI_OBSERVATORY_AUTO_REFRESH_V1';
-let autoRefreshDueAt=Date.now()+AUTO_REFRESH_MS;
-let autoRefreshPending=false;
 function reloadPreservingView(){
   try{sessionStorage.setItem(AUTO_REFRESH_STATE_KEY,JSON.stringify({tab:active(),scrollY:Math.max(0,window.scrollY||0),savedAt:Date.now()}));}catch(_){ }
   try{const u=new URL(window.location.href);u.searchParams.set('refresh_ts',String(Date.now()));window.location.replace(u.toString());}catch(_){window.location.reload();}
@@ -156,12 +155,11 @@ function restoreViewAfterAutoRefresh(){
     setTimeout(restore,350);
   }catch(_){ }
 }
-function autoRefreshTick(){const now=Date.now();if(now<autoRefreshDueAt)return;autoRefreshDueAt=now+AUTO_REFRESH_MS;if(document.visibilityState==='visible')reloadPreservingView();else autoRefreshPending=true;}
-setInterval(autoRefreshTick,AUTO_REFRESH_HEARTBEAT_MS);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')return;if(autoRefreshPending||Date.now()>=autoRefreshDueAt){autoRefreshPending=false;reloadPreservingView();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && active()==='rates'){DATA=null;PROMISE=null;run();}});
+window.addEventListener('pageshow',event=>{if(event.persisted && active()==='rates'){DATA=null;PROMISE=null;run();}});
 restoreViewAfterAutoRefresh();
 
 window.__JJOONI_FED_WATCH={version:'2.0',data:'./data/fed-watch.json',contract:'CME_CONDITIONAL_MEETING_MATRIX_V2',legacy_fields:['hike_25bp_probability','change_1w_pctpt']};
-window.__JJOONI_AUTO_REFRESH={version:'1.1',interval_minutes:60,mode:'PAGE_RELOAD_LATEST_PUBLISHED_DATA',preserve_view:true};
+window.__JJOONI_AUTO_REFRESH={version:'2.0',mode:'ON_DEMAND_TAB_OPEN_OR_RESUME',preserve_view:true};
 })();
 

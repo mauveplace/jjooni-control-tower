@@ -22,14 +22,11 @@ on:
       - tests/test_observatory_fedwatch_publish_conflict.py
       - tools/publish_observatory_data.py
       - .github/workflows/market-observatory-supplemental-freshness.yml
-  workflow_run:
-    workflows:
-      - "Market Observatory Daily + Calendar"
-    types: [completed]
   schedule:
-    # Lightweight self-heal. Market daily series are clipped to the latest
-    # completed canonical session; crypto remains 24/7 spot.
-    - cron: '25 * * * *'
+    # Post-Korea-close and post-US-close public facts only, not hourly.
+    # The browser fetches live quotes on view instead of committing new data.
+    - cron: '40 7 * * 1-5'
+    - cron: '50 21 * * 0-5'
   workflow_dispatch:
 
 permissions:
