@@ -3,7 +3,7 @@ name: Market Observatory Latest Board E2E
 on:
   workflow_dispatch:
   pull_request:
-    paths: ['market-observatory/latest-board-v1.js', 'market-observatory/metric-detail-v1.js', 'market-observatory/index.html', 'tests/observatory-tripod*.test.cjs', '.github/workflows/market-observatory-latest-board-e2e.yml']
+    paths: ['market-observatory/latest-board-v1.js', 'market-observatory/metric-detail-v1.js', 'market-observatory/index.html', 'market-observatory/crypto-on-view-v1.js', 'tests/crypto-on-view.test.cjs', 'tests/observatory-crypto-on-view-e2e.cjs', 'tests/observatory-tripod*.test.cjs', '.github/workflows/market-observatory-latest-board-e2e.yml']
   push:
     branches: [main]
     paths:
@@ -36,7 +36,7 @@ jobs:
       - name: Syntax and period-sign regression check
         run: |
           node --check market-observatory/latest-board-v1.js
-          node --test tests/latest-board-period.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-bipod-weekly.test.cjs tests/observatory-metric-bipod-weekly.test.cjs tests/observatory-tripod-state.test.cjs
+          node --test tests/crypto-on-view.test.cjs tests/latest-board-period.test.cjs tests/observatory-tripod-next.test.cjs tests/observatory-bipod-weekly.test.cjs tests/observatory-metric-bipod-weekly.test.cjs tests/observatory-tripod-state.test.cjs
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
@@ -134,8 +134,16 @@ jobs:
 
 
 
+      - name: Verify BTC and ETH browser recovery
+        if: github.event_name == 'pull_request'
+        env:
+          URL: http://127.0.0.1:8123/market-observatory/
+        run: node tests/observatory-crypto-on-view-e2e.cjs
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tripod-state-responsive
-          path: tripod-state-*.png
+          path: |
+            tripod-state-*.png
+            crypto-view-*.png
