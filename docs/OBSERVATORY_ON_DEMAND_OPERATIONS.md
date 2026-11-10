@@ -22,8 +22,10 @@ Many data commits could cause unnecessary Pages builds even with no user viewing
   approved USDT/USD quote-currency/previous-close reconciliation. Do not claim
   live crypto from that API. Show the true crypto observation time and stale
   status, and retire the hourly fallback only after a verified on-demand source.
-- US rates are archived once per post-US-close weekday, not every 30 minutes.
-  This intentionally reduces new 5-minute rate history observations.
+- US yields are sampled hourly only in the US-trading-session UTC window,
+  rather than every 30 minutes around the clock. Existing historical 5-minute
+  data remain available; new intraday bars are less dense, with source times
+  shown. No unverified live-yield price is substituted from the quote API.
 - Cross-market supplemental facts are archived after KR and US closing only.
 - Previous five-minute relay is a manual read-only health diagnostic only:
   no chained runner, writes, issue alerts or privileged job dispatch.
