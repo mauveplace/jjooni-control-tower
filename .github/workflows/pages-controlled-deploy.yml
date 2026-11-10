@@ -1,8 +1,8 @@
 name: Pages Controlled Deployment
 
-# Staged migration: remains SKIPPED until repository variable
-# PAGES_ACTIONS_ENABLED=true and Settings > Pages > Source = GitHub Actions.
-# Do not replace the existing branch deployment before switching the source.
+# Release from one pinned source SHA at most once per 15-minute window.
+# Disabled until the owner switches Pages Source to GitHub Actions and sets
+# PAGES_ACTIONS_ENABLED=true. Do not silence real build/deploy failures.
 on:
   workflow_dispatch:
   schedule:
@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  deployments: read
   pages: write
   id-token: write
 
@@ -18,24 +19,95 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  plan:
     if: ${{ vars.PAGES_ACTIONS_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      target_sha: ${{ steps.check.outputs.target_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Check latest completed Pages deployment against pinned source
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          should=true
+          echo "target_sha=$sha" >> "$GITHUB_OUTPUT"
+          # An API failure must NEVER suppress deployment; retry the site.
+          if deployment=$(gh api "/repos/${GH_REPO}/deployments?environment=github-pages&per_page=1" --jq '.[0] | {id,sha}' 2>/dev/null); then
+            deployment_id="$(jq -r '.id // empty' <<< "$deployment")"
+            deployment_sha="$(jq -r '.sha // empty' <<< "$deployment")"
+            if [[ -n "$deployment_id" && "$deployment_sha" == "$sha" ]]; then
+              if status=$(gh api "/repos/${GH_REPO}/deployments/${deployment_id}/statuses?per_page=1" --jq '.[0].state // empty' 2>/dev/null); then
+                if [[ "$status" == 'success' ]]; then
+                  should=false
+                  echo "PAGES_DEPLOY_PLAN=NO_CHANGE sha=$sha last_deployment=$deployment_id"
+                else
+                  echo "PAGES_DEPLOY_PLAN=RETRY sha=$sha last_state=$status"
+                fi
+              else
+                echo '::warning::Pages deployment status unavailable; retry publishing'
+              fi
+            fi
+          else
+            echo '::warning::Pages deployment metadata unavailable; retry publishing'
+          fi
+          echo "should_deploy=$should" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: plan
+    if: ${{ needs.plan.outputs.should_deploy == 'true' }}
     runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout latest main once for this deployment
+      - name: Checkout pinned source commit
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ needs.plan.outputs.target_sha }}
           fetch-depth: 1
+      - name: Stage public files only; retain all runtime market histories
+        shell: bash
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/jjooni-pages-site"
+          mkdir -p "$site"
+          rsync -a --exclude='/.git/' --exclude='/.github/' \
+            --exclude='/ai-collab/' --exclude='/ai-collab-dispatch/' \
+            --exclude='/tools/' --exclude='/tests/' \
+            ./ "$site/"
+          for required in index.html market-observatory/index.html \
+            market-observatory/data/observatory.json \
+            market-observatory/data/economic-calendar-history.json \
+            public-market-daily.json .nojekyll; do
+            if [[ ! -f "$site/$required" ]]; then
+              echo "::error::Missing required public Pages asset: $required"
+              exit 1
+            fi
+          done
+          for forbidden in .git .github ai-collab ai-collab-dispatch tools tests; do
+            if [[ -e "$site/$forbidden" ]]; then
+              echo "::error::Non-public source directory included: $forbidden"
+              exit 1
+            fi
+          done
+          echo 'PAGES_SITE_STAGE=PASS'
+          du -sh "$site"
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload same root content as current branch build
+      - name: Upload curated public artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: ${{ runner.temp }}/jjooni-pages-site
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4
