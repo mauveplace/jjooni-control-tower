@@ -40,8 +40,8 @@
     "JP30Y": 3.911,
     "JP_2S10S": 0.946,
     "KR_US_10Y": -1.017,
-    "BTCUSD": 74750.87,
-    "ETHUSD": 2120.85,
+    "BTCUSD": 74974.93,
+    "ETHUSD": 2124.63,
     "FEAR_GREED": 31.7,
     "FEAR_GREED_RATING": "FEAR",
     "KOSPI": 5226.5,
@@ -335712,20 +335712,18 @@
       },
       {
         "date": "2026-11-09",
-        "value": 75160.0,
-        "session_status": "IN_PROGRESS",
+        "value": 75223.1484375,
+        "session_status": "COMPLETED",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T08:47:57+09:00",
-        "observation_type": "SPOT_SNAPSHOT",
-        "source": "CoinGecko",
-        "quote_currency": "UNKNOWN"
+        "source": "Yahoo Finance USD daily",
+        "quote_currency": "USD"
       },
       {
         "date": "2026-11-10",
-        "value": 74750.87,
+        "value": 74974.93,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T13:56:45+09:00",
+        "observed_kst": "2026-11-10T16:46:43+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -344566,20 +344564,18 @@
       },
       {
         "date": "2026-11-09",
-        "value": 2130.96,
-        "session_status": "IN_PROGRESS",
+        "value": 2131.49853516,
+        "session_status": "COMPLETED",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T08:47:57+09:00",
-        "observation_type": "SPOT_SNAPSHOT",
-        "source": "CoinGecko",
-        "quote_currency": "UNKNOWN"
+        "source": "Yahoo Finance USD daily",
+        "quote_currency": "USD"
       },
       {
         "date": "2026-11-10",
-        "value": 2120.85,
+        "value": 2124.63,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T13:56:35+09:00",
+        "observed_kst": "2026-11-10T16:46:43+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -377445,9 +377441,9 @@
       "symbol": "BTCUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=BTCUSDT&limit=1",
-      "price": 74750.87,
-      "quote_as_of_kst": "2026-11-10T13:56:45+09:00",
-      "captured_kst": "2026-11-10T13:56:44+09:00",
+      "price": 74974.93,
+      "quote_as_of_kst": "2026-11-10T16:46:43+09:00",
+      "captured_kst": "2026-11-10T16:46:43+09:00",
       "status": "LIVE",
       "quote_age_seconds": 0,
       "quote_currency": "USDT",
@@ -377460,17 +377456,17 @@
       "previous_close_utc_date": "2026-11-09",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": -0.8194
+      "daily_change_pct": -0.5221
     },
     "ETHUSD": {
       "symbol": "ETHUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=ETHUSDT&limit=1",
-      "price": 2120.85,
-      "quote_as_of_kst": "2026-11-10T13:56:35+09:00",
-      "captured_kst": "2026-11-10T13:56:44+09:00",
+      "price": 2124.63,
+      "quote_as_of_kst": "2026-11-10T16:46:43+09:00",
+      "captured_kst": "2026-11-10T16:46:43+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 9,
+      "quote_age_seconds": 0,
       "quote_currency": "USDT",
       "usd_proxy": true,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
@@ -377481,7 +377477,7 @@
       "previous_close_utc_date": "2026-11-09",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": -0.6739
+      "daily_change_pct": -0.4969
     }
   },
   "cross_market_freshness_quality": {
@@ -377820,7 +377816,7 @@
   "history_base_generated_kst": "2026-09-13T00:12:30+09:00",
   "history_base_path": "./data/history-30y.json",
   "crypto_contract": "PRESERVED_USD_HISTORY_SEPARATE_USDT_REFERENCE_V3",
-  "crypto_enriched_kst": "2026-11-10T13:56:47+09:00",
+  "crypto_enriched_kst": "2026-11-10T16:46:45+09:00",
   "market_supplement_quality": {
     "KOSPI": {
       "status": "LIVE",
