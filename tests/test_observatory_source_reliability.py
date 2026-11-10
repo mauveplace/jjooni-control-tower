@@ -83,7 +83,8 @@ class CryptoHistoryRepairTest(unittest.TestCase):
         def stub(symbol, now=None, history_range='3y'):
             ranges.append(history_range)
             return [], {}
-        with patch.object(equities, 'coingecko_spot_observations', return_value=quotes), \
+        with patch.object(equities, 'binance_spot_observations', return_value={}), \
+             patch.object(equities, 'coingecko_spot_observations', return_value=quotes), \
              patch.object(equities, 'crypto_observation', side_effect=stub):
             equities.enrich_crypto(data)
         self.assertEqual(ranges, ['1mo', '1mo'])
