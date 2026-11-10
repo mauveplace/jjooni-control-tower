@@ -36,6 +36,8 @@ jobs:
           key = os.environ.get('BLS_API_KEY', '').strip()
           if not key:
               raise SystemExit('BLS_CREDENTIAL_PROBE=MISSING_SECRET')
+          if len(key) != 32:
+              raise SystemExit('BLS_CREDENTIAL_PROBE=KEY_LENGTH_MISMATCH')
           # No provider response body, URL or traceback is logged; BLS may
           # echo credentials in errors. This test only emits a fixed status.
           url = ('https://api.bls.gov/publicAPI/v2/timeseries/data/'
@@ -49,7 +51,16 @@ jobs:
           except Exception:
               raise SystemExit('BLS_CREDENTIAL_PROBE=TRANSPORT_OR_FORMAT_ERROR') from None
           if not valid:
-              raise SystemExit('BLS_CREDENTIAL_PROBE=REJECTED_BY_BLS')
+              # Classify only locally. Never echo provider messages or token.
+              reason = 'UNEXPECTED_RESPONSE' if data.get('status') == 'REQUEST_SUCCEEDED' else 'PROVIDER_REJECTED'
+              message = str(data.get('message') or '').lower()
+              if 'key' in message and 'invalid' in message:
+                  reason = 'INVALID_KEY'
+              elif 'key' in message and ('validate' in message or 'activation' in message):
+                  reason = 'KEY_NOT_ACTIVATED'
+              elif 'limit' in message or 'maximum' in message:
+                  reason = 'RATE_LIMIT'
+              raise SystemExit('BLS_CREDENTIAL_PROBE=' + reason)
           print('BLS_CREDENTIAL_PROBE=PASS')
           PY
       - name: Compile changed source and test
