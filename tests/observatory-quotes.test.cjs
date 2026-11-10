@@ -107,20 +107,22 @@ test('Korean market stale observations are not called a recent close during week
  assert.equal(Q.quality(kr,at),'관측 지연');
  assert.equal(Q.quality(kr,Date.parse('2026-11-04T07:00:00Z')),'최근 마감 관측');
 });
-test('visible page automatically refreshes quotes every two minutes; hidden tabs do not fetch',async()=>{
- let clock=Date.now(),reads=0;const intervals=[],listeners={};
- class Clock extends Date{static now(){return clock}}
- const document={hidden:false,dispatchEvent(){},addEventListener:(name,fn)=>listeners[name]=fn};
- const context=vm.createContext({document,CustomEvent:class{},AbortSignal,Date:Clock,Promise,Error,console,
-  fetch:async()=>{reads++;return {ok:true,json:async()=>payload({...row,value:100+reads,observed_at:new Date(clock-1000).toISOString()})}}});
- context.window=context;context.addEventListener=(name,fn)=>listeners[name]=fn;
- context.setInterval=(fn,ms)=>intervals.push({fn,ms});
- vm.runInContext(fs.readFileSync('market-observatory/intraday-quotes-v1.js','utf8'),context);
- await context.__JJOONI_OBSERVATORY_QUOTES.refresh(true);
- assert.equal(reads,1);
- const poll=intervals.find(i=>i.ms===120000);assert.ok(poll);
- clock+=120000;await poll.fn();assert.equal(reads,2);
- assert.equal(context.__JJOONI_OBSERVATORY_QUOTES.get('NASDAQ100').value,102);
- clock+=120000;document.hidden=true;await poll.fn();assert.equal(reads,2);
- document.hidden=false;await listeners.visibilitychange();assert.equal(reads,3);
+test('open/resume refreshes live quotes on demand, without background network polling',async()=>{
+  let clock=Date.now(),reads=0;const intervals=[],listeners={};
+  class Clock extends Date{static now(){return clock}}
+  const document={hidden:false,dispatchEvent(){},addEventListener:(name,fn)=>listeners[name]=fn};
+  const context=vm.createContext({document,CustomEvent:class{},AbortSignal,Date:Clock,Promise,Error,console,
+   fetch:async()=>{reads++;return {ok:true,json:async()=>payload({...row,value:100+reads,observed_at:new Date(clock-1000).toISOString()})}}});
+  context.window=context;context.addEventListener=(name,fn)=>listeners[name]=fn;
+  context.setInterval=(fn,ms)=>intervals.push({fn,ms});
+  vm.runInContext(fs.readFileSync('market-observatory/intraday-quotes-v1.js','utf8'),context);
+  await context.__JJOONI_OBSERVATORY_QUOTES.refresh(true);
+  assert.equal(reads,1);
+  assert.equal(intervals.filter(i=>i.ms===120000).length,0,'no 2-minute API polling');
+  clock+=120000;
+  for(const timer of intervals)await timer.fn();
+  assert.equal(reads,1,'age label updates cannot call the price API');
+  document.hidden=true;await listeners.visibilitychange();assert.equal(reads,1);
+  document.hidden=false;await listeners.visibilitychange();assert.equal(reads,2,'returning to page fetches');
+  assert.equal(context.__JJOONI_OBSERVATORY_QUOTES.get('NASDAQ100').value,102);
 });
