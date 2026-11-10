@@ -86,11 +86,27 @@ jobs:
         id: collect
         continue-on-error: true
         run: python tools/refresh_observatory_crypto.py
-      - name: Publish crypto observations with concurrent quote merge
+      # The 30-second card must not be older than the crypto snapshot when
+      # they share a release. One producer builds both from the same local
+      # observation and the publisher commits both in a single source update.
+      # A broken unrelated TRI-POD/card must not prevent crypto collection.
+      - name: Rebuild Daily Glance using just-collected crypto observations
+        id: glance
+        continue-on-error: true
+        run: python tools/build_daily_glance.py
+      - name: Publish crypto and matching card in one atomic commit
+        env:
+          GLANCE_OUTCOME: ${{ steps.glance.outcome }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh BTC ETH spot quotes' market-observatory/data/observatory.json
+          files=(market-observatory/data/observatory.json)
+          if [ "$GLANCE_OUTCOME" = success ]; then
+            files+=(market-observatory/data/daily-glance.json)
+          else
+            echo "::warning title=Daily Glance unavailable::Crypto is published independently; Daily Glance rebuild failed."
+          fi
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh BTC ETH and same-snapshot glance' "${files[@]}"
       # Deployment visibility is monitored, not a collection failure. With many
       # data writers pushing to main, GitHub Pages builds are queued/superseded
       # and routinely exceed the probe's 150s budget even though the quotes were
