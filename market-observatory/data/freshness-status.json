@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-11T02:34:17+09:00",
+  "generated_kst": "2026-11-11T05:03:04+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,7 +9,6 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
-    "crypto",
     "calendar",
     "audit"
   ],
@@ -112,20 +111,20 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "STALE",
-      "generated_kst": "2026-11-11T00:46:25+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-11-11T05:03:02+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=6474s · ETHUSD age=6474s",
+      "detail": "BTCUSD age=4s · ETHUSD age=4s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "STALE",
-          "quote_as_of_kst": "2026-11-11T00:46:23+09:00"
+          "status": "LIVE",
+          "quote_as_of_kst": "2026-11-11T05:03:00+09:00"
         },
         "ETHUSD": {
-          "status": "STALE",
-          "quote_as_of_kst": "2026-11-11T00:46:23+09:00"
+          "status": "LIVE",
+          "quote_as_of_kst": "2026-11-11T05:03:00+09:00"
         }
       },
       "max_age_seconds": 3600
@@ -178,7 +177,7 @@
     "official_macro": {
       "label": "Official Macro",
       "state": "LIVE",
-      "generated_kst": "2026-11-10T22:01:31+09:00",
+      "generated_kst": "2026-11-11T05:02:51+09:00",
       "as_of": null,
       "detail": "JJOONI_OFFICIAL_MACRO_V1",
       "source": "official-macro.json",
@@ -214,9 +213,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-11T02:34:17+09:00",
+      "generated_kst": "2026-11-11T05:03:04+09:00",
       "as_of": "2026-11-09",
-      "detail": "critical=0 · warnings=4",
+      "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
       "critical": true
     },
