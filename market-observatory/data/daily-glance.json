@@ -1,8 +1,8 @@
 {
   "schema": "JJOONI_DAILY_GLANCE_V1",
-  "generated_kst": "2026-11-10T12:28:50+09:00",
+  "generated_kst": "2026-11-10T12:43:19+09:00",
   "us_session": "2026-11-09",
-  "source_generated_kst": "2026-11-10T11:46:37+09:00",
+  "source_generated_kst": "2026-11-10T12:36:00+09:00",
   "read_only": true,
   "contains_account_data": false,
   "no_trade": true,
@@ -228,7 +228,14 @@
   "brief_check": {
     "report_date_kst": "2026-11-10",
     "market_date_us": "2026-11-09",
-    "status": "NOT_COMPARABLE"
+    "status": "REFERENCE_MATCH",
+    "reference_ndx": 27907.63,
+    "pipeline_ndx": 27907.625,
+    "diff_pct": 0.0,
+    "official_status": "CONFLICT",
+    "official_eod_verified": false,
+    "trade_signal_eligible": false,
+    "text": "NDX 제공자 참고 완료 일봉 27,907.63와 옵저버토리 27,907.62은 일치합니다. 공식 확정 종가 검증은 별도이며 매매 신호로 승격하지 않습니다."
   },
   "quality": {
     "missing": [],
