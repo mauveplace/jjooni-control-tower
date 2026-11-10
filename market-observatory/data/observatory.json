@@ -9,15 +9,15 @@
     "NASDAQ100": 27907.625,
     "SP500": 7549.93994141,
     "VIX": 19.92000008,
-    "DXY": 101.68699646,
+    "DXY": 101.67199707,
     "USDKRW": 1362.69995117,
     "USDJPY": 158.29200745,
     "JPYKRW": 8.60336018,
-    "WTI": 86.33000183,
-    "BRENT": 92.16000366,
+    "WTI": 85.62999725,
+    "BRENT": 91.44000244,
     "NATGAS": 3.20300007,
-    "GOLD": 4134.39990234,
-    "COPPER": 6.37200022,
+    "GOLD": 4119.20019531,
+    "COPPER": 6.33650017,
     "US3M": 4.24,
     "US5Y": 4.65899992,
     "US10Y": 4.86399984,
@@ -44,15 +44,15 @@
     "ETHUSD": 2114.37,
     "FEAR_GREED": 31.7,
     "FEAR_GREED_RATING": "FEAR",
-    "KOSPI": 5245.81,
-    "KOSDAQ": 665.22,
+    "KOSPI": 5214.17,
+    "KOSDAQ": 659.35,
     "RUSSELL2000": 2840.81225586,
     "DOW": 52389.75,
     "NASDAQCOMPOSITE": 25253.13867188,
-    "NIKKEI225": 57434.76953125,
-    "HANGSENG": 24481.859375,
-    "SHCOMP": 3649.17700195,
-    "SILVER": 53.18000031
+    "NIKKEI225": 58775.5,
+    "HANGSENG": 24448.94921875,
+    "SHCOMP": 3660.79199219,
+    "SILVER": 52.93000031
   },
   "series": {
     "NASDAQ100": [
@@ -12100,7 +12100,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 101.68699646
+        "value": 101.67199707
       }
     ],
     "USDKRW": [
@@ -24448,7 +24448,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 86.33000183
+        "value": 85.62999725
       }
     ],
     "BRENT": [
@@ -27470,7 +27470,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 92.16000366
+        "value": 91.44000244
       }
     ],
     "NATGAS": [
@@ -33514,7 +33514,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 4134.39990234
+        "value": 4119.20019531
       }
     ],
     "COPPER": [
@@ -36536,7 +36536,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 6.37200022
+        "value": 6.33650017
       }
     ],
     "US3M": [
@@ -335725,7 +335725,7 @@
         "value": 74551.36,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T12:55:14+09:00",
+        "observed_kst": "2026-11-10T12:55:16+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -344579,7 +344579,7 @@
         "value": 2114.37,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-10T12:55:11+09:00",
+        "observed_kst": "2026-11-10T12:55:17+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -351126,7 +351126,7 @@
       },
       {
         "date": "2026-11-10",
-        "value": 5245.81
+        "value": 5214.17
       }
     ],
     "KOSDAQ": [
@@ -351368,7 +351368,7 @@
       },
       {
         "date": "2026-11-10",
-        "value": 665.22
+        "value": 659.35
       }
     ],
     "RUSSELL2000": [
@@ -363301,6 +363301,10 @@
       {
         "date": "2026-11-06",
         "value": 57434.76953125
+      },
+      {
+        "date": "2026-11-09",
+        "value": 58775.5
       }
     ],
     "HANGSENG": [
@@ -366243,6 +366247,10 @@
       {
         "date": "2026-11-06",
         "value": 24481.859375
+      },
+      {
+        "date": "2026-11-09",
+        "value": 24448.94921875
       }
     ],
     "SHCOMP": [
@@ -369141,6 +369149,10 @@
       {
         "date": "2026-11-06",
         "value": 3649.17700195
+      },
+      {
+        "date": "2026-11-09",
+        "value": 3660.79199219
       }
     ],
     "SILVER": [
@@ -372158,7 +372170,7 @@
       },
       {
         "date": "2026-11-09",
-        "value": 53.18000031
+        "value": 52.93000031
       }
     ]
   },
@@ -372281,7 +372293,7 @@
     "drawdown_52w_pct": -10.622584237396138,
     "ma250": 27460.62300781272,
     "ndx": 27907.625,
-    "observed_at": "2026-11-10T12:54:34+09:00",
+    "observed_at": "2026-11-10T12:55:43+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -13.56141632952288,
     "previous_ma250": 27451.43946875024,
@@ -377434,8 +377446,8 @@
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=BTCUSDT&limit=1",
       "price": 74551.36,
-      "quote_as_of_kst": "2026-11-10T12:55:14+09:00",
-      "captured_kst": "2026-11-10T12:55:14+09:00",
+      "quote_as_of_kst": "2026-11-10T12:55:16+09:00",
+      "captured_kst": "2026-11-10T12:55:17+09:00",
       "status": "LIVE",
       "quote_age_seconds": 0,
       "quote_currency": "USDT",
@@ -377455,10 +377467,10 @@
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=ETHUSDT&limit=1",
       "price": 2114.37,
-      "quote_as_of_kst": "2026-11-10T12:55:11+09:00",
-      "captured_kst": "2026-11-10T12:55:14+09:00",
+      "quote_as_of_kst": "2026-11-10T12:55:17+09:00",
+      "captured_kst": "2026-11-10T12:55:17+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 3,
+      "quote_age_seconds": 0,
       "quote_currency": "USDT",
       "usd_proxy": true,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
@@ -377554,21 +377566,21 @@
     "NIKKEI225": {
       "status": "LIVE",
       "source": "Yahoo Finance ^N225 completed daily",
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-09",
       "date_basis": "Asia/Tokyo trading date",
       "fetch_error": null
     },
     "HANGSENG": {
       "status": "LIVE",
       "source": "Yahoo Finance ^HSI completed daily",
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-09",
       "date_basis": "Asia/Hong_Kong trading date",
       "fetch_error": null
     },
     "SHCOMP": {
       "status": "LIVE",
       "source": "Yahoo Finance 000001.SS completed daily",
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-09",
       "date_basis": "Asia/Shanghai trading date",
       "fetch_error": null
     },
@@ -377748,7 +377760,7 @@
       "status": "LIVE"
     }
   },
-  "kr_rates_refreshed_kst": "2026-11-10T12:44:59+09:00",
+  "kr_rates_refreshed_kst": "2026-11-10T12:55:22+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -377808,7 +377820,7 @@
   "history_base_generated_kst": "2026-09-13T00:12:30+09:00",
   "history_base_path": "./data/history-30y.json",
   "crypto_contract": "PRESERVED_USD_HISTORY_SEPARATE_USDT_REFERENCE_V3",
-  "crypto_enriched_kst": "2026-11-10T12:55:17+09:00",
+  "crypto_enriched_kst": "2026-11-10T12:55:19+09:00",
   "market_supplement_quality": {
     "KOSPI": {
       "status": "LIVE",
@@ -377850,7 +377862,7 @@
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
   "equity_enriched_kst": "2026-11-10T12:45:17+09:00",
-  "supplemental_refreshed_kst": "2026-11-10T11:19:17+09:00",
+  "supplemental_refreshed_kst": "2026-11-10T12:55:19+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
-  "us_rates_refreshed_kst": "2026-11-10T11:19:13+09:00"
+  "us_rates_refreshed_kst": "2026-11-10T12:55:13+09:00"
 }
