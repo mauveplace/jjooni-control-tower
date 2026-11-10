@@ -6,6 +6,7 @@ on:
       - tools/add_observatory_equities.py
       - tests/test_observatory_crypto.py
       - tests/test_observatory_binance_basis.py
+      - tests/test_crypto_glance_atomic.py
       - tools/refresh_observatory_crypto.py
       - tools/probe_observatory_runtime.py
       - tests/test_observatory_runtime_probe.py
@@ -49,6 +50,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
           python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
+          python -m unittest discover -s tests -p 'test_crypto_glance_atomic.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
       - name: Verify Binance market-data endpoint and timestamped BTC ETH quotes
         run: |
@@ -81,6 +83,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_observatory_crypto.py' -v
           python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
+          python -m unittest discover -s tests -p 'test_crypto_glance_atomic.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
       - name: Collect and validate actual BTC ETH quotes
         id: collect
