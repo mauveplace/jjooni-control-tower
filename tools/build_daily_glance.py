@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -64,15 +64,20 @@ def metric(key, label, series, crypto=None):
                 and current.get("session_status")=="IN_PROGRESS"
                 and isinstance(current.get("value"), (int,float))
                 and current["value"]>0 and current.get("date")):
-            prior=next((r for r in reversed(rows) if r.get("date")<current["date"]), None)
-            same=bool(prior and prior.get("quote_currency")==currency
-                      and prior.get("session_status")=="COMPLETED"
-                      and prior.get("date")==(__import__('datetime').date.fromisoformat(current['date'])-__import__('datetime').timedelta(days=1)).isoformat())
+            expected_prev=(date.fromisoformat(current["date"])-timedelta(days=1)).isoformat()
+            # For Binance, the verified USDT close is kept on the snapshot,
+            # not written over the original Yahoo fiat-USD daily series.
+            reference=crypto.get("previous_close_value")
+            same=bool(crypto.get("daily_change_safe") is True
+                      and crypto.get("previous_close_currency")==currency
+                      and crypto.get("previous_close_utc_date")==expected_prev
+                      and isinstance(reference,(int,float)) and not isinstance(reference,bool)
+                      and 0 < reference < float("inf"))
             result={"key":key,"label":label,"date":current["date"],
                     "value":round(current["value"],4),"quote_currency":currency,
                     "source":crypto.get("source"),"observed_kst":crypto.get("quote_as_of_kst"),
                     "comparison_status":"SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE",
-                    "d1_pct":pct(current["value"],prior["value"]) if same else None,
+                    "d1_pct":pct(current["value"],reference) if same else None,
                     "w1_pct":None}
             return result
     if len(rows) < 2:
@@ -83,11 +88,13 @@ def metric(key, label, series, crypto=None):
     if key in ("BTCUSD","ETHUSD"):
         currency=last.get("quote_currency")
         same=(currency in ("USD","USDT") and prev.get("quote_currency")==currency
-              and prev.get("date")==(__import__('datetime').date.fromisoformat(last['date'])-__import__('datetime').timedelta(days=1)).isoformat())
+              and prev.get("date")==(date.fromisoformat(last['date'])-timedelta(days=1)).isoformat())
         item.update(quote_currency=currency,source=last.get("source"),
                     comparison_status="SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE")
         item["d1_pct"]=pct(last["value"],prev["value"]) if same else None
-        item["w1_pct"]=pct(last["value"],week["value"]) if week and week.get("quote_currency")==currency else None
+        seven_days_ago=(date.fromisoformat(last["date"])-timedelta(days=7)).isoformat()
+        prior_week=next((r for r in reversed(rows[:-1]) if r.get("date")==seven_days_ago),None)
+        item["w1_pct"]=pct(last["value"],prior_week["value"]) if prior_week and prior_week.get("quote_currency")==currency else None
         return item
     if key in RATE_KEYS:
         item["d1_bp"] = round((last["value"] - prev["value"]) * 100, 1)
