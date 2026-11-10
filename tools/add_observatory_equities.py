@@ -93,6 +93,8 @@ def completed_us_rows(rows,target_session=None):
 CRYPTO_SYMBOLS={'BTCUSD':'BTC-USD','ETHUSD':'ETH-USD'}
 COINGECKO_IDS={'BTCUSD':'bitcoin','ETHUSD':'ethereum'}
 COINGECKO_SPOT='https://api.coingecko.com/api/v3/simple/price'
+BINANCE_MARKET_DATA='https://data-api.binance.vision/api/v3/trades'
+BINANCE_PAIRS={'BTCUSD':'BTCUSDT','ETHUSD':'ETHUSDT'}
 
 
 def completed_local_rows(rows,zone,close,now=None):
@@ -121,6 +123,51 @@ def refresh_asia_indexes(data,previous=None,fetch=None,now=None):
                       'date_basis':f'{zone_name} trading date','fetch_error':err}
     data.setdefault('sources',{})['ASIA_EQUITY']='Yahoo Finance completed daily (^N225/^HSI/000001.SS), exchange-local dates'
 
+
+
+def binance_spot_observations(now=None):
+    """Primary last-trade spot snapshots (USDT, not exact USD).
+
+    Binance's public market-data-only endpoint needs no account API key. Each
+    quote carries its last trade timestamp, never the collection-clock time.
+    Keep the legacy BTCUSD/ETHUSD keys for the consumer contract, but expose
+    quote_currency=USDT so no UI can present this as exact fiat USD.
+    """
+    now=(now or datetime.now(UTC)).astimezone(UTC)
+    observations={}
+    for key,pair in BINANCE_PAIRS.items():
+        url=BINANCE_MARKET_DATA+'?'+urllib.parse.urlencode({'symbol':pair,'limit':1})
+        try:
+            payload=get_json(url)
+            if not isinstance(payload,list) or len(payload)!=1 or not isinstance(payload[0],dict):
+                raise ValueError('BINANCE_TRADES_RESPONSE_INVALID')
+            trade=payload[0]
+            if isinstance(trade.get('price'),bool) or isinstance(trade.get('time'),bool):
+                raise ValueError('BINANCE_TRADE_INVALID_TYPE')
+            price=float(trade['price']);stamp=int(trade['time'])
+            if not math.isfinite(price) or price<=0 or stamp<=0:
+                raise ValueError('BINANCE_TRADE_INVALID')
+            observed=datetime.fromtimestamp(stamp/1000,UTC)
+            age=(now-observed).total_seconds()
+            if age < -300:raise ValueError('BINANCE_TRADE_FUTURE_TIMESTAMP')
+            if age>3600:raise ValueError('BINANCE_TRADE_STALE')
+            if observed.date()!=now.date():raise ValueError('BINANCE_TRADE_UTC_DATE_MISMATCH')
+            observed_kst=observed.astimezone(KST).isoformat(timespec='seconds')
+            row={'date':observed.date().isoformat(),'value':round(price,8),
+                 'session_status':'IN_PROGRESS','date_basis':'UTC',
+                 'observed_kst':observed_kst,'observation_type':'SPOT_SNAPSHOT',
+                 'source':'Binance','quote_currency':'USDT'}
+            snapshot={'symbol':pair,'source':'Binance Spot last trade / USDT',
+                      'source_url':url,'price':price,'quote_as_of_kst':observed_kst,
+                      'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),
+                      'status':'LIVE','quote_age_seconds':max(0,int(age)),
+                      'quote_currency':'USDT','usd_proxy':True,
+                      'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H',
+                      'market_hours':'24/7'}
+            observations[key]=([row],snapshot)
+        except (KeyError,TypeError,ValueError,OverflowError,OSError) as exc:
+            print('BINANCE_QUOTE=WARN',key,type(exc).__name__,str(exc))
+    return observations
 
 def coingecko_spot_observations(now=None):
     """One public request for both USD spot quotes; never invent provider timestamps.
@@ -205,14 +252,20 @@ def retain_crypto_observations(current, previous):
 def enrich_crypto(data):
     series_map=data.setdefault('series',{});latest=data.setdefault('latest',{});snapshots=data.setdefault('crypto_market',{})
     try:
-        coingecko=coingecko_spot_observations()
+        binance=binance_spot_observations()
     except Exception as exc:
-        coingecko={}
-        print('COINGECKO_FETCH=WARN',type(exc).__name__,str(exc))
+        binance={}
+        print('BINANCE_FETCH=WARN',type(exc).__name__,str(exc))
+    coingecko={}
+    if len(binance)<len(CRYPTO_SYMBOLS):
+        try:
+            coingecko=coingecko_spot_observations()
+        except Exception as exc:
+            print('COINGECKO_FETCH=WARN',type(exc).__name__,str(exc))
     for key,symbol in CRYPTO_SYMBOLS.items():
         try:
-            if key in coingecko:
-                fresh,snapshot=coingecko[key]
+            if key in binance or key in coingecko:
+                fresh,snapshot=binance.get(key) or coingecko[key]
                 rows=series_map.get(key,[])
                 # Only repair missing completed daily history. A successful spot
                 # refresh must not download three years twice every heartbeat.
@@ -237,7 +290,7 @@ def enrich_crypto(data):
         except Exception as exc:
             old=dict(snapshots.get(key) or {});old.update(status='STALE' if series_map.get(key) else 'UNAVAILABLE',fetch_error=f'{type(exc).__name__}: {exc}',last_attempt_kst=datetime.now(KST).isoformat(timespec='seconds'));snapshots[key]=old
             print('CRYPTO_QUOTE=WARN',key,old['status'],old['fetch_error'])
-    data.setdefault('sources',{})['CRYPTO_SPOT']='CoinGecko simple/price USD spot primary; Yahoo Finance spot + UTC daily candles fallback; provider observation timestamps preserved'
+    data.setdefault('sources',{})['CRYPTO_SPOT']='Binance last-trade USDT primary (USD proxy, explicitly tagged); CoinGecko fiat USD fallback; Yahoo Finance USD fallback and UTC daily history; provider timestamps preserved'
     data['crypto_contract']='SPOT_QUOTE_WITH_UTC_DAILY_COMPARISON_V1'
     data['crypto_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
 
