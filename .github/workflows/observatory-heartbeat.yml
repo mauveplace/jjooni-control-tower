@@ -6,7 +6,18 @@ name: Observatory Heartbeat Relay
 # Official US-close/KR-close, official calendar collection and data quality
 # watchdog workflows remain independently scheduled.
 on:
+  # Single read-only migration check on this workflow file's initial release.
+  # With the same concurrency group, this run cancels an in-flight legacy
+  # six-hour relay. Normal data commits never trigger this diagnostic.
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/observatory-heartbeat.yml
   workflow_dispatch:
+
+concurrency:
+  group: observatory-heartbeat-relay
+  cancel-in-progress: true
 
 permissions:
   contents: read
