@@ -11,7 +11,7 @@ class ExistingRatesCryptoHeartbeatTests(unittest.TestCase):
     def test_no_new_schedule_or_runner_is_added(self):
         text = WORKFLOW.read_text(encoding='utf-8')
         crons = re.findall(r"^\s*- cron: '([^']+)'$", text, re.M)
-        self.assertEqual(crons, ['17,47 * * * 1-5'])
+        self.assertEqual(crons, ['45 21 * * 1-5'])
         self.assertEqual(len(re.findall(r'^  collect:$', text, re.M)), 1)
 
     def test_crypto_failure_is_isolated_and_never_published(self):
