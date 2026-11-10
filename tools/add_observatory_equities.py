@@ -344,7 +344,7 @@ def enrich_crypto(data):
             series_map[key]=rows;latest[key]=rows[-1]['value'];snapshots[key]=snapshot
             snapshot['daily_change_basis']='SAME_CURRENCY_COMPLETED_UTC_OR_UNAVAILABLE'
             snapshot['previous_close_currency']=next(
-                (r.get('quote_currency') for r in reversed(rows[:-1]) if r.get('session_status')=='COMPLETED'), None)
+                (r.get('quote_currency') for r in reversed(rows[:-1]) if r.get('session_status')=='COMPLETED' and r.get('date')==(datetime.fromisoformat(rows[-1]['date']).date()-timedelta(days=1)).isoformat()), None)
             snapshot['daily_change_safe']=bool(snapshot.get('quote_currency')
                 and snapshot.get('previous_close_currency')==snapshot['quote_currency'])
             print('CRYPTO_QUOTE=PASS',key,snapshot['status'],'price=',snapshot['price'],'as_of=',snapshot['quote_as_of_kst'],'source=',snapshot['source'])
