@@ -47,7 +47,7 @@ def decide(repo, sha, run=subprocess.run):
         # In-progress/queued attempts are serialized by workflow concurrency;
         # any non-success state deliberately remains visible and retryable.
         return True, "NOT_SUCCESS_" + re.sub(r"[^A-Z0-9_]", "_", state.upper())
-    except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
+    except Exception as exc:  # malformed provider JSON must not suppress retry
         print(
             "::warning::Pages deployment status cannot be verified; "
             f"retry instead of hiding an error ({type(exc).__name__})",
