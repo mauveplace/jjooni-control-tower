@@ -49,7 +49,7 @@ const OVERVIEW_GROUPS=[
 const OVERVIEW_MACRO_GROUPS=[
   {key:'commodity',label:'원자재',keys:['WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']},
   {key:'rates',label:'금리',keys:['US3M','US2Y','US10Y_OFFICIAL','US30Y_OFFICIAL','JP2Y','JP10Y','JP30Y','KR3Y','KR10Y']},
-  {key:'crypto',label:'암호화폐 · 현물 USD · 24시간 거래',keys:['BTCUSD','ETHUSD']},
+  {key:'crypto',label:'암호화폐 · 현물 USD/USDT · 24시간 거래',keys:['BTCUSD','ETHUSD']},
   {key:'fx',label:'환율',keys:['DXY','USDJPY','USDKRW','JPYKRW']},
   {key:'spreads',label:'장단기 스프레드',keys:['US_2S10S','KR_3S10S','JP_2S10S']}
 ];
@@ -106,7 +106,7 @@ function rateSourceWarning(item,s){
  return `<div class="latestRateLag" role="status"><b>자료 지연 · ${esc(basis)}</b><small>실제 관측 ${esc(lag.observed)} · ${esc(note)}<br>아래 등락은 직전 관측일 기준이며 오늘 등락이 아닙니다.</small></div>`;
 }
 function rateDateContext(item,s){if(item.kind!=='bp'||!s)return '';const region=item.k.startsWith('US')?'미국 현지':item.k.startsWith('JP')?'일본 현지':'한국';return `<div class="latestCryptoBasis">${region} ${esc(s.date)} 기준 · 일별 확정값<br>실시간 금리가 아닙니다.</div>`}
-function cryptoQuoteContext(item){if(!['BTCUSD','ETHUSD'].includes(item.k))return '';const q=(typeof DATA!=='undefined'&&DATA?.crypto_market?.[item.k])||{};const when=q.quote_as_of_kst?String(q.quote_as_of_kst).slice(0,16).replace('T',' ')+' KST':'시각 미확인';const stamp=Date.parse(q.quote_as_of_kst||'');const age=Date.now()-stamp;const fresh=Number.isFinite(stamp)&&age>=-60000&&age<=3600000;const label=q.status==='LIVE'&&fresh?'수집 시점 시세':q.status==='LIVE'||q.status==='STALE'?'이전 시세 · 갱신 지연':'시세 확인 중';return `<div class="latestCryptoBasis">${esc(when)} · ${esc(label)}<br>등락 기준: UTC 일봉</div>`}
+function cryptoQuoteContext(item){if(!['BTCUSD','ETHUSD'].includes(item.k))return '';const q=(typeof DATA!=='undefined'&&DATA?.crypto_market?.[item.k])||{};const when=q.quote_as_of_kst?String(q.quote_as_of_kst).slice(0,16).replace('T',' ')+' KST':'시각 미확인';const stamp=Date.parse(q.quote_as_of_kst||'');const age=Date.now()-stamp;const fresh=Number.isFinite(stamp)&&age>=-60000&&age<=3600000;const label=q.status==='LIVE'&&fresh?'수집 시점 시세':q.status==='LIVE'||q.status==='STALE'?'이전 시세 · 갱신 지연':'시세 확인 중';return `<div class="latestCryptoBasis">${esc(when)} · ${esc(label)}<br>호가통화: ${esc(q.quote_currency||'USD')} · 등락 기준: UTC 일봉</div>`}
 function primaryChange(item,s){
  const lag=compareKey==='D1'&&japaneseRateFreshness(item,s);
  const label=s?.intraday?(['BTCUSD','ETHUSD'].includes(item.k)?'전일 기준값 대비':'전일 종가 대비'):lag?'직전 관측일 대비':(COMPARES[compareKey]?.label||'비교')+' 대비';
