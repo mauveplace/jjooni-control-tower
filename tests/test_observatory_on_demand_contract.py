@@ -83,7 +83,7 @@ class LowFrequencyWriterTests(unittest.TestCase):
         self.assertIn("20,50 20,21 * * 0-5", close)
         self.assertIn("Market Observatory Daily + Calendar", close)
 
-    def test_crypto_and_rates_are_archived_only_daily(self):
+    def test_crypto_hourly_and_us_yields_in_session_only(self):
         self.assertEqual(schedules(".github/workflows/observatory-crypto-refresh.yml"),
                          ["20 * * * *"])
         self.assertEqual(schedules(".github/workflows/observatory-us-rates-intraday.yml"),
