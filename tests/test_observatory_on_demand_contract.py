@@ -65,6 +65,7 @@ class LowFrequencyWriterTests(unittest.TestCase):
         config = yaml.safe_load(content)
         self.assertEqual(config["permissions"], {"contents": "read"})
         self.assertNotIn("schedule:", content)
+        self.assertIn("cancel-in-progress: true", content)
         self.assertIn("workflow_dispatch:", content)
         self.assertNotIn("gh workflow run", content)
         self.assertNotIn("sleep", content)
