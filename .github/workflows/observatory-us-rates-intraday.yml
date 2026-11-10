@@ -16,9 +16,11 @@ on:
       - tests/test_us_rates_intraday.py
       - tests/us-rates-intraday.test.cjs
       - .github/workflows/observatory-us-rates-intraday.yml
-  # Archive one post-US-close observation; browser quotes use existing API.
+  # One sampled observation per hour around the US trading session only.
+  # The browser has no verified live-yield API: keep intraday history useful
+  # without 30-minute collection during all 24 UTC hours.
   schedule:
-    - cron: '45 21 * * 1-5'
+    - cron: '45 12-22 * * 1-5'
   workflow_dispatch:
 
 permissions:
