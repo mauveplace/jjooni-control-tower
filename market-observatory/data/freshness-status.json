@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-11T00:46:49+09:00",
+  "generated_kst": "2026-11-11T02:33:24+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,6 +9,7 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "crypto",
     "calendar",
     "audit"
   ],
@@ -111,19 +112,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-11-11T00:46:25+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=26s · ETHUSD age=26s",
+      "detail": "BTCUSD age=6421s · ETHUSD age=6421s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-11T00:46:23+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-11T00:46:23+09:00"
         }
       },
@@ -186,9 +187,9 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-11-11T00:41:48+09:00",
-      "as_of": "2026-11-11T00:41:48+09:00",
-      "detail": "events=190 · overdue=1 · pending=0 · source_failures=0 · official_probe_blocked=2 · 기존 공식 검증 98건 · 이번 원천 조회 DEGRADED",
+      "generated_kst": "2026-11-11T02:33:07+09:00",
+      "as_of": "2026-11-11T02:33:07+09:00",
+      "detail": "events=190 · overdue=1 · pending=0 · source_failures=0 · official_probe_blocked=1 · 기존 공식 검증 98건 · 이번 원천 조회 DEGRADED",
       "source": "economic-calendar.json",
       "critical": false,
       "official_probe_scope": "LATEST_COLLECTION_ATTEMPTS_ONLY",
@@ -200,14 +201,12 @@
       },
       "actual_completeness_state": "DEGRADED",
       "official_probe_state": "DEGRADED",
-      "official_probe_failure_count": 5,
-      "official_probe_unresolved_failure_count": 5,
+      "official_probe_failure_count": 4,
+      "official_probe_unresolved_failure_count": 4,
       "official_probe_blocked_releases": [
-        "BLS_API",
         "Consumer Price Index"
       ],
       "official_probe_transport_blocked_releases": [
-        "BLS_API",
         "Consumer Price Index"
       ],
       "official_probe_verified_fallback_releases": []
@@ -215,9 +214,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-11T00:46:49+09:00",
+      "generated_kst": "2026-11-11T02:33:24+09:00",
       "as_of": "2026-11-09",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=4",
       "source": "data-audit.json",
       "critical": true
     },

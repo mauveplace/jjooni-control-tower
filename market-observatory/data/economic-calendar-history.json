@@ -1,6 +1,6 @@
 {
-  "available_from": "2016-11-12",
-  "available_to": "2026-11-10",
+  "available_from": "2016-11-14",
+  "available_to": "2026-11-11",
   "backfill": {
     "canonical_rows_matched": 2,
     "checked_kst": "2026-11-10T12:55:20+09:00",
@@ -86,7 +86,7 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-10T21:31:15+09:00",
+  "generated_kst": "2026-11-11T02:33:10+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37817,
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
@@ -798577,9 +798577,9 @@
     },
     "KR::고용동향": {
       "available_from": "2026-09-09",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-11",
       "category": "고용",
-      "count": 2,
+      "count": 3,
       "country": "KR",
       "event_title": "2026년 8월 고용동향",
       "kind": "event",
@@ -798591,7 +798591,7 @@
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
-          "2026": 2
+          "2026": 3
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -798629,6 +798629,16 @@
           "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
           "value_vintage": "AS_RELEASED",
           "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": null,
+          "date": "2026-11-11",
+          "datetime_kst": "2026-11-11T08:00+09:00",
+          "label": "2026년 10월 고용동향",
+          "previous": "2.6%",
+          "previous_source": "KOSTAT",
+          "previous_source_tier": null,
+          "source": "KOSTAT"
         }
       ]
     },
@@ -798792,9 +798802,9 @@
     },
     "KR::고용동향::kr_unemployment_sa": {
       "available_from": "2026-09-09",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-11",
       "category": "고용",
-      "count": 2,
+      "count": 3,
       "country": "KR",
       "event_title": "2026년 8월 고용동향",
       "kind": "metric",
@@ -798807,7 +798817,7 @@
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
-          "2026": 2
+          "2026": 3
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -798847,6 +798857,17 @@
           "source_url": "https://mods.go.kr/board.es?act=view&bid=210&list_no=447479&mid=a10301030200",
           "value_vintage": "AS_RELEASED",
           "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": null,
+          "date": "2026-11-11",
+          "datetime_kst": "2026-11-11T08:00+09:00",
+          "label": "kr_unemployment_sa",
+          "metric_key": "kr_unemployment_sa",
+          "previous": "2.6%",
+          "previous_source": "국가데이터처 2026년 9월 고용동향",
+          "previous_source_tier": null,
+          "source": "국가데이터처 2026년 9월 고용동향"
         }
       ]
     },
@@ -800100,10 +800121,11 @@
         },
         {
           "actual": null,
-          "checked_kst": "2026-11-10T21:31:09+09:00",
+          "checked_kst": "2026-11-11T00:34:29+09:00",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T22:30+09:00",
           "label": "Consumer Price Index",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "previous": "3.7%",
           "previous_source": "FairEconomy/ForexFactory",
           "previous_source_tier": "MARKET_FEED",
@@ -800125,7 +800147,7 @@
       "label": "Core CPI MoM",
       "metric_key": "core_cpi_mom",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -803050,12 +803072,12 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         },
         {
-          "actual": null,
+          "actual": "0.3%",
           "canonical_match": true,
-          "checked_kst": "2026-11-10T21:31:11+09:00",
+          "checked_kst": "2026-11-11T00:41:41+09:00",
           "consensus": "0.2%",
           "consensus_source": "FairEconomy/ForexFactory",
-          "consensus_source_tier": "MARKET_FEED",
+          "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T22:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
@@ -803063,17 +803085,20 @@
           "label": "Core CPI MoM",
           "match_score": 105.0,
           "metric_key": "core_cpi_mom",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026",
           "previous": "0.3%",
           "previous_source": "FairEconomy/ForexFactory",
-          "previous_source_tier": "MARKET_FEED",
+          "previous_source_tier": "OFFICIAL",
+          "reference_period": "2026-10",
+          "series_id": "CUSR0000SA0L1E",
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
-          "source_tier": "MARKET_FEED",
+          "source_tier": "OFFICIAL",
           "source_time": "7:30am",
           "source_timezone": "America/Chicago",
-          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
-          "verification_status": "MARKET_REPORTED"
+          "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026",
+          "value_vintage": "LATEST_REVISION",
+          "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ]
     },
@@ -806040,11 +806065,12 @@
         },
         {
           "actual": null,
-          "checked_kst": "2026-11-10T21:31:09+09:00",
+          "checked_kst": "2026-11-11T00:34:29+09:00",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T22:30+09:00",
           "label": "Core CPI YoY",
           "metric_key": "core_cpi_yoy",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "previous": "2.6%",
           "previous_source": "BLS_cpi official release",
           "previous_source_tier": "MARKET_FEED",
@@ -806066,7 +806092,7 @@
       "label": "CPI MoM",
       "metric_key": "cpi_mom",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -808991,12 +809017,12 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         },
         {
-          "actual": null,
+          "actual": "0.4%",
           "canonical_match": true,
-          "checked_kst": "2026-11-10T21:31:11+09:00",
+          "checked_kst": "2026-11-11T00:41:41+09:00",
           "consensus": "0.3%",
           "consensus_source": "FairEconomy/ForexFactory",
-          "consensus_source_tier": "MARKET_FEED",
+          "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T22:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
@@ -809004,17 +809030,20 @@
           "label": "CPI MoM",
           "match_score": 105.0,
           "metric_key": "cpi_mom",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "previous": "0.6%",
           "previous_source": "FairEconomy/ForexFactory",
-          "previous_source_tier": "MARKET_FEED",
+          "previous_source_tier": "OFFICIAL",
+          "reference_period": "2026-10",
+          "series_id": "CUSR0000SA0",
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
-          "source_tier": "MARKET_FEED",
+          "source_tier": "OFFICIAL",
           "source_time": "7:30am",
           "source_timezone": "America/Chicago",
-          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
-          "verification_status": "MARKET_REPORTED"
+          "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
+          "value_vintage": "LATEST_REVISION",
+          "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ]
     },
@@ -811981,11 +812010,12 @@
         },
         {
           "actual": null,
-          "checked_kst": "2026-11-10T21:31:09+09:00",
+          "checked_kst": "2026-11-11T00:34:29+09:00",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T22:30+09:00",
           "label": "CPI YoY",
           "metric_key": "cpi_yoy",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "previous": "3.7%",
           "previous_source": "BLS_cpi official release",
           "previous_source_tier": "MARKET_FEED",
@@ -884445,23 +884475,23 @@
       ]
     },
     "US::university-of-michigan-consumer-sentiment::umich_inflation_1y": {
-      "available_from": "2016-11-12",
+      "available_from": "2016-11-24",
       "available_to": "2026-11-06",
       "category": "심리/기대인플레",
-      "count": 245,
+      "count": 244,
       "country": "US",
       "event_title": "University of Michigan Consumer Sentiment (Preliminary)",
       "kind": "metric",
       "label": "UoM 1Y Inflation Expectations",
       "metric_key": "umich_inflation_1y",
       "quality": {
-        "actual_count": 245,
+        "actual_count": 244,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 1,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 28,
         "rows_by_year": {
-          "2016": 4,
+          "2016": 3,
           "2017": 24,
           "2018": 24,
           "2019": 24,
@@ -884477,28 +884507,6 @@
       },
       "ref": "US::university-of-michigan-consumer-sentiment::umich_inflation_1y",
       "rows": [
-        {
-          "actual": "2.7%",
-          "canonical_match": true,
-          "consensus": null,
-          "date": "2016-11-12",
-          "datetime_kst": "2016-11-12T00:00+09:00",
-          "label": "UoM 1Y Inflation Expectations",
-          "match_score": 75.6,
-          "metric_key": "umich_inflation_1y",
-          "previous": "2.4%",
-          "previous_source": "ForexFactory historical calendar",
-          "previous_source_tier": "MARKET_FEED",
-          "reference_period": null,
-          "source": "ForexFactory historical calendar",
-          "source_date": "2016-11-11",
-          "source_tier": "MARKET_FEED",
-          "source_time": "9:00am",
-          "source_timezone": "America/Chicago",
-          "surprise": null,
-          "te_forecast": null,
-          "verification_status": "HISTORICAL_MARKET_REPORTED"
-        },
         {
           "actual": "2.4%",
           "canonical_match": true,
@@ -889849,23 +889857,23 @@
       ]
     },
     "US::university-of-michigan-consumer-sentiment::umich_sentiment": {
-      "available_from": "2016-11-12",
+      "available_from": "2016-11-24",
       "available_to": "2026-11-06",
       "category": "심리/기대인플레",
-      "count": 245,
+      "count": 244,
       "country": "US",
       "event_title": "University of Michigan Consumer Sentiment (Preliminary)",
       "kind": "metric",
       "label": "UoM Consumer Sentiment",
       "metric_key": "umich_sentiment",
       "quality": {
-        "actual_count": 245,
+        "actual_count": 244,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 245,
+        "consensus_count": 244,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 28,
         "rows_by_year": {
-          "2016": 4,
+          "2016": 3,
           "2017": 24,
           "2018": 24,
           "2019": 24,
@@ -889881,30 +889889,6 @@
       },
       "ref": "US::university-of-michigan-consumer-sentiment::umich_sentiment",
       "rows": [
-        {
-          "actual": "91.6",
-          "canonical_match": true,
-          "consensus": "87.4",
-          "consensus_source": "ForexFactory historical calendar",
-          "consensus_source_tier": "MARKET_FEED",
-          "date": "2016-11-12",
-          "datetime_kst": "2016-11-12T00:00+09:00",
-          "label": "UoM Consumer Sentiment",
-          "match_score": 100.2,
-          "metric_key": "umich_sentiment",
-          "previous": "87.2",
-          "previous_source": "ForexFactory historical calendar",
-          "previous_source_tier": "MARKET_FEED",
-          "reference_period": null,
-          "source": "ForexFactory historical calendar",
-          "source_date": "2016-11-11",
-          "source_tier": "MARKET_FEED",
-          "source_time": "9:00am",
-          "source_timezone": "America/Chicago",
-          "surprise": null,
-          "te_forecast": null,
-          "verification_status": "HISTORICAL_MARKET_REPORTED"
-        },
         {
           "actual": "93.8",
           "canonical_match": true,
@@ -895728,7 +895712,7 @@
   "series_count": 439,
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-10",
-  "window_start": "2016-11-12",
+  "window_end": "2026-11-11",
+  "window_start": "2016-11-13",
   "window_years": 10
 }

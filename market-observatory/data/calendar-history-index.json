@@ -1,6 +1,6 @@
 {
-  "available_from": "2016-11-12",
-  "available_to": "2026-11-10",
+  "available_from": "2016-11-14",
+  "available_to": "2026-11-11",
   "backfill": {
     "canonical_rows_matched": 2,
     "checked_kst": "2026-11-10T12:55:20+09:00",
@@ -86,7 +86,7 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-10T21:31:15+09:00",
+  "generated_kst": "2026-11-11T02:33:10+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37817,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
@@ -12581,14 +12581,14 @@
     },
     "KR::고용동향": {
       "available_from": "2026-09-09",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-11",
       "category": "고용",
-      "count": 2,
+      "count": 3,
       "country": "KR",
       "event_title": "2026년 8월 고용동향",
       "kind": "event",
       "label": "2026년 8월 고용동향",
-      "path": "./calendar-history/series/7dcfa27dbe8b1e56261f35d5a55cebc96cf7a8c4fc86b660f9a1c62935eed728.json",
+      "path": "./calendar-history/series/8db128e34545e5fa2a70ffcf4a51d4c399dbe19f4424b88b26ea637fdcc94640.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12596,12 +12596,12 @@
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
-          "2026": 2
+          "2026": 3
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::고용동향",
-      "sha256": "7dcfa27dbe8b1e56261f35d5a55cebc96cf7a8c4fc86b660f9a1c62935eed728"
+      "sha256": "8db128e34545e5fa2a70ffcf4a51d4c399dbe19f4424b88b26ea637fdcc94640"
     },
     "KR::고용동향::kr_employed": {
       "available_from": "2026-10-16",
@@ -12705,15 +12705,15 @@
     },
     "KR::고용동향::kr_unemployment_sa": {
       "available_from": "2026-09-09",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-11",
       "category": "고용",
-      "count": 2,
+      "count": 3,
       "country": "KR",
       "event_title": "2026년 8월 고용동향",
       "kind": "metric",
       "label": "계절조정 실업률",
       "metric_key": "kr_unemployment_sa",
-      "path": "./calendar-history/series/7a0fb52e71c5ef9f30a1831b0a9360804446c1a519f3ffefea33b3c62076614d.json",
+      "path": "./calendar-history/series/30d3a456db780d60a000487446fc4797d9fbc0b22bdee48fe154c8bb11131b2b.json",
       "quality": {
         "actual_count": 2,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -12721,12 +12721,12 @@
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
-          "2026": 2
+          "2026": 3
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "KR::고용동향::kr_unemployment_sa",
-      "sha256": "7a0fb52e71c5ef9f30a1831b0a9360804446c1a519f3ffefea33b3c62076614d"
+      "sha256": "30d3a456db780d60a000487446fc4797d9fbc0b22bdee48fe154c8bb11131b2b"
     },
     "KR::기업경기조사-및-esi": {
       "available_from": null,
@@ -13178,7 +13178,7 @@
       "event_title": "Consumer Price Index",
       "kind": "event",
       "label": "Consumer Price Index",
-      "path": "./calendar-history/series/09e0ee3e98d7aaae03f0638f5fd868157bfbade5fd6e2d0db7e3b387f1191811.json",
+      "path": "./calendar-history/series/b4c53c5ea4c11038776e5a04defb5f98c42c1e8a61448cda889d6a280f51da26.json",
       "quality": {
         "actual_count": 10,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13191,7 +13191,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index",
-      "sha256": "09e0ee3e98d7aaae03f0638f5fd868157bfbade5fd6e2d0db7e3b387f1191811"
+      "sha256": "b4c53c5ea4c11038776e5a04defb5f98c42c1e8a61448cda889d6a280f51da26"
     },
     "US::consumer-price-index::core_cpi_mom": {
       "available_from": "2016-11-17",
@@ -13203,9 +13203,9 @@
       "kind": "metric",
       "label": "Core CPI MoM",
       "metric_key": "core_cpi_mom",
-      "path": "./calendar-history/series/1ae1ba7cda8187b53cf32cd14ecd8192ad781809bb90cd53b49ae5f27d575861.json",
+      "path": "./calendar-history/series/1fae6da1409cfdb07c65d1f75868aa461bd78d796acb3db933914bf978270122.json",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -13226,7 +13226,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::core_cpi_mom",
-      "sha256": "1ae1ba7cda8187b53cf32cd14ecd8192ad781809bb90cd53b49ae5f27d575861"
+      "sha256": "1fae6da1409cfdb07c65d1f75868aa461bd78d796acb3db933914bf978270122"
     },
     "US::consumer-price-index::core_cpi_yoy": {
       "available_from": "2016-11-17",
@@ -13238,7 +13238,7 @@
       "kind": "metric",
       "label": "Core CPI YoY",
       "metric_key": "core_cpi_yoy",
-      "path": "./calendar-history/series/03bd37200a76e5334ff629880a665d91cd2bbda2e5695e5b1e3e513d542ac789.json",
+      "path": "./calendar-history/series/caa241168170821c2a290329fbf2f07f45a9b6e08b45f04d94e0a37a821b4c1f.json",
       "quality": {
         "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13261,7 +13261,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::core_cpi_yoy",
-      "sha256": "03bd37200a76e5334ff629880a665d91cd2bbda2e5695e5b1e3e513d542ac789"
+      "sha256": "caa241168170821c2a290329fbf2f07f45a9b6e08b45f04d94e0a37a821b4c1f"
     },
     "US::consumer-price-index::cpi_mom": {
       "available_from": "2016-11-17",
@@ -13273,9 +13273,9 @@
       "kind": "metric",
       "label": "CPI MoM",
       "metric_key": "cpi_mom",
-      "path": "./calendar-history/series/45cfa94d79a886e0f1d3878ac0e95e049d5798f967cd9d15f22d63ff42d7d21d.json",
+      "path": "./calendar-history/series/b9ac064d1581c7278a3b722898b92aa5b1843f8f73cf0d0542490014ee013c11.json",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -13296,7 +13296,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::cpi_mom",
-      "sha256": "45cfa94d79a886e0f1d3878ac0e95e049d5798f967cd9d15f22d63ff42d7d21d"
+      "sha256": "b9ac064d1581c7278a3b722898b92aa5b1843f8f73cf0d0542490014ee013c11"
     },
     "US::consumer-price-index::cpi_yoy": {
       "available_from": "2016-11-17",
@@ -13308,7 +13308,7 @@
       "kind": "metric",
       "label": "CPI YoY",
       "metric_key": "cpi_yoy",
-      "path": "./calendar-history/series/8165ffb3bd932ddc78f7ab1153db31282fc791a4194942109a0e0dbcc1c9ba68.json",
+      "path": "./calendar-history/series/ecbb9297ddb2be2e2510fbff54e7ba6821d012b598e2e37c27811b61a58d708b.json",
       "quality": {
         "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
@@ -13331,7 +13331,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::consumer-price-index::cpi_yoy",
-      "sha256": "8165ffb3bd932ddc78f7ab1153db31282fc791a4194942109a0e0dbcc1c9ba68"
+      "sha256": "ecbb9297ddb2be2e2510fbff54e7ba6821d012b598e2e37c27811b61a58d708b"
     },
     "US::employment-cost-index": {
       "available_from": "2026-02-10",
@@ -14756,24 +14756,24 @@
       "sha256": "1941bafe2b4a5fa6939a982709d3a087595a04b113abc25bfcd4a0772f51e8a1"
     },
     "US::university-of-michigan-consumer-sentiment::umich_inflation_1y": {
-      "available_from": "2016-11-12",
+      "available_from": "2016-11-24",
       "available_to": "2026-11-06",
       "category": "심리/기대인플레",
-      "count": 245,
+      "count": 244,
       "country": "US",
       "event_title": "University of Michigan Consumer Sentiment (Preliminary)",
       "kind": "metric",
       "label": "UoM 1Y Inflation Expectations",
       "metric_key": "umich_inflation_1y",
-      "path": "./calendar-history/series/1b280d2b9c445e42cc88cf1162f9ff94b238516ecd1bc258c8285bef49a229b4.json",
+      "path": "./calendar-history/series/3cb51c61b0b0bd6ae42fbb2e61667cbd81fb2657512a0980a4b138c245f41887.json",
       "quality": {
-        "actual_count": 245,
+        "actual_count": 244,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 1,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 28,
         "rows_by_year": {
-          "2016": 4,
+          "2016": 3,
           "2017": 24,
           "2018": 24,
           "2019": 24,
@@ -14788,7 +14788,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::university-of-michigan-consumer-sentiment::umich_inflation_1y",
-      "sha256": "1b280d2b9c445e42cc88cf1162f9ff94b238516ecd1bc258c8285bef49a229b4"
+      "sha256": "3cb51c61b0b0bd6ae42fbb2e61667cbd81fb2657512a0980a4b138c245f41887"
     },
     "US::university-of-michigan-consumer-sentiment::umich_inflation_5y": {
       "available_from": "2026-09-11",
@@ -14816,24 +14816,24 @@
       "sha256": "5280b0877f2cb4120c0f3030357b2089d873edd894fe8fdd0ad535d5ea14ee3d"
     },
     "US::university-of-michigan-consumer-sentiment::umich_sentiment": {
-      "available_from": "2016-11-12",
+      "available_from": "2016-11-24",
       "available_to": "2026-11-06",
       "category": "심리/기대인플레",
-      "count": 245,
+      "count": 244,
       "country": "US",
       "event_title": "University of Michigan Consumer Sentiment (Preliminary)",
       "kind": "metric",
       "label": "UoM Consumer Sentiment",
       "metric_key": "umich_sentiment",
-      "path": "./calendar-history/series/1e2baf091184a73ceb8861294ac59bc63153370e848a11058b278dfec4018bc0.json",
+      "path": "./calendar-history/series/0dcf2368f79530e324a31ab694126872160a85264c5f30020714e0d0fa7a5c54.json",
       "quality": {
-        "actual_count": 245,
+        "actual_count": 244,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 245,
+        "consensus_count": 244,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 28,
         "rows_by_year": {
-          "2016": 4,
+          "2016": 3,
           "2017": 24,
           "2018": 24,
           "2019": 24,
@@ -14848,16 +14848,16 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::university-of-michigan-consumer-sentiment::umich_sentiment",
-      "sha256": "1e2baf091184a73ceb8861294ac59bc63153370e848a11058b278dfec4018bc0"
+      "sha256": "0dcf2368f79530e324a31ab694126872160a85264c5f30020714e0d0fa7a5c54"
     }
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 439,
-  "snapshot_id": "a155d48c432db067f8435d82bff9a2da6bf630f22874f1c173f198167804ddd5",
-  "source_sha256": "a155d48c432db067f8435d82bff9a2da6bf630f22874f1c173f198167804ddd5",
+  "snapshot_id": "451cd46debb37d573088d3e6e993a57d662d20154b30ac4173f9910196e692e8",
+  "source_sha256": "451cd46debb37d573088d3e6e993a57d662d20154b30ac4173f9910196e692e8",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-10",
-  "window_start": "2016-11-12",
+  "window_end": "2026-11-11",
+  "window_start": "2016-11-13",
   "window_years": 10
 }
