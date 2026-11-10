@@ -80,7 +80,35 @@ function utcDate(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00Z');ret
 function refPoint(s,last,key){if(s.length<2)return null;const cfg=COMPARES[key]||COMPARES.D1;if(cfg.mode==='prev')return s[s.length-2]||null;const d=utcDate(last?.date);if(!d)return s[s.length-2]||null;if(cfg.days)d.setUTCDate(d.getUTCDate()-cfg.days);if(cfg.months)d.setUTCMonth(d.getUTCMonth()-cfg.months);if(cfg.years)d.setUTCFullYear(d.getUTCFullYear()-cfg.years);const target=d.toISOString().slice(0,10);for(let i=s.length-2;i>=0;i--){if(String(s[i]?.date||'')<=target)return s[i]}return null}
 function cryptoItem(item){return ['BTCUSD','ETHUSD'].includes(item.k)}
 function sameCryptoBasis(last,ref){const d=utcDate(last?.date);if(!d)return false;d.setUTCDate(d.getUTCDate()-1);return !!(ref&&last.quote_currency&&ref.quote_currency&&last.quote_currency===ref.quote_currency&&ref.session_status==='COMPLETED'&&ref.date===d.toISOString().slice(0,10))}
-function stat(item,key=compareKey){const s=seriesOf(item).filter(p=>p?.date&&p.value!==null&&p.value!==undefined&&String(p.value).trim()!==''&&typeof p.value!=='boolean'&&Number.isFinite(Number(p.value))),last=s[s.length-1];const quote=key==='D1'&&!cryptoItem(item)&&typeof window!=='undefined'?window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k,typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]?.quote_as_of_kst:null):null;if(quote&&(!last||quote.session_date>=last.date))return {value:quote.value,date:quote.session_date,change:quote.change_pct,refDate:null,refValue:quote.previous_close,intraday:quote};if(!last)return null;const ref=refPoint(s,last,key);let ch=null;const comparable=!cryptoItem(item)||sameCryptoBasis(last,ref);if(ref&&comparable&&Number.isFinite(Number(ref.value))&&Number.isFinite(Number(last.value))){ch=item.kind==='bp'?(Number(last.value)-Number(ref.value))*100:item.kind==='pts'?(Number(last.value)-Number(ref.value)):(Number(ref.value)!==0?(Number(last.value)/Number(ref.value)-1)*100:null)}return{value:Number(last.value),date:last.date,change:ch,refDate:ref?.date||null,refValue:ref?Number(ref.value):null,quote_currency:last.quote_currency||null,comparison_basis_valid:comparable}}
+function stat(item,key=compareKey){
+ const s=seriesOf(item).filter(p=>p?.date&&p.value!==null&&p.value!==undefined&&String(p.value).trim()!==''&&typeof p.value!=='boolean'&&Number.isFinite(Number(p.value))),last=s[s.length-1];
+ const quote=key==='D1'&&!cryptoItem(item)&&typeof window!=='undefined'?window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k,typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]?.quote_as_of_kst:null):null;
+ if(quote&&(!last||quote.session_date>=last.date))return {value:quote.value,date:quote.session_date,change:quote.change_pct,refDate:null,refValue:quote.previous_close,intraday:quote};
+ if(!last)return null;
+ const ref=refPoint(s,last,key);
+ let ch=null,refDate=ref?.date||null,refValue=ref?Number(ref.value):null;
+ let comparable=!cryptoItem(item);
+ if(cryptoItem(item)){
+   // Current Binance price is USDT. Its native preceding close is stored as
+   // separate snapshot metadata, never merged into the fiat-USD history.
+   const q=typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]||{}:{};
+   const d=utcDate(last.date);
+   if(d)d.setUTCDate(d.getUTCDate()-1);
+   const expected=d?.toISOString().slice(0,10);
+   const basis=key==='D1'&&q.status==='LIVE'&&q.daily_change_safe===true
+     &&q.quote_currency===last.quote_currency&&q.previous_close_currency===last.quote_currency
+     &&q.previous_close_utc_date===expected
+     &&Number.isFinite(Number(q.previous_close_value))&&Number(q.previous_close_value)>0
+     &&Number(q.price)===Number(last.value);
+   comparable=!!basis;
+   if(basis){refDate=expected;refValue=Number(q.previous_close_value);ch=(Number(last.value)/refValue-1)*100}
+   // W1/M1/Y1 against older USD history are deliberately not computed from
+   // current USDT spot. Show a visible D1-only limitation instead.
+ }else if(ref&&Number.isFinite(Number(ref.value))&&Number.isFinite(Number(last.value))){
+   ch=item.kind==='bp'?(Number(last.value)-Number(ref.value))*100:item.kind==='pts'?(Number(last.value)-Number(ref.value)):(Number(ref.value)!==0?(Number(last.value)/Number(ref.value)-1)*100:null);
+ }
+ return{value:Number(last.value),date:last.date,change:ch,refDate,refValue,quote_currency:last.quote_currency||null,comparison_basis_valid:comparable};
+}
 function arrow(v){return v==null?'':v>0?'▲':v<0?'▼':'■'}
 function cls(v){return v==null?'flat':v>0?'up':v<0?'down':'flat'}
 function changeText(item,v){const label=COMPARES[compareKey]?.label||'비교';if(v==null||!Number.isFinite(v))return `${label} 대비 —`;if(item.kind==='bp')return `${label} ${arrow(v)} ${Math.abs(v).toFixed(1)}bp`;if(item.kind==='pts')return `${label} ${arrow(v)} ${Math.abs(v).toFixed(1)}pt`;return `${label} ${arrow(v)} ${Math.abs(v).toFixed(2)}%`}
@@ -108,7 +136,7 @@ function rateSourceWarning(item,s){
  return `<div class="latestRateLag" role="status"><b>자료 지연 · ${esc(basis)}</b><small>실제 관측 ${esc(lag.observed)} · ${esc(note)}<br>아래 등락은 직전 관측일 기준이며 오늘 등락이 아닙니다.</small></div>`;
 }
 function rateDateContext(item,s){if(item.kind!=='bp'||!s)return '';const region=item.k.startsWith('US')?'미국 현지':item.k.startsWith('JP')?'일본 현지':'한국';return `<div class="latestCryptoBasis">${region} ${esc(s.date)} 기준 · 일별 확정값<br>실시간 금리가 아닙니다.</div>`}
-function cryptoQuoteContext(item){if(!['BTCUSD','ETHUSD'].includes(item.k))return '';const q=(typeof DATA!=='undefined'&&DATA?.crypto_market?.[item.k])||{};const when=q.quote_as_of_kst?String(q.quote_as_of_kst).slice(0,16).replace('T',' ')+' KST':'시각 미확인';const stamp=Date.parse(q.quote_as_of_kst||'');const age=Date.now()-stamp;const fresh=Number.isFinite(stamp)&&age>=-60000&&age<=3600000;const label=q.status==='LIVE'&&fresh?'수집 시점 시세':q.status==='LIVE'||q.status==='STALE'?'이전 시세 · 갱신 지연':'시세 확인 중';return `<div class="latestCryptoBasis">${esc(when)} · ${esc(label)}<br>호가통화: ${esc(q.quote_currency||'미확인')} · ${esc(q.daily_change_safe?'동일 통화 UTC 완료일봉 비교':'비교 기준 통화 불명·혼용 시 등락률 보류')}</div>`}
+function cryptoQuoteContext(item){if(!['BTCUSD','ETHUSD'].includes(item.k))return '';const q=(typeof DATA!=='undefined'&&DATA?.crypto_market?.[item.k])||{};const when=q.quote_as_of_kst?String(q.quote_as_of_kst).slice(0,16).replace('T',' ')+' KST':'시각 미확인';const stamp=Date.parse(q.quote_as_of_kst||'');const age=Date.now()-stamp;const fresh=Number.isFinite(stamp)&&age>=-60000&&age<=3600000;const label=q.status==='LIVE'&&fresh?'수집 시점 시세':q.status==='LIVE'||q.status==='STALE'?'이전 시세 · 갱신 지연':'시세 확인 중';return `<div class="latestCryptoBasis">${esc(when)} · ${esc(label)}<br>호가통화: ${esc(q.quote_currency||'미확인')} · ${esc(q.daily_change_safe?'D1은 같은 통화의 완료 종가 기준':'같은 통화의 완료 종가 없으면 D1 보류')}<br>W1/M1 이상은 현물·과거 USD 통화 차이로 미산출 · 과거 USD 차트 별도</div>`}
 function primaryChange(item,s){
  const lag=compareKey==='D1'&&japaneseRateFreshness(item,s);
  const label=s?.intraday?(['BTCUSD','ETHUSD'].includes(item.k)?'전일 기준값 대비':'전일 종가 대비'):lag?'직전 관측일 대비':(COMPARES[compareKey]?.label||'비교')+' 대비';
