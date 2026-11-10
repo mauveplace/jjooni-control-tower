@@ -8,6 +8,7 @@ import sys
 import unittest
 from datetime import date, timedelta
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
@@ -42,6 +43,30 @@ class CryptoGlanceAtomicContract(unittest.TestCase):
                     "market-observatory/data/freshness-status.json",
                     "market-observatory/data/data-audit.json"):
             self.assertIn(key,paths)
+
+    def test_rebuild_glance_after_every_source_rebase(self):
+        # The publisher runs materialize_publication before the initial
+        # commit AND again after rebasing over concurrent crypto/day writers.
+        # Do not rely on later generated_kst from an earlier source checkout.
+        paths=["market-observatory/data/daily-glance.json"]
+        with patch.object(publisher,"materialize_market_dependents") as market, \
+             patch.object(publisher,"materialize",return_value=[]) as materialize, \
+             patch.object(publisher,"materialize_health") as health, \
+             patch.object(glance,"main",return_value=0) as regenerate:
+            result=publisher.materialize_publication(paths)
+            self.assertEqual(result,paths)
+            publisher.materialize_publication(paths)
+        self.assertEqual(regenerate.call_count,2)
+        self.assertEqual(market.call_count,2)
+        self.assertEqual(health.call_count,2)
+
+    def test_non_glance_publication_does_not_add_implicit_card_rebuild(self):
+        with patch.object(publisher,"materialize_market_dependents"), \
+             patch.object(publisher,"materialize",return_value=[]), \
+             patch.object(publisher,"materialize_health"), \
+             patch.object(glance,"main") as rebuild:
+            publisher.materialize_publication(["market-observatory/data/observatory.json"])
+        rebuild.assert_not_called()
 
     def test_just_collected_live_quote_is_used_with_native_usdt_reference(self):
         today=date(2026,11,10)
