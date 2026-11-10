@@ -1,20 +1,29 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-11T05:54:28+09:00",
+  "generated_kst": "2026-11-11T07:01:09+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE_WITH_WARNINGS",
-  "critical_bad": [],
-  "warnings": [
-    "calendar",
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "market",
+    "pulse",
+    "tripod",
     "audit"
   ],
-  "watchdog_required": false,
+  "warnings": [
+    "market",
+    "crypto",
+    "pulse",
+    "fedwatch",
+    "tripod",
+    "calendar"
+  ],
+  "watchdog_required": true,
   "session_alignment": {
-    "expected_session": "2026-11-09",
+    "expected_session": "2026-11-10",
     "source_session": "2026-11-09",
     "market_aligned": true,
     "observatory": "2026-11-09",
@@ -25,12 +34,12 @@
     "us_supplement_aligned": true,
     "kr_kospi": "2026-11-10",
     "kr_kosdaq": "2026-11-10",
-    "aligned": true
+    "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-11T00:34:28+09:00",
       "as_of": "2026-11-09",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
@@ -111,19 +120,19 @@
     },
     "crypto": {
       "label": "Crypto",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-11-11T05:54:25+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=5s · ETHUSD age=5s",
+      "detail": "BTCUSD age=4006s · ETHUSD age=4006s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-11T05:54:23+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-11T05:54:23+09:00"
         }
       },
@@ -131,7 +140,7 @@
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-11T00:46:49+09:00",
       "as_of": "2026-11-09",
       "detail": "snapshot=FINAL · Observatory session=2026-11-09",
@@ -149,16 +158,16 @@
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-10T09:02:23+09:00",
       "as_of": "2026-11-09",
-      "detail": "expected=2026-11-09 · FOMC 2026-12-09",
+      "detail": "expected=2026-11-10 · FOMC 2026-12-09",
       "source": "CME FedWatch official public probability tables (QuikStrike)",
       "critical": false
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-11T00:46:49+09:00",
       "as_of": "2026-11-09",
       "detail": "상승 · QQQ 50% + QLD 50%",
@@ -186,8 +195,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-11-11T02:33:07+09:00",
-      "as_of": "2026-11-11T02:33:07+09:00",
+      "generated_kst": "2026-11-11T07:00:55+09:00",
+      "as_of": "2026-11-11T07:00:55+09:00",
       "detail": "events=190 · overdue=1 · pending=0 · source_failures=0 · official_probe_blocked=1 · 기존 공식 검증 98건 · 이번 원천 조회 DEGRADED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -212,10 +221,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-11-11T05:54:28+09:00",
+      "state": "FAIL",
+      "generated_kst": "2026-11-11T07:01:09+09:00",
       "as_of": "2026-11-09",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=1 · warnings=6",
       "source": "data-audit.json",
       "critical": true
     },
