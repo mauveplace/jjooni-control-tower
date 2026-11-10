@@ -1,188 +1,91 @@
 {
   "schema": "JJOONI_MORNING_BRIEF_V1",
-  "title": "유가 하락이 만든 광범위 반등, 그러나 NDX·SOX 종가는 아직 잠그지 못했다",
-  "report_date_kst": "2026-11-10",
-  "market_date_us": "2026-11-09",
-  "generated_kst": "2026-11-10T06:41:36+09:00",
-  "published_kst": "2026-11-10T06:41:36+09:00",
+  "report_date_kst": "2026-11-11",
+  "market_date_us": "2026-11-10",
+  "title": "뜨거운 CPI가 금리를 다시 깨웠다 — 기술주 반등의 두 번째 시험",
   "author": "송팀장 아침 시황 · ChatGPT",
+  "generated_kst": "2026-11-11T06:34:00+09:00",
+  "published_kst": "2026-11-11T06:34:00+09:00",
   "content_status": "WEB_VERIFIED_WITH_DISCLOSED_GAPS",
-  "verification_note": "사후 참고가격 보완 2026-11-10T08:49:08+09:00: 미국 11/9 NDX 27,907.63(+3.40%), SOX 10,033.93(+6.85%)는 Yahoo/YCharts 완료 일봉에서 같은 값으로 확인한 참고 수치이며 공식 EOD 확정이 아닙니다. 최초 06:41 자료와 Nasdaq 동적 화면 간 충돌은 유지합니다. close_checks null·매매신호 보류.",
   "read_only": true,
   "contains_account_data": false,
+  "verification_note": "2026-11-10 US session: canonical datasets were still on 11/9 at 16:32 ET and NDX/SOX post-close providers did not exact-match. Strict close_checks remain MISSING with null canonical values; no provider reference quote was created. NO_TRADE_REVIEW_ONLY.",
   "editorial_contract": {
     "version": "SONG_INSPIRED_DAILY_V1",
-    "verified_at_kst": "2026-11-10T06:41:36+09:00",
+    "verified_at_kst": "2026-11-11T06:34:00+09:00",
     "close_checks": [
       {
         "symbol": "NDX",
-        "session_date": "2026-11-09",
-        "status": "CONFLICT",
-        "reason": "Nasdaq 공식 동적 History, beta Nasdaq, Yahoo 과거표, Observatory 제공자 일봉이 발행 전 재조회에서 서로 다른 값을 반환. exact regular-session close proof 미충족.",
+        "session_date": "2026-11-10",
+        "status": "MISSING",
+        "reason": "GitHub main canonical datasets remained on the 2026-11-09 session at 16:32 ET, while post-close provider daily observations for 2026-11-10 did not exact-match. Nasdaq dynamic History/Overview snapshots were excluded from official fixed-EOD proof.",
         "observation_type": "REGULAR_SESSION_CLOSE",
         "source_urls": [
-          "https://indexes.nasdaq.com/Index/History/NDX",
-          "https://beta.indexes.nasdaq.com/Index/History/NDX",
+          "https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-glance.json",
+          "https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json",
           "https://finance.yahoo.com/quote/%5ENDX/history/",
-          "https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json"
+          "https://www.investing.com/indices/nq-100-historical-data"
         ],
         "close": null,
-        "previous_close": 26989.99,
+        "previous_close": 27907.63,
         "change_pct": null,
-        "official_status": "CONFLICT",
+        "official_status": "NOT_VERIFIED",
         "source_observations": [
           {
-            "url": "https://indexes.nasdaq.com/Index/History/NDX",
-            "close": 27833.87,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-09T16:36:00-05:00",
-            "observation_type": "OFFICIAL_DYNAMIC_HISTORY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
-          },
-          {
-            "url": "https://beta.indexes.nasdaq.com/Index/History/NDX",
-            "close": 27844.36,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-09T16:36:00-05:00",
-            "observation_type": "OFFICIAL_BETA_DYNAMIC_HISTORY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
-          },
-          {
             "url": "https://finance.yahoo.com/quote/%5ENDX/history/",
-            "close": 28006.63,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-09T16:36:00-05:00",
-            "observation_type": "PROVIDER_DYNAMIC_DAILY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
+            "close": 27703.79,
+            "session_date": "2026-11-10",
+            "observed_at": "2026-11-10T16:29:00-05:00",
+            "observation_type": "PROVIDER_POST_CLOSE_DAILY",
+            "time_note": "Provider observation only; disagrees with other provider."
           },
           {
-            "url": "https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json",
-            "close": 27907.625,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-10T06:17:35+09:00",
-            "observation_type": "OBSERVATORY_PROVIDER_DAILY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
+            "url": "https://www.investing.com/indices/nq-100-historical-data",
+            "close": 27601.56,
+            "session_date": "2026-11-10",
+            "observed_at": "2026-11-10T16:29:00-05:00",
+            "observation_type": "PROVIDER_POST_CLOSE_DAILY",
+            "time_note": "Provider observation only; disagrees with other provider."
           }
         ]
       },
       {
         "symbol": "SOX",
-        "session_date": "2026-11-09",
-        "status": "CONFLICT",
-        "reason": "Nasdaq 공식 동적 History와 Yahoo 과거표가 발행 전 재조회에서 불일치. exact regular-session close proof 미충족.",
+        "session_date": "2026-11-10",
+        "status": "MISSING",
+        "reason": "GitHub main canonical datasets remained on the 2026-11-09 session at 16:32 ET, while post-close provider daily observations for 2026-11-10 did not exact-match. Nasdaq dynamic History/Overview snapshots were excluded from official fixed-EOD proof.",
         "observation_type": "REGULAR_SESSION_CLOSE",
         "source_urls": [
-          "https://indexes.nasdaq.com/Index/History/SOX",
-          "https://finance.yahoo.com/quote/%5ESOX/history/"
+          "https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json",
+          "https://finance.yahoo.com/quote/%5ESOX/history/",
+          "https://www.investing.com/indices/phlx-semiconductor-historical-data"
         ],
         "close": null,
-        "previous_close": 9390.25,
+        "previous_close": 10033.93,
         "change_pct": null,
-        "official_status": "CONFLICT",
+        "official_status": "NOT_VERIFIED",
         "source_observations": [
           {
-            "url": "https://indexes.nasdaq.com/Index/History/SOX",
-            "close": 9849.33,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-09T16:36:00-05:00",
-            "observation_type": "OFFICIAL_DYNAMIC_HISTORY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
+            "url": "https://finance.yahoo.com/quote/%5ESOX/history/",
+            "close": 9921.29,
+            "session_date": "2026-11-10",
+            "observed_at": "2026-11-10T16:29:00-05:00",
+            "observation_type": "PROVIDER_POST_CLOSE_DAILY",
+            "time_note": "Provider observation only; disagrees with other provider."
           },
           {
-            "url": "https://finance.yahoo.com/quote/%5ESOX/history/",
-            "close": 10004.62,
-            "session_date": "2026-11-09",
-            "observed_at": "2026-11-09T16:36:00-05:00",
-            "observation_type": "PROVIDER_DYNAMIC_DAILY",
-            "time_note": "서로 불일치하여 정규장 확정 종가로 채택하지 않음"
+            "url": "https://www.investing.com/indices/phlx-semiconductor-historical-data",
+            "close": 9847.6,
+            "session_date": "2026-11-10",
+            "observed_at": "2026-11-10T16:29:00-05:00",
+            "observation_type": "PROVIDER_POST_CLOSE_DAILY",
+            "time_note": "Provider observation only; disagrees with other provider."
           }
         ]
       }
     ],
-    "reference_quotes": [
-      {
-        "symbol": "NDX",
-        "session_date": "2026-11-09",
-        "status": "PROVIDER_REFERENCE_ONLY",
-        "close": 27907.63,
-        "previous_close": 26989.99,
-        "change_pct": 3.4,
-        "checked_at_kst": "2026-11-10T08:49:08+09:00",
-        "official_eod_verified": false,
-        "trade_signal_eligible": false,
-        "source_observations": [
-          {
-            "url": "https://finance.yahoo.com/quote/%5ENDX/history/",
-            "session_date": "2026-11-09",
-            "close": 27907.63,
-            "quote_time_et": "2026-11-09T17:15:59-05:00",
-            "observation_type": "POST_CLOSE_DAILY_BAR"
-          },
-          {
-            "url": "https://ycharts.com/indices/%5ENDX/level",
-            "session_date": "2026-11-09",
-            "close": 27907.63,
-            "quote_time_et": "2026-11-09T16:51:00-05:00",
-            "observation_type": "POST_CLOSE_DAILY_BAR"
-          }
-        ],
-        "limitations": "Yahoo/YCharts가 같은 기초시세를 공유할 수 있음. Nasdaq 공식 동적 History 값과 불일치하며 공식 최종 EOD 검증 전이므로 참고용; TRI-POD 전환·매매 근거로 사용 금지."
-      },
-      {
-        "symbol": "SOX",
-        "session_date": "2026-11-09",
-        "status": "PROVIDER_REFERENCE_ONLY",
-        "close": 10033.93,
-        "previous_close": 9390.25,
-        "change_pct": 6.85,
-        "checked_at_kst": "2026-11-10T08:49:08+09:00",
-        "official_eod_verified": false,
-        "trade_signal_eligible": false,
-        "source_observations": [
-          {
-            "url": "https://finance.yahoo.com/quote/%5ESOX/history/",
-            "session_date": "2026-11-09",
-            "close": 10033.93,
-            "quote_time_et": "2026-11-09T16:46:36-05:00",
-            "observation_type": "POST_CLOSE_DAILY_BAR"
-          },
-          {
-            "url": "https://ycharts.com/indices/%5ESOX/level",
-            "session_date": "2026-11-09",
-            "close": 10033.93,
-            "quote_time_et": "2026-11-09T16:11:00-05:00",
-            "observation_type": "POST_CLOSE_DAILY_BAR"
-          }
-        ],
-        "limitations": "Yahoo/YCharts가 같은 기초시세를 공유할 수 있음. Nasdaq 공식 동적 History 값과 불일치하며 공식 최종 EOD 검증 전이므로 참고용; TRI-POD 전환·매매 근거로 사용 금지."
-      }
-    ],
-    "reference_verified_at_kst": "2026-11-10T08:49:08+09:00"
+    "reference_quotes": []
   },
-  "body_markdown": "## ① 오늘의 시장 이야기\n\n🚨 TRI-POD: BIPOD 유지(전일 공식 상태·당일 전환 미검증) | 미국 세션 2026-11-09 | NDX 참고 완료 일봉 27,907.63(+3.40%)·SOX 참고 10,033.93(+6.85%) | Observatory 참고 MA250 27,460.62·52주 DD -10.62%·VIX10 20.36 | 위 숫자는 공식 확정 EOD·매매 신호가 아닙니다.\n🟠 가격 기준 돌파·전환 후보: 없음(관측 범위는 9% 회복선 28,414.27 미만) | 최종 신호 미검증 — NDX·SOX 정규장 종가가 strict gate를 통과하지 못함\n\n형님, 오늘 미국 시장은 지난주 충격을 되돌리는 강한 반등이었습니다. S&P 500은 2.35%, 나스닥종합은 2.74%, 러셀2000은 3.15% 올랐고 11개 업종이 모두 상승했습니다. 반등의 첫 동력은 국제유가 하락이었습니다. WTI가 4% 넘게 떨어지며 인플레이션 부담이 완화됐고, 대형 기술주뿐 아니라 산업재·소비재·중소형주까지 매수세가 퍼졌습니다.\n\n하지만 이것을 곧바로 AI 상승 추세의 완전 복구로 읽기에는 두 가지 제약이 있습니다. 첫째, 엔비디아는 시장 상승과 반대로 약세였고 AI 내부에서도 종목별 차별화가 컸습니다. 둘째, NDX와 SOX의 공식 동적 화면과 제공자 간 종가가 일치하지 않습니다. 사후 재조회한 Yahoo·YCharts 완료 일봉은 각각 NDX 27,907.63(+3.40%), SOX 10,033.93(+6.85%)으로 일치해 참고 수치로 병기합니다. 다만 두 업체의 기초 데이터가 공유될 수 있어 공식 EOD 검증으로 승격하지 않고, TRI-POD 당일 확정 상태는 계산하지 않은 채 전일 공식 BIPOD를 유지합니다.\n\n국내장은 더 조심스럽습니다. 코스피는 장중 5,172.94까지 반등했다가 5,018.85(-0.81%)로 마감했고, 외국인 매도가 7거래일째 이어졌습니다. 미국의 강한 반등이 다음 한국장에 긍정적 출발 재료가 될 수는 있지만, 전일 반등 실패와 외국인 수급이 확인되기 전까지 V자 회복을 기본 시나리오로 두기는 어렵습니다.\n\n## ② 시장 한눈에\n\n아래 수치는 최초 06:17 KST Observatory 자료와 사후 확인한 제공자 완료 일봉을 구분했습니다. NDX·SOX는 공식 종가 검증(strict close gate)은 통과하지 못했지만, 참고 수치를 별도로 표시합니다. 참고값은 TRI-POD 매매 신호에 사용하지 않습니다. 1주·1개월·3개월은 5·21·63거래일 비교이며 미검증 기간은 비워 둡니다.\n\n| 자산 | 기준 세션 | 종가/수준 | 1D | 1W | 1M | 3M | 상태 |\n|---|---:|---:|---:|---:|---:|---:|---|\n| NDX | 11/9 미국 | 27,907.63 (참고) | +3.40% (참고) | -0.29% (Observatory) | 자료 미확인 | 자료 미확인 | 제공자 완료 일봉 일치·공식 EOD CONFLICT |\n| SOX | 11/9 미국 | 10,033.93 (참고) | +6.85% (참고) | 자료 미확인 | 자료 미확인 | 자료 미확인 | 제공자 완료 일봉 일치·공식 EOD CONFLICT |\n| S&P 500 | 11/9 미국 | 7,549.94 | +2.35% | +0.11% | -3.35% | -2.31% | 완료 일봉·AP 마감표 일치 |\n| Nasdaq Composite | 11/9 미국 | 25,253.14 | +2.74% | +0.35% | -7.72% | -4.51% | 완료 일봉·AP 마감표 일치 |\n| Dow | 11/9 미국 | 52,389.75 | +2.15% | +0.78% | +1.42% | -2.61% | 완료 일봉·AP 마감표 일치 |\n| Russell 2000 | 11/9 미국 | 2,840.81 | +3.15% | +1.25% | +1.21% | -6.16% | 완료 일봉·AP 마감표 일치 |\n| VIX | 11/9 미국 | 20.12 | -21.53% | -4.87% | +35.58% | +38.28% | 제공자 완료 일봉, 공식 독립검증 미완료 |\n| DXY | 11/9 미국 | 101.68 | -0.61% | -0.07% | -0.52% | +1.86% | 제공자 완료 일봉 |\n| 미국 10년물 | 11/9 미국 | 4.84% | -1.6bp | -5.1bp | -40.0bp | +15.9bp | 시장 일봉; 재무부 11/9 표 미반영 |\n| WTI | 11/9 미국 | $86.92 | -4.31% | -9.89% | -5.37% | +4.47% | 선물 완료 일봉 |\n| USD/KRW | 11/9 미국 | 1,340.29 | -1.18% | +1.11% | -0.20% | -5.09% | 글로벌 일봉; 서울 현물 마감 1,347.1원과 시각 다름 |\n| KOSPI | 11/9 한국 | 5,018.85 | -0.81% | -14.34% | -24.25% | 자료 미확인 | 한국 정규장 마감 교차확인 |\n| KOSDAQ | 11/9 한국 | 638.97 | -0.82% | -12.99% | -28.39% | 자료 미확인 | 한국 정규장 마감 교차확인 |\n| Nikkei 225 | 11/6 일본 | 57,434.77 | -5.96% | -11.17% | -18.74% | -9.91% | 최신 완료 세션 11/6 |\n| Hang Seng | 11/6 홍콩 | 24,481.86 | -1.27% | +5.10% | +1.46% | -4.62% | 최신 완료 세션 11/6 |\n\n시장폭은 강했습니다. NYSE 상승종목/하락종목 비율은 약 4.46배, Nasdaq은 약 3.56배였고 11개 S&P 업종이 모두 올랐습니다. 단순 지수 반등보다 참여 폭이 넓었다는 뜻입니다. 반면 CNN Fear & Greed는 31.8로 여전히 ‘공포’ 구간이어서 가격 반등과 심리 회복 사이에는 간격이 남아 있습니다.\n\n## ③ 핵심 이슈 깊이 읽기\n\n### 1. 유가 하락이 만든 ‘넓은 반등’은 지난주 공포를 얼마나 되돌렸나\n\n**핵심 숫자:** S&P 500 +2.35%, Russell 2000 +3.15%, WTI -4.31%, VIX -21.53%입니다.\n\n**무슨 일이 있었나:** 이란 관련 군사 충돌 재확대 가능성이 낮아졌다는 해석으로 원유가 급락했고, 인플레이션과 기업 비용 부담이 동시에 완화될 수 있다는 기대가 주식 전반으로 번졌습니다. 대형주보다 중소형주가 더 오른 것은 반등이 일부 초대형 기술주에만 의존하지 않았다는 증거입니다.\n\n**왜 중요한가:** 지난주 매도는 AI 규제 우려와 금리 부담이 한꺼번에 반영된 위험회피였습니다. 오늘처럼 유가·달러·변동성이 동시에 낮아지고 시장폭이 넓어지면, 단기적으로는 강제 매도와 헤지 해소가 이어질 여지가 있습니다. 다만 표의 1개월 수익률을 보면 S&P와 나스닥은 아직 손실 구간입니다.\n\n**반대 해석:** 하루의 숏커버와 저가매수일 수 있습니다. 미국 10년물은 장중 다시 오르는 모습이 있었고, 다음 CPI가 높으면 유가 하락 효과보다 금리 재상승이 더 크게 작용할 수 있습니다.\n\n**다음 확인:** 11월 10일 미국 CPI, 이후 2년·10년 금리 반응, 그리고 다음 세션에서도 상승종목 우위와 VIX 20선 안착이 이어지는지 확인합니다.\n\n### 2. AI 지수는 올랐지만 엔비디아가 빠진 이유 — ‘AI 전체’가 아니라 내부 재평가\n\n**핵심 숫자:** SOX 참고 완료 일봉은 10,033.93(+6.85%)입니다(공식 최종 EOD 미검증). AMD와 브로드컴은 강하게 오른 반면 엔비디아는 약세였습니다.\n\n**무슨 일이 있었나:** 지난주 데이터센터 규제 우려로 함께 팔렸던 반도체가 반등했지만, 엔비디아에는 최고경영자 관련 불확실성이 별도로 작용했습니다. 동시에 Constellation Energy 실적과 신규 전력 계약은 AI 데이터센터 전력 수요 자체가 사라진 것이 아니라는 근거를 제공했습니다.\n\n**왜 중요한가:** 시장이 이제 ‘AI CAPEX가 계속되느냐’라는 하나의 질문에서, GPU·ASIC·메모리·전력·냉각·네트워크 가운데 누가 실제 계약과 현금흐름을 확보했는지를 구분하기 시작했다는 뜻입니다. 지수 반등을 개별 기업의 펀더멘털 회복과 동일시하면 안 됩니다.\n\n**반대 해석:** 전력 계약과 장기 프로젝트는 인허가·계통 연결·건설비·금리 위험이 큽니다. 반도체 반등 역시 지난주 급락의 기술적 반작용일 수 있습니다. NDX·SOX의 제공자 참고 등락률은 확인됐지만 공식 확정 종가로 승격할 수 없어 전략 전환 판단은 유보합니다.\n\n**다음 확인:** 11월 10일 TSMC 월매출, 11월 12일 장후 Applied Materials 실적, 다음주 Nvidia 실적에서 데이터센터 매출·공급제약·마진과 고객 CAPEX의 실제 전환을 확인합니다.\n\n### 3. 한국장은 왜 미국 반도체 반등 기대를 끝까지 지키지 못했나\n\n**핵심 숫자:** 코스피 -0.81%, 장중 고점 5,172.94에서 종가 5,018.85로 반락, 외국인 약 6,930억원 순매도입니다.\n\n**무슨 일이 있었나:** 반도체 대형주는 소폭 반등했지만 외국인 매도가 이어졌고, 이차전지·자동차·바이오 약세가 지수를 눌렀습니다. 기관이 약 7,204억원 순매수했지만 장중 2% 넘는 상승을 지키지 못했습니다.\n\n**왜 중요한가:** 미국 기술주 반등이 한국장 전체로 전달되려면 원화 안정뿐 아니라 외국인 현물·선물 수급과 반도체 외 업종의 하락 진정이 필요합니다. 오늘은 환율이 내려왔는데도 지수가 반등을 반납했으므로 수급 불안이 더 강했다는 뜻입니다.\n\n**반대 해석:** 지난주 급락 뒤 손절과 마진콜이 뒤늦게 반영된 일시적 현상일 수 있습니다. 미국 정규장의 광범위한 반등은 다음 한국장 외국인 매도를 줄이는 계기가 될 수 있습니다.\n\n**다음 확인:** 11월 10일 개장 후 30분 외국인 현·선물 동행, 코스피 5,000선 유지, 반도체 대형주의 상승 폭 유지, 원/달러 서울 현물의 1,340원대 안착 여부를 봅니다.\n\n## ④ 글로벌·한국 시장\n\n미국은 표에서 보듯 대형 성장주뿐 아니라 산업재·소비재·중소형주까지 오른 전형적인 위험선호 반등이었습니다. 다만 나스닥의 1개월 낙폭이 S&P보다 크고, VIX의 1개월 수준도 여전히 높습니다. ‘공포 해소’보다 ‘공포 완화’가 정확한 표현입니다.\n\n한국은 미국보다 회복 탄력이 약했습니다. 외국인 순매도가 7거래일 연속 이어졌고, 지수는 장중 반등을 모두 반납했습니다. 일본과 홍콩의 최신 완료 자료는 11월 6일이라 오늘 미국 반등을 아직 반영하지 않습니다. 아시아 지수는 다음 현지 정규장 마감 뒤 다시 비교해야 합니다.\n\n달러와 원유 하락은 한국 성장주에 우호적인 조합이지만, 미국 CPI가 금리 상승을 재점화하면 효과가 짧아질 수 있습니다. 따라서 다음 한국장에서는 지수 갭상승 자체보다 외국인 수급과 종가 유지력을 우선해서 봅니다.\n\n## ⑤ AI 산업·기업실적\n\n오늘 실적에서 꼭 볼 변화는 세 가지입니다. 첫째, 전력 수요는 이야기 단계가 아니라 장기계약과 가이던스에 반영되고 있습니다. 둘째, 현금흐름이 강한 사업자는 설비투자와 주주환원을 동시에 추진하고 있습니다. 셋째, 프로젝트 발표가 실제 전력 공급으로 이어지는지 인허가와 계통 연결을 별도로 확인해야 합니다.\n\n**Constellation Energy:** 3분기 GAAP EPS는 $5.19, 조정 영업 EPS는 $5.06으로 전년 동기 $2.97와 $3.04를 웃돌았습니다. 회사는 2026년 조정 영업 EPS 가이던스를 $12.50~$12.80으로 좁히며 중간값을 높였습니다. Google과 신규 원전 용량 협력, 20년·270MW 전력 계약, 최대 $50억 DOE 조건부 대출 약정은 AI 전력 수요가 장기 계약으로 이동하고 있음을 보여줍니다. 다만 Calpine 통합비용과 발전소 증설의 규제·공사 위험은 남습니다.\n\n**NRG Energy:** 3분기 조정 EBITDA $20.13억, 성장투자 전 잉여현금흐름 $12.42억을 기록했습니다. 2027년 조정 EBITDA 가이던스는 $55억~$60억, 잉여현금흐름은 $29억~$34억입니다. 1.2GW BYOP 데이터센터 프로젝트는 예정대로 진행 중이라고 밝혔습니다. 반면 4.9GW 발전자산을 $40억에 매각하기로 해, 성장투자와 부채축소·자사주 매입 사이의 자본배분을 함께 봐야 합니다.\n\n두 회사의 공통점은 ‘AI 수요’라는 문구보다 계약 용량, 현금흐름, 가이던스가 먼저 개선됐다는 점입니다. 반대편 위험은 발전 프로젝트의 긴 착공 기간, 규제 승인, 연료·금리 비용, 데이터센터 고객 집중입니다. 공식 컨퍼런스콜 원문은 발행 시점에 완전 확인하지 못했으므로 보도자료와 실적표 범위만 반영했습니다.\n\n## ⑥ 주요 일정\n\n- 11월 10일 14:30 KST: TSMC·MediaTek 10월 월매출 예정. AI 가속기·파운드리·메모리 수요의 실제 매출 전환 확인.\n- 11월 10일 22:30 KST: 미국 10월 CPI. 유가 하락보다 근원물가와 주거비, 2년물 금리 반응이 핵심.\n- 11월 11일 07:00 KST: CoreWeave 실적·콜 예정. 백로그의 매출 전환, GPU 조달, 이자비용 확인.\n- 11월 11일: 한국 1~10일 수출. 반도체 일평균 수출의 10월 추세 유지 여부 확인.\n- 11월 13일 06:30 KST: Applied Materials·Cisco 실적. 장비 주문과 AI 네트워크 수주 확인.\n- 11월 13일 22:30 KST: 미국 10월 PPI. CPI 이후 생산자 단계 비용 압력 재확인.\n\n## ⑦ 투자전략·위험점검·복기\n\n전일 공식 상태는 BIPOD입니다. NDX 참고 완료 일봉 27,907.63은 9% 회복선 28,414.27 아래이고, Observatory의 MA250 27,460.62·52주 DD -10.62%·VIX10 20.36도 같은 완료 미국 세션 자료입니다. 다만 Nasdaq 공식 최종 EOD 독립 검증은 아직 통과하지 못했으므로 이 값들로 TRI-POD 신규 확정 신호를 선언하거나 거래하지 않습니다.\n\n일반화된 조건부 대응은 다음과 같습니다. 첫째, NDX 공식 완료 일봉과 독립 완료 일봉이 정확히 일치하고 회복선을 넘은 뒤에만 복귀 후보를 다시 계산합니다. 둘째, NDX가 MA250×0.95 아래이면서 VIX10이 18 이상인 하락 레짐 조건은 현재 확정 종가가 없어 판정하지 않습니다. 셋째, 하루 반등만으로 레버리지를 확대하지 않으며, 실제 전략 변경이나 주문은 별도 승인 없이는 실행하지 않습니다.\n\n전일 관찰의 복기는 절반의 적중입니다. 미국은 반도체와 지수가 반등했지만 한국장은 외국인 매도로 회복을 이어가지 못했습니다. ‘미국 반등이 한국장에 자동 전달되지 않는다’는 경계는 유효했고, 반면 유가 급락이 미국 시장폭을 크게 넓힌 정도는 예상보다 강했습니다. 이 판단의 무효화 조건은 다음 미국 세션에서 시장폭이 다시 급격히 축소되거나 CPI 뒤 금리·VIX가 동반 급등하는 경우입니다.\n\n## ⑧ 원천·데이터 감사\n\n- 기준 원장: 최초 06:41 발행 당시 [Daily Glance](https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-glance.json)는 과거 세션이었습니다. 이후 06:45 공개된 카드에서 미국 11월 9일 세션 NDX 27,907.63(+3.40%), MA250 27,460.62, DD -10.62%, VIX10 20.36, source consistency OK를 확인했습니다. [Observatory](https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json)는 원천 06:17:35 KST 생성, [Daily Market Pulse](https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-market-pulse.json)는 이후 갱신됐으나 두 자료의 존재 자체가 공식 EOD 검증은 아닙니다.\n- NDX: 최초 발행 16:36 ET 재조회에서는 Nasdaq History 27,833.87, beta 27,844.36, 당시 Yahoo 28,006.63, Observatory 27,907.625가 충돌했습니다. 사후 Yahoo의 11/9 완료 일봉 27,907.63(+3.40%)이 [YCharts](https://ycharts.com/indices/%5ENDX/level)와 같아 참고로 추가했지만 동일 원천 피드 가능성을 배제하지 못합니다. 공식 최종 EOD는 여전히 CONFLICT; close_checks.close/change_pct는 null입니다. [Nasdaq NDX](https://indexes.nasdaq.com/Index/History/NDX) · [Yahoo NDX](https://finance.yahoo.com/quote/%5ENDX/history/)\n- SOX: 최초 발행 당시 Nasdaq 9,849.33, Yahoo 약 10,004.62로 불일치했습니다. 사후 [Yahoo SOX](https://finance.yahoo.com/quote/%5ESOX/history/)와 [YCharts SOX](https://ycharts.com/indices/%5ESOX/level) 완료 일봉에서 10,033.93(+6.85%)를 함께 확인해 참고로 추가했습니다. 두 제공자의 기초 피드 공유 가능성 때문에 공식 최종 EOD 검증은 CONFLICT로 유지합니다.\n- 미국 지수 마감: [AP 마감표](https://apnews.com/article/wall-street-stocks-dow-nasdaq-f7ec9680fc858e3c2505913e7b3a54e2)와 Observatory 완료 일봉을 대조했습니다. 한국 지수·수급은 [한국거래소 인용 장마감표](https://www.seoul.co.kr/news/economy/securities/2026/11/09/20261109500283)와 Naver 기반 완료 일봉을 대조했습니다.\n- 기업실적: [Constellation Energy 3Q26 공식 발표](https://investors.constellationenergy.com/news-releases/news-release-details/constellation-reports-third-quarter-2026-results), [NRG Energy 3Q26 공식 발표](https://www.nrg.com/en/about/newsroom/2026/46136). 공식 콜 전사 전체는 미확인입니다.\n- 전일 공개값/사후확정값: 2026-11-07 보고서의 NDX 27,154.71 서술은 사후 검증 전 기록이며 현재 검증 입력으로 사용하지 않았습니다. 해당 아카이브의 close_checks는 11월 9일 NDX 26,989.99와 SOX 9,390.25로 정정됐고, 기존 서술은 HISTORIC_NARRATIVE_NOT_RECALCULATED_AFTER_EOD_CORRECTION 경고와 append-only revisions로 보존돼 있습니다.\n- 사후 참고 수치 보완(2026-11-10T08:49:08+09:00): 누락된 주요 지수의 참고 완료 일봉은 제공자 2개 화면의 11/9 동일 세션 수치로 별도 복원했습니다. 기존 최초 발행 및 CONFLICT 기록은 revisions에 보존했습니다. 정규장 공식 확정·TRI-POD 확정 신호는 여전히 미검증이며, 참고값으로 거래하거나 단정하지 않습니다.",
-  "revisions": [
-    {
-      "field": "editorial_contract.reference_quotes",
-      "revised_at_kst": "2026-11-10T08:49:08+09:00",
-      "reason": "First publication hid usable provider-completed close candidates under strict official CONFLICT. Restore labeled reference without changing official close or original timestamp.",
-      "original_rows": [
-        {
-          "before": "| NDX | 11/9 미국 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | CONFLICT — 정규장 종가 원천 불일치 |",
-          "after": "| NDX | 11/9 미국 | 27,907.63 (참고) | +3.40% (참고) | -0.29% (Observatory) | 자료 미확인 | 자료 미확인 | 제공자 완료 일봉 일치·공식 EOD CONFLICT |"
-        },
-        {
-          "before": "| SOX | 11/9 미국 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | CONFLICT — 정규장 종가 원천 불일치 |",
-          "after": "| SOX | 11/9 미국 | 10,033.93 (참고) | +6.85% (참고) | 자료 미확인 | 자료 미확인 | 자료 미확인 | 제공자 완료 일봉 일치·공식 EOD CONFLICT |"
-        }
-      ],
-      "source_urls": [
-        "https://finance.yahoo.com/quote/%5ENDX/history/",
-        "https://ycharts.com/indices/%5ENDX/level",
-        "https://finance.yahoo.com/quote/%5ESOX/history/",
-        "https://ycharts.com/indices/%5ESOX/level"
-      ],
-      "official_close_checks_unchanged": true,
-      "original_published_kst": "2026-11-10T06:41:36+09:00"
-    }
-  ]
+  "body_markdown": "🚨 TRI-POD 상태: BIPOD 유지(이전 공식 상태·당일 산식 미확인) | 미국 정규장 거래일 2026-11-10 | NDX 종가·일간 수익률 미확인(완료 일봉 제공자 불일치) | 52주 고점 대비 DD 미확인 | VIX10 미확인 | MA250 레짐 미확인 | 공개 검증 상태: NO_TRADE_REVIEW_ONLY\n\n🟠 가격 기준 돌파·전환 후보: 미확인 | 기존 9% 경계 28,414.27과의 거리도 산출 보류 | NDX 공식 EOD와 동일값 참고 일봉이 없어 최종 신호 미검증·주문 근거 아님\n\n## ① 오늘의 시장 이야기\n\n오늘 시장의 핵심은 “물가가 다시 금리를 깨웠고, 전날의 AI 반등이 곧바로 검증대에 올랐다”입니다. 미국 10월 소비자물가는 전월 대비 0.4%, 근원물가는 0.3% 올라 금리 인하 기대를 약화시켰습니다. 2년물 금리는 약 19bp 뛴 4.74%, 10년물은 4.988%까지 올라 성장주 할인율 부담이 커졌습니다. S&P 500은 7,520.93, 다우는 52,231.89, 나스닥 종합은 25,065.87로 마감했습니다.\n\n다만 NDX와 SOX는 숫자를 숨긴 것이 아니라 검증 실패를 분리한 것입니다. 16:32 ET까지 Observatory·Daily Glance·Daily Market Pulse는 11/9 세션이었고, 11/10 장후 제공자 완료 일봉도 서로 달랐습니다. Nasdaq 동적 History/Overview 값은 고정 EOD 증빙으로 사용하지 않았습니다. 따라서 strict close_checks는 MISSING, canonical close와 change_pct는 null이며, 정확히 일치하는 독립 제공자 두 곳도 없어 reference_quotes 역시 만들지 않았습니다.\n\n전일 공식 상태 BIPOD는 유지합니다. 이것은 당일 시장 산식을 재계산했다는 뜻이 아닙니다. NDX, MA250, VIX10, 고점 대비 낙폭이 같은 완료 세션에서 잠기지 않았으므로 TRIPOD 복귀·NOPOD 전환 어느 쪽도 확정하지 않습니다.\n\n## ② 시장 한눈에\n\n기간 수익률은 확인 가능한 완료 일봉만 표시했습니다. 1W는 최근 5거래일 또는 제공된 주간 합계, 1M·3M은 동일 기준 원장이 없으면 자료 미확인입니다.\n\n| 자산 | 기준 세션 | 종가·수준 | 1D | 1W | 1M | 3M | 검증 상태 |\n|---|---|---:|---:|---:|---:|---:|---|\n| NDX | 11/10 미국 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | MISSING — 원장 지연·제공자 불일치 |\n| SOX | 11/10 미국 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 자료 미확인 | MISSING — 원장 지연·제공자 불일치 |\n| S&P 500 | 11/10 미국 | 7,520.93 | -0.4% | +2.0% | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| Dow | 11/10 미국 | 52,231.89 | -0.3% | +1.8% | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| Nasdaq Composite | 11/10 미국 | 25,065.87 | -0.7% | +2.0% | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| Russell 2000 | 11/10 미국 | 2,821.38 | -0.7% | +2.4% | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| 미국 2년물 | 11/10 미국 | 4.74% | +19.28bp | 자료 미확인 | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| 미국 10년물 | 11/10 미국 | 4.988% | 상승 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 장마감 보도 |\n| 달러지수 DXY | 11/10 미국 | 자료 미확인 | +0.6% | 자료 미확인 | 자료 미확인 | 자료 미확인 | 변동률만 확인 |\n| KOSPI | 11/10 한국 | 5,239.13 | +4.39% | 자료 미확인 | 자료 미확인 | 자료 미확인 | KRX 장마감 표 |\n| KOSDAQ | 11/10 한국 | 1,667.61 | +4.48% | 자료 미확인 | 자료 미확인 | 자료 미확인 | KRX 장마감 표 |\n| KOSPI200 현물 | 11/10 한국 | 814.31 | +4.62% | 자료 미확인 | 자료 미확인 | 자료 미확인 | KRX 장마감 표 |\n| USD/KRW | 11/10 한국 | 1,337.50원 | -9.30원 | 자료 미확인 | 자료 미확인 | 자료 미확인 | 국내 장마감 표 |\n| Nikkei 225 | 11/10 일본 | 60,459.58 | +2.87% | 자료 미확인 | 자료 미확인 | 자료 미확인 | 현지 장마감 보도 |\n| Hang Seng | 11/10 홍콩 | 24,557.04 | +0.40% | 자료 미확인 | 자료 미확인 | 자료 미확인 | 현지 장마감 보도 |\n| TAIEX | 11/10 대만 | 42,711.92 | +2.52% | 자료 미확인 | 자료 미확인 | 자료 미확인 | 현지 장마감 보도 |\n\n시장폭·집중도는 11/10 완료 자료를 확인하지 못해 전일 값을 재사용하지 않았습니다. 공포·탐욕 지수는 비공식 미러가 28~33으로 갈려 방향만 ‘공포’로 참고하며 단일 숫자로 확정하지 않습니다.\n\n## ③ 핵심 이슈 깊이 읽기\n\n### 1. 뜨거운 CPI가 장기금리보다 2년물을 더 세게 밀어 올렸다\n\n**핵심 숫자:** 10월 CPI +0.4% MoM, 근원 CPI +0.3% MoM, 2년물 4.74%(+19.28bp), 10년물 4.988%.\n\n**무슨 일이 있었나:** 에너지 +0.7%, 식품 +0.5%, 주거비 +0.3%가 물가를 밀었습니다. 자료 공백 때문에 다수의 전년동월비가 제공되지 않아 월간 속도와 구성에 무게를 둬야 합니다.\n\n**왜 중요한가:** 2년물의 급등은 연준 경로 재가격이 핵심이었다는 뜻입니다. 할인율에 민감한 고밸류 성장주는 이익 전망이 유지돼도 멀티플이 먼저 눌릴 수 있습니다.\n\n**반대 해석:** 한 달의 물가만으로 추세를 확정할 수 없고, 전년비 공백은 비교력을 낮춥니다. 주거비 둔화가 이어지면 금리 충격은 되돌려질 수 있습니다.\n\n**다음 확인:** 11/13 PPI와 향후 고용·임금 자료에서 서비스 물가의 지속성을 확인합니다.\n\n### 2. AI 수요 증거는 강했지만 주가는 금리와 밸류에이션을 먼저 봤다\n\n**핵심 숫자:** TSMC 10월 매출 NT$586.89bn, 전월 대비 +14.7%, 전년 대비 +59.7%.\n\n**무슨 일이 있었나:** TSMC가 공식 월간 매출에서 강한 증가를 발표했습니다. 반면 미국 기술주는 CPI 이후 금리 상승 압력을 받았습니다. 수요 데이터와 당일 가격 반응이 분리된 날입니다.\n\n**왜 중요한가:** 첨단공정·AI 가속기 수요가 실제 매출로 전환되는 증거는 반도체 가치사슬의 중기 이익 근거를 보강합니다. 그러나 금리가 동시에 오르면 좋은 실적이 곧바로 좋은 주가가 되지는 않습니다.\n\n**반대 해석:** 월간 매출은 출하 시점과 고객 믹스의 영향을 받으며 마진·현금흐름을 직접 보여주지 않습니다. 높은 기저와 선출하 가능성도 남습니다.\n\n**다음 확인:** 분기 가이던스, 첨단공정 비중, 재고일수와 고객 CAPEX가 같은 방향인지 확인합니다.\n\n### 3. 한국·아시아 급반등은 미국 물가 충격보다 먼저 끝난 거래였다\n\n**핵심 숫자:** KOSPI +4.39%, KOSPI200 +4.62%, Nikkei +2.87%, TAIEX +2.52%; KOSPI 외국인 +3,696억원, 기관 +4,889억원, 개인 -1조3,414억원.\n\n**무슨 일이 있었나:** 아시아 시장은 전일 미국 기술주 반등과 위험선호 회복을 반영해 크게 올랐습니다. 이후 미국 CPI가 발표되고 미 국채금리가 급등했습니다.\n\n**왜 중요한가:** 한국장 상승은 강했지만 시간 순서상 미국 물가 충격을 아직 가격에 반영하지 않았습니다. 다음 한국장에서는 반도체·성장주의 갭 반납 여부와 원화 흐름이 중요합니다.\n\n**반대 해석:** 외국인·기관 동반 순매수와 원화 강세는 단순 숏커버를 넘어선 수급 개선일 수 있습니다. 미국 금리가 안정되면 아시아의 상대 강도가 유지될 수 있습니다.\n\n**다음 확인:** 다음 개장 초반 KOSPI200 현물, 외국인 선물·현물 동시 방향, USD/KRW 1,340원 안팎의 재돌파 여부를 봅니다.\n\n## ④ 글로벌·한국 시장\n\n미국은 “주식 하락·단기금리 급등·달러 강세·금 약세” 조합이었습니다. 금은 약 2.3% 하락한 온스당 4,043.73달러로 보도됐습니다. 이는 경기침체 공포보다 정책금리 경로 재가격이 앞섰다는 해석과 맞습니다. 다만 NDX·SOX의 정확한 하락폭은 완료 일봉 검증 전까지 단정하지 않습니다.\n\n한국은 KOSPI200 현물과 선물을 혼동하지 않았습니다. 표의 814.31은 현물지수입니다. 국내 수급은 외국인·기관 순매수와 개인 순매도로 갈렸고 원화는 강세였습니다. 다음 장에서는 전일 급등의 연속성보다 미국 금리 충격을 얼마나 흡수하는지가 더 중요한 검증점입니다.\n\n아시아는 일본·대만의 기술주 민감도가 높아 미국 금리 상승의 후행 반응을 확인해야 합니다. 홍콩은 상승폭이 작아 지역 내 온도 차도 컸습니다.\n\n## ⑤ AI 산업·기업실적\n\n오늘 실적에서 꼭 볼 변화는 세 가지입니다. 첫째, TSMC 월간 매출은 AI 수요의 실물 전환을 뒷받침했습니다. 둘째, 금리 상승은 같은 이익에 적용되는 가치평가를 낮출 수 있습니다. 셋째, CoreWeave의 공식 실적 콜은 미국 17:00 ET 예정으로 이 보고서의 16:32 ET 검증 마감 뒤이므로 확인했다고 쓰지 않습니다.\n\nTSMC 수치는 회사 공식 월간 공시 기준입니다. 매출 증가가 이익률·FCF 증가를 자동 보장하지 않으므로 다음 분기 공정 믹스와 CAPEX를 함께 보겠습니다. CoreWeave는 공식 자료가 실제 게시되고 콜을 확인한 뒤 다음 회차에서 매출, 수주잔고, CAPEX·FCF와 고객집중도를 분리해 다룹니다. 마감 뒤 자료를 미리 읽었다고 처리하지 않습니다.\n\n새로운 중요 공식 실적·콜을 추가로 확인하지 못했습니다. 과거 전력기업 실적을 오늘 신규 발표처럼 재사용하지 않았습니다.\n\n## ⑥ 주요 일정\n\n- 11/11 미국: 현충일 관련 채권·정부 일정 변동을 각 공식 시장 공지로 재확인합니다. 주식 정규장 여부도 개장 전 최종 확인합니다.\n- 11/12 미국: 기존주택판매 등 거시 일정은 발표기관 최종 캘린더를 재확인합니다.\n- 11/13 08:30 ET(22:30 KST): 미국 10월 생산자물가(PPI) 예정. BLS 공식 캘린더 기준입니다.\n- CoreWeave 11/10 17:00 ET 실적 콜: 본 보고서 마감 뒤 자료이므로 다음 회차 확인 대상으로 이월합니다.\n\n## ⑦ 투자전략·위험점검·복기\n\n전략 상태는 전일 공식 BIPOD를 유지하되 당일 신호를 계산하지 않습니다. NDX 공식 EOD·독립 완료 일봉, 같은 세션 MA250·VIX10·고점 기준이 모두 잠겨야 9% 경계와 레짐을 계산할 수 있습니다. 숫자가 없는 상태에서 “경계를 넘었다” 또는 “NOPOD로 바뀌었다”고 말하지 않습니다.\n\n조건부 위험 점검은 공개 원칙만 제시합니다. 2년물 급등이 이어지고 성장주 시장폭이 좁아지면 고밸류 자산의 조정 위험이 커집니다. 반대로 PPI가 완화되고 금리가 되돌아가면서 반도체 시장폭이 넓어지면 오늘의 하락은 이벤트성 소화가 될 수 있습니다. 어느 경우에도 이 보고서는 주문·비중 변경을 승인하지 않습니다.\n\n전일 “유가 하락이 만든 광범위 반등” 관찰은 다음 날 CPI 금리 충격으로 단기 연속성이 약해졌습니다. 다만 NDX·SOX 정확한 값이 잠기지 않았으므로 적중·미적중의 정량 채점은 이월합니다. 무효화 조건은 공식 종가와 제공자 완료 일봉이 같은 세션에서 일치해 현재 해석과 다른 시장폭·레짐을 보여주는 경우입니다.\n\n## ⑧ 원천·데이터 감사\n\n- canonical snapshot: GitHub main의 `daily-glance.json`(생성 2026-11-11 05:54 KST, US session 11/9), `observatory.json`(생성 2026-11-11 00:34 KST, 완료세션 11/9), `daily-market-pulse.json`(생성 00:46 KST, market date 11/9). 11/10 장후 기준으로 세션 지연.\n- NDX 관측: Yahoo 27,703.79, Investing 27,601.56 등 11/10 장후 제공자 값 불일치. 동일 완료세션·정확 일치 두 원천 요건 미충족. Nasdaq 동적 화면 값은 공식 고정 EOD 증빙과 충돌 판정의 단독 근거에서 제외.\n- SOX 관측: Yahoo 9,921.29, Investing 9,847.60 등 제공자 값 불일치. exact-match reference 요건 미충족.\n- close_checks: NDX·SOX 모두 status=MISSING, close=null, change_pct=null, official_status=NOT_VERIFIED. reference_quotes 없음. TRI-POD 산식·주문 신호 사용 금지.\n- 미국 물가: BLS CPI 보도자료와 발표 캘린더. 시장 마감: AP 최종 지수 수준, Reuters 금리·달러·금 보도.\n- 한국: KRX 장마감 수치를 인용한 삼성증권 시장 종합표. 아시아: 현지 장마감 보도. 단일 숫자 미확인 항목은 표에서 자료 미확인으로 유지.\n- 기업: TSMC 공식 10월 매출 공시. CoreWeave 공식 IR 일정은 17:00 ET로 보고서 마감 뒤.\n- 공개 개인정보 점검: 개인 계좌·보유·거래·비공개 작업공간·내부 식별자 없음. NO_TRADE_REVIEW_ONLY.\n- 발행 목표 06:30 KST를 넘긴 원인은 11/10 canonical close snapshot 지연과 NDX·SOX 장후 제공자 불일치 확인입니다. 원인 밖의 추측은 하지 않습니다.\n\n원천 링크: [BLS CPI](https://www.bls.gov/news.release/cpi.nr0.htm) · [BLS 일정](https://www.bls.gov/schedule/2026/11_sched.htm) · [AP](https://apnews.com/) · [Reuters 시장](https://www.reuters.com/markets/us/) · [TSMC 공시](https://pr.tsmc.com/english/news/3274) · [CoreWeave IR](https://investors.coreweave.com/) · [Daily Glance](https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-glance.json) · [Observatory](https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/observatory.json)\n",
+  "revisions": []
 }
