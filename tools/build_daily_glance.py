@@ -66,7 +66,8 @@ def metric(key, label, series, crypto=None):
                 and current["value"]>0 and current.get("date")):
             prior=next((r for r in reversed(rows) if r.get("date")<current["date"]), None)
             same=bool(prior and prior.get("quote_currency")==currency
-                      and prior.get("session_status")=="COMPLETED")
+                      and prior.get("session_status")=="COMPLETED"
+                      and prior.get("date")==(__import__('datetime').date.fromisoformat(current['date'])-__import__('datetime').timedelta(days=1)).isoformat())
             result={"key":key,"label":label,"date":current["date"],
                     "value":round(current["value"],4),"quote_currency":currency,
                     "source":crypto.get("source"),"observed_kst":crypto.get("quote_as_of_kst"),
@@ -81,7 +82,8 @@ def metric(key, label, series, crypto=None):
     item = {"key": key, "label": label, "date": last["date"], "value": round(last["value"], 4)}
     if key in ("BTCUSD","ETHUSD"):
         currency=last.get("quote_currency")
-        same=currency in ("USD","USDT") and prev.get("quote_currency")==currency
+        same=(currency in ("USD","USDT") and prev.get("quote_currency")==currency
+              and prev.get("date")==(__import__('datetime').date.fromisoformat(last['date'])-__import__('datetime').timedelta(days=1)).isoformat())
         item.update(quote_currency=currency,source=last.get("source"),
                     comparison_status="SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE")
         item["d1_pct"]=pct(last["value"],prev["value"]) if same else None
