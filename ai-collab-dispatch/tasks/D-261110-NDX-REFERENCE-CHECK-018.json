@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-NDX-REFERENCE-CHECK-018",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review narrow NDX morning-brief comparison bug: existing Observatory/Daily Glance completed-session bar is present, close_checks official gate may be CONFLICT and close null, valid provider reference currently produces NOT_COMPARABLE. Ensure safe REFERENCE_MATCH/REFERENCE_MISMATCH statuses never imply Nasdaq official EOD verification, never change trade signals or source of truth, and gate reference by session and explicit non-trading provenance.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Daily Glance recognizes same-session validated reference value without converting CONFLICT to VERIFIED",
+    "Reference values do not enter TRI-POD regime calculation or trading",
+    "Mismatched reference is a warning; missing/stale or trade-eligible reference remains NOT_COMPARABLE",
+    "Existing matching verified official close retains MATCH semantics",
+    "Python suite, UI CI, and architecture tests PASS; no direct publication until owner authorization"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets, account data or automated trading",
+    "No automatic main merge or production deploy",
+    "No paid model API or new cloud deployment"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "This is a narrow follow-up to the 2026-11-10 NDX false missing/UNCOMPARABLE presentation. ROY independently audit once on current PR head; don't repeat tokens for unchanged commits."
+}
