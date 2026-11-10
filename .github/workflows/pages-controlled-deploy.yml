@@ -57,34 +57,9 @@ jobs:
         with:
           ref: ${{ needs.plan.outputs.target_sha }}
           fetch-depth: 1
-      - name: Stage public files only; retain all runtime market histories
+      - name: Stage and audit exact public site assets
         shell: bash
-        run: |
-          set -euo pipefail
-          site="$RUNNER_TEMP/jjooni-pages-site"
-          mkdir -p "$site"
-          rsync -a --exclude='/.git/' --exclude='/.github/' \
-            --exclude='/ai-collab/' --exclude='/ai-collab-dispatch/' \
-            --exclude='/tools/' --exclude='/tests/' --exclude='/scripts/' \
-            ./ "$site/"
-          for required in index.html market-observatory/index.html \
-            market-observatory/data/observatory.json \
-            market-observatory/data/economic-calendar-history.json \
-            public-market-daily.json .nojekyll; do
-            if [[ ! -f "$site/$required" ]]; then
-              echo "::error::Missing required public Pages asset: $required"
-              exit 1
-            fi
-          done
-          for forbidden in .git .github ai-collab ai-collab-dispatch tools tests; do
-            if [[ -e "$site/$forbidden" ]]; then
-              echo "::error::Non-public source directory included: $forbidden"
-              exit 1
-            fi
-          done
-          python3 scripts/pages_site_audit.py "$site"
-          echo 'PAGES_SITE_STAGE=PASS'
-          du -sh "$site"
+        run: bash scripts/pages_site_stage.sh "$RUNNER_TEMP/jjooni-pages-site"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload curated public artifact
