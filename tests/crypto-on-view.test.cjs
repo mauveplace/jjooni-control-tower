@@ -1,0 +1,3 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {parse}=require('../market-observatory/crypto-on-view-v1.js');
+test('Binance last trade is USDT and carries exchange timestamp',()=>{const now=Date.now(),q=parse('BTCUSD',[{price:'90000.25',time:now-5000}],now);assert.equal(q.value,90000.25);assert.equal(q.quote_currency,'USDT');assert.equal(Date.parse(q.observed_at),now-5000);assert.match(q.source,/BTCUSDT/)});
+test('invalid, old, future and wrong-symbol observations are rejected',()=>{const now=Date.now();for(const [key,row] of [['BTCUSD',{price:'0',time:now}],['BTCUSD',{price:'1',time:now-1200001}],['ETHUSD',{price:'1',time:now+60001}],['OTHER',{price:'1',time:now}],['BTCUSD',{}]])assert.throws(()=>parse(key,[row],now));});
