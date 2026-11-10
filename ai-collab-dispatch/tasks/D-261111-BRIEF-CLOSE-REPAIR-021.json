@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-BRIEF-CLOSE-REPAIR-021",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Verify integer-part-only provider quote comparison and recover recurring U.S.-close canonical staleness for 2026-11-10 market session. The Nov 11 morning brief reports conflicting non-official postclose NDX/SOX provider quotes and canonical 11/09 data despite expected 11/10. Independently audit no-trade boundary, timing, schedule fallback, and reliability of published main SSOT.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Reference matches only positive finite values with identical integer part; other integer, NaN/Infinity/boolean, wrong session or provider, missing provenance must fail closed.",
+    "Official VERIFIED/CROSS_CHECKED close and trading signal gates remain unchanged; references are labeled nonofficial nontradable.",
+    "An authorized daily-brief latest.json main publish can activate existing close-watchdog gate once: it rebuilds only if an independently computed completed U.S. cash session is stale; no 5-minute data harvesting or new timers.",
+    "Fail-closed acceptance proves observatory NDX/SP500/VIX, final Daily Pulse, TRI-POD, freshness all belong to one expected completed session before any new market SSOT is published.",
+    "Actual head SHA and GitHub Actions CI are checked; review scheduled Nov 11 nonexecution and distinguish providers' dynamic post-close snapshots from final fixed EOD.",
+    "ROY returns PASS, NEEDS_CHANGES or BLOCKED for this exact head with concrete tests/evidence and authenticated Claude session; do not merge before independent review."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets, private accounts, paid model API or cloud runtime additions",
+    "No automated trade, strict official-price gate weakening, backdating quote evidence or fabricated postclose proof",
+    "No ROY code writes or automatic main merge/deployment"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "GitHub #380 originally lacked changed task JSON and therefore did not meet opt-in review contract; add only this one active task to PR diff and request one read-only review of exact HEAD via issue-opened Routine, not repeated comments."
+}
