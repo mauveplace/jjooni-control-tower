@@ -1,6 +1,7 @@
 """Behavioral regressions for controlled Pages deployment (no live mutation)."""
 from pathlib import Path
 from types import SimpleNamespace
+import hashlib
 import json
 import subprocess
 import sys
@@ -152,7 +153,10 @@ class PagesCalendarPruneBehavior(unittest.TestCase):
             (data / "calendar-history-index.json").write_text(
                 json.dumps({
                     "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
-                    "series": {"x": {"path": "./calendar-history/series/current.json"}}
+                    "series": {"x": {
+                        "path": "./calendar-history/series/current.json",
+                        "sha256": hashlib.sha256(keep.read_bytes()).hexdigest(),
+                    }}
                 }), encoding="utf-8",
             )
             indexed, kept, removed, saved = prune.prune(site)
@@ -178,6 +182,32 @@ class PagesCalendarPruneBehavior(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 prune.prune(site)
             self.assertTrue(original.is_file())
+
+    def test_corrupt_referenced_series_blocks_pruning(self):
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp)
+            data = site / "market-observatory/data"
+            files = data / "calendar-history/series"
+            files.mkdir(parents=True)
+            current = files / "current.json"
+            current.write_bytes(b'{"v":1}')
+            original_hash = hashlib.sha256(current.read_bytes()).hexdigest()
+            orphan = files / "old-revision.json"
+            orphan.write_bytes(b'{"v":0}')
+            (data / "calendar-history-index.json").write_text(
+                json.dumps({
+                    "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
+                    "series": {"x": {
+                        "path": "./calendar-history/series/current.json",
+                        "sha256": original_hash,
+                    }},
+                }), encoding="utf-8",
+            )
+            current.write_bytes(b'{"v":2}')
+            with self.assertRaisesRegex(RuntimeError, "checksum mismatch"):
+                prune.prune(site)
+            self.assertTrue(orphan.is_file())
+
 
 class PagesWorkflowContract(unittest.TestCase):
     def test_deployment_and_retry_gates(self):

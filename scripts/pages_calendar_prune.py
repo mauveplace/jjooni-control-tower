@@ -5,6 +5,7 @@ Never modify the repository, only a disposable staging directory. The latest
 calendar-history-index.json is the runtime authority for published series.
 """
 from pathlib import Path
+import hashlib
 import json
 import sys
 
@@ -33,6 +34,9 @@ def prune(site):
         ref = (data / raw).resolve()
         if ref.parent != series_root or ref.suffix != ".json" or not ref.is_file():
             raise RuntimeError("referenced calendar series file missing: " + raw)
+        expected = entry.get("sha256")
+        if not isinstance(expected, str) or hashlib.sha256(ref.read_bytes()).hexdigest() != expected:
+            raise RuntimeError("referenced calendar series checksum mismatch: " + raw)
         keep.add(ref)
     paths = list(series_root.glob("*.json"))
     missing = keep - set(paths)
