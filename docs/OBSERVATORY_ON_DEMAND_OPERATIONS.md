@@ -22,6 +22,8 @@ Many data commits could cause unnecessary Pages builds even with no user viewing
   approved USDT/USD quote-currency/previous-close reconciliation. Do not claim
   live crypto from that API. Show the true crypto observation time and stale
   status, and retire the hourly fallback only after a verified on-demand source.
+  The best-effort source schedule targets :20 each hour, including 06:20 KST
+  before the 06:30 morning brief; the actual quote timestamp remains decisive.
 - US yields are sampled hourly only in the US-trading-session UTC window,
   rather than every 30 minutes around the clock. Existing historical 5-minute
   data remain available; new intraday bars are less dense, with source times
