@@ -19,6 +19,9 @@ class ExistingRatesCryptoHeartbeatTests(unittest.TestCase):
         start = text.index('      - name: Best-effort BTC ETH quote refresh on existing rates heartbeat')
         end = text.index('      - name: Expose partial source failures', start)
         block = text[start:end]
+        self.assertIn("id: crypto_gate", text)
+        self.assertIn('run: python tools/crypto_heartbeat_gate.py >> "$GITHUB_OUTPUT"', text)
+        self.assertIn("steps.crypto_gate.outputs.crypto_should_refresh == 'true'", block)
         self.assertIn("if: github.event_name == 'schedule'", block)
         self.assertIn('id: crypto', block)
         self.assertIn('continue-on-error: true', block)
