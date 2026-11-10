@@ -124,7 +124,7 @@ class DailyGlance(unittest.TestCase):
         self.assertEqual(glance.build(observatory(), d)["brief_check"]["status"], "NOT_COMPARABLE")
 
     def test_actual_20261110_ndx_reference_does_not_upgrade_strict_gate(self):
-        published = json.loads((ROOT / "market-observatory/data/morning-brief/latest.json").read_text())
+        published = json.loads((ROOT / "market-observatory/data/morning-brief/20261110.json").read_text())
         d = brief(None, market_date="2026-11-09", status="CONFLICT", official="CONFLICT")
         d["editorial_contract"]["reference_quotes"] = (
             published["editorial_contract"]["reference_quotes"])
