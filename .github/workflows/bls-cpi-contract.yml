@@ -1,0 +1,30 @@
+name: BLS CPI and Credential Safety Contract
+
+on:
+  pull_request:
+    paths:
+      - 'tools/official_bls_api.py'
+      - 'tools/calendar_actual_contract.py'
+      - 'tools/calendar_market_events.py'
+      - 'tools/official_calendar_collectors.py'
+      - 'tools/sync_calendar_representative_values.py'
+      - 'tests/test_bls_cpi_nonpublication_and_key_safety.py'
+      - '.github/workflows/bls-cpi-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile changed source and test
+        run: |
+          python -m py_compile tools/official_bls_api.py tools/calendar_actual_contract.py tools/calendar_market_events.py tools/official_calendar_collectors.py tools/sync_calendar_representative_values.py tests/test_bls_cpi_nonpublication_and_key_safety.py
+          python -m unittest discover -s tests -p 'test_bls_cpi_nonpublication_and_key_safety.py' -v
