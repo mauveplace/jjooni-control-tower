@@ -81,6 +81,65 @@ class DailyGlance(unittest.TestCase):
             check = glance.build(observatory(), brief(26989.99, status=status, official=official))["brief_check"]
             self.assertEqual(check["status"], "UNVERIFIED", (status, official))
 
+    def test_conflicting_official_close_with_matching_provider_reference_is_not_missing(self):
+        d = brief(None, status="CONFLICT", official="CONFLICT")
+        d["editorial_contract"]["reference_quotes"] = [{
+            "symbol": "NDX", "session_date": "2026-11-06",
+            "status": "PROVIDER_REFERENCE_ONLY",
+            "official_eod_verified": False, "trade_signal_eligible": False,
+            "close": 26989.99
+        }]
+        result = glance.build(observatory(), d)["brief_check"]
+        self.assertEqual(result["status"], "REFERENCE_MATCH")
+        self.assertEqual(result["official_status"], "CONFLICT")
+        self.assertFalse(result["official_eod_verified"])
+        self.assertFalse(result["trade_signal_eligible"])
+        self.assertEqual(result["pipeline_ndx"], 26989.99)
+        self.assertIn("공식 확정 종가 검증은 별도", result["text"])
+
+    def test_conflicting_official_close_with_divergent_provider_reference_is_warning(self):
+        d = brief(None, status="CONFLICT", official="CONFLICT")
+        d["editorial_contract"]["reference_quotes"] = [{
+            "symbol": "NDX", "session_date": "2026-11-06",
+            "status": "PROVIDER_REFERENCE_ONLY",
+            "official_eod_verified": False, "trade_signal_eligible": False,
+            "close": 27800.0
+        }]
+        result = glance.build(observatory(), d)["brief_check"]
+        self.assertEqual(result["status"], "REFERENCE_MISMATCH")
+        self.assertFalse(result["official_eod_verified"])
+        self.assertGreater(result["diff_pct"], 0.1)
+
+    def test_no_reference_match_without_session_and_safety_provenance(self):
+        d = brief(None, status="CONFLICT", official="CONFLICT")
+        d["editorial_contract"]["reference_quotes"] = [{
+            "symbol": "NDX", "session_date": "2026-11-05",
+            "status": "PROVIDER_REFERENCE_ONLY",
+            "official_eod_verified": False, "trade_signal_eligible": False,
+            "close": 26989.99
+        }]
+        self.assertEqual(glance.build(observatory(), d)["brief_check"]["status"], "NOT_COMPARABLE")
+        d["editorial_contract"]["reference_quotes"][0]["session_date"] = "2026-11-06"
+        d["editorial_contract"]["reference_quotes"][0]["trade_signal_eligible"] = True
+        self.assertEqual(glance.build(observatory(), d)["brief_check"]["status"], "NOT_COMPARABLE")
+
+    def test_actual_20261110_ndx_reference_does_not_upgrade_strict_gate(self):
+        published = json.loads((ROOT / "market-observatory/data/morning-brief/latest.json").read_text())
+        d = brief(None, market_date="2026-11-09", status="CONFLICT", official="CONFLICT")
+        d["editorial_contract"]["reference_quotes"] = (
+            published["editorial_contract"]["reference_quotes"])
+        now_obs = observatory()
+        now_obs["us_completed_session_date"] = "2026-11-09"
+        now_obs["tripod_latest"] = dict(now_obs["tripod_latest"],
+                                        date="2026-11-09", session_date="2026-11-09",
+                                        ndx=27907.625)
+        now_obs["series"]["NASDAQ100"].append(
+            {"date": "2026-11-09", "value": 27907.625})
+        result = glance.build(now_obs, d)["brief_check"]
+        self.assertEqual(result["status"], "REFERENCE_MATCH")
+        self.assertAlmostEqual(result["reference_ndx"], 27907.63, places=2)
+        self.assertFalse(result["trade_signal_eligible"])
+
     def test_stale_signal_is_isolated_from_current_bar(self):
         stale = dict(observatory()["tripod_latest"], date="2026-11-05", session_date="2026-11-05", ndx=26629.81)
         g = glance.build(observatory(tripod_latest=stale))
