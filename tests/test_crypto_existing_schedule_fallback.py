@@ -11,7 +11,7 @@ class ExistingRatesCryptoHeartbeatTests(unittest.TestCase):
     def test_no_new_schedule_or_runner_is_added(self):
         text = WORKFLOW.read_text(encoding='utf-8')
         crons = re.findall(r"^\s*- cron: '([^']+)'$", text, re.M)
-        self.assertEqual(crons, ['17,47 * * * 1-5'])
+        self.assertEqual(crons, ['45 12-22 * * 1-5'])
         self.assertEqual(len(re.findall(r'^  collect:$', text, re.M)), 1)
 
     def test_crypto_failure_is_isolated_and_never_published(self):
@@ -19,6 +19,9 @@ class ExistingRatesCryptoHeartbeatTests(unittest.TestCase):
         start = text.index('      - name: Best-effort BTC ETH quote refresh on existing rates heartbeat')
         end = text.index('      - name: Expose partial source failures', start)
         block = text[start:end]
+        self.assertIn("id: crypto_gate", text)
+        self.assertIn('run: python tools/crypto_heartbeat_gate.py >> "$GITHUB_OUTPUT"', text)
+        self.assertIn("steps.crypto_gate.outputs.crypto_should_refresh == 'true'", block)
         self.assertIn("if: github.event_name == 'schedule'", block)
         self.assertIn('id: crypto', block)
         self.assertIn('continue-on-error: true', block)

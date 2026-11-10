@@ -8,7 +8,7 @@ const api={marketClock,revision,canApply,retainHistory};
 if(typeof module==='object'&&module.exports){module.exports=api;return}
 if(!root.document)return;
 let pending=null,lastAttempt=0,lastRevision=null;
-const state={version:'1.0',status:'WAITING',interval_ms:60000,refresh};root.__JJOONI_OBSERVATORY_MARKET_REFRESH=state;
+const state={version:'1.1',status:'WAITING',mode:'ON_OPEN_OR_RESUME',min_recheck_ms:55000,refresh};root.__JJOONI_OBSERVATORY_MARKET_REFRESH=state;
 function note(text){const e=document.getElementById('obsCollectMessage');if(e&&!root.__JJOONI_DATA_REFRESH?.pending)e.textContent=text}
 async function refresh(force=false){
  if(pending)return pending;
@@ -29,8 +29,9 @@ async function refresh(force=false){
   note('최신 게시값 반영 · 시장 수집 '+String(marketClock(next)).replace('T',' ').slice(0,16)+' KST · 원천별 기준일은 각 항목에 표시됩니다.');return true;
  }catch(e){state.status='RETRY';state.error=String(e.message||e);note('최신 게시값 조회 재시도 중 · 마지막 확인 자료 유지');return false}finally{pending=null}})();return pending;
 }
-setInterval(()=>refresh(),state.interval_ms);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});root.addEventListener('pageshow',event=>refresh(!!event?.persisted));
+// Static history snapshots are checked only on user activity. Manual '게시값 다시
+// 확인' still calls refresh(true); visibility changes obey the 55-second guard.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(false)});root.addEventListener('pageshow',()=>refresh(false));
 // Also cover a tab restored from the mobile browser back-forward cache.
 const start=setInterval(()=>{if(typeof DATA!=='undefined'&&DATA){clearInterval(start);lastRevision=revision(DATA);lastAttempt=Date.now();state.status='READY'}},200);
 })(typeof window==='object'?window:globalThis);

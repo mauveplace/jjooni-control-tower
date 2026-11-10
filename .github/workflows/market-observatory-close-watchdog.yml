@@ -15,7 +15,7 @@ on:
   schedule:
     # Independent DST/standard-time candidates. Delayed starts remain eligible;
     # the completed-session clock makes already-current candidates a no-op.
-    - cron: '10,20,35,50 20,21 * * 0-5'
+    - cron: '20,50 20,21 * * 0-5'
   workflow_dispatch:
     inputs:
       force_repair:
