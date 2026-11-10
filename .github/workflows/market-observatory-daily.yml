@@ -428,7 +428,7 @@ jobs:
           board_runtime_version=re.search(r"version:'([0-9A-Za-z._-]+)'",board)
           assert board_url_version and board_runtime_version,'latest board runtime/cache version missing'
           assert board_url_version[1]==board_runtime_version[1],(board_url_version[1],board_runtime_version[1])
-          assert 'fed-watch-v1.js?v=2.1' in html
+          require_runtime(html, 'fed-watch-v1.js')
           print('MARKET_OBSERVATORY_ACCEPTANCE=PASS')
           print('us_source_dates=',us_dates)
           print('calendar_actual_freshness=',c.get('actual_freshness'))
