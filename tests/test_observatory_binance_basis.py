@@ -43,7 +43,7 @@ class BinanceBasisTest(unittest.TestCase):
         prev=(today-timedelta(days=1)).isoformat()
         live=([{'date':day,'value':101,'session_status':'IN_PROGRESS',
                 'quote_currency':'USDT'}],
-              {'price':101,'status':'LIVE','source':'Binance','quote_currency':'USDT'})
+              {'price':101,'status':'LIVE','source':'Binance','quote_currency':'USDT','quote_as_of_kst':datetime.now(UTC).astimezone(ZoneInfo('Asia/Seoul')).isoformat()})
         bar={'date':prev,'value':100,'session_status':'COMPLETED',
              'quote_currency':'USDT','source':'Binance UTC 1d kline'}
         data={'series':{'BTCUSD':[{'date':prev,'value':99,'session_status':'COMPLETED'}]}}
@@ -66,7 +66,7 @@ class BinanceBasisTest(unittest.TestCase):
         prev=(today-timedelta(days=1)).isoformat()
         live=([{'date':day,'value':101,'session_status':'IN_PROGRESS',
                 'quote_currency':'USDT'}],
-              {'price':101,'status':'LIVE','source':'Binance','quote_currency':'USDT'})
+              {'price':101,'status':'LIVE','source':'Binance','quote_currency':'USDT','quote_as_of_kst':datetime.now(UTC).astimezone(ZoneInfo('Asia/Seoul')).isoformat()})
         original={'date':prev,'value':100,'session_status':'IN_PROGRESS',
                   'quote_currency':'USDT','source':'Binance'}
         data={'series':{'BTCUSD':[original]}}
