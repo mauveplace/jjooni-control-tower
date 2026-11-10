@@ -32,6 +32,8 @@ Many data commits could cause unnecessary Pages builds even with no user viewing
 - Cross-market supplemental facts are archived after KR and US closing only.
 - Previous five-minute relay is a manual read-only health diagnostic only:
   no chained runner, writes, issue alerts or privileged job dispatch.
+  A one-time workflow-file push diagnostic shares the old relay concurrency
+  group with cancel-in-progress enabled to retire already-running old relays.
 - Staged GitHub Actions Pages deployment is manual only. Do not switch the
   live GitHub Pages Source from the existing branch-publishing mode yet.
 
