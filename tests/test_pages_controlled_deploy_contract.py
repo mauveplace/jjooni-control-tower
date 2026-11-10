@@ -133,7 +133,7 @@ class PagesWorkflowContract(unittest.TestCase):
     def test_deployment_and_retry_gates(self):
         src = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("python3 scripts/pages_deploy_plan.py", src)
-        self.assertIn("python3 scripts/pages_site_audit.py", src)
+        self.assertIn("bash scripts/pages_site_stage.sh", src)
         self.assertIn("ref: " + chr(36) + "{{ needs.plan.outputs.target_sha }}", src)
         self.assertIn("if: " + chr(36) + "{{ needs.plan.outputs.should_deploy == 'true' }}", src)
         self.assertIn("timeout-minutes: 15", src)
@@ -141,9 +141,11 @@ class PagesWorkflowContract(unittest.TestCase):
         self.assertIn("vars.PAGES_ACTIONS_ENABLED == 'true'", src)
         self.assertIn("deployments: read", src)
         self.assertIn("cancel-in-progress: false", src)
+        self.assertIn("pages-site-preflight.yml", (ROOT / ".github/workflows/pages-site-preflight.yml").read_text(encoding="utf-8"))
 
     def test_preserves_public_market_data_and_excludes_dev_sources(self):
-        src = WORKFLOW.read_text(encoding="utf-8")
+        src = (ROOT / "scripts/pages_site_stage.sh").read_text(encoding="utf-8")
+        self.assertIn("python3 scripts/pages_site_audit.py", src)
         for name in ("market-observatory/data/observatory.json",
                      "market-observatory/data/economic-calendar-history.json",
                      "public-market-daily.json", "index.html"):
