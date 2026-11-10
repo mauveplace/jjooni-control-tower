@@ -84,7 +84,7 @@ class LowFrequencyWriterTests(unittest.TestCase):
 
     def test_crypto_and_rates_are_archived_only_daily(self):
         self.assertEqual(schedules(".github/workflows/observatory-crypto-refresh.yml"),
-                         ["35 21 * * *"])
+                         ["35 * * * *"])
         self.assertEqual(schedules(".github/workflows/observatory-us-rates-intraday.yml"),
                          ["45 21 * * 1-5"])
         self.assertEqual(schedules(".github/workflows/market-observatory-supplemental-freshness.yml"),
