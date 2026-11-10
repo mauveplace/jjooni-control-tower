@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-10T09:29:37+09:00",
+  "generated_kst": "2026-11-10T09:30:33+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-11-09",
   "file_status": {
     "observatory": {
@@ -68,11 +68,12 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-10T09:29:28+09:00",
+      "generated_kst": "2026-11-10T09:30:32+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
         "fx",
+        "jp_rates",
         "audit"
       ]
     },
@@ -438,7 +439,7 @@
       "latest_mismatch": []
     },
     "jp_rates": {
-      "state": "LIVE",
+      "state": "LAGGING",
       "anchor": "2026-11-10",
       "allow_lag_days": 5,
       "critical": false,
@@ -494,7 +495,7 @@
       },
       "missing": [],
       "latest_mismatch": [],
-      "expected_latest_weekday": "2026-11-06",
+      "expected_latest_weekday": "2026-11-09",
       "published_source_status": null
     },
     "crypto": {
@@ -561,14 +562,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-10T09:01:52+09:00",
-      "current_quote_age_seconds": 1665,
+      "current_quote_age_seconds": 1721,
       "captured_quote_age_seconds": 47
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-10T09:01:52+09:00",
-      "current_quote_age_seconds": 1665,
+      "current_quote_age_seconds": 1721,
       "captured_quote_age_seconds": 47
     }
   },
@@ -577,6 +578,11 @@
       "code": "GROUP_FX_AHEAD_OF_ANCHOR",
       "severity": "WARN",
       "detail": "anchor=2026-11-09 dates=DXY:2026-11-09,USDKRW:2026-11-10,USDJPY:2026-11-10,JPYKRW:2026-11-10"
+    },
+    {
+      "code": "GROUP_JP_RATES_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-11-10 dates=JP2Y:2026-11-06,JP5Y:2026-11-06,JP10Y:2026-11-06,JP20Y:2026-11-06,JP30Y:2026-11-06,JP_2S10S:2026-11-06"
     }
   ],
   "contracts": {
