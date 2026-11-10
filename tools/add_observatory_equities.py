@@ -95,6 +95,7 @@ COINGECKO_IDS={'BTCUSD':'bitcoin','ETHUSD':'ethereum'}
 COINGECKO_SPOT='https://api.coingecko.com/api/v3/simple/price'
 BINANCE_MARKET_DATA='https://data-api.binance.vision/api/v3/trades'
 BINANCE_PAIRS={'BTCUSD':'BTCUSDT','ETHUSD':'ETHUSDT'}
+BINANCE_KLINES='https://data-api.binance.vision/api/v3/klines'
 
 
 def completed_local_rows(rows,zone,close,now=None):
@@ -169,6 +170,34 @@ def binance_spot_observations(now=None):
             print('BINANCE_QUOTE=WARN',key,type(exc).__name__,str(exc))
     return observations
 
+
+def binance_completed_utc_day(key, day, now=None):
+    """Verified native-USDT prior UTC close, never a mid-session spot snapshot."""
+    now=(now or datetime.now(UTC)).astimezone(UTC)
+    if key not in BINANCE_PAIRS:raise ValueError('BINANCE_SYMBOL_UNKNOWN')
+    target=datetime.fromisoformat(day).replace(tzinfo=UTC)
+    if (target+timedelta(days=1))>now:raise ValueError('BINANCE_CANDLE_NOT_COMPLETE')
+    url=BINANCE_KLINES+'?'+urllib.parse.urlencode({
+        'symbol':BINANCE_PAIRS[key], 'interval':'1d',
+        'startTime':int(target.timestamp()*1000), 'endTime':int((target+timedelta(days=1)).timestamp()*1000)-1,
+        'limit':1})
+    payload=get_json(url)
+    if not isinstance(payload,list) or len(payload)!=1 or not isinstance(payload[0],list):
+        raise ValueError('BINANCE_CANDLE_RESPONSE_INVALID')
+    bar=payload[0]
+    if len(bar)<7 or isinstance(bar[4],bool) or isinstance(bar[0],bool) or isinstance(bar[6],bool):
+        raise ValueError('BINANCE_CANDLE_INVALID')
+    close=float(bar[4]);opens=int(bar[0]);ends=int(bar[6])
+    if not math.isfinite(close) or close<=0 or opens!=int(target.timestamp()*1000):
+        raise ValueError('BINANCE_CANDLE_VALUE_OR_DATE_INVALID')
+    if ends>int(now.timestamp()*1000)+300000:
+        raise ValueError('BINANCE_CANDLE_FUTURE')
+    if ends<int((target+timedelta(days=1)).timestamp()*1000)-60000:
+        raise ValueError('BINANCE_CANDLE_NOT_COMPLETE')
+    return {'date':day,'value':round(close,8),'session_status':'COMPLETED',
+            'date_basis':'UTC','observation_type':'DAILY_CLOSE','source':'Binance UTC 1d kline',
+            'quote_currency':'USDT'}
+
 def coingecko_spot_observations(now=None):
     """One public request for both USD spot quotes; never invent provider timestamps.
 
@@ -203,11 +232,12 @@ def coingecko_spot_observations(now=None):
             observed_kst=observed.astimezone(KST).isoformat(timespec='seconds')
             row={'date':date,'value':round(price,8),'session_status':'IN_PROGRESS',
                  'date_basis':'UTC','observed_kst':observed_kst,
-                 'observation_type':'SPOT_SNAPSHOT','source':'CoinGecko'}
+                 'observation_type':'SPOT_SNAPSHOT','source':'CoinGecko','quote_currency':'USD'}
             snapshot={'symbol':CRYPTO_SYMBOLS[key],'source':'CoinGecko public simple/price USD spot',
                       'source_url':url,'price':price,'quote_as_of_kst':observed_kst,
                       'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),
                       'status':'LIVE','quote_age_seconds':max(0,int(age)),
+                      'quote_currency':'USD','usd_proxy':False,
                       'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H','market_hours':'24/7'}
             observations[key]=([row],snapshot)
         except (KeyError,TypeError,ValueError,OverflowError,OSError) as exc:
@@ -228,15 +258,15 @@ def crypto_observation(symbol, now=None, history_range='3y'):
         if not math.isfinite(value) or value<=0:continue
         day=datetime.fromtimestamp(int(stamp),UTC).date().isoformat()
         if day>today:continue
-        rows[day]={'date':day,'value':round(value,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC'}
+        rows[day]={'date':day,'value':round(value,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC','source':'Yahoo Finance USD daily','quote_currency':'USD'}
     price=meta.get('regularMarketPrice');stamp=meta.get('regularMarketTime')
     if price is None or stamp is None:raise ValueError('CRYPTO_QUOTE_METADATA_MISSING')
     price=float(price)
     if not math.isfinite(price) or price<=0:raise ValueError('CRYPTO_QUOTE_INVALID')
     observed=datetime.fromtimestamp(int(stamp),UTC);age=(now.astimezone(UTC)-observed).total_seconds()
     if age < -300:raise ValueError('CRYPTO_QUOTE_FUTURE_TIMESTAMP')
-    day=observed.date().isoformat();rows[day]={'date':day,'value':round(price,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC','observed_kst':observed.astimezone(KST).isoformat(timespec='seconds')}
-    snapshot={'symbol':symbol,'source':'Yahoo Finance spot crypto quote + UTC daily candles','source_url':url,'price':price,'quote_as_of_kst':observed.astimezone(KST).isoformat(timespec='seconds'),'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),'status':'LIVE' if age<=3600 else 'STALE','quote_age_seconds':max(0,int(age)),'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H','market_hours':'24/7'}
+    day=observed.date().isoformat();rows[day]={'date':day,'value':round(price,8),'session_status':'IN_PROGRESS' if day==today else 'COMPLETED','date_basis':'UTC','observed_kst':observed.astimezone(KST).isoformat(timespec='seconds'),'source':'Yahoo Finance USD daily','quote_currency':'USD'}
+    snapshot={'symbol':symbol,'source':'Yahoo Finance spot crypto quote + UTC daily candles','source_url':url,'price':price,'quote_as_of_kst':observed.astimezone(KST).isoformat(timespec='seconds'),'captured_kst':now.astimezone(KST).isoformat(timespec='seconds'),'status':'LIVE' if age<=3600 else 'STALE','quote_age_seconds':max(0,int(age)),'quote_currency':'USD','usd_proxy':False,'comparison_basis':'UTC_DAILY_CLOSE_NOT_ROLLING_24H','market_hours':'24/7'}
     return [rows[d] for d in sorted(rows)],snapshot
 
 
@@ -264,12 +294,34 @@ def enrich_crypto(data):
             print('COINGECKO_FETCH=WARN',type(exc).__name__,str(exc))
     for key,symbol in CRYPTO_SYMBOLS.items():
         try:
+            # Previous collectors stored Yahoo BTC-USD/ETH-USD history without
+            # currency annotations. The legacy completed rows are fiat USD.
+            # Never upgrade an unfinished historical snapshot to a close.
+            existing=series_map.get(key) or []
+            for row in existing:
+                if row.get('quote_currency') is None:
+                    if row.get('session_status')=='IN_PROGRESS':
+                        row['quote_currency']='UNKNOWN'
+                    else:
+                        row['quote_currency']='USD'
+                        row.setdefault('source','Legacy Yahoo USD daily')
             if key in binance or key in coingecko:
                 fresh,snapshot=binance.get(key) or coingecko[key]
                 rows=series_map.get(key,[])
                 # Only repair missing completed daily history. A successful spot
                 # refresh must not download three years twice every heartbeat.
                 previous_day=(datetime.fromisoformat(fresh[0]['date']).date()-timedelta(days=1)).isoformat()
+                # Prefer native Binance USDT previous-day close when the live
+                # quote is USDT; never compare Binance USDT against Yahoo USD.
+                if key in binance:
+                    matching=any(r.get('date')==previous_day and r.get('session_status')=='COMPLETED'
+                                 and r.get('quote_currency')=='USDT' for r in rows)
+                    if not matching:
+                        try:
+                            candle=binance_completed_utc_day(key,previous_day)
+                            rows=merge_rows(rows,[candle])
+                        except Exception as candle_exc:
+                            print('BINANCE_PREVIOUS_CLOSE=WARN',key,type(candle_exc).__name__,str(candle_exc))
                 history_ready=any(r.get('date')==previous_day and r.get('session_status')=='COMPLETED' for r in rows)
                 try:
                     # Stored history only needs the recent gap repaired; a full
@@ -278,7 +330,11 @@ def enrich_crypto(data):
                     yahoo_rows=[] if history_ready else crypto_observation(symbol,history_range=repair_range)[0]
                     completed=[r for r in yahoo_rows if r.get('date','')<fresh[0]['date']
                                and r.get('session_status')=='COMPLETED']
-                    rows=merge_rows(rows,completed)
+                    # Yahoo fiat USD backfill cannot replace a verified
+                    # Binance USDT close; it only repairs missing history.
+                    rows=merge_rows(rows,[r for r in completed if not any(
+                        old.get('date')==r.get('date') and old.get('session_status')=='COMPLETED'
+                        and old.get('quote_currency')=='USDT' for old in rows)])
                 except Exception as history_exc:
                     print('CRYPTO_DAILY_HISTORY=WARN',key,type(history_exc).__name__,str(history_exc))
                 rows=merge_rows(rows,fresh)
@@ -286,12 +342,17 @@ def enrich_crypto(data):
                 rows,snapshot=crypto_observation(symbol)
             if not rows:raise ValueError('CRYPTO_SERIES_EMPTY')
             series_map[key]=rows;latest[key]=rows[-1]['value'];snapshots[key]=snapshot
+            snapshot['daily_change_basis']='SAME_CURRENCY_COMPLETED_UTC_OR_UNAVAILABLE'
+            snapshot['previous_close_currency']=next(
+                (r.get('quote_currency') for r in reversed(rows[:-1]) if r.get('session_status')=='COMPLETED'), None)
+            snapshot['daily_change_safe']=bool(snapshot.get('quote_currency')
+                and snapshot.get('previous_close_currency')==snapshot['quote_currency'])
             print('CRYPTO_QUOTE=PASS',key,snapshot['status'],'price=',snapshot['price'],'as_of=',snapshot['quote_as_of_kst'],'source=',snapshot['source'])
         except Exception as exc:
             old=dict(snapshots.get(key) or {});old.update(status='STALE' if series_map.get(key) else 'UNAVAILABLE',fetch_error=f'{type(exc).__name__}: {exc}',last_attempt_kst=datetime.now(KST).isoformat(timespec='seconds'));snapshots[key]=old
             print('CRYPTO_QUOTE=WARN',key,old['status'],old['fetch_error'])
     data.setdefault('sources',{})['CRYPTO_SPOT']='Binance last-trade USDT primary (USD proxy, explicitly tagged); CoinGecko fiat USD fallback; Yahoo Finance USD fallback and UTC daily history; provider timestamps preserved'
-    data['crypto_contract']='SPOT_QUOTE_WITH_UTC_DAILY_COMPARISON_V1'
+    data['crypto_contract']='SOURCE_CURRENCY_GUARDED_UTC_DAILY_COMPARISON_V2'
     data['crypto_enriched_kst']=datetime.now(KST).isoformat(timespec='seconds')
 
 
