@@ -79,7 +79,6 @@ function seriesOf(item){if(typeof DATA==='undefined'||!DATA?.series)return[];con
 function utcDate(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00Z');return Number.isNaN(d.getTime())?null:d}
 function refPoint(s,last,key){if(s.length<2)return null;const cfg=COMPARES[key]||COMPARES.D1;if(cfg.mode==='prev')return s[s.length-2]||null;const d=utcDate(last?.date);if(!d)return s[s.length-2]||null;if(cfg.days)d.setUTCDate(d.getUTCDate()-cfg.days);if(cfg.months)d.setUTCMonth(d.getUTCMonth()-cfg.months);if(cfg.years)d.setUTCFullYear(d.getUTCFullYear()-cfg.years);const target=d.toISOString().slice(0,10);for(let i=s.length-2;i>=0;i--){if(String(s[i]?.date||'')<=target)return s[i]}return null}
 function cryptoItem(item){return ['BTCUSD','ETHUSD'].includes(item.k)}
-function sameCryptoBasis(last,ref){const d=utcDate(last?.date);if(!d)return false;d.setUTCDate(d.getUTCDate()-1);return !!(ref&&last.quote_currency&&ref.quote_currency&&last.quote_currency===ref.quote_currency&&ref.session_status==='COMPLETED'&&ref.date===d.toISOString().slice(0,10))}
 function stat(item,key=compareKey){
  const s=seriesOf(item).filter(p=>p?.date&&p.value!==null&&p.value!==undefined&&String(p.value).trim()!==''&&typeof p.value!=='boolean'&&Number.isFinite(Number(p.value))),last=s[s.length-1];
  const quote=key==='D1'&&!cryptoItem(item)&&typeof window!=='undefined'?window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k,typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]?.quote_as_of_kst:null):null;
