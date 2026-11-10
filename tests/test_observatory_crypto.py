@@ -204,6 +204,11 @@ class CryptoObservationTest(unittest.TestCase):
 
 
 class BinancePrimaryObservationTest(unittest.TestCase):
+    def setUp(self):
+        patcher=patch.object(equities,'binance_completed_utc_day',side_effect=OSError('TEST_NO_NETWORK'))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_binance_trade_uses_provider_timestamp_and_usdt_provenance(self):
         now=datetime(2026,11,10,0,30,tzinfo=ZoneInfo('UTC'))
         payloads={
