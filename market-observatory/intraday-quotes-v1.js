@@ -89,9 +89,9 @@ async function refresh(force=false){
   finally{pending=null}
  })();return pending;
 }
-// Reuse the server-coalesced public read while visible, with a bounded cadence.
-// Hidden tabs do not fetch; lifecycle bursts share one flight and a 60-second gate.
-// Manual refresh remains available and bypasses the lifecycle gate.
+// On-demand prices: read once on opening the page, returning to the tab, or pressing
+// the manual refresh button. No background market-data network polling. Existing
+// 60-second activation guard and single-flight request protect Cloud Run quota.
 function resume(){return refresh(false).catch(()=>{})}
 if(typeof root.setInterval==='function')root.setInterval(()=>{
  if(document.hidden)return;
@@ -105,7 +105,6 @@ if(typeof root.setInterval==='function')root.setInterval(()=>{
  }
  paintSummary();
 },60000);
-if(typeof root.setInterval==='function')root.setInterval(resume,120000);
 document.addEventListener?.('visibilitychange',resume);
 root.addEventListener?.('pageshow',resume);
 resume();
