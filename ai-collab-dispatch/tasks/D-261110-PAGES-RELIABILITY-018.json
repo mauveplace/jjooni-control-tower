@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261110-PAGES-RELIABILITY-018",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently challenge the operational root cause of repeated GitHub Pages syncing_files timeouts (17MB pages artifact and very frequent main data commits) and review the proposed gated deployment path, including correctness, freshness tradeoff, security boundaries, and its owner-settings migration prerequisite.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Check actual Pages timeout and successful run evidence (e.g. run IDs 42718294283 and 42732278493), and separate correlation from proven cause.",
+    "Audit SHA dedup: only skip when the latest same-SHA Pages deployment status is success; failures/unavailable API must retry; pinned source SHA must match uploaded artifact.",
+    "Audit staged web asset list and determine whether excluding .github, tools, tests, ai-collab, ai-collab-dispatch can break any public routes or client scripts. Verify all necessary data including history remain.",
+    "Check whether a 15-minute deploy cadence weakens public market freshness expectations; propose a verified update SLA/contingency before activating migration.",
+    "Verify current PR HEAD and relevant CI tests; give BLOCKED/NEEDS_CHANGES/PASS with concrete changes, no token expansion/merge/deploy or disabling true failures."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets/private account/consumer data",
+    "No automatic merge/deploy/trading",
+    "Do not change GitHub Pages Source or repository vars without owner step",
+    "Do not mute failure notices or add external paid infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "operations_root_cause",
+  "coordination_notes": "Owner explicitly requested to eliminate underlying workflow failures instead of muting GitHub error email; ROY should serve as a single substantive independent reviewer. Note #351 already removed the Pages-completion freshness feedback trigger."
+}
