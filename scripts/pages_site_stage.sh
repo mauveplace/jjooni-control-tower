@@ -9,6 +9,10 @@ rsync -a --exclude='/.git/' --exclude='/.github/' \
   --exclude='/tools/' --exclude='/tests/' --exclude='/scripts/' \
   ./ "$site/"
 
+# Only the 439 live, index-addressed series are needed by the UI. Historical
+# revisions remain immutable in GitHub but never enter the Pages upload.
+python3 scripts/pages_calendar_prune.py "$site"
+
 for required in index.html market-observatory/index.html \
   market-observatory/data/observatory.json \
   market-observatory/data/economic-calendar-history.json \
