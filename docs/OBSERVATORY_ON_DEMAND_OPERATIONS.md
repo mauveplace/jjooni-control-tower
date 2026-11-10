@@ -56,3 +56,25 @@ After release: verify served script version, current quotes on user activity,
 no unintended scheduled runners, correct completed-close market dates,
 TRI-POD and next morning brief. Keep alerts for genuine close/official failures.
 Rollback: revert the PR; no Pages Source or account permission change needed.
+
+## Exact official release data path (independent of hourly Observatory rebuild)
+
+CPI/PPI/economic actuals: Economic Calendar Light Refresh still captures
+release-window changes and publishes market-observatory/data/economic-calendar.json
+on its own. Market Observatory Verified Calendar runs on that workflow completion
+and validates/publishes the same canonical calendar file. The visible Calendar
+tab directly reloads ./data/economic-calendar.json on opening; the Calendar
+'게시값 다시 확인' action can re-read it without a complete market rebuild.
+This is different from TRI-POD completed-close market source snapshots and
+must not alter strategy NDX/VIX history intraday.
+
+Official Macro: Market Observatory Official Macro separately commits
+market-observatory/data/official-macro.json. The macro panel reads that file
+on tab opening/resume. The removed Market Daily workflow_run listener is not
+the only producer of the released actual file; it had become a redundant
+market-snapshot refresh path.
+
+The latest official market-observatory/observatory.json may remain at the
+last completed closing snapshot until the next close/maintenance workflow.
+This is intentional: the viewer's live quote API and the official calendar
+have independent source clocks. Never label this as an intraday TRI-POD update.
