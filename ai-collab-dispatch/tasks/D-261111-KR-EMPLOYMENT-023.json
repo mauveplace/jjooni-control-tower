@@ -1,0 +1,29 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-KR-EMPLOYMENT-023",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Fix national Korean employment release discovery: live official index uses a new badge and javascript:addSearchParam wrapper.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Inspect #388 live runner evidence: badge, wrapper, attachments and 2026-10 official parsing.",
+    "Verify only exact national release title, validated official host and board identity with a unique numeric list_no are accepted; reject malicious javascript, ambiguous links, wrong month and attachments.",
+    "Test existing collector behavior and source-period checks. Verify CI and live integration before suggesting merge.",
+    "Report PASS, NEEDS_CHANGES or BLOCKED for exact head with test evidence and actual session."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No private data or secrets",
+    "No reviewer code writes or automatic merge",
+    "Do not loosen official provenance, missing-value or overdue checks"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity"
+}

@@ -254,6 +254,34 @@ def parse_kr_employment(text, year, month):
     return rows
 
 
+def employment_release_link(raw, index, year, month):
+    """Find the national release, accepting only MODS' known link wrapper."""
+    candidates = set()
+    for href, label in Links(raw).rows:
+        if not re.fullmatch(rf'(?:새글\s*)?{year}년\s*0?{month}월\s*고용동향', label.strip()):
+            continue
+        href = html.unescape(href or '')
+        if href.startswith('javascript:'):
+            match = re.fullmatch(r"javascript:addSearchParam\(['\"]([^'\"]+)['\"]\);?", href)
+            if not match:
+                continue
+            href = match.group(1)
+        url = urllib.parse.urljoin(index, href)
+        parsed = urllib.parse.urlparse(url)
+        query = urllib.parse.parse_qs(parsed.query)
+        if (parsed.scheme != 'https' or parsed.netloc not in ('mods.go.kr', 'www.mods.go.kr', 'kostat.go.kr', 'www.kostat.go.kr')
+                or parsed.path != '/board.es' or query.get('bid') != ['210']
+                or query.get('act') != ['view'] or len(query.get('list_no', [])) != 1
+                or not re.fullmatch(r'\d+', query['list_no'][0])):
+            continue
+        candidates.add(url)
+    if len(candidates) > 1:
+        raise ValueError('KR_EMPLOYMENT_RELEASE_AMBIGUOUS')
+    if not candidates:
+        raise ValueError('KR_EMPLOYMENT_RELEASE_NOT_FOUND')
+    return candidates.pop()
+
+
 def collect_kr_employment(e,checks):
     period=re.search(r'(20\d{2})년\s*(\d{1,2})월\s*고용동향',e['title'])
     if not period: raise ValueError('KR_EMPLOYMENT_TITLE_PERIOD_MISSING')
@@ -263,9 +291,7 @@ def collect_kr_employment(e,checks):
         page=e.get('official_release_url')
         if not page:
             raw=raw_fetch(index).decode('utf-8',errors='replace')
-            link=next((u for u,t in Links(raw).rows if re.fullmatch(rf'{year}년\s*0?{month}월\s*고용동향',t.strip())),None)
-            if not link: raise ValueError('KR_EMPLOYMENT_RELEASE_NOT_FOUND')
-            page=urllib.parse.urljoin(index,html.unescape(link))
+            page=employment_release_link(raw,index,year,month)
         parsed=urllib.parse.urlparse(page)
         if parsed.scheme!='https' or parsed.hostname not in ('mods.go.kr','www.mods.go.kr','kostat.go.kr','www.kostat.go.kr'):
             raise ValueError('KR_EMPLOYMENT_OFFICIAL_HOST_REQUIRED')
