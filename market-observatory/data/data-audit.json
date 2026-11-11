@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-11T18:01:21+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-11-11T20:42:45+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 3,
+  "warning_count": 0,
   "observatory_session": "2026-11-10",
   "file_status": {
     "observatory": {
@@ -68,13 +68,10 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-11T18:01:20+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
+      "generated_kst": "2026-11-11T20:42:44+09:00",
+      "overall": "LIVE",
       "critical_bad": [],
-      "warnings": [
-        "crypto",
-        "audit"
-      ]
+      "warnings": []
     },
     "watchdog": {
       "checked_kst": "2026-11-11T09:44:38+09:00",
@@ -561,32 +558,27 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-11T16:52:35+09:00",
-      "current_quote_age_seconds": 4126,
+      "current_quote_age_seconds": 13810,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-11T16:52:35+09:00",
-      "current_quote_age_seconds": 4126,
+      "current_quote_age_seconds": 13810,
       "captured_quote_age_seconds": 0
     }
   },
   "issues": [
     {
-      "code": "GROUP_CRYPTO_STALE",
-      "severity": "WARN",
-      "detail": "anchor=None dates=BTCUSD:2026-11-11,ETHUSD:2026-11-11"
-    },
-    {
       "code": "CRYPTO_BTCUSD_STALE",
-      "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T16:52:35+09:00', 'current_quote_age_seconds': 4126, 'captured_quote_age_seconds': 0}"
+      "severity": "INFO",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T16:52:35+09:00', 'current_quote_age_seconds': 13810, 'captured_quote_age_seconds': 0}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
-      "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T16:52:35+09:00', 'current_quote_age_seconds': 4126, 'captured_quote_age_seconds': 0}"
+      "severity": "INFO",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T16:52:35+09:00', 'current_quote_age_seconds': 13810, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
