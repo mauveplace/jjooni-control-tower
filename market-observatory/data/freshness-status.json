@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-11T21:28:23+09:00",
+  "generated_kst": "2026-11-12T00:09:37+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -28,7 +28,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:43:32+09:00",
+      "generated_kst": "2026-11-12T00:08:56+09:00",
       "as_of": "2026-11-10",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -82,7 +82,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:43:32+09:00",
+      "generated_kst": "2026-11-12T00:08:56+09:00",
       "as_of": "2026-11-10",
       "detail": "US3M 2026-11-10 · US2Y 2026-11-10 · US5Y_OFFICIAL 2026-11-10 · US10Y_OFFICIAL 2026-11-10 · US30Y_OFFICIAL 2026-11-10 · US_2S10S 2026-11-10",
       "source": "U.S. Treasury official",
@@ -91,7 +91,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:43:31+09:00",
+      "generated_kst": "2026-11-12T00:08:55+09:00",
       "as_of": "2026-11-11",
       "detail": "KR3Y 2026-11-11 · KR5Y 2026-11-11 · KR10Y 2026-11-11 · KR20Y 2026-11-11 · KR30Y 2026-11-11 · KR_3S10S 2026-11-11",
       "source": "BOK ECOS",
@@ -109,19 +109,19 @@
     "crypto": {
       "label": "Crypto fallback snapshot",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:43:47+09:00",
+      "generated_kst": "2026-11-12T00:09:19+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=2678s · ETHUSD age=2677s",
+      "detail": "BTCUSD age=22s · ETHUSD age=21s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-11-11T20:43:45+09:00"
+          "quote_as_of_kst": "2026-11-12T00:09:15+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-11-11T20:43:46+09:00"
+          "quote_as_of_kst": "2026-11-12T00:09:16+09:00"
         }
       },
       "max_age_seconds": 3600,
@@ -130,7 +130,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:44:09+09:00",
+      "generated_kst": "2026-11-12T00:09:37+09:00",
       "as_of": "2026-11-10",
       "detail": "snapshot=FINAL · Observatory session=2026-11-10",
       "source": "daily-market-pulse.json",
@@ -157,7 +157,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:44:09+09:00",
+      "generated_kst": "2026-11-12T00:09:37+09:00",
       "as_of": "2026-11-10",
       "detail": "상승 · QQQ 50% + QLD 50%",
       "source": "public-market-daily.json + observatory.json",
@@ -166,8 +166,8 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T20:43:48+09:00",
-      "as_of": "2026-11-11",
+      "generated_kst": "2026-11-12T00:09:20+09:00",
+      "as_of": "2026-11-10",
       "detail": "priced=46",
       "source": "sector-etf.json",
       "critical": false
@@ -184,8 +184,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T21:27:33+09:00",
-      "as_of": "2026-11-11T21:27:33+09:00",
+      "generated_kst": "2026-11-12T00:09:01+09:00",
+      "as_of": "2026-11-12T00:09:01+09:00",
       "detail": "events=190 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 99건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -207,7 +207,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "PASS",
-      "generated_kst": "2026-11-11T21:28:23+09:00",
+      "generated_kst": "2026-11-12T00:09:37+09:00",
       "as_of": "2026-11-10",
       "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
