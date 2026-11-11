@@ -16,6 +16,7 @@ import json
 import random
 import subprocess
 import sys
+import tempfile
 import time
 from copy import deepcopy
 from datetime import datetime
@@ -28,6 +29,7 @@ from calendar_actual_contract import KST, build_freshness, merge_observation, re
 ROOT = Path(__file__).resolve().parents[1]
 PUBLISH_ATTEMPTS = 6
 DATA = 'market-observatory/data/'
+GLANCE = DATA + 'daily-glance.json'
 MARKET_BUNDLE = (DATA + 'observatory.json', DATA + 'daily-market-pulse.json', 'public-market-daily.json')
 
 
@@ -67,7 +69,8 @@ CANONICAL_JSON = ('/economic-calendar-history.json', '/economic-calendar.json')
 
 
 def serialize(path, doc):
-    return json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=path.endswith(CANONICAL_JSON)) + '\n'
+    indent = 1 if path == GLANCE else 2
+    return json.dumps(doc, ensure_ascii=False, indent=indent, sort_keys=path.endswith(CANONICAL_JSON)) + '\n'
 
 
 def merge_generated(path, local, remote):
@@ -166,6 +169,9 @@ def merge_generated(path, local, remote):
         if local.get('crypto_enriched_kst') or remote.get('crypto_enriched_kst'):
             result['crypto_enriched_kst'] = max(str(local.get('crypto_enriched_kst') or ''), str(remote.get('crypto_enriched_kst') or ''))
         return result
+    if path == GLANCE:
+        return deepcopy(max((remote, local), key=lambda doc: (
+            str(doc.get('source_generated_kst') or ''), str(doc.get('generated_kst') or ''))))
     if path.endswith('/fed-watch.json') or path.endswith('/fedwatch-official.json'):
         # An older fallback cannot replace a newer official observation.
         return deepcopy(max((remote, local), key=lambda doc: (str(doc.get('market_data_as_of') or ''), doc.get('source_kind') == 'CME_OFFICIAL_PUBLIC_TABLE', str(doc.get('source_as_of_ct') or ''), str(doc.get('generated_kst') or ''))))
@@ -310,18 +316,56 @@ def materialize_health(paths):
                            check=True, capture_output=True, text=True)
 
 
+def materialize_daily_glance(paths):
+    """Build the card from the final source in this checkout before each push."""
+    includes_source = MARKET_BUNDLE[0] in paths
+    if not includes_source and GLANCE not in paths:
+        return False
+
+    card = ROOT / GLANCE
+    temp = None
+    try:
+        from build_daily_glance import build, read
+        obs = read(ROOT / MARKET_BUNDLE[0])
+        brief_path = ROOT / DATA / 'morning-brief/latest.json'
+        brief = read(brief_path) if brief_path.exists() else None
+        payload = build(obs, brief)
+        try:
+            previous = read(card)
+        except (OSError, ValueError):
+            previous = None
+
+        # A republish of identical card content must not create a new commit
+        # solely because build() uses the current clock.
+        comparable = {key: value for key, value in payload.items() if key != 'generated_kst'}
+        if isinstance(previous, dict) and comparable == {
+                key: value for key, value in previous.items() if key != 'generated_kst'}:
+            return False
+
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=card.parent,
+                                         prefix='.daily-glance-', delete=False) as output:
+            temp = Path(output.name)
+            output.write(serialize(GLANCE, payload))
+        temp.replace(card)
+        print('DAILY_GLANCE_ATOMIC=PASS source=' + str(payload.get('source_generated_kst')))
+        return True
+    except Exception as exc:
+        if not includes_source:
+            raise
+        # A failed derived view must not prevent the market data from publishing.
+        print(f'::warning::DAILY_GLANCE_ATOMIC=DEGRADED {type(exc).__name__}: {exc}', file=sys.stderr)
+        return False
+    finally:
+        if temp is not None and temp.exists():
+            temp.unlink()
+
+
 def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
-    # A data-only Daily Glance writer may start before a concurrent crypto
-    # writer and finish later. Recompute *after every source rebase*, not from
-    # its old checkout; generated_kst alone cannot prove the source is newer.
-    # This also keeps the new atomic crypto+glance publication consistent with
-    # whichever canonical Observatory source won the concurrent merge.
-    if DATA+'daily-glance.json' in paths:
-        import build_daily_glance
-        build_daily_glance.main()
+    if materialize_daily_glance(paths) and GLANCE not in paths:
+        paths.append(GLANCE)
     if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
         from archive_fedwatch import archive_snapshot
         archive_snapshot(json.loads((ROOT/(DATA+'fed-watch.json')).read_text()), ROOT/DATA)

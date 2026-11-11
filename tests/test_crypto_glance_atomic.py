@@ -4,11 +4,15 @@ A branch merge starts independent writers simultaneously; a card built before
 Binance has published can otherwise pin an older CoinGecko-only observation
 throughout the trading day despite fresh canonical data.
 """
+import json
 import sys
+import tempfile
 import unittest
 from datetime import date, timedelta
 from pathlib import Path
 from unittest.mock import patch
+
+from tests.test_daily_glance import observatory
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
@@ -44,29 +48,50 @@ class CryptoGlanceAtomicContract(unittest.TestCase):
                     "market-observatory/data/data-audit.json"):
             self.assertIn(key,paths)
 
-    def test_rebuild_glance_after_every_source_rebase(self):
-        # The publisher runs materialize_publication before the initial
-        # commit AND again after rebasing over concurrent crypto/day writers.
-        # Do not rely on later generated_kst from an earlier source checkout.
-        paths=["market-observatory/data/daily-glance.json"]
-        with patch.object(publisher,"materialize_market_dependents") as market, \
-             patch.object(publisher,"materialize",return_value=[]) as materialize, \
-             patch.object(publisher,"materialize_health") as health, \
-             patch.object(glance,"main",return_value=0) as regenerate:
-            result=publisher.materialize_publication(paths)
-            self.assertEqual(result,paths)
-            publisher.materialize_publication(paths)
-        self.assertEqual(regenerate.call_count,2)
-        self.assertEqual(market.call_count,2)
-        self.assertEqual(health.call_count,2)
+    def test_source_publication_rebuilds_glance_after_merge_and_leaves_identical_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / publisher.MARKET_BUNDLE[0]
+            source.parent.mkdir(parents=True)
+            card = root / publisher.GLANCE
+            paths = [publisher.MARKET_BUNDLE[0]]
+            first = '2026-11-10T13:46:47+09:00'
+            newer = '2026-11-10T21:02:47+09:00'
+            with patch.object(publisher, 'ROOT', root), \
+                 patch.object(publisher, 'materialize_market_dependents'), \
+                 patch.object(publisher, 'materialize', return_value=[]), \
+                 patch.object(publisher, 'materialize_health'):
+                for timestamp in (first, newer):
+                    source.write_text(json.dumps(observatory(generated_kst=timestamp)))
+                    self.assertIn(publisher.GLANCE, publisher.materialize_publication(paths))
+                    self.assertEqual(json.loads(card.read_text())['source_generated_kst'], timestamp)
+                original = card.read_bytes()
+                self.assertNotIn(publisher.GLANCE, publisher.materialize_publication(paths))
+                self.assertEqual(card.read_bytes(), original)
 
-    def test_non_glance_publication_does_not_add_implicit_card_rebuild(self):
-        with patch.object(publisher,"materialize_market_dependents"), \
-             patch.object(publisher,"materialize",return_value=[]), \
-             patch.object(publisher,"materialize_health"), \
-             patch.object(glance,"main") as rebuild:
-            publisher.materialize_publication(["market-observatory/data/observatory.json"])
-        rebuild.assert_not_called()
+                source.write_text(json.dumps(observatory(series={'NASDAQ100': [None]})))
+                self.assertEqual(publisher.materialize_publication(paths), paths)
+                self.assertEqual(card.read_bytes(), original)
+
+    def test_card_only_rebuilds_and_unrelated_publications_leave_card_untouched(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / publisher.MARKET_BUNDLE[0]
+            source.parent.mkdir(parents=True)
+            source.write_text(json.dumps(observatory()))
+            with patch.object(publisher, 'ROOT', root):
+                self.assertFalse(publisher.materialize_daily_glance(
+                    [publisher.DATA + 'economic-calendar.json']))
+                self.assertFalse((root / publisher.GLANCE).exists())
+                self.assertTrue(publisher.materialize_daily_glance([publisher.GLANCE]))
+
+    def test_concurrent_card_merge_prefers_source_time_over_build_time(self):
+        older = {'source_generated_kst': '2026-11-10T13:46:47+09:00',
+                 'generated_kst': '2026-11-10T22:00:00+09:00'}
+        newer = {'source_generated_kst': '2026-11-10T21:02:47+09:00',
+                 'generated_kst': '2026-11-10T21:03:00+09:00'}
+        self.assertEqual(publisher.merge_generated(publisher.GLANCE, older, newer), newer)
+        self.assertEqual(publisher.merge_generated(publisher.GLANCE, newer, older), newer)
 
     def test_just_collected_live_quote_is_used_with_native_usdt_reference(self):
         today=date(2026,11,10)
