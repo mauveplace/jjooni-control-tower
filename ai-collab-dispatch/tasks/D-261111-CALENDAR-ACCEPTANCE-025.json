@@ -1,0 +1,28 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-CALENDAR-ACCEPTANCE-025",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Fix simulated missing-actual acceptance gate after official CPI nonpublication repair while preserving detection of real missing values.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Analyze failure 42965584129: freshness legitimately restores event actual from a verified monthly metric.",
+    "Check that removing both event-level and selected metric actual tests real absence, without changing production data or loosening other safety checks.",
+    "Verify regression test, exact-head CI and report PASS, NEEDS_CHANGES or BLOCKED with evidence and actual session."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or private data",
+    "No reviewer writes, merge or deploy",
+    "No suppression of real overdue signals"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity"
+}
