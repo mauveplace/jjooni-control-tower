@@ -1,0 +1,29 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-BLS-RECONCILE-024",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Stop historical BLS reconciliation from assigning a different reference month to an already verified release or filling officially unpublished metrics.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Review live failure run 42964698897 and the incorrect September CPI anchor inferred for October release.",
+    "Verify verified reference month constrains reconciliation and conflicting verified periods fail closed; officially unpublished metrics are never filled by historical all-metric reconciler.",
+    "Inspect compatibility with normal BLS reconciliation, history, current CPI publication, tests and exact-head CI.",
+    "Return PASS, NEEDS_CHANGES or BLOCKED with evidence and actual session."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No private data or secret values",
+    "No reviewer code writes, merging, deployment or trading",
+    "No relaxation of source and data quality checks"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity"
+}

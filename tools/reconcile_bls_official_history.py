@@ -102,10 +102,18 @@ def resolve(event, code, fetch=fetch_series, claimed=()):
     officially verified release of the same series are excluded.
     """
     day = date.fromisoformat(str(event.get('datetime_kst'))[:10])
+    verified_periods = {str(m.get('reference_period'))[:7] for m in event.get('market_metrics') or []
+                        if isinstance(m, dict) and is_official(m) and m.get('reference_period')}
+    # Existing verified observations bind the release to one reference month.
+    # A coincidental match in another month must never overwrite that evidence.
+    if len(verified_periods) > 1:
+        return (None, {}, [])
     feed = {m.get('key'): norm(m.get('actual')) for m in event.get('market_metrics') or []
             if isinstance(m, dict) and clean(m.get('actual')) is not None}
     best = (None, {}, [])
     for year, month in candidate_months(day, code):
+        if verified_periods and f'{year}-{month:02d}' not in verified_periods:
+            continue
         if f'{year}-{month:02d}' in claimed:
             continue
         vals = official_values(code, year, month, fetch)
@@ -136,6 +144,10 @@ def apply(cal, hist, now=None, fetch=fetch_series):
         if age < 0 or age > LOOKBACK_DAYS:
             continue
         metrics = [m for m in e.get('market_metrics') or [] if isinstance(m, dict) and m.get('key') in SERIES[code]]
+        # A release with officially absent observations is not a complete set;
+        # the historical all-metric reconciler must not invent those values.
+        if any(m.get('availability_status') == 'OFFICIALLY_NOT_PUBLISHED' for m in metrics):
+            continue
         if not metrics or all(is_official(m) for m in metrics):
             continue
         last_fail = str(e.get('official_reconcile_failed_kst') or '')
