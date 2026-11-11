@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 const ENDPOINT='https://jjooni-ct-fast-apgynr7pea-du.a.run.app/observatory/quotes';
-// Crypto BTCUSD/ETHUSD must use the published, provenance-tagged Binance/CoinGecko snapshots.
+// BTCUSD and ETHUSD use the separate public Binance browser reader.
 // The intraday API currently has no validated quote_currency/previous_close_currency contract.
 const KEYS=new Set(['NASDAQ100','NASDAQCOMPOSITE','SP500','DOW','RUSSELL2000','VIX','KOSPI','KOSDAQ','USDKRW','USDJPY','JPYKRW','DXY','WTI','BRENT','NATGAS','GOLD','SILVER','COPPER']);
 function valid(row,key,now=Date.now()){

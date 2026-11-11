@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const url = process.env.URL;
 const binance = 'https://data-api.binance.vision/api/v3/trades?*';
+const klines = 'https://data-api.binance.vision/api/v3/klines?*';
 const tile = key => `#latestBoardGrid [data-metric="${key}"]`;
 
 async function open(page) {
@@ -19,6 +20,13 @@ async function testFallback(browser, width) {
     await page.addInitScript(() => { delete AbortSignal.timeout; });
     let blocked = true;
     let reads = 0;
+    let closes = 0;
+    await page.route(klines, route => {
+      closes++;
+      const start = Number(new URL(route.request().url()).searchParams.get('startTime'));
+      return route.fulfill({headers: {'access-control-allow-origin': '*'},
+        json: [[start, '12000', '12600', '11000', '12000', '1', start + 86400000 - 1]]});
+    });
     await page.route(binance, route => {
       reads++;
       return route.fulfill({
@@ -40,12 +48,22 @@ async function testFallback(browser, width) {
     blocked = false;
     await page.locator('#obsForceRefresh').click();
     await btc.locator('[data-live-quote]').waitFor({state: 'attached'});
+    await page.waitForFunction(() => window.__JJOONI_CRYPTO_ON_VIEW.status === 'COMPLETE');
     assert.match(await btc.locator('.latestLevelValue').innerText(), /12,345\.67 USDT/);
     assert.match(await btc.locator('[data-live-quote]').innerText(), /Binance BTCUSDT/);
     assert.match(await eth.locator('[data-live-quote]').innerText(), /Binance ETHUSDT/);
     assert.match(await btc.locator('time').innerText(), /KST/);
+    assert.match(await btc.innerText(), /2\.88%/);
+    assert.match(await page.locator('[data-glance-crypto="BTCUSD"]').innerText(), /12,345\.67/);
     assert.equal(reads, 4);
+    assert.equal(closes, 2);
     await btc.screenshot({path: `crypto-view-recovery-${width}.png`});
+    blocked = true;
+    await open(page);
+    assert.match(await btc.locator('.latestLevelValue').innerText(), /12,345\.67 USDT/);
+    assert.match(await btc.locator('[data-live-quote]').innerText(), /이전 관측 유지/);
+    assert.match(await btc.innerText(), /2\.88%/);
+    assert.equal(closes, 2);
     console.log('CRYPTO_BROWSER_FALLBACK_AND_RECOVERY=PASS width=' + width);
   } finally {
     await page.close();
@@ -76,14 +94,14 @@ async function probeProvider(browser, width) {
     const pass = Object.values(result).every(row => row.currency === 'USDT' && row.observed &&
       /Binance (BTC|ETH)USDT/.test(row.source || ''));
     console.log('CRYPTO_BROWSER_LIVE=' + (pass ? 'PASS' : 'UNVERIFIED'), JSON.stringify({width, responses, result}));
-    if (pass) await page.locator(tile('BTCUSD')).screenshot({path: `crypto-view-live-${width}.png`});
+    if (pass) await page.screenshot({path: `crypto-view-live-${width}.png`});
   } finally {
     await page.close();
   }
 }
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({executablePath: process.env.CHROMIUM_PATH});
   try {
     for (const width of [390, 1363]) {
       await testFallback(browser, width);

@@ -83,13 +83,13 @@ class LowFrequencyWriterTests(unittest.TestCase):
         self.assertIn("20,50 20,21 * * 0-5", close)
         self.assertIn("Market Observatory Daily + Calendar", close)
 
-    def test_crypto_hourly_and_us_yields_in_session_only(self):
+    def test_crypto_snapshot_is_manual_and_us_yields_in_session_only(self):
         self.assertEqual(schedules(".github/workflows/observatory-crypto-refresh.yml"),
-                         ["20 * * * *"])
+                         [])
         self.assertEqual(schedules(".github/workflows/observatory-us-rates-intraday.yml"),
                          ["45 12-22 * * 1-5"])
         rates = read(".github/workflows/observatory-us-rates-intraday.yml")
-        self.assertIn("steps.crypto_gate.outputs.crypto_should_refresh == 'true'", rates)
+        self.assertNotIn("refresh_observatory_crypto.py", rates)
         self.assertEqual(schedules(".github/workflows/market-observatory-supplemental-freshness.yml"),
                          ["40 7 * * 1-5", "50 21 * * 0-5"])
         self.assertNotIn("  workflow_run:", read(".github/workflows/market-observatory-supplemental-freshness.yml"))

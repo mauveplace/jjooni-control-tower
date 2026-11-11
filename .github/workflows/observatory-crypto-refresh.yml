@@ -11,20 +11,8 @@ on:
       - tools/probe_observatory_runtime.py
       - tests/test_observatory_runtime_probe.py
       - .github/workflows/observatory-crypto-refresh.yml
-  push:
-    branches: [main]
-    paths:
-      - tools/probe_observatory_runtime.py
-      - tools/refresh_observatory_crypto.py
-      - tools/add_observatory_equities.py
-      - .github/workflows/observatory-crypto-refresh.yml
+  # Manual publication of a fallback snapshot. The browser owns live quotes.
   workflow_dispatch:
-  # One hourly provenanced BTC/ETH snapshot, rather than twice per hour.
-  # The public on-demand quotes API currently EXCLUDES BTC/ETH pending a verified
-  # USDT/USD and previous-close contract; do not present its API as live crypto.
-  # Retain an hourly safe publishing fallback until an authenticated source is ready.
-  schedule:
-    - cron: '20 * * * *'
 
 permissions:
   contents: write
@@ -51,21 +39,6 @@ jobs:
           python -m unittest discover -s tests -p 'test_observatory_binance_basis.py' -v
           python -m unittest discover -s tests -p 'test_crypto_glance_atomic.py' -v
           python -m unittest discover -s tests -p 'test_observatory_runtime_probe.py' -v
-      - name: Verify Binance market-data endpoint and timestamped BTC ETH quotes
-        run: |
-          python - <<'PY'
-          import sys
-          sys.path.insert(0, 'tools')
-          from add_observatory_equities import binance_spot_observations
-          observations = binance_spot_observations()
-          assert set(observations) == {'BTCUSD', 'ETHUSD'}, 'BINANCE_LIVE_PROBE_INCOMPLETE'
-          for key, (rows, snapshot) in observations.items():
-              assert snapshot['status'] == 'LIVE', (key, snapshot)
-              assert snapshot['quote_currency'] == 'USDT', key
-              assert rows[-1]['value'] == snapshot['price'], key
-              print('BINANCE_LIVE_PROBE=PASS', key, snapshot['quote_as_of_kst'])
-          PY
-
   crypto:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest

@@ -82,8 +82,15 @@ function cryptoItem(item){return ['BTCUSD','ETHUSD'].includes(item.k)}
 function stat(item,key=compareKey){
  const s=seriesOf(item).filter(p=>p?.date&&p.value!==null&&p.value!==undefined&&String(p.value).trim()!==''&&typeof p.value!=='boolean'&&Number.isFinite(Number(p.value))),last=s[s.length-1];
  const crypto=cryptoItem(item), published=typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]:null;
- const quote=key==='D1'&&typeof window!=='undefined'?(crypto?window.__JJOONI_CRYPTO_ON_VIEW?.get(item.k,published?.quote_as_of_kst):window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k)):null;
- if(quote&&crypto){const previous=new Date(quote.session_date+'T00:00:00Z');previous.setUTCDate(previous.getUTCDate()-1);const expected=previous.toISOString().slice(0,10);const safe=published?.daily_change_safe===true&&published.quote_currency==='USDT'&&published.previous_close_currency==='USDT'&&published.previous_close_utc_date===expected&&Number.isFinite(Number(published.previous_close_value))&&Number(published.previous_close_value)>0;return {value:quote.value,date:quote.session_date,change:safe?(quote.value/Number(published.previous_close_value)-1)*100:null,refValue:safe?Number(published.previous_close_value):null,intraday:quote,quote_currency:'USDT'};}
+ const quote=key==='D1'&&typeof window!=='undefined'?(crypto?window.__JJOONI_CRYPTO_ON_VIEW?.get(item.k,published?.quote_currency==='USDT'?published.quote_as_of_kst:null):window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k)):null;
+ if(quote&&crypto){
+   const previous=utcDate(quote.session_date);
+   previous.setUTCDate(previous.getUTCDate()-1);
+   const expected=previous.toISOString().slice(0,10);
+   const safe=published?.daily_change_safe===true&&published.quote_currency==='USDT'&&published.previous_close_currency==='USDT'&&published.previous_close_utc_date===expected&&Number.isFinite(Number(published.previous_close_value))&&Number(published.previous_close_value)>0;
+   const refValue=quote.previous_close??(safe?Number(published.previous_close_value):null);
+   return {value:quote.value,date:quote.session_date,change:refValue===null?null:(quote.value/refValue-1)*100,refValue,intraday:quote,quote_currency:'USDT'};
+ }
  if(quote&&(!last||quote.session_date>=last.date))return {value:quote.value,date:quote.session_date,change:quote.change_pct,refDate:null,refValue:quote.previous_close,intraday:quote};
  if(!last)return null;
  const ref=refPoint(s,last,key);
@@ -184,7 +191,14 @@ function customTile(group,label,value,foot='',tone='flat',time='',change=null,no
 function dataGenerated(){const d=typeof DATA!=='undefined'?DATA:null;const clock=[d?.generated_kst,d?.supplemental_refreshed_kst].filter(x=>Number.isFinite(Date.parse(x))).sort((a,b)=>Date.parse(b)-Date.parse(a))[0];return String(clock||'').replace('T',' ').slice(0,16)}
 function renderCompare(show=true){const host=ensure(),box=host?.querySelector('#latestCompare');if(!box)return;box.style.display=show?'flex':'none';if(!show)return;box.innerHTML=Object.entries(COMPARES).map(([k,v])=>`<button type="button" data-compare="${k}" class="${k===compareKey?'on':''}">${esc(v.label)}</button>`).join('');box.querySelectorAll('button[data-compare]').forEach(b=>b.onclick=()=>{compareKey=b.dataset.compare;renderBoard()})}
 function setHeader(title,sub,generated,showCompare=true){const host=ensure();if(!host)return;const t=host.querySelector('#latestBoardTitle'),s=host.querySelector('#latestBoardSub'),g=host.querySelector('#latestBoardGenerated');if(t)t.textContent=title;if(s)s.textContent=showCompare?`${sub} · 선택 기준: ${COMPARES[compareKey]?.label||'일간'} 대비`:sub;if(g)g.textContent=generated?`수집 ${generated} KST`:'';renderCompare(showCompare)}
-function setGrid(html,count,grouped=false){const host=ensure();if(!host)return;host.dataset.tab=activeTab();const grid=host.querySelector('#latestBoardGrid');grid.classList.toggle('grouped',grouped);grid.innerHTML=html;grid.style.gridTemplateColumns=grouped?'1fr':(count>0&&count<=5?`repeat(${count},minmax(0,1fr))`:'')}
+// Update tiles in place when the layout is unchanged. Rebuilding with innerHTML
+// on every data arrival (quotes, calendar, macro, crypto) detached each tile
+// several times during boot: lost taps and detached e2e screenshot targets.
+function sameNode(a,b){return a.nodeType===b.nodeType&&a.nodeName===b.nodeName&&(a.nodeType!==1||a.getAttribute('data-metric')===b.getAttribute('data-metric'))}
+function morph(a,b){if(a.nodeType!==1){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return}for(const n of [...a.attributes])if(!b.hasAttribute(n.name))a.removeAttribute(n.name);for(const n of [...b.attributes])if(a.getAttribute(n.name)!==n.value)a.setAttribute(n.name,n.value);patchNodes(a,[...b.childNodes])}
+function patchNodes(parent,next){const cur=[...parent.childNodes];if(cur.length!==next.length||cur.some((n,i)=>!sameNode(n,next[i]))){parent.replaceChildren(...next);return}cur.forEach((n,i)=>morph(n,next[i]))}
+function patchChildren(parent,html){const t=document.createElement('template');t.innerHTML=html;patchNodes(parent,[...t.content.childNodes])}
+function setGrid(html,count,grouped=false){const host=ensure();if(!host)return;host.dataset.tab=activeTab();const grid=host.querySelector('#latestBoardGrid');grid.classList.toggle('grouped',grouped);patchChildren(grid,html);grid.style.gridTemplateColumns=grouped?'1fr':(count>0&&count<=5?`repeat(${count},minmax(0,1fr))`:'')}
 function groupHtml(g){if(g.special==='tripod')return overviewGroup(g,`<div class="latestGroupGrid">${tripodTiles().join('')}</div>`);if(g.special==='macro')return overviewGroup(g,`<div class="overviewMacroGrid">${OVERVIEW_MACRO_GROUPS.map(x=>`<div class="overviewMacroBlock"><h4>${esc(x.label)}</h4><div class="latestGroupGrid">${x.keys.map(k=>standardTile(BY_KEY[k])).join('')}</div></div>`).join('')}</div>`);if(g.special==='week')return overviewGroup(g,overviewWeekHtml());const items=(g.keys||[]).map(k=>BY_KEY[k]).filter(Boolean);return `<section class="latestGroup latestGroup-${esc(g.key)}" data-overview-group="${esc(g.key)}"><div class="latestGroupHead"><div><b>${esc(g.label)}</b><span>${esc(g.sub||'')}</span></div><em>${items.length}개</em></div><div class="latestGroupGrid">${items.map(standardTile).join('')}</div></section>`}
 function pulseChips(items){const p=document.getElementById('pulse');if(!p)return;p.innerHTML=items.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}
 function overviewGroup(g,html){return `<section class="latestGroup latestGroup-${esc(g.key)}" data-overview-group="${esc(g.key)}"><div class="latestGroupHead"><div><b>${esc(g.label)}</b><span>${esc(g.sub||'')}</span></div></div>${html}</section>`}
@@ -335,6 +349,16 @@ function renderCalendarSummary(){if(typeof CAL==='undefined'||!CAL){setHeader(TA
  customTile('MAJOR','다음 ★★★',major?.title||'예정 없음',major?`${major.country||''} · ${major.category||''}`:'','flat',time(major))
  ];setHeader(TAB_CONFIG.calendar.title,TAB_CONFIG.calendar.sub,String(CAL.generated_kst||'').replace('T',' ').slice(0,16),false);setGrid(rows.join(''),rows.length);pulseChips([`오늘 ${todayEvents.length}건`,`7일 ${week.length}건`,`★★★ ${weekHigh.length}건`,major?`다음 ★★★ ${time(major)}`:'다음 ★★★ —'])}
 function renderBoard(){const host=ensure();if(!host||typeof DATA==='undefined'||!DATA)return false;const tab=activeTab();if(!TAB_CONFIG[tab]){host.style.display='none';return true}host.style.display='';const cfg=TAB_CONFIG[tab]||TAB_CONFIG.overview;if(cfg.special==='sector')renderSector();else if(cfg.special==='tripod')renderTripod();else if(cfg.special==='calendar')renderCalendarSummary();else renderStandard(tab,cfg);if(tab==='indices')setTimeout(renderIndexPanel,0);return true}
+function renderCrypto(){
+ if(compareKey!=='D1')return;
+ const template=document.createElement('template');
+ for(const item of ITEMS.filter(cryptoItem)){
+   const card=document.querySelector(`#latestBoardGrid [data-metric="${item.k}"]`);
+   if(!card)continue;
+   template.innerHTML=standardTile(item);
+   card.replaceChildren(...template.content.firstElementChild.childNodes);
+ }
+}
 function hookRender(){const base=window.render;if(typeof base!=='function'||base.__latestBoardHooked)return false;const w=function(){const r=base.apply(this,arguments);setTimeout(renderBoard,0);return r};w.__latestBoardHooked=true;window.render=w;return true}
 function hookCalendar(){const base=window.renderCalendar;if(typeof base!=='function'||base.__latestBoardCalendarHooked)return false;const w=function(){const r=base.apply(this,arguments);if(['calendar','overview'].includes(activeTab()))setTimeout(renderBoard,0);return r};w.__latestBoardCalendarHooked=true;window.renderCalendar=w;return true}
 function ensureOfficialMacroRuntime(){
@@ -362,6 +386,9 @@ const st=document.createElement('style');st.textContent=`
 .latestChangeFirst[data-comparison="D1"] .latestTilePeriods>span:first-child,.latestChangeFirst[data-comparison="W1"] .latestTilePeriods>span:nth-child(2){display:none}
 .latestTile[data-metric="TRIPOD_TARGET"]>strong,.latestTile[data-metric="TRIPOD_TREND"]>strong{white-space:normal;text-overflow:clip;overflow:visible;line-height:1.35;font-size:clamp(16px,2vw,24px);overflow-wrap:anywhere}.latestTile[data-metric^="TRIPOD_"] .latestTileFoot>span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.5}.tripodStageLegend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tripodStageLegend span{padding:6px 9px;border:1px solid #dce5ef;border-radius:8px;font-size:12px;color:#526071;background:#fff}.tripodStageLegend span.active{color:#153b65;background:#eaf3ff;border-color:#8fb2dc;font-weight:800}
 `;document.head.appendChild(st);
-let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10&&window.__JJOONI_OFFICIAL_MACRO_V1)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'20261110-crypto-view-recovery',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+// Boot loop: wait for DATA, hooks and the official-macro runtime, but rebuild the
+// grid only when something new became ready. Re-rendering on every 100 ms tick
+// replaced each tile ~15 times in the first 2 s (lost taps, detached e2e nodes).
+let tries=0;let booted=false,macroSeen=false;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();const hooked=hookRender()|hookCalendar();bindTabs();const macro=Boolean(window.__JJOONI_OFFICIAL_MACRO_V1);if(!booted||hooked||(macro&&!macroSeen))booted=renderBoard()||booted;macroSeen=macro;if(booted&&tries>10&&macro)clearInterval(id);if(tries>120)clearInterval(id)},100);
+window.__JJOONI_LATEST_BOARD={version:'20261111-binance-utc',items:ITEMS,render:renderBoard,renderCrypto,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();
