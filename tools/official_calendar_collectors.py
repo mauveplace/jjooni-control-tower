@@ -9,7 +9,7 @@ import urllib.request
 import urllib.parse
 from datetime import timedelta
 from html.parser import HTMLParser
-from calendar_actual_contract import KST, release_time, merge_observation, clean, actual_expected
+from calendar_actual_contract import KST, release_time, merge_observation, clean, actual_expected, apply_known_official_nonpublication
 
 def official_user_agent(contact=None):
     """Identify this collector honestly; agencies such as BLS reject anonymous
@@ -418,6 +418,8 @@ def apply_official_actuals(calendar,now):
         for key in expected:
             old.setdefault(key,metric(key,key,None))
         e['market_metrics']=list(old.values())
+        if kind == 'BLS_cpi':
+            apply_known_official_nonpublication(e)
         start=dt.replace(hour=0,minute=0,second=0) if e.get('time_status')=='TBD' else dt
         if now<start: continue
         incomplete=clean(e.get('actual')) is None or any(actual_expected(m) and clean(m.get('actual')) is None for m in old.values())
@@ -463,7 +465,11 @@ def apply_official_actuals(calendar,now):
             if kind == 'BOK_GDP' and clean(m.get('actual')) is not None:
                 m['market_value_status'] = 'ACTUAL_AVAILABLE'
             old[m['key']]=merge_observation(old.get(m['key'],{}),m)
-        representative=old[expected[0]]
+        if kind == 'BLS_cpi':
+            e['market_metrics'] = list(old.values())
+            apply_known_official_nonpublication(e)
+            old = {m.get('key'): m for m in e['market_metrics']}
+        representative=old.get(e.get('representative_metric_key') or expected[0]) or old[expected[0]]
         source_label=representative.get('source') or kind+' official release'
         patch=dict(provenance,actual=representative['actual'],market_metrics=list(old.values()),
                    source=source_label,actual_source=source_label)

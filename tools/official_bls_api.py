@@ -64,9 +64,26 @@ def fetch_series(series, year):
     # free registration key (secret BLS_API_KEY) raises it to 500. The key is
     # sent in the query only, never stored in the published source_url.
     key = os.environ.get('BLS_API_KEY', '').strip()
-    data = json.loads(raw_fetch(url + (f'&registrationkey={key}' if key else '')))
+    try:
+        data = json.loads(raw_fetch(url + (f'&registrationkey={key}' if key else '')))
+    except Exception:
+        # URLs can include credentials. Neither publish nor chain raw errors.
+        raise ValueError('BLS_API_TRANSPORT_FAILURE') from None
     if data.get('status') != 'REQUEST_SUCCEEDED':
-        raise ValueError('BLS_API_REQUEST_FAILED: ' + str(data.get('message')))
+        # BLS sometimes echoes the complete submitted key in its error
+        # response. Never serialize that provider message into a public file.
+        message = str(data.get('message') or '').lower()
+        if key and 'key' in message and 'invalid' in message:
+            print('BLS_API_REGISTRATION_KEY=INVALID; TRY_KEYLESS_FALLBACK')
+            try:
+                data = json.loads(raw_fetch(url))
+            except Exception:
+                raise ValueError('BLS_API_KEY_INVALID_KEYLESS_TRANSPORT_FAILURE') from None
+            if data.get('status') != 'REQUEST_SUCCEEDED':
+                raise ValueError('BLS_API_KEY_INVALID_KEYLESS_REJECTED')
+        else:
+            code = 'RATE_LIMIT' if 'limit' in message or 'maximum' in message else 'PROVIDER_REJECTED'
+            raise ValueError('BLS_API_REQUEST_FAILED_' + code)
     results = data.get('Results', {})
     if isinstance(results, list):
         results = results[0] if results else {}

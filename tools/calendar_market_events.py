@@ -278,6 +278,17 @@ def representative_metric(event):
                m.get('metric_type') != 'market_probability_snapshot' and
                any(clean(m.get(k)) is not None for k in ['previous','consensus','actual'])]
     if event.get('country') == 'US' and event.get('title') == 'Consumer Price Index':
+        # BLS did not publish October 2026 YoY values because the October
+        # 2025 reference index is missing. Show verified monthly CPI instead,
+        # without ever presenting it as a YoY change.
+        if (str(event.get('datetime_kst') or '')[:10] == '2026-11-10'
+                and (event.get('official_nonpublication') or {}).get('reason') == 'OCT_2025_BASE_NOT_COLLECTED'):
+            monthly = next((m for m in metrics if m.get('key') == 'cpi_mom'
+                            and m.get('source_tier') == 'OFFICIAL'
+                            and str(m.get('verification_status') or '').startswith('VERIFIED_OFFICIAL')
+                            and m.get('reference_period') == '2026-10'), None)
+            if monthly is not None:
+                return monthly
         headline = next((m for m in metrics if m.get('key') == 'cpi_yoy'), None)
         if headline is not None:
             return headline

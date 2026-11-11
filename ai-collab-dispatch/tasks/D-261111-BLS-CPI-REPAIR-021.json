@@ -1,0 +1,28 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-BLS-CPI-REPAIR-021",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review CPI nonpublication, credential-safe BLS error handling, and preservation of current calendar data after merging main.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Verify October 2026 CPI annual measures remain null and marked officially not published on the exact release only; verified monthly values retain official provenance.",
+    "Challenge credential redaction in all paths, bounded anonymous fallback, quotas and any remaining exposed historical or cached credentials without disclosing values.",
+    "Check merge resolution preserves newer main data and does not restore exposed strings. Test calendar semantics, later releases, credential handling and error states.",
+    "Run tests and inspect exact-head CI; report PASS, NEEDS_CHANGES or BLOCKED with actual session and evidence."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secret values or private account data in output",
+    "No production write, deploy, or trading by reviewer"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity"
+}

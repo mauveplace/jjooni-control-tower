@@ -99,9 +99,62 @@ def deadline(e):
         return datetime.fromisoformat(day).replace(tzinfo=KST) + timedelta(days=1)
     return dt + timedelta(minutes=e.get('actual_grace_minutes', 45))
 
+# The BLS November 10, 2026 release explicitly omitted the October 2026
+# twelve-month CPI changes: the October 2025 base indexes were not collected.
+# This is an event+metric-specific official nonpublication, not a general
+# relaxation of actual completeness or a guessed replacement observation.
+OCT_2026_CPI_RELEASE = '2026-11-10'
+OCT_2026_CPI_SOURCE = 'https://www.bls.gov/news.release/archives/cpi_11102026.htm'
+
+
+def apply_known_official_nonpublication(event):
+    """Mark only the two BLS-unpublished annual metrics; keep MoM source gates."""
+    if (event.get('country') != 'US'
+            or event.get('title') != 'Consumer Price Index'
+            or str(event.get('datetime_kst') or '')[:10] != OCT_2026_CPI_RELEASE):
+        return False
+    metric_rows = {m.get('key'): m for m in event.get('market_metrics') or []
+                   if isinstance(m, dict)}
+    for key in ('cpi_yoy', 'core_cpi_yoy'):
+        metric = metric_rows.get(key)
+        if metric is None or clean(metric.get('actual')) is not None:
+            continue
+        metric['actual_expected'] = False
+        metric['availability_status'] = 'OFFICIALLY_NOT_PUBLISHED'
+        metric['official_unavailable_reason'] = 'OCT_2025_BASE_NOT_COLLECTED'
+        metric['official_unavailable_source_url'] = OCT_2026_CPI_SOURCE
+        metric['market_value_status'] = 'NOT_PUBLISHED'
+    # The headline can legitimately show the published MoM observation only
+    # when official series provenance and the exact October 2026 reference
+    # month are verified. Do not promote a feed estimate or prior value.
+    mom = metric_rows.get('cpi_mom') or {}
+    if (clean(mom.get('actual')) is not None
+            and mom.get('source_tier') == 'OFFICIAL'
+            and str(mom.get('verification_status') or '').startswith('VERIFIED_OFFICIAL')
+            and mom.get('reference_period') == '2026-10'
+            and mom.get('source_url')):
+        event['actual'] = mom['actual']
+        event['representative_metric_key'] = 'cpi_mom'
+        event['actual_source'] = mom.get('source') or 'BLS API official series'
+        event['source'] = event['actual_source']
+        event['market_data_source'] = event['actual_source']
+        for attr in ('source_tier', 'source_url', 'official_url',
+                     'verification_status', 'value_vintage', 'series_id', 'checked_kst'):
+            if mom.get(attr) is not None:
+                event[attr] = mom[attr]
+        event['market_value_status'] = 'ACTUAL_AVAILABLE'
+    event['official_nonpublication'] = {
+        'metrics': ['cpi_yoy', 'core_cpi_yoy'],
+        'reason': 'OCT_2025_BASE_NOT_COLLECTED',
+        'source_url': OCT_2026_CPI_SOURCE,
+    }
+    return True
+
+
 def build_freshness(calendar, now, checks):
     pending, overdue = [], []
     for e in calendar.get('events', []):
+        apply_known_official_nonpublication(e)
         e.pop('actual_status', None)
         if not actual_expected(e):
             e['actual_status'] = 'NOT_APPLICABLE'; continue
