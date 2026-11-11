@@ -144,6 +144,11 @@ jobs:
                   continue
               simulated=deepcopy(event)
               simulated['actual']=None
+              # Remove the representative source too: a verified metric may
+              # legitimately restore the event actual during freshness checks.
+              for metric in simulated.get('market_metrics') or []:
+                  if isinstance(metric, dict) and metric.get('key') == simulated.get('representative_metric_key'):
+                      metric['actual']=None
               health=build_freshness({'events':[simulated]},datetime.now(KST),[])
               assert health['status'] != 'LIVE',event['title']
           print('ECON_CAL_LIGHT_ACCEPTANCE=PASS',c.get('enrichment_matched'),c.get('all_event_enrichment'),c.get('previous_value_fill'),c.get('representative_value_sync'),freshness,'recent_recovery=',recovery,'official_macro_bridge=',bridge,'history_rows=',h.get('row_count'),'available_from=',h.get('available_from'),'coverage=',h.get('coverage_status'))
