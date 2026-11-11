@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-11T10:31:06+09:00",
+  "generated_kst": "2026-11-11T10:51:37+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -114,7 +114,7 @@
       "state": "LIVE",
       "generated_kst": "2026-11-11T10:30:45+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=24s · ETHUSD age=24s",
+      "detail": "BTCUSD age=1255s · ETHUSD age=1255s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -186,9 +186,9 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "DEGRADED",
-      "generated_kst": "2026-11-11T10:12:13+09:00",
-      "as_of": "2026-11-11T10:12:13+09:00",
-      "detail": "events=190 · overdue=2 · pending=0 · source_failures=0 · official_probe_blocked=2 · 기존 공식 검증 98건 · 이번 원천 조회 DEGRADED",
+      "generated_kst": "2026-11-11T10:51:23+09:00",
+      "as_of": "2026-11-11T10:51:23+09:00",
+      "detail": "events=190 · overdue=2 · pending=0 · source_failures=0 · official_probe_blocked=3 · 기존 공식 검증 98건 · 이번 원천 조회 DEGRADED",
       "source": "economic-calendar.json",
       "critical": false,
       "official_probe_scope": "LATEST_COLLECTION_ATTEMPTS_ONLY",
@@ -200,14 +200,16 @@
       },
       "actual_completeness_state": "DEGRADED",
       "official_probe_state": "DEGRADED",
-      "official_probe_failure_count": 5,
-      "official_probe_unresolved_failure_count": 5,
+      "official_probe_failure_count": 6,
+      "official_probe_unresolved_failure_count": 6,
       "official_probe_blocked_releases": [
         "2026년 10월 고용동향",
+        "BLS_API",
         "Consumer Price Index"
       ],
       "official_probe_transport_blocked_releases": [
         "2026년 10월 고용동향",
+        "BLS_API",
         "Consumer Price Index"
       ],
       "official_probe_verified_fallback_releases": []
@@ -215,7 +217,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-11T10:31:06+09:00",
+      "generated_kst": "2026-11-11T10:51:37+09:00",
       "as_of": "2026-11-10",
       "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
