@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import unittest
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -50,6 +51,18 @@ class OfficialCpiNonpublication(unittest.TestCase):
         status, event = self.check(self.event(verified=False))
         self.assertEqual(status['status'], 'DEGRADED')
         self.assertIsNone(event['actual'])
+
+    def test_missing_card_is_recovered_only_if_verified_representative_exists(self):
+        _, released = self.check(self.event())
+        simulated = deepcopy(released)
+        simulated['actual'] = None
+        self.assertEqual(self.check(simulated)[0]['status'], 'LIVE')
+        for metric in simulated['market_metrics']:
+            if metric.get('key') == simulated.get('representative_metric_key'):
+                metric['actual'] = None
+        simulated['actual'] = None
+        self.assertEqual(self.check(simulated)[0]['status'], 'DEGRADED')
+        self.assertEqual(released['actual'], '0.4%')
 
     def test_other_dates_still_require_yoy_and_headline(self):
         status, event = self.check(self.event(day='2026-11-09'))
