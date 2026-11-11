@@ -1,5 +1,9 @@
 # JJOONI × ROY: dual-entry, quota-safe collaboration operations
 
+## Mobile-first bounded review proposal (V6)
+
+For a PC-free owner, see [MOBILE_FIRST_V6.md](./MOBILE_FIRST_V6.md) and the non-executing `mobile_review_loop.py` decision helper. This proposal keeps the existing V4/V5.1 gates and all external ROY/Work event settings intact. Standard small fixes stay JJOONI-only; substantive/high-assurance changes use one ROY challenge and at most one materially justified follow-up, then human escalation instead of automatic approval. Approval and merge of the V6 PR are required before treating this as active policy.
+
 ## Objective
 
 > **V5 JJOONI-FIRST cost policy (active; owner-approved PR #338):** [JJOONI_FIRST.md](./JJOONI_FIRST.md) governs ordinary development. Default executor is JJOONI, including Python/JS code, automation and testing. ROY is reserved for mandatory high-assurance review or a specific owner request. Existing V4 dual-agent rules apply only to explicitly opted-in `[AI-COLLAB]` PRs. External Claude/Work subscriptions and release permissions are unchanged.
