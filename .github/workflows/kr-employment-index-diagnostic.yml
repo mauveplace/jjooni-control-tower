@@ -31,7 +31,6 @@ jobs:
               print('PARSER', [(r['key'], r['actual']) for r in result])
           except Exception as exc:
               print('PARSER_ERROR', type(exc).__name__, str(exc)[:150])
-          PY
           from official_calendar_collectors import collect_kr_employment
           checks=[]
           event={'title':'2026년 10월 고용동향'}
@@ -43,3 +42,4 @@ jobs:
           print('LIVE_DISCOVERY', source, values)
           assert values == {'kr_unemployment_sa':'2.5%','kr_unemployment':'2%', 'kr_employment_rate':'70.4%','kr_employed':'29179'}
           assert all(r.get('reference_period')=='2026-10' for r in rows)
+          PY
