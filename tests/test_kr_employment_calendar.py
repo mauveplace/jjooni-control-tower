@@ -17,6 +17,29 @@ class EmploymentCalendarTests(unittest.TestCase):
     def setUp(self):
         self.text=(ROOT/'tests/fixtures/kr-employment-202609.txt').read_text()
 
+    def test_current_official_index_wrapper_and_new_badge(self):
+        index='https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list'
+        path='/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid='
+        markup=(f'<a href="javascript:addSearchParam(\'{path}\');"><span>새글</span> 2026년 10월 고용동향</a>'
+                '<a href="/boardDownload.es?bid=210&list_no=447893&seq=1">2026년 10월 고용동향의 pdf파일</a>'
+                '<a href="/board.es?bid=210&act=view&list_no=1">2026년 10월 경기도 고용동향</a>')
+        self.assertEqual(collectors.employment_release_link(markup,index,2026,10), 'https://mods.go.kr'+path)
+        with self.assertRaisesRegex(ValueError,'RELEASE_NOT_FOUND'):
+            collectors.employment_release_link(markup,index,2026,9)
+
+    def test_discovery_rejects_external_links_javascript_and_ambiguity(self):
+        index='https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list'
+        label='2026년 10월 고용동향'
+        for href in ('https://evil.example/board.es?bid=210&act=view&list_no=5',
+                     "javascript:addSearchParam('/board.es?bid=210&act=view&list_no=5');alert(1)",
+                     '/boardDownload.es?bid=210&act=view&list_no=5',
+                     '/board.es?bid=999&act=view&list_no=5'):
+            with self.subTest(href=href), self.assertRaisesRegex(ValueError,'RELEASE_NOT_FOUND'):
+                collectors.employment_release_link(f'<a href="{href}">{label}</a>',index,2026,10)
+        markup=''.join(f'<a href="/board.es?bid=210&act=view&list_no={n}">{label}</a>' for n in (5,6))
+        with self.assertRaisesRegex(ValueError,'RELEASE_AMBIGUOUS'):
+            collectors.employment_release_link(markup,index,2026,10)
+
     def test_official_release_separates_seasonal_raw_and_youth_unemployment(self):
         rows=collectors.parse_kr_employment(self.text,2026,9)
         values={m['key']:m['actual'] for m in rows}
