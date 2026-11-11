@@ -226,7 +226,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         'us_rates':group('US Rates',(ag.get('us_rates') or {}).get('state'),obs.get('generated_kst'),_audit_asof(ag.get('us_rates') or {}),_audit_detail(ag.get('us_rates') or {}),'U.S. Treasury official',False),
         'kr_rates':group('KR Rates',(ag.get('kr_rates') or {}).get('state'),obs.get('kr_rates_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('kr_rates') or {}),_audit_detail(ag.get('kr_rates') or {}),'BOK ECOS',False),
         'jp_rates':group('JP Rates',(ag.get('jp_rates') or {}).get('state'),obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('jp_rates') or {}),_audit_detail(ag.get('jp_rates') or {}),'Japan MOF current JGB CSV',False),
-        'crypto':group('Crypto',(ag.get('crypto') or {}).get('state'),crypto_generated,None,' · '.join(f"{k} age={v.get('current_quote_age_seconds','—')}s" for k,v in (audit.get('crypto_status') or {}).items()),crypto_sources,False),
+        'crypto':group('Crypto fallback snapshot',(ag.get('crypto') or {}).get('state'),crypto_generated,None,' · '.join(f"{k} age={v.get('current_quote_age_seconds','—')}s" for k,v in (audit.get('crypto_status') or {}).items()),crypto_sources,False),
         'pulse':group('Daily Pulse',pulse_state,pulse.get('generated_kst'),pulse_session,f"snapshot={pulse.get('snapshot_status') or '—'} · Observatory session={session or '—'}",'daily-market-pulse.json',True),
         'fear_greed':group('Fear & Greed',fg_state,obs.get('supplemental_refreshed_kst') or obs.get('generated_kst'),_audit_asof(ag.get('sentiment') or {}) or fgq.get('observed_at') or session,f"{(obs.get('latest') or {}).get('FEAR_GREED','—')}/100 · {(obs.get('latest') or {}).get('FEAR_GREED_RATING') or ''}".strip(),fgq.get('source') or 'Fear & Greed public',False),
         'fedwatch':group('FedWatch',fed_state,fed.get('generated_kst'),fed.get('market_data_as_of'),f"expected={(audit.get('file_status') or {}).get('fedwatch',{}).get('audit_expected_market_data_date') or '—'} · FOMC {fed.get('meeting_date') or '—'}",text(fed.get('source')) or 'CME Fed Funds settlement',False),
@@ -263,6 +263,7 @@ def build_status(root: Path = ROOT, now=None) -> dict:
         for k, v in (audit.get('crypto_status') or {}).items()
     }
     groups['crypto']['max_age_seconds'] = 3600
+    groups['crypto']['informational'] = True
     hard_bad={'UNAVAILABLE','FAILED','ERROR','MISALIGNED','FAIL','INCONSISTENT','AHEAD_OF_ANCHOR'};soft_bad={'WARN','LAGGING','STALE','STALE_FALLBACK','DEGRADED','PENDING','FALLBACK','EXPIRED'}
     critical_bad=[k for k,v in groups.items() if v['critical'] and v['state'] in (hard_bad|{'LAGGING','STALE'})];warnings=[k for k,v in groups.items() if not v.get('informational') and (v['state'] in soft_bad or (not v['critical'] and v['state'] in hard_bad))]
     overall='DEGRADED' if critical_bad else ('LIVE_WITH_WARNINGS' if warnings else 'LIVE')

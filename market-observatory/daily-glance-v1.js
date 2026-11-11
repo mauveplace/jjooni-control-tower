@@ -1,7 +1,7 @@
 /* JJOONI Daily Glance — 30-second market card. Read-only; numbers come from daily-glance.json. */
 (function () {
   'use strict';
-  var VERSION = '20261109-glance2';
+  var VERSION = '20261111-binance-utc';
   var main = document.querySelector('main.wrap');
   if (!main || document.getElementById('dailyGlance')) return;
   var host = document.createElement('section');
@@ -38,6 +38,25 @@
     var cls = v > 0 ? 'up' : v < 0 ? 'dn' : '';
     return '<td class="n ' + cls + '">' + (v > 0 ? '+' : '') + num(v, unit === '%' ? 2 : 1) + unit + '</td>';
   }
+  var cryptoItems = {};
+  function cryptoCells(item) {
+    var quote = window.__JJOONI_CRYPTO_ON_VIEW?.get(item.key, item.quote_currency === 'USDT' ? item.observed_kst : null);
+    if (quote) {
+      var stamp = new Date(quote.observed_at).toLocaleString('sv-SE', {timeZone: 'Asia/Seoul'}).slice(5, 19);
+      var change = quote.previous_close === null ? null : (quote.value / quote.previous_close - 1) * 100;
+      return '<td>' + esc(item.label) + ' · USDT<br><small>' + esc(quote.display_status + ' · ' + stamp + ' KST') +
+        '</small></td><td class="n">' + num(quote.value, 2) + '</td>' + chg({d1_pct: change});
+    }
+    var publishedAt = item.observed_kst ? item.observed_kst.slice(5, 16).replace('T', ' ') + ' KST' : item.date;
+    return '<td>' + esc(item.label) + (item.quote_currency ? ' · ' + esc(item.quote_currency) : '') +
+      '<br><small>게시값' + (publishedAt ? ' · ' + esc(publishedAt) : '') + '</small></td>' +
+      '<td class="n">' + num(item.value, 2) + '</td>' + chg(item);
+  }
+  function renderCrypto() {
+    for (const row of host.querySelectorAll('[data-glance-crypto]')) {
+      row.innerHTML = cryptoCells(cryptoItems[row.dataset.glanceCrypto]);
+    }
+  }
   function render(g) {
     var t = g.tripod || {};
     var collapsed = '0';
@@ -47,6 +66,10 @@
     (g.groups || []).forEach(function (grp) { grp.items.forEach(function (it) { if (it.date && it.key !== 'BTCUSD' && (!latestDates[grp.name] || it.date > latestDates[grp.name])) latestDates[grp.name] = it.date; }); });
     var tables = (g.groups || []).map(function (grp) {
       return '<table><caption>' + esc(grp.name) + '</caption>' + grp.items.map(function (it) {
+        if (it.key === 'BTCUSD' || it.key === 'ETHUSD') {
+          cryptoItems[it.key] = it;
+          return '<tr data-glance-crypto="' + esc(it.key) + '">' + cryptoCells(it) + '</tr>';
+        }
         if (it.status === 'MISSING') return '<tr><td>' + esc(it.label) + '</td><td class="n old">자료 없음</td><td></td></tr>';
         var old = it.key !== 'BTCUSD' && it.date !== latestDates[grp.name] ? ' old' : '';
         var dp = it.d1_bp != null ? 3 : it.value > 1000 ? 0 : 2;
@@ -69,7 +92,7 @@
         '<ul><li>▲ ' + esc(t.next_up) + '</li><li>▼ ' + esc(t.next_down) + '</li>' +
         (g.cross_read || []).map(function (c) { return '<li>' + esc(c.text) + '</li>'; }).join('') + '</ul>' +
         brief + '<div class="dgGrid">' + tables + '</div>' +
-        '<div class="dgFoot">숫자 출처: 옵저버토리 수집 파이프라인 확정치 · 생성 ' + esc((g.generated_kst || '').slice(0, 16).replace('T', ' ')) + ' KST · 매매 지시 아님</div>' +
+        '<div class="dgFoot">완료장 자료 생성 ' + esc((g.generated_kst || '').slice(0, 16).replace('T', ' ')) + ' KST · 매매 지시 아님</div>' +
       '</div>';
     var head = host.querySelector('.dgHead');
     function toggle() {
@@ -85,5 +108,5 @@
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (g) { if (g && g.schema === 'JJOONI_DAILY_GLANCE_V1') render(g); else host.remove(); })
     .catch(function () { host.remove(); });
-  window.JjooniDailyGlance = {version: VERSION};
+  window.JjooniDailyGlance = {version: VERSION, renderCrypto};
 })();

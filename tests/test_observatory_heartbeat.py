@@ -26,13 +26,12 @@ class HeartbeatDecisionTest(unittest.TestCase):
              mock.patch.object(hb.sector_heartbeat_gate, 'should_refresh', return_value=False):
             return hb.decide(NOW)
 
-    def test_stale_quote_requests_crypto_refresh(self):
+    def test_old_fallback_snapshot_does_not_trigger_crypto_recovery(self):
         d = self.run_decide(obs(77))
-        self.assertEqual((d['crypto'], d['alert']), ('refresh', 'crypto'))
+        self.assertEqual((d['crypto'], d['alert']), ('on_view', 'none'))
 
-    def test_due_but_not_yet_stale_does_not_alert(self):
-        d = self.run_decide(obs(50))
-        self.assertEqual((d['crypto'], d['alert']), ('refresh', 'none'))
+    def test_age_of_fallback_is_still_reported(self):
+        self.assertEqual(self.run_decide(obs(50))['crypto_max_age_min'], 50)
 
     def test_market_behind_session_alerts_after_90_min(self):
         files = {'observatory.json': obs(10)}
@@ -43,7 +42,7 @@ class HeartbeatDecisionTest(unittest.TestCase):
 
     def test_fresh_quote_requests_nothing(self):
         d = self.run_decide(obs(10))
-        self.assertEqual((d['crypto'], d['market'], d['alert']), ('ok', 'ok', 'none'))
+        self.assertEqual((d['crypto'], d['market'], d['alert']), ('on_view', 'ok', 'none'))
 
 
 class HeartbeatWorkflowContractTest(unittest.TestCase):

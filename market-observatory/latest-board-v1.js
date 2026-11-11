@@ -82,8 +82,15 @@ function cryptoItem(item){return ['BTCUSD','ETHUSD'].includes(item.k)}
 function stat(item,key=compareKey){
  const s=seriesOf(item).filter(p=>p?.date&&p.value!==null&&p.value!==undefined&&String(p.value).trim()!==''&&typeof p.value!=='boolean'&&Number.isFinite(Number(p.value))),last=s[s.length-1];
  const crypto=cryptoItem(item), published=typeof DATA!=='undefined'?DATA?.crypto_market?.[item.k]:null;
- const quote=key==='D1'&&typeof window!=='undefined'?(crypto?window.__JJOONI_CRYPTO_ON_VIEW?.get(item.k,published?.quote_as_of_kst):window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k)):null;
- if(quote&&crypto){const previous=new Date(quote.session_date+'T00:00:00Z');previous.setUTCDate(previous.getUTCDate()-1);const expected=previous.toISOString().slice(0,10);const safe=published?.daily_change_safe===true&&published.quote_currency==='USDT'&&published.previous_close_currency==='USDT'&&published.previous_close_utc_date===expected&&Number.isFinite(Number(published.previous_close_value))&&Number(published.previous_close_value)>0;return {value:quote.value,date:quote.session_date,change:safe?(quote.value/Number(published.previous_close_value)-1)*100:null,refValue:safe?Number(published.previous_close_value):null,intraday:quote,quote_currency:'USDT'};}
+ const quote=key==='D1'&&typeof window!=='undefined'?(crypto?window.__JJOONI_CRYPTO_ON_VIEW?.get(item.k,published?.quote_currency==='USDT'?published.quote_as_of_kst:null):window.__JJOONI_OBSERVATORY_QUOTES?.get(item.k)):null;
+ if(quote&&crypto){
+   const previous=utcDate(quote.session_date);
+   previous.setUTCDate(previous.getUTCDate()-1);
+   const expected=previous.toISOString().slice(0,10);
+   const safe=published?.daily_change_safe===true&&published.quote_currency==='USDT'&&published.previous_close_currency==='USDT'&&published.previous_close_utc_date===expected&&Number.isFinite(Number(published.previous_close_value))&&Number(published.previous_close_value)>0;
+   const refValue=quote.previous_close??(safe?Number(published.previous_close_value):null);
+   return {value:quote.value,date:quote.session_date,change:refValue===null?null:(quote.value/refValue-1)*100,refValue,intraday:quote,quote_currency:'USDT'};
+ }
  if(quote&&(!last||quote.session_date>=last.date))return {value:quote.value,date:quote.session_date,change:quote.change_pct,refDate:null,refValue:quote.previous_close,intraday:quote};
  if(!last)return null;
  const ref=refPoint(s,last,key);
@@ -363,5 +370,5 @@ const st=document.createElement('style');st.textContent=`
 .latestTile[data-metric="TRIPOD_TARGET"]>strong,.latestTile[data-metric="TRIPOD_TREND"]>strong{white-space:normal;text-overflow:clip;overflow:visible;line-height:1.35;font-size:clamp(16px,2vw,24px);overflow-wrap:anywhere}.latestTile[data-metric^="TRIPOD_"] .latestTileFoot>span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.5}.tripodStageLegend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tripodStageLegend span{padding:6px 9px;border:1px solid #dce5ef;border-radius:8px;font-size:12px;color:#526071;background:#fff}.tripodStageLegend span.active{color:#153b65;background:#eaf3ff;border-color:#8fb2dc;font-weight:800}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10&&window.__JJOONI_OFFICIAL_MACRO_V1)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'20261110-crypto-view-recovery',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'20261111-binance-utc',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();

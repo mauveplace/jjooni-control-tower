@@ -1,0 +1,29 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261111-BINANCE-ON-VIEW-026",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Make Binance BTC/ETH spot cards and Daily Glance independent of GitHub spot publication, with UTC prior closes and a persistent last-good quote.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Independently verify on-view Binance USDT quotes are separate from Pages data publication and share one reader across the board and glance.",
+    "Verify completed UTC candle date, no USD/USDT mixing, independent symbols and close failures, reload fallback retaining the true trade time, timeouts and retry.",
+    "Verify dedicated quote cron and both heartbeat recoveries are removed, manual snapshot and existing official close collectors still work, and fallback age is diagnostic.",
+    "Review current PR tests and CI, report exact-head PASS / NEEDS_CHANGES / BLOCKED with evidence and actual session."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or private data",
+    "No reviewer code writes, merge, deployment or trading",
+    "No new polling, runner schedule, service or key"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity"
+}

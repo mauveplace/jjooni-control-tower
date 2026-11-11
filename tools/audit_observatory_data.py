@@ -152,13 +152,13 @@ def build():
     if pulse_session!=session:issue('PULSE_SESSION_MISMATCH','CRITICAL',f'pulse={pulse_session} observatory={session}')
     if tripod_session!=session or tripod.get('ok') is not True:issue('TRIPOD_SESSION_MISMATCH','CRITICAL',f'tripod={tripod_session} ok={tripod.get("ok")} observatory={session}')
     for name,g in groups.items():
-        if g['state']!='LIVE':issue('GROUP_'+name.upper()+'_'+g['state'],'CRITICAL' if g.get('critical') else 'WARN',f"anchor={g.get('anchor')} dates="+','.join(f"{k}:{v.get('last_date')}" for k,v in g.get('items',{}).items()))
+        if g['state']!='LIVE' and name!='crypto':issue('GROUP_'+name.upper()+'_'+g['state'],'CRITICAL' if g.get('critical') else 'WARN',f"anchor={g.get('anchor')} dates="+','.join(f"{k}:{v.get('last_date')}" for k,v in g.get('items',{}).items()))
     if fed.get('freshness')=='LIVE' and fed_state!='LIVE':issue('FEDWATCH_DECLARATION_INCONSISTENT','WARN',f'declared=LIVE audit={fed_state} expected={fed_expected} asof={fed_asof}')
     for k,q in us_sup_quality.items():
         if q.get('last_date')!=session or q.get('status')!='LIVE':issue('US_SUPPLEMENT_QUALITY_'+k,'WARN',str(q))
     if len({q.get('last_date') for q in kr_quality.values() if q.get('last_date')})>1:issue('KR_EQUITY_DATE_MISMATCH','CRITICAL',str({k:q.get('last_date') for k,q in kr_quality.items()}))
     for k,q in crypto_status.items():
-        if q.get('status')!='LIVE':issue('CRYPTO_'+k+'_'+q['status'],'WARN',str(q))
+        if q.get('status')!='LIVE':issue('CRYPTO_'+k+'_'+q['status'],'INFO',str(q))
     cal_state=cal_fresh.get('status')
     if cal_state in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_ACTUAL_'+str(cal_state),'WARN',f'overdue_count={calendar_overdue_count} pending_count={calendar_pending_count}')
     if cal_collection.get('status') in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_COLLECTION_'+str(cal_collection.get('status')),'WARN',f'failed_source_count={len(failed_calendar_sources)} sources='+','.join(str(x.get('source') or 'unknown') for x in failed_calendar_sources if isinstance(x,dict)))
