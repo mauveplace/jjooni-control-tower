@@ -1,17 +1,26 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-12T04:54:33+09:00",
+  "generated_kst": "2026-11-12T08:12:27+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE",
-  "critical_bad": [],
-  "warnings": [],
-  "watchdog_required": false,
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "market",
+    "pulse",
+    "tripod",
+    "audit"
+  ],
+  "warnings": [
+    "market",
+    "pulse",
+    "tripod"
+  ],
+  "watchdog_required": true,
   "session_alignment": {
-    "expected_session": "2026-11-10",
+    "expected_session": "2026-11-11",
     "source_session": "2026-11-10",
     "market_aligned": true,
     "observatory": "2026-11-10",
@@ -22,12 +31,12 @@
     "us_supplement_aligned": true,
     "kr_kospi": "2026-11-11",
     "kr_kosdaq": "2026-11-11",
-    "aligned": true
+    "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-12T00:08:56+09:00",
       "as_of": "2026-11-10",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
@@ -111,7 +120,7 @@
       "state": "STALE",
       "generated_kst": "2026-11-12T00:36:07+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=15507s · ETHUSD age=15507s",
+      "detail": "BTCUSD age=27381s · ETHUSD age=27381s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -129,7 +138,7 @@
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-12T00:36:30+09:00",
       "as_of": "2026-11-10",
       "detail": "snapshot=FINAL · Observatory session=2026-11-10",
@@ -156,7 +165,7 @@
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-12T00:36:30+09:00",
       "as_of": "2026-11-10",
       "detail": "상승 · QQQ 50% + QLD 50%",
@@ -184,8 +193,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T02:47:31+09:00",
-      "as_of": "2026-11-12T02:47:31+09:00",
+      "generated_kst": "2026-11-12T08:12:15+09:00",
+      "as_of": "2026-11-12T08:12:15+09:00",
       "detail": "events=190 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 99건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -206,10 +215,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-11-12T04:54:33+09:00",
+      "state": "FAIL",
+      "generated_kst": "2026-11-12T08:12:27+09:00",
       "as_of": "2026-11-10",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=1 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     },

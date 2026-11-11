@@ -1,8 +1,8 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-12T04:54:33+09:00",
-  "overall": "PASS",
-  "critical_count": 0,
+  "generated_kst": "2026-11-12T08:12:27+09:00",
+  "overall": "FAIL",
+  "critical_count": 1,
   "warning_count": 0,
   "observatory_session": "2026-11-10",
   "file_status": {
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-11-12T02:47:31+09:00",
+      "generated_kst": "2026-11-12T08:12:15+09:00",
       "events": 190,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -68,10 +68,19 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-12T04:54:33+09:00",
-      "overall": "LIVE",
-      "critical_bad": [],
-      "warnings": []
+      "generated_kst": "2026-11-12T08:12:20+09:00",
+      "overall": "DEGRADED",
+      "critical_bad": [
+        "market",
+        "pulse",
+        "tripod",
+        "audit"
+      ],
+      "warnings": [
+        "market",
+        "pulse",
+        "tripod"
+      ]
     },
     "watchdog": {
       "checked_kst": "2026-11-11T09:44:38+09:00",
@@ -81,8 +90,8 @@
   },
   "groups": {
     "core_us": {
-      "state": "LIVE",
-      "anchor": "2026-11-10",
+      "state": "LAGGING",
+      "anchor": "2026-11-11",
       "allow_lag_days": 0,
       "critical": true,
       "items": {
@@ -558,27 +567,32 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-12T00:36:06+09:00",
-      "current_quote_age_seconds": 15507,
+      "current_quote_age_seconds": 27381,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-12T00:36:06+09:00",
-      "current_quote_age_seconds": 15507,
+      "current_quote_age_seconds": 27381,
       "captured_quote_age_seconds": 0
     }
   },
   "issues": [
     {
+      "code": "GROUP_CORE_US_LAGGING",
+      "severity": "CRITICAL",
+      "detail": "anchor=2026-11-11 dates=NASDAQ100:2026-11-10,SP500:2026-11-10,VIX:2026-11-10"
+    },
+    {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-12T00:36:06+09:00', 'current_quote_age_seconds': 15507, 'captured_quote_age_seconds': 0}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-12T00:36:06+09:00', 'current_quote_age_seconds': 27381, 'captured_quote_age_seconds': 0}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-12T00:36:06+09:00', 'current_quote_age_seconds': 15507, 'captured_quote_age_seconds': 0}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-12T00:36:06+09:00', 'current_quote_age_seconds': 27381, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
