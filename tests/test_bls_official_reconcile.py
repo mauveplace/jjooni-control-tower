@@ -44,6 +44,25 @@ def ppi_event(**over):
 
 
 class ReconcileTest(unittest.TestCase):
+    def test_verified_reference_period_blocks_coincidental_other_month(self):
+        e = ppi_event()
+        e['market_metrics'][0].update(verification_status='VERIFIED_OFFICIAL_REVISED', reference_period='2026-10')
+        # September matches the input and would otherwise win; October is incomplete.
+        report = rec.apply({'events': [e]}, {'series': {}}, NOW, fake_fetch)
+        self.assertEqual(e['market_metrics'][1]['actual'], '3.7%')
+        self.assertTrue(report['anchor_failed'])
+
+    def test_official_nonpublication_never_reconciles_or_writes_history(self):
+        e = ppi_event()
+        e['market_metrics'][1].update(actual=None, availability_status='OFFICIALLY_NOT_PUBLISHED')
+        hist = {'series': {'US::ppi::ppi_yoy': {'rows': [{'date': '2026-10-15', 'actual': None}]}}}
+        def boom(*args):
+            raise AssertionError('must not fetch incomplete release')
+        report = rec.apply({'events': [e]}, hist, NOW, boom)
+        self.assertEqual(report['events_checked'], 0)
+        self.assertIsNone(e['market_metrics'][1]['actual'])
+        self.assertIsNone(hist['series']['US::ppi::ppi_yoy']['rows'][0]['actual'])
+
     def test_market_feed_sibling_value_replaced_by_official(self):
         cal = {'events': [ppi_event()]}
         hist = {'series': {'US::ppi::ppi_yoy': {'rows': [{'date': '2026-10-15', 'actual': '3.7%'}]}}}
