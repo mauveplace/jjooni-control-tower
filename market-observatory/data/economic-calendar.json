@@ -1,75 +1,12 @@
 {
   "actual_backfill": {
-    "checked_kst": "2026-11-11T11:12:26+09:00",
+    "checked_kst": "2026-11-11T14:30:33+09:00",
     "checks": [
       {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_11102026.htm"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_11102026.pdf"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_11102026.txt"
-      },
-      {
-        "adapter": "BLS_API",
-        "reference_period": "2026-10",
-        "result": "REFERENCE_PERIOD_FROM_API",
-        "title": "Consumer Price Index"
-      },
-      {
-        "adapter": "BLS_API",
-        "error": "(2025, 10)",
-        "key": "cpi_yoy",
-        "result": "KeyError",
-        "series_id": "CUUR0000SA0"
-      },
-      {
-        "adapter": "BLS_API",
-        "event_kst": "2026-11-10T22:30+09:00",
-        "key": "cpi_mom",
-        "reference_period": "2026-10",
-        "result": "PARSED_REVISED_SERIES",
-        "title": "Consumer Price Index",
-        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026"
-      },
-      {
-        "adapter": "BLS_API",
-        "error": "(2025, 10)",
-        "key": "core_cpi_yoy",
-        "result": "KeyError",
-        "series_id": "CUUR0000SA0L1E"
-      },
-      {
-        "adapter": "BLS_API",
-        "event_kst": "2026-11-10T22:30+09:00",
-        "key": "core_cpi_mom",
-        "reference_period": "2026-10",
-        "result": "PARSED_REVISED_SERIES",
-        "title": "Consumer Price Index",
-        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026"
-      },
-      {
         "adapter": "KOSTAT_EMPLOYMENT",
-        "error": "KR_EMPLOYMENT_RELEASE_NOT_FOUND",
-        "result": "ValueError",
+        "result": "PARSED",
         "title": "2026년 10월 고용동향",
-        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list"
+        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid="
       }
     ],
     "lookback_days": 14,
@@ -141,16 +78,6 @@
     ],
     "unresolved_candidates": [
       {
-        "adapter": "BLS_cpi",
-        "date": "2026-11-10",
-        "fallback_tiers": [
-          "SECONDARY",
-          "MARKET_FEED"
-        ],
-        "official_adapter_status": "REGISTERED",
-        "title": "Consumer Price Index"
-      },
-      {
         "adapter": "KOSTAT_EMPLOYMENT",
         "date": "2026-11-11",
         "fallback_tiers": [
@@ -173,123 +100,36 @@
     ]
   },
   "actual_freshness": {
-    "checked_kst": "2026-11-11T11:12:38+09:00",
+    "checked_kst": "2026-11-11T14:30:50+09:00",
     "grace_minutes": 45,
     "official_checks": [
       {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_11102026.htm"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/archives/cpi_11102026.pdf"
-      },
-      {
-        "adapter": "BLS_cpi",
-        "error": "HTTP Error 403: Forbidden",
-        "response_prefix": "<!DOCTYPE HTML>\n<html lang=\"en-us\">      \n               <head> \n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title>Access Denied</title>\n</head>\n  <style type=\"text/css\">\n    .centerDiv\n    {\n      width: 60%;\n      height:200px;\n      margin: 0 auto;\n      background-color:#FFFFFF ;\n    }\n  </style>\n<body>\n<div class=\"ce",
-        "result": "HTTP_403",
-        "title": "Consumer Price Index",
-        "url": "https://www.bls.gov/news.release/history/cpi_11102026.txt"
-      },
-      {
-        "adapter": "BLS_API",
-        "reference_period": "2026-10",
-        "result": "REFERENCE_PERIOD_FROM_API",
-        "title": "Consumer Price Index"
-      },
-      {
-        "adapter": "BLS_API",
-        "error": "(2025, 10)",
-        "key": "cpi_yoy",
-        "result": "KeyError",
-        "series_id": "CUUR0000SA0"
-      },
-      {
-        "adapter": "BLS_API",
-        "event_kst": "2026-11-10T22:30+09:00",
-        "key": "cpi_mom",
-        "reference_period": "2026-10",
-        "result": "PARSED_REVISED_SERIES",
-        "title": "Consumer Price Index",
-        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026"
-      },
-      {
-        "adapter": "BLS_API",
-        "error": "(2025, 10)",
-        "key": "core_cpi_yoy",
-        "result": "KeyError",
-        "series_id": "CUUR0000SA0L1E"
-      },
-      {
-        "adapter": "BLS_API",
-        "event_kst": "2026-11-10T22:30+09:00",
-        "key": "core_cpi_mom",
-        "reference_period": "2026-10",
-        "result": "PARSED_REVISED_SERIES",
-        "title": "Consumer Price Index",
-        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026"
-      },
-      {
         "adapter": "KOSTAT_EMPLOYMENT",
-        "error": "KR_EMPLOYMENT_RELEASE_NOT_FOUND",
-        "result": "ValueError",
+        "result": "PARSED",
         "title": "2026년 10월 고용동향",
-        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list"
+        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid="
       }
     ],
-    "overdue_count": 2,
-    "overdue_events": [
-      {
-        "actual_due_kst": "2026-11-10T23:15:00+09:00",
-        "country": "US",
-        "datetime_kst": "2026-11-10T22:30:00+09:00",
-        "missing_metrics": [
-          "event.actual",
-          "cpi_yoy",
-          "core_cpi_yoy"
-        ],
-        "status": "OVERDUE",
-        "title": "Consumer Price Index"
-      },
-      {
-        "actual_due_kst": "2026-11-11T08:45:00+09:00",
-        "country": "KR",
-        "datetime_kst": "2026-11-11T08:00:00+09:00",
-        "missing_metrics": [
-          "event.actual",
-          "kr_unemployment_sa"
-        ],
-        "status": "OVERDUE",
-        "title": "2026년 10월 고용동향"
-      }
-    ],
+    "overdue_count": 0,
+    "overdue_events": [],
     "pending_count": 0,
     "pending_events": [],
-    "status": "DEGRADED",
+    "status": "LIVE",
     "unresolved_expiry": null
   },
   "all_event_enrichment": {
-    "checked_kst": "2026-11-11T11:12:33+09:00",
+    "checked_kst": "2026-11-11T14:30:42+09:00",
     "eligible_events": 190,
     "field_updates": 0,
     "matched_events": 3,
     "matched_metric_rows": 5,
     "missing_policy": "NEVER_INVENT_VALUES; NOT_PUBLISHED means source has not supplied a usable value",
     "row_reuse_contract": "REUSE_PRIMARY_ENRICHER_FETCH_V1",
-    "vendor_rows": 37
+    "vendor_rows": 65
   },
   "all_event_enrichment_contract": "ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1",
   "collection_health": {
-    "checked_kst": "2026-11-11T11:12:33+09:00",
+    "checked_kst": "2026-11-11T14:30:43+09:00",
     "contract": "PRIMARY_SOURCE_FAILURES_SEPARATE_FROM_OPTIONAL_OVERLAY_AVAILABILITY_V2",
     "failed_sources": [],
     "optional_source_warnings": [
@@ -876,7 +716,7 @@
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
       "previous": null,
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -1824,7 +1664,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-02-26",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_corrected_from": "2026-02-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -2979,7 +2819,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -4114,7 +3954,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-05-28",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_corrected_from": "2026-05-14T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -5359,7 +5199,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -5991,7 +5831,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -6391,7 +6231,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-08-27",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_corrected_from": "2026-08-13T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -6900,7 +6740,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -7970,7 +7810,7 @@
         }
       ],
       "market_value_status": "ACTUAL_AVAILABLE",
-      "official_reconcile_failed_kst": "2026-11-11T10:12:14+09:00",
+      "official_reconcile_failed_kst": "2026-11-11T14:30:44+09:00",
       "previous": "7.34M",
       "reference_period": "",
       "source": "BLS",
@@ -8128,7 +7968,7 @@
             },
             "previous": {
               "copied_from": "personal_spending",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.1%"
             }
@@ -8483,7 +8323,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -9176,13 +9016,13 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.9%"
             },
             "previous": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.5%"
             }
@@ -9264,7 +9104,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -9640,13 +9480,13 @@
             },
             "consensus": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             },
             "previous": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-11T11:12:26+09:00",
+              "quarantined_kst": "2026-11-11T14:30:33+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -10398,32 +10238,36 @@
     },
     {
       "_verified_override": true,
-      "actual": null,
+      "actual": "0.4%",
       "actual_backfill_checked_kst": "2026-11-11T11:12:26+09:00",
       "actual_due_kst": "2026-11-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
-      "actual_source": "FairEconomy/ForexFactory",
-      "actual_status": "OVERDUE",
+      "actual_source": "BLS_cpi official release",
+      "actual_status": "RELEASED",
       "actual_watch": true,
       "category": "물가/고용",
-      "checked_kst": "2026-11-11T00:34:29+09:00",
-      "consensus": null,
+      "checked_kst": "2026-11-11T11:12:26+09:00",
+      "consensus": "0.3%",
       "country": "US",
       "datetime_kst": "2026-11-10T22:30+09:00",
       "ff_match_score": 48,
       "history_ref": "US::consumer-price-index",
       "importance": 3,
-      "market_data_source": "FairEconomy/ForexFactory",
+      "market_data_source": "BLS_cpi official release",
       "market_metrics": [
         {
           "actual": null,
+          "actual_expected": false,
+          "availability_status": "OFFICIALLY_NOT_PUBLISHED",
           "consensus": null,
           "history_ref": "US::consumer-price-index::cpi_yoy",
           "key": "cpi_yoy",
           "label": "CPI YoY",
           "market_value_source": "BLS_cpi official release",
-          "market_value_status": "PREVIOUS_ONLY",
+          "market_value_status": "NOT_PUBLISHED",
+          "official_unavailable_reason": "OCT_2025_BASE_NOT_COLLECTED",
+          "official_unavailable_source_url": "https://www.bls.gov/news.release/archives/cpi_11102026.htm",
           "previous": "3.7%",
           "previous_observed_date": "2026-10-14",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
@@ -10458,12 +10302,16 @@
         },
         {
           "actual": null,
+          "actual_expected": false,
+          "availability_status": "OFFICIALLY_NOT_PUBLISHED",
           "consensus": null,
           "history_ref": "US::consumer-price-index::core_cpi_yoy",
           "key": "core_cpi_yoy",
           "label": "Core CPI YoY",
           "market_value_source": "BLS_cpi official release",
-          "market_value_status": "PREVIOUS_ONLY",
+          "market_value_status": "NOT_PUBLISHED",
+          "official_unavailable_reason": "OCT_2025_BASE_NOT_COLLECTED",
+          "official_unavailable_source_url": "https://www.bls.gov/news.release/archives/cpi_11102026.htm",
           "previous": "2.6%",
           "previous_observed_date": "2026-10-14",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
@@ -10497,64 +10345,150 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ],
-      "market_value_status": "PREVIOUS_ONLY",
+      "market_value_status": "ACTUAL_AVAILABLE",
+      "official_nonpublication": {
+        "metrics": [
+          "cpi_yoy",
+          "core_cpi_yoy"
+        ],
+        "reason": "OCT_2025_BASE_NOT_COLLECTED",
+        "source_url": "https://www.bls.gov/news.release/archives/cpi_11102026.htm"
+      },
       "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
-      "previous": "3.7%",
+      "previous": "0.6%",
       "previous_observed_date": "2026-10-14",
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "FairEconomy/ForexFactory",
       "reference_period": "",
-      "representative_metric_key": "cpi_yoy",
+      "representative_metric_key": "cpi_mom",
       "representative_value_contract": "CPI_HEADLINE_YOY_V1",
-      "source": "FairEconomy/ForexFactory",
-      "source_tier": "MARKET_FEED",
-      "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-      "surprise": null,
+      "series_id": "CUSR0000SA0",
+      "source": "BLS_cpi official release",
+      "source_tier": "OFFICIAL",
+      "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
+      "surprise": "actual_vs_consensus",
       "te_forecast": null,
       "title": "Consumer Price Index",
-      "verification_status": "MARKET_REPORTED"
+      "value_vintage": "LATEST_REVISION",
+      "verification_status": "VERIFIED_OFFICIAL_REVISED"
     },
     {
-      "actual": null,
-      "actual_backfill_checked_kst": "2026-11-11T11:12:26+09:00",
+      "actual": "2.5%",
+      "actual_backfill_checked_kst": "2026-11-11T14:30:33+09:00",
       "actual_due_kst": "2026-11-11T08:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
-      "actual_status": "OVERDUE",
+      "actual_source": "KOSTAT_EMPLOYMENT official release",
+      "actual_status": "RELEASED",
       "actual_watch": true,
       "category": "고용",
+      "checked_kst": "2026-11-11T14:30:33+09:00",
       "consensus": null,
       "country": "KR",
       "datetime_kst": "2026-11-11T08:00+09:00",
       "history_ref": "KR::고용동향",
       "importance": 2,
-      "market_data_source": "KOSTAT + 국가데이터처 2026년 9월 고용동향",
+      "market_data_source": "KOSTAT_EMPLOYMENT official release",
       "market_metrics": [
         {
-          "actual": null,
+          "actual": "2.5%",
+          "checked_kst": "2026-11-11T14:30:33+09:00",
           "history_ref": "KR::고용동향::kr_unemployment_sa",
           "key": "kr_unemployment_sa",
-          "label": "kr_unemployment_sa",
+          "label": "실업률 (계절조정)",
           "market_value_source": "국가데이터처 2026년 9월 고용동향",
           "market_value_status": "PREVIOUS_ONLY",
+          "official_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
           "previous": "2.6%",
           "previous_observed_date": "2026-10-16",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
           "previous_value_source": "국가데이터처 2026년 9월 고용동향",
-          "source": "국가데이터처 2026년 9월 고용동향"
+          "reference_period": "2026-10",
+          "source": "KOSTAT_EMPLOYMENT official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "value_vintage": "AS_RELEASED",
+          "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": "2%",
+          "checked_kst": "2026-11-11T14:30:33+09:00",
+          "history_ref": "KR::고용동향::kr_unemployment",
+          "key": "kr_unemployment",
+          "label": "실업률 (비계절조정)",
+          "market_value_source": "국가데이터처 2026년 9월 고용동향",
+          "market_value_status": "ACTUAL_AVAILABLE",
+          "official_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "previous": "2%",
+          "previous_observed_date": "2026-10-16",
+          "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
+          "previous_value_source": "국가데이터처 2026년 9월 고용동향",
+          "reference_period": "2026-10",
+          "source": "KOSTAT_EMPLOYMENT official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "value_vintage": "AS_RELEASED",
+          "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": "70.4%",
+          "checked_kst": "2026-11-11T14:30:33+09:00",
+          "history_ref": "KR::고용동향::kr_employment_rate",
+          "key": "kr_employment_rate",
+          "label": "15~64세 고용률 (OECD)",
+          "market_value_source": "국가데이터처 2026년 9월 고용동향",
+          "market_value_status": "ACTUAL_AVAILABLE",
+          "official_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "previous": "70.6%",
+          "previous_observed_date": "2026-10-16",
+          "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
+          "previous_value_source": "국가데이터처 2026년 9월 고용동향",
+          "reference_period": "2026-10",
+          "source": "KOSTAT_EMPLOYMENT official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "value_vintage": "AS_RELEASED",
+          "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": "29179",
+          "checked_kst": "2026-11-11T14:30:33+09:00",
+          "history_ref": "KR::고용동향::kr_employed",
+          "key": "kr_employed",
+          "label": "취업자 수 (천명)",
+          "market_value_source": "국가데이터처 2026년 9월 고용동향",
+          "market_value_status": "ACTUAL_AVAILABLE",
+          "official_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "previous": "29266",
+          "previous_observed_date": "2026-10-16",
+          "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
+          "previous_value_source": "국가데이터처 2026년 9월 고용동향",
+          "reference_period": "2026-10",
+          "source": "KOSTAT_EMPLOYMENT official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+          "value_vintage": "AS_RELEASED",
+          "verification_status": "VERIFIED_OFFICIAL"
         }
       ],
-      "market_value_status": "PREVIOUS_ONLY",
+      "market_value_status": "ACTUAL_AVAILABLE",
+      "official_release_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
+      "official_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
       "previous": "2.6%",
       "previous_observed_date": "2026-10-16",
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "국가데이터처 2026년 9월 고용동향",
       "reference_period": "",
+      "representative_metric_key": "kr_unemployment_sa",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "source": "KOSTAT",
+      "source": "KOSTAT_EMPLOYMENT official release",
+      "source_tier": "OFFICIAL",
+      "source_url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=view&list_no=447893&tag=&nPage=1&ref_bid=",
       "surprise": null,
       "te_forecast": null,
-      "title": "2026년 10월 고용동향"
+      "title": "2026년 10월 고용동향",
+      "value_vintage": "AS_RELEASED",
+      "verification_status": "VERIFIED_OFFICIAL"
     },
     {
       "actual": null,
@@ -10565,7 +10499,7 @@
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "고용",
-      "checked_kst": "2026-11-11T11:12:26+09:00",
+      "checked_kst": "2026-11-11T14:30:33+09:00",
       "consensus": "194K",
       "country": "US",
       "datetime_kst": "2026-11-12T22:30+09:00",
@@ -10577,7 +10511,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T11:12:33+09:00",
+          "checked_kst": "2026-11-11T14:30:42+09:00",
           "consensus": "194K",
           "datetime_source": "2026-11-12T08:30:00-05:00",
           "event_title": "Unemployment Claims",
@@ -10594,7 +10528,7 @@
           "previous_value_source": "FairEconomy/ForexFactory",
           "source": "FairEconomy/ForexFactory",
           "source_tier": "MARKET_FEED",
-          "source_url": "https://www.forexfactory.com/calendar?week=nov8.2026",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
           "verification_status": "MARKET_REPORTED"
         }
       ],
@@ -10622,7 +10556,7 @@
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "물가/고용",
-      "checked_kst": "2026-11-11T11:12:26+09:00",
+      "checked_kst": "2026-11-11T14:30:33+09:00",
       "consensus": "0.4%",
       "country": "US",
       "datetime_kst": "2026-11-13T22:30+09:00",
@@ -10634,7 +10568,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T11:12:33+09:00",
+          "checked_kst": "2026-11-11T14:30:42+09:00",
           "consensus": "0.4%",
           "datetime_source": "2026-11-13T08:30:00-05:00",
           "event_title": "PPI m/m",
@@ -10651,7 +10585,7 @@
           "previous_value_source": "FairEconomy/ForexFactory",
           "source": "FairEconomy/ForexFactory",
           "source_tier": "MARKET_FEED",
-          "source_url": "https://www.forexfactory.com/calendar?week=nov8.2026",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
           "verification_status": "MARKET_REPORTED"
         },
         {
@@ -10671,7 +10605,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T11:12:33+09:00",
+          "checked_kst": "2026-11-11T14:30:42+09:00",
           "consensus": "0.3%",
           "datetime_source": "2026-11-13T08:30:00-05:00",
           "event_title": "Core PPI m/m",
@@ -10688,7 +10622,7 @@
           "previous_value_source": "FairEconomy/ForexFactory",
           "source": "FairEconomy/ForexFactory",
           "source_tier": "MARKET_FEED",
-          "source_url": "https://www.forexfactory.com/calendar?week=nov8.2026",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
           "verification_status": "MARKET_REPORTED"
         },
         {
@@ -11014,7 +10948,7 @@
       "reference_period": "",
       "release_date": "2026-11-26",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-11T11:12:26+09:00",
+      "schedule_checked_kst": "2026-11-11T14:30:33+09:00",
       "schedule_corrected_from": "2026-11-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK",
@@ -11731,16 +11665,16 @@
           "label": "kr_unemployment_sa",
           "market_value_source": "국가데이터처 2026년 9월 고용동향",
           "market_value_status": "PREVIOUS_ONLY",
-          "previous": "2.6%",
-          "previous_observed_date": "2026-10-16",
+          "previous": "2.5%",
+          "previous_observed_date": "2026-11-11",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
           "previous_value_source": "국가데이터처 2026년 9월 고용동향",
           "source": "국가데이터처 2026년 9월 고용동향"
         }
       ],
       "market_value_status": "PREVIOUS_ONLY",
-      "previous": "2.6%",
-      "previous_observed_date": "2026-10-16",
+      "previous": "2.5%",
+      "previous_observed_date": "2026-11-11",
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "국가데이터처 2026년 9월 고용동향",
       "reference_period": "",
@@ -13273,23 +13207,23 @@
       "title": "U.S. Initial Jobless Claims"
     }
   ],
-  "generated_kst": "2026-11-11T11:12:34+09:00",
+  "generated_kst": "2026-11-11T14:30:43+09:00",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
   "key_event_seeded_kst": "2026-11-11T11:12:26+09:00",
   "market_event_refresh": {
     "dynamic_metric_matches": 1,
-    "faireconomy_rows": 105,
+    "faireconomy_rows": 106,
     "fedwatch_forecast_applied": true,
-    "refreshed_kst": "2026-11-11T11:12:33+09:00",
-    "representative_values_synced": 1,
+    "refreshed_kst": "2026-11-11T14:30:43+09:00",
+    "representative_values_synced": 2,
     "verified_overrides_applied": 132
   },
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "official_actual_contract": "OFFICIAL_REGISTRY_BACKFILL_V2",
-  "official_actual_updated_kst": "2026-11-11T11:12:34+09:00",
+  "official_actual_updated_kst": "2026-11-11T14:30:43+09:00",
   "official_macro_calendar_bridge": {
-    "checked_kst": "2026-11-11T11:12:34+09:00",
+    "checked_kst": "2026-11-11T14:30:43+09:00",
     "checks": [
       {
         "metric": "KR_CPI",
@@ -13352,15 +13286,15 @@
     ],
     "contract": "EXACT_REFERENCE_PERIOD_VERIFIED_OFFICIAL_ONLY_NO_INFERENCE",
     "eligible_mapping_count": 2,
-    "macro_generated_kst": "2026-11-11T05:37:41+09:00",
+    "macro_generated_kst": "2026-11-11T11:45:17+09:00",
     "matched_events": 2,
     "schema": "JJOONI_CALENDAR_OFFICIAL_MACRO_BRIDGE_V1",
     "updated_events": 0
   },
   "previous_value_contract": "LATEST_PRIOR_VERIFIED_ACTUAL_AS_PREVIOUS_FALLBACK_V1",
   "previous_value_fill": {
-    "event_rows": 53,
-    "metric_rows": 12,
+    "event_rows": 51,
+    "metric_rows": 16,
     "provenance": "SOURCE_OF_PRIOR_ACTUAL_PROPAGATED"
   },
   "quality": {
@@ -13373,31 +13307,20 @@
     }
   },
   "recent_historical_recovery": {
-    "checked_kst": "2026-11-11T11:12:33+09:00",
+    "checked_kst": "2026-11-11T14:30:43+09:00",
     "contract": "MARKET_FEED_RECOVERY_NEVER_OVERRIDES_HIGHER_TIER_ACTUALS",
     "fetch_errors": [],
-    "fetched_weeks": [
-      {
-        "rows": 64,
-        "source_url": "https://www.forexfactory.com/calendar?week=nov8.2026",
-        "week": "2026-11-08"
-      }
-    ],
+    "fetched_weeks": [],
     "field_updates": 0,
     "lookback_days": 120,
-    "matched_events": 3,
-    "matched_metric_rows": 5,
-    "overdue_after": 2,
-    "overdue_before": 2,
+    "matched_events": 0,
+    "matched_metric_rows": 0,
+    "overdue_after": 0,
+    "overdue_before": 0,
     "schema": "JJOONI_CALENDAR_RECENT_FF_RECOVERY_V1",
-    "target_overdue_dates": [
-      "2026-11-10",
-      "2026-11-11"
-    ],
-    "target_weeks": [
-      "2026-11-08"
-    ],
-    "vendor_rows": 64
+    "target_overdue_dates": [],
+    "target_weeks": [],
+    "vendor_rows": 0
   },
   "representative_value_contract": "PRIMARY_NON_PROBABILITY_METRIC_AFTER_MERGE_V1",
   "representative_value_sync": {
@@ -13405,7 +13328,7 @@
     "probability_overlay_events_guarded": 2
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
-  "retention_kst": "2026-11-11T11:12:34+09:00",
+  "retention_kst": "2026-11-11T14:30:43+09:00",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,

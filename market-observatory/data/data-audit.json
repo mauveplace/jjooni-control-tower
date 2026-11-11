@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-11T14:26:45+09:00",
+  "generated_kst": "2026-11-11T14:30:59+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 4,
+  "warning_count": 3,
   "observatory_session": "2026-11-10",
   "file_status": {
     "observatory": {
@@ -33,10 +33,10 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-11-11T11:12:34+09:00",
+      "generated_kst": "2026-11-11T14:30:43+09:00",
       "events": 190,
-      "actual_freshness": "DEGRADED",
-      "overdue_count": 2,
+      "actual_freshness": "LIVE",
+      "overdue_count": 0,
       "pending_count": 0,
       "collection_health": "LIVE",
       "failed_source_count": 0,
@@ -68,12 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-11T14:26:44+09:00",
+      "generated_kst": "2026-11-11T14:30:49+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
         "crypto",
-        "calendar",
         "audit"
       ]
     },
@@ -562,14 +561,14 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-11T12:37:22+09:00",
-      "current_quote_age_seconds": 6563,
+      "current_quote_age_seconds": 6817,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-11T12:37:23+09:00",
-      "current_quote_age_seconds": 6562,
+      "current_quote_age_seconds": 6816,
       "captured_quote_age_seconds": 0
     }
   },
@@ -582,17 +581,12 @@
     {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T12:37:22+09:00', 'current_quote_age_seconds': 6563, 'captured_quote_age_seconds': 0}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T12:37:22+09:00', 'current_quote_age_seconds': 6817, 'captured_quote_age_seconds': 0}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "WARN",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T12:37:23+09:00', 'current_quote_age_seconds': 6562, 'captured_quote_age_seconds': 0}"
-    },
-    {
-      "code": "CALENDAR_ACTUAL_DEGRADED",
-      "severity": "WARN",
-      "detail": "overdue_count=2 pending_count=0"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-11T12:37:23+09:00', 'current_quote_age_seconds': 6816, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
