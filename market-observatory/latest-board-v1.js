@@ -342,6 +342,16 @@ function renderCalendarSummary(){if(typeof CAL==='undefined'||!CAL){setHeader(TA
  customTile('MAJOR','다음 ★★★',major?.title||'예정 없음',major?`${major.country||''} · ${major.category||''}`:'','flat',time(major))
  ];setHeader(TAB_CONFIG.calendar.title,TAB_CONFIG.calendar.sub,String(CAL.generated_kst||'').replace('T',' ').slice(0,16),false);setGrid(rows.join(''),rows.length);pulseChips([`오늘 ${todayEvents.length}건`,`7일 ${week.length}건`,`★★★ ${weekHigh.length}건`,major?`다음 ★★★ ${time(major)}`:'다음 ★★★ —'])}
 function renderBoard(){const host=ensure();if(!host||typeof DATA==='undefined'||!DATA)return false;const tab=activeTab();if(!TAB_CONFIG[tab]){host.style.display='none';return true}host.style.display='';const cfg=TAB_CONFIG[tab]||TAB_CONFIG.overview;if(cfg.special==='sector')renderSector();else if(cfg.special==='tripod')renderTripod();else if(cfg.special==='calendar')renderCalendarSummary();else renderStandard(tab,cfg);if(tab==='indices')setTimeout(renderIndexPanel,0);return true}
+function renderCrypto(){
+ if(compareKey!=='D1')return;
+ const template=document.createElement('template');
+ for(const item of ITEMS.filter(cryptoItem)){
+   const card=document.querySelector(`#latestBoardGrid [data-metric="${item.k}"]`);
+   if(!card)continue;
+   template.innerHTML=standardTile(item);
+   card.replaceChildren(...template.content.firstElementChild.childNodes);
+ }
+}
 function hookRender(){const base=window.render;if(typeof base!=='function'||base.__latestBoardHooked)return false;const w=function(){const r=base.apply(this,arguments);setTimeout(renderBoard,0);return r};w.__latestBoardHooked=true;window.render=w;return true}
 function hookCalendar(){const base=window.renderCalendar;if(typeof base!=='function'||base.__latestBoardCalendarHooked)return false;const w=function(){const r=base.apply(this,arguments);if(['calendar','overview'].includes(activeTab()))setTimeout(renderBoard,0);return r};w.__latestBoardCalendarHooked=true;window.renderCalendar=w;return true}
 function ensureOfficialMacroRuntime(){
@@ -370,5 +380,5 @@ const st=document.createElement('style');st.textContent=`
 .latestTile[data-metric="TRIPOD_TARGET"]>strong,.latestTile[data-metric="TRIPOD_TREND"]>strong{white-space:normal;text-overflow:clip;overflow:visible;line-height:1.35;font-size:clamp(16px,2vw,24px);overflow-wrap:anywhere}.latestTile[data-metric^="TRIPOD_"] .latestTileFoot>span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.5}.tripodStageLegend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tripodStageLegend span{padding:6px 9px;border:1px solid #dce5ef;border-radius:8px;font-size:12px;color:#526071;background:#fff}.tripodStageLegend span.active{color:#153b65;background:#eaf3ff;border-color:#8fb2dc;font-weight:800}
 `;document.head.appendChild(st);
 let tries=0;const id=setInterval(()=>{tries++;ensureIndexShell();ensureOfficialMacroRuntime();hookRender();hookCalendar();bindTabs();if(renderBoard()&&tries>10&&window.__JJOONI_OFFICIAL_MACRO_V1)clearInterval(id);if(tries>120)clearInterval(id)},100);
-window.__JJOONI_LATEST_BOARD={version:'20261111-binance-utc',items:ITEMS,render:renderBoard,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
+window.__JJOONI_LATEST_BOARD={version:'20261111-binance-utc',items:ITEMS,render:renderBoard,renderCrypto,getSeries:seriesOf,getComparison:()=>({key:compareKey,...COMPARES[compareKey]}),getTripodDisplay:()=>tripodDisplayModel(typeof DATA==='undefined'?{}:DATA?.tripod_latest||{},typeof DATA==='undefined'?null:DATA?.us_completed_session_date,typeof DATA==='undefined'?[]:DATA?.tripod_history||[]),contract:'GROUPED_MARKET_BOARD_WITH_INDEX_TAB_PERIOD_COMPARISON_AND_SOURCE_BASIS',tabs:Object.keys(TAB_CONFIG),comparisons:Object.keys(COMPARES)};
 })();

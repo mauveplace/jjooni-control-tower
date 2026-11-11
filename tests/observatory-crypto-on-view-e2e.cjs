@@ -94,7 +94,7 @@ async function probeProvider(browser, width) {
     const pass = Object.values(result).every(row => row.currency === 'USDT' && row.observed &&
       /Binance (BTC|ETH)USDT/.test(row.source || ''));
     console.log('CRYPTO_BROWSER_LIVE=' + (pass ? 'PASS' : 'UNVERIFIED'), JSON.stringify({width, responses, result}));
-    if (pass) await page.locator(tile('BTCUSD')).screenshot({path: `crypto-view-live-${width}.png`});
+    if (pass) await page.screenshot({path: `crypto-view-live-${width}.png`});
   } finally {
     await page.close();
   }

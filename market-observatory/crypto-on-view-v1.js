@@ -157,7 +157,7 @@ function displayReason(key, publishedAt) {
 }
 
 function render() {
-  root.__JJOONI_LATEST_BOARD?.render?.();
+  root.__JJOONI_LATEST_BOARD?.renderCrypto?.();
   root.JjooniDailyGlance?.renderCrypto?.();
 }
 
