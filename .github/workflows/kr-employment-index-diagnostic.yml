@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 99ed1686786ea397c8ee8e4dca82f8edfaf39b46
       - name: Inspect public official listing without secrets
         run: |
           python - <<'PY'
@@ -30,3 +32,14 @@ jobs:
           except Exception as exc:
               print('PARSER_ERROR', type(exc).__name__, str(exc)[:150])
           PY
+          from official_calendar_collectors import collect_kr_employment
+          checks=[]
+          event={'title':'2026년 10월 고용동향'}
+          result=collect_kr_employment(event, checks)
+          if not result:
+              raise SystemExit('COLLECTOR_FAILED '+str(checks))
+          rows, source = result
+          values={r['key']:r['actual'] for r in rows}
+          print('LIVE_DISCOVERY', source, values)
+          assert values == {'kr_unemployment_sa':'2.5%','kr_unemployment':'2%', 'kr_employment_rate':'70.4%','kr_employed':'29179'}
+          assert all(r.get('reference_period')=='2026-10' for r in rows)
