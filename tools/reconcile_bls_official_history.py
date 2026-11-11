@@ -95,6 +95,16 @@ def official_values(code, year, month, fetch=fetch_series):
     return out
 
 
+def usual_period(event, code):
+    """YYYY-MM a release normally reports (release month minus the usual lag)."""
+    try:
+        day = date.fromisoformat(str(event.get('datetime_kst'))[:10])
+    except ValueError:
+        return None
+    year, month = next(candidate_months(day, code))
+    return f'{year}-{month:02d}'
+
+
 def resolve(event, code, fetch=fetch_series, claimed=()):
     """Pick the reference month with the most exact market-feed matches.
 
@@ -157,6 +167,15 @@ def apply(cal, hist, now=None, fetch=fetch_series):
         claimed = {str(x.get('reference_period') or '')[:7]
                    for o in cal.get('events') or [] if o is not e and DEFS.get(o.get('title'), (None,))[0] == code
                    for x in o.get('market_metrics') or [] if isinstance(x, dict) and is_official(x)}
+        # Each earlier release owns its usual reference month even before it is
+        # officially verified. Otherwise an incomplete target month silently
+        # falls back to an older month whose MoM happens to match: the
+        # 2026-11-10 CPI (YoY unpublished by BLS) was anchored to August 2026
+        # (Sep 11 release, same 0.4%/0.3% MoM) and got its 3.4%/2.4% YoY.
+        claimed |= {usual_period(o, code) for o in cal.get('events') or []
+                    if o is not e and DEFS.get(o.get('title'), (None,))[0] == code
+                    and str(o.get('datetime_kst') or '')[:10] < day}
+        claimed.discard(None)
         try:
             period, vals, anchors = resolve(e, code, fetch, claimed)
         except RuntimeError as exc:
