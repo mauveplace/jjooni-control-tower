@@ -1,8 +1,8 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-11T09:38:11+09:00",
+ "generated_kst": "2026-11-11T09:44:36+09:00",
  "us_session": "2026-11-10",
- "source_generated_kst": "2026-11-11T08:03:06+09:00",
+ "source_generated_kst": "2026-11-11T09:42:57+09:00",
  "read_only": true,
  "contains_account_data": false,
  "no_trade": true,
@@ -94,18 +94,18 @@
     {
      "key": "KOSPI",
      "label": "코스피",
-     "date": "2026-11-09",
-     "value": 5018.85,
-     "d1_pct": -0.81,
-     "w1_pct": -14.34
+     "date": "2026-11-11",
+     "value": 5217.78,
+     "d1_pct": -0.41,
+     "w1_pct": -8.2
     },
     {
      "key": "KOSDAQ",
      "label": "코스닥",
-     "date": "2026-11-09",
-     "value": 638.97,
-     "d1_pct": -0.82,
-     "w1_pct": -12.99
+     "date": "2026-11-11",
+     "value": 688.33,
+     "d1_pct": 3.1,
+     "w1_pct": -3.72
     },
     {
      "key": "NIKKEI225",
@@ -139,18 +139,18 @@
     {
      "key": "USDKRW",
      "label": "원/달러",
-     "date": "2026-11-10",
-     "value": 1342.3,
-     "d1_pct": -1.5,
-     "w1_pct": -0.19
+     "date": "2026-11-11",
+     "value": 1339.34,
+     "d1_pct": -0.33,
+     "w1_pct": -0.27
     },
     {
      "key": "DXY",
      "label": "달러인덱스",
      "date": "2026-11-10",
-     "value": 102.232,
-     "d1_pct": 0.57,
-     "w1_pct": 0.36
+     "value": 102.217,
+     "d1_pct": 0.56,
+     "w1_pct": 0.34
     },
     {
      "key": "US10Y",
@@ -192,28 +192,28 @@
      "key": "GOLD",
      "label": "금",
      "date": "2026-11-10",
-     "value": 4040.5,
-     "d1_pct": -1.8,
-     "w1_pct": 2.54
+     "value": 4042.3,
+     "d1_pct": -1.75,
+     "w1_pct": 2.59
     },
     {
      "key": "WTI",
      "label": "WTI",
      "date": "2026-11-10",
-     "value": 86.44,
-     "d1_pct": -0.47,
-     "w1_pct": -10.04
+     "value": 86.2,
+     "d1_pct": -0.75,
+     "w1_pct": -10.29
     },
     {
      "key": "BTCUSD",
      "label": "비트코인",
-     "date": "2026-11-10",
-     "value": 73651.47,
+     "date": "2026-11-11",
+     "value": 73626.0,
      "quote_currency": "USDT",
      "source": "Binance Spot last trade / USDT",
-     "observed_kst": "2026-11-11T08:03:09+09:00",
+     "observed_kst": "2026-11-11T09:43:17+09:00",
      "comparison_status": "SAME_CURRENCY_COMPLETED",
-     "d1_pct": -2.28,
+     "d1_pct": -0.23,
      "w1_pct": null
     }
    ]
@@ -221,20 +221,12 @@
  ],
  "cross_read": [
   {
-   "type": "ASIA_CROSS",
-   "kind": "항셍·상하이종합와 동조, 닛케이225는 상대 선방",
-   "kospi_d1_pct": -0.81,
-   "peer_avg_d1_pct": 0.84,
-   "gap_pp": -1.65,
-   "text": "2026-11-09 코스피 -0.81% vs 닛케이225 +2.33%, 항셍 -0.13%, 상하이종합 +0.32% → 항셍·상하이종합와 동조, 닛케이225는 상대 선방"
-  },
-  {
    "type": "TIME_LAG",
-   "text": "한국 최근 종가(2026-11-09)는 미국 2026-11-10 장 이전입니다. 나스닥100 -0.60%는 다음 KRX 세션에 반영됩니다."
+   "text": "한국 최근 종가(2026-11-11)는 미국 2026-11-10 장을 이미 반영했습니다."
   },
   {
    "type": "FX",
-   "text": "원/달러 1,342.3원(-1.50%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
+   "text": "원/달러 1,339.3원(-0.33%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
   }
  ],
  "brief_check": {
