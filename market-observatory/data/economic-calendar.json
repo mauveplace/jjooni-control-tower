@@ -1,7 +1,14 @@
 {
   "actual_backfill": {
-    "checked_kst": "2026-11-11T07:00:50+09:00",
+    "checked_kst": "2026-11-11T09:43:01+09:00",
     "checks": [
+      {
+        "adapter": "KOSTAT_EMPLOYMENT",
+        "error": "KR_EMPLOYMENT_RELEASE_NOT_FOUND",
+        "result": "ValueError",
+        "title": "2026년 10월 고용동향",
+        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list"
+      },
       {
         "adapter": "BLS_cpi",
         "error": "HTTP Error 403: Forbidden",
@@ -28,14 +35,41 @@
       },
       {
         "adapter": "BLS_API",
-        "error": "BLS_API_REQUEST_FAILED: ['The key:ba55697a0cc162d6a1a33874d3b228f47721dfe3f10fa0e84e93a5914039d040 provided by the User is invalid. Please provide a proper key for the operation to be successful']",
-        "result": "LATEST_PERIOD_LOOKUP_FAILED",
+        "reference_period": "2026-10",
+        "result": "REFERENCE_PERIOD_FROM_API",
         "title": "Consumer Price Index"
       },
       {
         "adapter": "BLS_API",
-        "result": "REFERENCE_PERIOD_MISSING",
-        "title": "Consumer Price Index"
+        "error": "(2025, 10)",
+        "key": "cpi_yoy",
+        "result": "KeyError",
+        "series_id": "CUUR0000SA0"
+      },
+      {
+        "adapter": "BLS_API",
+        "event_kst": "2026-11-10T22:30+09:00",
+        "key": "cpi_mom",
+        "reference_period": "2026-10",
+        "result": "PARSED_REVISED_SERIES",
+        "title": "Consumer Price Index",
+        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026"
+      },
+      {
+        "adapter": "BLS_API",
+        "error": "(2025, 10)",
+        "key": "core_cpi_yoy",
+        "result": "KeyError",
+        "series_id": "CUUR0000SA0L1E"
+      },
+      {
+        "adapter": "BLS_API",
+        "event_kst": "2026-11-10T22:30+09:00",
+        "key": "core_cpi_mom",
+        "reference_period": "2026-10",
+        "result": "PARSED_REVISED_SERIES",
+        "title": "Consumer Price Index",
+        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026"
       }
     ],
     "lookback_days": 14,
@@ -107,6 +141,16 @@
     ],
     "unresolved_candidates": [
       {
+        "adapter": "KOSTAT_EMPLOYMENT",
+        "date": "2026-11-11",
+        "fallback_tiers": [
+          "SECONDARY",
+          "MARKET_FEED"
+        ],
+        "official_adapter_status": "REGISTERED",
+        "title": "2026년 10월 고용동향"
+      },
+      {
         "adapter": "BLS_cpi",
         "date": "2026-11-10",
         "fallback_tiers": [
@@ -129,9 +173,16 @@
     ]
   },
   "actual_freshness": {
-    "checked_kst": "2026-11-11T07:01:02+09:00",
+    "checked_kst": "2026-11-11T09:43:34+09:00",
     "grace_minutes": 45,
     "official_checks": [
+      {
+        "adapter": "KOSTAT_EMPLOYMENT",
+        "error": "KR_EMPLOYMENT_RELEASE_NOT_FOUND",
+        "result": "ValueError",
+        "title": "2026년 10월 고용동향",
+        "url": "https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list"
+      },
       {
         "adapter": "BLS_cpi",
         "error": "HTTP Error 403: Forbidden",
@@ -158,17 +209,44 @@
       },
       {
         "adapter": "BLS_API",
-        "error": "BLS_API_REQUEST_FAILED: ['The key:ba55697a0cc162d6a1a33874d3b228f47721dfe3f10fa0e84e93a5914039d040 provided by the User is invalid. Please provide a proper key for the operation to be successful']",
-        "result": "LATEST_PERIOD_LOOKUP_FAILED",
+        "reference_period": "2026-10",
+        "result": "REFERENCE_PERIOD_FROM_API",
         "title": "Consumer Price Index"
       },
       {
         "adapter": "BLS_API",
-        "result": "REFERENCE_PERIOD_MISSING",
-        "title": "Consumer Price Index"
+        "error": "(2025, 10)",
+        "key": "cpi_yoy",
+        "result": "KeyError",
+        "series_id": "CUUR0000SA0"
+      },
+      {
+        "adapter": "BLS_API",
+        "event_kst": "2026-11-10T22:30+09:00",
+        "key": "cpi_mom",
+        "reference_period": "2026-10",
+        "result": "PARSED_REVISED_SERIES",
+        "title": "Consumer Price Index",
+        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026"
+      },
+      {
+        "adapter": "BLS_API",
+        "error": "(2025, 10)",
+        "key": "core_cpi_yoy",
+        "result": "KeyError",
+        "series_id": "CUUR0000SA0L1E"
+      },
+      {
+        "adapter": "BLS_API",
+        "event_kst": "2026-11-10T22:30+09:00",
+        "key": "core_cpi_mom",
+        "reference_period": "2026-10",
+        "result": "PARSED_REVISED_SERIES",
+        "title": "Consumer Price Index",
+        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026"
       }
     ],
-    "overdue_count": 1,
+    "overdue_count": 2,
     "overdue_events": [
       {
         "actual_due_kst": "2026-11-10T23:15:00+09:00",
@@ -181,6 +259,17 @@
         ],
         "status": "OVERDUE",
         "title": "Consumer Price Index"
+      },
+      {
+        "actual_due_kst": "2026-11-11T08:45:00+09:00",
+        "country": "KR",
+        "datetime_kst": "2026-11-11T08:00:00+09:00",
+        "missing_metrics": [
+          "event.actual",
+          "kr_unemployment_sa"
+        ],
+        "status": "OVERDUE",
+        "title": "2026년 10월 고용동향"
       }
     ],
     "pending_count": 0,
@@ -189,7 +278,7 @@
     "unresolved_expiry": null
   },
   "all_event_enrichment": {
-    "checked_kst": "2026-11-11T07:00:54+09:00",
+    "checked_kst": "2026-11-11T09:43:08+09:00",
     "eligible_events": 190,
     "field_updates": 0,
     "matched_events": 3,
@@ -200,7 +289,7 @@
   },
   "all_event_enrichment_contract": "ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1",
   "collection_health": {
-    "checked_kst": "2026-11-11T07:00:53+09:00",
+    "checked_kst": "2026-11-11T09:43:07+09:00",
     "contract": "PRIMARY_SOURCE_FAILURES_SEPARATE_FROM_OPTIONAL_OVERLAY_AVAILABILITY_V2",
     "failed_sources": [],
     "optional_source_warnings": [
@@ -787,7 +876,7 @@
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
       "previous": null,
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -1735,7 +1824,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-02-26",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_corrected_from": "2026-02-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -2890,7 +2979,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -4025,7 +4114,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-05-28",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_corrected_from": "2026-05-14T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -5270,7 +5359,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -5902,7 +5991,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -6302,7 +6391,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-08-27",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_corrected_from": "2026-08-13T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -6811,7 +6900,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -8039,7 +8128,7 @@
             },
             "previous": {
               "copied_from": "personal_spending",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.1%"
             }
@@ -8394,7 +8483,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -9087,13 +9176,13 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.9%"
             },
             "previous": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.5%"
             }
@@ -9175,7 +9264,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -9551,13 +9640,13 @@
             },
             "consensus": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             },
             "previous": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-11T07:00:50+09:00",
+              "quarantined_kst": "2026-11-11T09:43:01+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -10310,7 +10399,7 @@
     {
       "_verified_override": true,
       "actual": null,
-      "actual_backfill_checked_kst": "2026-11-11T07:00:50+09:00",
+      "actual_backfill_checked_kst": "2026-11-11T09:43:01+09:00",
       "actual_due_kst": "2026-11-10T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
@@ -10343,7 +10432,7 @@
         },
         {
           "actual": "0.4%",
-          "checked_kst": "2026-11-11T00:41:41+09:00",
+          "checked_kst": "2026-11-11T09:43:01+09:00",
           "consensus": "0.3%",
           "datetime_source": "2026-11-10T08:30:00-05:00",
           "event_title": "CPI m/m",
@@ -10383,7 +10472,7 @@
         },
         {
           "actual": "0.3%",
-          "checked_kst": "2026-11-11T00:41:41+09:00",
+          "checked_kst": "2026-11-11T09:43:01+09:00",
           "consensus": "0.2%",
           "datetime_source": "2026-11-10T08:30:00-05:00",
           "event_title": "Core CPI m/m",
@@ -10427,10 +10516,11 @@
     },
     {
       "actual": null,
+      "actual_backfill_checked_kst": "2026-11-11T09:43:01+09:00",
       "actual_due_kst": "2026-11-11T08:45:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
-      "actual_status": "SCHEDULED",
+      "actual_status": "OVERDUE",
       "actual_watch": true,
       "category": "고용",
       "consensus": null,
@@ -10475,7 +10565,7 @@
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "고용",
-      "checked_kst": "2026-11-11T07:00:50+09:00",
+      "checked_kst": "2026-11-11T09:43:01+09:00",
       "consensus": "194K",
       "country": "US",
       "datetime_kst": "2026-11-12T22:30+09:00",
@@ -10487,7 +10577,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T07:00:54+09:00",
+          "checked_kst": "2026-11-11T09:43:08+09:00",
           "consensus": "194K",
           "datetime_source": "2026-11-12T08:30:00-05:00",
           "event_title": "Unemployment Claims",
@@ -10532,7 +10622,7 @@
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "물가/고용",
-      "checked_kst": "2026-11-11T07:00:50+09:00",
+      "checked_kst": "2026-11-11T09:43:01+09:00",
       "consensus": "0.4%",
       "country": "US",
       "datetime_kst": "2026-11-13T22:30+09:00",
@@ -10544,7 +10634,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T07:00:54+09:00",
+          "checked_kst": "2026-11-11T09:43:08+09:00",
           "consensus": "0.4%",
           "datetime_source": "2026-11-13T08:30:00-05:00",
           "event_title": "PPI m/m",
@@ -10581,7 +10671,7 @@
         {
           "actual": null,
           "actual_source": "FairEconomy/ForexFactory",
-          "checked_kst": "2026-11-11T07:00:54+09:00",
+          "checked_kst": "2026-11-11T09:43:08+09:00",
           "consensus": "0.3%",
           "datetime_source": "2026-11-13T08:30:00-05:00",
           "event_title": "Core PPI m/m",
@@ -10924,7 +11014,7 @@
       "reference_period": "",
       "release_date": "2026-11-26",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-11T07:00:50+09:00",
+      "schedule_checked_kst": "2026-11-11T09:43:01+09:00",
       "schedule_corrected_from": "2026-11-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK",
@@ -11365,7 +11455,7 @@
       "consensus": null,
       "country": "US",
       "datetime_kst": "2026-12-10T04:00+09:00",
-      "fedwatch_as_of": "2026-11-09",
+      "fedwatch_as_of": "2026-11-10",
       "history_ref": "US::fomc-정책결정",
       "importance": 3,
       "market_data_source": "Federal Reserve official FOMC statement + FairEconomy/ForexFactory + CME Fed Funds futures settlement-derived",
@@ -11386,12 +11476,12 @@
         },
         {
           "actual": null,
-          "consensus": "84.0%",
+          "consensus": "90.9%",
           "key": "fedwatch_hike_25bp",
-          "label": "CME FedWatch 25bp 인상확률 (2026-11-09 기준)",
+          "label": "CME FedWatch 25bp 인상확률 (2026-11-10 기준)",
           "market_value_status": "CONSENSUS_AVAILABLE",
           "metric_type": "market_probability_snapshot",
-          "observed_date": "2026-11-09",
+          "observed_date": "2026-11-10",
           "source": "CME Fed Funds futures settlement-derived",
           "value_role": "market_forecast"
         }
@@ -13183,23 +13273,23 @@
       "title": "U.S. Initial Jobless Claims"
     }
   ],
-  "generated_kst": "2026-11-11T07:00:55+09:00",
+  "generated_kst": "2026-11-11T09:43:09+09:00",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
-  "key_event_seeded_kst": "2026-11-11T00:41:41+09:00",
+  "key_event_seeded_kst": "2026-11-11T09:43:00+09:00",
   "market_event_refresh": {
     "dynamic_metric_matches": 1,
     "faireconomy_rows": 105,
     "fedwatch_forecast_applied": true,
-    "refreshed_kst": "2026-11-11T07:00:53+09:00",
+    "refreshed_kst": "2026-11-11T09:43:08+09:00",
     "representative_values_synced": 1,
     "verified_overrides_applied": 132
   },
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "official_actual_contract": "OFFICIAL_REGISTRY_BACKFILL_V2",
-  "official_actual_updated_kst": "2026-11-11T07:00:55+09:00",
+  "official_actual_updated_kst": "2026-11-11T09:43:09+09:00",
   "official_macro_calendar_bridge": {
-    "checked_kst": "2026-11-11T07:00:55+09:00",
+    "checked_kst": "2026-11-11T09:43:09+09:00",
     "checks": [
       {
         "metric": "KR_CPI",
@@ -13283,7 +13373,7 @@
     }
   },
   "recent_historical_recovery": {
-    "checked_kst": "2026-11-11T07:00:54+09:00",
+    "checked_kst": "2026-11-11T09:43:08+09:00",
     "contract": "MARKET_FEED_RECOVERY_NEVER_OVERRIDES_HIGHER_TIER_ACTUALS",
     "fetch_errors": [],
     "fetched_weeks": [
@@ -13297,11 +13387,12 @@
     "lookback_days": 120,
     "matched_events": 3,
     "matched_metric_rows": 5,
-    "overdue_after": 1,
-    "overdue_before": 1,
+    "overdue_after": 2,
+    "overdue_before": 2,
     "schema": "JJOONI_CALENDAR_RECENT_FF_RECOVERY_V1",
     "target_overdue_dates": [
-      "2026-11-10"
+      "2026-11-10",
+      "2026-11-11"
     ],
     "target_weeks": [
       "2026-11-08"
@@ -13314,7 +13405,7 @@
     "probability_overlay_events_guarded": 2
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
-  "retention_kst": "2026-11-11T07:00:55+09:00",
+  "retention_kst": "2026-11-11T09:43:09+09:00",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,
@@ -13344,7 +13435,7 @@
   ],
   "stockchild_gap_review": {
     "candidate_events": [],
-    "checked_kst": "2026-11-11T00:34:38+09:00",
+    "checked_kst": "2026-11-11T09:43:13+09:00",
     "contract": "OPTIONAL_MISSING_SCHEDULE_CANDIDATES_ONLY_NEVER_OFFICIAL",
     "schema": "JJOONI_CALENDAR_STOCKCHILD_GAP_REVIEW_V1",
     "source": "https://stockchild.com",
