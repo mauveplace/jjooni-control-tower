@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261112-MOBILE-FIRST-027",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review a phone/tablet-only JJOONI-first review-loop improvement for safe bounded ROY participation; assess the deterministic review step helper, user-facing protocol, dedupe, budget escalation and actual GitHub/Claude Routine limitations before any merge.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Confirm ai-collab/mobile_review_loop.py and its unit tests never treat an unverified PASS, exhausted review budget, or stale unchanged HEAD as permission to merge/deploy.",
+    "Verify low-risk JJOONI-only fixes avoid unnecessary ROY invocations while security/market data/strategy changes still require independent review.",
+    "Challenge mobile-first owner workflow and PR-log format against active PROTOCOL.md, ROUTINES.md, OPERATIONS.md and actual Claude event capabilities.",
+    "Provide current exact full PR HEAD, evidence-backed PASS/NEEDS_CHANGES/BLOCKED and actual first-party Claude session provenance; do not self-approve or merge."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets, non-public company/account/customer data, or connected financial data",
+    "No production code release, merge, external Routine settings, or trading orders",
+    "No new paid model API, local CLI owner dependency, or cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "architecture",
+  "coordination_notes": "ROY is a read-only reviewer only, triggered on a genuine new PR.opened event if connected Claude Routine supports this repository. Owner is tablet-only. Proposal changes only AI collaboration helper/tests/docs, no production or permissions. Max 2 distinct verified reviews then escalation, not pass."
+}
