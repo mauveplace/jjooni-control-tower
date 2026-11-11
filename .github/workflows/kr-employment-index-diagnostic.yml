@@ -1,0 +1,32 @@
+name: KR employment official index diagnostic
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/kr-employment-index-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect public official listing without secrets
+        run: |
+          python - <<'PY'
+          import sys, urllib.parse
+          sys.path.insert(0, 'tools')
+          from official_calendar_collectors import raw_fetch, Links, text_fetch, parse_kr_employment
+          index = 'https://mods.go.kr/board.es?mid=a10301030200&bid=210&act=list'
+          raw = raw_fetch(index).decode('utf-8', errors='replace')
+          rows = [(u, ' '.join(t.split())) for u, t in Links(raw).rows if '고용동향' in t]
+          print('OFFICIAL_INDEX_MATCHES', len(rows))
+          for u, t in rows[:15]:
+              print('ROW', repr(t[:120]), repr(u[:240]))
+          page = 'https://mods.go.kr/board.es?act=view&bid=210&list_no=447893&mid=a10301030100'
+          try:
+              result = parse_kr_employment(text_fetch(page), 2026, 10)
+              print('PARSER', [(r['key'], r['actual']) for r in result])
+          except Exception as exc:
+              print('PARSER_ERROR', type(exc).__name__, str(exc)[:150])
+          PY
