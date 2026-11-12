@@ -313,6 +313,18 @@ def materialize_health(paths):
 def fedwatch_source_problem(fedwatch, calendar):
     """Return why fed-watch.json / the FOMC rows cannot be trusted, else None."""
     from datetime import date
+    if not isinstance(fedwatch, dict):
+        return f'fed-watch.json is {type(fedwatch).__name__}, not an object'
+    if not isinstance(calendar, dict):
+        return f'economic-calendar.json is {type(calendar).__name__}, not an object'
+    events = calendar.get('events')
+    if not isinstance(events, list):
+        return f'calendar events is {type(events).__name__}, not a list'
+    for index, event in enumerate(events):
+        if not isinstance(event, dict):
+            return f'calendar event[{index}] is {type(event).__name__}, not an object'
+        if not isinstance(event.get('market_metrics') or [], list):
+            return f'calendar event[{index}].market_metrics is not a list'
     meeting, as_of = fedwatch.get('meeting_date'), fedwatch.get('market_data_as_of')
     try:
         meeting_day, as_of_day = date.fromisoformat(str(meeting)), date.fromisoformat(str(as_of))
@@ -370,15 +382,22 @@ def materialize_calendar_fedwatch(paths):
         calendar.pop('fedwatch_metric_status', None)
     else:
         # Legitimate meeting roll to a valid future meeting the calendar has not
-        # seeded yet: omit only the FedWatch metric, explicitly, and keep every
-        # other indicator publishable. No row may claim the current observation.
-        as_of = fedwatch.get('market_data_as_of')
-        for event in calendar.get('events') or []:
+        # seeded yet: invalidate EVERY FedWatch row (any meeting, any as-of) so no
+        # old probability can be read as current, keep all unrelated metrics, and
+        # strip only FedWatch-specific event provenance. Other indicators publish.
+        from calendar_market_events import FEDWATCH_SOURCE_LABELS, merge_sources
+        for event in calendar['events']:
             rows = event.get('market_metrics') or []
-            kept = [m for m in rows if not (isinstance(m, dict) and m.get('key') == 'fedwatch_hike_25bp'
-                                            and m.get('observed_date') == as_of)]
+            kept = [m for m in rows if not (isinstance(m, dict) and m.get('key') == 'fedwatch_hike_25bp')]
             if len(kept) != len(rows):
                 event['market_metrics'] = kept
+            if 'fedwatch_as_of' in event:
+                event.pop('fedwatch_as_of')
+            if event.get('market_data_source'):
+                tokens = [t.strip() for t in str(event['market_data_source']).split(' + ')
+                          if t.strip() and t.strip() not in FEDWATCH_SOURCE_LABELS]
+                event['market_data_source'] = merge_sources(*tokens)
+        as_of = fedwatch.get('market_data_as_of')
         calendar['fedwatch_metric_status'] = {
             'status': 'UNAVAILABLE_NO_CALENDAR_EVENT',
             'meeting_date': fedwatch.get('meeting_date'),

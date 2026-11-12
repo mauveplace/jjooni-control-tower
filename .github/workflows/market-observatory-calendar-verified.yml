@@ -82,7 +82,8 @@ jobs:
               # omitted explicitly, and no row may carry the current observation.
               assert fw_status.get('status')=='UNAVAILABLE_NO_CALENDAR_EVENT',fw_status
               assert fw_status.get('meeting_date')==fwd['meeting_date'] and fw_status.get('market_data_as_of')==fwd['market_data_as_of'],fw_status
-              assert not any(m.get('key')=='fedwatch_hike_25bp' and m.get('observed_date')==fwd['market_data_as_of'] for e in events for m in (e.get('market_metrics') or [])),'FedWatch row without target'
+              assert not any(m.get('key')=='fedwatch_hike_25bp' for e in events for m in (e.get('market_metrics') or [])),'FedWatch row while UNAVAILABLE'
+              assert not any(e.get('fedwatch_as_of') for e in events),'fedwatch_as_of while UNAVAILABLE'
               fw={'previous':None,'consensus':'UNAVAILABLE'}
           else:
               assert fw_status.get('status')!='UNAVAILABLE_NO_CALENDAR_EVENT',fw_status
