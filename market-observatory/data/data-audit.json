@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-12T10:57:17+09:00",
+  "generated_kst": "2026-11-12T11:13:28+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 1,
@@ -12,12 +12,12 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-12T10:57:17+09:00",
+      "generated_kst": "2026-11-12T11:13:28+09:00",
       "session": "2026-11-11",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-12T10:57:17+09:00",
+      "generated_kst": "2026-11-12T11:13:28+09:00",
       "session": "2026-11-11",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-12T10:57:15+09:00",
+      "generated_kst": "2026-11-12T11:13:26+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -77,9 +77,9 @@
       ]
     },
     "watchdog": {
-      "checked_kst": "2026-11-12T08:50:46+09:00",
-      "result": "REPAIRED",
-      "decision": "REPAIR"
+      "checked_kst": "2026-11-12T10:58:01+09:00",
+      "result": "HEALTHY_NOOP",
+      "decision": "NOOP"
     }
   },
   "groups": {
@@ -561,14 +561,14 @@
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-12T10:56:58+09:00",
-      "current_quote_age_seconds": 19,
+      "current_quote_age_seconds": 990,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-12T10:56:59+09:00",
-      "current_quote_age_seconds": 18,
+      "current_quote_age_seconds": 989,
       "captured_quote_age_seconds": 0
     }
   },
