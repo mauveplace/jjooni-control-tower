@@ -1,39 +1,39 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-12T14:59:13+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-11-12T15:08:01+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "observatory_session": "2026-11-11",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-11-12T14:58:32+09:00",
+      "generated_kst": "2026-11-12T15:07:20+09:00",
       "session": "2026-11-11",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-12T14:59:13+09:00",
+      "generated_kst": "2026-11-12T15:08:00+09:00",
       "session": "2026-11-11",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-12T14:59:13+09:00",
+      "generated_kst": "2026-11-12T15:08:00+09:00",
       "session": "2026-11-11",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
     },
     "fedwatch": {
-      "generated_kst": "2026-11-11T09:42:57+09:00",
-      "source_kind": "CME_OFFICIAL_PUBLIC_TABLE",
+      "generated_kst": "2026-11-12T15:07:21+09:00",
+      "source_kind": null,
       "source_as_of_kst": null,
-      "market_data_as_of": "2026-11-10",
-      "expected_market_data_date": "2026-11-10",
+      "market_data_as_of": "2026-11-11",
+      "expected_market_data_date": "2026-11-11",
       "audit_expected_market_data_date": "2026-11-10",
       "declared_freshness": "LIVE",
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-11-12T14:58:41+09:00",
+      "generated_kst": "2026-11-12T15:07:27+09:00",
       "events": 190,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-12T14:58:53+09:00",
+      "generated_kst": "2026-11-12T15:07:41+09:00",
       "as_of_date": "2026-11-11",
       "priced_count": 46
     },
@@ -68,14 +68,13 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-12T14:59:10+09:00",
+      "generated_kst": "2026-11-12T15:07:57+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
         "energy",
         "fx",
         "metals",
-        "kr_rates",
         "audit"
       ]
     },
@@ -383,7 +382,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": "2026-11-12",
       "allow_lag_days": 4,
       "critical": false,
@@ -438,11 +437,7 @@
         }
       },
       "missing": [],
-      "latest_mismatch": [],
-      "fetch_succeeded": false,
-      "failed_series": {
-        "KR20Y": "RuntimeError:ECOS_010220000_INFO-200"
-      }
+      "latest_mismatch": []
     },
     "jp_rates": {
       "state": "LIVE",
@@ -513,17 +508,17 @@
         "BTCUSD": {
           "count": 1108,
           "last_date": "2026-11-12",
-          "last_value": 73574.02,
+          "last_value": 73558.82,
           "group": "crypto",
-          "latest_value": 73574.02,
+          "latest_value": 73558.82,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1108,
           "last_date": "2026-11-12",
-          "last_value": 2046.68,
+          "last_value": 2047.9,
           "group": "crypto",
-          "latest_value": 2046.68,
+          "latest_value": 2047.9,
           "latest_matches": true
         }
       },
@@ -555,7 +550,7 @@
       "critical": false,
       "items": {
         "FEDWATCH": {
-          "last_date": "2026-11-10",
+          "last_date": "2026-11-11",
           "last_value": null
         }
       },
@@ -567,25 +562,19 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-12T14:58:50+09:00",
-      "current_quote_age_seconds": 23,
+      "quote_as_of_kst": "2026-11-12T15:07:37+09:00",
+      "current_quote_age_seconds": 24,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-12T14:58:50+09:00",
+      "quote_as_of_kst": "2026-11-12T15:07:38+09:00",
       "current_quote_age_seconds": 23,
       "captured_quote_age_seconds": 0
     }
   },
-  "issues": [
-    {
-      "code": "GROUP_KR_RATES_STALE",
-      "severity": "WARN",
-      "detail": "anchor=2026-11-12 dates=KR3Y:2026-11-11,KR5Y:2026-11-11,KR10Y:2026-11-11,KR20Y:2026-11-11,KR30Y:2026-11-11,KR_3S10S:2026-11-11"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY",

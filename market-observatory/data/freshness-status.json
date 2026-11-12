@@ -1,17 +1,14 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-12T14:59:13+09:00",
+  "generated_kst": "2026-11-12T15:08:01+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE_WITH_WARNINGS",
+  "overall": "LIVE",
   "critical_bad": [],
-  "warnings": [
-    "kr_rates",
-    "audit"
-  ],
+  "warnings": [],
   "watchdog_required": false,
   "session_alignment": {
     "expected_session": "2026-11-11",
@@ -31,7 +28,7 @@
     "market": {
       "label": "Market SSOT",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:58:32+09:00",
+      "generated_kst": "2026-11-12T15:07:20+09:00",
       "as_of": "2026-11-11",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
       "source": "observatory.json",
@@ -85,7 +82,7 @@
     "us_rates": {
       "label": "US Rates",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:58:32+09:00",
+      "generated_kst": "2026-11-12T15:07:20+09:00",
       "as_of": "2026-11-10",
       "detail": "US3M 2026-11-10 · US2Y 2026-11-10 · US5Y_OFFICIAL 2026-11-10 · US10Y_OFFICIAL 2026-11-10 · US30Y_OFFICIAL 2026-11-10 · US_2S10S 2026-11-10",
       "source": "U.S. Treasury official",
@@ -93,10 +90,10 @@
     },
     "kr_rates": {
       "label": "KR Rates",
-      "state": "STALE",
-      "generated_kst": "2026-11-12T14:58:32+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-11-12T15:07:20+09:00",
       "as_of": "2026-11-11",
-      "detail": "KR3Y 2026-11-11 · KR5Y 2026-11-11 · KR10Y 2026-11-11 · KR20Y 2026-11-11 · KR30Y 2026-11-11 · KR_3S10S 2026-11-11 · 수집 실패: KR20Y (RuntimeError:ECOS_010220000_INFO-200)",
+      "detail": "KR3Y 2026-11-11 · KR5Y 2026-11-11 · KR10Y 2026-11-11 · KR20Y 2026-11-11 · KR30Y 2026-11-11 · KR_3S10S 2026-11-11",
       "source": "BOK ECOS",
       "critical": false
     },
@@ -112,19 +109,19 @@
     "crypto": {
       "label": "Crypto fallback snapshot",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:58:52+09:00",
+      "generated_kst": "2026-11-12T15:07:39+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=23s · ETHUSD age=23s",
+      "detail": "BTCUSD age=24s · ETHUSD age=23s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-11-12T14:58:50+09:00"
+          "quote_as_of_kst": "2026-11-12T15:07:37+09:00"
         },
         "ETHUSD": {
           "status": "LIVE",
-          "quote_as_of_kst": "2026-11-12T14:58:50+09:00"
+          "quote_as_of_kst": "2026-11-12T15:07:38+09:00"
         }
       },
       "max_age_seconds": 3600,
@@ -133,7 +130,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:59:13+09:00",
+      "generated_kst": "2026-11-12T15:08:00+09:00",
       "as_of": "2026-11-11",
       "detail": "snapshot=FINAL · Observatory session=2026-11-11",
       "source": "daily-market-pulse.json",
@@ -151,16 +148,16 @@
     "fedwatch": {
       "label": "FedWatch",
       "state": "LIVE",
-      "generated_kst": "2026-11-11T09:42:57+09:00",
-      "as_of": "2026-11-10",
+      "generated_kst": "2026-11-12T15:07:21+09:00",
+      "as_of": "2026-11-11",
       "detail": "expected=2026-11-10 · FOMC 2026-12-09",
-      "source": "CME FedWatch official public probability tables (QuikStrike)",
+      "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
       "critical": false
     },
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:59:13+09:00",
+      "generated_kst": "2026-11-12T15:08:00+09:00",
       "as_of": "2026-11-11",
       "detail": "상승 · QQQ 50% + QLD 50%",
       "source": "public-market-daily.json + observatory.json",
@@ -169,7 +166,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:58:53+09:00",
+      "generated_kst": "2026-11-12T15:07:41+09:00",
       "as_of": "2026-11-11",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -187,8 +184,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T14:58:41+09:00",
-      "as_of": "2026-11-12T14:58:41+09:00",
+      "generated_kst": "2026-11-12T15:07:27+09:00",
+      "as_of": "2026-11-12T15:07:27+09:00",
       "detail": "events=190 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 99건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -209,10 +206,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "WARN",
-      "generated_kst": "2026-11-12T14:59:13+09:00",
+      "state": "PASS",
+      "generated_kst": "2026-11-12T15:08:01+09:00",
       "as_of": "2026-11-11",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
       "critical": true
     },
