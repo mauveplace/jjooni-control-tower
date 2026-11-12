@@ -26,7 +26,7 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
       assert.ok(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').isVisible(), 'state tag visible at ' + width);
     }
     const box = await page.locator('.todayV2').boundingBox();
-    assert.ok(box && box.y < 1000, 'today screen near the top: y=' + (box && box.y));
+    assert.ok(box && box.y < 700, 'today screen near the top: y=' + (box && box.y));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     assert.ok(overflow <= 1, 'no horizontal overflow ' + overflow);
     await page.locator('.todayV2 [data-go="morning-brief"]').click();

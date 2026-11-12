@@ -173,9 +173,10 @@
     const events = el('article', { class: 'tV2Card' }, el('div', { class: 'tV2Eyebrow' }, '다음 일정 (KST)'),
       ...(vm.events.length ? vm.events.map(e => el('div', { class: 'tV2Event' }, el('span', null, e.when), el('span', null, e.country + ' · ' + e.title))) : [el('div', null, '예정된 주요 일정 없음')]));
     wrap.append(el('div', { class: 'tV2Grid' }, market, events));
-    // Directly under the navigation: the legacy board and Daily Glance sit
-    // above #overview, so prepending there would land thousands of px down.
-    tabs.parentNode.insertBefore(wrap, tabs.nextSibling);
+    // Directly under the v2 navigation, BEFORE the hidden legacy #tabs: legacy
+    // modules insert their board/glance right after #tabs at varying times,
+    // so anchoring after #tabs let them land above this screen in CI.
+    tabs.parentNode.insertBefore(wrap, tabs);
     showForTab();
     wrap.querySelector('[data-go]')?.addEventListener('click', () => document.querySelector('#tabs button[data-tab="morning-brief"]')?.click());
     root.__JJOONI_TODAY_V2.rendered = true;
