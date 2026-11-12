@@ -2,10 +2,10 @@ name: Observatory Device Audit
 on:
   push:
     branches: [main]
-    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', 'tests/observatory-nav-v2.test.cjs', 'tests/observatory-nav-v2-e2e.cjs', 'tests/intraday-prev-close-align.test.cjs', 'tests/today-v2.test.cjs', 'tests/today-v2-e2e.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', 'tests/observatory-nav-v2.test.cjs', 'tests/observatory-nav-v2-e2e.cjs', 'tests/intraday-prev-close-align.test.cjs', 'tests/today-v2.test.cjs', 'tests/today-v2-e2e.cjs', 'tests/observatory-v2-skin-e2e.cjs', '.github/workflows/observatory-device-audit.yml']
   pull_request:
     branches: [main]
-    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', 'tests/observatory-nav-v2.test.cjs', 'tests/observatory-nav-v2-e2e.cjs', 'tests/intraday-prev-close-align.test.cjs', 'tests/today-v2.test.cjs', 'tests/today-v2-e2e.cjs', '.github/workflows/observatory-device-audit.yml']
+    paths: ['market-observatory/*.js', 'market-observatory/*.css', 'market-observatory/index.html', 'tests/observatory-device-audit.cjs', 'tests/observatory-status-e2e.cjs', 'tests/calendar-lazy-e2e.cjs', 'tests/regime-consensus-e2e.cjs', 'tests/collector-schedule-e2e.cjs', 'tests/observatory-display-contract.test.cjs', 'tests/observatory-tripod-next.test.cjs', 'tests/observatory-nav-v2.test.cjs', 'tests/observatory-nav-v2-e2e.cjs', 'tests/intraday-prev-close-align.test.cjs', 'tests/today-v2.test.cjs', 'tests/today-v2-e2e.cjs', 'tests/observatory-v2-skin-e2e.cjs', '.github/workflows/observatory-device-audit.yml']
 concurrency:
   group: observatory-device-${{ github.ref }}
   cancel-in-progress: true
@@ -29,6 +29,7 @@ jobs:
       - run: node --test tests/observatory-nav-v2.test.cjs tests/intraday-prev-close-align.test.cjs
       - run: node tests/observatory-nav-v2-e2e.cjs
       - run: node --test tests/today-v2.test.cjs && node tests/today-v2-e2e.cjs
+      - run: node tests/observatory-v2-skin-e2e.cjs
       - run: node tests/observatory-status-e2e.cjs
       - run: node tests/collector-schedule-e2e.cjs
       - run: node tests/regime-consensus-e2e.cjs
