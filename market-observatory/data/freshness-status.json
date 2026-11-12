@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-12T16:16:10+09:00",
+  "generated_kst": "2026-11-12T18:26:11+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -108,19 +108,19 @@
     },
     "crypto": {
       "label": "Crypto fallback snapshot",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-11-12T16:15:49+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=24s · ETHUSD age=25s",
+      "detail": "BTCUSD age=7825s · ETHUSD age=7826s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-12T16:15:46+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-12T16:15:45+09:00"
         }
       },
@@ -175,7 +175,7 @@
     "official_macro": {
       "label": "Official Macro",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T12:47:44+09:00",
+      "generated_kst": "2026-11-12T16:19:23+09:00",
       "as_of": null,
       "detail": "JJOONI_OFFICIAL_MACRO_V1",
       "source": "official-macro.json",
@@ -184,8 +184,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-12T16:15:37+09:00",
-      "as_of": "2026-11-12T16:15:37+09:00",
+      "generated_kst": "2026-11-12T18:25:54+09:00",
+      "as_of": "2026-11-12T18:25:54+09:00",
       "detail": "events=198 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 99건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -207,7 +207,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "PASS",
-      "generated_kst": "2026-11-12T16:16:10+09:00",
+      "generated_kst": "2026-11-12T18:26:11+09:00",
       "as_of": "2026-11-11",
       "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
