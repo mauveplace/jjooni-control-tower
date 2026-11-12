@@ -310,8 +310,36 @@ def materialize_health(paths):
                            check=True, capture_output=True, text=True)
 
 
+def materialize_calendar_fedwatch(paths):
+    """The calendar FedWatch row is a pure view of the merged fed-watch.json.
+
+    fed-watch.json is the single FedWatch source. A publisher may compute the
+    calendar from its own local FedWatch build that then loses the fed-watch.json
+    merge (e.g. a settlement-derived build vs. the CME official table), and the
+    calendar merge keeps a stale non-null `previous`. Both left the calendar
+    showing numbers that fed-watch.json does not contain (2026-11-12: 96.7%/86.2%
+    vs canonical 90.9% with no history). Re-derive after every merge/rebase,
+    replacing the row wholesale, so the calendar can never diverge from the source.
+    """
+    cal_path = ROOT / (DATA + 'economic-calendar.json')
+    fw_path = ROOT / (DATA + 'fed-watch.json')
+    if DATA + 'economic-calendar.json' not in paths or not cal_path.is_file() or not fw_path.is_file():
+        return False
+    from calendar_market_events import apply_fedwatch_metric
+    calendar = json.loads(cal_path.read_text(encoding='utf-8'))
+    fedwatch = json.loads(fw_path.read_text(encoding='utf-8'))
+    before = serialize(DATA + 'economic-calendar.json', calendar)
+    apply_fedwatch_metric(calendar, fedwatch)
+    after = serialize(DATA + 'economic-calendar.json', calendar)
+    if after == before:
+        return False
+    cal_path.write_text(after, encoding='utf-8')
+    return True
+
+
 def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
+    materialize_calendar_fedwatch(paths)
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
     # A data-only Daily Glance writer may start before a concurrent crypto
