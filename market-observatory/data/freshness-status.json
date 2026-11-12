@@ -1,17 +1,27 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-13T06:09:24+09:00",
+  "generated_kst": "2026-11-13T07:30:15+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
     "watchdog_scope": "US_CLOSE_RECOVERY_ONLY"
   },
-  "overall": "LIVE",
-  "critical_bad": [],
-  "warnings": [],
-  "watchdog_required": false,
+  "overall": "DEGRADED",
+  "critical_bad": [
+    "market",
+    "pulse",
+    "tripod",
+    "audit"
+  ],
+  "warnings": [
+    "market",
+    "pulse",
+    "fedwatch",
+    "tripod"
+  ],
+  "watchdog_required": true,
   "session_alignment": {
-    "expected_session": "2026-11-11",
+    "expected_session": "2026-11-12",
     "source_session": "2026-11-11",
     "market_aligned": true,
     "observatory": "2026-11-11",
@@ -22,12 +32,12 @@
     "us_supplement_aligned": true,
     "kr_kospi": "2026-11-12",
     "kr_kosdaq": "2026-11-12",
-    "aligned": true
+    "aligned": false
   },
   "groups": {
     "market": {
       "label": "Market SSOT",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-13T00:58:07+09:00",
       "as_of": "2026-11-11",
       "detail": "미국 핵심 완료세션 NDX/SPX/VIX",
@@ -111,7 +121,7 @@
       "state": "STALE",
       "generated_kst": "2026-11-13T01:12:44+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=17802s · ETHUSD age=17803s",
+      "detail": "BTCUSD age=22653s · ETHUSD age=22654s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -129,7 +139,7 @@
     },
     "pulse": {
       "label": "Daily Pulse",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-13T01:13:04+09:00",
       "as_of": "2026-11-11",
       "detail": "snapshot=FINAL · Observatory session=2026-11-11",
@@ -147,16 +157,16 @@
     },
     "fedwatch": {
       "label": "FedWatch",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-12T15:07:21+09:00",
       "as_of": "2026-11-11",
-      "detail": "expected=2026-11-10 · FOMC 2026-12-09",
+      "detail": "expected=2026-11-12 · FOMC 2026-12-09",
       "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
       "critical": false
     },
     "tripod": {
       "label": "TRI-POD",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-13T01:13:04+09:00",
       "as_of": "2026-11-11",
       "detail": "상승 · QQQ 50% + QLD 50%",
@@ -184,8 +194,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-13T03:00:01+09:00",
-      "as_of": "2026-11-13T03:00:01+09:00",
+      "generated_kst": "2026-11-13T07:29:58+09:00",
+      "as_of": "2026-11-13T07:29:58+09:00",
       "detail": "events=198 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -206,10 +216,10 @@
     },
     "audit": {
       "label": "Full Data Audit",
-      "state": "PASS",
-      "generated_kst": "2026-11-13T06:09:24+09:00",
+      "state": "FAIL",
+      "generated_kst": "2026-11-13T07:30:15+09:00",
       "as_of": "2026-11-11",
-      "detail": "critical=0 · warnings=0",
+      "detail": "critical=1 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     },

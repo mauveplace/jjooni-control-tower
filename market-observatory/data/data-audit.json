@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-13T06:09:24+09:00",
-  "overall": "PASS",
-  "critical_count": 0,
-  "warning_count": 0,
+  "generated_kst": "2026-11-13T07:30:15+09:00",
+  "overall": "FAIL",
+  "critical_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-11-11",
   "file_status": {
     "observatory": {
@@ -28,12 +28,12 @@
       "source_as_of_kst": null,
       "market_data_as_of": "2026-11-11",
       "expected_market_data_date": "2026-11-11",
-      "audit_expected_market_data_date": "2026-11-10",
+      "audit_expected_market_data_date": "2026-11-12",
       "declared_freshness": "LIVE",
-      "audit_state": "LIVE"
+      "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-11-13T03:00:01+09:00",
+      "generated_kst": "2026-11-13T07:29:58+09:00",
       "events": 198,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -68,10 +68,20 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-13T06:09:23+09:00",
-      "overall": "LIVE",
-      "critical_bad": [],
-      "warnings": []
+      "generated_kst": "2026-11-13T07:30:05+09:00",
+      "overall": "DEGRADED",
+      "critical_bad": [
+        "market",
+        "pulse",
+        "tripod",
+        "audit"
+      ],
+      "warnings": [
+        "market",
+        "pulse",
+        "fedwatch",
+        "tripod"
+      ]
     },
     "watchdog": {
       "checked_kst": "2026-11-12T10:58:01+09:00",
@@ -81,8 +91,8 @@
   },
   "groups": {
     "core_us": {
-      "state": "LIVE",
-      "anchor": "2026-11-11",
+      "state": "LAGGING",
+      "anchor": "2026-11-12",
       "allow_lag_days": 0,
       "critical": true,
       "items": {
@@ -539,8 +549,8 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LIVE",
-      "anchor": "2026-11-10",
+      "state": "LAGGING",
+      "anchor": "2026-11-12",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
@@ -558,27 +568,42 @@
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-13T01:12:42+09:00",
-      "current_quote_age_seconds": 17802,
+      "current_quote_age_seconds": 22653,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-13T01:12:41+09:00",
-      "current_quote_age_seconds": 17803,
+      "current_quote_age_seconds": 22654,
       "captured_quote_age_seconds": 0
     }
   },
   "issues": [
     {
+      "code": "GROUP_CORE_US_LAGGING",
+      "severity": "CRITICAL",
+      "detail": "anchor=2026-11-12 dates=NASDAQ100:2026-11-11,SP500:2026-11-11,VIX:2026-11-11"
+    },
+    {
+      "code": "GROUP_FEDWATCH_LAGGING",
+      "severity": "WARN",
+      "detail": "anchor=2026-11-12 dates=FEDWATCH:2026-11-11"
+    },
+    {
+      "code": "FEDWATCH_DECLARATION_INCONSISTENT",
+      "severity": "WARN",
+      "detail": "declared=LIVE audit=LAGGING expected=2026-11-12 asof=2026-11-11"
+    },
+    {
       "code": "CRYPTO_BTCUSD_STALE",
       "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-13T01:12:42+09:00', 'current_quote_age_seconds': 17802, 'captured_quote_age_seconds': 0}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-13T01:12:42+09:00', 'current_quote_age_seconds': 22653, 'captured_quote_age_seconds': 0}"
     },
     {
       "code": "CRYPTO_ETHUSD_STALE",
       "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-13T01:12:41+09:00', 'current_quote_age_seconds': 17803, 'captured_quote_age_seconds': 0}"
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-13T01:12:41+09:00', 'current_quote_age_seconds': 22654, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
