@@ -55,7 +55,9 @@ class OnDemandRuntimeTests(unittest.TestCase):
                      "freshness-watchdog-v1.js", "data-refresh-v1.js",
                      "fed-watch-v1.js", "us-rates-intraday-v1.js",
                      "official-macro-v1.js"):
-            self.assertIn(name + "?v=20261110-on-demand", html)
+            # The on-demand release (20261110) or any later cache-buster.
+            m = re.search(re.escape(name) + r"\?v=(\d{8})", html)
+            self.assertTrue(m and m.group(1) >= "20261110", name)
 
 
 class LowFrequencyWriterTests(unittest.TestCase):
