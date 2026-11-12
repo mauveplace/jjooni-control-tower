@@ -329,7 +329,12 @@ def materialize_calendar_fedwatch(paths):
     calendar = json.loads(cal_path.read_text(encoding='utf-8'))
     fedwatch = json.loads(fw_path.read_text(encoding='utf-8'))
     before = serialize(DATA + 'economic-calendar.json', calendar)
-    apply_fedwatch_metric(calendar, fedwatch)
+    if not apply_fedwatch_metric(calendar, fedwatch):
+        # Not fail-closed here: blocking would also withhold unrelated calendar
+        # values. The Verified Calendar acceptance contract asserts the current
+        # meeting's FedWatch row exists and matches fed-watch.json, so a missing
+        # target or malformed source is rejected there, visibly.
+        print('CALENDAR_FEDWATCH_REDERIVE=NO_TARGET meeting_date=' + str(fedwatch.get('meeting_date')))
     after = serialize(DATA + 'economic-calendar.json', calendar)
     if after == before:
         return False

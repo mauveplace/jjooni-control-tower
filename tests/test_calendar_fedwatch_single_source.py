@@ -8,11 +8,13 @@ The calendar light refresh then restored the consensus but the calendar merge
 kept the stale `previous` 86.2%, so the acceptance contract failed.
 """
 import copy
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -53,6 +55,7 @@ def calendar(fw_metric, generated='2026-11-12T08:12:00+09:00'):
     return {'schema': 'JJOONI_ECONOMIC_CALENDAR_V1', 'generated_kst': generated, 'events': [{
         'country': 'US', 'title': 'FOMC 정책결정', 'datetime_kst': '2026-12-10T04:00+09:00',
         'previous': '4.00%', 'consensus': None, 'actual': None,
+        'market_data_source': 'Federal Reserve + CME Fed Funds futures settlement-derived',
         'market_metrics': [{'key': 'fed_rate', 'previous': '4.00%', 'consensus': None, 'actual': None},
                            fw_metric]}]}
 
@@ -77,6 +80,16 @@ def acceptance(cal, fwd):
         assert fw['previous'] is None and fw['previous_observed_date'] is None, fw
     assert fw['value_role'] == 'market_forecast', fw
     return fw
+
+
+def provenance(cal):
+    event = cal['events'][0]
+    fw = next(m for m in event['market_metrics'] if m.get('key') == 'fedwatch_hike_25bp')
+    return fw['source'], fw.get('source_kind'), event['market_data_source']
+
+
+OFFICIAL_LABEL = 'CME FedWatch official public probability table'
+DERIVED_LABEL = 'CME Fed Funds futures settlement-derived'
 
 
 def put(root, rel, doc):
@@ -135,6 +148,59 @@ class MaterializeTest(unittest.TestCase):
             with patch.object(pub, 'ROOT', root):
                 self.assertFalse(pub.materialize_calendar_fedwatch([FW]))
             self.assertEqual((root / CAL).read_text(), before)
+
+
+class ProvenanceTest(unittest.TestCase):
+    def run_once(self, root, fedwatch, fw_metric):
+        put(root, FW, fedwatch)
+        put(root, CAL, calendar(fw_metric))
+        with patch.object(pub, 'ROOT', root):
+            pub.materialize_calendar_fedwatch([CAL])
+        return read(root, CAL)
+
+    def test_official_source_kind_labels_official_without_promotion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cal = self.run_once(Path(tmp), OFFICIAL, metric('96.7%', '86.2%', '2026-11-09'))
+            src, kind, event_src = provenance(cal)
+            self.assertEqual((src, kind), (OFFICIAL_LABEL, 'CME_OFFICIAL_PUBLIC_TABLE'))
+            self.assertEqual(event_src, 'Federal Reserve + ' + OFFICIAL_LABEL)
+            fw = acceptance(cal, OFFICIAL)  # still market_forecast, actual None
+            self.assertEqual(fw['observed_date'], '2026-11-10')
+
+    def test_derived_or_unknown_source_kind_stays_settlement_derived(self):
+        for kind in (None, 'SOMETHING_UNVERIFIED'):
+            with tempfile.TemporaryDirectory() as tmp:
+                fedwatch = dict(DERIVED, source_kind=kind)
+                cal = self.run_once(Path(tmp), fedwatch, metric('90.9%', None, None))
+                src, got_kind, event_src = provenance(cal)
+                self.assertEqual((src, got_kind), (DERIVED_LABEL, kind))
+                self.assertEqual(event_src, 'Federal Reserve + ' + DERIVED_LABEL)
+
+    def test_switching_back_and_forth_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.run_once(root, OFFICIAL, metric('96.7%', '86.2%', '2026-11-09'))
+            with patch.object(pub, 'ROOT', root):
+                put(root, FW, DERIVED); pub.materialize_calendar_fedwatch([CAL])
+                put(root, FW, OFFICIAL); pub.materialize_calendar_fedwatch([CAL])
+                snapshot = (root / CAL).read_text()
+                self.assertFalse(pub.materialize_calendar_fedwatch([CAL]))
+            self.assertEqual((root / CAL).read_text(), snapshot)
+            self.assertEqual(provenance(read(root, CAL))[2], 'Federal Reserve + ' + OFFICIAL_LABEL)
+
+    def test_missing_target_is_reported_and_rejected_by_acceptance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            put(root, FW, dict(OFFICIAL, meeting_date='2027-01-27'))
+            put(root, CAL, calendar(metric('96.7%', '86.2%', '2026-11-09')))
+            before = (root / CAL).read_text()
+            out = io.StringIO()
+            with patch.object(pub, 'ROOT', root), redirect_stdout(out):
+                self.assertFalse(pub.materialize_calendar_fedwatch([CAL]))
+            self.assertIn('CALENDAR_FEDWATCH_REDERIVE=NO_TARGET meeting_date=2027-01-27', out.getvalue())
+            self.assertEqual((root / CAL).read_text(), before)
+            with self.assertRaises(StopIteration):  # acceptance fails closed
+                acceptance(read(root, CAL), dict(OFFICIAL, meeting_date='2027-01-27'))
 
 
 class RealGitPublicationTest(unittest.TestCase):

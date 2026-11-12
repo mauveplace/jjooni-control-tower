@@ -218,6 +218,28 @@ def probability_pct(value):
         return None
 
 
+FEDWATCH_DERIVED_SOURCE = 'CME Fed Funds futures settlement-derived'
+# Only an exact, known source_kind earns a non-derived label; anything else
+# (None, unknown) stays conservatively "settlement-derived". Provenance label
+# only: value_role stays market_forecast, never official EOD or a trade signal.
+FEDWATCH_SOURCE_BY_KIND = {
+    'CME_OFFICIAL_PUBLIC_TABLE': 'CME FedWatch official public probability table',
+}
+FEDWATCH_SOURCE_LABELS = frozenset([FEDWATCH_DERIVED_SOURCE, *FEDWATCH_SOURCE_BY_KIND.values()])
+
+
+def fedwatch_source(fedwatch):
+    kind = clean(fedwatch.get('source_kind'))
+    return FEDWATCH_SOURCE_BY_KIND.get(kind, FEDWATCH_DERIVED_SOURCE), kind
+
+
+def replace_fedwatch_source(existing, label):
+    """Swap only the FedWatch token; keep every unrelated provenance token."""
+    kept = [part.strip() for part in str(existing or '').split(' + ')
+            if part.strip() and part.strip() not in FEDWATCH_SOURCE_LABELS]
+    return merge_sources(*kept, label)
+
+
 def apply_fedwatch_metric(calendar, fedwatch=None):
     """Attach market-implied probability as a forecast, never as an actual."""
     if fedwatch is None:
@@ -244,13 +266,15 @@ def apply_fedwatch_metric(calendar, fedwatch=None):
                x.get('hike_25bp_probability') is not None]
     history.sort(key=lambda x: x.get('trade_date'))
     previous = history[-2].get('hike_25bp_probability') if len(history) >= 2 else None
+    source, source_kind = fedwatch_source(fedwatch)
     metric = {
         'key': 'fedwatch_hike_25bp',
         'label': f'CME FedWatch 25bp 인상확률 ({as_of or "최신"} 기준)',
         'previous': probability_pct(previous),
         'consensus': probability_pct(current),
         'actual': None,
-        'source': 'CME Fed Funds futures settlement-derived',
+        'source': source,
+        'source_kind': source_kind,
         'observed_date': as_of,
         'previous_observed_date': history[-2].get('trade_date') if len(history) >= 2 else None,
         'metric_type': 'market_probability_snapshot',
@@ -260,8 +284,7 @@ def apply_fedwatch_metric(calendar, fedwatch=None):
             (m.get('key') or m.get('label')) != 'fedwatch_hike_25bp']
     rows.append(metric)
     target['market_metrics'] = rows
-    target['market_data_source'] = merge_sources(
-        target.get('market_data_source'), 'CME Fed Funds futures settlement-derived')
+    target['market_data_source'] = replace_fedwatch_source(target.get('market_data_source'), source)
     target['fedwatch_as_of'] = as_of
     return True
 
