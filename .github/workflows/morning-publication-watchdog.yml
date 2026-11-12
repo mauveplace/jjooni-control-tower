@@ -1,0 +1,37 @@
+name: Morning Publication Watchdog
+
+# Turns a silent morning miss into a failed run (GitHub e-mails on failure).
+# Off-the-hour minutes: top-of-hour schedules were delivered hours late on
+# 2026-11-11/12. If US-close data is stale it also dispatches the existing
+# close watchdog once (workflow_dispatch is allowed from GITHUB_TOKEN).
+on:
+  schedule:
+    - cron: '7,37 22 * * 1-6'   # 07:07 / 07:37 KST Tue-Sun
+    - cron: '7 23 * * 1-6'      # 08:07 KST Tue-Sun
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: morning-publication-watchdog
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check brief and US-close deadlines
+        id: check
+        run: python tools/check_morning_publication.py
+      - name: Dispatch close watchdog when US-close data is stale
+        if: failure() && hashFiles('us-close-stale.flag') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run market-observatory-close-watchdog.yml --ref main && echo CLOSE_WATCHDOG_DISPATCHED=1
