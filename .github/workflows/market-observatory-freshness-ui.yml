@@ -121,8 +121,10 @@ jobs:
           if int(a.get('critical_count') or 0)>0:
               print('OBSERVATORY_CRITICAL_AUDIT_DIAGNOSTICS='+json.dumps({
                   'critical_count':a.get('critical_count'),
-                  'critical_issues':[i for i in a.get('issues',[]) if i.get('severity')=='CRITICAL'],
-                  'core_us':(a.get('groups') or {}).get('core_us'),
+                  'critical_issues':[i for i in (a.get('issues') or []) if isinstance(i,dict) and i.get('severity')=='CRITICAL'],
+                  'critical_groups':{name:group for name,group in (a.get('groups') or {}).items()
+                                     if isinstance(group,dict) and group.get('critical') and group.get('state')!='LIVE'},
+                  'file_status':a.get('file_status'),
                   'session_alignment':f.get('session_alignment'),
               },ensure_ascii=False,default=str))
           assert int(a.get('critical_count') or 0)==0,a.get('issues')
