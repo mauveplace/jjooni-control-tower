@@ -64,9 +64,19 @@ def acceptance(cal, fwd):
     """Same FedWatch checks as the Verified Calendar 'Acceptance contract' step."""
     fw_kst = datetime.fromisoformat(fwd['meeting_date'] + 'T14:00:00').replace(
         tzinfo=ZoneInfo('America/New_York')).astimezone(ZoneInfo('Asia/Seoul')).date().isoformat()
-    event = next(e for e in cal['events'] if e['datetime_kst'].startswith(fw_kst) and 'FOMC 정책결정' in e['title'])
-    fw = next(m for m in event['market_metrics'] if m.get('key') == 'fedwatch_hike_25bp')
-    assert fw['metric_type'] == 'market_probability_snapshot', fw
+    events = cal['events']
+    event = next((e for e in events if str(e.get('datetime_kst', '')).startswith(fw_kst)
+                  and 'FOMC 정책결정' in e['title']), None)
+    status = cal.get('fedwatch_metric_status') or {}
+    if event is None:
+        assert status.get('status') == 'UNAVAILABLE_NO_CALENDAR_EVENT', status
+        assert status.get('meeting_date') == fwd['meeting_date'] and status.get('market_data_as_of') == fwd['market_data_as_of'], status
+        assert not any(m.get('key') == 'fedwatch_hike_25bp' and m.get('observed_date') == fwd['market_data_as_of']
+                       for e in events for m in (e.get('market_metrics') or [])), 'FedWatch row without target'
+        return None
+    assert status.get('status') != 'UNAVAILABLE_NO_CALENDAR_EVENT', status
+    fw = next((m for m in event['market_metrics'] if m.get('key') == 'fedwatch_hike_25bp'), None)
+    assert fw and fw['metric_type'] == 'market_probability_snapshot', fw
     assert fw['observed_date'] == fwd['market_data_as_of'], fw
     assert fw['consensus'] == f"{float(fwd['hike_25bp_probability']) * 100:.1f}%", fw
     assert fw['actual'] is None, fw
@@ -188,16 +198,112 @@ class ProvenanceTest(unittest.TestCase):
             self.assertEqual((root / CAL).read_text(), snapshot)
             self.assertEqual(provenance(read(root, CAL))[2], 'Federal Reserve + ' + OFFICIAL_LABEL)
 
-    def test_missing_target_fails_closed_without_writing(self):
+    def test_meeting_roll_beyond_seed_omits_only_fedwatch(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            put(root, FW, dict(OFFICIAL, meeting_date='2027-01-27'))
+            rolled = dict(OFFICIAL, meeting_date='2028-01-26', market_data_as_of='2027-12-09')
+            put(root, FW, rolled)
+            stale = metric('96.7%', '86.2%', '2026-11-09')
+            current_on_wrong_event = dict(stale, observed_date='2027-12-09')
+            cal = calendar(current_on_wrong_event)
+            put(root, CAL, cal)
+            out = io.StringIO()
+            with patch.object(pub, 'ROOT', root), redirect_stdout(out):
+                self.assertTrue(pub.materialize_calendar_fedwatch([CAL]))
+            got = read(root, CAL)
+            self.assertIn('UNAVAILABLE_NO_CALENDAR_EVENT meeting_date=2028-01-26', out.getvalue())
+            self.assertIsNone(acceptance(got, rolled))
+            self.assertEqual(got['events'][0]['market_metrics'], [cal['events'][0]['market_metrics'][0]])  # fed_rate kept
+            self.assertEqual(got['events'][0]['market_data_source'], cal['events'][0]['market_data_source'])
+
+    def test_recovers_when_target_event_is_seeded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10')
+            put(root, FW, rolled)
             put(root, CAL, calendar(metric('96.7%', '86.2%', '2026-11-09')))
-            before = (root / CAL).read_text()
             with patch.object(pub, 'ROOT', root):
-                with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_NO_TARGET.*2027-01-27'):
-                    pub.materialize_calendar_fedwatch([CAL])
-            self.assertEqual((root / CAL).read_text(), before)
+                pub.materialize_calendar_fedwatch([CAL])
+                self.assertEqual(read(root, CAL)['fedwatch_metric_status']['status'], 'UNAVAILABLE_NO_CALENDAR_EVENT')
+                cal = read(root, CAL)
+                cal['events'].append({'country': 'US', 'title': 'FOMC 정책결정', 'datetime_kst': '2027-01-28T04:00+09:00',
+                                      'market_metrics': []})
+                put(root, CAL, cal)
+                pub.materialize_calendar_fedwatch([CAL])
+            got = read(root, CAL)
+            self.assertNotIn('fedwatch_metric_status', got)
+            self.assertEqual(acceptance(got, rolled)['consensus'], '90.9%')
+
+    def test_source_delay_keeps_source_observation_date(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            delayed = dict(OFFICIAL, market_data_as_of='2026-11-06', hike_25bp_probability=0.8)
+            put(root, FW, delayed)
+            put(root, CAL, calendar(metric('90.9%', None, None)))
+            with patch.object(pub, 'ROOT', root):
+                pub.materialize_calendar_fedwatch([CAL])
+            fw = acceptance(read(root, CAL), delayed)
+            self.assertEqual((fw['observed_date'], fw['consensus']), ('2026-11-06', '80.0%'))
+
+    def test_corrupt_inputs_fail_closed_without_writing(self):
+        cases = {
+            'no meeting_date': (lambda f: f.pop('meeting_date'), None),
+            'non-ISO as_of': (lambda f: f.update(market_data_as_of='11/10/2026'), None),
+            'meeting before as_of': (lambda f: f.update(meeting_date='2026-11-01'), None),
+            'probability not numeric': (lambda f: f.update(hike_25bp_probability='n/a'), None),
+            'probability out of range': (lambda f: f.update(hike_25bp_probability=9.09), None),
+            'malformed FOMC datetime': (None, lambda c: c['events'][0].update(datetime_kst='TBD')),
+            'duplicate same-meeting FOMC': (None, lambda c: c['events'].append(copy.deepcopy(c['events'][0]))),
+        }
+        for name, (mutate_fw, mutate_cal) in cases.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                fw, cal = copy.deepcopy(OFFICIAL), calendar(metric('96.7%', '86.2%', '2026-11-09'))
+                if mutate_fw: mutate_fw(fw)
+                if mutate_cal: mutate_cal(cal)
+                put(root, FW, fw); put(root, CAL, cal)
+                before = (root / CAL).read_text()
+                with patch.object(pub, 'ROOT', root):
+                    with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_MALFORMED'):
+                        pub.materialize_calendar_fedwatch([CAL])
+                self.assertEqual((root / CAL).read_text(), before)
+
+
+class FomcSeedTest(unittest.TestCase):
+    # Federal Reserve press release 2025-09-05 (tentative 2027 schedule), second meeting day.
+    FED_2027_SECOND_DAYS = ['2027-01-27', '2027-03-17', '2027-04-28', '2027-06-09',
+                            '2027-07-28', '2027-09-15', '2027-10-27', '2027-12-08']
+
+    def test_2027_seed_is_fed_statement_time_in_kst(self):
+        import calendar_market_events as cme
+        expected = [datetime.fromisoformat(d + 'T14:00:00').replace(tzinfo=ZoneInfo('America/New_York'))
+                    .astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m-%dT%H:%M+09:00')
+                    for d in self.FED_2027_SECOND_DAYS]
+        self.assertEqual(cme.FOMC_2027_KST, expected)
+        self.assertEqual(cme.FOMC_KST, cme.FOMC_2026_KST + cme.FOMC_2027_KST)
+        self.assertEqual(cme.FOMC_KST, sorted(cme.FOMC_KST))
+
+    def test_dec_2026_to_jan_2027_roll_attaches_to_seeded_event(self):
+        import calendar_market_events as cme
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cal = {'schema': 'JJOONI_ECONOMIC_CALENDAR_V1', 'events': [
+                {'country': 'US', 'title': 'FOMC 정책결정', 'datetime_kst': dt, 'market_metrics': []}
+                for dt in cme.FOMC_KST]}
+            cal['events'][7]['market_metrics'] = [metric('96.7%', '86.2%', '2026-11-09')]  # Dec 2026 meeting
+            rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10',
+                          hike_25bp_probability=0.25, history=[
+                              {'trade_date': '2026-12-09', 'hike_25bp_probability': 0.3},
+                              {'trade_date': '2026-12-10', 'hike_25bp_probability': 0.25}])
+            put(root, FW, rolled); put(root, CAL, cal)
+            with patch.object(pub, 'ROOT', root):
+                pub.materialize_calendar_fedwatch([CAL])
+            got = read(root, CAL)
+            fw = acceptance(got, rolled)
+            self.assertEqual((fw['consensus'], fw['previous']), ('25.0%', '30.0%'))
+            jan = next(e for e in got['events'] if e['datetime_kst'] == '2027-01-28T04:00+09:00')
+            self.assertIn(fw, jan['market_metrics'])
+            self.assertNotIn('fedwatch_metric_status', got)
 
 
 class RealGitPublicationTest(unittest.TestCase):
@@ -253,16 +359,26 @@ class RealGitPublicationTest(unittest.TestCase):
             put(local, FW, local_fw)
             put(local, CAL, local_cal)
             with patch.object(pub, 'ROOT', local):
-                with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_NO_TARGET'):
+                with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_MALFORMED'):
                     pub.publish([FW, CAL], label)
             self.assertEqual(git(bare, 'rev-parse', 'main'), head_before, label)
             self.assertEqual(git(bare, 'show', 'main:' + CAL), remote_before, label)
 
-    def test_no_target_meeting_blocks_calendar_publication(self):
-        # e.g. FedWatch rolled to a meeting the calendar has not seeded.
-        rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10',
-                      generated_kst='2026-12-11T09:00:00+09:00')
-        self._remote_calendar_unchanged_on(rolled, calendar(metric('96.7%', '86.2%', '2026-11-09')), 'no target')
+    def test_meeting_roll_beyond_seed_publishes_calendar_without_fedwatch_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bare, remote, local = self._repo(tmp)
+            rolled = dict(OFFICIAL, meeting_date='2028-01-26', market_data_as_of='2027-12-09',
+                          generated_kst='2027-12-10T09:00:00+09:00')
+            put(local, FW, rolled)
+            cal = calendar(metric('96.7%', '86.2%', '2026-11-09'), '2027-12-10T09:01:00+09:00')
+            cal['events'][0]['market_metrics'][0]['previous'] = '3.75%'  # unrelated indicator update
+            put(local, CAL, cal)
+            with patch.object(pub, 'ROOT', local):
+                pub.publish([FW, CAL], 'daily after roll')
+            published_cal = json.loads(git(bare, 'show', 'main:' + CAL))
+            self.assertIsNone(acceptance(published_cal, json.loads(git(bare, 'show', 'main:' + FW))))
+            self.assertEqual(published_cal['events'][0]['market_metrics'][0]['previous'], '3.75%')
+            self.assertEqual(git(bare, 'log', '-1', '--format=%s', 'main'), 'daily after roll')
 
     def test_malformed_fomc_event_blocks_calendar_publication(self):
         broken = calendar(metric('96.7%', '86.2%', '2026-11-09'))
@@ -276,9 +392,12 @@ class RealGitPublicationTest(unittest.TestCase):
         bad['market_data_as_of'] = '2026-11-11'
         self._remote_calendar_unchanged_on(bad, calendar(metric('96.7%', '86.2%', '2026-11-09')), 'malformed fedwatch')
 
-    def test_non_calendar_publication_unaffected_by_no_target(self):
+    def test_non_calendar_publication_unaffected_by_corrupt_calendar(self):
         with tempfile.TemporaryDirectory() as tmp:
             bare, remote, local = self._repo(tmp)
+            broken = calendar(metric('96.7%', '86.2%', '2026-11-09'))
+            broken['events'][0]['datetime_kst'] = 'TBD'
+            put(local, CAL, broken)  # present on disk but not part of this publication
             rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10',
                           generated_kst='2026-12-11T09:00:00+09:00')
             put(local, FW, rolled)

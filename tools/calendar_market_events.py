@@ -31,6 +31,21 @@ FOMC_2026_KST = [
     '2026-10-29T03:00+09:00',
     '2026-12-10T04:00+09:00',
 ]
+# Federal Reserve tentative 2027 schedule (press release 2025-09-05,
+# https://www.federalreserve.gov/newsevents/pressreleases/monetary20250905a.htm;
+# matches https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm).
+# Value = statement 2:00pm ET on the second meeting day, in KST.
+FOMC_2027_KST = [
+    '2027-01-28T04:00+09:00',
+    '2027-03-18T03:00+09:00',
+    '2027-04-29T03:00+09:00',
+    '2027-06-10T03:00+09:00',
+    '2027-07-29T03:00+09:00',
+    '2027-09-16T03:00+09:00',
+    '2027-10-28T03:00+09:00',
+    '2027-12-09T04:00+09:00',
+]
+FOMC_KST = FOMC_2026_KST + FOMC_2027_KST
 
 
 def clean(v):
@@ -71,7 +86,7 @@ def seed():
     # arbitrary KST clock time. Replace it with the actual 2:00pm ET statement
     # release converted to Korea time. This avoids duplicate/wrong FOMC cards.
     events[:] = [e for e in events if not (e.get('country') == 'US' and e.get('title') == 'FOMC 정책결정')]
-    for dt in FOMC_2026_KST:
+    for dt in FOMC_KST:
         upsert(events, {
             'datetime_kst': dt,
             'title': 'FOMC 정책결정',
