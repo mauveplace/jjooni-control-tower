@@ -52,6 +52,7 @@ body.navV2 #tabs{display:none!important}
     const tabs = document.getElementById('tabs');
     if (!tabs || document.querySelector('.navV2Bar')) return;
     const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+    const skin = document.createElement('link'); skin.rel = 'stylesheet'; skin.href = './observatory-v2-skin.css?v=20261112-skin1'; document.head.appendChild(skin);
     const bar = document.createElement('nav'); bar.className = 'navV2Bar'; bar.setAttribute('aria-label', '주요 화면');
     const main = document.createElement('div'); main.className = 'navV2Main';
     const sub = document.createElement('div'); sub.className = 'navV2Sub'; sub.setAttribute('aria-label', '하위 화면');
@@ -76,6 +77,7 @@ body.navV2 #tabs{display:none!important}
   function sync() {
     const bar = document.querySelector('.navV2Bar'); if (!bar) return;
     const tab = current(), g = groupOf(tab);
+    if (document.body.dataset.v2tab !== tab) document.body.dataset.v2tab = tab;
     for (const b of bar.querySelectorAll('.navV2Main button')) {
       if (g && b.dataset.group === g.id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     }
