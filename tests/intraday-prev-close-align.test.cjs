@@ -43,3 +43,14 @@ test('missing inputs pass through', () => {
   assert.deepEqual(alignPrevious(row(667.61, { session_date: undefined }), KQ).previous_close, 667.61);
   assert.equal(alignPrevious(row(667.61), null).previous_close, 667.61);
 });
+
+test('only the immediately preceding session can trigger a rebase', () => {
+  const out = alignPrevious(row(638.97), KQ); // two sessions behind
+  assert.equal(out.previous_close, 638.97);
+  assert.equal(out.previous_close_status, undefined);
+});
+
+test('near-but-not-exact values never match', () => {
+  const out = alignPrevious(row(667.6), KQ);
+  assert.equal(out.previous_close, 667.6);
+});

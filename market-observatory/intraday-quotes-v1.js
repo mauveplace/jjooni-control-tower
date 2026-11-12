@@ -16,10 +16,12 @@ function alignPrevious(row,series){
  if(!Array.isArray(series)||!day||!(typeof prov==='number'&&prov>0))return row;
  const prior=series.filter(x=>x&&x.date<day&&typeof x.value==='number'&&x.value>0);
  if(!prior.length)return row;
- const latest=prior[prior.length-1],same=(a,b)=>Math.abs(a-b)<=Math.max(0.01,b*0.00005);
+ // Exact to the cent, and only the one-session-behind pattern: a loose or
+ // deep match could pin a synthetic or coincidental value to an old close.
+ const latest=prior[prior.length-1],same=(a,b)=>Math.abs(a-b)<0.006;
  if(same(prov,latest.value))return {...row,previous_close_date:latest.date,previous_close_status:'MATCHES_CANONICAL'};
- const older=prior.slice(0,-1).reverse().find(x=>same(prov,x.value));
- if(!older)return row;
+ const older=prior.length>1?prior[prior.length-2]:null;
+ if(!older||!same(prov,older.value))return row;
  return {...row,provider_previous_close:prov,provider_previous_close_date:older.date,previous_close:latest.value,previous_close_date:latest.date,previous_close_status:'CANONICAL_REBASED',change_pct:(row.value/latest.value-1)*100};
 }
 function merge(previous,payload,now=Date.now()){
