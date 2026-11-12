@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-13T00:58:50+09:00",
+  "generated_kst": "2026-11-13T01:06:18+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -111,7 +111,7 @@
       "state": "LIVE",
       "generated_kst": "2026-11-13T00:58:26+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=26s · ETHUSD age=26s",
+      "detail": "BTCUSD age=474s · ETHUSD age=474s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -184,9 +184,9 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-13T00:58:13+09:00",
-      "as_of": "2026-11-13T00:58:13+09:00",
-      "detail": "events=198 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 PASS",
+      "generated_kst": "2026-11-13T01:04:56+09:00",
+      "as_of": "2026-11-13T01:04:56+09:00",
+      "detail": "events=198 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
       "official_probe_scope": "LATEST_COLLECTION_ATTEMPTS_ONLY",
@@ -197,7 +197,7 @@
         "note": "기존 공식 검증 이력 · 이번 실행의 원천 접속 성공을 뜻하지 않습니다."
       },
       "actual_completeness_state": "LIVE",
-      "official_probe_state": "PASS",
+      "official_probe_state": "NOT_CHECKED",
       "official_probe_failure_count": 0,
       "official_probe_unresolved_failure_count": 0,
       "official_probe_blocked_releases": [],
@@ -207,7 +207,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "PASS",
-      "generated_kst": "2026-11-13T00:58:50+09:00",
+      "generated_kst": "2026-11-13T01:06:18+09:00",
       "as_of": "2026-11-11",
       "detail": "critical=0 · warnings=0",
       "source": "data-audit.json",
