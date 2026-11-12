@@ -106,6 +106,16 @@ jobs:
           assert 'pulse_aligned' in align and 'tripod_aligned' in align and 'us_supplement_aligned' in align,align
           assert a.get('schema')=='JJOONI_OBSERVATORY_DATA_AUDIT_V2',a.get('schema')
           assert a.get('read_only') is True
+          # A critical failure must remain blocking. Print the exact lagging
+          # market family and observation dates before failing so the next
+          # incident is actionable without hunting through raw JSON artifacts.
+          if int(a.get('critical_count') or 0)>0:
+              print('OBSERVATORY_CRITICAL_AUDIT_DIAGNOSTICS='+json.dumps({
+                  'critical_count':a.get('critical_count'),
+                  'critical_issues':[i for i in a.get('issues',[]) if i.get('severity')=='CRITICAL'],
+                  'core_us':(a.get('groups') or {}).get('core_us'),
+                  'session_alignment':f.get('session_alignment'),
+              },ensure_ascii=False,default=str))
           assert int(a.get('critical_count') or 0)==0,a.get('issues')
           for name in ['core_us','us_supplement','kr_equity','fx','energy','metals','us_rates','kr_rates','jp_rates','crypto','sentiment','fedwatch']:
               assert name in (a.get('groups') or {}),name
