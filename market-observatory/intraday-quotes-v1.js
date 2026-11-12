@@ -7,6 +7,21 @@ const KEYS=new Set(['NASDAQ100','NASDAQCOMPOSITE','SP500','DOW','RUSSELL2000','V
 function valid(row,key,now=Date.now()){
  return !!row&&KEYS.has(key)&&row.key===key&&typeof row.value==='number'&&Number.isFinite(row.value)&&row.value>0&&Number.isFinite(Date.parse(row.observed_at))&&Date.parse(row.observed_at)<=now+120000;
 }
+// Provider previous_close can lag one session (2026-11-12: Yahoo ^KQ11 gave the
+// 11/10 close 667.61 while 11/11 was 705.10, so KOSDAQ showed +3.83% instead of
+// -1.69%). Rebase only when the provider value matches an OLDER completed close
+// in the canonical series; a lagging series never overrides the provider.
+function alignPrevious(row,series){
+ const prov=row?.previous_close,day=row?.session_date;
+ if(!Array.isArray(series)||!day||!(typeof prov==='number'&&prov>0))return row;
+ const prior=series.filter(x=>x&&x.date<day&&typeof x.value==='number'&&x.value>0);
+ if(!prior.length)return row;
+ const latest=prior[prior.length-1],same=(a,b)=>Math.abs(a-b)<=Math.max(0.01,b*0.00005);
+ if(same(prov,latest.value))return {...row,previous_close_date:latest.date,previous_close_status:'MATCHES_CANONICAL'};
+ const older=prior.slice(0,-1).reverse().find(x=>same(prov,x.value));
+ if(!older)return row;
+ return {...row,provider_previous_close:prov,provider_previous_close_date:older.date,previous_close:latest.value,previous_close_date:latest.date,previous_close_status:'CANONICAL_REBASED',change_pct:(row.value/latest.value-1)*100};
+}
 function merge(previous,payload,now=Date.now()){
  if(payload?.schema!=='JJOONI_OBSERVATORY_QUOTES_V1'||!payload.quotes)throw Error('INVALID_QUOTES_RESPONSE');
  const quotes=Object.fromEntries(Object.entries(previous).map(([key,row])=>[key,{...row,refresh_status:'RETAINED'}]));
@@ -44,12 +59,13 @@ function select(row,publishedAt,now=Date.now()){
  if(Number.isFinite(Date.parse(publishedAt))&&Date.parse(publishedAt)>Date.parse(row.observed_at))return null;
  return row;
 }
-const api={ENDPOINT,valid,merge,quality,ageLabel,summary,select};
+const api={ENDPOINT,valid,merge,alignPrevious,quality,ageLabel,summary,select};
 if(typeof module==='object'&&module.exports){module.exports=api;return}
 if(!root.document)return;
 let quotes={},pending=null,lastAttempt=null;
-const state={version:'1.0',status:'WAITING',result:null,paintSummary,summary:()=>summary(quotes),supports:key=>KEYS.has(key),get:(key,publishedAt)=>{const q=select(quotes[key],publishedAt);if(!q)return null;const row=state.status==='FAILED'?{...q,refresh_status:'RETAINED'}:q;return {...row,display_status:quality(row),age_label:ageLabel(row)}},refresh};
+const state={version:'1.0',status:'WAITING',result:null,paintSummary,summary:()=>summary(quotes),supports:key=>KEYS.has(key),get:(key,publishedAt)=>{const q=select(quotes[key],publishedAt);if(!q)return null;const base=state.status==='FAILED'?{...q,refresh_status:'RETAINED'}:q;const row=alignPrevious(base,canonicalSeries(key));const fixed=row.previous_close_status==='CANONICAL_REBASED';return {...row,display_status:quality(row)+(fixed?' · 전일 종가 보정':''),age_label:ageLabel(row)}},refresh};
 root.__JJOONI_OBSERVATORY_QUOTES=state;
+function canonicalSeries(key){try{return typeof DATA!=='undefined'&&DATA?.series?.[key]||null}catch(_){return null}}
 function paintSummary(){
  const host=document.getElementById?.('overviewKpis');if(!host)return;
  for(const cell of host.querySelectorAll('.kpi')){
