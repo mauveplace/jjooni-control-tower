@@ -47,6 +47,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: observatory-freshness-panel
@@ -82,6 +83,14 @@ jobs:
           python -m unittest discover -s tests -p 'test_observatory_freshness_status.py' -v
           python -m unittest discover -s tests -p 'test_calendar_probe_fallback_health.py' -v
           python tools/build_observatory_freshness.py
+
+      # Recover a genuinely lagging US-close publisher without weakening audit failure.
+      - name: Request missing US-close repair once
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: python tools/dispatch_core_us_repair.py
 
       - name: Freshness and full-data audit acceptance
         shell: bash
