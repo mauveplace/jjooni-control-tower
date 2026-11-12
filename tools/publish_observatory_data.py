@@ -330,11 +330,13 @@ def materialize_calendar_fedwatch(paths):
     fedwatch = json.loads(fw_path.read_text(encoding='utf-8'))
     before = serialize(DATA + 'economic-calendar.json', calendar)
     if not apply_fedwatch_metric(calendar, fedwatch):
-        # Not fail-closed here: blocking would also withhold unrelated calendar
-        # values. The Verified Calendar acceptance contract asserts the current
-        # meeting's FedWatch row exists and matches fed-watch.json, so a missing
-        # target or malformed source is rejected there, visibly.
-        print('CALENDAR_FEDWATCH_REDERIVE=NO_TARGET meeting_date=' + str(fedwatch.get('meeting_date')))
+        # Scoped fail-closed: only a publication that includes the calendar is
+        # stopped, before commit/push, so a stale FedWatch row is never exposed.
+        # Publications that do not carry the calendar are unaffected (early return).
+        raise RuntimeError('CALENDAR_FEDWATCH_NO_TARGET: cannot derive the FedWatch row for '
+                           f"meeting_date={fedwatch.get('meeting_date')!r} "
+                           f"market_data_as_of={fedwatch.get('market_data_as_of')!r}; "
+                           'refusing to publish economic-calendar.json')
     after = serialize(DATA + 'economic-calendar.json', calendar)
     if after == before:
         return False

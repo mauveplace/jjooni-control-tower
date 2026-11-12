@@ -188,19 +188,16 @@ class ProvenanceTest(unittest.TestCase):
             self.assertEqual((root / CAL).read_text(), snapshot)
             self.assertEqual(provenance(read(root, CAL))[2], 'Federal Reserve + ' + OFFICIAL_LABEL)
 
-    def test_missing_target_is_reported_and_rejected_by_acceptance(self):
+    def test_missing_target_fails_closed_without_writing(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             put(root, FW, dict(OFFICIAL, meeting_date='2027-01-27'))
             put(root, CAL, calendar(metric('96.7%', '86.2%', '2026-11-09')))
             before = (root / CAL).read_text()
-            out = io.StringIO()
-            with patch.object(pub, 'ROOT', root), redirect_stdout(out):
-                self.assertFalse(pub.materialize_calendar_fedwatch([CAL]))
-            self.assertIn('CALENDAR_FEDWATCH_REDERIVE=NO_TARGET meeting_date=2027-01-27', out.getvalue())
+            with patch.object(pub, 'ROOT', root):
+                with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_NO_TARGET.*2027-01-27'):
+                    pub.materialize_calendar_fedwatch([CAL])
             self.assertEqual((root / CAL).read_text(), before)
-            with self.assertRaises(StopIteration):  # acceptance fails closed
-                acceptance(read(root, CAL), dict(OFFICIAL, meeting_date='2027-01-27'))
 
 
 class RealGitPublicationTest(unittest.TestCase):
@@ -246,6 +243,49 @@ class RealGitPublicationTest(unittest.TestCase):
             published_cal = json.loads(git(bare, 'show', 'main:' + CAL))
             fw = acceptance(published_cal, json.loads(git(bare, 'show', 'main:' + FW)))
             self.assertIsNone(fw['previous'])
+
+
+    def _remote_calendar_unchanged_on(self, local_fw, local_cal, label):
+        with tempfile.TemporaryDirectory() as tmp:
+            bare, remote, local = self._repo(tmp)
+            remote_before = git(bare, 'show', 'main:' + CAL)
+            head_before = git(bare, 'rev-parse', 'main')
+            put(local, FW, local_fw)
+            put(local, CAL, local_cal)
+            with patch.object(pub, 'ROOT', local):
+                with self.assertRaisesRegex(RuntimeError, 'CALENDAR_FEDWATCH_NO_TARGET'):
+                    pub.publish([FW, CAL], label)
+            self.assertEqual(git(bare, 'rev-parse', 'main'), head_before, label)
+            self.assertEqual(git(bare, 'show', 'main:' + CAL), remote_before, label)
+
+    def test_no_target_meeting_blocks_calendar_publication(self):
+        # e.g. FedWatch rolled to a meeting the calendar has not seeded.
+        rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10',
+                      generated_kst='2026-12-11T09:00:00+09:00')
+        self._remote_calendar_unchanged_on(rolled, calendar(metric('96.7%', '86.2%', '2026-11-09')), 'no target')
+
+    def test_malformed_fomc_event_blocks_calendar_publication(self):
+        broken = calendar(metric('96.7%', '86.2%', '2026-11-09'))
+        broken['events'][0]['datetime_kst'] = 'TBD'
+        self._remote_calendar_unchanged_on(dict(OFFICIAL, generated_kst='2026-11-12T12:00:00+09:00'),
+                                           broken, 'malformed event')
+
+    def test_malformed_fedwatch_blocks_calendar_publication(self):
+        bad = {k: v for k, v in OFFICIAL.items() if k != 'meeting_date'}
+        bad['generated_kst'] = '2026-11-12T12:00:00+09:00'
+        bad['market_data_as_of'] = '2026-11-11'
+        self._remote_calendar_unchanged_on(bad, calendar(metric('96.7%', '86.2%', '2026-11-09')), 'malformed fedwatch')
+
+    def test_non_calendar_publication_unaffected_by_no_target(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bare, remote, local = self._repo(tmp)
+            rolled = dict(OFFICIAL, meeting_date='2027-01-27', market_data_as_of='2026-12-10',
+                          generated_kst='2026-12-11T09:00:00+09:00')
+            put(local, FW, rolled)
+            with patch.object(pub, 'ROOT', local):
+                pub.publish([FW], 'fedwatch only')
+            self.assertEqual(json.loads(git(bare, 'show', 'main:' + FW))['meeting_date'], '2027-01-27')
+            self.assertEqual(git(bare, 'log', '-1', '--format=%s', 'main'), 'fedwatch only')
 
 
 if __name__ == '__main__':
