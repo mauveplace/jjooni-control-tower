@@ -76,22 +76,33 @@ jobs:
           fw_kst=datetime.fromisoformat(fwd['meeting_date']+'T14:00:00').replace(tzinfo=ZoneInfo('America/New_York')).astimezone(ZoneInfo('Asia/Seoul')).date().isoformat()
           fw_event=find(fw_kst,'FOMC 정책결정')
           fw=next((m for m in (fw_event or {}).get('market_metrics',[]) if m.get('key')=='fedwatch_hike_25bp'),None)
-          assert fw and fw.get('metric_type')=='market_probability_snapshot',fw
-          # Compare the snapshot to its source; do not fabricate a prior observation
-          # when the next meeting becomes the front contract after an FOMC roll.
-          assert fw.get('observed_date') == fwd.get('market_data_as_of'),fw
-          assert fw.get('consensus') == f"{float(fwd['hike_25bp_probability'])*100:.1f}%",fw
-          assert fw.get('actual') is None,fw
-          valid_history=sorted((x for x in (fwd.get('history') or [])
-              if x.get('trade_date') and x.get('trade_date') <= fwd['market_data_as_of']
-              and x.get('hike_25bp_probability') is not None),
-              key=lambda x:x['trade_date'])
-          if len(valid_history) >= 2:
-              assert fw.get('previous') == f"{float(valid_history[-2]['hike_25bp_probability'])*100:.1f}%",fw
-              assert fw.get('previous_observed_date') == valid_history[-2]['trade_date'],fw
+          fw_status=c.get('fedwatch_metric_status') or {}
+          if fw_event is None:
+              # Meeting roll beyond the verified FOMC seed: the metric must be
+              # omitted explicitly, and no row may carry the current observation.
+              assert fw_status.get('status')=='UNAVAILABLE_NO_CALENDAR_EVENT',fw_status
+              assert fw_status.get('meeting_date')==fwd['meeting_date'] and fw_status.get('market_data_as_of')==fwd['market_data_as_of'],fw_status
+              assert not any(m.get('key')=='fedwatch_hike_25bp' for e in events for m in (e.get('market_metrics') or [])),'FedWatch row while UNAVAILABLE'
+              assert not any(e.get('fedwatch_as_of') for e in events),'fedwatch_as_of while UNAVAILABLE'
+              fw={'previous':None,'consensus':'UNAVAILABLE'}
           else:
-              assert fw.get('previous') is None and fw.get('previous_observed_date') is None,fw
-          assert fw.get('value_role')=='market_forecast',fw
+              assert fw_status.get('status')!='UNAVAILABLE_NO_CALENDAR_EVENT',fw_status
+              assert fw and fw.get('metric_type')=='market_probability_snapshot',fw
+              # Compare the snapshot to its source; do not fabricate a prior observation
+              # when the next meeting becomes the front contract after an FOMC roll.
+              assert fw.get('observed_date') == fwd.get('market_data_as_of'),fw
+              assert fw.get('consensus') == f"{float(fwd['hike_25bp_probability'])*100:.1f}%",fw
+              assert fw.get('actual') is None,fw
+              valid_history=sorted((x for x in (fwd.get('history') or [])
+                  if x.get('trade_date') and x.get('trade_date') <= fwd['market_data_as_of']
+                  and x.get('hike_25bp_probability') is not None),
+                  key=lambda x:x['trade_date'])
+              if len(valid_history) >= 2:
+                  assert fw.get('previous') == f"{float(valid_history[-2]['hike_25bp_probability'])*100:.1f}%",fw
+                  assert fw.get('previous_observed_date') == valid_history[-2]['trade_date'],fw
+              else:
+                  assert fw.get('previous') is None and fw.get('previous_observed_date') is None,fw
+              assert fw.get('value_role')=='market_forecast',fw
           mich=find('2026-09-11','University of Michigan Consumer Sentiment')
           assert mich,mich
           mm={m.get('key'):m for m in mich.get('market_metrics',[])}

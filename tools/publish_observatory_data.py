@@ -310,8 +310,112 @@ def materialize_health(paths):
                            check=True, capture_output=True, text=True)
 
 
+def fedwatch_source_problem(fedwatch, calendar):
+    """Return why fed-watch.json / the FOMC rows cannot be trusted, else None."""
+    from datetime import date
+    if not isinstance(fedwatch, dict):
+        return f'fed-watch.json is {type(fedwatch).__name__}, not an object'
+    if not isinstance(calendar, dict):
+        return f'economic-calendar.json is {type(calendar).__name__}, not an object'
+    events = calendar.get('events')
+    if not isinstance(events, list):
+        return f'calendar events is {type(events).__name__}, not a list'
+    for index, event in enumerate(events):
+        if not isinstance(event, dict):
+            return f'calendar event[{index}] is {type(event).__name__}, not an object'
+        if not isinstance(event.get('market_metrics') or [], list):
+            return f'calendar event[{index}].market_metrics is not a list'
+    meeting, as_of = fedwatch.get('meeting_date'), fedwatch.get('market_data_as_of')
+    try:
+        meeting_day, as_of_day = date.fromisoformat(str(meeting)), date.fromisoformat(str(as_of))
+    except ValueError:
+        return f'meeting_date={meeting!r} market_data_as_of={as_of!r} not ISO dates'
+    if meeting_day < as_of_day:
+        return f'meeting_date={meeting} precedes market_data_as_of={as_of}'
+    try:
+        probability = float(fedwatch.get('hike_25bp_probability'))
+    except (TypeError, ValueError):
+        return f"hike_25bp_probability={fedwatch.get('hike_25bp_probability')!r} not numeric"
+    if not 0 <= probability <= 1:
+        return f'hike_25bp_probability={probability} outside [0,1]'
+    for event in calendar.get('events') or []:
+        if event.get('country') == 'US' and event.get('title') == 'FOMC 정책결정':
+            try:
+                datetime.fromisoformat(str(event.get('datetime_kst')))
+            except ValueError:
+                return f"FOMC event datetime_kst={event.get('datetime_kst')!r} malformed"
+    from calendar_market_events import ET, KST as EVENT_KST
+    target_day = datetime.fromisoformat(str(meeting) + 'T14:00:00').replace(tzinfo=ET).astimezone(EVENT_KST).date().isoformat()
+    same_meeting = [e for e in calendar.get('events') or [] if e.get('country') == 'US'
+                    and e.get('title') == 'FOMC 정책결정' and str(e.get('datetime_kst'))[:10] == target_day]
+    if len(same_meeting) > 1:
+        return f'{len(same_meeting)} FOMC events for meeting_date={meeting} (KST {target_day})'
+    return None
+
+
+def materialize_calendar_fedwatch(paths):
+    """The calendar FedWatch row is a pure view of the merged fed-watch.json.
+
+    fed-watch.json is the single FedWatch source. A publisher may compute the
+    calendar from its own local FedWatch build that then loses the fed-watch.json
+    merge (e.g. a settlement-derived build vs. the CME official table), and the
+    calendar merge keeps a stale non-null `previous`. Both left the calendar
+    showing numbers that fed-watch.json does not contain (2026-11-12: 96.7%/86.2%
+    vs canonical 90.9% with no history). Re-derive after every merge/rebase,
+    replacing the row wholesale, so the calendar can never diverge from the source.
+    """
+    cal_path = ROOT / (DATA + 'economic-calendar.json')
+    fw_path = ROOT / (DATA + 'fed-watch.json')
+    if DATA + 'economic-calendar.json' not in paths or not cal_path.is_file() or not fw_path.is_file():
+        return False
+    from calendar_market_events import apply_fedwatch_metric
+    calendar = json.loads(cal_path.read_text(encoding='utf-8'))
+    fedwatch = json.loads(fw_path.read_text(encoding='utf-8'))
+    before = serialize(DATA + 'economic-calendar.json', calendar)
+    problem = fedwatch_source_problem(fedwatch, calendar)
+    if problem:
+        # Corrupt source or malformed same-meeting calendar data: stop this
+        # calendar publication before commit/push. Never expose a stale row.
+        raise RuntimeError('CALENDAR_FEDWATCH_MALFORMED: ' + problem +
+                           '; refusing to publish economic-calendar.json')
+    if apply_fedwatch_metric(calendar, fedwatch):
+        calendar.pop('fedwatch_metric_status', None)
+    else:
+        # Legitimate meeting roll to a valid future meeting the calendar has not
+        # seeded yet: invalidate EVERY FedWatch row (any meeting, any as-of) so no
+        # old probability can be read as current, keep all unrelated metrics, and
+        # strip only FedWatch-specific event provenance. Other indicators publish.
+        from calendar_market_events import FEDWATCH_SOURCE_LABELS, merge_sources
+        for event in calendar['events']:
+            rows = event.get('market_metrics') or []
+            kept = [m for m in rows if not (isinstance(m, dict) and m.get('key') == 'fedwatch_hike_25bp')]
+            if len(kept) != len(rows):
+                event['market_metrics'] = kept
+            if 'fedwatch_as_of' in event:
+                event.pop('fedwatch_as_of')
+            if event.get('market_data_source'):
+                tokens = [t.strip() for t in str(event['market_data_source']).split(' + ')
+                          if t.strip() and t.strip() not in FEDWATCH_SOURCE_LABELS]
+                event['market_data_source'] = merge_sources(*tokens)
+        as_of = fedwatch.get('market_data_as_of')
+        calendar['fedwatch_metric_status'] = {
+            'status': 'UNAVAILABLE_NO_CALENDAR_EVENT',
+            'meeting_date': fedwatch.get('meeting_date'),
+            'market_data_as_of': as_of,
+            'reason': 'FedWatch front meeting is not in the verified FOMC calendar seed',
+        }
+        print('CALENDAR_FEDWATCH_REDERIVE=UNAVAILABLE_NO_CALENDAR_EVENT meeting_date='
+              + str(fedwatch.get('meeting_date')))
+    after = serialize(DATA + 'economic-calendar.json', calendar)
+    if after == before:
+        return False
+    cal_path.write_text(after, encoding='utf-8')
+    return True
+
+
 def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
+    materialize_calendar_fedwatch(paths)
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
     # A data-only Daily Glance writer may start before a concurrent crypto

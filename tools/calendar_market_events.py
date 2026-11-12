@@ -31,6 +31,21 @@ FOMC_2026_KST = [
     '2026-10-29T03:00+09:00',
     '2026-12-10T04:00+09:00',
 ]
+# Federal Reserve tentative 2027 schedule (press release 2025-09-05,
+# https://www.federalreserve.gov/newsevents/pressreleases/monetary20250905a.htm;
+# matches https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm).
+# Value = statement 2:00pm ET on the second meeting day, in KST.
+FOMC_2027_KST = [
+    '2027-01-28T04:00+09:00',
+    '2027-03-18T03:00+09:00',
+    '2027-04-29T03:00+09:00',
+    '2027-06-10T03:00+09:00',
+    '2027-07-29T03:00+09:00',
+    '2027-09-16T03:00+09:00',
+    '2027-10-28T03:00+09:00',
+    '2027-12-09T04:00+09:00',
+]
+FOMC_KST = FOMC_2026_KST + FOMC_2027_KST
 
 
 def clean(v):
@@ -71,7 +86,7 @@ def seed():
     # arbitrary KST clock time. Replace it with the actual 2:00pm ET statement
     # release converted to Korea time. This avoids duplicate/wrong FOMC cards.
     events[:] = [e for e in events if not (e.get('country') == 'US' and e.get('title') == 'FOMC 정책결정')]
-    for dt in FOMC_2026_KST:
+    for dt in FOMC_KST:
         upsert(events, {
             'datetime_kst': dt,
             'title': 'FOMC 정책결정',
@@ -218,6 +233,28 @@ def probability_pct(value):
         return None
 
 
+FEDWATCH_DERIVED_SOURCE = 'CME Fed Funds futures settlement-derived'
+# Only an exact, known source_kind earns a non-derived label; anything else
+# (None, unknown) stays conservatively "settlement-derived". Provenance label
+# only: value_role stays market_forecast, never official EOD or a trade signal.
+FEDWATCH_SOURCE_BY_KIND = {
+    'CME_OFFICIAL_PUBLIC_TABLE': 'CME FedWatch official public probability table',
+}
+FEDWATCH_SOURCE_LABELS = frozenset([FEDWATCH_DERIVED_SOURCE, *FEDWATCH_SOURCE_BY_KIND.values()])
+
+
+def fedwatch_source(fedwatch):
+    kind = clean(fedwatch.get('source_kind'))
+    return FEDWATCH_SOURCE_BY_KIND.get(kind, FEDWATCH_DERIVED_SOURCE), kind
+
+
+def replace_fedwatch_source(existing, label):
+    """Swap only the FedWatch token; keep every unrelated provenance token."""
+    kept = [part.strip() for part in str(existing or '').split(' + ')
+            if part.strip() and part.strip() not in FEDWATCH_SOURCE_LABELS]
+    return merge_sources(*kept, label)
+
+
 def apply_fedwatch_metric(calendar, fedwatch=None):
     """Attach market-implied probability as a forecast, never as an actual."""
     if fedwatch is None:
@@ -244,13 +281,15 @@ def apply_fedwatch_metric(calendar, fedwatch=None):
                x.get('hike_25bp_probability') is not None]
     history.sort(key=lambda x: x.get('trade_date'))
     previous = history[-2].get('hike_25bp_probability') if len(history) >= 2 else None
+    source, source_kind = fedwatch_source(fedwatch)
     metric = {
         'key': 'fedwatch_hike_25bp',
         'label': f'CME FedWatch 25bp 인상확률 ({as_of or "최신"} 기준)',
         'previous': probability_pct(previous),
         'consensus': probability_pct(current),
         'actual': None,
-        'source': 'CME Fed Funds futures settlement-derived',
+        'source': source,
+        'source_kind': source_kind,
         'observed_date': as_of,
         'previous_observed_date': history[-2].get('trade_date') if len(history) >= 2 else None,
         'metric_type': 'market_probability_snapshot',
@@ -260,8 +299,7 @@ def apply_fedwatch_metric(calendar, fedwatch=None):
             (m.get('key') or m.get('label')) != 'fedwatch_hike_25bp']
     rows.append(metric)
     target['market_metrics'] = rows
-    target['market_data_source'] = merge_sources(
-        target.get('market_data_source'), 'CME Fed Funds futures settlement-derived')
+    target['market_data_source'] = replace_fedwatch_source(target.get('market_data_source'), source)
     target['fedwatch_as_of'] = as_of
     return True
 
