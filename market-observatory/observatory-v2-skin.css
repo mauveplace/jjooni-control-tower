@@ -44,3 +44,43 @@ body.navV2 .panel .chart{height:220px}
 body.navV2 #signalLog{max-height:340px;overflow:auto}
 body.navV2 #sectors .obsEtfCard{padding:10px}
 body.navV2 .briefArticle{line-height:1.65}
+
+/* 5. Dense structured screens (phase 2c). */
+/* Charts: device-ui sets 420px; v2 keeps one height everywhere. */
+body.navV2 .panel .card .chart{height:240px!important}
+@media(min-width:900px){body.navV2 .panel .card .chart{height:300px!important}}
+/* 공식 거시: name on its own line, six cells in 3 columns (was 2 → 220px/row). */
+@media(max-width:899px){
+body.navV2 .obsMacroRow{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px 8px;padding:10px 12px}
+body.navV2 .obsMacroRow .obsMacroName{grid-column:1/-1}
+body.navV2 .obsMacroRow .obsMacroCell{padding:4px 6px;min-height:0}
+body.navV2 .obsMacroRow .obsMacroCell span{font-size:10px;line-height:1.3}
+body.navV2 .obsMacroRow .obsMacroCell b{font-size:14px}
+body.navV2 .obsMacroKpis{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px}
+}
+body.navV2 .obsMacroHero{gap:10px}
+/* 섹터: six periods in one row; compact sparkline. */
+body.navV2 .obsPeriodGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:2px}
+body.navV2 .obsPeriod{padding:4px 2px;text-align:center}
+body.navV2 .obsPeriod span{font-size:10px}
+body.navV2 .obsPeriod b{font-size:11px;white-space:nowrap}
+body.navV2 .obsSpark svg{height:28px}
+body.navV2 .obsEtfCard{gap:6px}
+body.navV2 .obsSectorKpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))!important;gap:6px}
+/* 섹터 상대강도: a real table with horizontal scroll (mobile CSS turned each
+   sector into a ~240px card). First column stays visible while scrolling. */
+body.navV2 #sectors .obsSectorTableWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+body.navV2 #sectors .obsSectorTableWrap table{display:table!important;width:max-content;min-width:100%;border-collapse:collapse}
+body.navV2 #sectors .obsSectorTableWrap thead{display:table-header-group!important}
+body.navV2 #sectors .obsSectorTableWrap tbody{display:table-row-group!important}
+body.navV2 #sectors .obsSectorTableWrap tr{display:table-row!important}
+body.navV2 #sectors .obsSectorTableWrap th,body.navV2 #sectors .obsSectorTableWrap td{display:table-cell!important;padding:6px 8px;white-space:nowrap;font-size:12px;border-top:1px solid #f1f3f6}
+body.navV2 #sectors .obsSectorTableWrap td::before{content:none!important}
+body.navV2 #sectors .obsSectorTableWrap tr>*:first-child{position:sticky;left:0;background:#fff;z-index:1}
+body.navV2 #sectors .obsSectorTableWrap svg{height:22px;width:90px}
+/* 일정: one compact row per event; long source line clamped, actions inline. */
+body.navV2 #calendar .event{padding:8px 0;gap:6px}
+body.navV2 #calendar .event .source{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:10px;max-width:220px}
+body.navV2 #calendar .obsHistLine,body.navV2 #calendar .obsCalEditLine{display:inline-block;margin:4px 6px 0 0}
+body.navV2 #calendar .obsHistBtn,body.navV2 #calendar .obsCalEditBtn{min-height:32px;padding:0 10px;font-size:12px}
+body.navV2 #calendar .obsMetricRow{gap:6px;padding:4px 0}

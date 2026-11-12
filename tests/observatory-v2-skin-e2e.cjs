@@ -24,6 +24,11 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
   }
   const tileH = await page.evaluate(() => { document.querySelector('#tabs button[data-tab="indices"]').click(); return new Promise(r => setTimeout(() => r(Math.max(...[...document.querySelectorAll('#latestBoardGrid .latestTile')].map(t => t.getBoundingClientRect().height))), 1500)); });
   assert.ok(tileH < 240, 'tile height ' + tileH);
+  await page.evaluate(() => document.querySelector('#tabs button[data-tab="sectors"]').click());
+  await page.waitForFunction(() => document.querySelector('#sectors .obsSectorTableWrap table'), null, { timeout: 15000 });
+  const sector = await page.evaluate(() => { const t = document.querySelector('#sectors .obsSectorTableWrap table'); return { display: getComputedStyle(t).display, rows: t.querySelectorAll('tbody tr').length, h: Math.round(t.getBoundingClientRect().height) }; });
+  assert.equal(sector.display, 'table', 'sector RS stays a table on mobile');
+  assert.ok(sector.h < sector.rows * 90 + 80, 'sector rows compact: ' + JSON.stringify(sector));
   assert.deepEqual(errors, []);
   console.log('OBS_V2_SKIN_PASS tabs=' + tabs.length + ' maxTile=' + Math.round(tileH));
   await browser.close();
