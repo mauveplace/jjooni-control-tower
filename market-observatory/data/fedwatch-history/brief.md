@@ -21,7 +21,7 @@ next FOMC가 바뀌면 다음회의 확률끼리 단순 비교하지 마십시�
 
 | 가격 기준일 | 관측 시각 | 원문 | 보존 관측 수 |
 |---|---|---|---|
-| 2026-11-10 | 2026-11-11T09:42:57+09:00 | [JSON](../fedwatch-history/2026-11-10/fc9bc6f16765422c464830dff968b8d9302c7ecd669580ca68e97c8800711fe9.json) | 2 |
+| 2026-11-10 | 2026-11-11T09:42:57+09:00 | [JSON](../fedwatch-history/2026-11-10/fc9bc6f16765422c464830dff968b8d9302c7ecd669580ca68e97c8800711fe9.json) | 3 |
 | 2026-11-09 | 2026-11-10T09:02:23+09:00 | [JSON](../fedwatch-history/2026-11-09/c5ec4cf6f79b586ba714c6dc541e2faea60be2b705b31b05ee11dfba20366d85.json) | 1 |
 | 2026-11-06 | 2026-11-07T08:21:15+09:00 | [JSON](../fedwatch-history/2026-11-06/e45f126a1a1fc7047f71c912bb8a17528b0c5e99dc5ea196dcc7cac8d0b38d5c.json) | 1 |
 | 2026-11-05 | 2026-11-06T07:06:19+09:00 | [JSON](../fedwatch-history/2026-11-05/59e2f426554ceb45e0675ebe2d82743ae3d32bf4e2a9f3e030f6d4b46198cd3c.json) | 1 |
