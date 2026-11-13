@@ -30,7 +30,7 @@ The owner-facing shorthand “two rounds” limits wasteful repeated prompts; it
 
 1. JJOONI implements, runs the appropriate CI/tests, and opens one properly scoped PR. One ROY review is requested only when justified by the table above.
 2. ROY returns evidence with current 40-character HEAD, actual first-party session provenance and PASS / NEEDS_CHANGES / BLOCKED.
-3. On NEEDS_CHANGES, JJOONI fixes findings first. Do **not** request a second ROY run on an unchanged tree, formatting-only commit, duplicate issue, or event retry.
+3. On verified NEEDS_CHANGES/BLOCKED, JJOONI fixes findings first. A material code change may trigger one more review, but an unchanged tree, formatting-only commit, duplicate issue or event retry does not. If the review actor's first-party session provenance is not verified, return VERIFY_ROY_SOURCE and do not advance the review loop.
 4. If relevant code/decision materially changed, allow **one** targeted follow-up review via the existing Issue-opened Routine, with current PR HEAD, only after checking if a review already exists. If no verified ROY event fires, show WAITING_EVENT rather than claiming success.
 5. If the second review still finds material defects, **ESCALATE_TO_OWNER** and stop automatic re-requesting. In particular, blockers must remain BLOCKED and never turn into a PASS merely because the budget is exhausted.
 6. A claimed PASS is not authenticated ROY provenance. Independently check the session/event; run CI, production/data freshness checks where applicable; and secure owner approval for any merge or deploy. No automatic trades.
@@ -73,7 +73,7 @@ Use this concise PR body structure rather than creating `PLAN.md` and `PLAN-REVI
 
 1. Existing `ai-collab-contract.yml` runs unit tests including `ai-collab/tests/test_mobile_review_loop.py` via test discovery; inspect actual CI.
 2. Normal low-risk test -> `JJOONI_TESTS_ONLY`; substantial/repeated or mandatory type -> `REQUEST_ROY`.
-3. Unverified PASS -> `VERIFY_ROY_SOURCE`; same-head NEEDS_CHANGES -> `JJOONI_FIX_FIRST`; after round 2 -> `ESCALATE_TO_OWNER`; critical defect -> `BLOCKED_REQUIRES_FIX`.
+3. Any unverified non-NONE review -> `VERIFY_ROY_SOURCE`; verified same-head NEEDS_CHANGES -> `JJOONI_FIX_FIRST`; verified BLOCKED with material HEAD fix -> `REQUEST_ROY`; a second failed verified review immediately -> `ESCALATE_TO_OWNER`; active critical defect -> `BLOCKED_REQUIRES_FIX`.
 4. For this PR, verify one genuine PR-opened Claude run and one ROY review for exact current HEAD, then incorporate relevant feedback **without automatically merging**.
 5. During future live work, measure AI runs, duplicate review requests, code-to-PR elapsed time, and post-deploy failure counts across 3 real tasks. No fabricated efficiency percentage.
 
