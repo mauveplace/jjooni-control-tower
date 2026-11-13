@@ -296,5 +296,51 @@ class OwnerRelayGateTests(unittest.TestCase):
             expected_task_id=TASK,expected_head_sha=NEW)["decision"],"BLOCKED")
 
 
+    def test_roy_final_f1_workflow_rename_from_outside_scope_blocked(self):
+        args = fixture()
+        args[5].append({
+            "filename": "ai-collab/x.py",
+            "status": "renamed",
+            "previous_filename": ".github/workflows/ai-collab-contract.yml",
+        })
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_roy_final_f1_second_task_rename_hidden_by_new_filename_blocked(self):
+        args = fixture()
+        args[5].append({
+            "filename": "ai-collab/x.json",
+            "status": "renamed",
+            "previous_filename": "ai-collab-dispatch/tasks/D-261113-OTHER-1.json",
+        })
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_renamed_or_previous_filename_anywhere_blocked(self):
+        args = fixture()
+        args[5][1]["status"] = "renamed"
+        args[5][1]["previous_filename"] = "ai-collab/safe_previous.py"
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture()
+        args[5][1]["previous_filename"] = ".github/workflows/hidden.yml"
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_roy_final_low_ci_wrong_type_or_workflow_float_blocked(self):
+        for key, val in (("app","evil"), ("workflow_id", 411466939.0)):
+            args = fixture()
+            args[4][key] = val
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_control_character_and_nested_task_rejected(self):
+        for path in ("ai-collab/x\n.py", "ai-collab/x\x00.py",
+                     "ai-collab/x\x7f.py"):
+            args = fixture()
+            args[3]["files"][0]["filename"] = path
+            args[5][1]["filename"] = path
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture()
+        args[5].append({"filename":"ai-collab-dispatch/tasks/sub/D-261113-OTHER-1.json",
+                        "status":"added"})
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+
 if __name__ == "__main__":
     unittest.main()
