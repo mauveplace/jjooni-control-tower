@@ -1,7 +1,8 @@
 name: AI Collaboration CI Green ROY Follow-Up
 
 # Runs trusted main-branch code, not PR artifacts or PR checkout.
-# The only allowed mutation is a deduplicated read-only ROY review issue.
+# The only allowed mutation is a deduplicated PR CI-green handoff comment.
+# Connected owner-authorized Work creates the final review Issue after validating it.
 on:
   workflow_run:
     workflows:
@@ -12,8 +13,8 @@ on:
 permissions:
   contents: read
   actions: read
-  pull-requests: read
-  issues: write
+  pull-requests: write
+  issues: read
 
 concurrency:
   group: ai-collab-ci-roy-${{ github.event.workflow_run.head_sha }}
@@ -37,7 +38,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify exact CI source, opt-in contract, Claude review and issue dedup
+      - name: Verify CI and emit one bot-authored PR handoff comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python ai-collab/ci_roy_followup.py
