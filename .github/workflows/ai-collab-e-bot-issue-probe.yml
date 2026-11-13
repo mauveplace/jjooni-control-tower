@@ -26,7 +26,7 @@ jobs:
     steps:
       # Never check out or execute PR code while the issues:write token exists.
       - name: Emit one distinct CI-bot issue delivery probe
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
