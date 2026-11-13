@@ -34,7 +34,8 @@ def _positive_int(x):
 def _safe_path(p):
     if not isinstance(p, str) or not p or "\\" in p or p.startswith("/"):
         return False
-    return all(segment not in ("", ".", "..") for segment in p.split("/"))
+    return (all(segment not in ("", ".", "..") for segment in p.split("/"))
+            and all(ord(char) >= 32 and ord(char) != 127 for char in p))
 
 
 def _owner_pr(pr, *, require_opt_in=True):
@@ -86,13 +87,22 @@ def _candidate(original_pr, task, first_review, correction_commit, green_ci,
         return blocked("Task does not opt into E2 with ROY and owner release gate")
 
     # Entire PR diff must be current/verified and must include ONE active task.
-    if any(not isinstance(f, dict) or not _safe_path(f.get("filename"))
+    # Reject all renames: GitHub includes previous_filename, which may point
+    # outside ai-collab/ or to an additional task JSON otherwise missed.
+    if any(not isinstance(f, dict)
+           or not _safe_path(f.get("filename"))
+           or f.get("status") == "renamed"
+           or f.get("previous_filename") is not None
            for f in changed_pr_files):
-        return blocked("Invalid changed-file path/type")
+        return blocked("Malformed or renamed PR file (old path untrusted)")
     if any(not (f["filename"].startswith("ai-collab/")
                 or f["filename"].startswith("ai-collab-dispatch/"))
            for f in changed_pr_files):
         return blocked("Out-of-scope PR path")
+    if any(f["filename"].startswith("ai-collab-dispatch/tasks/")
+           and TASK_PATH.fullmatch(f["filename"]) is None
+           for f in changed_pr_files):
+        return blocked("Nested or non-task path in active task directory")
     task_changes = [f for f in changed_pr_files
                     if TASK_PATH.fullmatch(f["filename"])]
     if (len(task_changes) != 1
@@ -136,9 +146,13 @@ def _candidate(original_pr, task, first_review, correction_commit, green_ci,
             or filename not in [f["filename"] for f in changed_pr_files]):
         return blocked("Correction file must be safe source and present in PR diff")
 
-    app_slug = _obj(green_ci.get("app")).get("slug")
+    app = green_ci.get("app")
+    if app is not None and not isinstance(app, dict):
+        return blocked("Malformed CI app metadata")
+    app_slug = _obj(app).get("slug")
     if (not _positive_int(green_ci.get("id"))
             or not _positive_int(green_ci.get("run_attempt"))
+            or type(green_ci.get("workflow_id")) is not int
             or green_ci.get("workflow_id") != CONTRACT_WORKFLOW_ID
             or green_ci.get("name") != CONTRACT_NAME
             or green_ci.get("path") != CONTRACT_PATH
