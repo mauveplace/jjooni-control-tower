@@ -17,10 +17,11 @@ def review_receipt_key(repository, pr_number, source_comment_id):
     """
     if not isinstance(repository, str) or not _REPO.fullmatch(repository):
         raise ValueError("repository must be owner/name")
+    if any(part in (".", "..") for part in repository.split("/")):
+        raise ValueError("repository must be owner/name")
     if type(pr_number) is not int or pr_number < 1:
         raise ValueError("PR number must be a positive integer")
     if type(source_comment_id) is not int or source_comment_id < 1:
         raise ValueError("source comment ID must be a positive integer")
 
-    # L2 REVIEW TARGET: currently ignores repository and PR, causing collisions.
-    return "review-receipt:" + str(source_comment_id)
+    return f"review-receipt:{repository.lower()}#{pr_number}:{source_comment_id}"
