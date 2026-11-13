@@ -149,5 +149,63 @@ class MorningReadinessTests(unittest.TestCase):
         reverted["revisions"].append({"field":"new","revised_at_kst":"2026-11-14T07:00:00+09:00"})
         self.assertTrue(revision_only(reverted,prior))
 
+    def test_v2_report_rejects_blank_numbers_when_same_session_is_available(self):
+        args=list(sample())
+        day,obs,pulse,glance=args
+        day["report_date_kst"]="2026-11-15"
+        day["editorial_contract"].update(
+            verified_at_kst="2026-11-15T06:46:00+09:00",
+            canonical_source_vintage={
+               "session":SESSION,
+               "observatory_generated_kst":obs["generated_kst"],
+               "pulse_generated_kst":pulse["generated_kst"],
+               "glance_generated_kst":glance["generated_kst"]},
+            market_metrics={k:{"value":None,"status":"MISSING"} for k in
+                            ("NDX","SOX","VIX10","MA250","DD52W")})
+        day["generated_kst"]="2026-11-15T06:47:00+09:00"
+        day["published_kst"]="2026-11-15T06:48:00+09:00"
+        glance["groups"]=[{"name":"미국","items":[
+           {"key":"NASDAQ100","value":27943.7363,"date":SESSION},
+           {"key":"SOX","value":10146.3232,"date":SESSION}]}]
+        glance["tripod"].update(vix10=20.73,ma250=27505.8,drawdown_52w_pct=-10.51)
+        with self.assertRaisesRegex(ValueError,"CORE_MARKET_REPORT_MISSING_WHILE_SOURCE_AVAILABLE:NDX"):
+            verify(*args)
+        vals={"NDX":27943.7363,"SOX":10146.3232,
+              "VIX10":20.73,"MA250":27505.8,"DD52W":-10.51}
+        for k,v in vals.items():
+            day["editorial_contract"]["market_metrics"][k]={"value":v,"status":"PROVIDER_REFERENCE_ONLY"}
+        self.assertEqual(verify(*args)["session"],SESSION)
+        day["editorial_contract"]["market_metrics"]["SOX"]["value"]=10000.0
+        with self.assertRaisesRegex(ValueError,"CORE_MARKET_REPORT_DIFFERS_FROM_CANONICAL:SOX"):
+            verify(*args)
+
+    def test_v2_sox_source_missing_may_be_disclosed_but_not_invented(self):
+        args=list(sample())
+        day,obs,pulse,glance=args
+        day["report_date_kst"]="2026-11-15"
+        day["editorial_contract"].update(
+           verified_at_kst="2026-11-15T06:46:00+09:00",
+           canonical_source_vintage={
+               "session":SESSION,
+               "observatory_generated_kst":obs["generated_kst"],
+               "pulse_generated_kst":pulse["generated_kst"],
+               "glance_generated_kst":glance["generated_kst"]},
+           market_metrics={
+               "NDX":{"value":27943.74,"status":"PROVIDER_REFERENCE_ONLY"},
+               "SOX":{"value":None,"status":"MISSING"},
+               "VIX10":{"value":20.73,"status":"PROVIDER_REFERENCE_ONLY"},
+               "MA250":{"value":27505.8,"status":"PROVIDER_REFERENCE_ONLY"},
+               "DD52W":{"value":-10.51,"status":"PROVIDER_REFERENCE_ONLY"}})
+        day["generated_kst"]="2026-11-15T06:47:00+09:00"
+        day["published_kst"]="2026-11-15T06:48:00+09:00"
+        glance["groups"]=[{"name":"미국","items":[
+           {"key":"NASDAQ100","value":27943.7363,"date":SESSION}]}]
+        glance["tripod"].update(vix10=20.73,ma250=27505.8,drawdown_52w_pct=-10.51)
+        self.assertEqual(verify(*args)["session"],SESSION)
+        day["editorial_contract"]["market_metrics"]["SOX"]["value"]=10146.32
+        day["editorial_contract"]["market_metrics"]["SOX"]["status"]="PROVIDER_REFERENCE_ONLY"
+        with self.assertRaisesRegex(ValueError,"CORE_MARKET_SOURCE_NOT_READY:SOX"):
+            verify(*args)
+
 if __name__=="__main__":
     unittest.main()
