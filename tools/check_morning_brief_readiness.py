@@ -129,8 +129,18 @@ def verify(brief, observatory, pulse, glance):
                         raise ValueError("CORE_MARKET_REPORT_MISSING_WHILE_SOURCE_AVAILABLE:" + key)
                     if abs(actual - expected) > (0.06 if key in ("VIX10", "DD52W") else 0.1):
                         raise ValueError("CORE_MARKET_REPORT_DIFFERS_FROM_CANONICAL:" + key)
-                    if market.get("status") not in ("PROVIDER_REFERENCE_ONLY", "OFFICIAL_VERIFIED"):
+                    status = market.get("status")
+                    if status not in ("PROVIDER_REFERENCE_ONLY", "OFFICIAL_VERIFIED"):
                         raise ValueError("CORE_MARKET_REFERENCE_STATUS_MISSING:" + key)
+                    if status == "OFFICIAL_VERIFIED":
+                        if key not in ("NDX", "SOX"):
+                            raise ValueError("DERIVED_MARKET_METRIC_CANNOT_BE_OFFICIAL:" + key)
+                        checks = brief.get("editorial_contract", {}).get("close_checks") or []
+                        close_check = next((x for x in checks if x.get("symbol") == key), {})
+                        if close_check.get("status") != "VERIFIED" or market.get("official_eod_verified") is not True:
+                            raise ValueError("OFFICIAL_CLOSE_PROOF_NOT_PRESENT:" + key)
+                    elif market.get("official_eod_verified") is not False:
+                        raise ValueError("REFERENCE_CANNOT_CLAIM_OFFICIAL:" + key)
                 else:
                     if market.get("value") is not None or market.get("status") not in ("MISSING", "CONFLICT"):
                         raise ValueError("CORE_MARKET_SOURCE_NOT_READY:" + key)
