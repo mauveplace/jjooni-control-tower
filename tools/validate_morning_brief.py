@@ -128,119 +128,31 @@ def validate_dual_market_template(d, contract):
             assert price_tokens == [numeric], ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
             if m['status'] == 'PROVIDER_REFERENCE_ONLY':
                 assert '참고' in visible, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
-    # V2.1: a numeric ETF move cannot masquerade as verified new cash.
-    # Source existence is ultimately checked outside this offline validator.
-    import re as _regex
-    from urllib.parse import urlparse as _flow_parse
-    region_section = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
-    earnings_section = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
-    strategy_section = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
-    assert '**섹터 로테이션·자금흐름**' in region_section, 'SECTOR_FLOW_SECTION_MISSING'
-    assert '**주요 기업 실적·가이던스**' in earnings_section, 'EARNINGS_SECTION_MISSING'
-    assert '**실적×자금흐름 종합판정**' in strategy_section, 'EARNINGS_FLOW_CROSS_SECTION_MISSING'
-
-    status_line = _regex.search(
-        r'(?m)^\s*(?:[-*]\s*)?(?:\*\*)?(DIRECT_VERIFIED|PROXY_ONLY|UNAVAILABLE)(?:\*\*)?\s*[·:]',
-        region_section)
-    assert status_line, 'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'
-    status = status_line.group(1)
-    earnings_line = _regex.search(
-        r'(?m)^\s*(?:[-*]\s*)?(?:\*\*)?(REPORTED|NO_NEW_RELEASES|SOURCE_UNAVAILABLE)(?:\*\*)?\s*[·:]',
-        earnings_section)
-    assert earnings_line, 'EARNINGS_COVERAGE_STATUS_MISSING'
-    earnings_status = earnings_line.group(1)
-    flow_entries = contract.get('sector_flows')
-    assert isinstance(flow_entries, list), 'SECTOR_FLOW_CLAIMS_REQUIRED'
-    issuer_events = contract.get('earnings_events')
-    assert isinstance(issuer_events, list), 'EARNINGS_EVENTS_REQUIRED'
-
-    def require_url(value, code):
-        u = _flow_parse(str(value or ''))
-        assert u.scheme == 'https' and bool(u.hostname) and u.hostname not in (
-            'example.com', 'localhost', 'test.com'), code
-
-    def time_with_zone(value, code):
-        try:
-            v = datetime.fromisoformat(str(value or ''))
-        except ValueError as ex:
-            raise AssertionError(code) from ex
-        assert v.tzinfo is not None and v.utcoffset() is not None, code
-        return v
-
-    for row in flow_entries:
-        assert isinstance(row, dict), 'FLOW_ENTRY_SHAPE'
-        assert row.get('measure') in ('creation_redemption', 'investor_net_buy'), 'FLOW_MEASURE_UNRECOGNIZED'
-        assert isinstance(row.get('instrument'), str) and row['instrument'].strip(), 'FLOW_INSTRUMENT'
-        val = row.get('value')
-        assert isinstance(val, (int, float)) and not isinstance(val, bool) and isfinite(val), 'FLOW_VALUE'
-        assert row.get('currency') in ('USD','KRW','JPY','EUR','TWD','HKD'), 'FLOW_CURRENCY'
-        assert row.get('derived') is False, 'DERIVED_ESTIMATE_NOT_DIRECT_FLOW'
-        assert isinstance(row.get('period_start'), str) and isinstance(row.get('period_end'), str), 'FLOW_PERIOD'
-        assert _regex.fullmatch(r'\d{4}-\d{2}-\d{2}', row['period_start']), 'FLOW_PERIOD'
-        assert _regex.fullmatch(r'\d{4}-\d{2}-\d{2}', row['period_end']), 'FLOW_PERIOD'
-        assert row['period_start'] <= row['period_end'], 'FLOW_PERIOD_INVERTED'
-        require_url(row.get('source_url'), 'FLOW_SOURCE_URL_REQUIRED')
-        time_with_zone(row.get('source_published_at'), 'FLOW_SOURCE_CLOCK_REQUIRED')
-    direct_lines = [line.strip() for line in region_section.splitlines()
-                    if _regex.search(r'(?<!\w)DIRECT_VERIFIED(?!\w)', line)]
-    if status == 'DIRECT_VERIFIED':
-        assert flow_entries and direct_lines, 'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'
-    if status != 'DIRECT_VERIFIED':
-        assert not direct_lines and not flow_entries, 'UNVERIFIED_SECTOR_CANNOT_CLAIM_DIRECT_FLOW'
-    for line in direct_lines:
-        assert any(row['instrument'] in line and row['currency'] in line
-                   and f"{row['value']:,.2f}" in line and row['period_end'] in line
-                   and row['source_url'] in line for row in flow_entries), 'DIRECT_FLOW_VISIBLE_CLAIM_UNBACKED'
-
-    if status == 'PROXY_ONLY':
-        summary = status_line.group(0)
-        tail = region_section[status_line.end():].splitlines()[0]
-        assert ('확인 불가' in tail or '미확인' in tail), 'PROXY_FLOW_LIMIT_MISSING'
-    if status == 'UNAVAILABLE':
-        tail = region_section[status_line.end():].splitlines()[0]
-        assert any(x in tail for x in ('미확인','자료 없음','확인 불가','원천 지연')), 'FLOW_UNAVAILABLE_REASON_MISSING'
-
-    # Scan ALL content of ④ and ⑦, not just lines with the status word.
-    # Genuine asserted new cash movement must have a structured source-backed
-    # DIRECT_VERIFIED line. Hypothetical/comparative discussion is allowed
-    # only when explicitly qualified as speculation or unconfirmed.
-    asserted_flow = _regex.compile(
-        r'(?:자금\s*(?:대거\s*)?(?:유입|유출)|순유입액?\s*(?:[+$€₩-]|\d)|'
-        r'순매수\s*(?:[+$€₩-]|\d)|(?:inflow|outflow)\s*(?:[+$€₩-]|\d))', _regex.I)
-    for block in (region_section, strategy_section):
-        for line in block.splitlines():
-            # In Markdown tables each cell stands on its own: "미확인" in
-            # the 1D-return cell must not excuse a forged $900M fund-flow
-            # amount shown in a DIFFERENT cell on the same row.
-            pieces = line.split('|') if '|' in line else [line]
-            for cell in pieces:
-                if not asserted_flow.search(cell):
-                    continue
-                if any(x in cell for x in ('추론','가정','가능성','확인 불가','미확인','불명','만약','가설','조건부','UNAVAILABLE','PROXY_ONLY')):
-                    continue
-                assert 'DIRECT_VERIFIED' in cell and any(
-                    row['instrument'] in line and row['currency'] in line
-                    and f"{row['value']:,.2f}" in line and row['source_url'] in line
-                    for row in flow_entries), 'UNVERIFIED_FUND_INFLOW_ASSERTION'
-
-    if earnings_status == 'REPORTED':
-        assert issuer_events, 'ISSUER_EARNINGS_SOURCE_REQUIRED'
-    elif earnings_status == 'NO_NEW_RELEASES':
-        assert not issuer_events, 'NO_RELEASES_CONFLICT_WITH_EARNINGS'
-    elif earnings_status == 'SOURCE_UNAVAILABLE':
-        assert not issuer_events, 'ISSUER_UNAVAILABLE_CANNOT_ASSERT_RELEASE'
-    for event in issuer_events:
-        assert isinstance(event, dict), 'EARNINGS_EVENT_SHAPE'
-        assert isinstance(event.get('issuer'), str) and event['issuer'].strip(), 'EARNINGS_ISSUER'
-        assert isinstance(event.get('fiscal_period'), str) and event['fiscal_period'].strip(), 'EARNINGS_PERIOD'
-        require_url(event.get('source_url'), 'EARNINGS_ISSUER_URL_REQUIRED')
-        time_with_zone(event.get('released_at'), 'EARNINGS_RELEASE_TIME_REQUIRED')
-        assert event.get('eps_basis') in ('GAAP', 'NON_GAAP', 'NOT_REPORTED'), 'EARNINGS_EPS_BASIS_REQUIRED'
-        assert event.get('consensus_status') in ('PUBLISHED_SOURCE','CONSENSUS_UNAVAILABLE'), 'EARNINGS_CONSENSUS_STATUS'
-    if earnings_status == 'REPORTED':
-        assert any(event['issuer'] in earnings_section for event in issuer_events), 'EARNINGS_NOT_VISIBLE'
-    if earnings_status in ('NO_NEW_RELEASES','SOURCE_UNAVAILABLE'):
-        assert any(word in earnings_section for word in ('미확인','발표 없음','공시 없음','접근 불가','조회 불가','자료 없음')), 'EARNINGS_QUIET_DAY_REASON_REQUIRED'
+    # User-requested LITE 2-session sector and historical company radar.
+    # New reports keep V2 canonical price and publication audits. A flow
+    # amount, ETF creation/redemption or source-less consensus is NOT REQUIRED.
+    from re import search as _search
+    for name in ('## ④ 글로벌·한국 시장', '## ⑤ AI 산업·기업실적',
+                 '## ⑥ 주요 일정', '## ⑦ 투자전략·위험점검·복기',
+                 '## ⑧ 원천·데이터 감사'):
+        assert name in body, ('SECTION_REQUIRED', name)
+    region = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
+    earnings = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
+    strategy = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
+    assert '**섹터 강약 비교(전일→당일)**' in region, 'TWO_SESSION_SECTOR_BLOCK_REQUIRED'
+    assert '수익률 기반 추정' in region, 'SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'
+    rows = []
+    for line in region.splitlines():
+        if line.strip().startswith('|'):
+            rows.append([v.strip() for v in line.strip().strip('|').split('|')])
+    assert any(len(r) >= 5 and '섹터' in r[0] and
+               '전일' in r[1] and '당일' in r[2] and '변화' in r[3]
+               for r in rows), 'TWO_SESSION_SECTOR_TABLE_REQUIRED'
+    assert sum(len(r) >= 5 and r[0] not in ('---', '섹터·대표 지표') and
+               not r[0].startswith('---') and '섹터' not in r[0]
+               for r in rows) >= 1, 'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'
+    assert '**송팀장 관심기업 업데이트**' in earnings, 'SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'
+    assert '**기업·섹터 연결 해석**' in strategy, 'COMPANY_SECTOR_LINK_REQUIRED'
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
