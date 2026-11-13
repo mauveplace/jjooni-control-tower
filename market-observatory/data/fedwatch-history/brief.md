@@ -1,9 +1,9 @@
 # FedWatch · PB / Analyst Read View
 
-- 자료 기준일: 2026-11-11
-- 원천 표시시각: 2026-11-11
-- 수집 시각: 2026-11-13T11:38:49+09:00
-- 수집 당시 상태: LAGGING
+- 자료 기준일: 2026-11-12
+- 원천 표시시각: 2026-11-12
+- 수집 시각: 2026-11-14T00:21:26+09:00
+- 수집 당시 상태: LIVE
 - 원천: CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix
 - 공식 API: NOT_CONFIGURED_SETTLEMENT_DERIVED
 - 최신 원문: [fed-watch.json](../fed-watch.json)
@@ -21,6 +21,7 @@ next FOMC가 바뀌면 다음회의 확률끼리 단순 비교하지 마십시�
 
 | 가격 기준일 | 관측 시각 | 원문 | 보존 관측 수 |
 |---|---|---|---|
+| 2026-11-12 | 2026-11-14T00:21:26+09:00 | [JSON](../fedwatch-history/2026-11-12/31090d31de517fd1aa5c76ab38a0a3c16feddb5e6b3f11b688e069694bc54514.json) | 1 |
 | 2026-11-11 | 2026-11-13T11:38:49+09:00 | [JSON](../fedwatch-history/2026-11-11/694ef81d9459fad0ed79dd54f6b6fbf15f7432ac0a54c48627022038e8f08de5.json) | 4 |
 | 2026-11-10 | 2026-11-11T09:42:57+09:00 | [JSON](../fedwatch-history/2026-11-10/fc9bc6f16765422c464830dff968b8d9302c7ecd669580ca68e97c8800711fe9.json) | 5 |
 | 2026-11-09 | 2026-11-10T09:02:23+09:00 | [JSON](../fedwatch-history/2026-11-09/c5ec4cf6f79b586ba714c6dc541e2faea60be2b705b31b05ee11dfba20366d85.json) | 1 |
