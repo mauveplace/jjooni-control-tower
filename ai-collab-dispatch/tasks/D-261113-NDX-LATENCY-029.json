@@ -1,0 +1,29 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-NDX-LATENCY-029",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent ROY review of PR #414 US close->Observatory/Daily Pulse latency telemetry following #407, ensuring DST, early close, invalid timestamp, and schema stability; review only on current HEAD.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Verify market session cash close timing across standard/daylight saving and US market early closes.",
+    "Ensure latency metadata cannot be mistaken for data freshness, or hide critical failures, and handles invalid or absent timestamps without fabricating values.",
+    "Verify current-HEAD regression tests and exact GitHub CI evidence. Include original issue ID, actual Claude first-party session provenance and no false approval."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets/private financial or customer data",
+    "No trading, main merge, deployment, permission changes or paid service",
+    "No weakening critical acceptance or scheduled writer freshness tests"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "coordination_notes": "PR #414 was opened without required changed task JSON; add it to unblock contract. Its original PR.opened event will NOT replay. Request one independent ROY follow-up using a supported new issue-opened event on exact updated HEAD after verifying no duplicate."
+}

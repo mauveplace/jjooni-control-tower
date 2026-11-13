@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from observatory_session import ET, EARLY_CLOSES
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'market-observatory' / 'data' / 'watchdog-status.json'
 KST = ZoneInfo('Asia/Seoul')
@@ -42,6 +44,25 @@ def next_check_due(checked):
                 if candidate > utc:
                     return (candidate + timedelta(hours=3)).astimezone(KST).isoformat(timespec='seconds')
     raise ValueError('NO_NEXT_CLOSE_WATCHDOG_CANDIDATE')
+
+
+def publication_latency(session, generated):
+    """Measure elapsed time from the actual US cash close to publication.
+
+    This is telemetry, not a freshness verdict. Early closes and DST are
+    evaluated using the session date in America/New_York.
+    """
+    try:
+        day = datetime.fromisoformat(str(session)[:10]).date()
+        stamp = datetime.fromisoformat(str(generated))
+        if stamp.tzinfo is None:
+            return None
+        hour = 13 if day in EARLY_CLOSES else 16
+        close = datetime(day.year, day.month, day.day, hour, tzinfo=ET)
+        elapsed = round((stamp - close).total_seconds() / 60, 1)
+        return elapsed if elapsed >= 0 else None
+    except (ValueError, TypeError):
+        return None
 
 
 def main():
@@ -111,6 +132,9 @@ def main():
             'public_generated_kst': public.get('generated_kst'),
             'tripod_session': (public.get('tripod_signal') or {}).get('date'),
         },
+        'us_close_to_observatory_generated_minutes': publication_latency(obs.get('us_completed_session_date'), obs.get('generated_kst')),
+        'us_close_to_pulse_generated_minutes': publication_latency(pulse.get('market_date_us'), pulse.get('generated_kst')),
+        'publication_latency_measurement': 'US_CASH_CLOSE_TO_GENERATED_TIMESTAMP_NOT_NETWORK_OR_UI_ARRIVAL',
         'workflow_url': workflow_url,
         'run_url': run_url,
         'manual_dispatch_supported': True,
