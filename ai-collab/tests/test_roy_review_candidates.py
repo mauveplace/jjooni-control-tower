@@ -147,5 +147,37 @@ class ReviewCandidateParsingTests(unittest.TestCase):
         self.assertEqual(parse_roy_review_candidate(text)["verdict"], "PASS")
 
 
+    def test_four_backtick_fence_not_closed_by_three(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        opening = chr(96) * 4
+        shorter = chr(96) * 3
+        value = review(marker, f"{opening}\n{shorter}\nROY_REVIEW=PASS\n{opening}")
+        self.assertIsNone(parse_roy_review_candidate(value))
+
+    def test_indented_verdicts_are_not_declarations(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        for value in ("    ROY_REVIEW=PASS", "\tROY_REVIEW=PASS",
+                      "  \tROY_REVIEW=PASS"):
+            with self.subTest(value=value):
+                self.assertIsNone(parse_roy_review_candidate(review(marker, value)))
+
+    def test_conflicting_issue_identifiers_are_rejected(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        self.assertIsNone(parse_roy_review_candidate(
+            review(marker + " source-issue=419 issue=999")
+        ))
+        same = parse_roy_review_candidate(
+            review(marker + " source-issue=419 issue=419")
+        )
+        self.assertEqual(same["source_issue"], 419)
+
+    def test_long_fence_close_restores_actual_verdict(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        fence = chr(96) * 4
+        value = review(marker, f"{fence}\nROY_REVIEW=BLOCKED\n{fence}\nROY_REVIEW=PASS")
+        got = parse_roy_review_candidate(value)
+        self.assertEqual(got["verdict"], "PASS")
+
+
 if __name__ == "__main__":
     unittest.main()
