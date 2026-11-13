@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ci_roy_followup import (
     REPO, WORKFLOW, ISSUE_MARKER, TITLE_PREFIX,
     authorized_task, event_is_eligible, issue_matches, make_issue,
-    parse_roy_comment, try_dispatch,
+    make_bridge_comment, bridge_matches, parse_roy_comment, try_dispatch,
 )
 
 PARENT = "a" * 40
@@ -68,7 +68,10 @@ class FakeGitHub:
     def api(self, suffix):
         if suffix == "/actions/runs/77":
             return {"head_sha": HEAD, "conclusion": "success",
-                    "event": "pull_request", "name": WORKFLOW}
+                    "event": "pull_request", "name": WORKFLOW,
+                    "path": ".github/workflows/ai-collab-contract.yml",
+                    "repository": {"full_name": REPO},
+                    "head_repository": {"full_name": REPO}}
         if suffix == "/commits/" + HEAD + "/pulls":
             return [{"number": 430}]
         if suffix == "/pulls/430":
@@ -100,10 +103,13 @@ class FakeGitHub:
 
     def request(self, uri, payload=None):
         self.created.append(payload)
-        issue = {"number": 431, "title": payload["title"],
-                 "body": payload["body"], "html_url": "https://github.com/example/431"}
-        self.issues.insert(0, issue)
-        return issue
+        if uri != "/repos/" + REPO + "/issues/430/comments":
+            raise AssertionError("Unauthorized non-comment GitHub write: " + uri)
+        comment = {"id": 431, "body": payload["body"],
+                   "user": {"login": "github-actions[bot]"},
+                   "html_url": "https://github.com/example/431"}
+        self.comments.append(comment)
+        return comment
 
 
 class CIDispatchTests(unittest.TestCase):
@@ -162,6 +168,7 @@ class CIDispatchTests(unittest.TestCase):
 
     def test_issue_exact_match_and_false_positive(self):
         req = make_issue(430, TASK_ID, HEAD, 77, 42)
+        req["user"] = {"login": "mauveplace"}
         self.assertTrue(issue_matches(req, 430, TASK_ID, HEAD))
         self.assertFalse(issue_matches(req, 430, TASK_ID, PARENT))
         unrelated = {"title": "[AI-COLLAB][ROY-REQUEST] old review",
@@ -176,10 +183,110 @@ class CIDispatchTests(unittest.TestCase):
 
     def test_end_to_end_created_once_then_deduped(self):
         gh = FakeGitHub()
-        self.assertEqual(try_dispatch(gh, sample_event()), "CREATED")
+        self.assertEqual(try_dispatch(gh, sample_event()), "BRIDGE_CREATED")
         self.assertEqual(len(gh.created), 1)
+        self.assertTrue(bridge_matches(gh.comments[-1], 430, TASK_ID, HEAD))
         self.assertEqual(try_dispatch(gh, sample_event()), "DEDUPED")
         self.assertEqual(len(gh.created), 1)
+
+    def test_actions_bot_cannot_impersonate_trusted_owner_issue(self):
+        req = make_issue(430, TASK_ID, HEAD, 77, 42)
+        req["user"] = {"login": "github-actions[bot]"}
+        self.assertFalse(issue_matches(req, 430, TASK_ID, HEAD))
+        req["user"]["login"] = "mauveplace"
+        self.assertTrue(issue_matches(req, 430, TASK_ID, HEAD))
+
+    def test_real_bridge_signal_has_strict_idempotency_scope(self):
+        note = make_bridge_comment(430, TASK_ID, HEAD, 77, 42)
+        bot = {"body": note["body"], "user": {"login": "github-actions[bot]"}}
+        self.assertTrue(bridge_matches(bot, 430, TASK_ID, HEAD))
+        self.assertFalse(bridge_matches(bot, 430, TASK_ID, PARENT))
+        bot["user"]["login"] = "mauveplace"
+        self.assertFalse(bridge_matches(bot, 430, TASK_ID, HEAD))
+
+    def test_fake_roy_actor_and_modern_header(self):
+        c = sample_comment()
+        c["body"] = c["body"].replace("actor=ROY", "actor=JJOONI")
+        self.assertIsNone(parse_roy_comment(c))
+        good = sample_comment()
+        good["body"] = good["body"].replace(
+            "<!-- JJOONI-COLLAB-V4 ", "<!-- JJOONI-COLLAB-ROY-REVIEW-V4 "
+        ).replace("actor=ROY ", "")
+        self.assertEqual(parse_roy_comment(good)["verdict"], "NEEDS_CHANGES")
+
+    def test_bot_ci_comment_does_not_authenticate_roy(self):
+        c = sample_comment(app="github-actions")
+        self.assertIsNone(parse_roy_comment(c))
+
+    def test_run_api_wrong_path_fails_closed(self):
+        gh = FakeGitHub()
+        old_api = gh.api
+        def wrong_path(suffix):
+            x = old_api(suffix)
+            if suffix == "/actions/runs/77":
+                x["path"] = ".github/workflows/other.yml"
+            return x
+        gh.api = wrong_path
+        with self.assertRaisesRegex(RuntimeError, "CI source mismatch"):
+            try_dispatch(gh, sample_event())
+        self.assertFalse(gh.created)
+
+    def test_second_pr_file_task_contract_rejected(self):
+        gh = FakeGitHub()
+        old_pages = gh.pages
+        def extra_contract(suffix):
+            files = old_pages(suffix)
+            if suffix == "/pulls/430/files":
+                files.append({"filename": "ai-collab-dispatch/tasks/D-261113-EXTRA-123.json",
+                              "status": "added"})
+            return files
+        gh.pages = extra_contract
+        self.assertEqual(try_dispatch(gh, sample_event()), "SKIP")
+        self.assertFalse(gh.created)
+
+    def test_commit_cannot_change_regression_tests(self):
+        gh = FakeGitHub()
+        old_api = gh.api
+        def edited_tests(suffix):
+            x = old_api(suffix)
+            if suffix == "/commits/" + HEAD:
+                x["files"][0]["filename"] = "ai-collab/tests/test_ci_roy_followup.py"
+            return x
+        gh.api = edited_tests
+        self.assertEqual(try_dispatch(gh, sample_event()), "SKIP")
+        self.assertFalse(gh.created)
+
+    def test_true_stale_race_after_all_validation(self):
+        gh = FakeGitHub()
+        old_api = gh.api
+        called = [0]
+        def late_change(suffix):
+            if suffix == "/pulls/430":
+                called[0] += 1
+                if called[0] == 2:
+                    result = dict(gh.pr)
+                    result["head"] = dict(gh.pr["head"], sha=PARENT)
+                    return result
+            return old_api(suffix)
+        gh.api = late_change
+        self.assertEqual(try_dispatch(gh, sample_event()), "STALE")
+        self.assertFalse(gh.created)
+
+    def test_receiver_contract_owner_issue_bridge(self):
+        from issue_dispatch import decide
+        req = make_issue(430, TASK_ID, HEAD, 77, 42)
+        envelope = {
+            "action": "opened", "repository": {"full_name": REPO},
+            "sender": {"login": "mauveplace"},
+            "issue": {"id": 100, "number": 431, "title": req["title"],
+                      "body": req["body"], "user": {"login": "mauveplace"}},
+        }
+        target = {"number": 430, "title": "[AI-COLLAB] isolated", "state": "open",
+                  "base": {"ref": "main"}, "head": {"sha": HEAD}}
+        self.assertEqual(decide(envelope, target)["decision"], "REQUEST_ROY_REVIEW")
+        envelope["issue"]["user"]["login"] = "github-actions[bot]"
+        envelope["sender"]["login"] = "github-actions[bot]"
+        self.assertEqual(decide(envelope, target)["decision"], "UNTRUSTED")
 
     def test_source_must_be_first_review_on_parent_sha(self):
         gh = FakeGitHub()
