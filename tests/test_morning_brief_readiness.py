@@ -4,7 +4,7 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_morning_brief_readiness import verify
+from check_morning_brief_readiness import verify, revision_only
 
 SESSION="2026-11-13"
 def sample():
@@ -54,11 +54,10 @@ class MorningReadinessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"CANONICAL_STATUS_NOT_READY"):
             verify(*args)
 
-    def test_glance_not_newer_than_report_verification(self):
+    def test_later_glance_rebuild_does_not_invalidate_original_observation(self):
         args=list(sample())
-        args[3]["generated_kst"]="2026-11-14T06:49:00+09:00"
-        with self.assertRaisesRegex(ValueError,"REPORT_PREDATES_CANONICAL_SOURCE"):
-            verify(*args)
+        args[3]["generated_kst"]="2026-11-14T07:49:00+09:00"
+        self.assertEqual(verify(*args)["session"], SESSION)
 
     def test_derived_glance_vintage_must_match_original(self):
         args=list(sample())
@@ -83,6 +82,64 @@ class MorningReadinessTests(unittest.TestCase):
         args[0]["generated_kst"]="2026-11-15T06:47:00+09:00"
         args[0]["published_kst"]="2026-11-15T06:48:00+09:00"
         self.assertEqual(verify(*args)["session"],SESSION)
+
+
+    def test_new_publication_requires_immutable_consumed_vintage(self):
+        args=list(sample())
+        args[0]["report_date_kst"]="2026-11-15"
+        args[0]["editorial_contract"]["verified_at_kst"]="2026-11-15T06:46:00+09:00"
+        args[0]["generated_kst"]="2026-11-15T06:47:00+09:00"
+        args[0]["published_kst"]="2026-11-15T06:48:00+09:00"
+        with self.assertRaisesRegex(ValueError,"CANONICAL_SOURCE_VINTAGE_REQUIRED"):
+            verify(*args)
+        args[0]["editorial_contract"]["canonical_source_vintage"]={
+            "session":SESSION,
+            "observatory_generated_kst":"2026-11-14T06:34:06+09:00",
+            "pulse_generated_kst":"2026-11-14T06:34:38+09:00",
+            "glance_generated_kst":"2026-11-14T06:36:45+09:00",
+        }
+        self.assertEqual(verify(*args)["session"],SESSION)
+
+    def test_source_after_publication_is_not_laundered_as_old_vintage(self):
+        args=list(sample())
+        args[0]["report_date_kst"]="2026-11-15"
+        args[0]["editorial_contract"]["canonical_source_vintage"]={
+            "session":SESSION,
+            "observatory_generated_kst":"2026-11-14T07:34:06+09:00",
+            "pulse_generated_kst":"2026-11-14T07:34:38+09:00",
+            "glance_generated_kst":"2026-11-14T07:36:45+09:00",
+        }
+        with self.assertRaisesRegex(ValueError,"REPORT_PREDATES_CANONICAL_SOURCE"):
+            verify(*args)
+
+    def test_same_session_source_rebuild_after_correct_publication(self):
+        args=list(sample())
+        args[0]["report_date_kst"]="2026-11-15"
+        args[0]["editorial_contract"]["verified_at_kst"]="2026-11-15T06:46:00+09:00"
+        args[0]["generated_kst"]="2026-11-15T06:47:00+09:00"
+        args[0]["published_kst"]="2026-11-15T06:48:00+09:00"
+        args[0]["editorial_contract"]["canonical_source_vintage"]={
+            "session":SESSION,
+            "observatory_generated_kst":"2026-11-14T06:34:06+09:00",
+            "pulse_generated_kst":"2026-11-14T06:34:38+09:00",
+            "glance_generated_kst":"2026-11-14T06:36:45+09:00",
+        }
+        args[1]["generated_kst"]="2026-11-15T07:49:00+09:00"
+        args[2]["generated_kst"]="2026-11-15T07:50:00+09:00"
+        args[3]["source_generated_kst"]=args[1]["generated_kst"]
+        args[3]["generated_kst"]="2026-11-15T07:51:00+09:00"
+        self.assertEqual(verify(*args)["source_generated_kst"],
+                         "2026-11-14T06:34:06+09:00")
+
+    def test_revision_only_not_incorrectly_blocked_by_new_source(self):
+        prior={"report_date_kst":"2026-11-14","market_date_us":SESSION,
+               "generated_kst":"2026-11-14T06:31:00+09:00",
+               "editorial_contract":{"verified_at_kst":"2026-11-14T06:31:00+09:00"}}
+        revised=copy.deepcopy(prior)
+        revised["revisions"]=[{"field":"published_kst","revised_at_kst":"2026-11-14T07:00:00+09:00"}]
+        self.assertTrue(revision_only(revised,prior))
+        revised["editorial_contract"]["verified_at_kst"]="2026-11-14T07:02:00+09:00"
+        self.assertFalse(revision_only(revised,prior))
 
 if __name__=="__main__":
     unittest.main()
