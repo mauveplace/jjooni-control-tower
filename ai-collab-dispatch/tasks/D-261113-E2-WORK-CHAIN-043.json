@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-E2-WORK-CHAIN-043",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Test (unmerged branch only) a full first-party ROY NEEDS_CHANGES GitHub issue_comment.created event leading to an isolated Work event-handler code fix, exact-head CI retest, creation of an owner-authored same-SHA alias PR (B), and first-party ROY pull_request.opened second review. Existing production GitHub webhook and hourly fallback must not be modified. The canary intentionally fails strict boolean tests until the one-file Work fix.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "auto_roy_review_after_ci": true,
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-13 owner explicitly authorized E test-only continued experiments without main merge/deploy; additional '야 이어서 진행해' authorizes continuation in that scope. This does not authorize trading, production code, changes to current production Work webhook.",
+  "acceptance": [
+    "First PR A opened by owner with exactly one changed task JSON and strict red canary tests; ROY first-party pull_request.opened Routine independently confirms initial exact 40-char HEAD and returns actual ROY_REVIEW=NEEDS_CHANGES with reason string/number truthiness and original GitHub comment id.",
+    "A separately enabled scoped TEST-only JJOONI L2 worker receives the TRUE triggering ROY issue_comment.created event; prove exact original ID, author via performed_via_github_app.slug=claude if available, target PR, task, branch, old HEAD. Do not count manual run/polling as event success.",
+    "The test worker changes ONLY ai-collab/e2_relay_canary.py to use identity check 'approval is True'; leaves tests/task untouched; re-fetches new HEAD/one-file correction and checks exact-head AI Collaboration Contract success, or records staged WAITING_CI with no alias if not yet green.",
+    "Only with verified CI-green and authenticated first ROY NEEDS_CHANGES may the test worker create ONE owner-authored alias ref pointing at the exact fixed HEAD, ONE new [AI-COLLAB][E2 RELAY] PR to main, distinct original ref, and no extra file edits. It must be obvious NO MERGE/NO DEPLOY, and must recheck duplicate PR/task/HEAD across open/closed PRs before write.",
+    "ROY's first-party pull_request.opened Routine must be independently triggered by alias PR B, cite exact source PR and fixed SHA, check CI and first original review; at most one final ROY review. Any event provenance not independently observed is UNVERIFIED, never assert fully autonomous.",
+    "Close test PRs unmerged once evidence collected; preserve original GitHub URLs/run IDs and issue #443 evidence. No existing production Work/Claude webhooks or schedulers changed, no extra paid service/secret, no trading/customer data."
+  ],
+  "forbidden": [
+    "No main merge or deployment",
+    "No production existing webhook or hourly automation prompt edits",
+    "No writes beyond the single canary source and branch alias test PR",
+    "No third ROY review, no new credentials, no Github workflow permissions changes",
+    "No private bank/financial/customer data, no trading"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "event_driven_e2e_canary",
+  "coordination_notes": "This is a knowingly RED test-only fixture for ROY first review. Do not suggest merge. Owner-created alias PR B to use EXACT source HEAD; no edits after fix. If Work test event subscription does not activate, note that as blocker rather than manually claiming event receipt. Work L2 dedicated job is disabled by default and will be temporarily enabled only for this exact branch/task."
+}
