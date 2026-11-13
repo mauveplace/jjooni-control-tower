@@ -26,27 +26,41 @@ _ASCII_ISSUE = re.compile(r"^[1-9][0-9]{0,9}$")
 
 
 def _find_unquoted_verdicts(body):
-    """Ignore quoted/fenced examples; only use top-level verdict declarations."""
+    """Read only top-level declarations, excluding block quotes and code."""
     verdicts = set()
-    fence = None
+    fence = None  # (delimiter character, minimum closing run length)
     for line in body.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith(("~~~", chr(96) * 3)):
-            delimiter = stripped[:3]
-            if fence is None:
-                fence = delimiter
-            elif fence == delimiter:
+        spaces = len(line) - len(line.lstrip(" "))
+        if line.startswith("\t") or (spaces < 4 and line[spaces:].startswith("\t")):
+            continue
+        stripped = line[spaces:]
+
+        # A code fence may be indented at most three spaces. A closing fence
+        # must use the same character and be at least as long as its opener.
+        marker = stripped[:1]
+        marker_len = (
+            len(stripped) - len(stripped.lstrip(marker))
+            if marker in ("~", chr(96)) else 0
+        )
+        is_fence_line = spaces <= 3 and marker_len >= 3
+        if fence is not None:
+            if (is_fence_line and marker == fence[0]
+                    and marker_len >= fence[1]
+                    and not stripped[marker_len:].strip()):
                 fence = None
             continue
-        if fence or stripped.startswith(">"):
+        if spaces >= 4 or stripped.startswith(">"):
             continue
+        if is_fence_line:
+            fence = (marker, marker_len)
+            continue
+
         stripped = re.sub(r"^#{1,6}\s+", "", stripped)
         stripped = stripped.lstrip("*").strip()
         m = _VERDICT_LINE.match(stripped)
         if m:
             verdicts.add(m.group(1).upper())
     return verdicts
-
 
 def parse_roy_review_candidate(comment):
     """Return a non-authoritative candidate dict, or None for unrecognized text.
@@ -96,7 +110,12 @@ def parse_roy_review_candidate(comment):
     if len(verdicts) != 1:
         return None
 
-    source_issue = fields.get("source-issue", fields.get("issue"))
+    source_issue = fields.get("source-issue")
+    generic_issue = fields.get("issue")
+    if (source_issue is not None and generic_issue is not None
+            and source_issue != generic_issue):
+        return None
+    source_issue = source_issue if source_issue is not None else generic_issue
     if source_issue is not None and not _ASCII_ISSUE.fullmatch(source_issue):
         return None
 
