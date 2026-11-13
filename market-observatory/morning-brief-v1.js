@@ -74,6 +74,7 @@ function canonicalSupplement(d,g,p){
     g.consistency?.status!=='OK')return null;
  const a=g.groups?.find(x=>x.name==='미국')?.items?.find(x=>x.key==='NASDAQ100');
  const raw=p.raw?.tradingview_cross_asset?.ndx;
+ const soxItem=g.groups?.find(x=>x.name==='미국')?.items?.find(x=>x.key==='SOX');
  const numeric=v=>typeof v==='number'&&Number.isFinite(v);
  if(a?.date!==d.market_date_us||raw?.market_date!==d.market_date_us||
     !numeric(a?.value)||!numeric(a?.d1_pct)||!numeric(raw?.value)||
@@ -95,7 +96,9 @@ function canonicalSupplement(d,g,p){
     !Number.isFinite(glanceGenerated)||!Number.isFinite(published)||
     sourceGenerated>glanceGenerated||pulseGenerated>glanceGenerated||
     sourceGenerated> Date.now()+60000||glanceGenerated>Date.now()+60000)return null;
+ const soxOk=soxItem?.date===d.market_date_us&&numeric(soxItem.value)&&soxItem.value>0&&numeric(soxItem.d1_pct);
  return {session:g.us_session,ndx:raw.value,ndxPct:raw.change_pct,
+  sox:soxOk?soxItem.value:null,soxPct:soxOk?soxItem.d1_pct:null,
   vix10:g.tripod.vix10,ma250:g.tripod.ma250,dd:g.tripod.drawdown_52w_pct,
   pod:g.tripod.pod,sourceGenerated:g.source_generated_kst,
   pulseGenerated:p.generated_kst,glanceGenerated:g.generated_kst,
@@ -112,7 +115,9 @@ function render(d){
  figures.innerHTML=editorial?(d.editorial_contract.close_checks||[]).map(c=>{
   const baseFigure=figureQuote(c,d);
   const figure=c.symbol==='NDX'&&supplement&&!Number.isFinite(baseFigure.value)
-   ?{value:supplement.ndx,pct:supplement.ndxPct,reference:true,kind:'CANONICAL_REFERENCE_ONLY'}:baseFigure;
+   ?{value:supplement.ndx,pct:supplement.ndxPct,reference:true,kind:'CANONICAL_REFERENCE_ONLY'}:
+   c.symbol==='SOX'&&supplement&&Number.isFinite(supplement.sox)&&!Number.isFinite(baseFigure.value)
+   ?{value:supplement.sox,pct:supplement.soxPct,reference:true,kind:'CANONICAL_REFERENCE_ONLY'}:baseFigure;
   const usable=Number.isFinite(figure.value),ref=figure.reference;
   const pct=usable?(figure.pct>=0?'+':'')+Number(figure.pct).toFixed(2)+'%':'';
   const note=figure.kind==='CANONICAL_REFERENCE_ONLY'?pct+' · 원장 참고 / 공식 EOD 미검증 (매매 신호 금지)':
@@ -138,8 +143,9 @@ function render(d){
   const percent=v=>(v>=0?'+':'')+Number(v).toFixed(2)+'%';
   catchup.hidden=false;
   catchup.innerHTML='<strong>원장 후속 갱신 · '+esc(supplement.session)+' 미국장</strong>'+
-   '<p>원문 발행'+(supplement.late?' 후':' 시점에 확인된')+' 최신 원장 참고값입니다. 공식 NDX/SOX EOD 이중검증이 아니며, 기존 시황 원문의 계산·결론이나 거래 신호를 재작성하지 않습니다.</p>'+
+   '<p>원문 발행'+(supplement.late?' 후':' 시점에 확인된')+' 최신 원장 참고값입니다. NDX는 Observatory 단일원장, SOX는 Yahoo 일봉 단일원천 참고값입니다. 공식 NDX/SOX EOD 이중검증이 아니며, 기존 시황 원문의 계산·결론이나 거래 신호를 재작성하지 않습니다.</p>'+
    '<p>NDX <b>'+number(supplement.ndx)+'</b> ('+percent(supplement.ndxPct)+') · '+
+   (Number.isFinite(supplement.sox)?'SOX <b>'+number(supplement.sox)+'</b> ('+percent(supplement.soxPct)+') · ':'SOX 원천 참고값 미확인 · ')+
    'VIX10 <b>'+number(supplement.vix10)+'</b> · MA250 <b>'+number(supplement.ma250)+'</b> · '+
    '52주 고점 대비 DD <b>'+percent(supplement.dd)+'</b> · 이전 전략 표시 <b>'+esc(supplement.pod)+'</b></p>'+
    '<small>출처: Observatory 원장 '+esc(time(supplement.sourceGenerated))+' / Daily Pulse '+esc(time(supplement.pulseGenerated))+
