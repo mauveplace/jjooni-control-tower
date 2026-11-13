@@ -1,0 +1,43 @@
+name: AI Collaboration CI Green ROY Follow-Up
+
+# Runs trusted main-branch code, not PR artifacts or PR checkout.
+# The only allowed mutation is a deduplicated read-only ROY review issue.
+on:
+  workflow_run:
+    workflows:
+      - AI Collaboration Read-Only Contract
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  issues: write
+
+concurrency:
+  group: ai-collab-ci-roy-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  review-request:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == 'mauveplace/jjooni-control-tower'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout trusted default branch (never PR HEAD)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact CI source, opt-in contract, Claude review and issue dedup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python ai-collab/ci_roy_followup.py
