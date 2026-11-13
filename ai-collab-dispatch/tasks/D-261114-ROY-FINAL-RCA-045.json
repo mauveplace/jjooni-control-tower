@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-ROY-FINAL-RCA-045",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Joint JJOONI↔ROY root-cause analysis to close the recurring instant collaboration loop without fresh unverified trigger architecture: explain why the verified first-party ROY pull_request.opened/issues.opened path has no observable ROY response on PR #449 and Issue #450, distinguish actual event receipt from provider Routines delay/filter/quota, and decide reliable operational completion using already proven PR #428 direct Work code fix plus existing trusted-main CI-green handoff and hourly owner-Issue fallback. Report precise blockers, smallest viable changes, no speculative platform claims.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "joint_operational_rca",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner directed immediate ROY collaboration and root-cause repair on 2026-11-14; production main merge/deploy is not part of the prior controlled experiment authorization.",
+  "acceptance": [
+    "ROY reports actual first-party Claude trigger context for THIS new PR if received; never claim receipt for PR #449 or Issue #450 without the actual corresponding trigger session. If cross-session metadata unavailable, explicitly UNVERIFIED rather than attributing to quota, filters or GitHub bugs.",
+    "Review hard evidence: PR #428 genuine direct ROY comment→Work code commit→CI-green first-party event success, manually issued ROY final review, and #449 initial RED test pending first ROY comment; owner Issue #450 opened but no ROY response 10+ hours later.",
+    "Classify each hop as already proven, still unproven, or known blocked: PR.opened→ROY, ROY issue_comment.created→Work, Work source fix→CI, CI green bot marker→owner hourly issue, owner issues.opened→ROY, owner alias PR opened→ROY. Do not let E2 extra alias PR duplicate existing supported owner follow-up issue workflow.",
+    "Present a single agreed realistic design: keep existing production webhook read-only and owner-hourly recovery; use main-verified CI handoff/owner read-only final issue; do NOT trust bot-origin direct Claude event without first-party evidence; escalate provider ingestion uncertainty instead of endless duplicate GitHub probes.",
+    "One substantive ROY RCA comment only with explicit ROY_FINAL_RCA verdict and recommendation, no code writes, main merge, cloud deployment, secrets, extra automation config changes, financial data or trading.",
+    "JJOONI audits ROY original GitHub comment and exact HEAD, records final operating decision in P1 tracker Issue #443, closes all temporary test PRs and disables the temporary E2 event fixer. If ROY did not receive this PR, honestly record provider event failure/unverified with no fabricated collaboration."
+  ],
+  "forbidden": [
+    "No production main merge/deployment",
+    "No modification of existing Claude or Work production webhook configuration by ROY",
+    "No new PAT/credentials, paid service or GitHub scopes",
+    "No third review of previous test PRs",
+    "No operating trading/account/customer private data"
+  ],
+  "coordination_notes": "This is LAST targeted diagnosis request, not another E2 code experiment. PR #449 and owner issue #450 are waiting for ROY, but no first-party Claude receipt evidence. Ask ROY to inspect only accessible first-party own Routine triggers, not invent cross-session access, and give one clear engineering conclusion."
+}
