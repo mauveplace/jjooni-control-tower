@@ -9,7 +9,14 @@ from validate_morning_brief import validate_dual_market_template
 MARKET_DAY="2026-11-13"
 def fixture():
     body=("## ① 오늘의 시장 이야기\n가상 예제\n"
-          "## ② 시장 한눈에\n| NDX | SOX | VIX10 | MA250 | DD |\n"
+          "## ② 시장 한눈에\n"
+          "| 자산 | 종가·수준 | 검증상태 |\n"
+          "|---|---:|---|\n"
+          "| NDX | 27,943.74 | 원장 참고 |\n"
+          "| SOX | 10,146.32 | Yahoo 참고 |\n"
+          "| VIX10 | 20.73 | 원장 참고 |\n"
+          "| MA250 | 27,505.80 | 원장 참고 |\n"
+          "| DD52W | -10.51% | 원장 참고 |\n"
           "## ③ 핵심 이슈 깊이 읽기\n"
           "## ④ 글로벌·한국 시장\n"
           "## ⑤ AI 산업·기업실적\n"
@@ -56,23 +63,56 @@ class DualTemplateV2(unittest.TestCase):
 
     def test_missing_provider_value_requires_real_reason(self):
         d,c=fixture();c["market_metrics"]["SOX"].update(value=None,status="MISSING",reason="Yahoo same-session unavailable")
+        d["body_markdown"]=d["body_markdown"].replace("| SOX | 10,146.32 | Yahoo 참고 |",
+         "| SOX | 미확인: Yahoo same-session unavailable | 원천 결측 |")
         validate_dual_market_template(d,c)
         del c["market_metrics"]["SOX"]["reason"]
         with self.assertRaisesRegex(AssertionError,"METRIC_UNVERIFIED_REASON"):
             validate_dual_market_template(d,c)
 
-    def test_roy_review_must_provide_real_source_and_comparisons(self):
-        d,c=fixture();c["dual_review"]["review_status"]="REVIEWED"
+    def test_roy_review_must_have_repo_bound_exact_comment_and_structured_comparison(self):
+        d,c=fixture();r=c["dual_review"];r["review_status"]="REVIEWED"
         with self.assertRaisesRegex(AssertionError,"ROY_EVIDENCE_URL"):
             validate_dual_market_template(d,c)
-        c["dual_review"]["roy_comment_url"]="https://github.com/mauveplace/jjooni-control-tower/issues/458#issuecomment-999"
+        r["roy_comment_url"]="https://github.com/other/repo/issues/1#issuecomment-999"
+        with self.assertRaisesRegex(AssertionError,"ROY_EVIDENCE_URL"):
+            validate_dual_market_template(d,c)
+        r["roy_comment_url"]="https://github.com/mauveplace/jjooni-control-tower/pull/459"
+        with self.assertRaisesRegex(AssertionError,"ROY_EVIDENCE_URL"):
+            validate_dual_market_template(d,c)
+        # Syntax of a real GH comment, not an online author authentication test.
+        r["roy_comment_url"]="https://github.com/mauveplace/jjooni-control-tower/pull/459#issuecomment-6867212874"
+        r["roy_comment_id"]="other"
+        with self.assertRaisesRegex(AssertionError,"ROY_EVIDENCE_ID_MISMATCH"):
+            validate_dual_market_template(d,c)
+        r["roy_comment_id"]="6867212874";r["roy_github_app"]="claude"
         with self.assertRaisesRegex(AssertionError,"ROY_NO_REAL_REPORT"):
             validate_dual_market_template(d,c)
-        c["dual_review"]["roy_report_status"]="FOUND"
+        r["roy_report_status"]="FOUND"
         with self.assertRaisesRegex(AssertionError,"ROY_NO_CLAIM_COMPARISON"):
             validate_dual_market_template(d,c)
-        c["dual_review"]["comparison"]=[{"metric":"NDX","outcome":"MATCH","source_independent":False}]
+        r["comparison"]=[{"metric":"NDX","outcome":"MATCH"}]
+        with self.assertRaisesRegex(AssertionError,"ROY_COMPARISON_CLAIM"):
+            validate_dual_market_template(d,c)
+        r["comparison"]=[{"claim":"NDX latest session close","outcome":"MATCH","session_date":MARKET_DAY,
+            "roy_source":"https://github.com/mauveplace/jjooni-control-tower/issues/458",
+            "jjooni_source":"https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/morning-brief/latest.json",
+            "source_independent":False}]
         validate_dual_market_template(d,c)
+
+    def test_report_table_numeric_row_cannot_be_blank_when_json_has_valid_price(self):
+        d,c=fixture()
+        d["body_markdown"]=d["body_markdown"].replace(
+           "| SOX | 10,146.32 | Yahoo 참고 |", "| SOX | 자료 미확인 | 공식 EOD 대기 |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_VALUE_MISMATCH"):
+            validate_dual_market_template(d,c)
+
+    def test_derived_indicator_must_never_assert_official_close(self):
+        d,c=fixture();c["market_metrics"]["VIX10"].update(
+            status="OFFICIAL_VERIFIED",official_eod_verified=True)
+        with self.assertRaisesRegex(AssertionError,"METRIC_DERIVED_NOT_OFFICIAL"):
+            validate_dual_market_template(d,c)
+
 
     def test_no_hiding_core_metrics_and_no_fabricated_dual_review(self):
         d,c=fixture();d["body_markdown"]=d["body_markdown"].replace("VIX10","VIX")
