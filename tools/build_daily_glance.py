@@ -255,9 +255,22 @@ def build(obs, brief=None, now=None):
     us_session = obs.get("us_completed_session_date")
     series = obs.get("series", {})
     groups, by_key = [], {}
+    core_ndx = completed(series.get('NASDAQ100'))
+    prior_ndx_session = core_ndx[-2]['date'] if len(core_ndx) >= 2 else None
     for name, items in GROUPS:
         rows = [metric(k, label, series.get(k), (obs.get('crypto_market') or {}).get(k)) for k, label in items]
         for r in rows:
+            if r.get("key") == "SOX" and "value" in r:
+                sox_completed = completed(series.get("SOX"))
+                prev = sox_completed[-2]['date'] if len(sox_completed) >= 2 else None
+                if prev != prior_ndx_session or r.get("date") != us_session:
+                    # A missing SOX bar must never convert multi-session change
+                    # into a false 1D return. Level may remain a reference.
+                    r["d1_pct"] = None
+                    r["comparison_status"] = "PRIOR_SESSION_UNVERIFIED"
+                else:
+                    r["comparison_status"] = "SAME_PREVIOUS_US_SESSION"
+                r["source"] = "Yahoo ^SOX completed daily (single provider)"
             by_key[r["key"]] = r
         groups.append({"name": name, "items": rows})
     tri = tripod_block(sig)
