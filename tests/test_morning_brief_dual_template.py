@@ -227,13 +227,13 @@ class DualTemplateV2(unittest.TestCase):
         d['body_markdown']=d['body_markdown'].replace(
             'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
             'DIRECT_VERIFIED · ETF 가격 상승')
-        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_MEASURE_MISSING'):
+        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
             validate_dual_market_template(d,c)
         d,c=fixture()
         d['body_markdown']=d['body_markdown'].replace(
             'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
             'DIRECT_VERIFIED · ETF 순설정 금액 확인')
-        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_SOURCE_MISSING'):
+        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
             validate_dual_market_template(d,c)
 
     def test_earnings_coverage_requires_explicit_release_status(self):
