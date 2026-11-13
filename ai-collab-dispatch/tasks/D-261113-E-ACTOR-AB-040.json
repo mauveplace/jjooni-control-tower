@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-E-ACTOR-AB-040",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Collaborative ROY/JJOONI experiment isolating GitHub Issue AUTHOR from issue CONTENT in E bot->Claude issues.opened trigger, while restricting all code and writes to a test-only unmerged PR. Compare identical issue title/body authored once by github-actions[bot] and once by owner connector, with true first-party Claude trigger evidence, without changing actual ROY Routine or production owner-only dispatcher.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Original GitHub Actions on this isolated PR creates exactly one bot Issue and records run and immutable body; owner connector manually creates exactly one matching title/body and no false origin label; exact body bytes comparison is authoritative.",
+    "ROY uses PR.opened path ONLY for collaborative analysis and independently inspects available Claude issue-opened Routine run context for both Issue IDs; distinguishes PR opened from Issue opened, receipt from acceptance and absence of public comment from actual non-delivery.",
+    "Report whether bot and owner actor events are observed, with strict statuses BOT_DELIVERY=CONFIRMED|UNVERIFIED, OWNER_DELIVERY=CONFIRMED|UNVERIFIED; include filter/visibility limits and recommended minimal operational architecture.",
+    "Do not auto-review test issues, merge, deploy, change production workflows/ChatGPT Work/Claude Routines/permissions, issue PAT, read accounts, trade or exceed ROY 1-2 review limit."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User explicitly requested continuing E experiment on 2026-11-13 after previous #437 bot delivery remained UNVERIFIED; preceding E authorization was strictly test-only, no main merge/deploy.",
+  "forbidden": [
+    "No main merge/deploy",
+    "No modification of existing ROY Claude Routine, owner Work webhook/scheduler",
+    "No trusted owner V1 dispatch marker on bot issues",
+    "No bot issue made to look owner-authored",
+    "No new token, PAT, Cloud Run, trading or customer data"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "collaborative_event_rca",
+  "coordination_notes": "New PR.opened will wake ROY automatically for consultation. Bot and owner Issues will have exactly equal content, distinct real sender provenance. If either lacks first-party issues.opened run, label UNVERIFIED. Aim minimum one ROY substantive reply. Do not count PR.opened as evidence."
+}
