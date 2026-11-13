@@ -142,11 +142,14 @@ def validate_dual_market_template(d, contract):
     assert _regex.search(r'\b(?:REPORTED|NO_NEW_RELEASES|SOURCE_UNAVAILABLE)\b', earnings_section), 'EARNINGS_COVERAGE_STATUS_MISSING'
     # The user must see what was measured and what was not, not a fake
     # "fund inflow" inferred solely from an ETF price move.
-    if 'DIRECT_VERIFIED' in region_section:
-        assert ('순설정' in region_section or '순매수' in region_section or '순유입액' in region_section), 'DIRECT_FLOW_MEASURE_MISSING'
-        assert ('출처' in region_section or 'https://' in region_section), 'DIRECT_FLOW_SOURCE_MISSING'
-    if 'PROXY_ONLY' in region_section:
-        assert ('순유입' in region_section or '자금' in region_section) and ('확인 불가' in region_section or '미확인' in region_section), 'PROXY_FLOW_LIMIT_MISSING'
+    direct_claims = [line for line in region_section.splitlines() if 'DIRECT_VERIFIED' in line]
+    proxy_claims = [line for line in region_section.splitlines() if 'PROXY_ONLY' in line]
+    for claim in direct_claims:
+        assert any(tag in claim for tag in ('순설정', '순매수', '순유입액')), 'DIRECT_FLOW_MEASURE_MISSING'
+        assert ('출처' in claim or 'https://' in claim), 'DIRECT_FLOW_SOURCE_MISSING'
+    for claim in proxy_claims:
+        assert (('순유입' in claim or '자금' in claim)
+                and ('확인 불가' in claim or '미확인' in claim)), 'PROXY_FLOW_LIMIT_MISSING'
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
