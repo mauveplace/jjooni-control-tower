@@ -122,6 +122,71 @@ class DualTemplateV2(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError,"DUAL_REVIEW_AUDIT_MISSING"):
             validate_dual_market_template(d,c)
 
+    def test_roy_second_review_blocker_wrong_value_prefix_must_not_pass(self):
+        d,c=fixture()
+        d["body_markdown"]=d["body_markdown"].replace(
+            "| NDX | 27,943.74 | 원장 참고 |",
+            "| NDX | 127,943.74 | 원장 참고 |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_VALUE_MISMATCH"):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        d["body_markdown"]=d["body_markdown"].replace(
+            "| DD52W | -10.51% | 원장 참고 |",
+            "| DD52W | -10.519% | 원장 참고 |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_VALUE_MISMATCH"):
+            validate_dual_market_template(d,c)
+
+    def test_roy_second_review_blocker_number_only_in_footnote_does_not_count(self):
+        d,c=fixture()
+        d["body_markdown"]=d["body_markdown"].replace(
+            "| MA250 | 27,505.80 | 원장 참고 |",
+            "| MA250 | 자료 미확인 | 참고: 어제 27,505.80 |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_VALUE_MISMATCH"):
+            validate_dual_market_template(d,c)
+
+    def test_roy_second_review_blocker_missing_row_cannot_show_price(self):
+        d,c=fixture()
+        m=c["market_metrics"]["SOX"]
+        m.update(value=None,status="MISSING",reason="단일 제공자 일봉 수집 실패")
+        d["body_markdown"]=d["body_markdown"].replace(
+            "| SOX | 10,146.32 | Yahoo 참고 |",
+            "| SOX | 10,146.32 미확인 | 단일 제공자 일봉 수집 실패 |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_MISSING"):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        m=c["market_metrics"]["SOX"]
+        m.update(value=None,status="MISSING",reason="Y")
+        d["body_markdown"]=d["body_markdown"].replace(
+            "| SOX | 10,146.32 | Yahoo 참고 |", "| SOX | 미확인 | Y |")
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_MISSING_REASON_TOO_SHORT"):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_anchor_type_must_match_pr_or_issue(self):
+        d,c=fixture()
+        r=c["dual_review"]
+        r.update(review_status="REVIEWED",roy_report_status="FOUND",
+                 roy_comment_url="https://github.com/mauveplace/jjooni-control-tower/issues/461#pullrequestreview-6867365807",
+                 roy_comment_id="6867365807",roy_github_app="claude",
+                 comparison=[{"claim":"PPI", "outcome":"MATCH","session_date":MARKET_DAY,
+                    "roy_source":"https://www.bls.gov/news.release/archives/ppi_11132026.htm",
+                    "jjooni_source":"https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/morning-brief/latest.json",
+                    "source_independent":True}])
+        with self.assertRaisesRegex(AssertionError,"ROY_EVIDENCE_URL"):
+            validate_dual_market_template(d,c)
+
+    def test_roy_unverified_common_cannot_be_marked_independent(self):
+        d,c=fixture();r=c["dual_review"]
+        r.update(review_status="REVIEWED",roy_report_status="FOUND",
+                 roy_comment_url="https://github.com/mauveplace/jjooni-control-tower/pull/459#issuecomment-6867365807",
+                 roy_comment_id="6867365807",roy_github_app="claude",
+                 verified_by_independent_provider=True,
+                 comparison=[{"claim":"NDX", "outcome":"MATCH","session_date":MARKET_DAY,
+                    "roy_source":"https://finance.yahoo.com/quote/%5ENDX/history/",
+                    "jjooni_source":"https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-glance.json",
+                    "source_independent":False}])
+        with self.assertRaisesRegex(AssertionError,"ROY_NO_INDEPENDENT_PRICE_PROOF"):
+            validate_dual_market_template(d,c)
+
     def test_historical_archive_is_not_retroactively_invalidated(self):
         d,c=fixture();d["report_date_kst"]="2026-11-14"
         c.clear()
