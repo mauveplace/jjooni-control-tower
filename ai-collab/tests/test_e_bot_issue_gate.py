@@ -17,19 +17,20 @@ def fixture():
     marker = "<!-- JJOONI-CI-GREEN-ROY-HANDOFF-V1 task=" + T + " pr=" + str(P) + " head=" + H + " run=" + str(R) + " -->"
     issue = {
         "id": 999, "number": 1000, "title": "[AI-COLLAB][ROY-REQUEST] CI-green test",
-        "user": {"login": "github-actions[bot]", "type": "Bot"},
-        "performed_via_github_app": {"slug": "github-actions"},
+        "user": {"login": "github-actions[bot]", "type": "Bot", "id": 41898282},
+        # First-party GitHub REST Issue #438 has null performed_via_github_app.
+        "performed_via_github_app": None,
         "body": MARKER + "\nTarget-PR: " + str(P) + "\nTask-ID: " + T +
                 "\nExpected-HEAD: " + H + "\nCI-Run: " + str(R) +
                 "\nSource-Comment: " + str(C) + "\nMode: SYSTEM_REVIEW_ONLY\nRequested-By: CI\n"
     }
     event = {"action": "opened", "repository": {"full_name": REPO},
-             "sender": {"login": "github-actions[bot]"}, "issue": issue}
+             "sender": {"login": "github-actions[bot]", "id": 41898282}, "issue": issue}
     pr = {"number": P, "state": "open", "draft": False, "merged": False,
           "title": "[AI-COLLAB] E experiment", "base": {"ref": "main"},
           "head": {"sha": H, "ref": "experiment/ai-collab-e", "repo": {"full_name": REPO}}}
-    comment = {"id": C, "user": {"login": "github-actions[bot]"},
-               "performed_via_github_app": {"slug": "github-actions"},
+    comment = {"id": C, "user": {"login": "github-actions[bot]", "id": 41898282},
+               "performed_via_github_app": None,
                "body": marker + "\nSOURCE=GITHUB_ACTIONS_CI_COMPLETED"}
     run = {"id": R, "name": "AI Collaboration Read-Only Contract",
            "path": ".github/workflows/ai-collab-contract.yml",
@@ -57,11 +58,27 @@ class EBotIssueCandidateTests(unittest.TestCase):
         v = fixture(); v[0]["issue"]["user"]["type"] = "User"
         self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
 
-    def test_forged_app_and_missing_app_rejected(self):
-        for app in ("user-app", None):
-            with self.subTest(app=app):
-                v = fixture(); v[0]["issue"]["performed_via_github_app"] = {"slug": app}
-                self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
+    def test_foreign_issue_app_rejected(self):
+        v = fixture(); v[0]["issue"]["performed_via_github_app"] = {"slug": "user-app"}
+        self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
+
+    def test_real_bot_issue_null_app_is_allowed_as_candidate_not_execution(self):
+        v = fixture()
+        self.assertIsNone(v[0]["issue"]["performed_via_github_app"])
+        self.assertEqual(self.verdict(v)["decision"], "CANDIDATE_READ_ONLY")
+        self.assertFalse(self.verdict(v)["issuer_run_verified"])
+
+    def test_wrong_bot_numeric_id_rejected_even_with_bot_login(self):
+        v = fixture(); v[0]["issue"]["user"]["id"] = 123456
+        self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
+        v = fixture(); v[2]["user"]["id"] = 123456
+        self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
+
+    def test_invalid_bool_issue_id_rejected(self):
+        v = fixture(); v[0]["issue"]["id"] = True
+        self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
+        v = fixture(); v[0]["issue"]["id"] = 0
+        self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
 
     def test_owner_marker_and_test_probe_marker_are_never_bot_review_requests(self):
         for m in ("<!-- JJOONI-COLLAB-ISSUE-V1 -->",
@@ -95,7 +112,7 @@ class EBotIssueCandidateTests(unittest.TestCase):
         for k,val in (("id", C+1),("body","not official")):
             v = fixture(); v[2][k] = val
             self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
-        v = fixture(); v[2]["performed_via_github_app"]["slug"] = "other"
+        v = fixture(); v[2]["performed_via_github_app"] = {"slug": "other"}
         self.assertEqual(self.verdict(v)["decision"], "BLOCKED")
 
     def test_task_requires_exact_opt_in_and_read_only(self):
