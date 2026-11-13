@@ -209,14 +209,19 @@ def validate_dual_market_template(d, contract):
         r'순매수\s*(?:[+$€₩-]|\d)|(?:inflow|outflow)\s*(?:[+$€₩-]|\d))', _regex.I)
     for block in (region_section, strategy_section):
         for line in block.splitlines():
-            if not asserted_flow.search(line):
-                continue
-            if any(x in line for x in ('추론','가정','가능성','확인 불가','미확인','불명','만약','가설','조건부','UNAVAILABLE','PROXY_ONLY')):
-                continue
-            assert 'DIRECT_VERIFIED' in line and any(
-                row['instrument'] in line and row['currency'] in line
-                and f"{row['value']:,.2f}" in line and row['source_url'] in line
-                for row in flow_entries), 'UNVERIFIED_FUND_INFLOW_ASSERTION'
+            # In Markdown tables each cell stands on its own: "미확인" in
+            # the 1D-return cell must not excuse a forged $900M fund-flow
+            # amount shown in a DIFFERENT cell on the same row.
+            pieces = line.split('|') if '|' in line else [line]
+            for cell in pieces:
+                if not asserted_flow.search(cell):
+                    continue
+                if any(x in cell for x in ('추론','가정','가능성','확인 불가','미확인','불명','만약','가설','조건부','UNAVAILABLE','PROXY_ONLY')):
+                    continue
+                assert 'DIRECT_VERIFIED' in cell and any(
+                    row['instrument'] in line and row['currency'] in line
+                    and f"{row['value']:,.2f}" in line and row['source_url'] in line
+                    for row in flow_entries), 'UNVERIFIED_FUND_INFLOW_ASSERTION'
 
     if earnings_status == 'REPORTED':
         assert issuer_events, 'ISSUER_EARNINGS_SOURCE_REQUIRED'
