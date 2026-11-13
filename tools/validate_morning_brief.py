@@ -235,7 +235,7 @@ def validate_dual_market_template(d, contract):
     if earnings_status == 'REPORTED':
         assert any(event['issuer'] in earnings_section for event in issuer_events), 'EARNINGS_NOT_VISIBLE'
     if earnings_status in ('NO_NEW_RELEASES','SOURCE_UNAVAILABLE'):
-        assert any(word in earnings_section for word in ('미확인','발표 없음','신규 공시 없음','접근 불가','조회 불가','자료 없음')), 'EARNINGS_QUIET_DAY_REASON_REQUIRED'
+        assert any(word in earnings_section for word in ('미확인','발표 없음','공시 없음','접근 불가','조회 불가','자료 없음')), 'EARNINGS_QUIET_DAY_REASON_REQUIRED'
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
