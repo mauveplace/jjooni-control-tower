@@ -12,16 +12,40 @@ import re
 
 _MARKER = re.compile(
     r"^<!--\s*(JJOONI-COLLAB-ROY-REVIEW-V4|JJOONI-COLLAB-V4|JJOONI_COLLAB_V4)"
-    r"(?P<rest>.*?)-->\s*$"
+    r"(?=\s|-->)(?P<rest>(?:(?!-->).)*)-->\s*$"
 )
 _ATTR = re.compile(r"(?:^|\s)([A-Za-z][\w-]*)=([^\s>]+)")
 _HEAD = re.compile(r"^[0-9a-f]{40}$")
 _TASK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{2,127}$")
-_VERDICT = re.compile(
-    r"\bROY_REVIEW\s*=\s*(PASS|NEEDS_CHANGES|BLOCKED)\b"
-    r"|\bROY\s+review\s*:\s*(PASS|NEEDS_CHANGES|BLOCKED)\b",
+_VERDICT_LINE = re.compile(
+    r"^(?:ROY_REVIEW\s*=\s*|ROY\s+review\s*:\s*)"
+    r"(PASS|NEEDS_CHANGES|BLOCKED)\b",
     re.IGNORECASE,
 )
+_ASCII_ISSUE = re.compile(r"^[1-9][0-9]{0,9}$")
+
+
+def _find_unquoted_verdicts(body):
+    """Ignore quoted/fenced examples; only use top-level verdict declarations."""
+    verdicts = set()
+    fence = None
+    for line in body.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith(("~~~", chr(96) * 3)):
+            delimiter = stripped[:3]
+            if fence is None:
+                fence = delimiter
+            elif fence == delimiter:
+                fence = None
+            continue
+        if fence or stripped.startswith(">"):
+            continue
+        stripped = re.sub(r"^#{1,6}\s+", "", stripped)
+        stripped = stripped.lstrip("*").strip()
+        m = _VERDICT_LINE.match(stripped)
+        if m:
+            verdicts.add(m.group(1).upper())
+    return verdicts
 
 
 def parse_roy_review_candidate(comment):
@@ -47,7 +71,13 @@ def parse_roy_review_candidate(comment):
 
     stem = match.group(1)
     rest = match.group("rest")
-    fields = dict(_ATTR.findall(rest))
+    pairs = _ATTR.findall(rest)
+    # Reject ambiguous duplicate HEAD, task, actor or other attributes.
+    if len(pairs) != len({key for key, _ in pairs}):
+        return None
+    fields = dict(pairs)
+    if any(fields.get(key, "ROY") != "ROY" for key in ("actor", "reviewer")):
+        return None
     tagged_as_roy = (
         stem == "JJOONI-COLLAB-ROY-REVIEW-V4"
         or rest.lstrip().startswith("ROY-REVIEW ")
@@ -62,12 +92,12 @@ def parse_roy_review_candidate(comment):
     if not _TASK.fullmatch(task_id) or not _HEAD.fullmatch(head_sha):
         return None
 
-    verdicts = {((m.group(1) or m.group(2)).upper()) for m in _VERDICT.finditer(body)}
+    verdicts = _find_unquoted_verdicts(body)
     if len(verdicts) != 1:
         return None
 
     source_issue = fields.get("source-issue", fields.get("issue"))
-    if source_issue is not None and not source_issue.isdecimal():
+    if source_issue is not None and not _ASCII_ISSUE.fullmatch(source_issue):
         return None
 
     return {
