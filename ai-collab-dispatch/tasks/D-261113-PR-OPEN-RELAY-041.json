@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-PR-OPEN-RELAY-041",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Isolated no-deploy alternative to blocked GitHub Actions bot issue delivery: verify whether an OWNER-AUTHORED second PR on a different branch, pointing at exactly the same immutable code HEAD as the first PR, triggers ROY's already-proven pull_request.opened Routine without a new CI bot Issue, secret, provider setting, or main merge. ROY and JJOONI collaboratively assess practical suitability for post-correction review.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Initial PR A and owner-created relay PR B each target main, have distinct head branch refs but the exact same full 40-character head SHA and same single changed opt-in task JSON; no code changes between them.",
+    "GitHub PR open event for relay PR B has a genuine original delivery ID and/or first-party ROY Claude Routine trigger explicitly showing pull_request.opened B, with an actual ROY reply on B. Never infer from an owner PR creation alone.",
+    "ROY on B distinguishes receiving an event from performing meaningful 2nd read-only review. If prior first review had NEEDS_CHANGES, a real corrected SHA and current exact-HEAD CI must be checked prior to final PASS; do not reuse old PASS blindly.",
+    "Report design risks: duplicate PR burden, identical head commit/branch ref, review budget and idempotency keyed by original PR + task + SHA + stage, avoidance of main double merge, repo/fork and owner authentication, Work PR creation trigger availability and possible background session/race issues.",
+    "No main merge, deploy, change to existing Work webhook, ROY Routine, token/secret, paid infrastructure, or trading. Experiment ends with both PRs closed unmerged and persistent issue #443 updated with actual evidence."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-13 user explicitly authorized continued test-only E experimentation, no main merge/deploy, with ROY validation and actual event checks. New test applies that exact scope to owner PR.opened instead of bot issue.",
+  "forbidden": [
+    "No main merge/deploy",
+    "No production Work/Claude subscription or Routine changes",
+    "No added PAT, secrets, paid infra",
+    "No automating trade or accessing private financial systems"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "event_delivery_architecture_experiment",
+  "coordination_notes": "The second PR is created from a brand-new branch ref at exactly the same immutable commit SHA as the first PR. Its PR.opened is the real event under test. Do not create an Issue to wake ROY; that would confound the result. Keep ROY feedback concise, security-relevant and collaboration-oriented. Same task is intentionally present in both PR diffs."
+}
