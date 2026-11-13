@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-MORNING-EARNINGS-SECTOR-050",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "objective": "Expand actually deployed ROY×JJOONI morning template V2 to permanently include real-company earnings/guidance and sector ETF cash-flow vs price-volume-proxy rotation, with source provenance, non-trading guardrails and visible-body regression. Same eight original sections; historical reports unchanged.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "production_morning_report_template_extension",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User follow-up 2026-11-14 asked that major company earnings and sector fund movement and interpretation be included in mandatory shared market brief template.",
+  "acceptance": [
+    "Section ④ permanent sector rotation and actual fund flow (DIRECT_VERIFIED vs PROXY_ONLY vs UNAVAILABLE) without inferring money movements from ETF price/turnover or AUM changes; US and KR local session dates and lagged flow timestamps separate.",
+    "Section ⑤ permanent major issuer earnings/guidance with reporting period, earnings vs street with proper source, GAAP vs nonGAAP, forward guidance vs consensus, CAPEX/order/gross margin/FCF, regular vs afterhours stock reaction, date and source. No releases -> explicit status and recent publication context.",
+    "Section ⑦ earnings×flow conditional scenario and provenance; no trade or private account claims. Keep eight exact headings with 3+ issue analysis.",
+    "CI checks V2 body contains all three permanent subsections and discloses coverage truthfully. Negative tests on omitted blocks and unsupported 'direct flow' representations. Old archives exempt.",
+    "ROY independent concise review of actual evidence logic and source feasibility, with exact SHA/real Claude app comment. No merge before CI validation and owner approval."
+  ],
+  "forbidden": [
+    "No trades",
+    "No inventing actual ETF flows",
+    "No treating price/turnover as flows",
+    "No private holdings in public Github",
+    "No secrets/permissions changes"
+  ],
+  "coordination_notes": "Review PR for overstrict missing-data blocking vs genuinely absent issuer flow. 2026-11-14 current US session report is historical and not rewritten retroactively; new daily report V2 from 2026-11-15 must contain section ④ ⑤ ⑦ permanent blocks. Prefer one substantive ROY review, no duplicate issues or third review loop."
+}
