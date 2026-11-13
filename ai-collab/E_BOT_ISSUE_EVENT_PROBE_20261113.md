@@ -28,3 +28,13 @@ This is NOT \`JJOONI-COLLAB-CI-ISSUE-V1\` (future production candidate), and NOT
 
 ## ROY-specific request
 Review exact diff, the unusually narrow workflow permission, trigger identity, dedup and the separation of experiment vs production. Report technical and security findings, actual CI and event provenance. Do not claim the bot Issue's external delivery without first-party issue-opened run evidence.
+
+
+## Observed live outcome and ROY first independent review
+- PR #437 head at original event: \`79878d3cb772921d0d2db3dd11e7be90c5cb43eb\`. Genuine PR-triggered GitHub Actions run \`43413925883\` succeeded and created bot Issue #438 (GitHub issue id \`6369916433\`) at 11:03:27Z; exact author \`github-actions[bot]\`. Probe Issue is intentionally not a CI-green E production request.
+- First-party ROY PR.opened Routine posted exact-original-HEAD \`ROY_REVIEW=NEEDS_CHANGES\` (original PR comment \`6851018383\`). Its trigger was **pull_request.opened** not bot Issue **issues.opened**. Therefore E external delivery remains \`UNVERIFIED\`.
+- ROY's real REST inspection showed bot Issue \`performed_via_github_app=null\`. Initial future-candidate gate mistakenly required \`slug=github-actions\`; that would reject a real bot Issue. Candidate gate was corrected to require the stable bot \`user.id=41898282\`, bot type and login, and allow missing app slug while rejecting an explicitly foreign slug. A source-comment null app field is also tolerated only with stable bot id + verified marker and exact CI. Additional tests reject wrong numeric id and bool Issue IDs.
+- ROY also noted the need to authenticate the **issuer workflow/run** independently from merely matching bot login (multiple same-repo workflows share the bot). Accordingly the candidate result explicitly includes \`issuer_run_verified=False\`; it is never a production authorization and a future independently approved design must add issuer-run verification before any trusted E routing. No change to owner-only dispatcher or Claude Routine is part of this experiment.
+- Elevated GitHub Script dependency was SHA-pinned to the precise commit observed in successful runner logs. The workflow still triggers only \`pull_request.opened\`, so branch corrections do **not** generate another bot Issue. Original Issue #438 remains historical proof for its original exact HEAD, not current-head execution proof.
+
+**Acceptance:** This experiment may be marked \`BOT_ISSUE_CREATION=PASS\` while \`E_EXTERNAL_DELIVERY=UNVERIFIED\`. Never interpret a later owner-authored final-review Issue or a PR.opened ROY review as proof that bot Issue #438 was delivered to Claude via \`issues.opened\`.
