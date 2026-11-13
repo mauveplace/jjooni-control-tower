@@ -140,6 +140,14 @@ class MorningReadinessTests(unittest.TestCase):
         self.assertTrue(revision_only(revised,prior))
         revised["editorial_contract"]["verified_at_kst"]="2026-11-14T07:02:00+09:00"
         self.assertFalse(revision_only(revised,prior))
+        reverted=copy.deepcopy(prior)
+        reverted["revisions"]=[]
+        self.assertFalse(revision_only(reverted,prior))
+        prior["revisions"]=[{"field":"earlier","revised_at_kst":"2026-11-14T06:50:00+09:00"}]
+        reverted["revisions"]=list(prior["revisions"])
+        self.assertFalse(revision_only(reverted,prior))
+        reverted["revisions"].append({"field":"new","revised_at_kst":"2026-11-14T07:00:00+09:00"})
+        self.assertTrue(revision_only(reverted,prior))
 
 if __name__=="__main__":
     unittest.main()
