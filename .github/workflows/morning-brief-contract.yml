@@ -7,10 +7,12 @@ on:
       - market-observatory/morning-brief-v1.js
       - market-observatory/index.html
       - tests/morning-brief-ui-contract.test.cjs
+      - tests/morning-brief-mobile-e2e.cjs
+      - tools/check_morning_brief_readiness.py
+      - tests/test_morning_brief_readiness.py
       - market-observatory/data/morning-brief/**
       - tools/validate_morning_brief.py
       - tests/test_morning_brief_editorial.py
-      - tests/morning-brief-ui-contract.test.cjs
       - tools/observatory_session.py
       - docs/song-daily-editorial-contract.md
       - .github/workflows/morning-brief-contract.yml
@@ -36,6 +38,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -46,6 +50,19 @@ jobs:
         run: python tools/validate_morning_brief.py
       - name: Verify editorial and completed-session regression cases
         run: python -m unittest discover -s tests -p test_morning_brief_editorial.py
+      - name: Verify P0 prepublication source readiness regressions
+        run: python -m unittest discover -s tests -p test_morning_brief_readiness.py -v
+      - name: Block stale source publication before new latest brief PR
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          if git diff --name-only "origin/${{ github.base_ref }}" HEAD -- market-observatory/data/morning-brief/latest.json | grep -Fxq 'market-observatory/data/morning-brief/latest.json'; then
+            python tools/check_morning_brief_readiness.py
+          else
+            echo "MORNING_BRIEF_CANONICAL_READINESS=NOT_APPLICABLE unchanged latest"
+          fi
       - name: Validate reader runtime
         run: |
           node --check market-observatory/morning-brief-v1.js
