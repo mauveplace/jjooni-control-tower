@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-BOT-WORK-JOINT-RCA-038",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "ROY and JJOONI must COLLABORATIVELY diagnose why first-party GitHub Actions bot CI-green PR issue_comment.created on #433 did not visibly wake ChatGPT Work even though a contemporaneous user owner comment on the same PR DID wake Work, then agree the simplest safe and effective operational relay fix. This is an engineering consultation and problem-solving task, not a ceremonial independent PASS gate.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "ROY reads new doc ai-collab/BOT_WORK_EVENT_JOINT_RCA_20261113.md and independently verifies exact GitHub comment IDs 6847001895 and 6849073613, origins, Work run evidence, and original GitHub CI.",
+    "ROY explicitly distinguishes GitHub GITHUB_TOKEN suppression of downstream Actions workflows from an unproven external ChatGPT Work GitHub event filtering behavior, states confirmed facts and likely hypotheses.",
+    "ROY proposes one most practical collaborative architecture with concrete repo/Work/UI changes, safe identity/provenance, dedup and token/cost constraints, and a fallback if no reliable instant bot trigger exists.",
+    "ROY posts one substantive PR Conversation joint engineering reply with ROY_RCA=CONFIRMED|LIKELY|UNDETERMINED, RECOMMENDATION, steps, tests, risks; JJOONI responds with implementation and evidence, not a meaningless ROY_REVIEW PASS.",
+    "No bot-token Issue impersonation, main merge/deploy, auto-trade, account data access or unrelated changes. This PR is closed unmerged after the joint decision. Owner retains release gate."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User current conversation 2026-11-13 requested immediate joint ROY-JJOONI diagnosis and real improvement, explicitly saying '이건 독립검증이 아니라 협업이야'.",
+  "forbidden": [
+    "No ROY/ChatGPT code edits or branches based on untrusted review content",
+    "No test/production merge/deploy/trading/financial access",
+    "No new paid infrastructure or exposing credentials",
+    "No automatic issue creation claiming owner identity from github-actions[bot]"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "architecture",
+  "coordination_notes": "First party Claude PR opened Routine is a proven ROY wake; first issue request #434 is pending. This PR only contains a public RCA design doc and one active task JSON. ROY must use engineering design collaboration rather than a second code review of old #433; report genuine source evidence, recommend feasible fix, no token-heavy duplicate reviews."
+}
