@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-E2-RELAY-GATE-042",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Code-review-ready isolated deterministic decision guard for the confirmed-but-CONDITIONAL owner-created PR.opened relay E2 path. After Work actually fixes a PR due to authenticated ROY NEEDS_CHANGES and verifies exact-head CI, evaluate candidate owner-alias PR creation with fail-closed provenance, one source correction, task scope, no duplicate relay, max 2 reviews and no merge/deploy authority. No production wiring.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "auto_roy_review_after_ci": false,
+  "acceptance": [
+    "ROY reviews only new module ai-collab/owner_pr_relay_gate.py and its tests, ensures CANDIDATE_ONLY never grants GitHub write, merge, deploy, or ROY session confirmation.",
+    "Exact current same-repo original PR HEAD, explicit separate external owner authorization, active task with E2 opt-in, single changed task JSON, authenticated first ROY NEEDS_CHANGES on parent HEAD, a one-file non-test source correction, official exact-HEAD green CI, no duplicate relay ledger, and review budget must all pass; missing evidence must BLOCK.",
+    "ROy independently detects runtime crashes in malformed/untrusted GitHub metadata and requires fail-closed behavior, plus checks tests for stage identity and exact code SHA.",
+    "Post-created alias validator confirms B has distinct PR number and branch ref, same exact SHA, same repo/main base, and never claims actual external event delivery.",
+    "ROY reports precise NEEDS_CHANGES|PASS with actionable evidence; user-approved scope is TEST ONLY, no main merge/deploy, no production Work/Claude Routine changes, no creds, no real asset/financial data.",
+    "Document remaining integration requirements: Work needs authenticated ROY webhook reception and consent to operate alias, no bot CI callback assumption, alias draft event behavior untested, canonical original PR ownership and 2-review dedup across pair."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner current ChatGPT turn '야, 이어서 진행해' after explicit E test-only authorization; all production main merge/deploy prohibited.",
+  "forbidden": [
+    "No main merge/deploy",
+    "No production Work/Claude webhook prompt or Routine change",
+    "No real duplicate PR alias auto-creation by this module",
+    "No API secrets/PAT/cloud or financial accounts"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "code_security_design",
+  "coordination_notes": "ROY uses established PR.opened Routine. Review meaningful code+tests, not ceremonial PASS. Source proof: earlier E2 alias PR B #445 6851483984 triggered first-party ROY pull_request.opened; still conditional. Current guard tests are entirely synthetic and do not access GitHub or mutate anything."
+}
