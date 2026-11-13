@@ -19,7 +19,7 @@ UA='Mozilla/5.0 JJOONI-Market-Observatory/1.0'
 YAHOO='https://query1.finance.yahoo.com/v8/finance/chart/'
 
 SYMBOLS={
- 'NASDAQ100':'^NDX','SP500':'^GSPC','VIX':'^VIX','DXY':'DX-Y.NYB',
+ 'NASDAQ100':'^NDX','SOX':'^SOX','SP500':'^GSPC','VIX':'^VIX','DXY':'DX-Y.NYB',
  'USDKRW':'KRW=X','USDJPY':'JPY=X','JPYKRW':'JPYKRW=X',
  'WTI':'CL=F','BRENT':'BZ=F','NATGAS':'NG=F',
  'GOLD':'GC=F','COPPER':'HG=F',
@@ -27,6 +27,8 @@ SYMBOLS={
 }
 KR_ECOS={'KR3Y':'010200000','KR5Y':'010200001','KR10Y':'010210000','KR20Y':'010220000','KR30Y':'010230000'}
 US_COMPLETED_SESSION_KEYS=('NASDAQ100','SP500','VIX')
+# SOX is an optional single-provider informational bar: its absence must NEVER stall the core NDX/SPX/VIX session.
+US_OPTIONAL_COMPLETED_SESSION_KEYS=('SOX',)
 US_REGULAR_CLOSE_GRACE=(16,15)
 
 
@@ -82,8 +84,9 @@ def align_completed_us_market_series(series):
     common=set.intersection(*date_sets)
     if not common:return None
     aligned=max(common)
-    for key in US_COMPLETED_SESSION_KEYS:
-        series[key]=[x for x in series[key] if str(x.get('date') or '')[:10]<=aligned]
+    for key in (*US_COMPLETED_SESSION_KEYS,*US_OPTIONAL_COMPLETED_SESSION_KEYS):
+        if key in series:
+            series[key]=[x for x in series[key] if str(x.get('date') or '')[:10]<=aligned]
     return aligned
 
 def load_prev():
@@ -196,7 +199,7 @@ def series_map():
     for k,s in SYMBOLS.items():
         try:
             rows=yahoo_series(s,'3y')
-            out[k]=completed_us_bars(rows) if k in US_COMPLETED_SESSION_KEYS else rows
+            out[k]=completed_us_bars(rows) if k in (*US_COMPLETED_SESSION_KEYS,*US_OPTIONAL_COMPLETED_SESSION_KEYS) else rows
         except Exception:out[k]=prev.get(k,[])
     # The dedicated official ECOS freshness collector runs in postprocess and
     # merges verified observations into these cached historical series. Repeating
