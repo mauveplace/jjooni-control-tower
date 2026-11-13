@@ -1,6 +1,6 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-14T06:36:45+09:00",
+ "generated_kst": "2026-11-14T07:40:28+09:00",
  "us_session": "2026-11-13",
  "source_generated_kst": "2026-11-14T06:34:06+09:00",
  "read_only": true,
@@ -45,6 +45,11 @@
      "value": 27943.7363,
      "d1_pct": -1.22,
      "w1_pct": 3.53
+    },
+    {
+     "key": "SOX",
+     "label": "필라델피아 반도체 · Yahoo 참고",
+     "status": "MISSING"
     },
     {
      "key": "SP500",
@@ -236,7 +241,9 @@
   "text": "NDX 공식 종가 교차검증에 필요한 값 또는 완료 세션이 부족합니다. 옵저버토리 저장값은 별도로 표시합니다."
  },
  "quality": {
-  "missing": [],
+  "missing": [
+   "SOX"
+  ],
   "number_source": "market-observatory/data/observatory.json only",
   "note": "카드의 모든 숫자는 저장소 수집 파이프라인 확정치이며 웹 검색·LLM 값을 쓰지 않습니다."
  }
