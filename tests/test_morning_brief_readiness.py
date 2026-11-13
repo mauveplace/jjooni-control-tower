@@ -216,7 +216,7 @@ class MorningReadinessTests(unittest.TestCase):
                "SOX":{"value":None,"status":"MISSING"},
                "VIX10":{"value":20.73,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False},
                "MA250":{"value":27505.8,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False},
-               "DD52W":{"value":-10.51,"status":"PROVIDER_REFERENCE_ONLY"}})
+               "DD52W":{"value":-10.51,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False}})
         day["generated_kst"]="2026-11-15T06:47:00+09:00"
         day["published_kst"]="2026-11-15T06:48:00+09:00"
         glance["groups"]=[{"name":"미국","items":[
