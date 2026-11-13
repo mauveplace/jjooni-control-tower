@@ -21,6 +21,8 @@ def decide_review(*, work_type, complexity="ROUTINE", repeated_failure=False,
     requested reviews, retry events, or unverified role markers.
     reviewed_head_changed means a material code/decision change since the
     last review; no-op commits or formatting alone do not count.
+    A non-NONE verdict cannot drive review-loop actions until its actual
+    first-party reviewer provenance is independently verified by the caller.
     """
     if work_type not in WORK_TYPES or complexity not in COMPLEXITY_LEVELS:
         raise ValueError("Unsupported task class")
@@ -40,20 +42,31 @@ def decide_review(*, work_type, complexity="ROUTINE", repeated_failure=False,
     suggested = mandatory or complexity != "ROUTINE" or repeated_failure or owner_requests_review
     remaining = MAX_REVIEWS - reviews_completed
 
-    if critical_findings_open or latest_verdict == "BLOCKED":
+    if critical_findings_open:
         decision = "BLOCKED_REQUIRES_FIX"
-    elif latest_verdict == "NEEDS_CHANGES":
-        if not reviewed_head_changed:
-            decision = "JJOONI_FIX_FIRST"
-        elif remaining:
+    elif reviews_completed and not provenance_verified:
+        # A role marker or claimed ROY verdict is not an independent review.
+        # Do not use it to start another round, grant readiness or spend quota.
+        decision = "VERIFY_ROY_SOURCE"
+    elif latest_verdict == "BLOCKED":
+        # A genuine code fix may earn one further review, not a silent PASS.
+        if not remaining:
+            decision = "ESCALATE_TO_OWNER"
+        elif reviewed_head_changed:
             decision = "REQUEST_ROY"
         else:
+            decision = "BLOCKED_REQUIRES_FIX"
+    elif latest_verdict == "NEEDS_CHANGES":
+        # A second failed review must escalate immediately, even before a fix.
+        if not remaining:
             decision = "ESCALATE_TO_OWNER"
+        elif not reviewed_head_changed:
+            decision = "JJOONI_FIX_FIRST"
+        else:
+            decision = "REQUEST_ROY"
     elif latest_verdict == "PASS":
         if reviewed_head_changed:
             decision = "REQUEST_ROY" if remaining else "ESCALATE_TO_OWNER"
-        elif not provenance_verified:
-            decision = "VERIFY_ROY_SOURCE"
         else:
             decision = "READY_FOR_OWNER_GATE"
     elif suggested:
