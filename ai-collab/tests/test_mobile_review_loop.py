@@ -37,18 +37,19 @@ class MobileReviewLoopTests(unittest.TestCase):
 
     def test_needs_changes_does_not_rerun_old_head(self):
         r = self.decide(complexity="SUBSTANTIVE", reviews_completed=1,
-                        latest_verdict="NEEDS_CHANGES")
+                        latest_verdict="NEEDS_CHANGES", provenance_verified=True)
         self.assertEqual(r["decision"], "JJOONI_FIX_FIRST")
 
     def test_changed_head_may_request_second_review(self):
         r = self.decide(complexity="SUBSTANTIVE", reviews_completed=1,
-                        latest_verdict="NEEDS_CHANGES", reviewed_head_changed=True)
+                        latest_verdict="NEEDS_CHANGES", reviewed_head_changed=True,
+                        provenance_verified=True)
         self.assertEqual(r["decision"], "REQUEST_ROY")
         self.assertEqual(r["reviews_remaining_before_escalation"], 1)
 
     def test_second_failure_escalates_not_approves(self):
         r = self.decide(reviews_completed=2, latest_verdict="NEEDS_CHANGES",
-                        reviewed_head_changed=True)
+                        reviewed_head_changed=True, provenance_verified=True)
         self.assertEqual(r["decision"], "ESCALATE_TO_OWNER")
         self.assertFalse(r["safe_to_merge"])
 
@@ -77,6 +78,40 @@ class MobileReviewLoopTests(unittest.TestCase):
         r = self.decide(reviews_completed=2, latest_verdict="PASS",
                         provenance_verified=True, reviewed_head_changed=True)
         self.assertEqual(r["decision"], "ESCALATE_TO_OWNER")
+
+    def test_fixed_blocked_head_reenters_review(self):
+        r = self.decide(reviews_completed=1, latest_verdict="BLOCKED",
+                        reviewed_head_changed=True, provenance_verified=True)
+        self.assertEqual(r["decision"], "REQUEST_ROY")
+        self.assertFalse(r["safe_to_merge"])
+
+    def test_unchanged_blocked_stays_blocked(self):
+        r = self.decide(reviews_completed=1, latest_verdict="BLOCKED",
+                        provenance_verified=True)
+        self.assertEqual(r["decision"], "BLOCKED_REQUIRES_FIX")
+
+    def test_second_blocked_review_escalates(self):
+        r = self.decide(reviews_completed=2, latest_verdict="BLOCKED",
+                        reviewed_head_changed=True, provenance_verified=True)
+        self.assertEqual(r["decision"], "ESCALATE_TO_OWNER")
+
+    def test_second_needs_changes_escalates_immediately(self):
+        r = self.decide(reviews_completed=2, latest_verdict="NEEDS_CHANGES",
+                        provenance_verified=True)
+        self.assertEqual(r["decision"], "ESCALATE_TO_OWNER")
+
+    def test_unverified_negative_review_cannot_drive_next_round(self):
+        for verdict in ("NEEDS_CHANGES", "BLOCKED"):
+            with self.subTest(verdict=verdict):
+                r = self.decide(reviews_completed=1, latest_verdict=verdict,
+                                reviewed_head_changed=True)
+                self.assertEqual(r["decision"], "VERIFY_ROY_SOURCE")
+                self.assertFalse(r["safe_to_merge"])
+
+    def test_critical_finding_stays_blocked_even_without_provenance(self):
+        r = self.decide(reviews_completed=1, latest_verdict="PASS",
+                        critical_findings_open=True)
+        self.assertEqual(r["decision"], "BLOCKED_REQUIRES_FIX")
 
     def test_rejected_unsafe_inputs(self):
         invalid = (
