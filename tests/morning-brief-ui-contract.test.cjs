@@ -149,7 +149,7 @@ test('historic reports without missing inputs are not amended and SOX is not inv
 
 test('optional SOX market bar only appears as a single-source reference on exact same session',()=>{
  const g=JSON.parse(JSON.stringify(glanceCatchup));
- g.groups[0].items.push({key:'SOX',date:'2026-11-13',value:10168.99,d1_pct:-3.21});
+ g.groups[0].items.push({key:'SOX',date:'2026-11-13',value:10168.99,d1_pct:-3.21,source:'Yahoo ^SOX completed daily (single provider)',comparison_status:'SAME_PREVIOUS_US_SESSION'});
  let x=projection(reportRace,g);
  assert.equal(x.sox,10168.99);
  assert.equal(x.soxPct,-3.21);
@@ -161,6 +161,15 @@ test('optional SOX market bar only appears as a single-source reference on exact
  assert.equal(x.sox,null);assert.equal(x.ndx,27943.73632812);
  g.groups[0].items.at(-1).date='2026-11-13';
  g.groups[0].items.at(-1).value=NaN;
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);
+ g.groups[0].items.at(-1).value=10168.99;
+ g.groups[0].items.at(-1).comparison_status='PRIOR_SESSION_UNVERIFIED';
+ g.groups[0].items.at(-1).d1_pct=null;
+ x=projection(reportRace,g);
+ assert.equal(x.sox,10168.99);
+ assert.equal(x.soxPct,null);
+ g.groups[0].items.at(-1).source='Unverified visitor quote';
  x=projection(reportRace,g);
  assert.equal(x.sox,null);
 });
