@@ -146,3 +146,21 @@ test('historic reports without missing inputs are not amended and SOX is not inv
  assert.match(src,/SOURCE_PULSE=results\[3\]/);
  assert.match(html,/sync=20261114-canonical-catchup/);
 });
+
+test('optional SOX market bar only appears as a single-source reference on exact same session',()=>{
+ const g=JSON.parse(JSON.stringify(glanceCatchup));
+ g.groups[0].items.push({key:'SOX',date:'2026-11-13',value:10168.99,d1_pct:-3.21});
+ let x=projection(reportRace,g);
+ assert.equal(x.sox,10168.99);
+ assert.equal(x.soxPct,-3.21);
+ assert.equal(x.officialEodVerified,false);
+ assert.equal(x.tradeEligible,false);
+ assert.match(src,/SOX는 Yahoo 일봉 단일원천 참고값/);
+ g.groups[0].items.at(-1).date='2026-11-12';
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);assert.equal(x.ndx,27943.73632812);
+ g.groups[0].items.at(-1).date='2026-11-13';
+ g.groups[0].items.at(-1).value=NaN;
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);
+});
