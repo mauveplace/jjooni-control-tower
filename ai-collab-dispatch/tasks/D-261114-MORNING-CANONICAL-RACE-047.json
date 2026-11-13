@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-MORNING-CANONICAL-RACE-047",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "P0 repair morning brief stale-source race on 2026-11-14: brief published 06:32:48 KST, completed-session Observatory+Pulse+Glance arrive 06:34-06:37. Add source-aligned read-only reference strip so existing public brief can show NDX/VIX10/MA250/DD from same completed market date without rewriting historical article or upgrading strict official NDX/SOX close proof. Morning Work scheduler has been independently shifted to 16:45 ET and ordered to require same-session canonical before publication. Review actual source correctness and test guards. No financial account operations.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "production_ui_data_integrity_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User 2026-11-14 asked immediately to collaborate with ROY, investigate recurring missing data, fix root cause and deliver operating improvement. Production merge only after authenticated ROY review, passing CI and source-level verification.",
+  "acceptance": [
+    "Exactly same report market_date_us, Daily Glance us_session and tripod.session, Daily Pulse market_date and core NDX date; all mandatory flags no_trade true/read_only true, snapshot FINAL and consistency OK; NDX prices+returns agree across two DERIVATIONS OF THE SAME canonical, so this is SINGLE-SOURCE REF, not two independent official source checks.",
+    "Read-only dynamic public UI loads latest + same-session Glance+Pulse on each tab activation and 60s refresh, and shows explicitly informational NDX, VIX10, MA250, 52w DD and pod even if original brief was published first. For historic selection, wrong session, stale/nonfinal, price mismatch, future timestamps, or missing fields no augmentation. No filled SOX without separate eligible SOX source.",
+    "Original editorial_contract.close_checks official NDX/SOX status, close=null, official_status, trade eligible must not be mutated or auto-promoted. Source provenance times and report vintage visible, content flags, any values are non-trade/nonofficial. Keep same old free-text body for audit with clear vintage banner.",
+    "Coverage: 2026-11-14 actual timing race with NDX 27943.7363 and VIX10 20.73, strict same-session checks, incompatible close and staleness, missing source, no simulated official close. Tests & CI pass; mobile display and Pages cache invalidated.",
+    "Root cause and mitigation recorded in docs with remaining structural fault: source-price corroboration for NDX and SOX truly independent remains unverified; restore only allowed nonofficial reference, never mask price conflict or fabricate provider. ROY investigate source timing/pipeline and advise any stricter preflight.",
+    "No main merge/deploy until ROY actual original GitHub comment with verdict on exact current SHA and user-authorized release. No private portfolio, accounts, tokens, automatic trading, cloud services."
+  ],
+  "forbidden": [
+    "No auto trade or portfolio updates",
+    "No invented official SOX/NDX close",
+    "No direct rewrite of historical body or generated/published times",
+    "No unapproved secrets/cloud/permissions",
+    "No GitHub Actions direct main bypass of PR CI"
+  ],
+  "coordination_notes": "Review PR code and related independent joint RCA Issue #454; distinguish source-session alignment from independent price accuracy. Explicitly identify whether we should fail-closed on any discrepancy between Nasdaq dynamic 11/13 and Yahoo historical vs canonical NDX, and whether SOX missing is a real ingestion gap rather than a UX-only bug. Revisions as necessary in PR with precise tests; give substantive ROY_REVIEW=PASS|NEEDS_CHANGES. User wants an actual fix."
+}
