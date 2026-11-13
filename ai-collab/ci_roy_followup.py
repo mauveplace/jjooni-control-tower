@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Default-branch CI success -> ROY review issue, never PR code execution."""
+"""Default-branch CI success -> verified PR handoff comment for owner Work.
+
+Github Actions GITHUB_TOKEN-created Issues cannot satisfy the existing Claude
+owner-authored issues.opened trust contract. Never execute untrusted PR code.
+"""
 import base64
 import json
 import os
@@ -11,6 +15,8 @@ import urllib.request
 REPO = "mauveplace/jjooni-control-tower"
 WORKFLOW = "AI Collaboration Read-Only Contract"
 ISSUE_MARKER = "<!-- JJOONI-COLLAB-ISSUE-V1 -->"
+BRIDGE_MARKER = "JJOONI-CI-GREEN-ROY-HANDOFF-V1"
+EXPECTED_CI_PATH = ".github/workflows/ai-collab-contract.yml"
 TASK_FILE = re.compile(r"ai-collab-dispatch/tasks/(D-[0-9]{6}-[A-Z0-9-]+)\.json\Z")
 SHA = re.compile(r"[a-f0-9]{40}\Z")
 TITLE_PREFIX = "[AI-COLLAB][ROY-REQUEST] L2 CI success final review PR #"
@@ -94,7 +100,8 @@ def parse_roy_comment(comment):
 
 
 def issue_matches(issue, number, task_id, head):
-    if issue.get("pull_request") or issue.get("title") != TITLE_PREFIX + str(number):
+    if (issue.get("pull_request") or issue.get("title") != TITLE_PREFIX + str(number)
+            or (issue.get("user") or {}).get("login") != "mauveplace"):
         return False
     body = (issue.get("body") or "").replace("\r\n", "\n")
     if not body.startswith(ISSUE_MARKER + "\n"):
@@ -131,6 +138,35 @@ def make_issue(number, task_id, head, run_id, source_comment_id):
             "Release gate: USER_APPROVAL_REQUIRED.",
         ]),
     }
+
+
+def make_bridge_comment(number, task_id, head, run_id, source_comment_id):
+    return {
+        "body": "\n".join([
+            "<!-- %s task=%s pr=%s head=%s run=%s -->" %
+                (BRIDGE_MARKER, task_id, number, head, run_id),
+            "SOURCE=GITHUB_ACTIONS_CI_COMPLETED",
+            "GitHub Actions verified exact green CI run, matching open PR/HEAD,",
+            "one Claude-app NEEDS_CHANGES review on its parent, and one safe fix.",
+            "Original Claude review comment ID: " + str(source_comment_id),
+            "The connected JJOONI Work webhook MUST independently recheck CI and",
+            "dedupe before creating ONE OWNER-AUTHORED read-only ROY Issue.",
+            "This github-actions[bot] comment is NOT an owner review request.",
+            "No main merge, deployment, trading or additional privileges."
+        ])
+    }
+
+
+def bridge_matches(comment, number, task_id, head):
+    if (comment.get("user") or {}).get("login") != "github-actions[bot]":
+        return False
+    first = (comment.get("body") or "").splitlines()
+    if not first:
+        return False
+    pattern = (r"<!-- " + BRIDGE_MARKER + r" task=" + re.escape(task_id)
+               + r" pr=" + str(number) + r" head=" + head
+               + r" run=[1-9][0-9]* -->")
+    return re.fullmatch(pattern, first[0]) is not None
 
 
 class GitHub:
@@ -195,7 +231,10 @@ def try_dispatch(gh, event):
     confirmed = gh.api("/actions/runs/" + str(run["id"]))
     if (confirmed.get("head_sha") != sha or confirmed.get("conclusion") != "success"
             or confirmed.get("event") != "pull_request"
-            or confirmed.get("name") != WORKFLOW):
+            or confirmed.get("name") != WORKFLOW
+            or confirmed.get("path") != EXPECTED_CI_PATH
+            or (confirmed.get("head_repository") or {}).get("full_name") != REPO
+            or (confirmed.get("repository") or {}).get("full_name") != REPO):
         raise RuntimeError("CI source mismatch")
     for number in candidate_prs(gh, run):
         pr = gh.api("/pulls/" + str(number))
@@ -242,20 +281,25 @@ def try_dispatch(gh, event):
             continue
         issues = gh.pages("/issues?state=all&sort=created&direction=desc")
         if any(issue_matches(i, number, task_id, sha) for i in issues):
-            print("DEDUPED: PR %s HEAD %s" % (number, sha))
+            print("DEDUPED: genuine owner ROY issue already exists")
+            return "DEDUPED"
+        if any(bridge_matches(c, number, task_id, sha) for c in comments):
+            print("DEDUPED: CI-green bridge comment already exists")
             return "DEDUPED"
         fresh = gh.api("/pulls/" + str(number))
         if fresh.get("state") != "open" or (fresh.get("head") or {}).get("sha") != sha:
-            print("STALE: PR changed before issue")
+            print("STALE: PR changed before handoff comment")
             return "STALE"
-        data = make_issue(number, task_id, sha, run["id"], reviews[0]["comment_id"])
-        created = gh.request("/repos/" + REPO + "/issues", data)
-        if (type(created.get("number")) is not int
-                or created.get("title") != data["title"]):
-            raise RuntimeError("GitHub issue creation confirmation failed")
-        print("CREATED pr=%s issue=%s sha=%s url=%s" %
-              (number, created["number"], sha, created.get("html_url")))
-        return "CREATED"
+        note = make_bridge_comment(number, task_id, sha, run["id"],
+                                   reviews[0]["comment_id"])
+        created = gh.request("/repos/" + REPO + "/issues/" +
+                             str(number) + "/comments", note)
+        if (type(created.get("id")) is not int
+                or created.get("body") != note["body"]):
+            raise RuntimeError("GitHub PR comment confirmation failed")
+        print("BRIDGE_CREATED pr=%s comment=%s sha=%s url=%s" %
+              (number, created["id"], sha, created.get("html_url")))
+        return "BRIDGE_CREATED"
     print("NO_ELIGIBLE_PR: no authorized code correction to review")
     return "SKIP"
 
