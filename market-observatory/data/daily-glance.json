@@ -1,8 +1,8 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-14T07:40:28+09:00",
+ "generated_kst": "2026-11-14T07:45:04+09:00",
  "us_session": "2026-11-13",
- "source_generated_kst": "2026-11-14T06:34:06+09:00",
+ "source_generated_kst": "2026-11-14T07:41:26+09:00",
  "read_only": true,
  "contains_account_data": false,
  "no_trade": true,
@@ -49,7 +49,12 @@
     {
      "key": "SOX",
      "label": "필라델피아 반도체 · Yahoo 참고",
-     "status": "MISSING"
+     "date": "2026-11-13",
+     "value": 10146.3232,
+     "d1_pct": -3.43,
+     "w1_pct": 8.05,
+     "comparison_status": "SAME_PREVIOUS_US_SESSION",
+     "source": "Yahoo ^SOX completed daily (single provider)"
     },
     {
      "key": "SP500",
@@ -145,17 +150,17 @@
      "key": "USDKRW",
      "label": "원/달러",
      "date": "2026-11-13",
-     "value": 1335.3199,
-     "d1_pct": -0.07,
-     "w1_pct": -1.55
+     "value": 1335.11,
+     "d1_pct": -0.09,
+     "w1_pct": -1.57
     },
     {
      "key": "DXY",
      "label": "달러인덱스",
      "date": "2026-11-13",
-     "value": 103.381,
-     "d1_pct": 0.2,
-     "w1_pct": 1.06
+     "value": 103.411,
+     "d1_pct": 0.23,
+     "w1_pct": 1.09
     },
     {
      "key": "US10Y",
@@ -190,35 +195,35 @@
      "key": "FEAR_GREED",
      "label": "공포탐욕",
      "date": "2026-11-13",
-     "value": 38.7,
-     "d1_pt": -1.6
+     "value": 38.6,
+     "d1_pt": -1.7
     },
     {
      "key": "GOLD",
      "label": "금",
      "date": "2026-11-13",
-     "value": 3880.5,
-     "d1_pct": -0.12,
-     "w1_pct": -4.77
+     "value": 3887.6001,
+     "d1_pct": 0.06,
+     "w1_pct": -4.6
     },
     {
      "key": "WTI",
      "label": "WTI",
      "date": "2026-11-13",
-     "value": 89.02,
-     "d1_pct": 0.32,
-     "w1_pct": -1.99
+     "value": 88.92,
+     "d1_pct": 0.2,
+     "w1_pct": -2.1
     },
     {
      "key": "BTCUSD",
      "label": "비트코인",
      "date": "2026-11-13",
-     "value": 68382.01,
+     "value": 68406.01,
      "quote_currency": "USDT",
      "source": "Binance Spot last trade / USDT",
-     "observed_kst": "2026-11-14T06:34:11+09:00",
+     "observed_kst": "2026-11-14T07:41:44+09:00",
      "comparison_status": "SAME_CURRENCY_COMPLETED",
-     "d1_pct": -4.31,
+     "d1_pct": -4.27,
      "w1_pct": null
     }
    ]
@@ -231,7 +236,7 @@
   },
   {
    "type": "FX",
-   "text": "원/달러 1,335.3원(-0.07%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
+   "text": "원/달러 1,335.1원(-0.09%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
   }
  ],
  "brief_check": {
@@ -241,9 +246,7 @@
   "text": "NDX 공식 종가 교차검증에 필요한 값 또는 완료 세션이 부족합니다. 옵저버토리 저장값은 별도로 표시합니다."
  },
  "quality": {
-  "missing": [
-   "SOX"
-  ],
+  "missing": [],
   "number_source": "market-observatory/data/observatory.json only",
   "note": "카드의 모든 숫자는 저장소 수집 파이프라인 확정치이며 웹 검색·LLM 값을 쓰지 않습니다."
  }
