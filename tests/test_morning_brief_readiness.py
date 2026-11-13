@@ -182,8 +182,20 @@ class MorningReadinessTests(unittest.TestCase):
         vals={"NDX":27943.7363,"SOX":10146.3232,
               "VIX10":20.73,"MA250":27505.8,"DD52W":-10.51}
         for k,v in vals.items():
-            day["editorial_contract"]["market_metrics"][k]={"value":v,"status":"PROVIDER_REFERENCE_ONLY"}
+            day["editorial_contract"]["market_metrics"][k]={"value":v,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False}
         self.assertEqual(verify(*args)["session"],SESSION)
+        day["editorial_contract"]["market_metrics"]["VIX10"]["status"]="OFFICIAL_VERIFIED"
+        day["editorial_contract"]["market_metrics"]["VIX10"]["official_eod_verified"]=True
+        with self.assertRaisesRegex(ValueError,"DERIVED_MARKET_METRIC_CANNOT_BE_OFFICIAL:VIX10"):
+            verify(*args)
+        day["editorial_contract"]["market_metrics"]["VIX10"]["status"]="PROVIDER_REFERENCE_ONLY"
+        day["editorial_contract"]["market_metrics"]["VIX10"]["official_eod_verified"]=False
+        day["editorial_contract"]["market_metrics"]["NDX"]["status"]="OFFICIAL_VERIFIED"
+        day["editorial_contract"]["market_metrics"]["NDX"]["official_eod_verified"]=True
+        with self.assertRaisesRegex(ValueError,"OFFICIAL_CLOSE_PROOF_NOT_PRESENT:NDX"):
+            verify(*args)
+        day["editorial_contract"]["market_metrics"]["NDX"]["status"]="PROVIDER_REFERENCE_ONLY"
+        day["editorial_contract"]["market_metrics"]["NDX"]["official_eod_verified"]=False
         day["editorial_contract"]["market_metrics"]["SOX"]["value"]=10000.0
         with self.assertRaisesRegex(ValueError,"CORE_MARKET_REPORT_DIFFERS_FROM_CANONICAL:SOX"):
             verify(*args)
@@ -200,10 +212,10 @@ class MorningReadinessTests(unittest.TestCase):
                "pulse_generated_kst":pulse["generated_kst"],
                "glance_generated_kst":glance["generated_kst"]},
            market_metrics={
-               "NDX":{"value":27943.74,"status":"PROVIDER_REFERENCE_ONLY"},
+               "NDX":{"value":27943.74,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False},
                "SOX":{"value":None,"status":"MISSING"},
-               "VIX10":{"value":20.73,"status":"PROVIDER_REFERENCE_ONLY"},
-               "MA250":{"value":27505.8,"status":"PROVIDER_REFERENCE_ONLY"},
+               "VIX10":{"value":20.73,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False},
+               "MA250":{"value":27505.8,"status":"PROVIDER_REFERENCE_ONLY","official_eod_verified":False},
                "DD52W":{"value":-10.51,"status":"PROVIDER_REFERENCE_ONLY"}})
         day["generated_kst"]="2026-11-15T06:47:00+09:00"
         day["published_kst"]="2026-11-15T06:48:00+09:00"
