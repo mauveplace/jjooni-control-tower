@@ -116,7 +116,7 @@ class DualTemplateV2(unittest.TestCase):
 
     def test_no_hiding_core_metrics_and_no_fabricated_dual_review(self):
         d,c=fixture();d["body_markdown"]=d["body_markdown"].replace("VIX10","VIX")
-        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_INCOMPLETE"):
+        with self.assertRaisesRegex(AssertionError,"CORE_MARKET_TABLE_ROW"):
             validate_dual_market_template(d,c)
         d,c=fixture();d["body_markdown"]=d["body_markdown"].replace("ROY 검토 대기","검토했음")
         with self.assertRaisesRegex(AssertionError,"DUAL_REVIEW_AUDIT_MISSING"):
