@@ -16,6 +16,62 @@ EDITORIAL_SECTIONS = [
     '⑦ 투자전략·위험점검·복기', '⑧ 원천·데이터 감사',
 ]
 
+
+# New-publication-only quality gate. Historical originally published reports are
+# immutable evidence and must not fail just because the template improved.
+DUAL_REVIEW_FROM = '2026-11-15'
+CORE_MARKET_FIELDS = ('NDX', 'SOX', 'VIX10', 'MA250', 'DD52W')
+STATUS_VALUES = {'OFFICIAL_VERIFIED', 'PROVIDER_REFERENCE_ONLY', 'MISSING', 'CONFLICT'}
+DUAL_REVIEW_VALUES = {'PENDING', 'REVIEWED', 'BLOCKED', 'UNAVAILABLE'}
+
+
+def validate_dual_market_template(d, contract):
+    if d['report_date_kst'] < DUAL_REVIEW_FROM:
+        return
+    assert contract.get('template_version') == 'ROY_JJOONI_DAILY_V2', 'DUAL_TEMPLATE_VERSION'
+    metrics = contract.get('market_metrics')
+    assert isinstance(metrics, dict) and all(k in metrics for k in CORE_MARKET_FIELDS), 'CORE_MARKET_METRICS_MISSING'
+    from math import isfinite
+    for key in CORE_MARKET_FIELDS:
+        m = metrics[key]
+        assert isinstance(m, dict) and m.get('status') in STATUS_VALUES, ('METRIC_STATUS', key)
+        assert m.get('session_date') == d['market_date_us'], ('METRIC_SESSION', key)
+        assert m.get('trade_signal_eligible') is False, ('METRIC_TRADE_BOUNDARY', key)
+        v = m.get('value')
+        if m['status'] in {'MISSING', 'CONFLICT'}:
+            assert v is None and isinstance(m.get('reason'), str) and m['reason'].strip(), ('METRIC_UNVERIFIED_REASON', key)
+        else:
+            assert isinstance(v, (float, int)) and not isinstance(v, bool) and isfinite(v), ('METRIC_VALUE', key)
+            assert v > 0 if key != 'DD52W' else -100 <= v <= 0, ('METRIC_RANGE', key)
+            assert isinstance(m.get('source'), str) and m['source'].strip(), ('METRIC_SOURCE', key)
+            t = datetime.fromisoformat(m['source_generated_kst'])
+            assert t.tzinfo and t.utcoffset() == timedelta(hours=9), ('METRIC_CLOCK', key)
+            assert t <= datetime.fromisoformat(d['editorial_contract']['verified_at_kst']), ('METRIC_AFTER_VERIFICATION', key)
+            if m['status'] == 'PROVIDER_REFERENCE_ONLY':
+                assert m.get('official_eod_verified') is False, ('METRIC_REFERENCE_IS_NOT_OFFICIAL', key)
+            else:
+                assert m.get('official_eod_verified') is True, ('METRIC_OFFICIAL_PROOF_MISSING', key)
+                if key in ('NDX', 'SOX'):
+                    check = next((x for x in contract['close_checks'] if x.get('symbol') == key), {})
+                    assert check.get('status') == 'VERIFIED', ('METRIC_OFFICIAL_GATE_NOT_VERIFIED', key)
+    review = contract.get('dual_review')
+    assert isinstance(review, dict) and review.get('review_status') in DUAL_REVIEW_VALUES, 'DUAL_REVIEW_STATUS'
+    assert review.get('roy_report_status') in ('FOUND', 'NOT_FOUND', 'UNVERIFIED'), 'ROY_ARTIFACT_STATUS'
+    assert review.get('reviewed_source_session') == d['market_date_us'], 'ROY_SESSION'
+    assert review.get('verified_by_independent_provider') in (False, True), 'ROY_PRICE_PROOF_FLAG'
+    if review['review_status'] == 'REVIEWED':
+        from urllib.parse import urlparse as _urlparse
+        u = _urlparse(str(review.get('roy_comment_url') or ''))
+        assert u.scheme == 'https' and u.hostname == 'github.com' and '/issues/' in u.path or (
+            u.scheme == 'https' and u.hostname == 'github.com' and '/pull/' in u.path), 'ROY_EVIDENCE_URL'
+        assert review.get('roy_report_status') == 'FOUND', 'ROY_NO_REAL_REPORT'
+        assert isinstance(review.get('comparison'), list) and review['comparison'], 'ROY_NO_CLAIM_COMPARISON'
+    body = d['body_markdown']
+    table_part = body.split('## ② 시장 한눈에', 1)[1].split('## ③ 핵심 이슈 깊이 읽기', 1)[0]
+    assert all(x in table_part for x in ('NDX', 'SOX', 'VIX10', 'MA250', 'DD')), 'CORE_MARKET_TABLE_INCOMPLETE'
+    audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
+    assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
+
 def validate_editorial(d, created):
     """Keep the new daily format and close proof from silently reverting."""
     if d['report_date_kst'] < '2026-11-03':
@@ -67,6 +123,7 @@ def validate_editorial(d, created):
                 late_postclose_count += 1
             domains.add(parsed.hostname)
         assert len(domains) >= 2 and late_postclose_count >= 1 and ref.get('limitations'), 'REFERENCE_PROVENANCE'
+    validate_dual_market_template(d, contract)
     for check in checks:
         assert check.get('session_date') == d['market_date_us'], 'CLOSE_SESSION_MISMATCH'
         post_audit=check.get('post_publication_verified_at_kst')
