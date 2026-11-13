@@ -60,6 +60,22 @@ class DailyGlance(unittest.TestCase):
         self.assertEqual(items["SP500"]["status"], "MISSING")
         self.assertIn("SP500", g["quality"]["missing"])
 
+    def test_optional_sox_yahoo_completed_bar_is_reference_not_trade_gate(self):
+        obs = observatory()
+        missing = glance.build(obs)
+        items = {i["key"]: i for grp in missing["groups"] for i in grp["items"]}
+        self.assertEqual(items["SOX"]["status"], "MISSING")
+        self.assertTrue(missing["no_trade"])
+        obs["series"]["SOX"] = series(10100, 10250, 10050, start=4)
+        g = glance.build(obs)
+        items = {i["key"]: i for grp in g["groups"] for i in grp["items"]}
+        self.assertEqual(items["SOX"]["date"], "2026-11-06")
+        self.assertEqual(items["SOX"]["value"], 10050)
+        self.assertIsInstance(items["SOX"]["d1_pct"], (float, int))
+        self.assertEqual(g["us_session"], "2026-11-06")
+        self.assertTrue(g["no_trade"])
+        self.assertNotIn("SOX", g["quality"]["missing"])
+
     def test_asia_cross_read_separates_aligned_and_divergent_peers(self):
         cross = {c["type"]: c for c in glance.build(observatory())["cross_read"]}
         self.assertIn("닛케이225와 동조", cross["ASIA_CROSS"]["kind"])
