@@ -76,6 +76,21 @@ class DailyGlance(unittest.TestCase):
         self.assertTrue(g["no_trade"])
         self.assertNotIn("SOX", g["quality"]["missing"])
 
+    def test_sox_gap_does_not_create_false_one_day_return(self):
+        obs = observatory()
+        # The last SOX observation is in the current session, but its
+        # previous bar is not the immediately preceding NDX trading session.
+        obs["series"]["SOX"] = [
+            {"date": "2026-11-03", "value": 10000},
+            {"date": "2026-11-06", "value": 10100},
+        ]
+        g = glance.build(obs)
+        sox = next(i for x in g["groups"] for i in x["items"] if i["key"] == "SOX")
+        self.assertEqual(sox["value"], 10100)
+        self.assertIsNone(sox["d1_pct"])
+        self.assertEqual(sox["comparison_status"], "PRIOR_SESSION_UNVERIFIED")
+        self.assertTrue(g["no_trade"])
+
     def test_asia_cross_read_separates_aligned_and_divergent_peers(self):
         cross = {c["type"]: c for c in glance.build(observatory())["cross_read"]}
         self.assertIn("닛케이225와 동조", cross["ASIA_CROSS"]["kind"])
