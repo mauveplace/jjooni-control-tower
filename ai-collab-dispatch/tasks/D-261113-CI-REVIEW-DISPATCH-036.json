@@ -4,7 +4,7 @@
   "repository": "mauveplace/jjooni-control-tower",
   "base_branch": "main",
   "source_sha": null,
-  "objective": "Apply the user's approved production CI-green ROY followup issue dispatch automation safely. Audit a main-branch workflow_run listener, fail-closed Python GitHub API dispatcher and regression tests for exact-head successful CI, Claude-app original NEEDS_CHANGES on parent commit, immutable task/test integrity, reviewer budget, no PR code execution, idempotent review issue creation with minimal issues:write permission.",
+  "objective": "Apply a trustworthy CI-green → GitHub Actions bot PR handoff comment → owner-authored ChatGPT Work ROY final-review Issue → Claude issues.opened review bridge. Preserve the existing owner-only receiver trust model; never let GITHUB_TOKEN-created Issues impersonate owner.",
   "mode": "SYSTEM_REVIEW_ONLY",
   "privacy": "PUBLIC_DATA_ONLY",
   "required_reviewers": [
@@ -12,12 +12,13 @@
   ],
   "optional_reviewers": [],
   "acceptance": [
-    "Workflow_run only after named CI workflow completed success for pull_request from the same repository, with script checkout of trusted main code (never a PR head/artifact).",
-    "Task must be exactly one changed ai-collab-dispatch/tasks/JSON, authorized reviewer ROY, no auto merge, and opt-in auto_roy_review_after_ci=true except exact preauthorized PR #430 migration case.",
-    "Genuine prior Claude-app ROY NEEDS_CHANGES comment on direct parent SHA, no second prior review, only one safe source-file correction in current commit, immutable tests/task; current PR HEAD exactly matches successful CI SHA.",
-    "Create exactly one read-only issues.opened ROY followup, dedupe by issue title + strict body metadata (not comments in unrelated incident issue #330), no false successes or third reviews.",
-    "Full integration tests include spoofed actor, same SHA replays, foreign repo, failed CI, old HEAD, duplicate existing issue, unauthorized changes, opt-in and no production deployment.",
-    "Independent ROY read-only code/security review returns PASS on CURRENT HEAD before any merge; no main merge, deployment or production write until user approval gate. User granted conditional operational apply in current chat."
+    "Privileged default-branch workflow_run.completed verifies actual named CI workflow path/name/repository/event, same-repo opened opt-in PR current HEAD and green result; never checkout/execute PR code or artifacts with write token.",
+    "Requires exact one task JSON, ROY as required independent reviewer, SYSTEM_REVIEW_ONLY, USER_APPROVAL_REQUIRED, future opt-in flag auto_roy_review_after_ci or exact known PR #430 exception.",
+    "Real Claude-app NEEDS_CHANGES on parent SHA, one helper code correction, immutable tests/task, no more than two reviews; fail closed against untrusted bot/actor claims.",
+    "GitHub Actions uses ONLY pull-requests:write to create one github-actions[bot] CI-green handoff PR comment (not bot-created review Issue). Verify dedup and source CI run id, exact SHA and task.",
+    "Owner-connected JJOONI Work event job independently validates bot PR CI-green comment and creates exactly one owner-authored strict V1 read-only ROY review Issue; existing issue_dispatch.decide() and Claude issues.opened Routine accept owner-author identity.",
+    "Adversarial tests cover spoofed actor, bot-owner distinction, workflow path/repo, no CI success, failed or stale head, duplicate GH Issues/comments, test/source/contract tamper, review cap, and receiver integration.",
+    "Only merge the trusted infrastructure branch if current exact HEAD CI and architecture check are green and ROY independent second review returns PASS; never auto-merge/deploy or trade. After merge prove a fresh CI event produces bot handoff, owner Issue and real ROY final review."
   ],
   "release_gate": "USER_APPROVAL_REQUIRED",
   "owner_approval_evidence": "User chat 2026-11-13: 'ㅇㅋ 다시 검증하고 개선해서 운영적용해버리자' - authorize after green CI and independent ROY approval, no trading/deployment.",
@@ -30,5 +31,5 @@
   ],
   "origin": "USER_TO_JJOONI",
   "work_type": "backend",
-  "coordination_notes": "Implement as independent GitHub Actions workflow_run completed + narrow issues:write token. Existing hourly and Work Webhook may inspect but must NOT concurrently emit an identical issue after rollout. Scoped rollout first validates against still-open public test PR #430 with immutable task D-261113-L2-CI-DISPATCH-035; opt-in future by auto_roy_review_after_ci true. The review request ticket must cause Claude existing issues.opened routine read-only. No source imports from untrusted PR executed in privileged workflow."
+  "coordination_notes": "The first ROY review on PR #431 observed critical GITHUB_TOKEN author mismatch: bot-generated issues violate the existing owner-only Claude receive contract. Revised into two-hop bot PR CI-green comment → owner Work Issue → Claude review; Python source, regression tests, YAML and docs revised. Only one final ROY re-review permitted. User explicitly granted conditional rollout; no permission to merge arbitrary product/investment code."
 }
