@@ -36,11 +36,17 @@ def revision_only(current, baseline):
         return False
     original = baseline.get("editorial_contract") or {}
     revised = current.get("editorial_contract") or {}
+    before = baseline.get("revisions") or []
+    after = current.get("revisions") or []
+    if not isinstance(before, list) or not isinstance(after, list):
+        return False
+    if len(after) <= len(before) or after[:len(before)] != before:
+        return False
     return (baseline.get("report_date_kst") == current.get("report_date_kst")
             and baseline.get("market_date_us") == current.get("market_date_us")
             and baseline.get("generated_kst") == current.get("generated_kst")
             and original.get("verified_at_kst") == revised.get("verified_at_kst")
-            and bool(current.get("revisions")))
+            and bool(after))
 
 
 def verify(brief, observatory, pulse, glance):
