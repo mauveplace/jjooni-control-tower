@@ -96,9 +96,11 @@ function canonicalSupplement(d,g,p){
     !Number.isFinite(glanceGenerated)||!Number.isFinite(published)||
     sourceGenerated>glanceGenerated||pulseGenerated>glanceGenerated||
     sourceGenerated> Date.now()+60000||glanceGenerated>Date.now()+60000)return null;
- const soxOk=soxItem?.date===d.market_date_us&&numeric(soxItem.value)&&soxItem.value>0&&numeric(soxItem.d1_pct);
+ const soxOk=soxItem?.date===d.market_date_us&&numeric(soxItem.value)&&soxItem.value>0&&
+  soxItem.source==='Yahoo ^SOX completed daily (single provider)';
+ const soxPctOk=soxOk&&soxItem.comparison_status==='SAME_PREVIOUS_US_SESSION'&&numeric(soxItem.d1_pct);
  return {session:g.us_session,ndx:raw.value,ndxPct:raw.change_pct,
-  sox:soxOk?soxItem.value:null,soxPct:soxOk?soxItem.d1_pct:null,
+  sox:soxOk?soxItem.value:null,soxPct:soxPctOk?soxItem.d1_pct:null,
   vix10:g.tripod.vix10,ma250:g.tripod.ma250,dd:g.tripod.drawdown_52w_pct,
   pod:g.tripod.pod,sourceGenerated:g.source_generated_kst,
   pulseGenerated:p.generated_kst,glanceGenerated:g.generated_kst,
@@ -119,8 +121,10 @@ function render(d){
    c.symbol==='SOX'&&supplement&&Number.isFinite(supplement.sox)&&!Number.isFinite(baseFigure.value)
    ?{value:supplement.sox,pct:supplement.soxPct,reference:true,kind:'CANONICAL_REFERENCE_ONLY'}:baseFigure;
   const usable=Number.isFinite(figure.value),ref=figure.reference;
-  const pct=usable?(figure.pct>=0?'+':'')+Number(figure.pct).toFixed(2)+'%':'';
-  const note=figure.kind==='CANONICAL_REFERENCE_ONLY'?pct+' · 원장 참고 / 공식 EOD 미검증 (매매 신호 금지)':
+  const pct=usable&&Number.isFinite(figure.pct)?(figure.pct>=0?'+':'')+Number(figure.pct).toFixed(2)+'%':'';
+  const note=figure.kind==='CANONICAL_REFERENCE_ONLY'?
+   (c.symbol==='SOX'?(pct||'1D 비교불가')+' · Yahoo 단일 제공자 참고 / 공식 EOD 미검증 (매매 신호 금지)':
+    pct+' · 원장 참고 / 공식 EOD 미검증 (매매 신호 금지)'):
    ref?pct+' · 참고 완료 일봉 / 공식 종가 미검증 (매매 신호 사용 금지)':
    c.status==='VERIFIED'?pct+' · 공식 EOD 확인':
    c.status==='CROSS_CHECKED'&&usable?pct+' · 비공식 교차 확인':
@@ -143,11 +147,11 @@ function render(d){
   const percent=v=>(v>=0?'+':'')+Number(v).toFixed(2)+'%';
   catchup.hidden=false;
   catchup.innerHTML='<strong>원장 후속 갱신 · '+esc(supplement.session)+' 미국장</strong>'+
-   '<p>원문 발행'+(supplement.late?' 후':' 시점에 확인된')+' 최신 원장 참고값입니다. NDX는 Observatory 단일원장, SOX는 Yahoo 일봉 단일원천 참고값입니다. 공식 NDX/SOX EOD 이중검증이 아니며, 기존 시황 원문의 계산·결론이나 거래 신호를 재작성하지 않습니다.</p>'+
+   '<p>원문 발행'+(supplement.late?' 후':' 시점에 확인된')+' 최신 원장 참고값입니다. NDX는 Observatory 단일원장'+(Number.isFinite(supplement.sox)?', SOX는 Yahoo 일봉 단일원천 참고값입니다.':'. SOX는 같은 세션 참고값을 수집하지 못했습니다.')+' 공식 NDX/SOX EOD 이중검증이 아니며, 기존 시황 원문의 계산·결론이나 거래 신호를 재작성하지 않습니다.</p>'+
    '<p>NDX <b>'+number(supplement.ndx)+'</b> ('+percent(supplement.ndxPct)+') · '+
-   (Number.isFinite(supplement.sox)?'SOX <b>'+number(supplement.sox)+'</b> ('+percent(supplement.soxPct)+') · ':'SOX 원천 참고값 미확인 · ')+
+   (Number.isFinite(supplement.sox)?'SOX <b>'+number(supplement.sox)+'</b> ('+(Number.isFinite(supplement.soxPct)?percent(supplement.soxPct):'1D 비교불가')+') · ':'SOX 원천 참고값 미확인 · ')+
    'VIX10 <b>'+number(supplement.vix10)+'</b> · MA250 <b>'+number(supplement.ma250)+'</b> · '+
-   '52주 고점 대비 DD <b>'+percent(supplement.dd)+'</b> · 이전 전략 표시 <b>'+esc(supplement.pod)+'</b></p>'+
+   '52주 고점 대비 DD <b>'+percent(supplement.dd)+'</b></p>'+
    '<small>출처: Observatory 원장 '+esc(time(supplement.sourceGenerated))+' / Daily Pulse '+esc(time(supplement.pulseGenerated))+
    ' / Glance '+esc(time(supplement.glanceGenerated))+' KST · 단일 원장 참고 · 공식 종가 미확인 · NO_TRADE_REVIEW_ONLY</small>';
   noticeElement.textContent+=' · 별도 후속 원장 참고값이 상단에 반영됐습니다. 본문은 최초 발행 시점 기록입니다.';
