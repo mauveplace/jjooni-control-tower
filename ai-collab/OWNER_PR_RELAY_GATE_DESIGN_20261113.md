@@ -34,3 +34,11 @@ Original ROY code review [comment 6851618534](https://github.com/mauveplace/jjoo
 - These functions do NOT authenticate a first-party Claude session, Work actor, GitHub event delivery, or external owner approval themselves. The `external_owner_approval` and `verified_first_party` values are trusted caller assertions requiring separate real-source proof. Therefore they never become sufficient authorization for a write, trade or deployment.
 - New negative tests exercise malformed GitHub nested objects, mismatched author, truthy strings, bool/int confusion, wrong task shapes, extra task deletions, source/PR changed file mismatch, path traversal, future/old relays and alias policy.
 - This PR will receive at most **one second/final ROY review** on the new exact HEAD. A PASS may confirm code-review quality but not unattended E2 workflow completion.
+
+
+## ROY FINAL 2/2 — NEEDS_CHANGES, no third review
+- Actual ROY final [PR comment 6851720877](https://github.com/mauveplace/jjooni-control-tower/pull/446#issuecomment-6851720877), triggered by first-party Claude `issues.opened` for owner-authored Issue #447, verdict **NEEDS_CHANGES**. ROY verified that all **initial** critical fail-open and malformed-metadata flaws had been corrected, with 29 targeted tests and 188 total tests PASS at prior HEAD `54747f9952cd66274af3b4db5a7ff3754994f05d`.
+- The remaining medium defect **F1**: a renamed file with `previous_filename` outside allowed `ai-collab/` paths or from another task JSON could still pass because the gate examined only `filename`.
+- JJOONI has now **blocked every renamed PR file and any `previous_filename` evidence** (stricter than validating old paths), and added two direct F1 regressions plus extra malformed CI app, float workflow ID, control-character path and nested task tests. All are pure test-code changes.
+- **No third ROY review requested**, honoring the exact 2-review budget. The code may pass GitHub CI independently, but no ROY PASS exists on the post-F1 HEAD. It remains a test-only unmerged candidate, NOT a production-certified or unattended relay.
+- The same task on a *different original PR* is a distinct scope in the dedupe key; first-party verification, durable ledger completeness and Work owner authorization are still mandatory at real runtime.
