@@ -104,5 +104,48 @@ class ReviewCandidateParsingTests(unittest.TestCase):
                 self.assertIsNone(parse_roy_review_candidate(value))
 
 
+    def test_duplicate_head_is_rejected(self):
+        bad = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={'a' * 40} head={'b' * 40}"
+        self.assertIsNone(parse_roy_review_candidate(review(bad)))
+
+    def test_conflicting_actor_claims_are_rejected(self):
+        for fields in ("actor=JJOONI actor=ROY", "actor=ROY reviewer=JJOONI"):
+            with self.subTest(fields=fields):
+                marker = f"JJOONI-COLLAB-V4 task={TASK} head={HEAD} {fields}"
+                self.assertIsNone(parse_roy_review_candidate(review(marker)))
+
+    def test_marker_stem_must_have_strict_boundary(self):
+        marker = f"JJOONI-COLLAB-V4-EVIL actor=ROY task={TASK} head={HEAD}"
+        self.assertIsNone(parse_roy_review_candidate(review(marker)))
+
+    def test_marker_cannot_parse_text_outside_html_comment(self):
+        marker = f"JJOONI-COLLAB-V4 --> visible actor=ROY task={TASK} head={HEAD}"
+        self.assertIsNone(parse_roy_review_candidate(review(marker)))
+
+    def test_quoted_and_fenced_verdicts_not_accepted(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        quote = review(marker, "> ROY_REVIEW=PASS")
+        code = review(marker, chr(96) * 3 + "\nROY_REVIEW=PASS\n" + chr(96) * 3)
+        tilde = review(marker, "~~~\nROY_REVIEW=PASS\n~~~")
+        for body in (quote, code, tilde):
+            with self.subTest(body=body):
+                self.assertIsNone(parse_roy_review_candidate(body))
+
+    def test_unicode_digit_issue_is_rejected(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD} source-issue=٤١٩"
+        self.assertIsNone(parse_roy_review_candidate(review(marker)))
+
+    def test_real_heading_and_markdown_bold_still_accepted(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        for verdict in ("## ROY_REVIEW=PASS (with findings)", "**ROY review: PASS**"):
+            with self.subTest(verdict=verdict):
+                self.assertEqual(parse_roy_review_candidate(review(marker, verdict))["verdict"], "PASS")
+
+    def test_quote_then_real_verdict_uses_only_real_declaration(self):
+        marker = f"JJOONI-COLLAB-ROY-REVIEW-V4 task={TASK} head={HEAD}"
+        text = review(marker, "> ROY_REVIEW=BLOCKED\nROY_REVIEW=PASS")
+        self.assertEqual(parse_roy_review_candidate(text)["verdict"], "PASS")
+
+
 if __name__ == "__main__":
     unittest.main()
