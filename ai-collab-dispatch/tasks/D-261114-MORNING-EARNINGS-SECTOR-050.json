@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-MORNING-EARNINGS-SECTOR-050",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "objective": "USER REVISION (later 2026-11-14): use Song manager's repeatedly discussed companies from six actual 11/03-12 transcripts, and just prior trading day vs latest completed day sector ETF/index returns to interpret broad market leadership. Do not require full ETF fund flow audit, sector ranking, 20-day table or 18-company earnings dashboard.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "production_morning_report_template_extension",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Latest user explicit direction: focus on companies from historic Song-manager daily analyses; compare yesterday's and latest completed session sector daily returns and make qualitative leadership/flow interpretation; simplify complex cash-flow and ranking requirements.",
+  "acceptance": [
+    "Review six original Song manager transcripts (11/03, 11/04, 11/06, 11/09, 11/11, 11/12) to ground primary names NVDA, CoreWeave, Oracle, Nebius, Microsoft; cover only 2-3 materially changed firms daily with issuer source where available.",
+    "Section ④ includes 4–6 representative sectors where available and a simple table of previous completed trading-session daily return %, current completed trading-session daily return %, change percentage-points and qualitative leader/laggard explanation; no mandatory rankings or sector/net ETF inflow dataset.",
+    "A daily return chart only illustrates relative market preference: no hard assertions of actual capital inflows based on ETF price, turnover, or rising AUM; missing session/proxy values are disclosed, not guessed.",
+    "Section ⑤ selected companies and actual material developments only, Section ⑦ short company-sector alignment interpretation. Original ①-⑧ structure, V2 canonical five-market-metric gate, privacy/no-trade untouched.",
+    "Simplified validator tests cover section ④ two-trading-day table and explanatory caveat, ⑤ and ⑦ required subheadings, pre-existing five-metric strict checks, historical archive exemption.",
+    "Only two ROY reviews were performed on prior, superseded overly engineered plan (comments 6867767556 and 6867900893, both NEEDS_CHANGES); no third review on this task; a green CI and user-specified simplification permit an explicitly disclosed owner release, not fabricated ROY PASS."
+  ],
+  "forbidden": [
+    "No trades",
+    "No inventing actual ETF flows",
+    "No treating price/turnover as flows",
+    "No private holdings in public Github",
+    "No secrets/permissions changes",
+    "No mandatory sector_flows/earnings_events schema or 18-company daily leaderboard",
+    "No claim flow numbers are observed from returns"
+  ],
+  "coordination_notes": "User superseded previous cashflow-structured design; no more ROY review calls for same task. Prior reviews were genuine and motivated simplification; exact final HEAD lacks new ROY PASS. One PR #462 only, no extra review issues. Document source corpus limited to six actual transcripts, not all history."
+}

@@ -19,9 +19,18 @@ def fixture():
           "| DD52W | -10.51% | 원장 참고 |\n"
           "## ③ 핵심 이슈 깊이 읽기\n"
           "## ④ 글로벌·한국 시장\n"
+          "**섹터 강약 비교(전일→당일)**\n"
+          "수익률 기반 추정 · 실제 자금 순유입은 확인하지 않음\n"
+          "| 섹터·대표 지표 | 전일 수익률 (%) | 당일 수익률 (%) | 변화(pp) | 해석 |\n"
+          "|---|---:|---:|---:|---|\n"
+          "| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |\n"
           "## ⑤ AI 산업·기업실적\n"
+          "**송팀장 관심기업 업데이트**\n"
+          "NVIDIA / CoreWeave / Oracle / Nebius / Microsoft 중 당일 주요 이슈 선택; NO_MATERIAL_CHANGE\n"
           "## ⑥ 주요 일정\n"
           "## ⑦ 투자전략·위험점검·복기\n"
+          "**기업·섹터 연결 해석**\n"
+          "실적과 이틀 수익률 방향의 관계를 조건부 설명\n"
           "## ⑧ 원천·데이터 감사\nROY 검토 대기")
     day={"report_date_kst":"2026-11-15","market_date_us":MARKET_DAY,
          "body_markdown":body,
@@ -186,6 +195,34 @@ class DualTemplateV2(unittest.TestCase):
                     "source_independent":False}])
         with self.assertRaisesRegex(AssertionError,"ROY_NO_INDEPENDENT_PRICE_PROOF"):
             validate_dual_market_template(d,c)
+
+    def test_lite_two_session_sector_and_company_blocks_required(self):
+        for needle,reason in [
+            ('**섹터 강약 비교(전일→당일)**','TWO_SESSION_SECTOR_BLOCK_REQUIRED'),
+            ('수익률 기반 추정','SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'),
+            ('**송팀장 관심기업 업데이트**','SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'),
+            ('**기업·섹터 연결 해석**','COMPANY_SECTOR_LINK_REQUIRED')]:
+            d,contract=fixture()
+            d['body_markdown']=d['body_markdown'].replace(needle,'')
+            with self.assertRaisesRegex(AssertionError,reason):
+                validate_dual_market_template(d,contract)
+
+    def test_lite_sector_table_headers_and_one_row_required(self):
+        d,contract=fixture()
+        d['body_markdown']=d['body_markdown'].replace('전일 수익률','과거 수익률')
+        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_TABLE_REQUIRED'):
+            validate_dual_market_template(d,contract)
+        d,contract=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            '| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |','')
+        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'):
+            validate_dual_market_template(d,contract)
+
+    def test_lite_no_optional_flow_earnings_arrays_needed(self):
+        d,contract=fixture()
+        self.assertNotIn('sector_flows',contract)
+        self.assertNotIn('earnings_events',contract)
+        validate_dual_market_template(d,contract)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
         d,c=fixture();d["report_date_kst"]="2026-11-14"

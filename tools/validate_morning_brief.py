@@ -128,6 +128,31 @@ def validate_dual_market_template(d, contract):
             assert price_tokens == [numeric], ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
             if m['status'] == 'PROVIDER_REFERENCE_ONLY':
                 assert '참고' in visible, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
+    # User-requested LITE 2-session sector and historical company radar.
+    # New reports keep V2 canonical price and publication audits. A flow
+    # amount, ETF creation/redemption or source-less consensus is NOT REQUIRED.
+    from re import search as _search
+    for name in ('## ④ 글로벌·한국 시장', '## ⑤ AI 산업·기업실적',
+                 '## ⑥ 주요 일정', '## ⑦ 투자전략·위험점검·복기',
+                 '## ⑧ 원천·데이터 감사'):
+        assert name in body, ('SECTION_REQUIRED', name)
+    region = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
+    earnings = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
+    strategy = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
+    assert '**섹터 강약 비교(전일→당일)**' in region, 'TWO_SESSION_SECTOR_BLOCK_REQUIRED'
+    assert '수익률 기반 추정' in region, 'SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'
+    rows = []
+    for line in region.splitlines():
+        if line.strip().startswith('|'):
+            rows.append([v.strip() for v in line.strip().strip('|').split('|')])
+    assert any(len(r) >= 5 and '섹터' in r[0] and
+               '전일' in r[1] and '당일' in r[2] and '변화' in r[3]
+               for r in rows), 'TWO_SESSION_SECTOR_TABLE_REQUIRED'
+    assert sum(len(r) >= 5 and r[0] not in ('---', '섹터·대표 지표') and
+               not r[0].startswith('---') and '섹터' not in r[0]
+               for r in rows) >= 1, 'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'
+    assert '**송팀장 관심기업 업데이트**' in earnings, 'SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'
+    assert '**기업·섹터 연결 해석**' in strategy, 'COMPANY_SECTOR_LINK_REQUIRED'
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
