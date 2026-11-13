@@ -23,6 +23,7 @@ DUAL_REVIEW_FROM = '2026-11-15'
 CORE_MARKET_FIELDS = ('NDX', 'SOX', 'VIX10', 'MA250', 'DD52W')
 STATUS_VALUES = {'OFFICIAL_VERIFIED', 'PROVIDER_REFERENCE_ONLY', 'MISSING', 'CONFLICT'}
 DUAL_REVIEW_VALUES = {'PENDING', 'REVIEWED', 'BLOCKED', 'UNAVAILABLE'}
+ROY_COMPARISON_OUTCOMES = {'MATCH', 'CONFLICT', 'COMPLEMENT', 'UNVERIFIED', 'INCOMPARABLE'}
 
 
 def validate_dual_market_template(d, contract):
@@ -38,6 +39,9 @@ def validate_dual_market_template(d, contract):
         assert m.get('session_date') == d['market_date_us'], ('METRIC_SESSION', key)
         assert m.get('trade_signal_eligible') is False, ('METRIC_TRADE_BOUNDARY', key)
         v = m.get('value')
+        # A derived Yahoo-based VIX10/MA250/DD is not an exchange official EOD.
+        if key in ('VIX10', 'MA250', 'DD52W'):
+            assert m['status'] != 'OFFICIAL_VERIFIED', ('METRIC_DERIVED_NOT_OFFICIAL', key)
         if m['status'] in {'MISSING', 'CONFLICT'}:
             assert v is None and isinstance(m.get('reason'), str) and m['reason'].strip(), ('METRIC_UNVERIFIED_REASON', key)
         else:
@@ -60,15 +64,52 @@ def validate_dual_market_template(d, contract):
     assert review.get('reviewed_source_session') == d['market_date_us'], 'ROY_SESSION'
     assert review.get('verified_by_independent_provider') in (False, True), 'ROY_PRICE_PROOF_FLAG'
     if review['review_status'] == 'REVIEWED':
+        # OFFLINE STRUCTURAL CHECK ONLY. JJOONI MUST independently fetch the
+        # issue comment's performed_via_github_app.slug == 'claude' before setting
+        # REVIEWED; a GitHub URL string cannot establish comment authorship.
         from urllib.parse import urlparse as _urlparse
         u = _urlparse(str(review.get('roy_comment_url') or ''))
-        assert u.scheme == 'https' and u.hostname == 'github.com' and '/issues/' in u.path or (
-            u.scheme == 'https' and u.hostname == 'github.com' and '/pull/' in u.path), 'ROY_EVIDENCE_URL'
+        assert (u.scheme == 'https' and u.hostname == 'github.com'
+                and re.fullmatch(r'/mauveplace/jjooni-control-tower/(?:issues|pull)/[0-9]+', u.path)
+                and re.fullmatch(r'(?:issuecomment|pullrequestreview)-[0-9]+', u.fragment)), 'ROY_EVIDENCE_URL'
+        comment_id = u.fragment.split('-')[-1]
+        assert str(review.get('roy_comment_id') or '') == comment_id, 'ROY_EVIDENCE_ID_MISMATCH'
+        assert review.get('roy_github_app') == 'claude', 'ROY_APP_NOT_CONFIRMED'
         assert review.get('roy_report_status') == 'FOUND', 'ROY_NO_REAL_REPORT'
         assert isinstance(review.get('comparison'), list) and review['comparison'], 'ROY_NO_CLAIM_COMPARISON'
+        for item in review['comparison']:
+            assert isinstance(item, dict), 'ROY_COMPARISON_ITEM'
+            assert isinstance(item.get('claim'), str) and item['claim'].strip(), 'ROY_COMPARISON_CLAIM'
+            assert item.get('outcome') in ROY_COMPARISON_OUTCOMES, 'ROY_COMPARISON_OUTCOME'
+            assert item.get('session_date') == d['market_date_us'], 'ROY_COMPARISON_SESSION'
+            for key in ('roy_source', 'jjooni_source'):
+                p = _urlparse(str(item.get(key) or ''))
+                assert p.scheme == 'https' and p.hostname, ('ROY_COMPARISON_SOURCE', key)
+            assert item.get('source_independent') in (True, False), 'ROY_INDEPENDENCE_FLAG'
     body = d['body_markdown']
+    assert '## ② 시장 한눈에' in body and '## ③ 핵심 이슈 깊이 읽기' in body, 'CORE_TABLE_SECTION'
     table_part = body.split('## ② 시장 한눈에', 1)[1].split('## ③ 핵심 이슈 깊이 읽기', 1)[0]
-    assert all(x in table_part for x in ('NDX', 'SOX', 'VIX10', 'MA250', 'DD')), 'CORE_MARKET_TABLE_INCOMPLETE'
+    table_rows = []
+    for line in table_part.splitlines():
+        if line.strip().startswith('|'):
+            cells = [x.strip() for x in line.strip().strip('|').split('|')]
+            if len(cells) >= 3:
+                table_rows.append(cells)
+    aliases = {'NDX':('NDX',), 'SOX':('SOX',), 'VIX10':('VIX10',),
+               'MA250':('MA250',), 'DD52W':('DD52W','DD 52주','DD(52주)','DD')}
+    for key in CORE_MARKET_FIELDS:
+        rows = [row for row in table_rows if any(re.search(r'(?<![A-Za-z0-9])' + re.escape(label) + r'(?![A-Za-z0-9])', row[0], re.I)
+                for label in aliases[key])]
+        assert len(rows) == 1, ('CORE_MARKET_TABLE_ROW', key)
+        text_row = ' | '.join(rows[0][1:])
+        m = metrics[key]
+        if m['status'] in {'MISSING', 'CONFLICT'}:
+            assert ('미확인' in text_row or '충돌' in text_row) and m['reason'] in text_row, ('CORE_MARKET_TABLE_MISSING_REASON', key)
+        else:
+            numeric = f"{m['value']:,.2f}"
+            assert numeric in text_row, ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
+            if m['status'] == 'PROVIDER_REFERENCE_ONLY':
+                assert '참고' in text_row, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
