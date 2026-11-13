@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-ROY-JJOONI-MORNING-V2-049",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Implement actual ROY×JJOONI mutually verifiable daily report template V2, apply 07:45 same-session NDX/SOX/VIX10/MA250/DD reference to the published Nov14 report with append-only correction, retain original 06:32 publication/strict official EOD state, enforce source and peer-evidence correctness on 2026-11-15 onward. Independent ROY issue #458 requests separate same-session analysis; do not claim ROY report exists without evidence.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "production_morning_brief_template_and_quality_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User 2026-11-14 explicitly asked to cross-validate ROY-produced and JJOONI-produced daily market analyses, improve the template, update and apply Observatory.",
+  "acceptance": [
+    "Same eight exact ## ①-⑧ sections and 3+ five-part issue analyses; no private account, trade, automation schedule or bot ordering logic changed.",
+    "2026-11-14 dated/latest reports must be identical, original generated/published/verified times unchanged, original blob and revision evidence recorded; same-session 07:45 reference NDX=27943.7363, SOX=10146.3232, VIX10=20.73, MA250=27505.80, DD=-10.51 with strict close_checks MISSING and no fabricated independent source.",
+    "New reports dated 2026-11-15+ require ROY_JJOONI_DAILY_V2 template version, 5 core market_metrics with source status and original vintage, evidence-backed dual_review PENDING unless verified actual ROY original GitHub comment; prohibit falsely completed peer review.",
+    "Strengthen deterministic prerelease gate: if same-session canonical has NDX/SOX/VIX10/MA250/DD, corresponding report metrics may not be MISSING, bogus value or stale; allow missing only when actual source unavailable. Never certify official EOD from same-derived Yahoo data.",
+    "New validator + readiness regression tests, Morning Brief Publication Contract, mobile/Pages, no secret or user account data; all CI PASS on immutable HEAD before merge and Pages+main verification after merge.",
+    "ROY submit independent analysis and critical code review via actual first-party Claude app, identify disagreements with JJOONI 11/14 report as-of both first publish and post-catchup; no fabricated ROY report."
+  ],
+  "forbidden": [
+    "No trading or personal accounts",
+    "No direct main publication without PR CI",
+    "No invented official price source or fabricated ROY PASS",
+    "No new secrets or GitHub permissions",
+    "No original timestamp backdating"
+  ],
+  "coordination_notes": "See joint independent first-author review Issue #458. Please inspect exact PR SHA and deterministic tests; distinguish ROY's own independently generated market analysis versus ChatGPT's public editorial. Give ROY_REVIEW=PASS|NEEDS_CHANGES and real market-specific claim comparison, not ceremonial review."
+}
