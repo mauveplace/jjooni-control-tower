@@ -19,17 +19,18 @@ def fixture():
           "| DD52W | -10.51% | 원장 참고 |\n"
           "## ③ 핵심 이슈 깊이 읽기\n"
           "## ④ 글로벌·한국 시장\n"
-          "**섹터 로테이션·자금흐름**\n"
-          "PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)\n"
-          "| 섹터 | 1D | 5D | ETF 실제 순유입 |\n"
-          "| 반도체 | 미확인 | 미확인 | 직접 공시 미확인 |\n"
+          "**섹터 강약 비교(전일→당일)**\n"
+          "수익률 기반 추정 · 실제 자금 순유입은 확인하지 않음\n"
+          "| 섹터·대표 지표 | 전일 수익률 (%) | 당일 수익률 (%) | 변화(pp) | 해석 |\n"
+          "|---|---:|---:|---:|---|\n"
+          "| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |\n"
           "## ⑤ AI 산업·기업실적\n"
-          "**주요 기업 실적·가이던스**\n"
-          "NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음\n"
+          "**송팀장 관심기업 업데이트**\n"
+          "NVIDIA / CoreWeave / Oracle / Nebius / Microsoft 중 당일 주요 이슈 선택; NO_MATERIAL_CHANGE\n"
           "## ⑥ 주요 일정\n"
           "## ⑦ 투자전략·위험점검·복기\n"
-          "**실적×자금흐름 종합판정**\n"
-          "실적 자료가 없어 독립적인 섹터 자금 로테이션 판단은 보류\n"
+          "**기업·섹터 연결 해석**\n"
+          "실적과 이틀 수익률 방향의 관계를 조건부 설명\n"
           "## ⑧ 원천·데이터 감사\nROY 검토 대기")
     day={"report_date_kst":"2026-11-15","market_date_us":MARKET_DAY,
          "body_markdown":body,
@@ -42,7 +43,6 @@ def fixture():
           "source_generated_kst":"2026-11-14T07:41:26+09:00",
           "official_eod_verified":False,"trade_signal_eligible":False}
     contract={"template_version":"ROY_JJOONI_DAILY_V2","market_metrics":metrics,
-       "sector_flows":[],"earnings_events":[],
        "dual_review":{"review_status":"PENDING","roy_report_status":"NOT_FOUND",
          "reviewed_source_session":MARKET_DAY,
          "verified_by_independent_provider":False,"comparison":[]},
@@ -196,122 +196,33 @@ class DualTemplateV2(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError,"ROY_NO_INDEPENDENT_PRICE_PROOF"):
             validate_dual_market_template(d,c)
 
-    def test_sector_earnings_permanent_sections_must_not_be_omitted(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace('**섹터 로테이션·자금흐름**','')
-        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_SECTION_MISSING'):
-            validate_dual_market_template(d,c)
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace('**주요 기업 실적·가이던스**','')
-        with self.assertRaisesRegex(AssertionError,'EARNINGS_SECTION_MISSING'):
-            validate_dual_market_template(d,c)
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace('**실적×자금흐름 종합판정**','')
-        with self.assertRaisesRegex(AssertionError,'EARNINGS_FLOW_CROSS_SECTION_MISSING'):
-            validate_dual_market_template(d,c)
+    def test_lite_two_session_sector_and_company_blocks_required(self):
+        for needle,reason in [
+            ('**섹터 강약 비교(전일→당일)**','TWO_SESSION_SECTOR_BLOCK_REQUIRED'),
+            ('수익률 기반 추정','SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'),
+            ('**송팀장 관심기업 업데이트**','SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'),
+            ('**기업·섹터 연결 해석**','COMPANY_SECTOR_LINK_REQUIRED')]:
+            d,contract=fixture()
+            d['body_markdown']=d['body_markdown'].replace(needle,'')
+            with self.assertRaisesRegex(AssertionError,reason):
+                validate_dual_market_template(d,contract)
 
-    def test_sector_price_volume_proxy_is_never_evidence_of_direct_fund_inflow(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace('PROXY_ONLY','')
-        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'):
-            validate_dual_market_template(d,c)
-        d,c=fixture()
+    def test_lite_sector_table_headers_and_one_row_required(self):
+        d,contract=fixture()
+        d['body_markdown']=d['body_markdown'].replace('전일 수익률','과거 수익률')
+        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_TABLE_REQUIRED'):
+            validate_dual_market_template(d,contract)
+        d,contract=fixture()
         d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'PROXY_ONLY · 가격 상승만 관측')
-        with self.assertRaisesRegex(AssertionError,'PROXY_FLOW_LIMIT_MISSING'):
-            validate_dual_market_template(d,c)
+            '| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |','')
+        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'):
+            validate_dual_market_template(d,contract)
 
-    def test_direct_flow_claim_requires_defined_quantity_and_evidence(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'DIRECT_VERIFIED · ETF 가격 상승')
-        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
-            validate_dual_market_template(d,c)
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'DIRECT_VERIFIED · ETF 순설정 금액 확인')
-        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
-            validate_dual_market_template(d,c)
-
-    def test_earnings_coverage_requires_explicit_release_status(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace('NO_NEW_RELEASES','')
-        with self.assertRaisesRegex(AssertionError,'EARNINGS_COVERAGE_STATUS_MISSING'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_fabricated_direct_inflow_without_structured_source_is_rejected(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'DIRECT_VERIFIED · SMH 순유입액 +$1.2B 출처: 추정')
-        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_unqualified_inflow_on_separate_line_is_rejected(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            '## ⑤ AI 산업·기업실적', '반도체 ETF로 대규모 자금 유입 (SMH +5% 급등)\n## ⑤ AI 산업·기업실적')
-        with self.assertRaisesRegex(AssertionError,'UNVERIFIED_FUND_INFLOW_ASSERTION'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_unavailable_cannot_hide_fake_fund_flow_in_table(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'UNAVAILABLE · 순유입 원천 지연')
-        d['body_markdown']=d['body_markdown'].replace(
-            '| 반도체 | 미확인 | 미확인 | 직접 공시 미확인 |',
-            '| 반도체 | 미확인 | 미확인 | 순유입액 $900M |')
-        with self.assertRaisesRegex(AssertionError,'UNVERIFIED_FUND_INFLOW_ASSERTION'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_reported_requires_valid_issuer_source(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음',
-            'REPORTED · 기업 A 실적 상승')
-        with self.assertRaisesRegex(AssertionError,'ISSUER_EARNINGS_SOURCE_REQUIRED'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_negated_unavailable_is_not_accepted_status(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'UNAVAILABLE 아님; 자금 대거 유입')
-        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_official_flow_requires_dates_units_source(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
-            'DIRECT_VERIFIED · KOSPI 반도체 순매수 900,000,000.00 KRW 2026-11-13 출처 https://data.krx.co.kr/')
-        c['sector_flows']=[{"instrument":"KOSPI 반도체","measure":"investor_net_buy",
-             "value":900000000,"currency":"KRW","period_start":"2026-11-13",
-             "period_end":"2026-11-13","derived":False,
-             "source_url":"https://data.krx.co.kr/",
-             "source_published_at":"2026-11-13T18:00:00+09:00"}]
-        validate_dual_market_template(d,c)
-        c['sector_flows'][0]['derived']=True
-        with self.assertRaisesRegex(AssertionError,'DERIVED_ESTIMATE_NOT_DIRECT_FLOW'):
-            validate_dual_market_template(d,c)
-
-    def test_roy_review_released_earnings_need_real_issuer_time_and_eps_basis(self):
-        d,c=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            'NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음',
-            'REPORTED · Applied Materials 실적 발표, 시장 예상 비교는 CONSENSUS_UNAVAILABLE')
-        c['earnings_events']=[{"issuer":"Applied Materials","fiscal_period":"FY2026 Q4",
-           "released_at":"2026-11-12T16:00:00-05:00",
-           "source_url":"https://ir.appliedmaterials.com/", "eps_basis":"NON_GAAP",
-           "consensus_status":"CONSENSUS_UNAVAILABLE"}]
-        validate_dual_market_template(d,c)
-        del c['earnings_events'][0]['source_url']
-        with self.assertRaisesRegex(AssertionError,'EARNINGS_ISSUER_URL_REQUIRED'):
-            validate_dual_market_template(d,c)
+    def test_lite_no_optional_flow_earnings_arrays_needed(self):
+        d,contract=fixture()
+        self.assertNotIn('sector_flows',contract)
+        self.assertNotIn('earnings_events',contract)
+        validate_dual_market_template(d,contract)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
         d,c=fixture();d["report_date_kst"]="2026-11-14"
