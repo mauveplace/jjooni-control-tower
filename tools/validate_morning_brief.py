@@ -128,6 +128,25 @@ def validate_dual_market_template(d, contract):
             assert price_tokens == [numeric], ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
             if m['status'] == 'PROVIDER_REFERENCE_ONLY':
                 assert '참고' in visible, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
+    # V2.1 permanent intelligence sections. A report must explicitly state
+    # whether actual issuer/ETF cash-flow evidence exists; sector price
+    # momentum/volume can never be labeled as genuine fund inflow.
+    import re as _regex
+    region_section = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
+    earnings_section = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
+    strategy_section = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
+    assert '**섹터 로테이션·자금흐름**' in region_section, 'SECTOR_FLOW_SECTION_MISSING'
+    assert '**주요 기업 실적·가이던스**' in earnings_section, 'EARNINGS_SECTION_MISSING'
+    assert '**실적×자금흐름 종합판정**' in strategy_section, 'EARNINGS_FLOW_CROSS_SECTION_MISSING'
+    assert _regex.search(r'\b(?:DIRECT_VERIFIED|PROXY_ONLY|UNAVAILABLE)\b', region_section), 'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'
+    assert _regex.search(r'\b(?:REPORTED|NO_NEW_RELEASES|SOURCE_UNAVAILABLE)\b', earnings_section), 'EARNINGS_COVERAGE_STATUS_MISSING'
+    # The user must see what was measured and what was not, not a fake
+    # "fund inflow" inferred solely from an ETF price move.
+    if 'DIRECT_VERIFIED' in region_section:
+        assert ('순설정' in region_section or '순매수' in region_section or '순유입액' in region_section), 'DIRECT_FLOW_MEASURE_MISSING'
+        assert ('출처' in region_section or 'https://' in region_section), 'DIRECT_FLOW_SOURCE_MISSING'
+    if 'PROXY_ONLY' in region_section:
+        assert ('순유입' in region_section or '자금' in region_section) and ('확인 불가' in region_section or '미확인' in region_section), 'PROXY_FLOW_LIMIT_MISSING'
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
