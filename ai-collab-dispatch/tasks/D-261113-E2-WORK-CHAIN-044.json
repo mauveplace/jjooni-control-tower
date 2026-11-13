@@ -1,0 +1,36 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-E2-WORK-CHAIN-044",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "One final isolated R2 test after R1 confirmed genuine ROY issue_comment.created -> test-only Work run but failed safe on real Claude header-format mismatch. Observe ROY first review, event-only Work source fix, green CI, owner-authored same-SHA review alias PR and ROY second auto-review. No production Work/webhook, main merge/deploy.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "auto_roy_review_after_ci": true,
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-13 user explicitly approved E test-only continued collaboration and requested further action; test-only Work automations may change but existing production webhook and hourly fallback stay unchanged.",
+  "acceptance": [
+    "PR A is an owner-authored open non-draft same-repo opt-in PR to main from exact branch experiment/ai-collab-e2-work-canary-20261113-r2 with exactly one changed active task JSON. Initially two strict approval tests fail on a deliberately isolated canary source.",
+    "ROY first-party PR.opened Routine adds precisely one review on original HEAD: ROY_REVIEW=NEEDS_CHANGES, explicit failing tests and fix one source line. The real Claude Code app source and source comment ID must be independently checked.",
+    "Dedicated temporary test-only Work event handler accepts current genuine ROY first-line V4 and JJOONI-COLLAB-ROY-REVIEW-V4 header variants in any attribute order; requires actual issue_comment.created event and Claude app origin, current HEAD, task and branch; modifies ONLY ai-collab/e2_relay_canary_r2.py by replacing bool(approval) with approval is True.",
+    "Worker verifies direct-parent single-source-file correction and a NEW exact-HEAD successful AI Collaboration Read-Only Contract PR CI run; if green cannot be verified within the run it must stop without alias and report WAITING_CI, with NO fake success.",
+    "Only after green CI and no duplicates, Work creates ONE owner-authored alias ref experiment/ai-collab-e2-work-canary-20261113-r2-relay pointing at exact fixed HEAD and opens ONE corresponding non-draft [AI-COLLAB][E2 RELAY] PR B from same SHA, not a new commit. Alias is review transport only, NEVER merge/deploy.",
+    "ROY first-party PR.opened Routine on B performs final review within maximum two distinct substantive reviews across A and B. Both test PRs close unmerged after the result; record evidence in tracker Issue #443.",
+    "No production automation edits, no main merge/deploy, no secrets, no private account data, no trading."
+  ],
+  "forbidden": [
+    "No main merge/deploy/trade",
+    "No edits beyond test-only canary source; task/tests immutable",
+    "No stale/duplicate event replay",
+    "No third ROY review",
+    "No modifications to production Work or Claude Routines"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "event_end_to_end_retry",
+  "coordination_notes": "This test intentionally RED initially. ROY should return NEEDS_CHANGES for bool approval bug and post first-line V4 marker with exact head. Genuine Work event task is narrowly scoped to this task and branch; if it fails, preserve original evidence; do not claim event on user/manual turn."
+}
