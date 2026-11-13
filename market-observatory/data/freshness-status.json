@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-13T10:46:49+09:00",
+  "generated_kst": "2026-11-13T10:47:15+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -115,7 +115,7 @@
       "state": "LIVE",
       "generated_kst": "2026-11-13T10:10:46+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=2165s · ETHUSD age=2164s",
+      "detail": "BTCUSD age=2191s · ETHUSD age=2190s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -134,7 +134,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-11-13T10:11:07+09:00",
+      "generated_kst": "2026-11-13T10:47:15+09:00",
       "as_of": "2026-11-12",
       "detail": "snapshot=FINAL · Observatory session=2026-11-12",
       "source": "daily-market-pulse.json",
@@ -161,7 +161,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-11-13T10:11:07+09:00",
+      "generated_kst": "2026-11-13T10:47:15+09:00",
       "as_of": "2026-11-12",
       "detail": "상승 · QQQ 50% + QLD 50%",
       "source": "public-market-daily.json + observatory.json",
@@ -211,7 +211,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-13T10:46:49+09:00",
+      "generated_kst": "2026-11-13T10:47:15+09:00",
       "as_of": "2026-11-12",
       "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
