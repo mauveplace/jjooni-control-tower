@@ -1,5 +1,10 @@
+import sys
 import unittest
-from tools.write_observatory_watchdog_status import publication_latency
+from pathlib import Path
+
+# Keep this test independent from test-discovery order and unrelated imports.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from write_observatory_watchdog_status import publication_latency
 
 class PublicationLatencyTests(unittest.TestCase):
     def test_regular_est_close(self):
