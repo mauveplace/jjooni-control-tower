@@ -102,6 +102,48 @@ def verify(brief, observatory, pulse, glance):
             # rebuild timestamp with original Observatory vintage.
             if not (obs_time <= pulse_time <= checked <= written <= published):
                 raise ValueError("REPORT_PREDATES_CANONICAL_SOURCE")
+        if brief.get("report_date_kst", "") >= "2026-11-15":
+            # A same-session canonical is meaningless if its known data is
+            # silently left blank in the report. Cross-check source values,
+            # not two AI opinions or two derivatives mislabeled independent.
+            metrics = brief.get("editorial_contract", {}).get("market_metrics") or {}
+            us = next((group.get("items", []) for group in glance.get("groups", [])
+                       if group.get("name") == "미국"), [])
+            usa = {x.get("key"): x for x in us}
+            tri = glance.get("tripod") or {}
+            expected_values = {
+                "NDX": (usa.get("NASDAQ100") or {}).get("value")
+                       if (usa.get("NASDAQ100") or {}).get("date") == session else None,
+                "SOX": (usa.get("SOX") or {}).get("value")
+                       if (usa.get("SOX") or {}).get("date") == session else None,
+                "VIX10": tri.get("vix10"),
+                "MA250": tri.get("ma250"),
+                "DD52W": tri.get("drawdown_52w_pct"),
+            }
+            import math
+            for key, expected in expected_values.items():
+                market = metrics.get(key) or {}
+                if isinstance(expected, (int, float)) and not isinstance(expected, bool) and math.isfinite(expected):
+                    actual = market.get("value")
+                    if not isinstance(actual, (int, float)) or isinstance(actual, bool) or not math.isfinite(actual):
+                        raise ValueError("CORE_MARKET_REPORT_MISSING_WHILE_SOURCE_AVAILABLE:" + key)
+                    if abs(actual - expected) > (0.06 if key in ("VIX10", "DD52W") else 0.1):
+                        raise ValueError("CORE_MARKET_REPORT_DIFFERS_FROM_CANONICAL:" + key)
+                    status = market.get("status")
+                    if status not in ("PROVIDER_REFERENCE_ONLY", "OFFICIAL_VERIFIED"):
+                        raise ValueError("CORE_MARKET_REFERENCE_STATUS_MISSING:" + key)
+                    if status == "OFFICIAL_VERIFIED":
+                        if key not in ("NDX", "SOX"):
+                            raise ValueError("DERIVED_MARKET_METRIC_CANNOT_BE_OFFICIAL:" + key)
+                        checks = brief.get("editorial_contract", {}).get("close_checks") or []
+                        close_check = next((x for x in checks if x.get("symbol") == key), {})
+                        if close_check.get("status") != "VERIFIED" or market.get("official_eod_verified") is not True:
+                            raise ValueError("OFFICIAL_CLOSE_PROOF_NOT_PRESENT:" + key)
+                    elif market.get("official_eod_verified") is not False:
+                        raise ValueError("REFERENCE_CANNOT_CLAIM_OFFICIAL:" + key)
+                else:
+                    if market.get("value") is not None or market.get("status") not in ("MISSING", "CONFLICT"):
+                        raise ValueError("CORE_MARKET_SOURCE_NOT_READY:" + key)
         if brief.get("read_only") is not True or brief.get("contains_account_data") is not False:
             raise ValueError("PUBLIC_READ_ONLY_GATE")
         # Status FINAL means completed session, *not* independently verified

@@ -68,3 +68,10 @@
 ## 2026-11-03 일일시황 재구성 적용
 
 [일일시황 구성·검증 계약](song-daily-editorial-contract.md)이 기존 섹션 순서보다 우선합니다. 오늘의 시장 이야기·숫자 대시보드·핵심 이슈의 인과 설명을 구성하고 완료 세션/DST/NDX·SOX 독립 가격 검증을 수행합니다. 같은 완성 본문을 채팅과 Observatory에 게시하며 PR·CI 통과만으로 반영 완료라고 하지 않습니다. 예약시간·개인정보·계좌 SSOT·주문 경계는 유지합니다.
+
+
+## 2026-11-14 실제 운영 업데이트 — ROY×JJOONI 공통 템플릿
+
+**활성 일일 자동화 실제 예약은 America/New_York 16:45 ET**입니다 (EST 다음날 KST 06:45, EDT 다음날 KST 05:45). 이보다 앞선 16:25/16:40/06:30 문장은 옛 운영 이력이지 현재 예약이 아닙니다. `market-observatory/data/morning-brief/YYYYMMDD.json` / latest / index는 여전히 한 세트로 PR 제출·CI 검사·승인된 병합·Pages 재조회를 완료해야 공개 반영입니다.
+
+[템플릿 V2](morning-brief-roy-jjooni-template-v2-20261114.md)에 따라 2026-11-15 이후 새 보고서는 `canonical_source_vintage`, `market_metrics` 5대 지표, `dual_review` 상태가 필요합니다. 시황 보고서가 같은 세션 원장에 이미 존재하는 NDX/SOX/VIX10/MA250/DD를 `MISSING`으로 기록하면 CI가 실패합니다. 단일 Yahoo 제공자의 참고값은 수치로 공개해도 `OFFICIAL_VERIFIED`가 아니며 거래신호로 사용하지 않습니다. ROY의 실제 별도 의견/원본 댓글을 확인하지 못하면 `PENDING`이지 공동 검증 PASS가 아닙니다. 사후 정정은 원 발행 시각과 이전 revision 원문 이력을 보존하며, 원문-정정 시점을 분리합니다.

@@ -168,3 +168,10 @@
 5. **방지 테스트:** validator에서 세션·post-close 근거·수익률 산술·서로 다른 호스트의 일치값을 확인하고 UI 회귀 테스트에서 공식 게이트 유지, 세션 불일치, 매매 신호 불허, 참고값 없는 CONFLICT 공란을 검증한다. 엄격 공식 EOD 검증은 별도로 유지한다.
 
 2026-11-10 오전의 NDX 27,907.63(+3.40%), SOX 10,033.93(+6.85%)는 Yahoo와 YCharts의 동일 날짜 완료 일봉이 일치해 **참고값으로 보완**했다. 두 제공자가 동일 기초 피드를 사용할 수 있으므로 독립적인 Nasdaq 공식 종가 확정이라고 주장하지 않는다. 원래 close_checks의 CONFLICT와 거래신호 보류는 계속 유효하다.
+
+
+## 2026-11-14 ROY × JJOONI 상호검증 V2 적용 — 이후 발행에 우선
+
+[공통 템플릿 및 필수 근거](morning-brief-roy-jjooni-template-v2-20261114.md)가 2026-11-15 이후 신규 공개 시황의 **템플릿 품질 기준**입니다. V1 스키마·8개 정확한 제목·3개 이상 5단 분석·기존 엄격한 NDX/SOX 공식 종가 독립검증·개인정보/NO_TRADE·PR 게시 계약은 그대로 둡니다.
+
+① ROY의 독립 일일시황이 GitHub에 실재하는지와 작성 출처를 먼저 확인합니다. 없으면 **ROY 별도 보고서 NOT_FOUND**, 상호검토 미완이면 **PENDING**. 숫자나 보도는 로이·쭈니 두 AI가 모두 동의해도 공식 독립 검증으로 격상할 수 없습니다. ② ②의 한 숫자표에 NDX·SOX·VIX10·MA250·DD52W를 필수로 두고 정규장 세션, 원천 시각과 `PROVIDER_REFERENCE_ONLY / OFFICIAL_VERIFIED / MISSING / CONFLICT`를 구분합니다. ③ `editorial_contract.canonical_source_vintage` + `market_metrics` + `dual_review`를 함께 기록합니다. ④ 새로운 원장이 도착해 이미 발행된 결측을 메우는 경우 원 발행시간을 바꾸지 않고 후속 확인시각·출처·해석 제한을 남깁니다. ⑤ 로이 검토의 5축 일치/불일치는 실제 원본 코멘트와 청구 항목 근거로 남깁니다.

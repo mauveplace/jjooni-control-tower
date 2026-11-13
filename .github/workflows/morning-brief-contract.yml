@@ -13,6 +13,10 @@ on:
       - market-observatory/data/morning-brief/**
       - tools/validate_morning_brief.py
       - tests/test_morning_brief_editorial.py
+      - tests/test_morning_brief_dual_template.py
+      - docs/morning-brief-roy-jjooni-template-v2-20261114.md
+      - docs/pb-morning-intelligence-prompt-v2.2.md
+      - docs/morning-brief-publishing.md
       - tools/observatory_session.py
       - docs/song-daily-editorial-contract.md
       - .github/workflows/morning-brief-contract.yml
@@ -24,6 +28,12 @@ on:
       - market-observatory/data/morning-brief/**
       - tools/validate_morning_brief.py
       - tests/test_morning_brief_editorial.py
+      - tests/test_morning_brief_dual_template.py
+      - docs/morning-brief-roy-jjooni-template-v2-20261114.md
+      - docs/pb-morning-intelligence-prompt-v2.2.md
+      - docs/morning-brief-publishing.md
+      - tools/check_morning_brief_readiness.py
+      - tests/test_morning_brief_readiness.py
       - tools/observatory_session.py
       - docs/song-daily-editorial-contract.md
       - .github/workflows/morning-brief-contract.yml
@@ -69,6 +79,8 @@ jobs:
           else
             echo "MORNING_BRIEF_CANONICAL_READINESS=NOT_APPLICABLE unchanged latest"
           fi
+      - name: Verify ROY×JJOONI core metrics and authentic review gate
+        run: python -m unittest discover -s tests -p test_morning_brief_dual_template.py -v
       - name: Validate reader runtime
         run: |
           node --check market-observatory/morning-brief-v1.js
