@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 REPO = "mauveplace/jjooni-control-tower"
@@ -130,7 +131,7 @@ def make_issue(number, task_id, head, run_id, source_comment_id):
             "Requested-By: JJOONI",
             "Scope: Second and FINAL independent ROY read-only review of current HEAD, CI, unchanged tests and one corrected source file; no edits, merge, deploy or trading.",
             "",
-            "Created by trusted default-branch CI green workflow_run. Do NOT infer release approval.",
+            "Created by owner-connected JJOONI Work after verifying the default-branch CI-green handoff. No release approval.",
             "Verified CI workflow_run ID: " + str(run_id),
             "Original Claude GitHub review comment ID: " + str(source_comment_id),
             "GitHub app corroborates Claude; Work commit author is not independently authenticated.",
@@ -138,6 +139,28 @@ def make_issue(number, task_id, head, run_id, source_comment_id):
             "Release gate: USER_APPROVAL_REQUIRED.",
         ]),
     }
+
+
+def existing_owner_issue(gh, number, task_id, head):
+    """Fast recent REST check plus narrow search for older issues.
+
+    Old incident #330 comments can mention the task but must not count
+    as a duplicate. A newly created Issue may not yet be search-indexed,
+    so inspect the newest 100 Issues directly first.
+    """
+    recent = gh.api("/issues?state=all&sort=created&direction=desc&per_page=100")
+    if not isinstance(recent, list):
+        raise RuntimeError("Invalid recent Issue response")
+    if any(issue_matches(issue, number, task_id, head) for issue in recent):
+        return True
+    query = urllib.parse.quote('repo:%s is:issue "%s"' % (REPO, task_id))
+    searched = gh.request("/search/issues?q=" + query + "&per_page=100")
+    if type(searched.get("total_count")) is not int:
+        raise RuntimeError("Invalid Issue search response")
+    if searched["total_count"] > 100:
+        raise RuntimeError("Large Issue search; refuse duplicate-risk write")
+    return any(issue_matches(issue, number, task_id, head)
+               for issue in searched.get("items", []))
 
 
 def make_bridge_comment(number, task_id, head, run_id, source_comment_id):
@@ -279,8 +302,7 @@ def try_dispatch(gh, event):
         if len(reviews) != 1 or reviews[0]["head"] != previous \
                 or reviews[0]["verdict"] != "NEEDS_CHANGES":
             continue
-        issues = gh.pages("/issues?state=all&sort=created&direction=desc")
-        if any(issue_matches(i, number, task_id, sha) for i in issues):
+        if existing_owner_issue(gh, number, task_id, sha):
             print("DEDUPED: genuine owner ROY issue already exists")
             return "DEDUPED"
         if any(bridge_matches(c, number, task_id, sha) for c in comments):
