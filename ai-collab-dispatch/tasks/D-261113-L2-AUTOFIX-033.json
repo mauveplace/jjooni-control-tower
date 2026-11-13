@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-L2-AUTOFIX-033",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Clean second L2 event-driven test on a new safe opt-in PR after the first L2 PR #424 caught 3 genuine CI failures but the original Work webhook blocked automatic code modification due legacy reviewer header and unavailable Claude app metadata. A dedicated, owner-authorized, event-triggered Work task must perform the helper-only fix and trigger one exact-head ROY final review after green CI. No production release.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Start ROY independent review only on real Claude PR-opened Routine event and inspect exact PR HEAD, changed helper/test files, task contract and CI.",
+    "Observed initial regression test failures for same comment ID across different PRs and across different repositories are legitimate NEEDS_CHANGES; the helper must incorporate canonical owner/name repository, PR number, and source comment ID into a stable key.",
+    "After a real ROY NEEDS_CHANGES GitHub source event, the original JJOONI Work webhook performs bounded automated code correction only on ai-collab/l2_review_receipt_key.py at this PR's current HEAD; never alter tests to force green, task JSON, other repo files or main.",
+    "Confirm AI Collaboration Read-Only Contract CI on the newly generated PR HEAD reaches success and re-run current-HEAD acceptance tests before requesting ROY second review.",
+    "JJOONI opens at most one new [AI-COLLAB][ROY-REQUEST] issues.opened follow-up pinned to current full HEAD, within two independent review rounds. ROY reviews only on the new verified HEAD. Every step records original GitHub comment ID, commit SHA, Work run provenance and unique stage.",
+    "If Work event runtime cannot safely update the correct branch or verify exact HEAD, classify L2_BLOCKED and do not claim code automatically fixed; manual chat fixes cannot count as L2_PASS.",
+    "Never merge or deploy this deliberately isolated probe; user approval is required for any release, but no release is needed for proof."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No main merge, production deploy, trading, secrets, personal financial data or private customer info",
+    "No live market data, financial rules, investment system, Observatory runtime changes",
+    "No change to test_l2_review_receipt_key.py, task JSON, or other files during Work event automatic remediation",
+    "No more than one automatic code-fix attempt per original ROY comment and one ROY re-review issue on changed HEAD",
+    "No new paid infrastructure or external Work/Claude account permissions"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "backend",
+  "coordination_notes": "Explicit owner chat authorizes a bounded test-only update of ai-collab/l2_review_receipt_key.py on experiment/ai-collab-l2-autofix-retry-20261113 through the dedicated Work event task JJOONI↔ROY L2 자동수정 시험, not a general code modification privilege. L1 proven Work comment receipt on PR #422. First L2 PR #424 is evidence of transport-format mismatch and remains separate. DO NOT change immutable tests or edit/merge/deploy main. Initial CI intentionally has 3 fails (two namespace collisions and ../other repository validation). GitHub first-party app slug is corroborating metadata; if unavailable classify unverified, do not grant release."
+}
