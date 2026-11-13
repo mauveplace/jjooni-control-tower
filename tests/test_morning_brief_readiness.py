@@ -24,6 +24,13 @@ def sample():
             "read_only":True,"no_trade":True}
     return brief,obs,pulse,glance
 
+def source_absent_v2_metrics(brief):
+    """Legacy timing fixtures have no market numeric payload; disclose genuine absence."""
+    brief["editorial_contract"]["market_metrics"]={
+        k:{"value":None,"status":"MISSING"} for k in ("NDX","SOX","VIX10","MA250","DD52W")}
+    return brief
+
+
 class MorningReadinessTests(unittest.TestCase):
     def test_new_1645_et_release_after_canonical_passes(self):
         result=verify(*sample())
@@ -98,6 +105,7 @@ class MorningReadinessTests(unittest.TestCase):
             "pulse_generated_kst":"2026-11-14T06:34:38+09:00",
             "glance_generated_kst":"2026-11-14T06:36:45+09:00",
         }
+        source_absent_v2_metrics(args[0])
         self.assertEqual(verify(*args)["session"],SESSION)
 
     def test_source_after_publication_is_not_laundered_as_old_vintage(self):
@@ -128,6 +136,7 @@ class MorningReadinessTests(unittest.TestCase):
         args[2]["generated_kst"]="2026-11-15T07:50:00+09:00"
         args[3]["source_generated_kst"]=args[1]["generated_kst"]
         args[3]["generated_kst"]="2026-11-15T07:51:00+09:00"
+        source_absent_v2_metrics(args[0])
         self.assertEqual(verify(*args)["source_generated_kst"],
                          "2026-11-14T06:34:06+09:00")
 
