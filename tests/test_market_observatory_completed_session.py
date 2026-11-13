@@ -27,4 +27,19 @@ assert MOD.align_completed_us_market_series(series)=='2026-09-14'
 assert {k:v[-1]['date'] for k,v in series.items()}=={
     'NASDAQ100':'2026-09-14','SP500':'2026-09-14','VIX':'2026-09-14'
 }
+
+# SOX is informational: a provisional post-cutoff bar is omitted, but a missing
+# SOX bar never delays the core NASDAQ100/SP500/VIX completed session.
+optional={
+    'NASDAQ100':rows('2026-09-11','2026-09-14'),
+    'SP500':rows('2026-09-11','2026-09-14'),
+    'VIX':rows('2026-09-11','2026-09-14'),
+    'SOX':rows('2026-09-11','2026-09-14','2026-09-15'),
+}
+assert MOD.align_completed_us_market_series(optional)=='2026-09-14'
+assert optional['SOX'][-1]['date']=='2026-09-14'
+optional['SOX']=[]
+assert MOD.align_completed_us_market_series(optional)=='2026-09-14'
+assert optional['SOX']==[]
+
 print('MARKET_OBSERVATORY_COMPLETED_SESSION_TEST=PASS')
