@@ -20,3 +20,17 @@ Because B could be double-merged accidentally, the alias should be treated as **
 
 ## Release constraints
 This PR intentionally contains only a single added active task JSON, this document, static Python gate and regression tests. No changes to main workflows, Work scheduled prompts or immediate webhook, Claude Routines, secrets, GitHub permissions, Cloud Run, finance systems or production dispatcher. **NO MAIN MERGE/DEPLOY** unless explicitly newly approved by the user. Current E2 rollout status remains CONDITIONAL until a real ROY feedback → Work correction → CI success → owner-alias PR → ROY second-review test is independently proven end-to-end.
+
+
+## ROY first review NEEDS_CHANGES — corrections
+Original ROY code review [comment 6851618534](https://github.com/mauveplace/jjooni-control-tower/pull/446#issuecomment-6851618534) disclosed actual fail-open and malformed-input crashes. The isolated code and regression tests have been corrected without changing any production file:
+
+- Accept **only exact boolean** independently authenticated owner approval; reject truthy strings and missing booleans.
+- Strict PR number/author/state, same-repo original source and alias identity; reject malformed nested REST objects rather than throwing exceptions. Draft alias is blocked because draft-trigger delivery has not been proven.
+- Task reviewers MUST be a list with exactly one ROY member. Any second active task JSON in the PR diff, even removed/renamed, fails.
+- Reject unsafe paths (dot segments, backslashes and self-modifying guard), require the corrected source file is actually in the same PR changed-file list.
+- CI must match the original SHA, workflow name/path, verified **workflow ID 411466939** from genuine GitHub run 43417762051, positive run ID and attempt, status and source repository. **Real GitHub workflow-run REST omitted `app`; a missing app slug cannot be used as proof of a foreign origin.** If present a foreign slug is rejected; caller must independently fetch the run from GitHub and authenticate its source.
+- Any prior alias relay for the same **original PR+task** blocks another one, regardless of whether its HEAD was older or its PR is closed; ledger type validation and cross-original+alias review count = exactly 1 before B request. This is more conservative than per-SHA dedup.
+- These functions do NOT authenticate a first-party Claude session, Work actor, GitHub event delivery, or external owner approval themselves. The `external_owner_approval` and `verified_first_party` values are trusted caller assertions requiring separate real-source proof. Therefore they never become sufficient authorization for a write, trade or deployment.
+- New negative tests exercise malformed GitHub nested objects, mismatched author, truthy strings, bool/int confusion, wrong task shapes, extra task deletions, source/PR changed file mismatch, path traversal, future/old relays and alias policy.
+- This PR will receive at most **one second/final ROY review** on the new exact HEAD. A PASS may confirm code-review quality but not unattended E2 workflow completion.
