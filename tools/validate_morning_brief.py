@@ -71,7 +71,9 @@ def validate_dual_market_template(d, contract):
         u = _urlparse(str(review.get('roy_comment_url') or ''))
         assert (u.scheme == 'https' and u.hostname == 'github.com'
                 and re.fullmatch(r'/mauveplace/jjooni-control-tower/(?:issues|pull)/[0-9]+', u.path)
-                and re.fullmatch(r'(?:issuecomment|pullrequestreview)-[0-9]+', u.fragment)), 'ROY_EVIDENCE_URL'
+                and ((re.fullmatch(r'issuecomment-[0-9]+', u.fragment) is not None)
+                     or (u.path.startswith('/mauveplace/jjooni-control-tower/pull/')
+                         and re.fullmatch(r'pullrequestreview-[0-9]+', u.fragment) is not None))), 'ROY_EVIDENCE_URL'
         comment_id = u.fragment.split('-')[-1]
         assert str(review.get('roy_comment_id') or '') == comment_id, 'ROY_EVIDENCE_ID_MISMATCH'
         assert review.get('roy_github_app') == 'claude', 'ROY_APP_NOT_CONFIRMED'
@@ -86,6 +88,8 @@ def validate_dual_market_template(d, contract):
                 p = _urlparse(str(item.get(key) or ''))
                 assert p.scheme == 'https' and p.hostname, ('ROY_COMPARISON_SOURCE', key)
             assert item.get('source_independent') in (True, False), 'ROY_INDEPENDENCE_FLAG'
+        if not any(item['source_independent'] is True for item in review['comparison']):
+            assert review['verified_by_independent_provider'] is False, 'ROY_NO_INDEPENDENT_PRICE_PROOF'
     body = d['body_markdown']
     assert '## ② 시장 한눈에' in body and '## ③ 핵심 이슈 깊이 읽기' in body, 'CORE_TABLE_SECTION'
     table_part = body.split('## ② 시장 한눈에', 1)[1].split('## ③ 핵심 이슈 깊이 읽기', 1)[0]
@@ -101,15 +105,29 @@ def validate_dual_market_template(d, contract):
         rows = [row for row in table_rows if any(re.search(r'(?<![A-Za-z0-9])' + re.escape(label) + r'(?![A-Za-z0-9])', row[0], re.I)
                 for label in aliases[key])]
         assert len(rows) == 1, ('CORE_MARKET_TABLE_ROW', key)
-        text_row = ' | '.join(rows[0][1:])
+        # Only the PUBLIC LEVEL cell (second column) is authoritative. Do
+        # not mistake a number in commentary/status for the displayed price.
+        # Require one complete numeric token, never substrings of a larger
+        # number (127,943.74 must not match 27,943.74). This also rejects
+        # a fabricated MISSING display value, not only numeric JSON mismatch.
+        level_cell = rows[0][1]
+        status_cells = ' | '.join(rows[0][2:])
+        visible = ' | '.join(rows[0][1:])
+        price_tokens = re.findall(
+            r'(?<![\\d.,A-Za-z])[-+]?(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?(?![\\d.,])',
+            level_cell)
         m = metrics[key]
         if m['status'] in {'MISSING', 'CONFLICT'}:
-            assert ('미확인' in text_row or '충돌' in text_row) and m['reason'] in text_row, ('CORE_MARKET_TABLE_MISSING_REASON', key)
+            reason = m['reason']
+            assert len(reason.strip()) >= 8, ('CORE_MARKET_MISSING_REASON_TOO_SHORT', key)
+            assert (('미확인' in level_cell or '충돌' in level_cell)
+                    and reason in visible), ('CORE_MARKET_TABLE_MISSING_REASON', key)
+            assert not price_tokens, ('CORE_MARKET_TABLE_MISSING_SHOWS_PRICE', key)
         else:
             numeric = f"{m['value']:,.2f}"
-            assert numeric in text_row, ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
+            assert price_tokens == [numeric], ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
             if m['status'] == 'PROVIDER_REFERENCE_ONLY':
-                assert '참고' in text_row, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
+                assert '참고' in visible, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
