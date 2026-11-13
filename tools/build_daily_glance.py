@@ -27,7 +27,7 @@ BRIEF_TOLERANCE_PCT = 0.10
 SIGNAL_PRICE_TOLERANCE_PCT = 0.01
 
 GROUPS = [
-    ("미국", [("NASDAQ100", "나스닥100"), ("SP500", "S&P500"), ("NASDAQCOMPOSITE", "나스닥종합"),
+    ("미국", [("NASDAQ100", "나스닥100"), ("SOX", "필라델피아 반도체 · Yahoo 참고"), ("SP500", "S&P500"), ("NASDAQCOMPOSITE", "나스닥종합"),
              ("DOW", "다우"), ("RUSSELL2000", "러셀2000"), ("VIX", "VIX")]),
     ("아시아", [("KOSPI", "코스피"), ("KOSDAQ", "코스닥"), ("NIKKEI225", "닛케이225"),
                ("HANGSENG", "항셍"), ("SHCOMP", "상하이종합")]),
@@ -255,9 +255,22 @@ def build(obs, brief=None, now=None):
     us_session = obs.get("us_completed_session_date")
     series = obs.get("series", {})
     groups, by_key = [], {}
+    core_ndx = completed(series.get('NASDAQ100'))
+    prior_ndx_session = core_ndx[-2]['date'] if len(core_ndx) >= 2 else None
     for name, items in GROUPS:
         rows = [metric(k, label, series.get(k), (obs.get('crypto_market') or {}).get(k)) for k, label in items]
         for r in rows:
+            if r.get("key") == "SOX" and "value" in r:
+                sox_completed = completed(series.get("SOX"))
+                prev = sox_completed[-2]['date'] if len(sox_completed) >= 2 else None
+                if prev != prior_ndx_session or r.get("date") != us_session:
+                    # A missing SOX bar must never convert multi-session change
+                    # into a false 1D return. Level may remain a reference.
+                    r["d1_pct"] = None
+                    r["comparison_status"] = "PRIOR_SESSION_UNVERIFIED"
+                else:
+                    r["comparison_status"] = "SAME_PREVIOUS_US_SESSION"
+                r["source"] = "Yahoo ^SOX completed daily (single provider)"
             by_key[r["key"]] = r
         groups.append({"name": name, "items": rows})
     tri = tripod_block(sig)

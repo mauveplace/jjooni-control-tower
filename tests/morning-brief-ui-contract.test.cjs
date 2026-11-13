@@ -80,3 +80,96 @@ test('missing reference never turns CONFLICT into an invented value',()=>{
  const x=quote({symbol:'SOX',status:'CONFLICT',close:null,change_pct:null},null);
  assert.equal(x.value,null);assert.equal(x.reference,false);
 });
+
+
+const supplementStart=src.indexOf('function canonicalSupplement(');
+const supplementEnd=src.indexOf('\nfunction render(d){',supplementStart);
+assert.ok(supplementStart>=0&&supplementEnd>supplementStart,'reader must expose a pure same-session catch-up projector');
+const supplementFn=src.slice(supplementStart,supplementEnd);
+const reportRace={report_date_kst:'2026-11-14',market_date_us:'2026-11-13',
+ published_kst:'2026-11-14T06:32:48+09:00',body_markdown:'VIX10 미확인',
+ editorial_contract:{close_checks:[{symbol:'NDX',status:'MISSING',close:null,change_pct:null},
+  {symbol:'SOX',status:'MISSING',close:null,change_pct:null}]}};
+const glanceCatchup={generated_kst:'2026-11-14T06:36:45+09:00',source_generated_kst:'2026-11-14T06:34:06+09:00',
+ us_session:'2026-11-13',no_trade:true,consistency:{status:'OK'},
+ tripod:{session:'2026-11-13',ndx:27943.74,pod:'BIPOD',
+  vix10:20.73,ma250:27505.80,drawdown_52w_pct:-10.51},
+ groups:[{name:'미국',items:[{key:'NASDAQ100',date:'2026-11-13',value:27943.7363,d1_pct:-1.22}]}]};
+const pulseCatchup={generated_kst:'2026-11-14T06:34:38+09:00',market_date_us:'2026-11-13',
+ read_only:true,snapshot_status:'FINAL',session_gate:{aligned:true,core_dates:{NASDAQ100:'2026-11-13'}},
+ raw:{tradingview_cross_asset:{ndx:{value:27943.73632812,change_pct:-1.221148897,
+  market_date:'2026-11-13'}}}};
+function projection(d=reportRace,g=glanceCatchup,p=pulseCatchup){
+ return vm.runInNewContext(supplementFn+'\ncanonicalSupplement(d,g,p)',
+  {d,g,p,Date});
+}
+test('2026-11-14 race: later completed-session canonical values are visible as NON-TRADE references',()=>{
+ const x=projection();
+ assert.ok(x);
+ assert.equal(x.session,'2026-11-13');
+ assert.equal(x.late,true);
+ assert.equal(x.ndx,27943.73632812);
+ assert.equal(x.vix10,20.73);
+ assert.equal(x.ma250,27505.80);
+ assert.equal(x.dd,-10.51);
+ assert.equal(x.tradeEligible,false);
+ assert.equal(x.officialEodVerified,false);
+ assert.match(src,/NO_TRADE_REVIEW_ONLY/);
+ assert.match(src,/원장 후속 갱신/);
+ assert.match(src,/공식 EOD 미검증/);
+});
+test('no source-session mixing or missing FINAL gate can surface a current NDX',()=>{
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ let g=clone(glanceCatchup);g.us_session='2026-11-12';assert.equal(projection(reportRace,g),null);
+ g=clone(glanceCatchup);g.consistency.status='ERROR';assert.equal(projection(reportRace,g),null);
+ g=clone(glanceCatchup);g.no_trade=false;assert.equal(projection(reportRace,g),null);
+ let p=clone(pulseCatchup);p.session_gate.aligned=false;assert.equal(projection(reportRace,glanceCatchup,p),null);
+ p=clone(pulseCatchup);p.snapshot_status='PROVISIONAL';assert.equal(projection(reportRace,glanceCatchup,p),null);
+ p=clone(pulseCatchup);p.market_date_us='2026-11-12';assert.equal(projection(reportRace,glanceCatchup,p),null);
+});
+test('conflicting NDX independent source and untrusted/early source timestamps never auto-upgrade',()=>{
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ let p=clone(pulseCatchup);p.raw.tradingview_cross_asset.ndx.value=28042;
+ assert.equal(projection(reportRace,glanceCatchup,p),null);
+ let g=clone(glanceCatchup);g.groups[0].items[0].d1_pct=1.5;
+ assert.equal(projection(reportRace,g),null);
+ g=clone(glanceCatchup);g.source_generated_kst='2026-11-14T07:30:00+09:00';
+ assert.equal(projection(reportRace,g),null);
+ g=clone(glanceCatchup);g.tripod.vix10=null;assert.equal(projection(reportRace,g),null);
+});
+test('historic reports without missing inputs are not amended and SOX is not invented',()=>{
+ const d={...reportRace,body_markdown:'최종 값 확인',editorial_contract:{
+  close_checks:[{symbol:'NDX',status:'VERIFIED',close:27943.74},{symbol:'SOX',status:'VERIFIED',close:10168.99}]}};
+ assert.equal(projection(d),null);
+ assert.doesNotMatch(supplementFn,/SOX.+close\s*[:=]/);
+ assert.match(src,/SOURCE_GLANCE=results\[2\]/);
+ assert.match(src,/SOURCE_PULSE=results\[3\]/);
+ assert.match(html,/sync=20261114-canonical-catchup/);
+});
+
+test('optional SOX market bar only appears as a single-source reference on exact same session',()=>{
+ const g=JSON.parse(JSON.stringify(glanceCatchup));
+ g.groups[0].items.push({key:'SOX',date:'2026-11-13',value:10168.99,d1_pct:-3.21,source:'Yahoo ^SOX completed daily (single provider)',comparison_status:'SAME_PREVIOUS_US_SESSION'});
+ let x=projection(reportRace,g);
+ assert.equal(x.sox,10168.99);
+ assert.equal(x.soxPct,-3.21);
+ assert.equal(x.officialEodVerified,false);
+ assert.equal(x.tradeEligible,false);
+ assert.match(src,/SOX는 Yahoo 일봉 단일원천 참고값/);
+ g.groups[0].items.at(-1).date='2026-11-12';
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);assert.equal(x.ndx,27943.73632812);
+ g.groups[0].items.at(-1).date='2026-11-13';
+ g.groups[0].items.at(-1).value=NaN;
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);
+ g.groups[0].items.at(-1).value=10168.99;
+ g.groups[0].items.at(-1).comparison_status='PRIOR_SESSION_UNVERIFIED';
+ g.groups[0].items.at(-1).d1_pct=null;
+ x=projection(reportRace,g);
+ assert.equal(x.sox,10168.99);
+ assert.equal(x.soxPct,null);
+ g.groups[0].items.at(-1).source='Unverified visitor quote';
+ x=projection(reportRace,g);
+ assert.equal(x.sox,null);
+});
