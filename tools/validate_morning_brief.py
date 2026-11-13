@@ -114,7 +114,7 @@ def validate_dual_market_template(d, contract):
         status_cells = ' | '.join(rows[0][2:])
         visible = ' | '.join(rows[0][1:])
         price_tokens = re.findall(
-            r'(?<![\\d.,A-Za-z])[-+]?(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?(?![\\d.,])',
+            r'(?<![\d.,A-Za-z])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\d.,])',
             level_cell)
         m = metrics[key]
         if m['status'] in {'MISSING', 'CONFLICT'}:
