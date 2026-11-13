@@ -19,9 +19,17 @@ def fixture():
           "| DD52W | -10.51% | 원장 참고 |\n"
           "## ③ 핵심 이슈 깊이 읽기\n"
           "## ④ 글로벌·한국 시장\n"
+          "**섹터 로테이션·자금흐름**\n"
+          "PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)\n"
+          "| 섹터 | 1D | 5D | ETF 실제 순유입 |\n"
+          "| 반도체 | 미확인 | 미확인 | 직접 공시 미확인 |\n"
           "## ⑤ AI 산업·기업실적\n"
+          "**주요 기업 실적·가이던스**\n"
+          "NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음\n"
           "## ⑥ 주요 일정\n"
           "## ⑦ 투자전략·위험점검·복기\n"
+          "**실적×자금흐름 종합판정**\n"
+          "실적 자료가 없어 독립적인 섹터 자금 로테이션 판단은 보류\n"
           "## ⑧ 원천·데이터 감사\nROY 검토 대기")
     day={"report_date_kst":"2026-11-15","market_date_us":MARKET_DAY,
          "body_markdown":body,
@@ -185,6 +193,52 @@ class DualTemplateV2(unittest.TestCase):
                     "jjooni_source":"https://github.com/mauveplace/jjooni-control-tower/blob/main/market-observatory/data/daily-glance.json",
                     "source_independent":False}])
         with self.assertRaisesRegex(AssertionError,"ROY_NO_INDEPENDENT_PRICE_PROOF"):
+            validate_dual_market_template(d,c)
+
+    def test_sector_earnings_permanent_sections_must_not_be_omitted(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace('**섹터 로테이션·자금흐름**','')
+        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_SECTION_MISSING'):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace('**주요 기업 실적·가이던스**','')
+        with self.assertRaisesRegex(AssertionError,'EARNINGS_SECTION_MISSING'):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace('**실적×자금흐름 종합판정**','')
+        with self.assertRaisesRegex(AssertionError,'EARNINGS_FLOW_CROSS_SECTION_MISSING'):
+            validate_dual_market_template(d,c)
+
+    def test_sector_price_volume_proxy_is_never_evidence_of_direct_fund_inflow(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace('PROXY_ONLY','')
+        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'PROXY_ONLY · 가격 상승만 관측')
+        with self.assertRaisesRegex(AssertionError,'PROXY_FLOW_LIMIT_MISSING'):
+            validate_dual_market_template(d,c)
+
+    def test_direct_flow_claim_requires_defined_quantity_and_evidence(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'DIRECT_VERIFIED · ETF 가격 상승')
+        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_MEASURE_MISSING'):
+            validate_dual_market_template(d,c)
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'DIRECT_VERIFIED · ETF 순설정 금액 확인')
+        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_SOURCE_MISSING'):
+            validate_dual_market_template(d,c)
+
+    def test_earnings_coverage_requires_explicit_release_status(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace('NO_NEW_RELEASES','')
+        with self.assertRaisesRegex(AssertionError,'EARNINGS_COVERAGE_STATUS_MISSING'):
             validate_dual_market_template(d,c)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
