@@ -35,13 +35,14 @@ if(hasAlignedCanonical){
   if(c.symbol==='NDX'){
    c.closeText=Number(pndx.value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
    c.pctText=Number(pndx.change_pct).toFixed(2)+'%';
-   c.reference=true;c.singleSource=true;
+   c.reference=true;c.singleSource='ndx';
   }
   if(c.symbol==='SOX'&&soxItem?.date===report.market_date_us&&
-     Number.isFinite(soxItem.value)&&soxItem.value>0&&Number.isFinite(soxItem.d1_pct)){
+     soxItem.source==='Yahoo ^SOX completed daily (single provider)'&&
+     Number.isFinite(soxItem.value)&&soxItem.value>0){
    c.closeText=Number(soxItem.value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-   c.pctText=Number(soxItem.d1_pct).toFixed(2)+'%';
-   c.reference=true;c.singleSource=true;
+   c.pctText=soxItem.comparison_status==='SAME_PREVIOUS_US_SESSION'&&Number.isFinite(soxItem.d1_pct)?Number(soxItem.d1_pct).toFixed(2)+'%':null;
+   c.reference=true;c.singleSource='sox';
   }
  }
 }
@@ -84,7 +85,7 @@ const nowKst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'nu
     const card=quoteCards[i],actual=result.figures[i];
     assert.match(actual,new RegExp(card.closeText.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
     if(card.pctText)assert(actual.includes(card.pctText),name+' missing percent '+card.symbol);
-    if(card.reference)assert.match(actual,card.singleSource?/원장 참고.*공식 EOD 미검증/:/참고 완료 일봉.*공식 종가 미검증/);
+    if(card.reference)assert.match(actual,card.singleSource==='sox'?/Yahoo 단일 제공자 참고.*공식 EOD 미검증/:card.singleSource==='ndx'?/원장 참고.*공식 EOD 미검증/:/참고 완료 일봉.*공식 종가 미검증/);
    }
    assert.equal(result.detailsOpen,false);
    for(const k of ['tools','label','select','refresh','head']){
