@@ -118,10 +118,51 @@
 | 호조 | 상대약세/직접 유출 | 기대 선반영·밸류에이션 부담·리밸런싱 가능성 | 발표 전/후 가격과 유출 공시 분리 |
 | 부진 | 상대강세/직접 유입 | 저점 기대·변화 선반영 가능성 | 가이던스/추정치 회복 여부 |
 | 부진 | 상대약세·직접 유출 | 이익·수급 동반 약화 가능성 | 실적 하향 확산/신용 변화 |
-| 자료 미확인 | 거래량·ETF 상대수익률만 존재 | `PRICE_VOLUME_PROXY_ONLY`, 진짜 유입/유출 불명 | 펀드 순설정/환매·기관 수급 공표 기다림 |
+| 자료 미확인 | 거래량·ETF 상대수익률만 존재 | `PROXY_ONLY`, 진짜 유입/유출 불명 | 펀드 순설정/환매·기관 수급 공표 기다림 |
 
 실제 ETF 순유입 지표가 없을 때도 **섹터별 등락/시장폭/상대강도 분석은 제공**하되, 표의 상태를 `PROXY_ONLY`로 표시한다. 주말 보고서는 5D 및 주간 실적을 기준으로 로테이션이 유의미하게 이어지는지 복기한다. 미래 가격이나 주문 수량, 포트폴리오 실제 보유 종목을 이 공개 보고서에서 임의로 단정하지 않는다.
 
 ### 발행 검사 및 2-AI 교차검토
 
 2026-11-15 이후에는 섹션 ④에 **`**섹터 로테이션·자금흐름**`**, 섹션 ⑤에 **`**주요 기업 실적·가이던스**`**, 섹션 ⑦에 **`**실적×자금흐름 종합판정**`**을 반드시 넣는다. 실제 순유입 데이터가 없으면 `자금 직접 확인 불가`/출처 시차와 `PROXY_ONLY`를 표시하여 마치 수집된 것처럼 포장하지 않는다. ROY는 **실적 원문과 발표시각**, JJOONI는 **섹터 간 가격·자금 데이터 및 인과 해석**을 먼저 각자 확인하고 교차검토하되 어느 한쪽이 확인 못한 항목은 `PENDING`, AI 간 일치와 데이터 원천 독립성은 별도 기록한다.
+
+
+### ROY 검토 이후 강화된 증거 계약 — 실제 순유입·기업 공시 증빙 필수
+
+2026-11-14 [로이 실제 코드 검토](https://github.com/mauveplace/jjooni-control-tower/pull/462#issuecomment-6867767556)에서 **'출처: 추정'을 실제 검증 순유입으로 통과시키는 문제**를 발견했다. 따라서 `DIRECT_VERIFIED`는 **텍스트가 아니라 원천관측 1건과 1:1로 연결**한다. 신규 `editorial_contract.sector_flows[]`에는 아래를 모두 기록한다.
+
+```json
+{
+  "sector_flows": [
+    {
+      "instrument": "해당 KRX 업종/ETF",
+      "measure": "investor_net_buy",
+      "value": 0,
+      "currency": "KRW",
+      "period_start": "YYYY-MM-DD",
+      "period_end": "YYYY-MM-DD",
+      "source_url": "https://data.krx.co.kr/",
+      "source_published_at": "YYYY-MM-DDTHH:MM:SS+09:00",
+      "derived": false
+    }
+  ],
+  "earnings_events": [
+    {
+      "issuer": "실제 발표 기업명",
+      "fiscal_period": "실제 회계분기",
+      "released_at": "YYYY-MM-DDTHH:MM:SS-05:00",
+      "source_url": "https://기업 공식 IR 또는 SEC/DART 링크",
+      "eps_basis": "GAAP",
+      "consensus_status": "CONSENSUS_UNAVAILABLE"
+    }
+  ]
+}
+```
+
+**위 예시의 0원, 날짜·링크는 입력 형식 설명용이고 검증된 실적/흐름 데이터가 아니다. 실보고서에 복사 금지.** `sector_flows`와 `earnings_events`는 자료가 없으면 빈 배열 `[]`이며, 실제 확인된 것처럼 장식하지 않는다. `DIRECT_VERIFIED` 출력행은 구조화 관측의 **정확한 종목·금액(소수 둘째자리·통화)·관측기간 종료일·출처 URL**과 일치해야 한다. 기간 시작/종료·공표시각·통화가 빠지거나 `derived=true`이면 직접 검증 유입으로 취급하지 않는다. **발행주식수 변화 × NAV**로 산출한 ETF 흐름은 유용한 `추정`일 수 있지만 `DIRECT_VERIFIED`가 아니며 `PROXY_ONLY`에서 방법·기준일을 명시한다. 실제 issuer 보고 수치가 언제 발표됐는지 원문 확인이 안 되면 **미확인**이다.
+
+섹터 ④에는 **단 하나의 대표 상태행** `PROXY_ONLY · 실제 ETF 순유입 확인 불가 (...) ` 또는 `UNAVAILABLE · 원천 지연 ...` 또는 `DIRECT_VERIFIED · <실제 종목> 순매수 1,234.00 KRW 2026-... 출처 https://...`를 쓴다. 이후 다른 행에서 무근거로 '자금 대거 유입'이라고 쓰면 차단한다. ⑦도 마찬가지다. 직접 입증이 없는 '로테이션'은 **상대수익률·시장폭·거래량으로 추정한 가설**임을 명시한다.
+
+⑤는 `REPORTED · <기업> 실적 발표` / `NO_NEW_RELEASES · 신규 공시 없음` / `SOURCE_UNAVAILABLE · 실적 원문 조회 불가`를 첫 줄에 명시한다. `REPORTED`라면 `earnings_events`에 실제 기업·실적분기·발표 일시·공식 IR/SEC EDGAR/KRX DART/KIND 출처 링크·`GAAP/NON_GAAP/NOT_REPORTED`·컨센서스 `PUBLISHED_SOURCE/CONSENSUS_UNAVAILABLE`가 필수다. 컨센서스 데이터가 제공되지 않으면 `CONSENSUS_UNAVAILABLE`이라고 표시하고 실적 서프라이즈율을 계산하지 않는다.
+
+**세션 시차:** 미국 ETF 순설정은 T-1 또는 그 이상 늦어질 수 있으므로 당일 16:45 ET 보고서에 같은 날짜 실유입이 있다고 미리 주장하지 않는다. 국내 거래소/투자자 순매수는 미국장과 **서로 다른 현지장 날짜**를 반드시 표시한다. 여러 ETF 순유입액 합산은 중복 섹터·중복 보유종목/별개 펀드 기여를 확인한 경우에만 정의된 범위에서 하며, 하나의 '섹터 전체 자금이동'으로 오인시키지 않는다.
