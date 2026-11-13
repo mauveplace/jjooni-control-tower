@@ -68,3 +68,13 @@
 - 개인 거래·AI_AUTOBOT·Control Tower 비공개 SSOT·계좌·원금·주문·비밀키를 다루지 않는다.
 
 변경 이력은 이 문서와 관련 PR, [ROY 공동 분석 요청 #458](https://github.com/mauveplace/jjooni-control-tower/issues/458)에 남긴다.
+
+
+## ROY 1차 검토 반영 — 2026-11-14 08:09 KST 이후
+
+[ROY 첫 실댓글](https://github.com/mauveplace/jjooni-control-tower/pull/459#issuecomment-6867212874)에서 **실제 독립 시황 작성은 접근 가능한 외부 완료세션 원천 부족으로 BLOCKED**였고 기존 GitHub canonical만 대조할 수 있었다고 명시했습니다. 따라서 서로 다른 AI가 같은 원장 숫자를 낭독한 것을 **독립 시황과 가격 검증이 완료된 것**으로 표시하지 않습니다. 기존 `dual_review.review_status=PENDING`은 ROY의 진짜 독립 세션 분석 및 원본 주장 대조가 완료될 때까지 유지합니다.
+
+- ② 공개 숫자표의 핵심 5개 행은 `market_metrics` 숫자의 **소수 둘째 자리 표기**와 직접 일치해야 합니다. JSON만 정상이고 본문에 `미확인` 또는 엉뚱한 숫자가 남아 있으면 발행을 차단합니다. 결측은 해당 행에 `미확인 + 이유`를 명시합니다.
+- `VIX10/MA250/DD52W`는 원장 파생지표이므로 `OFFICIAL_VERIFIED` 금지. `PROVIDER_REFERENCE_ONLY / MISSING / CONFLICT`만 허용합니다. NDX/SOX도 공식 independent `close_checks.status=VERIFIED`가 없으면 `OFFICIAL_VERIFIED` 불가.
+- ROY `REVIEWED`의 **형식 검사**는 `/mauveplace/jjooni-control-tower/(issues|pull)/<번호>#issuecomment-<번호>` 등의 같은 레포 원본 **댓글 ID**, 실제 GitHub Claude 앱 식별 필드 `roy_github_app='claude'`, `roy_comment_id` 일치, `comparison`의 `claim / outcome / session_date / roy_source / jjooni_source / source_independent` 필수. 판정 값은 `MATCH / CONFLICT / COMPLEMENT / UNVERIFIED / INCOMPARABLE`. **이 검사는 URL 형식만 확인**하며 인터넷에서 그 댓글의 작성자를 인증할 수 없습니다. 따라서 `REVIEWED`로 바꾸기 전에 담당 AI가 원본 GitHub API `performed_via_github_app.slug='claude'`, 원본 댓글 ID, 동일 완료 세션, 실제 ROY 독립 분석 문장을 별도로 조회·확인해야 합니다.
+- `2026-11-14 07:45`는 **원장 생성 시각**, `08:02`·`08:09` 등은 **사후 보고서 검토/보강 시각**입니다. 원문 최초 발행은 `06:32:48`로 보존합니다.
