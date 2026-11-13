@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-COLLAB-RESTORE-028",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review a clean-main reimplementation of blocked PR #400, checking bounded JJOONI↔ROY review decisions, hour-level orphaned-PR fallback explanation, provenance, contract failure visibility and actual event paths. This PR is also one genuine new opt-in PR-opened event test.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Confirm ai-collab/mobile_review_loop.py and its unit tests never treat an unverified PASS, exhausted review budget, or stale unchanged HEAD as permission to merge/deploy.",
+    "Verify low-risk JJOONI-only fixes avoid unnecessary ROY invocations while security/market data/strategy changes still require independent review.",
+    "Challenge mobile-first owner workflow and PR-log format against active PROTOCOL.md, ROUTINES.md, OPERATIONS.md and actual Claude event capabilities.",
+    "Provide current exact full PR HEAD, evidence-backed PASS/NEEDS_CHANGES/BLOCKED and actual first-party Claude session provenance; do not self-approve or merge.",
+    "Identify original PR #400 merge conflict and validate fresh main-based PR does not silently treat an external Work/Claude event or missing task JSON as a completed review."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets, non-public company/account/customer data, or connected financial data",
+    "No production code release, merge, external Routine settings, or trading orders",
+    "No new paid model API, local CLI owner dependency, or cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "architecture",
+  "coordination_notes": "This fresh PR supersedes conflicting #400 once validated; preserve #400 until review. An existing hourly JJOONI monitor was updated in the external automation service, not by this PR. ROY should review read-only on the actual new PR opened event with full current HEAD; JJOONI should independently confirm Work source event. No owner PC."
+}
