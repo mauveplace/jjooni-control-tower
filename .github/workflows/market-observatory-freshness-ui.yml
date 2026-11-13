@@ -87,6 +87,8 @@ jobs:
       # Recover a genuinely lagging US-close publisher without weakening audit failure.
       - name: Request missing US-close repair once
         if: ${{ github.event_name != 'pull_request' }}
+        # Best effort only; the critical acceptance below always runs and decides.
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPOSITORY: ${{ github.repository }}
