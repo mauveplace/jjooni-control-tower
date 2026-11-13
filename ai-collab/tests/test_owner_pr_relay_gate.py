@@ -17,6 +17,7 @@ def fixture():
     original = {
         "number": PR, "state": "open", "draft": False, "merged": False,
         "title": "[AI-COLLAB] isolated corrected test", "base": {"ref": "main"},
+        "user": {"login": "mauveplace"},
         "head": {"sha": NEW, "ref": "experiment/ai-collab-e2-gate",
                  "repo": {"full_name": REPO}},
     }
@@ -37,6 +38,7 @@ def fixture():
                    "status": "modified"}],
     }
     ci = {
+        "id": 77, "run_attempt": 1, "workflow_id": 411466939,
         "name": "AI Collaboration Read-Only Contract",
         "path": ".github/workflows/ai-collab-contract.yml",
         "event": "pull_request", "status": "completed", "conclusion": "success",
@@ -179,6 +181,119 @@ class OwnerRelayGateTests(unittest.TestCase):
         args = fixture()
         args[2]["total_verified_reviews"] = 2
         self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_approval_must_be_exact_boolean_true(self):
+        for approval in ("no", "true", 1, [], None, False):
+            with self.subTest(approval=approval):
+                self.assertEqual(decide(fixture(), approval)["decision"], "BLOCKED")
+
+    def test_bool_pr_identity_and_verified_review_count_rejected(self):
+        args = fixture(); args[0]["number"] = 1; args[2]["pr_number"] = True
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture(); args[2]["total_verified_reviews"] = True
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_owner_author_required_and_missing_draft_merged_rejected(self):
+        for key in ("draft", "merged"):
+            args = fixture(); del args[0][key]
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture(); args[0]["user"]["login"] = "github-actions[bot]"
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture(); del args[0]["user"]
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_reviewer_must_be_exact_member_of_list(self):
+        for val in ("XROYX", {"ROY":1}, 5, ["roy"], ["ROY","ROY"]):
+            with self.subTest(val=val):
+                args = fixture(); args[1]["required_reviewers"] = val
+                self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_other_task_any_status_rejected(self):
+        for status in ("removed", "renamed", "added", "modified"):
+            args = fixture()
+            args[5].append({"filename":"ai-collab-dispatch/tasks/D-261113-OTHER-100.json",
+                            "status": status})
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_corrected_file_must_be_present_in_pr_diff(self):
+        args = fixture()
+        args[3]["files"][0]["filename"] = "ai-collab/coordinator.py"
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_traversal_backslash_and_self_edit_blocked(self):
+        for path in ("ai-collab/../.github/workflows/x.yml",
+                     "ai-collab//x.py", "ai-collab/\\evil.py",
+                     "ai-collab/owner_pr_relay_gate.py"):
+            with self.subTest(path=path):
+                args = fixture()
+                args[3]["files"][0]["filename"] = path
+                args[5][1]["filename"] = path
+                self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_malformed_nested_original_metadata_returns_blocked_not_exception(self):
+        for key, val in (("head", "x"), ("head", []),
+                         ("base", "x"), ("base", []), ("user", [])):
+            args = fixture(); args[0][key] = val
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture(); args[0]["head"]["repo"] = ["bad"]
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_malformed_review_correction_and_ci_returns_blocked_not_exception(self):
+        for key, val in (("parents", ["x"]), ("parents", 5),
+                         ("files", 5), ("files", "abc")):
+            args = fixture(); args[3][key] = val
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+        for key, val in (("repository", []), ("head_repository", "x")):
+            args = fixture(); args[4][key] = val
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_invalid_ci_run_identity_and_optional_explicit_app(self):
+        for key,val in (("id", True), ("id", 0), ("run_attempt", False),
+                        ("workflow_id", 999)):
+            args = fixture(); args[4][key] = val
+            self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture(); args[4]["app"] = {"slug": "untrusted-app"}
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_old_sha_relay_blocks_new_sha_even_if_closed(self):
+        args = fixture()
+        args[6].append({"source_pr":PR, "task_id":TASK, "head_sha":OLD, "state":"closed"})
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+        args = fixture()
+        args[6].append({"source_pr":str(PR), "task_id":TASK, "head_sha":OLD})
+        self.assertEqual(decide(args)["decision"], "BLOCKED")
+
+    def test_alias_pr_rejects_draft_foreign_owner_and_malformed(self):
+        orig = fixture()[0]
+        for k,v in (("draft",True), ("user", {"login":"github-actions[bot]"}),
+                    ("base","malformed"), ("head", ["bad"])):
+            alias = copy.deepcopy(orig)
+            alias["number"] = 506
+            alias["head"]["ref"] = "experiment/ai-collab-e2-gate-alias"
+            alias[k] = v
+            self.assertEqual(verify_opened_alias(
+                orig,alias,expected_original_pr=PR,
+                expected_task_id=TASK,expected_head_sha=NEW)["decision"],"BLOCKED")
+        orig["base"]["ref"] = "other"
+        alias = copy.deepcopy(orig)
+        alias["number"] = 506
+        alias["head"]["ref"] = "experiment/ai-collab-e2-gate-alias"
+        self.assertEqual(verify_opened_alias(
+            orig,alias,expected_original_pr=PR,
+            expected_task_id=TASK,expected_head_sha=NEW)["decision"],"BLOCKED")
+
+    def test_alias_ref_opt_in_and_initial_title_required(self):
+        original = fixture()[0]
+        alias = copy.deepcopy(original); alias["number"] = 506
+        alias["head"]["ref"] = "random-branch"
+        self.assertEqual(verify_opened_alias(
+            original,alias,expected_original_pr=PR,
+            expected_task_id=TASK,expected_head_sha=NEW)["decision"],"BLOCKED")
+        original["title"] = "other"
+        alias["head"]["ref"] = "experiment/ai-collab-e2-gate-alias"
+        self.assertEqual(verify_opened_alias(
+            original,alias,expected_original_pr=PR,
+            expected_task_id=TASK,expected_head_sha=NEW)["decision"],"BLOCKED")
 
 
 if __name__ == "__main__":
