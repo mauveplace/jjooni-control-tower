@@ -27,7 +27,7 @@ BRIEF_TOLERANCE_PCT = 0.10
 SIGNAL_PRICE_TOLERANCE_PCT = 0.01
 
 GROUPS = [
-    ("미국", [("NASDAQ100", "나스닥100"), ("SP500", "S&P500"), ("NASDAQCOMPOSITE", "나스닥종합"),
+    ("미국", [("NASDAQ100", "나스닥100"), ("SOX", "필라델피아 반도체 · Yahoo 참고"), ("SP500", "S&P500"), ("NASDAQCOMPOSITE", "나스닥종합"),
              ("DOW", "다우"), ("RUSSELL2000", "러셀2000"), ("VIX", "VIX")]),
     ("아시아", [("KOSPI", "코스피"), ("KOSDAQ", "코스닥"), ("NIKKEI225", "닛케이225"),
                ("HANGSENG", "항셍"), ("SHCOMP", "상하이종합")]),
