@@ -42,6 +42,7 @@ def fixture():
           "source_generated_kst":"2026-11-14T07:41:26+09:00",
           "official_eod_verified":False,"trade_signal_eligible":False}
     contract={"template_version":"ROY_JJOONI_DAILY_V2","market_metrics":metrics,
+       "sector_flows":[],"earnings_events":[],
        "dual_review":{"review_status":"PENDING","roy_report_status":"NOT_FOUND",
          "reviewed_source_session":MARKET_DAY,
          "verified_by_independent_provider":False,"comparison":[]},
@@ -239,6 +240,77 @@ class DualTemplateV2(unittest.TestCase):
         d,c=fixture()
         d['body_markdown']=d['body_markdown'].replace('NO_NEW_RELEASES','')
         with self.assertRaisesRegex(AssertionError,'EARNINGS_COVERAGE_STATUS_MISSING'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_fabricated_direct_inflow_without_structured_source_is_rejected(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'DIRECT_VERIFIED · SMH 순유입액 +$1.2B 출처: 추정')
+        with self.assertRaisesRegex(AssertionError,'DIRECT_FLOW_STRUCTURED_EVIDENCE_REQUIRED'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_unqualified_inflow_on_separate_line_is_rejected(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            '## ⑤ AI 산업·기업실적', '반도체 ETF로 대규모 자금 유입 (SMH +5% 급등)\n## ⑤ AI 산업·기업실적')
+        with self.assertRaisesRegex(AssertionError,'UNVERIFIED_FUND_INFLOW_ASSERTION'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_unavailable_cannot_hide_fake_fund_flow_in_table(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'UNAVAILABLE · 순유입 원천 지연')
+        d['body_markdown']=d['body_markdown'].replace(
+            '| 반도체 | 미확인 | 미확인 | 직접 공시 미확인 |',
+            '| 반도체 | 미확인 | 미확인 | 순유입액 $900M |')
+        with self.assertRaisesRegex(AssertionError,'UNVERIFIED_FUND_INFLOW_ASSERTION'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_reported_requires_valid_issuer_source(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음',
+            'REPORTED · 기업 A 실적 상승')
+        with self.assertRaisesRegex(AssertionError,'ISSUER_EARNINGS_SOURCE_REQUIRED'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_negated_unavailable_is_not_accepted_status(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'UNAVAILABLE 아님; 자금 대거 유입')
+        with self.assertRaisesRegex(AssertionError,'SECTOR_FLOW_EVIDENCE_STATUS_MISSING'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_official_flow_requires_dates_units_source(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'PROXY_ONLY · 실제 ETF 순유입 확인 불가 (발행기관 자료 미확인)',
+            'DIRECT_VERIFIED · KOSPI 반도체 순매수 900,000,000.00 KRW 2026-11-13 출처 https://data.krx.co.kr/')
+        c['sector_flows']=[{"instrument":"KOSPI 반도체","measure":"investor_net_buy",
+             "value":900000000,"currency":"KRW","period_start":"2026-11-13",
+             "period_end":"2026-11-13","derived":False,
+             "source_url":"https://data.krx.co.kr/",
+             "source_published_at":"2026-11-13T18:00:00+09:00"}]
+        validate_dual_market_template(d,c)
+        c['sector_flows'][0]['derived']=True
+        with self.assertRaisesRegex(AssertionError,'DERIVED_ESTIMATE_NOT_DIRECT_FLOW'):
+            validate_dual_market_template(d,c)
+
+    def test_roy_review_released_earnings_need_real_issuer_time_and_eps_basis(self):
+        d,c=fixture()
+        d['body_markdown']=d['body_markdown'].replace(
+            'NO_NEW_RELEASES · 최근 7거래일 이슈 별도 점검, 새로운 공식 공시 없음',
+            'REPORTED · Applied Materials 실적 발표, 시장 예상 비교는 CONSENSUS_UNAVAILABLE')
+        c['earnings_events']=[{"issuer":"Applied Materials","fiscal_period":"FY2026 Q4",
+           "released_at":"2026-11-12T16:00:00-05:00",
+           "source_url":"https://ir.appliedmaterials.com/", "eps_basis":"NON_GAAP",
+           "consensus_status":"CONSENSUS_UNAVAILABLE"}]
+        validate_dual_market_template(d,c)
+        del c['earnings_events'][0]['source_url']
+        with self.assertRaisesRegex(AssertionError,'EARNINGS_ISSUER_URL_REQUIRED'):
             validate_dual_market_template(d,c)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
