@@ -44,13 +44,18 @@ def decide_ci_bot_candidate(event, pr, source_comment, ci_run, task,
     issue = event.get("issue") or {}
     author = issue.get("user") or {}
     sender = event.get("sender") or {}
-    if issue.get("pull_request") or not isinstance(issue.get("id"), int):
+    if issue.get("pull_request") or type(issue.get("id")) is not int or issue["id"] <= 0:
         return blocked
     if issue["id"] in known_issue_ids:
         return {**blocked, "decision": "DUPLICATE"}
+    # Real Actions-created Issues may omit performed_via_github_app entirely.
+    # Confirm the stable first-party bot user ID and reject explicitly foreign app slugs.
+    issue_app = (issue.get("performed_via_github_app") or {}).get("slug")
     if not (author.get("login") == sender.get("login") == "github-actions[bot]"
             and author.get("type") == "Bot"
-            and (issue.get("performed_via_github_app") or {}).get("slug") == "github-actions"):
+            and author.get("id") == 41898282
+            and sender.get("id", 41898282) == 41898282
+            and issue_app in (None, "github-actions")):
         return blocked
     f = _fields(issue.get("body"))
     if f is None or not str(issue.get("title", "")).startswith("[AI-COLLAB][ROY-REQUEST] "):
@@ -77,9 +82,12 @@ def decide_ci_bot_candidate(event, pr, source_comment, ci_run, task,
             or "ROY" not in (task.get("required_reviewers") or [])
             or task.get("auto_roy_review_after_ci") is not True):
         return blocked
+    comment_author = source_comment.get("user") or {}
+    comment_app = (source_comment.get("performed_via_github_app") or {}).get("slug")
     if (str(source_comment.get("id")) != f["Source-Comment"]
-            or (source_comment.get("user") or {}).get("login") != "github-actions[bot]"
-            or (source_comment.get("performed_via_github_app") or {}).get("slug") != "github-actions"):
+            or comment_author.get("login") != "github-actions[bot]"
+            or comment_author.get("id") != 41898282
+            or comment_app not in (None, "github-actions")):
         return blocked
     marker = (r"<!-- " + COMMENT + r" task=" + re.escape(f["Task-ID"])
               + r" pr=" + re.escape(f["Target-PR"])
@@ -100,4 +108,5 @@ def decide_ci_bot_candidate(event, pr, source_comment, ci_run, task,
     return {**blocked, "decision": "CANDIDATE_READ_ONLY",
             "issue_id": issue["id"], "target_pr": pr["number"],
             "head_sha": f["Expected-HEAD"], "source_comment_id": int(f["Source-Comment"]),
-            "reason": "Candidate only; independent Claude run, tests and dedup must still be verified"}
+            "issuer_run_verified": False,
+            "reason": "Candidate only; issuer workflow/run, independent Claude event, tests and dedup still require first-party verification"}
