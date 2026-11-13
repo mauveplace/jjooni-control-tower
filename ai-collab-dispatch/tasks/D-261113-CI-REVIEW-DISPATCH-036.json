@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-CI-REVIEW-DISPATCH-036",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Apply a trustworthy CI-green → GitHub Actions bot PR handoff comment → owner-authored ChatGPT Work ROY final-review Issue → Claude issues.opened review bridge. Preserve the existing owner-only receiver trust model; never let GITHUB_TOKEN-created Issues impersonate owner.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Privileged default-branch workflow_run.completed verifies actual named CI workflow path/name/repository/event, same-repo opened opt-in PR current HEAD and green result; never checkout/execute PR code or artifacts with write token.",
+    "Requires exact one task JSON, ROY as required independent reviewer, SYSTEM_REVIEW_ONLY, USER_APPROVAL_REQUIRED, future opt-in flag auto_roy_review_after_ci or exact known PR #430 exception.",
+    "Real Claude-app NEEDS_CHANGES on parent SHA, one helper code correction, immutable tests/task, no more than two reviews; fail closed against untrusted bot/actor claims.",
+    "GitHub Actions uses ONLY pull-requests:write to create one github-actions[bot] CI-green handoff PR comment (not bot-created review Issue). Verify dedup and source CI run id, exact SHA and task.",
+    "Owner-connected JJOONI Work event job independently validates bot PR CI-green comment and creates exactly one owner-authored strict V1 read-only ROY review Issue; existing issue_dispatch.decide() and Claude issues.opened Routine accept owner-author identity.",
+    "Adversarial tests cover spoofed actor, bot-owner distinction, workflow path/repo, no CI success, failed or stale head, duplicate GH Issues/comments, test/source/contract tamper, review cap, and receiver integration.",
+    "Only merge the trusted infrastructure branch if current exact HEAD CI and architecture check are green and ROY independent second review returns PASS; never auto-merge/deploy or trade. After merge prove a fresh CI event produces bot handoff, owner Issue and real ROY final review."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User chat 2026-11-13: 'ㅇㅋ 다시 검증하고 개선해서 운영적용해버리자' - authorize after green CI and independent ROY approval, no trading/deployment.",
+  "forbidden": [
+    "No production trading, financial account access or Observatory changes",
+    "No untrusted PR checkout/execution with issues:write token",
+    "No auto merge, release or deployment",
+    "No review issue when CI red, stale HEAD or absent original Claude-app review",
+    "No third ROY review; no duplicate issues"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "backend",
+  "coordination_notes": "The first ROY review on PR #431 observed critical GITHUB_TOKEN author mismatch: bot-generated issues violate the existing owner-only Claude receive contract. Revised into two-hop bot PR CI-green comment → owner Work Issue → Claude review; Python source, regression tests, YAML and docs revised. Only one final ROY re-review permitted. User explicitly granted conditional rollout; no permission to merge arbitrary product/investment code."
+}
