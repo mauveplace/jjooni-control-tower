@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - market-observatory/morning-brief-v1.js
+      - market-observatory/index.html
+      - tests/morning-brief-ui-contract.test.cjs
       - market-observatory/data/morning-brief/**
       - tools/validate_morning_brief.py
       - tests/test_morning_brief_editorial.py
@@ -15,6 +17,8 @@ on:
   pull_request:
     paths:
       - market-observatory/morning-brief-v1.js
+      - market-observatory/index.html
+      - tests/morning-brief-ui-contract.test.cjs
       - market-observatory/data/morning-brief/**
       - tools/validate_morning_brief.py
       - tests/test_morning_brief_editorial.py
