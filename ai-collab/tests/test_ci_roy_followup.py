@@ -79,6 +79,8 @@ class FakeGitHub:
         if suffix == "/contents/" + TASK_PATH + "?ref=" + HEAD:
             encoded = base64.b64encode(json.dumps(task_data()).encode("utf-8"))
             return {"content": encoded.decode("ascii")}
+        if suffix == "/issues?state=all&sort=created&direction=desc&per_page=100":
+            return self.issues
         if suffix == "/commits/" + HEAD:
             return {
                 "parents": [{"sha": PARENT}],
@@ -97,11 +99,11 @@ class FakeGitHub:
             ]
         if suffix == "/issues/430/comments":
             return self.comments
-        if suffix == "/issues?state=all&sort=created&direction=desc":
-            return self.issues
         raise AssertionError("Unexpected pages: " + suffix)
 
     def request(self, uri, payload=None):
+        if uri.startswith("/search/issues?") and payload is None:
+            return {"total_count": len(self.issues), "items": self.issues}
         self.created.append(payload)
         if uri != "/repos/" + REPO + "/issues/430/comments":
             raise AssertionError("Unauthorized non-comment GitHub write: " + uri)
@@ -271,6 +273,45 @@ class CIDispatchTests(unittest.TestCase):
         gh.api = late_change
         self.assertEqual(try_dispatch(gh, sample_event()), "STALE")
         self.assertFalse(gh.created)
+
+    def test_owner_issue_dedup_not_blocked_by_bot_issue(self):
+        gh = FakeGitHub()
+        bot = make_issue(430, TASK_ID, HEAD, 77, 42)
+        bot.update({"number": 432, "user": {"login": "github-actions[bot]"}})
+        gh.issues.append(bot)
+        self.assertEqual(try_dispatch(gh, sample_event()), "BRIDGE_CREATED")
+        self.assertEqual(len(gh.created), 1)
+        owner = make_issue(430, TASK_ID, HEAD, 77, 42)
+        owner.update({"number": 433, "user": {"login": "mauveplace"}})
+        gh.issues.append(owner)
+        self.assertEqual(try_dispatch(gh, sample_event()), "DEDUPED")
+        self.assertEqual(len(gh.created), 1)
+
+    def test_search_catches_old_issue_missing_from_recent_page(self):
+        gh = FakeGitHub()
+        old_api = gh.api
+        exact = make_issue(430, TASK_ID, HEAD, 77, 42)
+        exact.update({"number": 100, "user": {"login": "mauveplace"}})
+        gh.issues.append(exact)
+        def empty_recent(suffix):
+            if suffix == "/issues?state=all&sort=created&direction=desc&per_page=100":
+                return []
+            return old_api(suffix)
+        gh.api = empty_recent
+        self.assertEqual(try_dispatch(gh, sample_event()), "DEDUPED")
+        self.assertEqual(len(gh.created), 0)
+
+    def test_excessive_search_results_fail_closed(self):
+        gh = FakeGitHub()
+        old_request = gh.request
+        def too_large(uri, payload=None):
+            if uri.startswith("/search/issues?"):
+                return {"total_count": 101, "items": []}
+            return old_request(uri, payload)
+        gh.request = too_large
+        with self.assertRaisesRegex(RuntimeError, "Large Issue search"):
+            try_dispatch(gh, sample_event())
+        self.assertEqual(len(gh.created), 0)
 
     def test_receiver_contract_owner_issue_bridge(self):
         from issue_dispatch import decide
