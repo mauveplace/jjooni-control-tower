@@ -1,0 +1,67 @@
+name: AI Collaboration E Bot Issue Delivery Probe (NO DEPLOY)
+
+# Test-only opt-in branch. Never merge this experimental workflow to main.
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ai-collab-e-bot-probe-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  issue-opened-delivery-probe:
+    if: >-
+      github.repository == 'mauveplace/jjooni-control-tower' &&
+      github.event.pull_request.head.repo.full_name == 'mauveplace/jjooni-control-tower' &&
+      github.event.pull_request.head.ref == 'experiment/ai-collab-e-bot-issue-20261113' &&
+      github.event.pull_request.user.login == 'mauveplace' &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      # Never check out or execute PR code while the issues:write token exists.
+      - name: Emit one distinct CI-bot issue delivery probe
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const marker = '<!-- JJOONI-COLLAB-CI-ISSUE-PROBE-V1 pr=' + pr.number +
+              ' head=' + pr.head.sha + ' -->';
+            // Existing issues, not PR conversation comments, are the dedupe authority.
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'all', per_page: 100
+            });
+            if (existing.some(x => !x.pull_request && (x.body || '').startsWith(marker + '\n'))) {
+              core.info('DEDUPED: matching GitHub Actions bot issue already exists');
+              return;
+            }
+            const body = [
+              marker,
+              'Source: GITHUB_ACTIONS_E_PROBE_ONLY',
+              'Target-PR: ' + pr.number,
+              'Expected-HEAD: ' + pr.head.sha,
+              'Mode: SYSTEM_REVIEW_ONLY',
+              'Requested-By: CI_PROBE',
+              '',
+              'This is a one-shot external Claude issues.opened DELIVERY test.',
+              'It is NOT a CI-green attestation, NOT an owner-authored V1 review request,',
+              'and NOT authorization to review code, merge, deploy, trade or change permissions.',
+              'The existing owner-only issue_dispatch.decide() must reject this bot issue.',
+              'If the genuine GitHub issues.opened event wakes a Claude Routine,',
+              'record the real event/source and session only; do not claim review PASS.',
+              'Do not turn a PR.opened Routine or polling observation into issues.opened proof.'
+            ].join('\n');
+            const made = await github.rest.issues.create({
+              owner, repo,
+              title: '[AI-COLLAB][ROY-REQUEST] E BOT ISSUE EVENT PROBE / NO DEPLOY PR #' + pr.number,
+              body
+            });
+            core.info('E_PROBE_BOT_ISSUE_CREATED number=' + made.data.number +
+              ' url=' + made.data.html_url);
