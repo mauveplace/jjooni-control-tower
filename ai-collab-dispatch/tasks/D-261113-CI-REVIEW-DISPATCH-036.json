@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-CI-REVIEW-DISPATCH-036",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Apply the user's approved production CI-green ROY followup issue dispatch automation safely. Audit a main-branch workflow_run listener, fail-closed Python GitHub API dispatcher and regression tests for exact-head successful CI, Claude-app original NEEDS_CHANGES on parent commit, immutable task/test integrity, reviewer budget, no PR code execution, idempotent review issue creation with minimal issues:write permission.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Workflow_run only after named CI workflow completed success for pull_request from the same repository, with script checkout of trusted main code (never a PR head/artifact).",
+    "Task must be exactly one changed ai-collab-dispatch/tasks/JSON, authorized reviewer ROY, no auto merge, and opt-in auto_roy_review_after_ci=true except exact preauthorized PR #430 migration case.",
+    "Genuine prior Claude-app ROY NEEDS_CHANGES comment on direct parent SHA, no second prior review, only one safe source-file correction in current commit, immutable tests/task; current PR HEAD exactly matches successful CI SHA.",
+    "Create exactly one read-only issues.opened ROY followup, dedupe by issue title + strict body metadata (not comments in unrelated incident issue #330), no false successes or third reviews.",
+    "Full integration tests include spoofed actor, same SHA replays, foreign repo, failed CI, old HEAD, duplicate existing issue, unauthorized changes, opt-in and no production deployment.",
+    "Independent ROY read-only code/security review returns PASS on CURRENT HEAD before any merge; no main merge, deployment or production write until user approval gate. User granted conditional operational apply in current chat."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User chat 2026-11-13: 'ㅇㅋ 다시 검증하고 개선해서 운영적용해버리자' - authorize after green CI and independent ROY approval, no trading/deployment.",
+  "forbidden": [
+    "No production trading, financial account access or Observatory changes",
+    "No untrusted PR checkout/execution with issues:write token",
+    "No auto merge, release or deployment",
+    "No review issue when CI red, stale HEAD or absent original Claude-app review",
+    "No third ROY review; no duplicate issues"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "backend",
+  "coordination_notes": "Implement as independent GitHub Actions workflow_run completed + narrow issues:write token. Existing hourly and Work Webhook may inspect but must NOT concurrently emit an identical issue after rollout. Scoped rollout first validates against still-open public test PR #430 with immutable task D-261113-L2-CI-DISPATCH-035; opt-in future by auto_roy_review_after_ci true. The review request ticket must cause Claude existing issues.opened routine read-only. No source imports from untrusted PR executed in privileged workflow."
+}
