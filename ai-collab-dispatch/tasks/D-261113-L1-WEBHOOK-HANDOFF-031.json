@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-L1-WEBHOOK-HANDOFF-031",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently audit the read-only L1 handoff acceptance document and, only if Claude first-party PR.opened event actually wakes ROY, issue one evidence-backed ROY review of the current PR HEAD to test a genuine ROY PR comment to existing JJOONI Work event auto-intake.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Compare L0 proof and its narrow limits against original GitHub source comment IDs 6842687765 and 6842701166; do not claim Work/Claude identity from shared GitHub account.",
+    "Independently inspect this current PR's actual changed file(s), current exact 40-char HEAD, task JSON, and relevant CI; audit L1 success/fail criteria for non-circular, objective evidence.",
+    "If first-party Claude PR.opened Routine actually ran, leave exactly one new original PR Conversation review comment with the prescribed V4 ROY header, current HEAD, ROY_REVIEW=PASS|NEEDS_CHANGES|BLOCKED, substantive evidence, and authentic session context if accessible.",
+    "Do not impersonate JJOONI Work, manufacture JJOONI auto-receipt, change another task trigger, write code, merge/deploy/trade, or disclose nonpublic data.",
+    "Final L1 success requires separate first-party Work execution and one GitHub ROY_REVIEW_RECEIVED response sourced to ROY comment ID; your ROY review alone cannot certify L1 PASS."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No production code, source-data, financial accounts or customer data",
+    "No main merge, deploy, trading, GitHub permission, external Work/Claude Routine updates or paid infrastructure",
+    "No write to other PR/issue other than a single scoped review comment on this PR"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "architecture",
+  "coordination_notes": "User explicitly approved step-by-step verification of automated handoff. Use isolated new [AI-COLLAB] PR on experiment/ai-collab-* branch known to trigger ROY PR.opened Routine; no owner message to ROY. L0 event-to-Work automatic response was proven on PR #323. This review must be genuine/independent, and L1 requires separate actual original JJOONI GitHub webhook acknowledgment. Older PR #420 has exhausted 2-round ROY review budget and must not be re-used."
+}
