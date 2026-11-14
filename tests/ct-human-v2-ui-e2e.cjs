@@ -54,6 +54,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     assert.equal(await page.locator('#ctHumanV2More').isVisible(),false);
     await nav.getByRole('button',{name:'전략'}).click();
     assert(await page.locator('#panel-tripod').isVisible(),'TRI-POD strategy route preserved');
+    await nav.getByRole('button',{name:'오늘'}).click();
+    assert(await page.locator('#panel-overview').isVisible(),'return to Overview from strategy');
    }else{
     assert.equal(await nav.isVisible(),false,'desktop retains current nav');
     assert(await page.locator('.tabs').isVisible());
