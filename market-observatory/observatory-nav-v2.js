@@ -1,8 +1,7 @@
-/* Observatory v2 navigation — phase 1 (issue #403).
- * Opt-in only: ?ui=v2 (or ?ui=v1 to clear a remembered opt-in). The default
- * page is untouched. Five top-level tabs group the 13 legacy tabs without
- * deleting any: the legacy buttons stay in the DOM (hidden) and are clicked to
- * switch panels, so lazy loading, hash deep links and module hooks keep working.
+/* Observatory v2 navigation — default UI rollout (issue #403, PR #471).
+ * V2 is the default for new visits. Explicit ?ui=v1 persists a legacy
+ * preference; ?ui=v2 restores the upgraded default. Both remain navigable.
+ * All 13 original tabs stay in the DOM for module hooks and deep links.
  */
 (function (root) {
   'use strict';
@@ -18,9 +17,9 @@
     const ui = new URLSearchParams(search || '').get('ui');
     if (ui === 'v2') return true;
     if (ui === 'v1') return false;
-    return stored === 'v2';
+    return stored !== 'v1';
   }
-  const api = { IA, groupOf, enabled, version: '1.0' };
+  const api = { IA, groupOf, enabled, version: '2.0-default' };
   if (typeof module === 'object' && module.exports) { module.exports = api; return; }
   if (!root.document) return;
 
@@ -28,11 +27,27 @@
   try {
     const ui = new URLSearchParams(location.search).get('ui');
     if (ui === 'v2') localStorage.setItem('obs-ui', 'v2');
-    if (ui === 'v1') localStorage.removeItem('obs-ui');
+    if (ui === 'v1') localStorage.setItem('obs-ui', 'v1');
     stored = localStorage.getItem('obs-ui');
   } catch (_) { /* storage blocked: query flag still works */ }
   root.__JJOONI_NAV_V2 = { ...api, active: false };
-  if (!enabled(location.search, stored)) return;
+  function addSwitch(target, label) {
+    const brand = document.querySelector('header.top .brand');
+    if (!brand || brand.querySelector('.obsSwitchUi')) return;
+    const anchor = document.createElement('a');
+    anchor.className = 'obsSwitchUi';
+    anchor.textContent = label;
+    anchor.setAttribute('aria-label', label);
+    anchor.href = '?ui=' + target + (location.hash || '');
+    anchor.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-left:12px;color:#d9eafa;font-size:12px;font-weight:650;text-decoration:underline;text-underline-offset:3px;vertical-align:middle';
+    anchor.addEventListener('click', () => { anchor.href = '?ui=' + target + (location.hash || ''); });
+    brand.appendChild(anchor);
+  }
+  if (!enabled(location.search, stored)) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => addSwitch('v2', '새 화면 V2로'));
+    else addSwitch('v2', '새 화면 V2로');
+    return;
+  }
 
   const css = `
 body.navV2 #tabs{display:none!important}
@@ -80,6 +95,7 @@ body.navV2 #tabs{display:none!important}
     bar.append(main, sub);
     tabs.parentNode.insertBefore(bar, tabs);
     document.body.classList.add('navV2');
+    addSwitch('v1', '구형 화면으로');
     sync();
     new MutationObserver(sync).observe(tabs, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
     root.__JJOONI_NAV_V2.active = true;
