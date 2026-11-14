@@ -14,7 +14,12 @@ def fixture():
     for key, tickers in (
         ("classic", list(SECTOR_KO)),
         ("kr_sector", list(KR_CATALOG)),
-        *[(k, [k.upper()]) for k in THEME_GROUPS],
+        ("semiconductor", ["SMH","SOXX"]),
+        ("software", ["IGV","SKYY","HACK"]),
+        ("biotech", ["XBI"]),
+        ("financial", ["KRE"]),
+        ("defense_infra", ["ITA","XAR","PAVE","XOP"]),
+        ("robotics", ["BOTZ","ROBO"]),
     ):
         rows = []
         for t in tickers:
