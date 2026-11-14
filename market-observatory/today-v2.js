@@ -80,7 +80,8 @@
     for (const c of fresh.critical_bad || []) if (['LIVE', 'LIVE_WITH_WARNINGS'].includes(fresh.overall)) alerts.push({ level: 'HIGH', title: '핵심 데이터 결함', body: String(c) });
     if (glance.consistency && glance.consistency.status && glance.consistency.status !== 'OK') alerts.push({ level: 'MID', title: '데이터 정합성 ' + glance.consistency.status, body: (glance.consistency.reasons || []).join(' · ') });
     for (const key of input.rebased || []) alerts.push({ level: 'MID', title: key + ' 전일 종가 보정', body: '장중 시세 원천의 전일 종가가 한 세션 늦어 확정 종가 기준으로 재계산' });
-    if (brief.report_date_kst && brief.report_date_kst !== today) alerts.push({ level: 'MID', title: '오늘 아침 시황 미게시', body: '최신 게시 ' + brief.report_date_kst });
+    if (brief.report_date_kst && brief.report_date_kst !== today && brief.market_date_us !== glance.us_session)
+      alerts.push({ level: 'MID', title: '오늘 아침 시황 미게시', body: '최신 게시 ' + brief.report_date_kst });
 
     const t = glance.tripod || {};
     const up = t.regime === '상승';
@@ -106,7 +107,9 @@
       verification: ndxVerified ? '공식 종가 검증됨' : '검증 보류 — NDX 공식 종가 미확인',
       next: [t.next_up, t.next_down].filter(Boolean) };
 
-    const ctx = { ndxVerified, today, freshness: fresh, usSession: glance.us_session };
+    const sourceFailed = (input.loadErrors || []).some(x => /^(freshness|glance)\b/.test(x));
+    const ctx = { ndxVerified: ndxVerified && !sourceFailed, today, freshness: sourceFailed ? {} : fresh,
+      usSession: glance.us_session };
     const groups = (glance.groups || []).map(g => ({ name: g.name, rows: (g.items || []).map(it => {
       const st = rowState(it, ctx);
       const unit = it.d1_bp != null ? 'bp' : it.d1_pt != null ? 'pt' : '%';
@@ -130,12 +133,18 @@
     const errors = Array.isArray(input.loadErrors) ? input.loadErrors : [];
     if (errors.length) alerts.push({ level: !input.glanceLoaded ? 'HIGH' : 'MID',
       title: '공개 데이터 재조회 실패', body: errors.join(', ') + ' · 이전 로드값은 최신 관측값이 아닙니다' });
+    const sector = summarizeSectors(input.sector);
+    if (sector.status === 'OK' && sector.groups[0].session !== glance.us_session) {
+      sector.status = 'UNVERIFIED';
+      sector.note = '미국 섹터 세션과 지수 세션이 달라 요약을 보류합니다. 원본의 시장일자를 확인하세요.';
+      sector.groups = [];
+    }
     return { alerts, judgment: { title: brief.title || '아침 시황 없음', date: brief.report_date_kst || '—',
         market: brief.market_date_us || '—', headline: glance.headline || '',
         firstPublished: brief.published_kst || null, revised,
         royStatus: roy.review_status === 'PENDING' ? '로이 전체 독립검토 대기' :
           (roy.review_status || '로이 검토 범위 미표시') },
-      tripod, groups, events, sectors: summarizeSectors(input.sector), session: glance.us_session || '—', today,
+      tripod, groups, events, sectors: sector, session: glance.us_session || '—', today,
       loadedAt: input.loadedAt || null,
       noTrade: '관찰용 · 자동주문 없음 · 공식 신호 확정 전 전환 금지' };
   }
@@ -231,7 +240,9 @@
       el('div', { class: 'tV2Vintage' },
         '최초 발행 ' + kstClock(vm.judgment.firstPublished)
         + ' · 최근 보강 ' + (vm.judgment.revised ? kstClock(vm.judgment.revised) : '없음')
-        + ' · ' + vm.judgment.royStatus),
+        + ' · ' + vm.judgment.royStatus + ' · 화면 조회 ' + kstClock(vm.loadedAt)),
+      el('button', { type: 'button', 'data-refresh': 'today',
+        style: 'align-self:flex-start;min-height:44px;padding:6px 12px;border:1px solid #c5d5e8;border-radius:8px;background:#f5f9ff;font-size:13px;font-weight:700;color:#173e6e' }, '오늘 정보 다시 확인'),
       vm.judgment.headline ? el('div', { style: 'font-size:13px;color:#3a4656' }, vm.judgment.headline) : null,
       el('button', { type: 'button', class: 'tV2Link', style: 'align-self:flex-start;min-height:44px;border:0;background:none;color:#175cd3;font:inherit;font-weight:700;cursor:pointer;padding:0', 'data-go': 'morning-brief' }, '아침 시황 전문 →'));
     const tp = vm.tripod;
@@ -286,6 +297,7 @@
     showForTab();
     wrap.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', () =>
       document.querySelector('#tabs button[data-tab="' + btn.dataset.go + '"]')?.click()));
+    wrap.querySelector('[data-refresh="today"]')?.addEventListener('click', () => root.__JJOONI_TODAY_V2.refresh?.());
     root.__JJOONI_TODAY_V2.rendered = true;
     root.__JJOONI_TODAY_V2.vm = vm;
   }
