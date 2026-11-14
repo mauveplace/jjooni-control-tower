@@ -167,3 +167,17 @@ test('no invented missing morning brief on a market-closed KST date with same co
   const vm = viewModel({ glance, brief: b, calendar }, NOW);
   assert.equal(vm.alerts.some(x => x.title === '오늘 아침 시황 미게시'), false);
 });
+
+
+test('Asian exchange cannot borrow US supplement provenance or official confidence', () => {
+  const g = { ...glance, groups: [
+    ...glance.groups,
+    { name: '기타 아시아', items: [{ key: 'NIKKEI225', label: '닛케이', date: '2026-11-11', value: 61000, d1_pct: 1 }] }
+  ] };
+  const fresh = { groups: { us_supplement: { state: 'LIVE', as_of: '2026-11-11', source: 'Yahoo US cash daily' } } };
+  const vm = viewModel({ glance: g, brief, freshness: fresh, calendar }, NOW);
+  const tokyo = vm.groups.at(-1).rows[0];
+  assert.equal(tokyo.state, 'ref');
+  assert.ok(!tokyo.provenance.includes('Yahoo US cash daily'));
+  assert.match(tokyo.provenance, /제공자 원장/);
+});
