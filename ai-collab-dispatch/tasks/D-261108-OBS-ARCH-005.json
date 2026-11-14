@@ -1,0 +1,71 @@
+{
+  "schema": "JJOONI_COLLAB_V3",
+  "task_id": "D-261108-OBS-ARCH-005",
+  "title": "Market Observatory end-to-end architecture audit — independent ROY review",
+  "requested_by": "JJOONI",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "future_optional_reviewers": [
+    "JJANGGU"
+  ],
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "snapshot_sha": "c19940c5d741952aadd5bc5ee0613b0d9a4ef555",
+  "scope": "Public Market Observatory only, not private Control Tower accounts or live trading",
+  "automatic_trigger_probe": {
+    "event": "pull_request.opened",
+    "require_actual_claude_session_evidence": true,
+    "do_not_claim_automatic_if_manual": true
+  },
+  "areas": [
+    "P0 source provenance, Yahoo monthly/quarterly bar look-ahead in TRI-POD signal replay; distinguish signal vs backtest vs UI",
+    "P0 collection-date and trading-session semantics: US/KR/JP FX rates, VIX close vs equity close, 24/7 crypto, market calendar, daily historical bars",
+    "P0 concurrent GitHub Actions writes, workflow_run chains, lock group mismatches and atomic multi-file publication",
+    "P1 publication assurance: main branch commit vs Pages deployed JSON vs live quotes endpoint; health/receipt provenance and generated_at freshness",
+    "P1 reliability and spend: number of workflows, cron overlap, redundant triggers, retries, watchdog, API rate limits, Pages build noise",
+    "P1 UI performance and mobile usability: loads, large files, long history on-demand, shared state, JS modules/chart rendering, touch interaction",
+    "P1 data observability: live vs stale and expected-session gates, independent source evidence, dashboards, alert quality",
+    "P2 architecture/maintainability: static Pages architecture vs API, refactoring to stable units, code ownership, testing, versioned schemas"
+  ],
+  "mandatory_source_files": [
+    "tools/build_tripod_comparison.py",
+    "tools/backfill_market_history_30y.py",
+    "tools/build_market_observatory.py",
+    "tools/publish_observatory_data.py",
+    "tools/audit_observatory_data.py",
+    "tools/build_observatory_freshness.py",
+    "tools/observatory_session.py",
+    "market-observatory/index.html",
+    "market-observatory/data-refresh-v1.js",
+    "market-observatory/observatory-v2.js",
+    "market-observatory/freshness-watchdog-v1.js",
+    ".github/workflows/market-observatory-daily.yml",
+    ".github/workflows/market-observatory-supplemental-freshness.yml",
+    ".github/workflows/market-observatory-close-watchdog.yml",
+    ".github/workflows/observatory-crypto-refresh.yml",
+    ".github/workflows/pages-controlled-deploy.yml",
+    "docs/pages-controlled-deployment.md"
+  ],
+  "acceptance": [
+    "Provide independently grounded severity P0/P1/P2 and concrete code path and line evidence, risk, remedial design and tests.",
+    "Clearly distinguish verified current bug, exposure/risk hypothesis, and unverified claim. Identify any false alarm in JJOONI findings.",
+    "Critique 47 workflow files, 31 root Observatory data entries, main-heavy output, short/long read paths and cost impact without inventing billing.",
+    "Trace 3 complete flows: (a) completed US close to published strategy UI, (b) crypto quote refreshed to live UI, (c) official macro calendar release to EOD date.",
+    "Provide top 5 quick wins (no prod change in this task) and 3 structural proposals with rollback/migration strategy.",
+    "Propose a limited regression test matrix, architecture contract, acceptance criteria and safe implementation staging.",
+    "Post exactly one GitHub top-level PR comment prefixed by exact one-line marker, then summary PASS/BLOCKED/NEEDS_DATA and source evidence."
+  ],
+  "comment_marker": "<!-- JJOONI-COLLAB-V3 task=D-261108-OBS-ARCH-005 actor=ROY snapshot=c19940c5d741952aadd5bc5ee0613b0d9a4ef555 -->",
+  "forbidden": [
+    "Any code modification or branch push",
+    "Changing data pipelines or published JSON",
+    "Production deploy or Pages switch",
+    "Broker trades or account/MAIOS access",
+    "Cloud Run, paid model API keys, paid background infrastructure",
+    "Reading or publishing credentials, private account or customer data",
+    "Asserting unattended event trigger without independently available run metadata"
+  ],
+  "status": "AWAITING_ROY",
+  "created_kst": "2026-11-08"
+}
