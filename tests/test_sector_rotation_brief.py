@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_sector_rotation_brief import make_digest, SECTOR_KO, KR_CATALOG, THEME_GROUPS
+from render_sector_rotation_brief import render
 
 
 def fixture():
@@ -81,6 +82,20 @@ class ExistingVerticalSectorSSOT(unittest.TestCase):
         self.assertEqual(d["quality"]["us_classic_coverage"], 11)
         self.assertEqual(d["quality"]["kr_sector_coverage"], 0)
         self.assertEqual(d["completed_cutoffs"]["KR"], "2026-11-12")
+
+    def test_full_vertical_markdown_has_all_34_rows_and_no_fixed_companies(self):
+        txt = render(make_digest(fixture()))
+        self.assertEqual(txt.count("| 원장 확인 대기 |"), 0)
+        self.assertIn("**미국 S&P500 11개 업종**", txt)
+        self.assertIn("**한국 10개 섹터 ETF**", txt)
+        self.assertIn("**주요 테마 ETF", txt)
+        self.assertIn("**수익률 기반 추정**", txt)
+        self.assertIn("| 기술 · XLK | +2.00% | -0.98% | -2.98%p", txt)
+        for ticker in (*SECTOR_KO, *KR_CATALOG):
+            self.assertEqual(txt.count("· " + ticker + " |"), 1)
+        self.assertNotIn("NVIDIA", txt)
+        self.assertEqual(sum(line.startswith("| ") and " · " in line and
+                             ("| +2.00%" in line) for line in txt.splitlines()), 34)
 
     def test_public_source_contract_and_sector_registry_are_fail_closed(self):
         s = fixture()
