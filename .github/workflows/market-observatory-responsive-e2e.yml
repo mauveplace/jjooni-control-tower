@@ -68,7 +68,7 @@ jobs:
               const page=await browser.newPage({viewport:{width:tc.width,height:tc.height}});
               const errors=[];
               page.on('pageerror',e=>errors.push(String(e)));
-              await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle',timeout:120000});
+              await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'networkidle',timeout:120000});
               await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_UI?.responsive===true,{timeout:30000});
               await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile strong').length>10);
               const yields=await page.locator('#latestBoardGrid .latestTile').filter({hasText:/미국 (3개월|2Y|10Y|30Y)/}).locator('strong').allTextContents();
