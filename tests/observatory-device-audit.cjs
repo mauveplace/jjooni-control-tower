@@ -15,7 +15,8 @@ const smoke=process.env.OBS_PUBLIC_SMOKE==='1';
   // commit. Wait for the exact versioned assets without lowering the contract:
   // a missing deployment still fails after a bounded publication window.
   for(let attempt=0;attempt<25;attempt++){
-   const target=new URL(base);if(attempt)target.searchParams.set('ui_verify',Date.now());
+   const target=new URL(base);target.searchParams.set('ui','v1'); // legacy visual/metrics audit stays a deliberate rollback test
+   if(attempt)target.searchParams.set('ui_verify',Date.now());
    await page.goto(target.href,{waitUntil:'networkidle',timeout:90000});
    const scripts=await page.locator('script[src]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));
    const missing=expected.filter(src=>!scripts.includes(src));
