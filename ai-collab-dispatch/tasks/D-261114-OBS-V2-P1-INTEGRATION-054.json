@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-OBS-V2-P1-INTEGRATION-054",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "User 2026-11-14 explicitly requested all previously reported Observatory UI UX P1 improvements at once. This PR implements V2 opt-in data on-view refresh without polling, report latest revision and partial ROY display, 34 original vertical sector source summary with current and prior completed daily returns linking original sectors and issuer ④/⑤ report, mobile bottom 5 tabs with 44px hit target and safe area, strict same-session issuer official-source status and failed source protection, no-trade. Request ROY independent substantive review of current exact PR HEAD with code and UI evidence; previous audit issue #470 remains original coordination thread. No default V2 switch or private data.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "observatory_ui_ux_p1_integrated_implementation",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Explicit 2026-11-14 current user message: 'p1까지 지금 한번에 정리해'. Earlier standing direction makes JJOONI responsible for safe routine code corrections, CI, merger and deployment without separate approval. The V1 default remains intact and all new UI code only affects opt-in V2; irreversible default switch excluded.",
+  "acceptance": [
+    "Confirm V1 default and v1 rollback unchanged, V2 mobile bottom safe-area 5 tabs; 44px minimum subnav targets; all 13 legacy hash destinations retained and responsive 390/1363 tested.",
+    "Verify on-view and manual refresh re-read five PUBLIC sources only when needed; never change data ingestion frequency, contract, source freshness or execute orders. Fetch failure cannot masquerade as fresh officially verified data, shows previous cache as stale.",
+    "Check NDX verified mark strictly needs brief close-check plus market LIVE same session; Treasury row official only matching source=U.S. Treasury official, as_of current row date, state LIVE. Source group tooltip text and KR same-day completed status valid.",
+    "Verify exactly 34 source-matched original sector rows, 11 US+10 KR+13 theme, 3 completed bars and US/KR separate dates; summary picks 2 each largest signed return-change in US/KR from original sectors, not invented cash flows.",
+    "Check 11/14 morning brief initial published 06:32 vs latest 12:04 revision and actual ROY PARTIAL review status not flattened to PASS; link full ④/⑤ company-event report and original sector screen.",
+    "Confirm missing/corrupted source/sector session conflicts are visibly marked UNVERIFIED rather than fake 34 highlights. Test official no-current-source gates.",
+    "Review exact code head and run CI + Playwright tests; provide at least two concrete ROY new independent findings, any fixes, ROY_UI_AUDIT=PASS|NEEDS_CHANGES|BLOCKED on pull request and #470, never fabricated."
+  ],
+  "forbidden": [
+    "No account/PB/portfolio/individual trading or private Plaud/customer data",
+    "No changing TRI-POD signal logic or market SSOT, no relaxing official price/freshness gates",
+    "No silent switching v1 default to v2 without full E2E + risk review, no new external infra/spend",
+    "No fabricating ROY identity, live browser screenshots, or PASS; no duplicate issue storm"
+  ],
+  "coordination_notes": "Use existing ROY UX audit issue #470 and historic #403; no separate duplicate issue. Review latest P1 PR exact HEAD; audit independently across 390/1363 if browser accessible, otherwise BROWSER_UNVERIFIED. Request reviewer challenge to design and test, not ceremonial PASS. Relate to previously merged P0 alert PR #469."
+}
