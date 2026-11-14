@@ -7,6 +7,11 @@ on:
       - market-observatory/sector-etf-v1.js
       - market-observatory/index.html
       - market-observatory/data/sector-etf.json
+      - market-observatory/data/sector-rotation-brief.json
+      - market-observatory/data/sector-rotation-brief.md
+      - tools/build_sector_rotation_brief.py
+      - tools/render_sector_rotation_brief.py
+      - tests/test_sector_rotation_brief.py
       - tools/build_observatory_sector_etf.py
       - .github/workflows/market-observatory-sector-qa.yml
   workflow_dispatch:
@@ -75,6 +80,21 @@ jobs:
           assert '<section class="panel" id="sectors">' in html,'static sector panel missing'
           assert html.find('data-tab="sectors"') < html.find('data-tab="tripod"'),'sector tab order broken'
           assert html.find('id="sectors"') < html.find('id="tripod"'),'sector panel order broken'
+          # NO second data provider/API. Old 11+10+13 vertical catalog must
+          # match this same source and generated clock atomically.
+          digest=json.load(open('market-observatory/data/sector-rotation-brief.json',encoding='utf-8'))
+          assert digest['schema']=='JJOONI_SECTOR_ROTATION_BRIEF_V1'
+          assert digest['source_generated_kst']==d['generated_kst'],'SECTOR_ROTATION_SOURCE_CLOCK'
+          assert digest['completed_cutoffs']==d['completed_cutoffs'],'SECTOR_ROTATION_CUTOFF'
+          assert digest['quality']['us_classic_expected']==11
+          assert digest['quality']['kr_sector_expected']==10
+          assert [len(g['rows']) for g in digest['groups']]==[11,10,2,3,1,1,4,2],'SECTOR_ALL_34'
+          from tools.build_sector_rotation_brief import make_digest
+          from tools.render_sector_rotation_brief import render
+          assert digest==make_digest(d),'SECTOR_DIGEST_SOURCE_MISMATCH'
+          md=Path('market-observatory/data/sector-rotation-brief.md').read_text(encoding='utf-8')
+          assert md==render(digest),'SECTOR_MARKDOWN_SOURCE_MISMATCH'
+          print('SECTOR_ROTATION_34_SOURCE_CONTRACT=PASS')
           print('SECTOR_ETF_CONTRACT=PASS')
           print('horizons=',d['horizons_sessions'],'sparkline_series_min=',min(len(d['series'][r['ticker']]) for r in theme_rows),'as_of_date=',d['as_of_date'],'classic=',len(classic),'priced=',d['summary']['priced_count'],'errors=',d['quality']['fetch_error_count'])
           PY
