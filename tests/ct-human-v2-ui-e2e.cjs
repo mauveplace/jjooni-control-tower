@@ -35,7 +35,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    await page.waitForSelector('#ctHumanQuickV2');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'+₩100');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
-   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric small').first().innerText(),'동일 기간 4계좌 확인');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric small').first().innerText(),'동일 기간 4계좌 · 증권사 실측');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
     assert(await nav.isVisible(),'V2 bottom navigation visible on '+width);
