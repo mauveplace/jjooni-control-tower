@@ -36,6 +36,7 @@
       return ctx.ndxVerified && item.date === ctx.usSession && freshAligned ? 'official' : 'hold';
     }
     if (OFFICIAL_KEYS.has(item.key)) {
+      if (group && group.state !== 'LIVE') return 'delay';
       return freshAligned && String(group.source || '').startsWith('U.S. Treasury official') ? 'official' : 'ref';
     }
     if (group && group.state !== 'LIVE') return 'delay';
