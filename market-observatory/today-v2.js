@@ -270,7 +270,7 @@
         ...g.rows.map(x => el('div', { class: 'tV2SectorRow' },
           el('div', null, el('strong', null, x.label + ' · ' + x.ticker),
             el('small', null, fmtPct(x.previous, true) + ' → ' + fmtPct(x.current, true))),
-          el('b', null, fmtPoint(x.delta) + 'p')))) : []),
+          el('b', null, fmtPoint(x.delta) + 'p'))))) : []),
       el('div', { class: 'tV2SectorNote' }, sector.note),
       el('div', { class: 'tV2SectorBtns' },
         el('button', { type: 'button', 'data-go': 'sectors' }, '34개 업종 전체 보기'),
