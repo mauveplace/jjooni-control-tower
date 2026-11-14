@@ -13,6 +13,9 @@ on:
       - tests/test_observatory_session.py
       - tools/publish_observatory_data.py
       - tools/build_observatory_sector_etf.py
+      - tools/build_sector_rotation_brief.py
+      - tools/render_sector_rotation_brief.py
+      - tests/test_sector_rotation_brief.py
       - tools/build_fed_watch.py
       - tools/postprocess_market_observatory.py
       - tools/backfill_market_history_30y.py
@@ -139,7 +142,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): recover sector snapshots' market-observatory/data/sector-etf.json
+          python tools/publish_observatory_data.py --message 'data(observatory): recover sector snapshots' market-observatory/data/sector-etf.json market-observatory/data/sector-rotation-brief.json market-observatory/data/sector-rotation-brief.md
 
   hourly_refresh:
     concurrency:
@@ -240,7 +243,7 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet 'curl_cffi>=0.7,<1' -r tools/requirements-observatory.txt
           python -m unittest discover -s tests -p 'test*.py' -v
-          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/calendar_market_events.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
+          python -m py_compile tools/build_market_observatory.py tools/build_observatory_sector_etf.py tools/build_sector_rotation_brief.py tools/render_sector_rotation_brief.py tools/build_fed_watch.py tools/postprocess_market_observatory.py tools/backfill_market_history_30y.py tools/enrich_economic_calendar.py tools/refresh_official_central_bank_actuals.py tools/persist_calendar_history.py tools/archive_calendar_actuals.py tools/calendar_market_events.py tools/add_observatory_equities.py tests/test_market_observatory_completed_session.py tests/test_calendar_market_semantics.py tests/test_calendar_data_quality.py
           python tests/test_market_observatory_completed_session.py
           python tests/test_calendar_market_semantics.py
           python tools/build_market_observatory.py
@@ -251,6 +254,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_observatory_crypto.py'
           python tools/add_observatory_equities.py
           python tools/build_observatory_sector_etf.py
+          python -m unittest discover -s tests -p test_sector_rotation_brief.py -v
           python - <<'PY'
           import sys
           sys.path.insert(0,'tools')
@@ -396,7 +400,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json $(find market-observatory/data/fedwatch-history -type f | sort)
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh latest market board calendar sectors and FedWatch' market-observatory/data/observatory.json market-observatory/data/daily-market-pulse.json public-market-daily.json market-observatory/data/economic-calendar.json market-observatory/data/history-30y.json market-observatory/data/sector-etf.json market-observatory/data/sector-rotation-brief.json market-observatory/data/sector-rotation-brief.md market-observatory/data/fed-watch.json market-observatory/data/fedwatch-official.json market-observatory/data/ai-read-contract.json market-observatory/data/calendar-manual-overrides.json market-observatory/data/calendar-official-release-cache.json $(find market-observatory/data/fedwatch-history -type f | sort)
 
 
 

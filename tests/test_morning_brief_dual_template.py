@@ -5,9 +5,24 @@ import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"tools"))
 from validate_morning_brief import validate_dual_market_template
+from build_sector_rotation_brief import SECTOR_KO, KR_CATALOG
 
 MARKET_DAY="2026-11-13"
 def fixture():
+    theme_tickers = ('SMH','SOXX','IGV','SKYY','HACK','XBI','KRE',
+                     'ITA','XAR','PAVE','XOP','BOTZ','ROBO')
+    vertical = ("**송팀장 Sector Observatory · 전체 업종 강약**\\n"
+                "수익률 기반 추정 · 실제 투자자 순유입/순매수 금액 아님\\n"
+                "미국 S&P500 11개 업종 · 2026-11-13 완료\\n")
+    vertical += ''.join(f"| {SECTOR_KO[ticker]} · {ticker} | 미확인 | 미확인 | 원장 지연 |\\n"
+                        for ticker in SECTOR_KO)
+    vertical += "한국 10개 섹터 ETF · 2026-11-13 완료\\n"
+    vertical += ''.join(f"| 한국업종 · {ticker} | 미확인 | 미확인 | 원장 지연 |\\n"
+                        for ticker in KR_CATALOG)
+    vertical += "주요 테마 ETF · 2026-11-13 완료\\n"
+    vertical += ''.join(f"| 테마 · {ticker} | 미확인 | 미확인 | 원장 지연 |\\n"
+                        for ticker in theme_tickers)
+    vertical=vertical.replace('\\n','\n')
     body=("## ① 오늘의 시장 이야기\n가상 예제\n"
           "## ② 시장 한눈에\n"
           "| 자산 | 종가·수준 | 검증상태 |\n"
@@ -18,19 +33,15 @@ def fixture():
           "| MA250 | 27,505.80 | 원장 참고 |\n"
           "| DD52W | -10.51% | 원장 참고 |\n"
           "## ③ 핵심 이슈 깊이 읽기\n"
-          "## ④ 글로벌·한국 시장\n"
-          "**섹터 강약 비교(전일→당일)**\n"
-          "수익률 기반 추정 · 실제 자금 순유입은 확인하지 않음\n"
-          "| 섹터·대표 지표 | 전일 수익률 (%) | 당일 수익률 (%) | 변화(pp) | 해석 |\n"
-          "|---|---:|---:|---:|---|\n"
-          "| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |\n"
+          "## ④ 글로벌·한국 시장\n" + vertical +
           "## ⑤ AI 산업·기업실적\n"
-          "**송팀장 관심기업 업데이트**\n"
-          "NVIDIA / CoreWeave / Oracle / Nebius / Microsoft 중 당일 주요 이슈 선택; NO_MATERIAL_CHANGE\n"
+          "**시장 전체 주요 기업 이벤트 · 발생 시 분석**\n"
+          "나스닥100·시장 전체 주요 공시 확인 범위: 원천 조회 후 확인.\n"
+          "NO_MATERIAL_EVENTS_CONFIRMED · 확인 범위의 중대 새 사건 없음\n"
           "## ⑥ 주요 일정\n"
           "## ⑦ 투자전략·위험점검·복기\n"
-          "**기업·섹터 연결 해석**\n"
-          "실적과 이틀 수익률 방향의 관계를 조건부 설명\n"
+          "**업종 주도권 변화 · 원인과 다음 확인**\n"
+          "각 업종 방향 변화와 확인할 조건\n"
           "## ⑧ 원천·데이터 감사\nROY 검토 대기")
     day={"report_date_kst":"2026-11-15","market_date_us":MARKET_DAY,
          "body_markdown":body,
@@ -196,33 +207,77 @@ class DualTemplateV2(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError,"ROY_NO_INDEPENDENT_PRICE_PROOF"):
             validate_dual_market_template(d,c)
 
-    def test_lite_two_session_sector_and_company_blocks_required(self):
-        for needle,reason in [
-            ('**섹터 강약 비교(전일→당일)**','TWO_SESSION_SECTOR_BLOCK_REQUIRED'),
-            ('수익률 기반 추정','SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'),
-            ('**송팀장 관심기업 업데이트**','SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'),
-            ('**기업·섹터 연결 해석**','COMPANY_SECTOR_LINK_REQUIRED')]:
+    def test_full_vertical_sector_board_not_five_etfs(self):
+        d,contract=fixture()
+        validate_dual_market_template(d,contract)
+        for token,reason in [
+            ('**송팀장 Sector Observatory · 전체 업종 강약**','EXISTING_VERTICAL_SECTOR_BOARD_REQUIRED'),
+            ('수익률 기반 추정','SECTOR_PRICE_IS_NOT_CASH_FLOW'),
+            ('미국 S&P500 11개 업종','FULL_SECTOR_CATEGORY_MISSING'),
+            ('한국 10개 섹터 ETF','FULL_SECTOR_CATEGORY_MISSING'),
+            ('주요 테마 ETF','FULL_SECTOR_CATEGORY_MISSING'),
+            ('**업종 주도권 변화 · 원인과 다음 확인**','ROTATION_INTERPRETATION_REQUIRED'),
+        ]:
             d,contract=fixture()
-            d['body_markdown']=d['body_markdown'].replace(needle,'')
+            d['body_markdown']=d['body_markdown'].replace(token,'')
             with self.assertRaisesRegex(AssertionError,reason):
                 validate_dual_market_template(d,contract)
 
-    def test_lite_sector_table_headers_and_one_row_required(self):
-        d,contract=fixture()
-        d['body_markdown']=d['body_markdown'].replace('전일 수익률','과거 수익률')
-        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_TABLE_REQUIRED'):
-            validate_dual_market_template(d,contract)
-        d,contract=fixture()
-        d['body_markdown']=d['body_markdown'].replace(
-            '| 반도체(SOX) | 미확인 | 미확인 | 미확인 | 원장 일봉 부족 |','')
-        with self.assertRaisesRegex(AssertionError,'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'):
-            validate_dual_market_template(d,contract)
+    def test_each_separate_sector_row_is_mandatory(self):
+        for ticker in ('XLK','XLV','XLRE','091160','117700','266410','SMH','XBI','ROBO'):
+            d,contract=fixture()
+            d['body_markdown']=d['body_markdown'].replace(f"| 한국업종 · {ticker} | 미확인 | 미확인 | 원장 지연 |",'' )
+            d['body_markdown']=d['body_markdown'].replace(f"| 테마 · {ticker} | 미확인 | 미확인 | 원장 지연 |",'' )
+            d['body_markdown']=d['body_markdown'].replace(
+                f"| {SECTOR_KO.get(ticker,'N/A')} · {ticker} | 미확인 | 미확인 | 원장 지연 |",'')
+            with self.assertRaisesRegex(AssertionError,'VERTICAL_SECTOR_ROW_MISSING_OR_DUPLICATE'):
+                validate_dual_market_template(d,contract)
 
-    def test_lite_no_optional_flow_earnings_arrays_needed(self):
+    def test_company_names_not_mandatory_in_quiet_session(self):
         d,contract=fixture()
+        self.assertNotIn('NVIDIA',d['body_markdown'])
+        self.assertNotIn('CoreWeave',d['body_markdown'])
         self.assertNotIn('sector_flows',contract)
         self.assertNotIn('earnings_events',contract)
         validate_dual_market_template(d,contract)
+
+    def test_dynamic_nasdaq100_not_fixed_song_watchlist(self):
+        day, contract = fixture()
+        self.assertNotIn('NVIDIA', day['body_markdown'])
+        self.assertNotIn('CoreWeave', day['body_markdown'])
+        validate_dual_market_template(day, contract)
+
+    def test_marketwide_event_scan_cannot_be_silently_omitted(self):
+        for needle,code in [
+            ('**시장 전체 주요 기업 이벤트 · 발생 시 분석**','EVENT_DRIVEN_COMPANY_SCAN_REQUIRED'),
+            ('나스닥100','NASDAQ100_SCREEN_SCOPE_REQUIRED'),
+            ('NO_MATERIAL_EVENTS_CONFIRMED','EVENT_SCREENING_STATE_REQUIRED'),
+        ]:
+            day, contract = fixture()
+            day['body_markdown'] = day['body_markdown'].replace(needle,'')
+            with self.assertRaisesRegex(AssertionError,code):
+                validate_dual_market_template(day, contract)
+
+    def test_material_event_with_no_primary_evidence_is_blocked(self):
+        day, contract = fixture()
+        day['body_markdown'] = day['body_markdown'].replace('NO_MATERIAL_EVENTS_CONFIRMED','MATERIAL_EVENTS_FOUND')
+        with self.assertRaisesRegex(AssertionError,'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'):
+            validate_dual_market_template(day, contract)
+        day['body_markdown'] = day['body_markdown'].replace(
+            'MATERIAL_EVENTS_FOUND · 확인 범위의 중대 새 사건 없음',
+            'MATERIAL_EVENTS_FOUND · 새 이슈 / 공식 원문 https://www.sec.gov/')
+        with self.assertRaisesRegex(AssertionError,'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'):
+            validate_dual_market_template(day, contract)
+        day['body_markdown'] = day['body_markdown'].replace(
+            'MATERIAL_EVENTS_FOUND · 새 이슈 / 공식 원문 https://www.sec.gov/',
+            'MATERIAL_EVENTS_FOUND · NVIDIA CEO 인사 / 공식 원문 https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-CEO-Transition/')
+        validate_dual_market_template(day, contract)
+
+    def test_incomplete_scan_is_truthfully_disclosed(self):
+        day, contract = fixture()
+        day['body_markdown'] = day['body_markdown'].replace('NO_MATERIAL_EVENTS_CONFIRMED',
+                                                              'SCREENING_INCOMPLETE')
+        validate_dual_market_template(day, contract)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
         d,c=fixture();d["report_date_kst"]="2026-11-14"

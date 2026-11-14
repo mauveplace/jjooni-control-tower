@@ -394,6 +394,14 @@ def build(now=None):
 
 def main():
     out = build()
+    # Same completed-bar source as the existing vertical Sector Observatory.
+    # Derive a small morning-report digest WITHOUT a new price/API call.
+    from build_sector_rotation_brief import make_digest, OUTPUT as ROTATION_OUT
+    rotation = make_digest(out)
+    ROTATION_OUT.write_text(json.dumps(rotation, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    from render_sector_rotation_brief import render, OUTPUT_MD
+    OUTPUT_MD.write_text(render(rotation), encoding='utf-8')
+    print('OBSERVATORY_SECTOR_ROTATION=PASS US='+str(rotation['quality']['us_classic_coverage'])+'/11 KR='+str(rotation['quality']['kr_sector_coverage'])+'/10')
     print('OBSERVATORY_SECTOR_ETF_BUILD=PASS')
     print('generated_kst=' + out['generated_kst'])
     print('as_of_date=' + str(out.get('as_of_date')))
