@@ -63,7 +63,7 @@ test('verified NDX removes the alert and marks the row official', () => {
 });
 
 test('rebased quotes, stale brief and freshness problems become alerts', () => {
-  const vm = viewModel({ glance, brief: { ...brief, report_date_kst: '2026-11-11' }, freshness: { overall: 'STALE', critical_bad: ['US_CLOSE'] }, calendar, rebased: ['KOSDAQ'] }, NOW);
+  const vm = viewModel({ glance, brief: { ...brief, report_date_kst: '2026-11-11', market_date_us: '2026-11-10' }, freshness: { overall: 'STALE', critical_bad: ['US_CLOSE'] }, calendar, rebased: ['KOSDAQ'] }, NOW);
   const titles = vm.alerts.map(a => a.title);
   assert.ok(titles.includes('KOSDAQ 전일 종가 보정'));
   assert.ok(titles.includes('오늘 아침 시황 미게시'));
