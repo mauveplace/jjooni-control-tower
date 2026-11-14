@@ -1,0 +1,46 @@
+name: Investment Decision Ledger Contract
+
+on:
+  pull_request:
+    paths:
+      - 'investment-decisions/**'
+      - 'tools/decision_ledger.py'
+      - 'tests/test_decision_ledger.py'
+      - '.github/workflows/investment-decision-ledger.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'investment-decisions/**'
+      - 'tools/decision_ledger.py'
+      - 'tests/test_decision_ledger.py'
+      - '.github/workflows/investment-decision-ledger.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: investment-decision-ledger-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate ledger schema and public-privacy guard
+        run: python tools/decision_ledger.py
+      - name: Enforce append-only against PR base
+        if: github.event_name == 'pull_request'
+        run: python tools/decision_ledger.py --base "origin/${{ github.base_ref }}"
+      - name: Enforce append-only against previous main commit
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: python tools/decision_ledger.py --base "${{ github.event.before }}"
+      - name: Unit tests
+        run: python -m unittest tests/test_decision_ledger.py -v

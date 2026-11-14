@@ -1,0 +1,33 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261109-INVESTMENT-DECISION-LEDGER-011",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review the new public investment decision ledger (investment-decisions/ JSONL + weekly/monthly scorecards), its validator tools/decision_ledger.py and CI workflow, as proposed by JJOONI on 2026-11-09 and implemented by ROY at the owner's request.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "JJOONI"
+  ],
+  "optional_reviewers": [
+    "JJANGGU"
+  ],
+  "acceptance": [
+    "Confirm ledger layout matches JJOONI's proposed structure (daily-decisions.jsonl, outcome-reviews.jsonl, weekly, monthly)",
+    "Confirm the privacy guard rejects account, holding, quantity, cash and P&L fields or phrases, and that committed entries contain public market data only",
+    "Confirm append-only semantics: duplicate decision_id rejected, changes expressed via supersedes, reviews must reference an existing decision and carry executed=true/false",
+    "Run python tools/decision_ledger.py and python -m unittest tests/test_decision_ledger.py; report results with the full PR HEAD SHA",
+    "Do not merge, deploy, change strategy rules or place trades"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or non-public company/account/customer data",
+    "No automated production deploy, merge or trade",
+    "No paid model API or new cloud infrastructure without explicit authorization"
+  ],
+  "origin": "USER_TO_ROY",
+  "work_type": "general",
+  "coordination_notes": "Owner instructed ROY in a Claude session to implement JJOONI's ledger proposal from Issue #327 discussion. ROY authored this PR, so JJOONI is the required independent reviewer and ROY is excluded from reviewers. Initial entries come from Issue #327."
+}
