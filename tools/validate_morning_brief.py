@@ -176,7 +176,7 @@ def validate_dual_market_template(d, contract):
                         if 'https://' in line and
                         any(tag in line for tag in ('원문', '공식', '공시', 'IR', '출처'))]
         proof_urls = [url for line in issuer_lines
-                      for url in re.findall(r'https://[^\\s)<>]+', line)]
+                      for url in re.findall(r'https://[^\s)<>]+', line)]
         proof_urls = [url.rstrip('.,;') for url in proof_urls]
         assert any(_issuer_urlparse(url).scheme == 'https' and
                    _issuer_urlparse(url).hostname not in ('example.com','localhost','test.com') and
