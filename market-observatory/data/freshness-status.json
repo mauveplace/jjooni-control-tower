@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-14T10:25:30+09:00",
+  "generated_kst": "2026-11-14T11:15:44+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -111,19 +111,19 @@
     },
     "crypto": {
       "label": "Crypto fallback snapshot",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-11-14T09:56:03+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=1769s · ETHUSD age=1769s",
+      "detail": "BTCUSD age=4783s · ETHUSD age=4783s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-14T09:56:01+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-14T09:56:01+09:00"
         }
       },
@@ -187,8 +187,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-14T09:55:51+09:00",
-      "as_of": "2026-11-14T09:55:51+09:00",
+      "generated_kst": "2026-11-14T11:15:29+09:00",
+      "as_of": "2026-11-14T11:15:29+09:00",
       "detail": "events=199 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -210,7 +210,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-14T10:25:30+09:00",
+      "generated_kst": "2026-11-14T11:15:44+09:00",
       "as_of": "2026-11-13",
       "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
