@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from build_sector_rotation_brief import OUTPUT, ROOT
+try:
+    from build_sector_rotation_brief import OUTPUT, ROOT
+except ModuleNotFoundError:
+    # The Sector QA contract imports tools.render_sector_rotation_brief as a package.
+    from tools.build_sector_rotation_brief import OUTPUT, ROOT
 
 OUTPUT_MD = ROOT / "market-observatory/data/sector-rotation-brief.md"
 ORDER = ("classic", "kr_sector", "semiconductor", "software", "biotech",
