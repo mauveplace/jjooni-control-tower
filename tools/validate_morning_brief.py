@@ -169,9 +169,19 @@ def validate_dual_market_template(d, contract):
     assert ('나스닥100' in earnings or 'NASDAQ-100' in earnings or 'NASDAQ100' in earnings), 'NASDAQ100_SCREEN_SCOPE_REQUIRED'
     assert any(s in earnings for s in ('원천', '출처', '조회', '확인 범위', '탐색 범위')), 'EVENT_SCREENING_SOURCE_DISCLOSURE_REQUIRED'
     if event_states[0] == 'MATERIAL_EVENTS_FOUND':
-        # Require an actual linked source for at least one event, not a named
-        # daily watchlist. Market event importance is editorially assessed.
-        assert _search(r'https://[^\s)]+', earnings), 'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'
+        # A generic SEC homepage or an unrelated article in a footer is not
+        # evidence that a market-moving issuer EVENT was actually disclosed.
+        from urllib.parse import urlparse as _issuer_urlparse
+        issuer_lines = [line for line in earnings.splitlines()
+                        if 'https://' in line and
+                        any(tag in line for tag in ('원문', '공식', '공시', 'IR', '출처'))]
+        proof_urls = [url for line in issuer_lines
+                      for url in re.findall(r'https://[^\\s)<>]+', line)]
+        proof_urls = [url.rstrip('.,;') for url in proof_urls]
+        assert any(_issuer_urlparse(url).scheme == 'https' and
+                   _issuer_urlparse(url).hostname not in ('example.com','localhost','test.com') and
+                   len(_issuer_urlparse(url).path.strip('/')) >= 12
+                   for url in proof_urls), 'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'
     # Company coverage intentionally has NO ticker/name obligation: a major
     # NASDAQ100 or any other company event is eligible even if Song never
     # mentioned the issuer. No filler on quiet sessions.
