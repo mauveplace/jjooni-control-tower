@@ -1,14 +1,14 @@
 {
   "available_from": "2016-11-16",
-  "available_to": "2026-11-13",
+  "available_to": "2026-11-14",
   "backfill": {
-    "canonical_rows_matched": 3,
-    "checked_kst": "2026-11-12T15:16:49+09:00",
+    "canonical_rows_matched": 5,
+    "checked_kst": "2026-11-14T11:55:03+09:00",
     "coverage_scope": "FETCHED_WEEKS_NOT_PER_SERIES_COMPLETENESS",
     "errors": [],
     "failed_weeks": [],
-    "generic_rows_retained": 47,
-    "previous_available_from": "2016-11-14",
+    "generic_rows_retained": 58,
+    "previous_available_from": "2016-11-16",
     "recent_completed_weeks": [
       "2016-10-16",
       "2016-11-13",
@@ -72,11 +72,11 @@
       "2026-10-25",
       "2026-11-01"
     ],
-    "requested_window_start": "2016-11-14",
+    "requested_window_start": "2016-11-16",
     "resumable": true,
     "rows_inserted": 21,
-    "rows_merged": 29,
-    "rows_parsed": 64,
+    "rows_merged": 42,
+    "rows_parsed": 63,
     "source_count": 1,
     "source_pattern": "https://www.forexfactory.com/calendar?week=<week>",
     "weeks_fetched": 1,
@@ -87,9 +87,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-14T11:54:59+09:00",
+  "generated_kst": "2026-11-14T11:55:03+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37834,
+  "row_count": 37855,
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -12695,17 +12695,17 @@
     },
     "FF::AU::cb-leading-index-m-m": {
       "available_from": "2016-11-22",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 122,
       "country": "AU",
       "event_title": "CB Leading Index m/m",
       "kind": "event",
       "label": "CB Leading Index m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -12721,7 +12721,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 11
+          "2026": 12
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -15325,6 +15325,23 @@
           "source_tier": "MARKET_FEED",
           "source_time": "10:30am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.0%",
+          "canonical_match": false,
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T00:30+09:00",
+          "label": "CB Leading Index m/m",
+          "previous": "-0.5%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "8:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -41606,7 +41623,9 @@
           "actual": "5.3%",
           "canonical_match": false,
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T04:00+09:00",
+          "datetime_kst": "2026-11-12T09:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-11",
           "label": "MI Inflation Expectations",
           "previous": "5.3%",
           "previous_source": "ForexFactory historical calendar",
@@ -41614,8 +41633,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:00pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:00pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -49458,7 +49477,7 @@
           "actual": "-15",
           "canonical_match": false,
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T04:30+09:00",
+          "datetime_kst": "2026-11-10T09:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "NAB Business Confidence",
@@ -49468,8 +49487,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -65700,7 +65719,7 @@
           "actual": "-2.7%",
           "canonical_match": false,
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T03:30+09:00",
+          "datetime_kst": "2026-11-10T08:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Westpac Consumer Sentiment",
@@ -65710,8 +65729,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -66880,7 +66899,7 @@
       "label": "Building Permits m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
@@ -69715,13 +69734,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "-4.1%",
           "canonical_match": false,
           "consensus": "-4.0%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T17:30+09:00",
+          "datetime_kst": "2026-11-12T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Building Permits m/m",
           "previous": "8.8%",
           "previous_source": "ForexFactory historical calendar",
@@ -69729,8 +69750,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -104522,19 +104543,19 @@
     },
     "FF::CA::manufacturing-sales-m-m": {
       "available_from": "2016-11-16",
-      "available_to": "2026-10-15",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 121,
       "country": "CA",
       "event_title": "Manufacturing Sales m/m",
       "kind": "event",
       "label": "Manufacturing Sales m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 121,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 35,
         "rows_by_year": {
@@ -104548,7 +104569,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -107389,6 +107410,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "8:30am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.0%",
+          "canonical_match": false,
+          "consensus": "0.1%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T22:30+09:00",
+          "label": "Manufacturing Sales m/m",
+          "previous": "1.8%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -129302,19 +129343,19 @@
     },
     "FF::CA::wholesale-sales-m-m": {
       "available_from": "2016-11-21",
-      "available_to": "2026-10-15",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 121,
       "country": "CA",
       "event_title": "Wholesale Sales m/m",
       "kind": "event",
       "label": "Wholesale Sales m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 121,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 35,
         "rows_by_year": {
@@ -129328,7 +129369,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -132167,6 +132208,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "8:30am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.7%",
+          "canonical_match": false,
+          "consensus": "0.5%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T22:30+09:00",
+          "label": "Wholesale Sales m/m",
+          "previous": "-1.4%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -144638,19 +144699,19 @@
     },
     "FF::CH::ppi-m-m": {
       "available_from": "2016-12-14",
-      "available_to": "2026-10-15",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 120,
       "country": "CH",
       "event_title": "PPI m/m",
       "kind": "event",
       "label": "PPI m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 36,
         "rows_by_year": {
@@ -144664,7 +144725,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -147479,6 +147540,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "2:30am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.9%",
+          "canonical_match": false,
+          "consensus": "0.2%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T16:30+09:00",
+          "label": "PPI m/m",
+          "previous": "0.3%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "12:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -170666,7 +170747,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-09",
-          "datetime_kst": "2026-11-09T05:30+09:00",
+          "datetime_kst": "2026-11-09T10:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-08",
           "label": "CPI y/y",
@@ -170676,8 +170757,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -179482,19 +179563,19 @@
     },
     "FF::CN::m2-money-supply-y-y": {
       "available_from": "2016-12-14",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 122,
+      "count": 123,
       "country": "CN",
       "event_title": "M2 Money Supply y/y",
       "kind": "event",
       "label": "M2 Money Supply y/y",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 122,
+        "consensus_count": 123,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
@@ -179508,7 +179589,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 13
+          "2026": 14
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -182385,6 +182466,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "tentative",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "7.1%",
+          "canonical_match": false,
+          "consensus": "7.2%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T18:00+09:00",
+          "label": "M2 Money Supply y/y",
+          "previous": "7.2%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "2:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -187502,19 +187603,19 @@
     },
     "FF::CN::new-loans": {
       "available_from": "2016-12-14",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 122,
+      "count": 123,
       "country": "CN",
       "event_title": "New Loans",
       "kind": "event",
       "label": "New Loans",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 122,
+        "consensus_count": 123,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
@@ -187528,7 +187629,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 13
+          "2026": 14
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -190405,6 +190506,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "tentative",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "-100B",
+          "canonical_match": false,
+          "consensus": "80B",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T18:00+09:00",
+          "label": "New Loans",
+          "previous": "1080B",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "2:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -196097,7 +196218,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-09",
-          "datetime_kst": "2026-11-09T05:30+09:00",
+          "datetime_kst": "2026-11-09T10:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-08",
           "label": "PPI y/y",
@@ -196107,8 +196228,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -207191,7 +207312,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T06:33+09:00",
+          "datetime_kst": "2026-11-10T11:33+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Trade Balance",
@@ -207201,8 +207322,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:33pm",
-          "source_timezone": "Europe/London",
+          "source_time": "7:33pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -212167,7 +212288,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T06:32+09:00",
+          "datetime_kst": "2026-11-10T11:32+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "USD-Denominated Trade Balance",
@@ -212177,8 +212298,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:32pm",
-          "source_timezone": "Europe/London",
+          "source_time": "7:32pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -238990,19 +239111,19 @@
     },
     "FF::EU::flash-employment-change-q-q": {
       "available_from": "2018-11-14",
-      "available_to": "2026-08-14",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 32,
+      "count": 33,
       "country": "EU",
       "event_title": "Flash Employment Change q/q",
       "kind": "event",
       "label": "Flash Employment Change q/q",
       "metric_key": null,
       "quality": {
-        "actual_count": 32,
+        "actual_count": 33,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 31,
+        "consensus_count": 32,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 95,
         "rows_by_year": {
@@ -239014,7 +239135,7 @@
           "2023": 4,
           "2024": 4,
           "2025": 4,
-          "2026": 3
+          "2026": 4
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -239769,24 +239890,44 @@
           "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.0%",
+          "canonical_match": false,
+          "consensus": "0.2%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T19:00+09:00",
+          "label": "Flash Employment Change q/q",
+          "previous": "0.1%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "3:00am",
+          "source_timezone": "America/Denver",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
       ]
     },
     "FF::EU::flash-gdp-q-q": {
       "available_from": "2017-02-14",
-      "available_to": "2026-08-14",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 39,
+      "count": 40,
       "country": "EU",
       "event_title": "Flash GDP q/q",
       "kind": "event",
       "label": "Flash GDP q/q",
       "metric_key": null,
       "quality": {
-        "actual_count": 39,
+        "actual_count": 40,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 39,
+        "consensus_count": 40,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 95,
         "rows_by_year": {
@@ -239799,7 +239940,7 @@
           "2023": 4,
           "2024": 4,
           "2025": 4,
-          "2026": 3
+          "2026": 4
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -240722,6 +240863,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "4:00am",
           "source_timezone": "America/Chicago",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.4%",
+          "canonical_match": false,
+          "consensus": "0.4%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T19:00+09:00",
+          "label": "Flash GDP q/q",
+          "previous": "0.4%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "3:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -251875,19 +252036,19 @@
     },
     "FF::EU::french-final-cpi-m-m": {
       "available_from": "2016-12-14",
-      "available_to": "2026-10-15",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 120,
       "country": "EU",
       "event_title": "French Final CPI m/m",
       "kind": "event",
       "label": "French Final CPI m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 41,
         "rows_by_year": {
@@ -251901,7 +252062,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -254716,6 +254877,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "2:45am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.4%",
+          "canonical_match": false,
+          "consensus": "0.4%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T16:45+09:00",
+          "label": "French Final CPI m/m",
+          "previous": "0.4%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "12:45am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -286833,7 +287014,7 @@
           "actual": "3.66|1.3",
           "canonical_match": false,
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T14:35+09:00",
+          "datetime_kst": "2026-11-11T19:35+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-11",
           "label": "German 30-y Bond Auction",
@@ -286843,8 +287024,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:35am",
-          "source_timezone": "Europe/London",
+          "source_time": "3:35am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -292569,7 +292750,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T11:00+09:00",
+          "datetime_kst": "2026-11-11T16:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-11",
           "label": "German Final CPI m/m",
@@ -292579,8 +292760,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -328908,7 +329089,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-09",
-          "datetime_kst": "2026-11-09T11:00+09:00",
+          "datetime_kst": "2026-11-09T16:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-08",
           "label": "German Trade Balance",
@@ -328918,8 +329099,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -331795,19 +331976,19 @@
     },
     "FF::EU::german-wpi-m-m": {
       "available_from": "2016-12-13",
-      "available_to": "2026-10-14",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 120,
       "country": "EU",
       "event_title": "German WPI m/m",
       "kind": "event",
       "label": "German WPI m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 42,
         "rows_by_year": {
@@ -331821,7 +332002,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -334636,6 +334817,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "2:00am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "0.4%",
+          "canonical_match": false,
+          "consensus": "0.4%",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T16:00+09:00",
+          "label": "German WPI m/m",
+          "previous": "1.9%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -345725,7 +345926,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T13:00+09:00",
+          "datetime_kst": "2026-11-11T18:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-11",
           "label": "Italian Industrial Production m/m",
@@ -345735,8 +345936,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "2:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -362058,19 +362259,19 @@
     },
     "FF::EU::italian-trade-balance": {
       "available_from": "2016-11-17",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 121,
       "country": "EU",
       "event_title": "Italian Trade Balance",
       "kind": "event",
       "label": "Italian Trade Balance",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 121,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 41,
         "rows_by_year": {
@@ -362084,7 +362285,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -364925,6 +365126,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "6:00am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "2.08B",
+          "canonical_match": false,
+          "consensus": "2.84B",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T18:00+09:00",
+          "label": "Italian Trade Balance",
+          "previous": "1.82B",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "2:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -383667,7 +383888,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-09",
-          "datetime_kst": "2026-11-09T13:30+09:00",
+          "datetime_kst": "2026-11-09T18:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Sentix Investor Confidence",
@@ -383677,8 +383898,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "2:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -400290,19 +400511,19 @@
     },
     "FF::EU::trade-balance": {
       "available_from": "2016-12-16",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 120,
       "country": "EU",
       "event_title": "Trade Balance",
       "kind": "event",
       "label": "Trade Balance",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 119,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 36,
         "rows_by_year": {
@@ -400316,7 +400537,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -403131,6 +403352,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "5:00am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "-8.7B",
+          "canonical_match": false,
+          "consensus": "-4.5B",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T19:00+09:00",
+          "label": "Trade Balance",
+          "previous": "-7.8B",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "3:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -412681,7 +412922,7 @@
           "actual": "5.54|3.8",
           "canonical_match": false,
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T14:02+09:00",
+          "datetime_kst": "2026-11-10T19:02+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-10",
           "label": "30-y Bond Auction",
@@ -412691,8 +412932,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:02am",
-          "source_timezone": "Europe/London",
+          "source_time": "3:02am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -419473,7 +419714,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T04:01+09:00",
+          "datetime_kst": "2026-11-10T09:01+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "BRC Retail Sales Monitor y/y",
@@ -419483,8 +419724,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:01pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:01pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -422158,17 +422399,17 @@
     },
     "FF::GB::cb-leading-index-m-m": {
       "available_from": "2016-11-16",
-      "available_to": "2026-10-14",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 121,
       "country": "GB",
       "event_title": "CB Leading Index m/m",
       "kind": "event",
       "label": "CB Leading Index m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -422184,7 +422425,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -424773,6 +425014,23 @@
           "source_tier": "MARKET_FEED",
           "source_time": "9:30am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "-0.1%",
+          "canonical_match": false,
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T23:30+09:00",
+          "label": "CB Leading Index m/m",
+          "previous": "0.1%",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "7:30am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -433402,7 +433660,7 @@
       "label": "Construction Output m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
@@ -436237,13 +436495,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.8%",
           "canonical_match": false,
           "consensus": "0.0%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Construction Output m/m",
           "previous": "-0.2%",
           "previous_source": "ForexFactory historical calendar",
@@ -436251,8 +436511,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -457420,7 +457680,7 @@
       "label": "GDP m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 100,
+        "actual_count": 101,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 100,
         "frequency_validation": "NOT_VALIDATED",
@@ -459793,13 +460053,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.2%",
           "canonical_match": false,
           "consensus": "0.0%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "GDP m/m",
           "previous": "0.1%",
           "previous_source": "ForexFactory historical calendar",
@@ -459807,8 +460069,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -462782,7 +463044,7 @@
       "label": "Goods Trade Balance",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
@@ -465617,13 +465879,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "-22.3B",
           "canonical_match": false,
           "consensus": "-19.2B",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Goods Trade Balance",
           "previous": "-18.0B",
           "previous_source": "ForexFactory historical calendar",
@@ -465631,8 +465895,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -470444,7 +470708,7 @@
       "label": "Index of Services 3m/3m",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 121,
         "frequency_validation": "NOT_VALIDATED",
@@ -473303,13 +473567,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.9%",
           "canonical_match": false,
           "consensus": "0.9%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Index of Services 3m/3m",
           "previous": "0.9%",
           "previous_source": "ForexFactory historical calendar",
@@ -473317,8 +473583,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -473336,7 +473602,7 @@
       "label": "Industrial Production m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
@@ -476171,13 +476437,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.3%",
           "canonical_match": false,
           "consensus": "-0.4%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Industrial Production m/m",
           "previous": "0.8%",
           "previous_source": "ForexFactory historical calendar",
@@ -476185,8 +476453,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -481938,7 +482206,7 @@
       "label": "Manufacturing Production m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
@@ -484773,13 +485041,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.7%",
           "canonical_match": false,
           "consensus": "-0.5%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Manufacturing Production m/m",
           "previous": "1.2%",
           "previous_source": "ForexFactory historical calendar",
@@ -484787,8 +485057,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -504333,7 +504603,7 @@
       "label": "Prelim Business Investment q/q",
       "metric_key": null,
       "quality": {
-        "actual_count": 40,
+        "actual_count": 41,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 41,
         "frequency_validation": "NOT_VALIDATED",
@@ -505300,13 +505570,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.4%",
           "canonical_match": false,
           "consensus": "0.4%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Prelim Business Investment q/q",
           "previous": "1.8%",
           "previous_source": "ForexFactory historical calendar",
@@ -505314,8 +505586,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -505333,7 +505605,7 @@
       "label": "Prelim GDP q/q",
       "metric_key": null,
       "quality": {
-        "actual_count": 39,
+        "actual_count": 40,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 40,
         "frequency_validation": "NOT_VALIDATED",
@@ -506275,13 +506547,15 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "0.7%",
           "canonical_match": false,
           "consensus": "0.7%",
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T11:00+09:00",
+          "datetime_kst": "2026-11-12T16:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Prelim GDP q/q",
           "previous": "0.5%",
           "previous_source": "ForexFactory historical calendar",
@@ -506289,8 +506563,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "12:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -515865,7 +516139,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T04:01+09:00",
+          "datetime_kst": "2026-11-12T09:01+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-11",
           "label": "RICS House Price Balance",
           "previous": "-34%",
           "previous_source": "ForexFactory historical calendar",
@@ -515873,8 +516149,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:01pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:01pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -529537,7 +529813,7 @@
           "actual": "3.85|3.4",
           "canonical_match": false,
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T07:35+09:00",
+          "datetime_kst": "2026-11-10T12:35+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "30-y Bond Auction",
@@ -529547,8 +529823,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "10:35pm",
-          "source_timezone": "Europe/London",
+          "source_time": "8:35pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -536431,7 +536707,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T03:50+09:00",
+          "datetime_kst": "2026-11-10T08:50+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Bank Lending y/y",
@@ -536441,8 +536717,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:50pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -549843,7 +550119,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T03:50+09:00",
+          "datetime_kst": "2026-11-10T08:50+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Current Account",
@@ -549853,8 +550129,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:50pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -552711,7 +552987,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T09:00+09:00",
+          "datetime_kst": "2026-11-10T14:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-10",
           "label": "Economy Watchers Sentiment",
@@ -552719,10 +552995,10 @@
           "previous_source": "ForexFactory historical calendar",
           "previous_source_tier": "MARKET_FEED",
           "source": "ForexFactory historical calendar",
-          "source_date": "2026-11-10",
+          "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "10:00pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -563273,7 +563549,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T03:30+09:00",
+          "datetime_kst": "2026-11-10T08:30+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-09",
           "label": "Household Spending y/y",
@@ -563283,8 +563559,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -569009,7 +569285,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-09",
-          "datetime_kst": "2026-11-09T09:00+09:00",
+          "datetime_kst": "2026-11-09T14:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-08",
           "label": "Leading Indicators",
@@ -569017,10 +569293,10 @@
           "previous_source": "ForexFactory historical calendar",
           "previous_source_tier": "MARKET_FEED",
           "source": "ForexFactory historical calendar",
-          "source_date": "2026-11-09",
+          "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "10:00pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -571879,7 +572155,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T03:50+09:00",
+          "datetime_kst": "2026-11-11T08:50+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-10",
           "label": "M2 Money Stock y/y",
@@ -571889,8 +572165,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:50pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -580479,7 +580755,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T03:50+09:00",
+          "datetime_kst": "2026-11-12T08:50+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-11",
           "label": "PPI y/y",
           "previous": "6.8%",
           "previous_source": "ForexFactory historical calendar",
@@ -580487,8 +580765,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "4:50pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -587870,7 +588148,7 @@
           "actual": "42.5%",
           "canonical_match": false,
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T10:00+09:00",
+          "datetime_kst": "2026-11-11T15:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-11",
           "label": "Prelim Machine Tool Orders y/y",
@@ -587878,10 +588156,10 @@
           "previous_source": "ForexFactory historical calendar",
           "previous_source_tier": "MARKET_FEED",
           "source": "ForexFactory historical calendar",
-          "source_date": "2026-11-11",
+          "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "1:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "11:00pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -617600,17 +617878,17 @@
     },
     "FF::NZ::businessnz-manufacturing-index": {
       "available_from": "2016-12-15",
-      "available_to": "2026-10-16",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 118,
+      "count": 119,
       "country": "NZ",
       "event_title": "BusinessNZ Manufacturing Index",
       "kind": "event",
       "label": "BusinessNZ Manufacturing Index",
       "metric_key": null,
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -617626,7 +617904,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 10
+          "2026": 11
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -620171,6 +620449,23 @@
           "source_tier": "MARKET_FEED",
           "source_time": "5:30pm",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "54.9",
+          "canonical_match": false,
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T06:30+09:00",
+          "label": "BusinessNZ Manufacturing Index",
+          "previous": "56.3",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "2:30pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -654075,7 +654370,9 @@
           "actual": "2.6%",
           "canonical_match": false,
           "date": "2026-11-12",
-          "datetime_kst": "2026-11-12T01:45+09:00",
+          "datetime_kst": "2026-11-12T06:45+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-11",
           "label": "Visitor Arrivals m/m",
           "previous": "3.0%",
           "previous_source": "ForexFactory historical calendar",
@@ -654083,8 +654380,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:45pm",
-          "source_timezone": "Europe/London",
+          "source_time": "2:45pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -654988,17 +655285,17 @@
     },
     "FF::US::10-y-bond-auction": {
       "available_from": "2016-12-13",
-      "available_to": "2026-11-10",
+      "available_to": "2026-11-11",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 122,
       "country": "US",
       "event_title": "10-y Bond Auction",
       "kind": "event",
       "label": "10-y Bond Auction",
       "metric_key": null,
       "quality": {
-        "actual_count": 121,
+        "actual_count": 122,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -655014,7 +655311,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 11
+          "2026": 12
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -657620,22 +657917,39 @@
           "source_timezone": "Europe/London",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "5.02|2.5",
+          "canonical_match": false,
+          "date": "2026-11-11",
+          "datetime_kst": "2026-11-11T03:01+09:00",
+          "label": "10-y Bond Auction",
+          "previous": "5.30|2.8",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-10",
+          "source_tier": "MARKET_FEED",
+          "source_time": "11:01am",
+          "source_timezone": "America/Denver",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
       ]
     },
     "FF::US::30-y-bond-auction": {
       "available_from": "2016-12-14",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 121,
       "country": "US",
       "event_title": "30-y Bond Auction",
       "kind": "event",
       "label": "30-y Bond Auction",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -657651,7 +657965,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 11
+          "2026": 12
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -660231,6 +660545,23 @@
           "source_tier": "MARKET_FEED",
           "source_time": "1:01pm",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "5.44|2.4",
+          "canonical_match": false,
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T03:01+09:00",
+          "label": "30-y Bond Auction",
+          "previous": "5.62|2.5",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "11:01am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -663056,24 +663387,24 @@
     },
     "FF::US::adp-weekly-employment-change": {
       "available_from": "2025-10-28",
-      "available_to": "2026-11-10",
+      "available_to": "2026-11-11",
       "canonical": false,
       "category": null,
-      "count": 52,
+      "count": 53,
       "country": "US",
       "event_title": "ADP Weekly Employment Change",
       "kind": "event",
       "label": "ADP Weekly Employment Change",
       "metric_key": null,
       "quality": {
-        "actual_count": 52,
+        "actual_count": 53,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 21,
         "rows_by_year": {
           "2025": 8,
-          "2026": 44
+          "2026": 45
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -663953,7 +664284,7 @@
           "actual": "19.5K",
           "canonical_match": false,
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T17:15+09:00",
+          "datetime_kst": "2026-11-10T22:15+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-10",
           "label": "ADP Weekly Employment Change",
@@ -663963,8 +664294,25 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:15am",
-          "source_timezone": "Europe/London",
+          "source_time": "6:15am",
+          "source_timezone": "America/Denver",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "19.5K",
+          "canonical_match": false,
+          "date": "2026-11-11",
+          "datetime_kst": "2026-11-11T04:00+09:00",
+          "label": "ADP Weekly Employment Change",
+          "previous": "16.8K",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-10",
+          "source_tier": "MARKET_FEED",
+          "source_time": "oct 17th",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -694582,19 +694930,19 @@
     },
     "FF::US::crude-oil-inventories": {
       "available_from": "2016-11-16",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 522,
+      "count": 523,
       "country": "US",
       "event_title": "Crude Oil Inventories",
       "kind": "event",
       "label": "Crude Oil Inventories",
       "metric_key": null,
       "quality": {
-        "actual_count": 521,
+        "actual_count": 522,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 522,
+        "consensus_count": 523,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 15,
         "rows_by_year": {
@@ -694608,7 +694956,7 @@
           "2023": 51,
           "2024": 52,
           "2025": 52,
-          "2026": 47
+          "2026": 48
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -706929,6 +707277,26 @@
           "source_timezone": "Europe/London",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "4.7M",
+          "canonical_match": false,
+          "consensus": "-0.6M",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T02:00+09:00",
+          "label": "Crude Oil Inventories",
+          "previous": "-0.9M",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "10:00am",
+          "source_timezone": "America/Denver",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
       ]
     },
@@ -713632,19 +714000,19 @@
     },
     "FF::US::existing-home-sales": {
       "available_from": "2016-11-23",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 122,
       "country": "US",
       "event_title": "Existing Home Sales",
       "kind": "event",
       "label": "Existing Home Sales",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 121,
+        "consensus_count": 122,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 36,
         "rows_by_year": {
@@ -713658,7 +714026,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 11
+          "2026": 12
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -716519,6 +716887,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "10:00am",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "3.75M",
+          "canonical_match": false,
+          "consensus": "3.89M",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T00:00+09:00",
+          "label": "Existing Home Sales",
+          "previous": "3.97M",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "8:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -719449,19 +719837,19 @@
     },
     "FF::US::federal-budget-balance": {
       "available_from": "2016-12-13",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 122,
       "country": "US",
       "event_title": "Federal Budget Balance",
       "kind": "event",
       "label": "Federal Budget Balance",
       "metric_key": null,
       "quality": {
-        "actual_count": 120,
+        "actual_count": 121,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 121,
+        "consensus_count": 122,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 62,
         "rows_by_year": {
@@ -719475,7 +719863,7 @@
           "2023": 12,
           "2024": 12,
           "2025": 12,
-          "2026": 12
+          "2026": 13
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -722328,6 +722716,26 @@
           "source_tier": "MARKET_FEED",
           "source_time": "2:00pm",
           "source_timezone": "Europe/London",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "-404.1B",
+          "canonical_match": false,
+          "consensus": "-298.6B",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-13",
+          "datetime_kst": "2026-11-13T04:00+09:00",
+          "label": "Federal Budget Balance",
+          "previous": "-26.9B",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-12",
+          "source_tier": "MARKET_FEED",
+          "source_time": "12:00pm",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -727165,6 +727573,8 @@
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
           "datetime_kst": "2026-11-10T00:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-09",
           "label": "Final Wholesale Inventories m/m",
           "previous": "0.6%",
           "previous_source": "ForexFactory historical calendar",
@@ -727172,8 +727582,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:00am",
-          "source_timezone": "America/Chicago",
+          "source_time": "8:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -745406,19 +745816,19 @@
     },
     "FF::US::natural-gas-storage": {
       "available_from": "2016-11-17",
-      "available_to": "2026-11-05",
+      "available_to": "2026-11-14",
       "canonical": false,
       "category": null,
-      "count": 521,
+      "count": 522,
       "country": "US",
       "event_title": "Natural Gas Storage",
       "kind": "event",
       "label": "Natural Gas Storage",
       "metric_key": null,
       "quality": {
-        "actual_count": 521,
+        "actual_count": 522,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 521,
+        "consensus_count": 522,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 15,
         "rows_by_year": {
@@ -745432,7 +745842,7 @@
           "2023": 51,
           "2024": 52,
           "2025": 52,
-          "2026": 45
+          "2026": 46
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -757737,6 +758147,26 @@
           "source_timezone": "Europe/London",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
+        },
+        {
+          "actual": "61B",
+          "canonical_match": false,
+          "consensus": "65B",
+          "consensus_source": "ForexFactory historical calendar",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-14",
+          "datetime_kst": "2026-11-14T00:30+09:00",
+          "label": "Natural Gas Storage",
+          "previous": "77B",
+          "previous_source": "ForexFactory historical calendar",
+          "previous_source_tier": "MARKET_FEED",
+          "source": "ForexFactory historical calendar",
+          "source_date": "2026-11-13",
+          "source_tier": "MARKET_FEED",
+          "source_time": "8:30am",
+          "source_timezone": "America/Denver",
+          "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
+          "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
       ]
     },
@@ -763422,7 +763852,7 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-10",
-          "datetime_kst": "2026-11-10T15:00+09:00",
+          "datetime_kst": "2026-11-10T20:00+09:00",
           "historical_market_source": "ForexFactory historical calendar",
           "historical_source_date": "2026-11-10",
           "label": "NFIB Small Business Index",
@@ -763432,8 +763862,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "4:00am",
+          "source_timezone": "America/Denver",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -803293,8 +803723,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
           "source_tier": "OFFICIAL",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -809244,8 +809674,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
           "source_tier": "OFFICIAL",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -843380,13 +843810,17 @@
         },
         {
           "actual": "0.3%",
+          "canonical_match": true,
           "checked_kst": "2026-11-14T00:21:29+09:00",
           "consensus": "0.3%",
           "consensus_source": "FairEconomy/ForexFactory",
           "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-13",
           "label": "Core PPI MoM",
+          "match_score": 105.0,
           "metric_key": "core_ppi_mom",
           "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD49104?startyear=2025&endyear=2026",
           "previous": "0.7%",
@@ -843395,7 +843829,10 @@
           "reference_period": "2026-10",
           "series_id": "WPSFD49104",
           "source": "FairEconomy/ForexFactory",
+          "source_date": "2026-11-13",
           "source_tier": "OFFICIAL",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD49104?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -846686,13 +847123,17 @@
         },
         {
           "actual": "0.3%",
+          "canonical_match": true,
           "checked_kst": "2026-11-14T00:21:29+09:00",
           "consensus": "0.4%",
           "consensus_source": "FairEconomy/ForexFactory",
           "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-13",
           "label": "PPI MoM",
+          "match_score": 105.0,
           "metric_key": "ppi_mom",
           "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD4?startyear=2025&endyear=2026",
           "previous": "1.3%",
@@ -846701,7 +847142,10 @@
           "reference_period": "2026-10",
           "series_id": "WPSFD4",
           "source": "FairEconomy/ForexFactory",
+          "source_date": "2026-11-13",
           "source_tier": "OFFICIAL",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD4?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -884679,8 +885123,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-12",
           "source_tier": "OFFICIAL",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "6:30am",
+          "source_timezone": "America/Denver",
           "source_url": "https://oui.doleta.gov/press/2026/111226.pdf",
           "verification_status": "VERIFIED_OFFICIAL"
         }
