@@ -242,7 +242,7 @@ function queueUpdate(){
 }
 if(enabled){
  document.documentElement.dataset.ctHumanUi='v2';
- const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=1';
+ const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=2';
  (document.head||document.documentElement).append(link);
 }
 document.addEventListener('jjooni:live-applied',queueUpdate);
