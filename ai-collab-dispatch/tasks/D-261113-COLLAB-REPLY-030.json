@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261113-COLLAB-REPLY-030",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Fix third real ROY review comment header parsing for the JJOONI–ROY collaboration handoff: JJOONI_COLLAB_V4 with Markdown `ROY review: PASS/NEEDS_CHANGES`, preserving strict review candidate vs authentication boundary. Validate the Claude PR.opened Routine actually runs for this opt-in experiment/ai-collab-* PR; diagnose separately from the ChatGPT Work PR-comment webhook.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Independently review parser tests for the three real observed ROY review header styles and legacy `actor=ROY` / `reviewer=ROY` forms; confirm malformed head, task, source issue, and contradictory verdicts cannot be accepted.",
+    "All outputs must be explicitly unverified candidates: no role marker, GitHub shared login, or Claude session URL may grant provenance, merge, deploy, or trade rights.",
+    "Run `python -m unittest discover -s ai-collab/tests -p 'test_roy_review_candidates.py'` and report actual source/checks on exact full current PR head; do not infer a GitHub event triggered Work from a Claude review.",
+    "Audit PR.opened Claude routine on this experiment/ai-collab-* branch using actual Claude first-party run provenance when available; if automation did not start, report as unverified.",
+    "Review only; no main merge, deployment, Work/Claude account trigger edits, secrets, or autonomous external API calls."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or non-public company, account, customer, or financial data",
+    "No production release, main merge, external Routine settings edits, or trading",
+    "No paid model APIs, extra agents, or cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "backend",
+  "coordination_notes": "Source diagnostic GitHub issue #330 and the user-approved collaboration repair. Existing Work webhook remains unresolved; this PR fixes only a verified parser compatibility gap and tests ROY PR.opened event path. Event delivery/identity must be assessed separately; if ROY first review needs a followup, use one exact-HEAD [AI-COLLAB][ROY-REQUEST] issue, no duplicate."
+}
