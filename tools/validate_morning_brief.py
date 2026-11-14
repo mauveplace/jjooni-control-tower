@@ -136,6 +136,7 @@ def validate_dual_market_template(d, contract):
                  '## ⑧ 원천·데이터 감사'):
         assert name in body, ('SECTOR_REQUIRED_SECTION', name)
     region = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
+    earnings = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
     strategy = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
     assert '**송팀장 Sector Observatory · 전체 업종 강약**' in region, 'EXISTING_VERTICAL_SECTOR_BOARD_REQUIRED'
     assert '수익률 기반 추정' in region, 'SECTOR_PRICE_IS_NOT_CASH_FLOW'
@@ -159,8 +160,21 @@ def validate_dual_market_template(d, contract):
         fields = [x.strip() for x in matched[0].strip().strip('|').split('|')]
         assert len(fields) >= 4, ('VERTICAL_SECTOR_ROW_INCOMPLETE', ticker)
     assert '**업종 주도권 변화 · 원인과 다음 확인**' in strategy, 'ROTATION_INTERPRETATION_REQUIRED'
-    # Company coverage intentionally has NO ticker/name obligation: major
-    # earnings, guidance, credit and corporate events are event-driven only.
+    assert '**시장 전체 주요 기업 이벤트 · 발생 시 분석**' in earnings, 'EVENT_DRIVEN_COMPANY_SCAN_REQUIRED'
+    event_states = [
+        s for s in ('MATERIAL_EVENTS_FOUND','NO_MATERIAL_EVENTS_CONFIRMED','SCREENING_INCOMPLETE')
+        if _search(r'(?<![A-Z_])' + s + r'(?![A-Z_])', earnings)
+    ]
+    assert len(event_states) == 1, 'EVENT_SCREENING_STATE_REQUIRED'
+    assert ('나스닥100' in earnings or 'NASDAQ-100' in earnings or 'NASDAQ100' in earnings), 'NASDAQ100_SCREEN_SCOPE_REQUIRED'
+    assert any(s in earnings for s in ('원천', '출처', '조회', '확인 범위', '탐색 범위')), 'EVENT_SCREENING_SOURCE_DISCLOSURE_REQUIRED'
+    if event_states[0] == 'MATERIAL_EVENTS_FOUND':
+        # Require an actual linked source for at least one event, not a named
+        # daily watchlist. Market event importance is editorially assessed.
+        assert _search(r'https://[^\s)]+', earnings), 'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'
+    # Company coverage intentionally has NO ticker/name obligation: a major
+    # NASDAQ100 or any other company event is eligible even if Song never
+    # mentioned the issuer. No filler on quiet sessions.
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
