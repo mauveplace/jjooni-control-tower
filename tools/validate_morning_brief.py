@@ -154,7 +154,7 @@ def validate_dual_market_template(d, contract):
     visible_rows = [line for line in region.splitlines() if line.strip().startswith('|')]
     for ticker in sector_symbols:
         matched = [line for line in visible_rows if _search(
-            r'(?<![A-Za-z0-9])' + _re.escape(ticker) + r'(?![A-Za-z0-9])',
+            r'(?<![A-Za-z0-9])' + re.escape(ticker) + r'(?![A-Za-z0-9])',
             line)]
         assert len(matched) == 1, ('VERTICAL_SECTOR_ROW_MISSING_OR_DUPLICATE', ticker)
         fields = [x.strip() for x in matched[0].strip().strip('|').split('|')]
