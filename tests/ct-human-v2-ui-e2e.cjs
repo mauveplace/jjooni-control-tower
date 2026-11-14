@@ -36,6 +36,12 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'+₩100');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric small').first().innerText(),'동일 기간 4계좌 · 증권사 실측');
+   assert.equal(await page.locator('#ctHumanV2QuickV2').count(),0,'no duplicate overview');
+   const driverRows=page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow');
+   assert.equal(await driverRows.count(),4,'all four original accounts remain represented');
+   assert.match(await driverRows.first().innerText(),/IRP/,'comparable P&L sorted by absolute impact');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths button').count(),5,'relevant original analysis panels accessible');
+   if(width>=1080)assert.equal(await page.locator('#ctHumanQuickV2').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2,'desktop has two-column concise insight');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
     assert(await nav.isVisible(),'V2 bottom navigation visible on '+width);
@@ -45,6 +51,9 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     assert.equal(await page.locator('.tabs').isVisible(),false);
     assert.equal(await nav.locator('button').count(),5);
     assert((await nav.locator('button').evaluateAll(xs=>xs.every(x=>x.getBoundingClientRect().height>=44))));
+    await driverRows.first().click();
+    assert(await page.locator('#panel-accounts').isVisible(),'account impact navigates to canonical accounts');
+    await nav.getByRole('button',{name:'오늘'}).click();
     await nav.getByRole('button',{name:'성과'}).click();
     assert(await page.locator('#panel-compare').isVisible(),'performance route via canonical tab');
     await nav.getByRole('button',{name:'더보기'}).click();
@@ -67,6 +76,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     document.dispatchEvent(new Event('jjooni:live-applied'));
    });
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('합산 확인 대기'));
+   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriversHeader').innerText(),/합산 비교 불가/,'incomparable account dates never imply a ranked contribution');
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/자료 없음/,'missing account P&L is not represented as zero');
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'must not display invented full day P&L when missing');
    assert.deepEqual(errors,[],'no browser exceptions '+width+': '+errors.join(';'));
