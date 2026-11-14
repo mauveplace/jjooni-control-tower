@@ -10,7 +10,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
    regime.authority=consensus==='PARTIAL_PENDING_JJANGGU'?'ANALYST_WEEKLY_PROVISIONAL_NOT_FINAL_CONSENSUS':'ANALYST_CONSENSUS_WEEKLY_SSOT';
    regime.effective_window={start_kst:new Date(Date.now()-3600000).toISOString(),end_kst:new Date(Date.now()+3600000).toISOString()};
    await page.route('**/market-regime.json?*',r=>r.fulfill({contentType:'application/json',body:JSON.stringify(regime)}));
-   await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'domcontentloaded'});
+   await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'domcontentloaded'});
    await page.locator('#tabs button[data-tab="regime"]').click();
    await page.locator('#regimeRoot .mrBadge').first().waitFor({timeout:30000});
    const expected=consensus==='CLOSED'?'ACTIVE':consensus==='UNKNOWN'?'UNKNOWN':'PROVISIONAL';
