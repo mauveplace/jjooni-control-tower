@@ -73,7 +73,8 @@ test('rebased quotes, stale brief and freshness problems become alerts', () => {
 test('LIVE_WITH_WARNINGS renders noncritical warnings as MID, not urgent HIGH', () => {
   const g = { ...glance, brief_check: { official_status: 'VERIFIED', official_eod_verified: true } };
   const vm = viewModel({ glance: g, brief, freshness: {
-    overall: 'LIVE_WITH_WARNINGS', warnings: ['fedwatch', 'audit'], critical_bad: []
+    overall: 'LIVE_WITH_WARNINGS', warnings: ['fedwatch', 'audit'], critical_bad: [],
+    groups: { market: { state: 'LIVE', as_of: '2026-11-11', source: 'observatory.json' } }
   }, calendar }, NOW);
   assert.equal(vm.alerts.some(a => a.level === 'HIGH'), false);
   assert.ok(vm.alerts.some(a => a.level === 'MID' && /fedwatch/.test(a.body)));
