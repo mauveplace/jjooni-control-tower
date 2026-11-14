@@ -162,7 +162,8 @@ function ensureQuickView(){
  }
  const comparable=m.known_day===4&&m.day_quality?.comparable_period&&m.day!=null;
  const dayText=comparable?formattedAmount(m.day):'합산 확인 대기';
- const dayNote=comparable?'동일 기간 4계좌 확인':('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
+ const dayTrust={BROKER_MEASURED:'증권사 실측',MODELED:'계산값',MIXED:'실측·계산 혼합',UNKNOWN:'원천 신뢰도 확인 필요'}[m.day_quality?.state]||'원천 검증 대기';
+ const dayNote=comparable?('동일 기간 4계좌 · '+dayTrust):('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
  const flowText=m.flow==null?'확인 대기':formattedAmount(m.flow);
  const signature=[C.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M)].join('|');
  if(box.dataset.signature===signature)return;
