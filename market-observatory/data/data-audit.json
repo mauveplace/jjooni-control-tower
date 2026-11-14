@@ -1,9 +1,9 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-14T11:56:10+09:00",
+  "generated_kst": "2026-11-14T11:56:22+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 2,
   "observatory_session": "2026-11-13",
   "file_status": {
     "observatory": {
@@ -12,18 +12,18 @@
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-14T11:54:15+09:00",
+      "generated_kst": "2026-11-14T11:56:21+09:00",
       "session": "2026-11-13",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-14T11:54:15+09:00",
+      "generated_kst": "2026-11-14T11:56:21+09:00",
       "session": "2026-11-13",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
     },
     "fedwatch": {
-      "generated_kst": "2026-11-14T11:28:07+09:00",
+      "generated_kst": "2026-11-14T11:55:53+09:00",
       "source_kind": null,
       "source_as_of_kst": null,
       "market_data_as_of": "2026-11-12",
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-14T09:56:04+09:00",
+      "generated_kst": "2026-11-14T11:55:57+09:00",
       "as_of_date": "2026-11-13",
       "priced_count": 46
     },
@@ -68,10 +68,11 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-14T11:56:09+09:00",
+      "generated_kst": "2026-11-14T11:56:14+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
+        "kr_rates",
         "fedwatch",
         "audit"
       ]
@@ -184,27 +185,27 @@
       "critical": false,
       "items": {
         "NIKKEI225": {
-          "count": 731,
-          "last_date": "2026-11-12",
-          "last_value": 60819.359375,
+          "count": 732,
+          "last_date": "2026-11-13",
+          "last_value": 61142.3515625,
           "group": "asia_equity",
-          "latest_value": 60819.359375,
+          "latest_value": 61142.3515625,
           "latest_matches": true
         },
         "HANGSENG": {
-          "count": 738,
-          "last_date": "2026-11-12",
-          "last_value": 24008.55078125,
+          "count": 739,
+          "last_date": "2026-11-13",
+          "last_value": 23637.59960938,
           "group": "asia_equity",
-          "latest_value": 24008.55078125,
+          "latest_value": 23637.59960938,
           "latest_matches": true
         },
         "SHCOMP": {
-          "count": 727,
-          "last_date": "2026-11-12",
-          "last_value": 3655.83007812,
+          "count": 728,
+          "last_date": "2026-11-13",
+          "last_value": 3634.35302734,
           "group": "asia_equity",
-          "latest_value": 3655.83007812,
+          "latest_value": 3634.35302734,
           "latest_matches": true
         }
       },
@@ -380,7 +381,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": "2026-11-14",
       "allow_lag_days": 4,
       "critical": false,
@@ -435,7 +436,15 @@
         }
       },
       "missing": [],
-      "latest_mismatch": []
+      "latest_mismatch": [],
+      "fetch_succeeded": false,
+      "failed_series": {
+        "KR3Y": "RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout;ECOS_NETWORK_TCP_OR_TLS_TIMEOUT",
+        "KR5Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR10Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR20Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
+        "KR30Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN"
+      }
     },
     "jp_rates": {
       "state": "LIVE",
@@ -495,10 +504,10 @@
       "missing": [],
       "latest_mismatch": [],
       "expected_latest_weekday": "2026-11-12",
-      "published_source_status": null
+      "published_source_status": "LIVE"
     },
     "crypto": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -506,17 +515,17 @@
         "BTCUSD": {
           "count": 1110,
           "last_date": "2026-11-14",
-          "last_value": 68302.03,
+          "last_value": 67654.01,
           "group": "crypto",
-          "latest_value": 68302.03,
+          "latest_value": 67654.01,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1110,
           "last_date": "2026-11-14",
-          "last_value": 1931.26,
+          "last_value": 1911.45,
           "group": "crypto",
-          "latest_value": 1931.26,
+          "latest_value": 1911.45,
           "latest_matches": true
         }
       },
@@ -558,35 +567,30 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-14T09:56:01+09:00",
-      "current_quote_age_seconds": 7209,
+      "quote_as_of_kst": "2026-11-14T11:55:09+09:00",
+      "current_quote_age_seconds": 73,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-14T09:56:01+09:00",
-      "current_quote_age_seconds": 7209,
+      "quote_as_of_kst": "2026-11-14T11:55:10+09:00",
+      "current_quote_age_seconds": 72,
       "captured_quote_age_seconds": 0
     }
   },
   "issues": [
     {
+      "code": "GROUP_KR_RATES_STALE",
+      "severity": "WARN",
+      "detail": "anchor=2026-11-14 dates=KR3Y:2026-11-13,KR5Y:2026-11-13,KR10Y:2026-11-13,KR20Y:2026-11-13,KR30Y:2026-11-13,KR_3S10S:2026-11-13"
+    },
+    {
       "code": "GROUP_FEDWATCH_LAGGING",
       "severity": "WARN",
       "detail": "anchor=2026-11-13 dates=FEDWATCH:2026-11-12"
-    },
-    {
-      "code": "CRYPTO_BTCUSD_STALE",
-      "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-14T09:56:01+09:00', 'current_quote_age_seconds': 7209, 'captured_quote_age_seconds': 0}"
-    },
-    {
-      "code": "CRYPTO_ETHUSD_STALE",
-      "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-14T09:56:01+09:00', 'current_quote_age_seconds': 7209, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
