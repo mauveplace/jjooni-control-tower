@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-OBS-V2-UX-AUDIT-053",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Joint ROY↔JJOONI 2026-11-14 Observatory FULL UI/UX independent audit of default V1 and feature flagged V2, especially whether it can safely become default on mobile without losing all 13 legacy deep links, independently test warning semantics from LIVE_WITH_WARNINGS vs true P0, fresh-vintage/revision state, mobile nav accessibility, 34-sector market story, TRI-POD official-vs-reference truth and loading costs. JJOONI patches narrow proven false critical-warning banner first; ROY to independently challenge and propose prioritized usability improvements with code/evidence, not rubber-stamp. Link existing #403 and no duplicate design.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "observatory_ui_ux_independent_audit",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-14 user asks for broad reciprocal ROY/JJOONI Observatory UI/UX improvement audit. Owner previously delegated narrow safe CI-validated routine defect fixes and deployment. Major new default navigation rollout/5-tab migration must be independently evaluated and materially changed UI confirmed, do not claim user approved irreversible reorganization.",
+  "acceptance": [
+    "ROY independently opens or inspects actual default /market-observatory/ and ?ui=v2 at 390/1363, or precisely states that live browser is not available; report what was tested versus code-only.",
+    "Check critical UI semantics: freshness overall LIVE_WITH_WARNINGS caused by noncritical fedwatch/audit versus LIVE with critical_bad; HIGH/red for genuine P0 only, MID advisory for noncritical; verify current live freshness-status.json and viewModel regression tests.",
+    "Verify V2 preserves all 13 legacy destinations and URLs with ?ui=v1 rollback; mobile 5-tab behavior, 36px subnavigation vs 44px touch target, keyboard focus; don't claim existing mobile bottom tab implementation if code still uses top sticky.",
+    "Review today-v2.js fresh data path: initial-only Promise.all and quote event redraw stale closures, revision timestamp not surfaced, data fetch error handling; prioritize user-visible stale-data avoidance.",
+    "Compare 11 US+10 KR+13 theme sector sources and full report with Today page sector-rotation digest access; propose concrete compact top gainers/losers + driver/next-condition view without invented sector cash-flow.",
+    "Verify TRI-POD canonical and strict NDX/SOX EOD state, and stale official/derived labels without creating BUY/SELL signals or trading integration.",
+    "Challenge loading/performance/accessibility with measurable Lighthouse/Playwright results when tooling available; avoid claiming screenshots or performance measurements not taken.",
+    "Post exact reviewed PR head and at least 3 evidence-backed independent findings, classify P0/P1/P2, and reply ROY_UI_AUDIT=PASS|NEEDS_CHANGES|BLOCKED with any proposed scope revisions. No secret/private data or trading."
+  ],
+  "forbidden": [
+    "No account/PB/portfolio/individual trading or private Plaud/customer data",
+    "No changing TRI-POD signal logic or market SSOT, no relaxing official price/freshness gates",
+    "No silent switching v1 default to v2 without full E2E + risk review, no new external infra/spend",
+    "No fabricating ROY identity, live browser screenshots, or PASS; no duplicate issue storm"
+  ],
+  "coordination_notes": "Existing collaboration/design issue #403 already contains ROY v1 and JJOONI AGREE_WITH_CHANGES and ROY v2, plus earlier merged opt-in #405 #406. This NEW request is a 2026-11-14 actual-current-code audit, not another redesign. ROY should produce its own prioritized audit, not just approve our patch."
+}
