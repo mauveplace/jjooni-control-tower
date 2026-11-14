@@ -1,6 +1,6 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-14T10:27:46+09:00",
+ "generated_kst": "2026-11-14T11:56:44+09:00",
  "us_session": "2026-11-13",
  "source_generated_kst": "2026-11-14T09:55:40+09:00",
  "read_only": true,
@@ -120,26 +120,26 @@
     {
      "key": "NIKKEI225",
      "label": "닛케이225",
-     "date": "2026-11-12",
-     "value": 60819.3594,
-     "d1_pct": -0.7,
-     "w1_pct": -0.42
+     "date": "2026-11-13",
+     "value": 61142.3516,
+     "d1_pct": 0.53,
+     "w1_pct": 6.46
     },
     {
      "key": "HANGSENG",
      "label": "항셍",
-     "date": "2026-11-12",
-     "value": 24008.5508,
-     "d1_pct": -1.26,
-     "w1_pct": -3.18
+     "date": "2026-11-13",
+     "value": 23637.5996,
+     "d1_pct": -1.55,
+     "w1_pct": -3.45
     },
     {
      "key": "SHCOMP",
      "label": "상하이종합",
-     "date": "2026-11-12",
-     "value": 3655.8301,
-     "d1_pct": -0.67,
-     "w1_pct": -0.92
+     "date": "2026-11-13",
+     "value": 3634.353,
+     "d1_pct": -0.59,
+     "w1_pct": -0.41
     }
    ]
   },
@@ -166,9 +166,9 @@
      "key": "US10Y",
      "label": "미 10년물",
      "date": "2026-11-13",
-     "value": 5.156,
-     "d1_bp": 5.3,
-     "w1_bp": 29.7
+     "value": 5.154,
+     "d1_bp": 5.1,
+     "w1_bp": 29.5
     },
     {
      "key": "US2Y",
@@ -218,18 +218,26 @@
      "key": "BTCUSD",
      "label": "비트코인",
      "date": "2026-11-14",
-     "value": 68302.03,
+     "value": 67654.01,
      "quote_currency": "USDT",
      "source": "Binance Spot last trade / USDT",
-     "observed_kst": "2026-11-14T09:56:01+09:00",
+     "observed_kst": "2026-11-14T11:55:09+09:00",
      "comparison_status": "SAME_CURRENCY_COMPLETED",
-     "d1_pct": -0.02,
+     "d1_pct": -0.97,
      "w1_pct": null
     }
    ]
   }
  ],
  "cross_read": [
+  {
+   "type": "ASIA_CROSS",
+   "kind": "항셍·상하이종합와 동조, 닛케이225는 상대 선방",
+   "kospi_d1_pct": -0.98,
+   "peer_avg_d1_pct": -0.54,
+   "gap_pp": -0.44,
+   "text": "2026-11-13 코스피 -0.98% vs 닛케이225 +0.53%, 항셍 -1.55%, 상하이종합 -0.59% → 항셍·상하이종합와 동조, 닛케이225는 상대 선방"
+  },
   {
    "type": "TIME_LAG",
    "text": "한국 최근 종가(2026-11-13)는 미국 2026-11-13 장 이전입니다. 나스닥100 -1.22%는 다음 KRX 세션에 반영됩니다."
