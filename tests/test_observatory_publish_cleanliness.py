@@ -23,6 +23,16 @@ class ObservatoryPublisherCleanlinessTest(unittest.TestCase):
         self.assertTrue({source, audit, status, 'public-market-daily.json',
                          'market-observatory/data/daily-market-pulse.json'}.issubset(set(bundle)))
 
+    def test_sector_source_publishes_atomic_json_and_markdown(self):
+        source = pub.DATA + 'sector-etf.json'
+        self.assertEqual(pub.publication_paths([source]), [
+            source,
+            pub.DATA + 'sector-rotation-brief.json',
+            pub.DATA + 'sector-rotation-brief.md',
+        ])
+        with self.assertRaisesRegex(ValueError, 'DATA_PUBLISHER_REJECTED_NON_DATA_PATH'):
+            pub.publication_paths([pub.DATA + 'unrelated.md'])
+
     def test_calendar_only_does_not_claim_unrelated_market_health(self):
         calendar = 'market-observatory/data/economic-calendar.json'
         self.assertEqual(pub.publication_paths([calendar]), [calendar])
