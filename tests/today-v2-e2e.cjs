@@ -30,7 +30,7 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     assert.equal(await page.locator('.todayV2 .tV2Cond').count(), vm.tripod.conds.length);
     if (glance.brief_check?.official_status !== 'VERIFIED') {
       assert.ok(await page.locator('.todayV2 .tV2Alert').isVisible(), 'unverified NDX raises the alert band');
-      assert.equal(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').getAttribute('title'), '? 검증 보류');
+      assert.match(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').getAttribute('title'), /^\? 검증 보류 · .*시장일자/);
       assert.ok(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').isVisible(), 'state tag visible at ' + width);
     }
     const box = await page.locator('.todayV2').boundingBox();
