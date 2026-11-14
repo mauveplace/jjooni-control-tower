@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_TASK_V2",
+  "task_id": "D-261108-TRIPOD-DQ-002",
+  "title": "TRI-POD history contamination: independently review repair design",
+  "head_sha": "8836f699b1676bc015fe13032ee3e98198a57976",
+  "head_sha_meaning": "Immutable source snapshot used for the review; latest pilot branch may have additional collaboration-only files.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "objective": "Independently propose a reproducible, non-deploying repair for historical TRI-POD comparison inputs. Diagnose pre-2023 quarterly/monthly bars overwriting daily prices and VIX holiday-date issues. Distinguish proof from hypotheses, propose targeted regression tests and a safe rollback path.",
+  "source_refs": [
+    "PR302#issuecomment-6716421914 (ROY initial review)",
+    "PR302#issuecomment-6717018485 (JJANGGU reproducibility findings)",
+    "tools/build_tripod_comparison.py",
+    "market-observatory/data/history-30y.json",
+    "market-observatory/data/tripod-comparison.json"
+  ],
+  "assignments": {
+    "ROY": "Independent skeptical review of merge precedence, source data granularity, look-ahead elimination, no hidden strategic assumption change, backtest design, benchmark total-return comparison and regression test criteria. Provide PASS/BLOCKED/NEEDS_DATA verdict and evidence. One PR comment only.",
+    "JJANGGU": "Reproduce suspect NDX/VIX date cases and source metadata, propose safe daily-only data reconstruction with completeness checks, VIX holiday date alignment, immutable data lineage, and clear before/after metrics. One PR comment only."
+  },
+  "completion": "After both comments appear, JJOONI verifies real session provenance, synthesizes a proposed patch and test plan. Human CIO must approve any implementation; no automatic source changes.",
+  "comment_marker": "JJOONI-COLLAB-V2",
+  "limits": {
+    "comments_per_actor": 1,
+    "retry_without_review": false,
+    "billed_model_api": false,
+    "auto_deploy": false,
+    "broker_orders": false
+  },
+  "created_date_kst": "2026-11-08"
+}
