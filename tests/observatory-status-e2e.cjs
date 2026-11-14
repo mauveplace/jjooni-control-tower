@@ -12,7 +12,7 @@ const {ORDER}=require('../market-observatory/freshness-core-v1.js');
    const url=route.request().url();if(!url.includes('/data/'))return route.fulfill({contentType:'text/html',body:'<html><head></head><body style="margin:0"><nav id="tabs"></nav></body></html>'});
    calls++;return route.fulfill({status:offline?503:200,contentType:'application/json',body:JSON.stringify(url.includes('watchdog')?{result:'HEALTHY_NOOP',checked_kst:'2026-10-27T07:28:00+09:00'}:status)});
   });
-  await page.goto('https://obs.test/');
+  await page.goto('https://obs.test/?ui=v1');
   await page.evaluate(now=>{const RealDate=Date;window.testNow=now;window.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[window.testNow]))}static now(){return window.testNow}};window.testIntervals=[];window.setInterval=(fn,ms)=>{window.testIntervals.push({fn,ms});return window.testIntervals.length};window.refreshFreshness=()=>window.__JJOONI_FRESHNESS_WATCHDOG.refresh()},now);
   for(const name of ['shared-data-reader-v1.js','freshness-core-v1.js','freshness-all-groups-v1.js','freshness-watchdog-v1.js'])await page.addScriptTag({content:fs.readFileSync('market-observatory/'+name,'utf8')});
   await page.waitForFunction(()=>window.__JJOONI_OBSERVATORY_STATUS?.overall==='LIVE');
