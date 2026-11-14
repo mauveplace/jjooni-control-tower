@@ -128,31 +128,39 @@ def validate_dual_market_template(d, contract):
             assert price_tokens == [numeric], ('CORE_MARKET_TABLE_VALUE_MISMATCH', key)
             if m['status'] == 'PROVIDER_REFERENCE_ONLY':
                 assert '참고' in visible, ('CORE_MARKET_TABLE_REFERENCE_LABEL', key)
-    # User-requested LITE 2-session sector and historical company radar.
-    # New reports keep V2 canonical price and publication audits. A flow
-    # amount, ETF creation/redemption or source-less consensus is NOT REQUIRED.
+    # Corrected owner request: mirror the EXISTING Song vertical sector board,
+    # not a new 4–6 AI-sector shortlist or forced company watchlist.
     from re import search as _search
     for name in ('## ④ 글로벌·한국 시장', '## ⑤ AI 산업·기업실적',
                  '## ⑥ 주요 일정', '## ⑦ 투자전략·위험점검·복기',
                  '## ⑧ 원천·데이터 감사'):
-        assert name in body, ('SECTION_REQUIRED', name)
+        assert name in body, ('SECTOR_REQUIRED_SECTION', name)
     region = body.split('## ④ 글로벌·한국 시장', 1)[1].split('## ⑤ AI 산업·기업실적', 1)[0]
-    earnings = body.split('## ⑤ AI 산업·기업실적', 1)[1].split('## ⑥ 주요 일정', 1)[0]
     strategy = body.split('## ⑦ 투자전략·위험점검·복기', 1)[1].split('## ⑧ 원천·데이터 감사', 1)[0]
-    assert '**섹터 강약 비교(전일→당일)**' in region, 'TWO_SESSION_SECTOR_BLOCK_REQUIRED'
-    assert '수익률 기반 추정' in region, 'SECTOR_FLOW_NOT_MEASURED_DISCLOSURE'
-    rows = []
-    for line in region.splitlines():
-        if line.strip().startswith('|'):
-            rows.append([v.strip() for v in line.strip().strip('|').split('|')])
-    assert any(len(r) >= 5 and '섹터' in r[0] and
-               '전일' in r[1] and '당일' in r[2] and '변화' in r[3]
-               for r in rows), 'TWO_SESSION_SECTOR_TABLE_REQUIRED'
-    assert sum(len(r) >= 5 and r[0] not in ('---', '섹터·대표 지표') and
-               not r[0].startswith('---') and '섹터' not in r[0]
-               for r in rows) >= 1, 'TWO_SESSION_SECTOR_ONE_ROW_REQUIRED'
-    assert '**송팀장 관심기업 업데이트**' in earnings, 'SONG_PRIMARY_COMPANY_UPDATE_REQUIRED'
-    assert '**기업·섹터 연결 해석**' in strategy, 'COMPANY_SECTOR_LINK_REQUIRED'
+    assert '**송팀장 Sector Observatory · 전체 업종 강약**' in region, 'EXISTING_VERTICAL_SECTOR_BOARD_REQUIRED'
+    assert '수익률 기반 추정' in region, 'SECTOR_PRICE_IS_NOT_CASH_FLOW'
+    for required in ('미국 S&P500 11개 업종', '한국 10개 섹터 ETF', '주요 테마 ETF'):
+        assert required in region, ('FULL_SECTOR_CATEGORY_MISSING', required)
+    sector_symbols = [
+        'XLK','XLC','XLY','XLF','XLI','XLE','XLB','XLV','XLP','XLU','XLRE',
+        '091160','091170','091180','102960','117460','117680','117700',
+        '140700','266360','266410',
+        'SMH','SOXX','IGV','SKYY','HACK','XBI','KRE','ITA','XAR','PAVE',
+        'XOP','BOTZ','ROBO',
+    ]
+    # Each ticker must appear as its own vertical row, not as a single
+    # name-dump in the introduction/description.
+    visible_rows = [line for line in region.splitlines() if line.strip().startswith('|')]
+    for ticker in sector_symbols:
+        matched = [line for line in visible_rows if _search(
+            r'(?<![A-Za-z0-9])' + _re.escape(ticker) + r'(?![A-Za-z0-9])',
+            line)]
+        assert len(matched) == 1, ('VERTICAL_SECTOR_ROW_MISSING_OR_DUPLICATE', ticker)
+        fields = [x.strip() for x in matched[0].strip().strip('|').split('|')]
+        assert len(fields) >= 4, ('VERTICAL_SECTOR_ROW_INCOMPLETE', ticker)
+    assert '**업종 주도권 변화 · 원인과 다음 확인**' in strategy, 'ROTATION_INTERPRETATION_REQUIRED'
+    # Company coverage intentionally has NO ticker/name obligation: major
+    # earnings, guidance, credit and corporate events are event-driven only.
     audit_part = body.split('## ⑧ 원천·데이터 감사', 1)[1]
     assert 'ROY' in audit_part or '로이' in audit_part, 'DUAL_REVIEW_AUDIT_MISSING'
 
