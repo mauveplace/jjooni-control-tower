@@ -30,6 +30,16 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     assert.ok(overflow <= 1, 'no horizontal overflow ' + overflow);
     const small = await page.evaluate(() => [...document.querySelectorAll('.navV2Main button')].filter(b => b.getBoundingClientRect().height < 44).length);
     assert.equal(small, 0, 'main tabs >= 44px');
+    const navLayout = await page.evaluate(() => {
+      const bar = document.querySelector('.navV2Bar');
+      const sub = document.querySelector('.navV2Sub');
+      const a = bar.getBoundingClientRect();
+      return { barBottom: Math.round(a.bottom), barTop: Math.round(a.top), screen: innerHeight,
+        minSub: Math.min(...[...sub.querySelectorAll('button')].map(b => b.getBoundingClientRect().height)) };
+    });
+    assert.ok(navLayout.minSub >= 44, 'subnav hit targets >=44px: ' + JSON.stringify(navLayout));
+    if (width === 390) assert.ok(Math.abs(navLayout.barBottom - navLayout.screen) <= 4,
+      'mobile 5-tabs pinned to safe-area bottom: ' + JSON.stringify(navLayout));
     await page.goto(BASE + '?ui=v1', { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.navV2Bar').count(), 0, '?ui=v1 rolls back');
     assert.deepEqual(errors, []);
