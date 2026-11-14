@@ -165,7 +165,14 @@ function ensureQuickView(){
  const dayTrust={BROKER_MEASURED:'증권사 실측',MODELED:'계산값',MIXED:'실측·계산 혼합',UNKNOWN:'원천 신뢰도 확인 필요'}[m.day_quality?.state]||'원천 검증 대기';
  const dayNote=comparable?('동일 기간 4계좌 · '+dayTrust):('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
  const flowText=m.flow==null?'확인 대기':formattedAmount(m.flow);
- const signature=[C.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M)].join('|');
+ const accounts=IDS.map((id,index)=>{
+  const a=C.accounts[id]||{},day=M.number(a.today_pnl);
+  return {id,label:{TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'}[id],day,scope:String(a.today_pnl_scope||''),kind:String(a.today_pnl_quality||'UNKNOWN'),index};
+ });
+ const ordered=comparable?accounts.slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)||a.index-b.index):accounts;
+ const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
+ const accountSignature=accounts.map(a=>[a.id,a.day,a.kind,a.scope].join(':')).join(',');
+ const signature=[C.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
  box.replaceChildren();
@@ -185,7 +192,38 @@ function ensureQuickView(){
  const footer=document.createElement('div');footer.className='ctHumanV2QuickFoot';
  const text=document.createElement('span');text.textContent='TRI-POD는 별도 계좌가 아닌 Toss 내 전략입니다.';
  const link=document.createElement('button');link.type='button';link.dataset.ctOpen='compare';link.textContent='성과 자세히 보기';
- footer.append(text,link);box.append(heading,grid,footer);
+ footer.append(text,link);
+ const drivers=document.createElement('section');drivers.className='ctHumanV2Drivers';
+ drivers.setAttribute('aria-label','계좌별 투자손익 영향');
+ const driverHeader=document.createElement('div');driverHeader.className='ctHumanV2DriversHeader';
+ const driverTitle=document.createElement('strong');driverTitle.textContent='계좌별 손익 영향';
+ const driverMeta=document.createElement('small');driverMeta.textContent=comparable?'동일 기준기간 · 손익규모순':'계좌별 참고 · 합산 비교 불가';
+ driverHeader.append(driverTitle,driverMeta);
+ const list=document.createElement('div');list.className='ctHumanV2DriverRows';
+ for(const a of ordered){
+  const item=document.createElement('button');item.type='button';item.className='ctHumanV2DriverRow';
+  item.dataset.ctOpen='accounts';item.setAttribute('aria-label',a.label+' 계좌성과 열기');
+  const name=document.createElement('span');name.className='ctHumanV2DriverLabel';name.textContent=a.label;
+  const track=document.createElement('span');track.className='ctHumanV2DriverTrack';
+  track.setAttribute('aria-hidden','true');
+  const bar=document.createElement('span');bar.className='ctHumanV2DriverBar';
+  if(a.day!=null&&maxDay>0){bar.style.width=(100*Math.abs(a.day)/maxDay).toFixed(1)+'%';bar.dataset.direction=a.day<0?'down':a.day>0?'up':'flat'}
+  track.append(bar);
+  const amount=document.createElement('strong');amount.textContent=a.day==null?'자료 없음':formattedAmount(a.day);
+  amount.dataset.direction=a.day==null?'unknown':a.day<0?'down':a.day>0?'up':'flat';
+  const source=document.createElement('small');
+  source.textContent={BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요';
+  item.append(name,track,amount,source);list.append(item);
+ }
+ drivers.append(driverHeader,list);
+ const actions=document.createElement('nav');actions.className='ctHumanV2QuickPaths';
+ actions.setAttribute('aria-label','자주 찾는 투자 분석');
+ for(const [id,label] of [['accounts','계좌 상세'],['portfolio','보유분석'],['compare','성과분석'],['tripod','TRI-POD'],['quality','데이터품질']]){
+  if(!knownTabs().some(t=>t.dataset.tab===id))continue;
+  const action=document.createElement('button');action.type='button';action.dataset.ctOpen=id;action.textContent=label;
+  actions.append(action);
+ }
+ box.append(heading,grid,drivers,footer,actions);
 }
 function showOldModeShortcut(){
  const top=qs('.top');if(!top||qs('#ctHumanV2Activate'))return;
