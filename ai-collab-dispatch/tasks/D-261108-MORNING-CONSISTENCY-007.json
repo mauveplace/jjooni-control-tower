@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261108-MORNING-CONSISTENCY-007",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "origin": "USER_TO_JJOONI",
+  "work_type": "data_integrity",
+  "objective": "ROY independently audit public daily market commentary, completed-session source evidence and GitHub Observatory failure remediation; propose implementable improvements to JJOONI before any release. Do not edit or merge the PR.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [
+    "JJANGGU"
+  ],
+  "acceptance": [
+    "Reproduce the 2026-11-06 NDX close mismatch between public 2026-11-07 morning brief (27154.71) and current published public-market-daily.json (26989.99023438), distinguishing historical source vintage from current data; identify trustworthy resolution criteria without inventing a price",
+    "Check whether latest morning-brief JSON meets tools/validate_morning_brief.py CROSS_CHECKED status/official_status/source_observations contracts; propose regression and publication gates preserving original issued report",
+    "Audit 8-section editorial report for priority hierarchy, source/analysis separation, actual source timestamps, TRI-POD rules and next-day comparison with SONG commentary; propose 3-5 concrete high-value improvements without duplicating sections",
+    "Find conflicting schedule references: active NY 16:25 every day vs legacy docs NY 16:40 and old Mon 05:40/ Tue-Sat; recommend one authoritative current contract",
+    "Independently review latest-board E2E ubuntu-24.04 workaround and historical calendar 10y publish retry failure; distinguish fixed historical runs from currently unverified latest-board E2E",
+    "Analyze market data gate: FINAL is session completeness, not verified close; propose a fail-closed same-session, same-basis, difference-threshold status gate, retaining old reports and revision provenance",
+    "Review source and checks in isolated PR; post a single ROY / REVIEW with exact HEAD SHA, file paths, tests/CI, factual evidence and clear priority (P0/P1/P2)"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No customer/account/private Google Drive data in public PR",
+    "Do not change or merge production code",
+    "No paid model API or cloud services",
+    "Never turn public-market reference into broker trade command"
+  ]
+}
