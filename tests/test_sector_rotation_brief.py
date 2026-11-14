@@ -1,6 +1,7 @@
 """No-network tests: the SAME Observatory bars must drive the morning sector story."""
 import sys
 import unittest
+import json
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_sector_rotation_brief import make_digest, SECTOR_KO, KR_CATALOG, THEME_GROUPS
@@ -101,6 +102,16 @@ class ExistingVerticalSectorSSOT(unittest.TestCase):
         self.assertNotIn("NVIDIA", txt)
         self.assertEqual(sum(line.startswith("| ") and " · " in line and
                              ("| +2.00%" in line) for line in txt.splitlines()), 34)
+
+    def test_committed_real_sector_snapshot_matches_same_original_data(self):
+        root = Path(__file__).resolve().parents[1]
+        source = json.loads((root/"market-observatory/data/sector-etf.json").read_text(encoding="utf-8"))
+        digest = json.loads((root/"market-observatory/data/sector-rotation-brief.json").read_text(encoding="utf-8"))
+        md = (root/"market-observatory/data/sector-rotation-brief.md").read_text(encoding="utf-8")
+        self.assertEqual(digest, make_digest(source))
+        self.assertEqual(md, render(digest))
+        self.assertEqual(digest["quality"]["us_classic_coverage"], 11)
+        self.assertEqual(digest["quality"]["kr_sector_coverage"], 10)
 
     def test_public_source_contract_and_sector_registry_are_fail_closed(self):
         s = fixture()
