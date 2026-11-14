@@ -7,7 +7,7 @@ const klines = 'https://data-api.binance.vision/api/v3/klines?*';
 const tile = key => `#latestBoardGrid [data-metric="${key}"]`;
 
 async function open(page) {
-  await page.goto(url, {waitUntil: 'domcontentloaded'});
+  await page.goto(url + (url.includes('?') ? '&' : '?') + 'ui=v1', {waitUntil: 'domcontentloaded'});
   await page.waitForFunction(() => ['COMPLETE', 'PARTIAL', 'FAILED']
     .includes(window.__JJOONI_CRYPTO_ON_VIEW?.status));
   await page.locator(tile('BTCUSD')).waitFor({state: 'attached'});
