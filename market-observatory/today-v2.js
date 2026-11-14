@@ -69,7 +69,10 @@
   function viewModel(input, now) {
     const glance = input.glance || {}, brief = input.brief || {}, fresh = input.freshness || {};
     const check = glance.brief_check || {};
-    const ndxVerified = check.official_status === 'VERIFIED' && check.official_eod_verified === true;
+    const ndxMarket = (fresh.groups || {}).market;
+    const failedCriticalSource = (input.loadErrors || []).some(x => /^(freshness|glance)\b/.test(x));
+    const ndxVerified = check.official_status === 'VERIFIED' && check.official_eod_verified === true
+      && ndxMarket?.state === 'LIVE' && ndxMarket.as_of === glance.us_session && !failedCriticalSource;
     const today = kstDate(now);
     const alerts = [];
     if (!ndxVerified) alerts.push({ level: 'HIGH', title: 'NDX 공식 종가 미검증', body: 'TRI-POD 전환 확정 금지 · 제공자 완료 일봉은 참고값' });
