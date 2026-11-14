@@ -36,7 +36,7 @@
       return ctx.ndxVerified && item.date === ctx.usSession && freshAligned ? 'official' : 'hold';
     }
     if (OFFICIAL_KEYS.has(item.key)) {
-      return freshAligned && /^U\\.S\\. Treasury official\\b/i.test(group.source || '') ? 'official' : 'ref';
+      return freshAligned && String(group.source || '').startsWith('U.S. Treasury official') ? 'official' : 'ref';
     }
     if (group && group.state !== 'LIVE') return 'delay';
     if (['KOSPI', 'KOSDAQ'].includes(item.key) && item.date === ctx.today && !freshAligned) return 'delay';
