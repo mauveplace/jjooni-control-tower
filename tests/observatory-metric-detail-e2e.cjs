@@ -4,7 +4,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
  for(const width of [360,390,800,1363]){
   const page=await browser.newPage({viewport:{width,height:844}}),errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle'});
+  await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile[data-metric]').length>30);
   const keys=await page.locator('#latestBoardGrid .latestTile[data-metric]').evaluateAll(es=>es.map(e=>e.dataset.metric));
   await page.waitForFunction(()=>{const el=document.querySelector('#latestBoardGrid [data-metric]');return el&&getComputedStyle(el).cursor==='pointer'});
