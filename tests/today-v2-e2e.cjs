@@ -52,7 +52,7 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     await page.waitForFunction(() => document.querySelector('#sectors')?.classList.contains('on'));
     await page.locator('.navV2Main button[data-group="today"]').click();
     await page.waitForFunction(() => document.querySelector('.todayV2') && !document.querySelector('.todayV2').hidden);
-    await page.locator('.todayV2 [data-go="morning-brief"]').click();
+    await page.locator('.todayV2 [data-go="morning-brief"]').first().click();
     await page.waitForFunction(() => document.getElementById('morning-brief')?.classList.contains('on'));
     assert.ok(await page.locator('#overview').count(), 'legacy overview still present');
     assert.equal(await page.locator('.todayV2').isVisible(), false, 'today screen hidden on other tabs');
