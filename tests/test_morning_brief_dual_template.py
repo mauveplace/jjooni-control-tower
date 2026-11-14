@@ -35,7 +35,9 @@ def fixture():
           "## ③ 핵심 이슈 깊이 읽기\n"
           "## ④ 글로벌·한국 시장\n" + vertical +
           "## ⑤ AI 산업·기업실적\n"
-          "이번 완료세션 확인된 중요한 신규 기업 이벤트 없음\n"
+          "**시장 전체 주요 기업 이벤트 · 발생 시 분석**\n"
+          "나스닥100·시장 전체 주요 공시 확인 범위: 원천 조회 후 확인.\n"
+          "NO_MATERIAL_EVENTS_CONFIRMED · 확인 범위의 중대 새 사건 없음\n"
           "## ⑥ 주요 일정\n"
           "## ⑦ 투자전략·위험점검·복기\n"
           "**업종 주도권 변화 · 원인과 다음 확인**\n"
@@ -238,6 +240,39 @@ class DualTemplateV2(unittest.TestCase):
         self.assertNotIn('sector_flows',contract)
         self.assertNotIn('earnings_events',contract)
         validate_dual_market_template(d,contract)
+
+    def test_dynamic_nasdaq100_not_fixed_song_watchlist(self):
+        day, contract = fixture()
+        self.assertNotIn('NVIDIA', day['body_markdown'])
+        self.assertNotIn('CoreWeave', day['body_markdown'])
+        validate_dual_market_template(day, contract)
+
+    def test_marketwide_event_scan_cannot_be_silently_omitted(self):
+        for needle,code in [
+            ('**시장 전체 주요 기업 이벤트 · 발생 시 분석**','EVENT_DRIVEN_COMPANY_SCAN_REQUIRED'),
+            ('나스닥100','NASDAQ100_SCREEN_SCOPE_REQUIRED'),
+            ('NO_MATERIAL_EVENTS_CONFIRMED','EVENT_SCREENING_STATE_REQUIRED'),
+        ]:
+            day, contract = fixture()
+            day['body_markdown'] = day['body_markdown'].replace(needle,'')
+            with self.assertRaisesRegex(AssertionError,code):
+                validate_dual_market_template(day, contract)
+
+    def test_material_event_with_no_primary_evidence_is_blocked(self):
+        day, contract = fixture()
+        day['body_markdown'] = day['body_markdown'].replace('NO_MATERIAL_EVENTS_CONFIRMED','MATERIAL_EVENTS_FOUND')
+        with self.assertRaisesRegex(AssertionError,'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'):
+            validate_dual_market_template(day, contract)
+        day['body_markdown'] = day['body_markdown'].replace(
+            'MATERIAL_EVENTS_FOUND · 확인 범위의 중대 새 사건 없음',
+            'MATERIAL_EVENTS_FOUND · 위기 이슈 / 공식 https://www.sec.gov/ 원문 검토')
+        validate_dual_market_template(day, contract)
+
+    def test_incomplete_scan_is_truthfully_disclosed(self):
+        day, contract = fixture()
+        day['body_markdown'] = day['body_markdown'].replace('NO_MATERIAL_EVENTS_CONFIRMED',
+                                                              'SCREENING_INCOMPLETE')
+        validate_dual_market_template(day, contract)
 
     def test_historical_archive_is_not_retroactively_invalidated(self):
         d,c=fixture();d["report_date_kst"]="2026-11-14"
