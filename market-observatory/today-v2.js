@@ -21,7 +21,9 @@
   function sourceGroupFor(key) {
     if (OFFICIAL_KEYS.has(key) || ['US5Y', 'US10Y', 'US30Y', 'US3M', 'US_2S10S'].includes(key)) return 'us_rates';
     if (['KOSPI', 'KOSDAQ'].includes(key)) return 'kr_equity';
-    if (['NIKKEI225', 'HANGSENG', 'SHCOMP'].includes(key)) return 'us_supplement';
+    if (['DOW', 'NASDAQCOMPOSITE', 'RUSSELL2000'].includes(key)) return 'us_supplement';
+    if (['NIKKEI225', 'HANGSENG', 'SHCOMP'].includes(key)) return null;
+    if (key === 'FEAR_GREED') return 'fear_greed';
     if (['DXY', 'USDKRW', 'USDJPY', 'JPYKRW'].includes(key)) return 'fx';
     if (['GOLD', 'SILVER', 'COPPER'].includes(key)) return 'metals';
     if (['WTI', 'BRENT', 'NATGAS'].includes(key)) return 'energy';
