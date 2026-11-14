@@ -66,6 +66,22 @@ test('rebased quotes, stale brief and freshness problems become alerts', () => {
   assert.ok(titles.includes('데이터 신선도 STALE'));
 });
 
+test('LIVE_WITH_WARNINGS renders noncritical warnings as MID, not urgent HIGH', () => {
+  const g = { ...glance, brief_check: { official_status: 'VERIFIED', official_eod_verified: true } };
+  const vm = viewModel({ glance: g, brief, freshness: {
+    overall: 'LIVE_WITH_WARNINGS', warnings: ['fedwatch', 'audit'], critical_bad: []
+  }, calendar }, NOW);
+  assert.equal(vm.alerts.some(a => a.level === 'HIGH'), false);
+  assert.ok(vm.alerts.some(a => a.level === 'MID' && /fedwatch/.test(a.body)));
+});
+
+test('LIVE_WITH_WARNINGS still surfaces a critical_bad as HIGH', () => {
+  const vm = viewModel({ glance, brief, freshness: {
+    overall: 'LIVE_WITH_WARNINGS', warnings: ['fedwatch'], critical_bad: ['US_CLOSE']
+  }, calendar }, NOW);
+  assert.ok(vm.alerts.some(a => a.level === 'HIGH' && /US_CLOSE/.test(a.body)));
+});
+
 test('events: future, importance >= 2, sorted, max 4', () => {
   const vm = viewModel({ glance, brief, calendar }, NOW);
   assert.deepEqual(vm.events.map(e => e.title), ['U.S. Initial Jobless Claims', 'Producer Price Index']);

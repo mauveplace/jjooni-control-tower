@@ -30,8 +30,11 @@
     const today = kstDate(now);
     const alerts = [];
     if (!ndxVerified) alerts.push({ level: 'HIGH', title: 'NDX 공식 종가 미검증', body: 'TRI-POD 전환 확정 금지 · 제공자 완료 일봉은 참고값' });
-    if (fresh.overall && fresh.overall !== 'LIVE') alerts.push({ level: 'HIGH', title: '데이터 신선도 ' + fresh.overall, body: (fresh.critical_bad || []).join(', ') || '상태 파일 확인 필요' });
-    for (const c of fresh.critical_bad || []) if (fresh.overall === 'LIVE') alerts.push({ level: 'HIGH', title: '핵심 데이터 결함', body: String(c) });
+    if (fresh.overall && !['LIVE', 'LIVE_WITH_WARNINGS'].includes(fresh.overall)) alerts.push({ level: 'HIGH', title: '데이터 신선도 ' + fresh.overall, body: (fresh.critical_bad || []).join(', ') || '상태 파일 확인 필요' });
+    // LIVE_WITH_WARNINGS can be caused by noncritical FedWatch/audit warnings.
+    // Reserve urgent red alerts for genuinely critical data problems.
+    if (fresh.overall === 'LIVE_WITH_WARNINGS') alerts.push({ level: 'MID', title: '일부 데이터 확인 필요', body: (fresh.warnings || []).join(', ') || '데이터 감사 상세 확인' });
+    for (const c of fresh.critical_bad || []) if (['LIVE', 'LIVE_WITH_WARNINGS'].includes(fresh.overall)) alerts.push({ level: 'HIGH', title: '핵심 데이터 결함', body: String(c) });
     if (glance.consistency && glance.consistency.status && glance.consistency.status !== 'OK') alerts.push({ level: 'MID', title: '데이터 정합성 ' + glance.consistency.status, body: (glance.consistency.reasons || []).join(' · ') });
     for (const key of input.rebased || []) alerts.push({ level: 'MID', title: key + ' 전일 종가 보정', body: '장중 시세 원천의 전일 종가가 한 세션 늦어 확정 종가 기준으로 재계산' });
     if (brief.report_date_kst && brief.report_date_kst !== today) alerts.push({ level: 'MID', title: '오늘 아침 시황 미게시', body: '최신 게시 ' + brief.report_date_kst });
@@ -97,6 +100,8 @@
 .tV2Alert{background:#fdecec;border:1px solid #f3c4c4;color:#7a1414;border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
 .tV2Alert b.badge{font-size:11px;background:#b42318;color:#fff;padding:2px 7px;border-radius:4px;margin-right:6px}
 .tV2Alert div{font-size:13px;line-height:1.45}
+.tV2Notice{background:#fff8e9;border:1px solid #e5ca82;color:#664608;border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.tV2Notice div{font-size:13px;line-height:1.45}
 .tV2Grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}
 .tV2Card{background:#fff;border:1px solid #e5ebf2;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .tV2Eyebrow{font-size:11px;font-weight:800;color:#5b6878;letter-spacing:.04em}
@@ -135,10 +140,17 @@
     const tabs = document.getElementById('tabs'); if (!tabs) return;
     document.querySelector('.todayV2')?.remove();
     const wrap = el('section', { class: 'todayV2', 'aria-label': '오늘 화면' });
-    if (vm.alerts.length) {
+    const criticalAlerts = vm.alerts.filter(a => a.level === 'HIGH');
+    const advisoryNotices = vm.alerts.filter(a => a.level !== 'HIGH');
+    if (criticalAlerts.length) {
       wrap.append(el('div', { class: 'tV2Alert', role: 'alert' },
-        el('div', null, el('b', { class: 'badge' }, '데이터 경고 ' + vm.alerts.length)),
-        ...vm.alerts.map(a => el('div', null, el('b', null, a.title), ' — ' + a.body))));
+        el('div', null, el('b', { class: 'badge' }, '긴급 데이터 경고 ' + criticalAlerts.length)),
+        ...criticalAlerts.map(a => el('div', null, el('b', null, a.title), ' — ' + a.body))));
+    }
+    if (advisoryNotices.length) {
+      wrap.append(el('div', { class: 'tV2Notice', role: 'status' },
+        el('div', null, el('b', null, '참고 안내 ' + advisoryNotices.length)),
+        ...advisoryNotices.map(a => el('div', null, el('b', null, a.title), ' — ' + a.body))));
     }
     const judge = el('article', { class: 'tV2Card' },
       el('div', { class: 'tV2Eyebrow' }, '오늘의 판단 · 아침 시황 ' + vm.judgment.date + ' (미국 ' + vm.judgment.market + ')'),
