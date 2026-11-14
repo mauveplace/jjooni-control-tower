@@ -85,7 +85,7 @@ jobs:
               const page=await browser.newPage({viewport:{width:390,height:844}});
               const errors=[];page.on('pageerror',e=>errors.push(String(e)));
               try{
-                await page.goto(process.env.URL+`?latest_board_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
+                await page.goto(process.env.URL+`?ui=v1&latest_board_e2e=${Date.now()}`,{waitUntil:'networkidle',timeout:120000});
                 await page.waitForFunction(v=>window.__JJOONI_LATEST_BOARD?.version===v,expectedVersion,{timeout:15000});
                 await page.waitForFunction(()=>document.querySelectorAll('#latestBoardGrid .latestTile').length>=21,{timeout:15000});
                 let x=await snapshot(page);
