@@ -40,11 +40,18 @@ def publication_paths(paths):
     """
     paths = list(dict.fromkeys(paths))
     for path in paths:
-        generated_view=path in (DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv')
+        generated_view=path in (DATA+'fedwatch-history/brief.md',
+                                DATA+'fedwatch-history/probabilities.csv',
+                                DATA+'sector-rotation-brief.md')
         if (not str(path).endswith('.json') and not generated_view) or '..' in Path(path).parts or not (str(path).startswith(DATA) or path=='public-market-daily.json'):
             raise ValueError('DATA_PUBLISHER_REJECTED_NON_DATA_PATH: '+str(path))
     if set(paths).intersection(MARKET_BUNDLE[1:]):
         paths = list(dict.fromkeys([*paths, *MARKET_BUNDLE]))
+    # Every sector source publisher owns its two deterministic derived views.
+    # This includes the cross-market writer that previously selected only JSON.
+    if DATA + 'sector-etf.json' in paths:
+        paths = list(dict.fromkeys([*paths, DATA + 'sector-rotation-brief.json',
+                                    DATA + 'sector-rotation-brief.md']))
     # GitHub Actions bot commits do not reliably trigger downstream push workflows.
     # Publish the audit and freshness verdict in the SAME commit as any canonical
     # market-source update, including independent 24/7 BTC/ETH quote refreshes.
@@ -413,9 +420,28 @@ def materialize_calendar_fedwatch(paths):
     return True
 
 
+def materialize_sector_dependents(paths):
+    """Rebuild both published sector views from the exact source after rebase.
+
+    A competing writer can advance sector-etf.json while publication retries;
+    committing stale summary/Markdown would silently diverge the morning brief.
+    """
+    if DATA + 'sector-etf.json' not in paths:
+        return
+    from build_sector_rotation_brief import make_digest
+    from render_sector_rotation_brief import render
+    source = json.loads((ROOT / (DATA + 'sector-etf.json')).read_text(encoding='utf-8'))
+    digest = make_digest(source)
+    (ROOT / (DATA + 'sector-rotation-brief.json')).write_text(
+        serialize(DATA + 'sector-rotation-brief.json', digest), encoding='utf-8')
+    (ROOT / (DATA + 'sector-rotation-brief.md')).write_text(
+        render(digest), encoding='utf-8')
+
+
 def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
     materialize_calendar_fedwatch(paths)
+    materialize_sector_dependents(paths)
     materialize_market_dependents(paths)
     paths = list(dict.fromkeys([*paths, *materialize(ROOT, paths)]))
     # A data-only Daily Glance writer may start before a concurrent crypto
@@ -456,7 +482,8 @@ def publish(paths, message):
         git('fetch', 'origin', 'main')
         payloads = {}
         for path in paths:
-            if path in {DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv',DATA+'observatory-recent.json'}:
+            if path in {DATA+'fedwatch-history/brief.md',DATA+'fedwatch-history/probabilities.csv',
+                        DATA+'sector-rotation-brief.md',DATA+'observatory-recent.json'}:
                 # These are deterministic views, regenerated from the merged
                 # archive after rebase. Only these exact generated paths qualify.
                 remote_view=git('show','origin/main:'+path,check=False)

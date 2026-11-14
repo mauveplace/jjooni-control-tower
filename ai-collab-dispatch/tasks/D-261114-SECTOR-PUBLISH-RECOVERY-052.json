@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261114-SECTOR-PUBLISH-RECOVERY-052",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "P0: restore 2026-11-14 Market Observatory sector-digest publisher and prevent Yahoo regressive completed-close cache from erasing already independently published same-session sector bars. Two actual GitHub Actions failures: Daily+Calendar 43538239106 and Cross-Market Freshness 43543112563. JJOONI authored full patch and no-network regression tests in PR #467. ROY to review exact final HEAD and suggest substantive changes before release; no second data provider or new service.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "production_market_data_integrity_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-14 user said to continue the remaining JJOONI-ROY review and operational verification. This authorizes investigation, isolated code changes and review requests, not fabrication of ROY PASS or bypassing release gates.",
+  "acceptance": [
+    "Sector previous completed daily close with a later date must not be replaced by a successfully fetched older Yahoo cache series. Prior generation must be timezone-aware and <= now, and prior points must have been completed as of the prior capture; never fabricate prices or promote future/provisional data.",
+    "Preserve each of 11 US and 10 KR original sector tickers and 13 theme tickers, with same-source digest quality/Markdown parity; stale/unknown data remains visibly missing, no fictional inflow claims.",
+    "Every publisher selecting sector-etf.json includes sector-rotation-brief.json and sector-rotation-brief.md, regenerates from exact source before initial commit and after rebase. No unrelated generated Markdown or UI files are silently discarded.",
+    "Inspect GitHub Actions runs 43538239106 and 43543112563; reproduce and challenge root cause, review SHA-pinned PR diff and all four modified source/test files, discuss hidden edge cases.",
+    "Full PR CI green including Sector completed-bar contract and architecture Python suite is distinct from original workflow repair. Actual main merge+fresh scheduled run/Pages browser verification only after user-authorized release.",
+    "ROY reply with original authenticated Claude GitHub app comment and full SHA, verdict PASS|NEEDS_CHANGES|BLOCKED, at least two nontrivial evidence findings; no self-attested identity."
+  ],
+  "forbidden": [
+    "No secrets or personal Plaud/customer/account/portfolio data",
+    "No lowering freshness or NDX/SOX independent official-price gates",
+    "No new hourly 5-minute API polling or duplicate data provider",
+    "No automated trade or personal strategy change",
+    "No main bypass, merge or deployment absent owner authorization"
+  ],
+  "coordination_notes": "This replaces no existing Task-ID. New opt-in task is attached to existing PR #467 for the existing read-only collaboration handoff. Exact PR event delivery and ROY identity must be verified; added task after initial PR opening alone does not prove Claude PR-opened Routine ran. Use CI-green owner fallback and configured issue-opened ROY follow-up when supported; do not spam duplicate review issues. ROY should be a collaborator, not a signature."
+}

@@ -2,10 +2,12 @@
 import sys
 import unittest
 import json
+from datetime import datetime
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_sector_rotation_brief import make_digest, SECTOR_KO, KR_CATALOG, THEME_GROUPS
 from render_sector_rotation_brief import render
+from build_observatory_sector_etf import preserve_newer_completed_series
 
 
 def fixture():
@@ -88,6 +90,27 @@ class ExistingVerticalSectorSSOT(unittest.TestCase):
         self.assertEqual(d["quality"]["us_classic_coverage"], 11)
         self.assertEqual(d["quality"]["kr_sector_coverage"], 0)
         self.assertEqual(d["completed_cutoffs"]["KR"], "2026-11-12")
+
+    def test_regressive_yahoo_cache_cannot_erase_prior_completed_session(self):
+        previous = fixture()
+        now = datetime.fromisoformat("2026-11-14T10:05:13+09:00")
+        fetched = previous["series"]["XLK"][:-1]
+        selected, retained = preserve_newer_completed_series("XLK", fetched, previous, now)
+        self.assertTrue(retained)
+        self.assertEqual(selected[-1]["date"], "2026-11-13")
+        self.assertEqual(fetched[-1]["date"], "2026-11-12")
+
+    def test_old_provisional_and_future_provenance_never_promoted(self):
+        previous = fixture()
+        now = datetime.fromisoformat("2026-11-14T10:05:13+09:00")
+        fetched = previous["series"]["XLK"][:-1]
+        previous["generated_kst"] = "2026-11-13T08:00:00+09:00"
+        selected, retained = preserve_newer_completed_series("XLK", fetched, previous, now)
+        self.assertFalse(retained)
+        self.assertEqual(selected, fetched)
+        previous["generated_kst"] = "2026-11-14T10:06:00+09:00"
+        selected, retained = preserve_newer_completed_series("XLK", fetched, previous, now)
+        self.assertFalse(retained)
 
     def test_full_vertical_markdown_has_all_34_rows_and_no_fixed_companies(self):
         txt = render(make_digest(fixture()))

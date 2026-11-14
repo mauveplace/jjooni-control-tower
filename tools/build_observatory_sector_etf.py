@@ -116,6 +116,27 @@ def completed_points(points, market, now=None):
     return [p for p in points if str(p.get('date') or '')[:10] <= cutoff]
 
 
+def preserve_newer_completed_series(ticker, fetched, previous, now):
+    """Keep a prior *completed* close if a successful Yahoo cache response regresses.
+
+    An old feed response must not erase a later already-observed session.
+    Never promote a previously provisional bar or a future-dated observation.
+    """
+    try:
+        previous_at = datetime.fromisoformat(previous['generated_kst'])
+        if previous_at.tzinfo is None or previous_at > now:
+            return fetched, False
+        market = market_of(ticker)
+        prior = completed_points((previous.get('series') or {}).get(ticker) or [],
+                                 market, previous_at)
+        prior = completed_points(prior, market, now)
+    except (KeyError, TypeError, ValueError):
+        return fetched, False
+    if prior and fetched and prior[-1]['date'] > fetched[-1]['date']:
+        return prior, True
+    return fetched, False
+
+
 def request_json(url: str, timeout: int = 20):
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/json'})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -265,6 +286,7 @@ def build(now=None):
     prev_series = previous.get('series') or {}
     series = {}
     fetch_errors = {}
+    regressive_fetches = {}
 
     tickers = list(BENCHMARKS.keys())
     for _, _, rows in GROUPS:
@@ -273,7 +295,14 @@ def build(now=None):
     for ticker in dict.fromkeys(tickers):
         try:
             symbol = ticker + '.KS' if market_of(ticker) == 'KR' else ticker
-            series[ticker] = yahoo_series(symbol, '2y', now)
+            fetched = yahoo_series(symbol, '2y', now)
+            series[ticker], retained = preserve_newer_completed_series(
+                ticker, fetched, previous, now)
+            if retained:
+                regressive_fetches[ticker] = {
+                    'new_fetch_last_date': fetched[-1]['date'],
+                    'previous_completed_last_date': series[ticker][-1]['date'],
+                }
             time.sleep(0.12)
         except Exception as exc:
             # Legacy fallback may itself contain a provisional bar. Filter by
@@ -383,6 +412,8 @@ def build(now=None):
         'quality': {
             'fetch_error_count': len(fetch_errors),
             'fetch_errors': fetch_errors,
+            'regressive_fetch_count': len(regressive_fetches),
+            'regressive_fetches': regressive_fetches,
             'expected_classic_count': 11,
             'classic_priced_count': len([r for r in classic if r.get('price') is not None]),
         },
@@ -409,6 +440,8 @@ def main():
     print('classic=' + str(out['quality']['classic_priced_count']) + '/11')
     print('priced=' + str(out['summary']['priced_count']) + '/' + str(out['summary']['total_count']))
     print('fetch_errors=' + str(out['quality']['fetch_error_count']))
+    print('yahoo_regressive_completed_cache_retained=' +
+          str(out['quality']['regressive_fetch_count']))
 
 
 if __name__ == '__main__':
