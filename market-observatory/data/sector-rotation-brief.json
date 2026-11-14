@@ -1,0 +1,530 @@
+{
+  "schema": "JJOONI_SECTOR_ROTATION_BRIEF_V1",
+  "generated_kst": "2026-11-14T07:41:47+09:00",
+  "source_path": "market-observatory/data/sector-etf.json",
+  "source_schema": "JJOONI_OBSERVATORY_SECTOR_ETF_V1",
+  "source_generated_kst": "2026-11-14T07:41:47+09:00",
+  "read_only": true,
+  "contains_account_data": false,
+  "no_trade": true,
+  "flow_evidence": "PRICE_PERFORMANCE_PROXY_ONLY_NOT_NET_INFLOWS",
+  "completed_cutoffs": {
+    "US": "2026-11-13",
+    "KR": "2026-11-13"
+  },
+  "groups": [
+    {
+      "key": "classic",
+      "label": "S&P 500 섹터",
+      "market": "US",
+      "expected_count": 11,
+      "rows": [
+        {
+          "ticker": "XLK",
+          "label": "기술",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.34,
+          "current_return_pct": -2.01,
+          "change_pp": -1.67,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLC",
+          "label": "커뮤니케이션",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.96,
+          "current_return_pct": 1.05,
+          "change_pp": 2.01,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLY",
+          "label": "경기소비재",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.44,
+          "current_return_pct": -0.4,
+          "change_pp": 0.04,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLF",
+          "label": "금융",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.72,
+          "current_return_pct": 0.81,
+          "change_pp": 1.52,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLI",
+          "label": "산업재",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.89,
+          "current_return_pct": -0.39,
+          "change_pp": 0.51,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLE",
+          "label": "에너지",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": 1.51,
+          "current_return_pct": 0.98,
+          "change_pp": -0.54,
+          "direction": "REMAINS_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLB",
+          "label": "소재",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.28,
+          "current_return_pct": -0.21,
+          "change_pp": 1.07,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLV",
+          "label": "헬스케어",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.59,
+          "current_return_pct": 0.54,
+          "change_pp": 1.14,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLP",
+          "label": "필수소비재",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.43,
+          "current_return_pct": 1.42,
+          "change_pp": 1.84,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLU",
+          "label": "유틸리티",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.02,
+          "current_return_pct": 0.52,
+          "change_pp": 0.55,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XLRE",
+          "label": "부동산",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.52,
+          "current_return_pct": 0.02,
+          "change_pp": 0.54,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "kr_sector",
+      "label": "한국 KRX 섹터 지수",
+      "market": "KR",
+      "expected_count": 10,
+      "rows": [
+        {
+          "ticker": "091160",
+          "label": "반도체",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.75,
+          "current_return_pct": -0.84,
+          "change_pp": -0.09,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "091170",
+          "label": "은행",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": 0.38,
+          "current_return_pct": 3.2,
+          "change_pp": 2.81,
+          "direction": "REMAINS_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "091180",
+          "label": "자동차",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.1,
+          "current_return_pct": 1.25,
+          "change_pp": 2.36,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "102960",
+          "label": "KODEX 기계장비",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.72,
+          "current_return_pct": 1.25,
+          "change_pp": 2.97,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "117460",
+          "label": "에너지·화학",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.03,
+          "current_return_pct": -0.5,
+          "change_pp": 0.53,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "117680",
+          "label": "철강",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.18,
+          "current_return_pct": -1.09,
+          "change_pp": 0.09,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "117700",
+          "label": "건설",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.1,
+          "current_return_pct": 1.88,
+          "change_pp": 2.98,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "140700",
+          "label": "보험",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -3.91,
+          "current_return_pct": -0.29,
+          "change_pp": 3.62,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "266360",
+          "label": "미디어·엔터테인먼트",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.55,
+          "current_return_pct": -2.89,
+          "change_pp": -2.33,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "266410",
+          "label": "필수소비재",
+          "market": "KR",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.83,
+          "current_return_pct": -0.18,
+          "change_pp": 0.65,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "semiconductor",
+      "label": "반도체·메모리",
+      "market": "US",
+      "expected_count": 2,
+      "rows": [
+        {
+          "ticker": "SMH",
+          "label": "VanEck Semiconductor ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.03,
+          "current_return_pct": -2.99,
+          "change_pp": -1.95,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "SOXX",
+          "label": "iShares Semiconductor ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.26,
+          "current_return_pct": -3.67,
+          "change_pp": -3.41,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "software",
+      "label": "소프트웨어·클라우드·사이버",
+      "market": "US",
+      "expected_count": 3,
+      "rows": [
+        {
+          "ticker": "IGV",
+          "label": "iShares Expanded Tech-Software Sector ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.76,
+          "current_return_pct": -0.26,
+          "change_pp": 0.51,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "SKYY",
+          "label": "First Trust Cloud Computing ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.07,
+          "current_return_pct": -1.09,
+          "change_pp": -1.02,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "HACK",
+          "label": "ETFMG Prime Cyber Security ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.44,
+          "current_return_pct": -1,
+          "change_pp": -0.56,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "biotech",
+      "label": "바이오",
+      "market": "US",
+      "expected_count": 1,
+      "rows": [
+        {
+          "ticker": "XBI",
+          "label": "SPDR S&P Biotech ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -3.27,
+          "current_return_pct": -0.43,
+          "change_pp": 2.84,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "financial",
+      "label": "지역은행",
+      "market": "US",
+      "expected_count": 1,
+      "rows": [
+        {
+          "ticker": "KRE",
+          "label": "SPDR S&P Regional Banking ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.59,
+          "current_return_pct": 0.3,
+          "change_pp": 0.89,
+          "direction": "TURN_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "defense_infra",
+      "label": "방산·인프라·에너지",
+      "market": "US",
+      "expected_count": 4,
+      "rows": [
+        {
+          "ticker": "ITA",
+          "label": "iShares U.S. Aerospace & Defense ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -2.06,
+          "current_return_pct": -0.31,
+          "change_pp": 1.76,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XAR",
+          "label": "SPDR S&P Aerospace & Defense ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -2.76,
+          "current_return_pct": -1.18,
+          "change_pp": 1.58,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "PAVE",
+          "label": "Global X U.S. Infrastructure Development ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -0.69,
+          "current_return_pct": -0.84,
+          "change_pp": -0.15,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "XOP",
+          "label": "SPDR S&P Oil & Gas Exploration & Production ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": 1.65,
+          "current_return_pct": 0.92,
+          "change_pp": -0.73,
+          "direction": "REMAINS_POSITIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    },
+    {
+      "key": "robotics",
+      "label": "로봇·자동화",
+      "market": "US",
+      "expected_count": 2,
+      "rows": [
+        {
+          "ticker": "BOTZ",
+          "label": "Global X Robotics & Artificial Intelligence ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -2.51,
+          "current_return_pct": -0.6,
+          "change_pp": 1.91,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        },
+        {
+          "ticker": "ROBO",
+          "label": "ROBO Global Robotics and Automation Index ETF",
+          "market": "US",
+          "previous_session": "2026-11-12",
+          "current_session": "2026-11-13",
+          "previous_return_pct": -1.55,
+          "current_return_pct": -1.12,
+          "change_pp": 0.43,
+          "direction": "REMAINS_NEGATIVE",
+          "status": "OK",
+          "data_origin": "OBSERVATORY_YAHOO_SINGLE_PROVIDER_COMPLETED_DAILY"
+        }
+      ]
+    }
+  ],
+  "quality": {
+    "us_classic_coverage": 11,
+    "kr_sector_coverage": 10,
+    "us_classic_expected": 11,
+    "kr_sector_expected": 10,
+    "theme_groups": 6
+  }
+}
