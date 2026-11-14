@@ -98,3 +98,73 @@ html[data-ct-human-ui="v2"] .ctHumanV2QuickFoot button{
  html[data-ct-human-ui="v2"] body #ctHumanBottomV2 button{font-size:11px}
  html[data-ct-human-ui="v2"] .ctHumanV2QuickGrid{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Human V2 phase 2: source-aware account contribution explorer (no new calculations). */
+html[data-ct-human-ui="v2"] .ctHumanV2Drivers{
+ min-width:0;margin:12px 0;padding:14px;background:#f8fafc;
+ border:1px solid #dce6f1;border-radius:14px;color:#20334c
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader{
+ display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader strong{font-size:15px;line-height:1.45}
+html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader small{font-size:12px;color:#62768d;line-height:1.45}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRows{display:grid;gap:6px}
+html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{
+ box-sizing:border-box;border:1px solid transparent;background:#fff;border-radius:10px;
+ display:grid;grid-template-columns:78px minmax(0,1fr) minmax(100px,auto);
+ align-items:center;gap:4px 9px;min-height:54px;width:100%;padding:8px 10px;
+ color:#253954;text-align:left;cursor:pointer;touch-action:manipulation
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverLabel{font-size:14px;font-weight:750}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverTrack{
+ position:relative;height:8px;border-radius:6px;background:#e7edf4;min-width:0;overflow:hidden
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverBar{
+ display:block;height:100%;width:0;border-radius:6px;background:#8699b1
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverBar[data-direction="up"]{background:#c54346}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverBar[data-direction="down"]{background:#347cc8}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong{
+ font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong[data-direction="up"]{color:#b42318}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong[data-direction="down"]{color:#175cd3}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong[data-direction="unknown"]{color:#6c7888}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow small{
+ grid-column:2/4;font-size:11px;line-height:1.3;color:#66778c;text-align:right
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths{
+ display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;padding-top:10px;
+ border-top:1px solid #e6edf5
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths button{
+ background:#f1f6fc;color:#164774;border:1px solid #cbdaed;
+ border-radius:10px;min-height:44px;padding:8px 12px;font:750 13px/1.4 system-ui;
+ cursor:pointer
+}
+html[data-ct-human-ui="v2"] :is(.ctHumanV2DriverRow,.ctHumanV2QuickPaths button):focus-visible{
+ outline:3px solid #357ed0;outline-offset:2px
+}
+@media(min-width:1080px){
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.9fr);
+  column-gap:18px;align-items:start
+ }
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2QuickHead{grid-column:1/-1}
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2QuickGrid{grid-column:1}
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2Drivers{grid-column:2;grid-row:2/4;margin:0}
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2QuickFoot{grid-column:1}
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2QuickPaths{grid-column:1/-1}
+}
+@media(max-width:479px){
+ html[data-ct-human-ui="v2"] .ctHumanV2Drivers{padding:10px}
+ html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{
+  grid-template-columns:68px minmax(0,1fr) minmax(90px,auto);
+  padding:8px;column-gap:6px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong{font-size:13px}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths button{padding:7px 5px}
+}
