@@ -265,7 +265,12 @@ class DualTemplateV2(unittest.TestCase):
             validate_dual_market_template(day, contract)
         day['body_markdown'] = day['body_markdown'].replace(
             'MATERIAL_EVENTS_FOUND · 확인 범위의 중대 새 사건 없음',
-            'MATERIAL_EVENTS_FOUND · 위기 이슈 / 공식 https://www.sec.gov/ 원문 검토')
+            'MATERIAL_EVENTS_FOUND · 새 이슈 / 공식 원문 https://www.sec.gov/')
+        with self.assertRaisesRegex(AssertionError,'MATERIAL_EVENT_EVIDENCE_LINK_REQUIRED'):
+            validate_dual_market_template(day, contract)
+        day['body_markdown'] = day['body_markdown'].replace(
+            'MATERIAL_EVENTS_FOUND · 새 이슈 / 공식 원문 https://www.sec.gov/',
+            'MATERIAL_EVENTS_FOUND · NVIDIA CEO 인사 / 공식 원문 https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-CEO-Transition/')
         validate_dual_market_template(day, contract)
 
     def test_incomplete_scan_is_truthfully_disclosed(self):
