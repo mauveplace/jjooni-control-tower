@@ -1,29 +1,29 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-14T11:56:22+09:00",
+  "generated_kst": "2026-11-14T11:56:52+09:00",
   "overall": "WARN",
   "critical_count": 0,
-  "warning_count": 2,
+  "warning_count": 1,
   "observatory_session": "2026-11-13",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-11-14T09:55:40+09:00",
+      "generated_kst": "2026-11-14T11:56:14+09:00",
       "session": "2026-11-13",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-14T11:56:21+09:00",
+      "generated_kst": "2026-11-14T11:56:52+09:00",
       "session": "2026-11-13",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-14T11:56:21+09:00",
+      "generated_kst": "2026-11-14T11:56:52+09:00",
       "session": "2026-11-13",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
     },
     "fedwatch": {
-      "generated_kst": "2026-11-14T11:55:53+09:00",
+      "generated_kst": "2026-11-14T11:56:15+09:00",
       "source_kind": null,
       "source_as_of_kst": null,
       "market_data_as_of": "2026-11-12",
@@ -33,7 +33,7 @@
       "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-11-14T11:54:57+09:00",
+      "generated_kst": "2026-11-14T11:56:22+09:00",
       "events": 199,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-14T11:55:57+09:00",
+      "generated_kst": "2026-11-14T11:56:35+09:00",
       "as_of_date": "2026-11-13",
       "priced_count": 46
     },
@@ -68,11 +68,10 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-14T11:56:14+09:00",
+      "generated_kst": "2026-11-14T11:56:49+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
-        "kr_rates",
         "fedwatch",
         "audit"
       ]
@@ -381,7 +380,7 @@
       "latest_mismatch": []
     },
     "kr_rates": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": "2026-11-14",
       "allow_lag_days": 4,
       "critical": false,
@@ -436,15 +435,7 @@
         }
       },
       "missing": [],
-      "latest_mismatch": [],
-      "fetch_succeeded": false,
-      "failed_series": {
-        "KR3Y": "RuntimeError:ECOS_TRANSPORT_FAILED_AFTER_3_ATTEMPTS;ECOS_CURL_FALLBACK_Timeout;ECOS_NETWORK_TCP_OR_TLS_TIMEOUT",
-        "KR5Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR10Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR20Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN",
-        "KR30Y": "RuntimeError:ECOS_TRANSPORT_CIRCUIT_OPEN_THIS_RUN"
-      }
+      "latest_mismatch": []
     },
     "jp_rates": {
       "state": "LIVE",
@@ -515,17 +506,17 @@
         "BTCUSD": {
           "count": 1110,
           "last_date": "2026-11-14",
-          "last_value": 67654.01,
+          "last_value": 67578.5,
           "group": "crypto",
-          "latest_value": 67654.01,
+          "latest_value": 67578.5,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1110,
           "last_date": "2026-11-14",
-          "last_value": 1911.45,
+          "last_value": 1909.57,
           "group": "crypto",
-          "latest_value": 1911.45,
+          "latest_value": 1909.57,
           "latest_matches": true
         }
       },
@@ -569,24 +560,19 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-14T11:55:09+09:00",
-      "current_quote_age_seconds": 73,
+      "quote_as_of_kst": "2026-11-14T11:56:30+09:00",
+      "current_quote_age_seconds": 22,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-14T11:55:10+09:00",
-      "current_quote_age_seconds": 72,
+      "quote_as_of_kst": "2026-11-14T11:56:31+09:00",
+      "current_quote_age_seconds": 21,
       "captured_quote_age_seconds": 0
     }
   },
   "issues": [
-    {
-      "code": "GROUP_KR_RATES_STALE",
-      "severity": "WARN",
-      "detail": "anchor=2026-11-14 dates=KR3Y:2026-11-13,KR5Y:2026-11-13,KR10Y:2026-11-13,KR20Y:2026-11-13,KR30Y:2026-11-13,KR_3S10S:2026-11-13"
-    },
     {
       "code": "GROUP_FEDWATCH_LAGGING",
       "severity": "WARN",
