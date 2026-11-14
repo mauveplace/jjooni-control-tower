@@ -8,7 +8,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    calls++;const run={id:123,event:'schedule',created_at:new Date(Date.now()-160*60000).toISOString(),status:'completed',conclusion:'success'};
    return route.fulfill({status:offline?503:200,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify({workflow_runs:[run]})});
   });
-  await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'domcontentloaded'});
+  await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'domcontentloaded'});
   await page.locator('#obsCollectorSchedule').waitFor({state:'attached',timeout:30000});
   assert.equal(calls,0,'collapsed panel should not request GitHub');
   await page.locator('.obsFreshDetails > summary').click();

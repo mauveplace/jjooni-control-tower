@@ -12,7 +12,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
     const calendar=JSON.parse(fs.readFileSync('market-observatory/data/economic-calendar.json','utf8'));delete calendar.official_actual_contract;
     await page.route('**/economic-calendar.json?*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(calendar)}));
    }
-   await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'domcontentloaded'});
+   await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>typeof CAL!=='undefined'&&CAL?.events?.length,{timeout:30000});
    assert.equal(counts.index,0,'overview must not request calendar history');
    assert.equal(counts.overrides,0,'overview must not request manual overrides');

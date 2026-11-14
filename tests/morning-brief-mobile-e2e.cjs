@@ -55,7 +55,7 @@ const nowKst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'nu
     {name:'mobile430',width:430,height:932},
     {name:'tablet800',width:800,height:1280}]){
    const page=await browser.newPage({viewport:{width,height}});
-   await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'domcontentloaded',timeout:90000});
+   await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'domcontentloaded',timeout:90000});
    await page.locator('button[data-tab="morning-brief"]').click();
    await page.waitForFunction(expected=>{
     const cards=[...document.querySelectorAll('#briefKeyFigures .briefFigure b')].map(x=>x.textContent);

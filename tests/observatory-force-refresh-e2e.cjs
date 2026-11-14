@@ -9,7 +9,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
    const at=new Date(Date.now()-60000).toISOString();
    await route.fulfill({contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify({schema:'JJOONI_OBSERVATORY_QUOTES_V1',status:'COMPLETE',fetched_count:1,expected_count:20,quotes:{NASDAQ100:{key:'NASDAQ100',value:30000+reads*100,previous_close:30000,observed_at:at,session_date:at.slice(0,10),market_state:'REGULAR',quality:'DELAY_POSSIBLE',refresh_status:'FETCHED'}}})});
   });
-  await page.goto('http://127.0.0.1:8123/market-observatory/',{waitUntil:'networkidle'});
+  await page.goto('http://127.0.0.1:8123/market-observatory/?ui=v1',{waitUntil:'networkidle'});
   const button=page.getByRole('button',{name:'지금 최신화',exact:true});await button.waitFor();
   const before=await page.evaluate(()=>JSON.stringify({series:DATA.series,tripod:DATA.tripod_latest}));
   const card=page.locator('#latestMarketBoard .latestChangeFirst[data-metric="NASDAQ100"]');

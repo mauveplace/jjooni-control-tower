@@ -1,4 +1,4 @@
-// Phase-2 contract: ?ui=v2 renders the 오늘 screen from published data; default page unchanged.
+// Default-V2 contract: unflagged URL renders '오늘'; V1 remains accessible and isolated.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
@@ -9,10 +9,8 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     const page = await ctx.newPage(); const errors = [];
     page.on('pageerror', e => errors.push(String(e)));
     await page.goto(BASE, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    assert.equal(await page.locator('.todayV2').count(), 0, 'default page has no v2 today screen');
-    await page.goto(BASE + '?ui=v2', { waitUntil: 'networkidle' });
     await page.waitForFunction(() => window.__JJOONI_TODAY_V2?.rendered === true, null, { timeout: 20000 });
+    assert.ok(await page.locator('.todayV2').isVisible(), 'unflagged URL renders new Today');
     const vm = await page.evaluate(() => window.__JJOONI_TODAY_V2.vm);
     const sectorSource = await page.evaluate(() => fetch('./data/sector-rotation-brief.json?cb=' + Date.now()).then(r => r.json()));
     const expectedSectorRows = sectorSource.groups.reduce((n, g) => n + g.rows.length, 0);

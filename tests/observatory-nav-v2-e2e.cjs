@@ -1,4 +1,4 @@
-// Phase-1 contract: ?ui=v2 reaches all 13 legacy panels; default page unchanged.
+// Default-V2 contract: unflagged URL uses five tabs; explicit V1 rollback remains persistent.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
@@ -9,9 +9,10 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     const page = await ctx.newPage(); const errors = [];
     page.on('pageerror', e => errors.push(String(e)));
     await page.goto(BASE, { waitUntil: 'networkidle' });
-    assert.equal(await page.locator('.navV2Bar').count(), 0, 'default page has no v2 nav');
-    assert.ok(await page.locator('#tabs').isVisible(), 'legacy tabs visible by default');
-    await page.goto(BASE + '?ui=v2', { waitUntil: 'networkidle' });
+    await page.waitForFunction(() => window.__JJOONI_NAV_V2?.active === true);
+    assert.ok(await page.locator('.navV2Bar').isVisible(), 'unflagged URL defaults to V2');
+    assert.equal(await page.locator('#tabs').isVisible(), false, 'old tabs hidden on new default');
+    assert.ok(await page.getByRole('link', { name: '구형 화면으로' }).isVisible());
     await page.waitForFunction(() => document.querySelectorAll('#tabs button[data-tab]').length >= 13);
     assert.equal(await page.locator('#tabs').isVisible(), false, 'legacy tabs hidden under v2');
     const ia = await page.evaluate(() => window.__JJOONI_NAV_V2.IA);
@@ -40,8 +41,20 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     assert.ok(navLayout.minSub >= 44, 'subnav hit targets >=44px: ' + JSON.stringify(navLayout));
     if (width === 390) assert.ok(Math.abs(navLayout.barBottom - navLayout.screen) <= 4,
       'mobile 5-tabs pinned to safe-area bottom: ' + JSON.stringify(navLayout));
-    await page.goto(BASE + '?ui=v1', { waitUntil: 'networkidle' });
+    await page.goto(BASE + '?ui=v1#rates', { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.navV2Bar').count(), 0, '?ui=v1 rolls back');
+    assert.ok(await page.locator('#tabs').isVisible(), 'V1 legacy tabs shown after explicit switch');
+    assert.ok(await page.getByRole('link', { name: '새 화면 V2로' }).isVisible(), 'forward switch offered');
+    assert.equal(await page.evaluate(() => localStorage.getItem('obs-ui')), 'v1', 'V1 choice persisted');
+    await page.goto(BASE + '#rates', { waitUntil: 'networkidle' });
+    assert.equal(await page.locator('.navV2Bar').count(), 0, 'remembered V1 stays V1');
+    assert.equal(await page.locator('#rates').getAttribute('class').then(s => s.includes('on')), true, 'legacy deep link works');
+    await page.getByRole('link', { name: '새 화면 V2로' }).click();
+    await page.waitForFunction(() => window.__JJOONI_NAV_V2?.active === true);
+    assert.ok(await page.locator('.navV2Bar').isVisible(), 'explicit switch restores V2');
+    assert.equal(await page.evaluate(() => localStorage.getItem('obs-ui')), 'v2');
+    await page.reload({ waitUntil: 'networkidle' });
+    assert.ok(await page.locator('.navV2Bar').isVisible(), 'V2 chosen persists');
     assert.deepEqual(errors, []);
     console.log('OBS_NAV_V2_PASS width=' + width + ' panels=' + reached);
     await ctx.close();

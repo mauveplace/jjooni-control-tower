@@ -27,11 +27,14 @@ test('both TRI-POD tracks stay separate tabs under 전략', () => {
   assert.equal(groupOf('jjooni-tripod').id, 'strategy');
 });
 
-test('opt-in only: default stays v1', () => {
-  assert.equal(enabled('', null), false);
-  assert.equal(enabled('?ui=v2', null), true);
+test('V2 default; V1 preference persistent, V2 explicitly reactivates', () => {
+  assert.equal(enabled('', null), true);
   assert.equal(enabled('', 'v2'), true);
+  assert.equal(enabled('', 'v1'), false);
+  assert.equal(enabled('?ui=v1', null), false);
   assert.equal(enabled('?ui=v1', 'v2'), false);
+  assert.equal(enabled('?ui=v2', 'v1'), true);
+  assert.equal(enabled('?ui=v2', null), true);
 });
 
 test('module is loaded after the legacy runtime', () => {
