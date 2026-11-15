@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261116-ROY-AUDIO-HANDOFF-064",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent ROY verification of the PUBLIC GitHub collaboration wake-up and review-start protocol for owner request issue #497. The owner has independently granted ROY private Plaud access, but this public GitHub contract does not authorize publication or ingestion of the private files. First post 검토시작 on this PR only after an actual ROY Claude session begins; diagnose whether ROY can perform the owner's separate private audio review through owner-authorized channels and report status on #497 without confidential data. If no authorized private execution path in ROY's actual session, report BLOCKED instead of claiming recordings have been heard.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Validate actual Claude routine invocation from PR-opened event and immediately post own 검토시작 at real work start (not requesting JJOONI's surrogate)",
+    "Independently examine public issue #497 and PR #498 governance rules; state in a public comment whether this PR's scope can support a secure, separately authorized private Plaud/XLSX handoff",
+    "Never claim audio listening completed from GitHub public issue text; explicitly distinguish authorized private access, actual audio playback and any blockers",
+    "Record one evidenced ROY REVIEW verdict and specific next secure handoff step; publish no internal bank materials"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "Do not publish, upload, quote, or link private bank recordings/transcripts/XLSX in GitHub",
+    "No secrets or non-public company/account/customer data in this PR or its comments",
+    "No automated merge, production deployment, investment trade, paid model APIs or new cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "general",
+  "coordination_notes": "Immediate owner-directed ROY wake-up. Separate bank Plaud audio review remains private and is not authorized by public PR. Owner independently confirms Plaud grants already made; ROY must verify connection and actual playback via its own first-party environment."
+}
