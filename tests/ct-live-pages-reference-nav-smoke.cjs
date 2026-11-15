@@ -4,6 +4,8 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
+const HUMAN_SCRIPT='ct-human-v2.js?v=3';
+const humanGuard=script=>assert(script.includes('const snapshotAligned='),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');
 const guard=script=>{
  assert(script.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'PERF_BRIDGE_TOLERANCE_NOT_FIXED');
  assert(script.includes('zonedTime(history.verified_at_kst)'),'PERF_VERIFICATION_TIMEZONE_NOT_GATED');
@@ -24,23 +26,26 @@ const fetchText=async path=>{
   const localVerified=fs.readFileSync('ct-performance-history-v1.js','utf8');
   assert(localIndex.includes(VERIFIED_SCRIPT),'PR_ENTRY_MISSING_VERSIONED_PERFORMANCE_SCRIPT');
   guard(localVerified);
+  assert(localIndex.includes(HUMAN_SCRIPT),'PR_ENTRY_MISSING_HUMAN_JS_CACHE_BUST');
+  humanGuard(fs.readFileSync('ct-human-v2.js','utf8'));
   console.log('CT_PREDEPLOY_VERIFIED_HISTORY_ASSET=PASS');
   return;
  }
  // Post-merge Pages deploy may race this workflow: retry bounded, no background polling.
- let ready=false,index='',js='',css='',verified='';
+ let ready=false,index='',js='',css='',verified='',human='';
  for(let attempt=0;attempt<10;attempt++){
-  [index,js,css,verified]=await Promise.all([
+  [index,js,css,verified,human]=await Promise.all([
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
-   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT)
+   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT)
   ]);
-  if(index.includes(VERIFIED_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')){ready=true;break}
+  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
  }
  assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
  guard(verified);
+ humanGuard(human);
  assert(index.includes('ct-reference-nav-history-v1.js?v=2'),'PAGES_ENTRY_OLD_REFERENCE_SCRIPT');
- assert(index.includes('ct-human-v2.js?v=2'),'PAGES_ENTRY_MISSING_V2');
+ assert(index.includes(HUMAN_SCRIPT),'PAGES_ENTRY_MISSING_V2');
  assert(index.includes(VERIFIED_SCRIPT),'PAGES_ENTRY_MISSING_VERIFIED_HISTORY');
  assert(js.includes('function overviewShortcut(report)'),'LIVE_JS_MISSING_OVERVIEW_LINK');
  assert(js.includes('그래프 보기 · 성과 탭'),'LIVE_JS_MISSING_PERFORMANCE_NAV');
@@ -52,9 +57,10 @@ const fetchText=async path=>{
  assert(css.includes('@media(max-width:479px)'),'LIVE_CSS_MISSING_PHONE_LAYOUT');
  new Function(js);
  new Function(verified);
+ new Function(human);
  const expected={production_shell:true,reference_js_current:true,reference_css_current:true,
                    direct_performance_navigation:true,reference_no_data_fail_closed:true,
-                   verified_history_js_current:true,strict_nav_bridge_and_time:true,
+                   verified_history_js_current:true,strict_nav_bridge_and_time:true,human_snapshot_guard:true,
                    approved_browser_decryption:'NOT_TESTED',private_nav_values_logged:false};
  console.log('CT_LIVE_PAGES_REFERENCE_NAV_DISCOVERY=PASS '+JSON.stringify(expected));
 })().catch(e=>{console.error('CT_LIVE_PAGES_REFERENCE_NAV_DISCOVERY=FAIL '+e.message);process.exit(1)});

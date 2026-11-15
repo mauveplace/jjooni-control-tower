@@ -80,6 +80,28 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/자료 없음/,'missing account P&L is not represented as zero');
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'must not display invented full day P&L when missing');
+
+   // If canonical and browser-live IDs diverge, every displayed day/flow
+   // amount must fail closed, even when all 4 accounting fields exist.
+   await page.evaluate(()=>{
+    const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD;
+    C.accounts.IRP.today_pnl=40;
+    L.snapshot_id='older-live-snapshot';
+    document.dispatchEvent(new Event('jjooni:live-applied'));
+   });
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('계좌 동기화 불일치'));
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/스냅샷 정합성 확인 대기/);
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'합산 확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'동기화 확인 대기');
+   assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100|\+₩500/,'mismatched sources must not show live values');
+   await page.evaluate(()=>{
+    window.__JJOONI_LIVE_PAYLOAD.snapshot_id=window.__JJOONI_CANONICAL_SSOT.snapshot_id;
+    document.dispatchEvent(new Event('jjooni:live-applied'));
+   });
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2QuickMetric strong')?.textContent==='+₩100');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
+
    assert.deepEqual(errors,[],'no browser exceptions '+width+': '+errors.join(';'));
    await context.close();
    console.log('CT_HUMAN_V2_PASS',width);
