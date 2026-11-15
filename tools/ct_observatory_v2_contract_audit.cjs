@@ -32,7 +32,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=5'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=6'),'Human V2 cache version drift');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
