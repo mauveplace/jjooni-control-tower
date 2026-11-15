@@ -15,12 +15,16 @@ on:
       - market-observatory/data/daily-market-pulse.json
       - market-observatory/data/morning-brief/latest.json
       - tools/build_daily_glance.py
+      - tools/publish_observatory_data.py
+      - tests/test_observatory_publish_cleanliness.py
       - .github/workflows/market-observatory-daily-glance.yml
   pull_request:
     paths:
       - tools/build_daily_glance.py
       - market-observatory/daily-glance-v1.js
       - tests/test_daily_glance.py
+      - tests/test_observatory_publish_cleanliness.py
+      - tools/publish_observatory_data.py
       - .github/workflows/market-observatory-daily-glance.yml
   workflow_dispatch:
 
@@ -47,8 +51,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Contract tests
-        run: python -m unittest tests.test_daily_glance -v
+      - name: Atomic source-chain and card contract tests
+        run: python -m unittest tests.test_daily_glance tests.test_observatory_publish_cleanliness -v
       - name: Build glance (verification only)
         run: python tools/build_daily_glance.py
 
