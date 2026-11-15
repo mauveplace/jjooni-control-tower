@@ -59,7 +59,7 @@ class ObservatoryPublisherCleanlinessTest(unittest.TestCase):
             pub.validate_market_bundle(market,pending,sidecar,card)
         with self.assertRaisesRegex(RuntimeError,'naive_clock'):
             pub.validate_market_bundle(dict(market,generated_kst='2026-11-14T21:23:56'),
-                                       pulse,sidecar,card)
+                                       pulse,sidecar,dict(card,source_generated_kst='2026-11-14T21:23:56'))
         with self.assertRaisesRegex(RuntimeError,'session_or_source_mismatch'):
             pub.validate_market_bundle(market,pulse,sidecar,dict(card,no_trade=False))
 
