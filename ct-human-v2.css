@@ -88,6 +88,9 @@ html[data-ct-human-ui="v2"] .ctHumanV2QuickFoot button{
   padding-top:12px;margin-top:12px;border-top:1px solid #406081
  }
  html[data-ct-human-ui="v2"] body .ctHumanV2MoreFoot button{width:100%;text-align:center!important}
+ /* The Overview quick paths duplicate all destinations in Bottom/More on
+    phone; they must not look like a second global tab bar. */
+ html[data-ct-human-ui="v2"] body .ctHumanV2QuickPaths{display:none!important}
  html[data-ct-human-ui="v2"] body #ctHumanQuickV2{padding:13px;margin:10px 0}
  html[data-ct-human-ui="v2"] body .ctHumanV2QuickMetric{padding:10px}
  html[data-ct-human-ui="v2"] body .ctHumanV2QuickMetric>strong{font-size:19px}
