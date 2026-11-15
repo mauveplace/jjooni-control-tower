@@ -6,10 +6,11 @@ const fs=require('node:fs');
 const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
 const HUMAN_SCRIPT='ct-human-v2.js?v=6';
 const humanGuard=script=>{assert(script.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');assert(script.includes('⚠ 계좌 동기화 확인 대기')&&script.includes('⚠ 계좌 동기화 불일치'),'HUMAN_SYNC_COPY_NOT_CONDITIONAL');};
-const navGuard=(script,style)=>{
+const navGuard=(script,style,legacy)=>{
  assert(script.includes('function syncNavigationOwner()'),'HUMAN_NAV_OWNER_MISSING');
- assert(script.includes("tabs.style.setProperty('display','none','important')"),'MOBILE_DUPLICATE_NAV_GUARD_MISSING');
- assert(script.includes("bottom.style.setProperty('display','none','important')"),'DESKTOP_DUPLICATE_NAV_GUARD_MISSING');
+ assert(script.includes("force(tabs,'none')"),'MOBILE_DUPLICATE_NAV_GUARD_MISSING');
+ assert(script.includes("force(bottom,'none')"),'DESKTOP_DUPLICATE_NAV_GUARD_MISSING');
+ assert(legacy.includes('humanV2.enforceNavigation()'),'LEGACY_TOP_NAV_DOES_NOT_DELEGATE_V2');
  assert(style.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs'),
    'RESPONSIVE_NAV_GUARD_MISSING');
 };
@@ -35,25 +36,25 @@ const fetchText=async path=>{
   guard(localVerified);
   assert(localIndex.includes(HUMAN_SCRIPT),'PR_ENTRY_MISSING_HUMAN_JS_CACHE_BUST');
   humanGuard(fs.readFileSync('ct-human-v2.js','utf8'));
-  navGuard(fs.readFileSync('ct-human-v2.js','utf8'),fs.readFileSync('responsive-layout.css','utf8'));
+  navGuard(fs.readFileSync('ct-human-v2.js','utf8'),fs.readFileSync('responsive-layout.css','utf8'),fs.readFileSync('trade-review-loader.js','utf8'));
   assert(localIndex.includes('responsive-layout.css?v=1.8-single-navigation'),'PR_ENTRY_MISSING_RESPONSIVE_CACHE_BUST');
   console.log('CT_PREDEPLOY_VERIFIED_HISTORY_ASSET=PASS');
   return;
  }
  // Post-merge Pages deploy may race this workflow: retry bounded, no background polling.
- let ready=false,index='',js='',css='',verified='',human='',responsive='';
+ let ready=false,index='',js='',css='',verified='',human='',responsive='',legacy='';
  for(let attempt=0;attempt<10;attempt++){
-  [index,js,css,verified,human,responsive]=await Promise.all([
+  [index,js,css,verified,human,responsive,legacy]=await Promise.all([
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
-   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation')
+   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=2-single-navigation')
   ]);
-  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')){ready=true;break}
+  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')&&legacy.includes('humanV2.enforceNavigation()')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
  }
  assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
  guard(verified);
  humanGuard(human);
- navGuard(human,responsive);
+ navGuard(human,responsive,legacy);
  assert(index.includes('responsive-layout.css?v=1.8-single-navigation'),'PAGES_ENTRY_OLD_RESPONSIVE_LAYOUT');
  assert(index.includes('ct-reference-nav-history-v1.js?v=2'),'PAGES_ENTRY_OLD_REFERENCE_SCRIPT');
  assert(index.includes(HUMAN_SCRIPT),'PAGES_ENTRY_MISSING_V2');
