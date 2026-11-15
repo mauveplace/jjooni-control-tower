@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   actions: write
+  issues: write
 
 concurrency:
   group: morning-publication-watchdog
@@ -31,9 +32,38 @@ jobs:
         run: python -m unittest discover -s tests -p test_check_morning_publication.py -v
       - name: Check brief and US-close deadlines
         id: check
-        run: python tools/check_morning_publication.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python tools/check_morning_publication.py | tee /tmp/morning-status.log
       - name: Dispatch close watchdog when US-close data is stale
         if: failure() && hashFiles('us-close-stale.flag') != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run market-observatory-close-watchdog.yml --ref main && echo CLOSE_WATCHDOG_DISPATCHED=1
+
+      - name: Open one actionable issue for a genuine missing US-session report
+        # Only the last 08:07 KST watchdog tick opens an incident.
+        # Never open an issue on holidays, Sundays, stale data alone, or a manual check.
+        if: ${{ failure() && github.event_name == 'schedule' && github.event.schedule == '7 23 * * 1-5' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [ -f /tmp/morning-status.log ] || exit 0
+          reason="$(grep -m1 'MORNING_PUBLICATION=FAIL BRIEF_MISSING' /tmp/morning-status.log || true)"
+          if [[ -z "$reason" ]]; then
+            echo MORNING_BRIEF_INCIDENT=NO_MISSING_REPORT
+            exit 0
+          fi
+          expected="$(sed -nE 's/.*BRIEF_MISSING expected=([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/p' <<< "$reason")"
+          [[ "$expected" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo MORNING_BRIEF_INCIDENT=INVALID_DATE; exit 1; }
+          title="[MORNING-BRIEF][AUTO] ${expected} public US-session brief missing"
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 500 --json title --jq '.[].title' | grep -Fxq "$title"; then
+            echo "MORNING_BRIEF_INCIDENT=ALREADY_TRACKED date=$expected"
+            exit 0
+          fi
+          body="$(printf 'US-session public brief missing after final scheduled watchdog.\n\n- Report date (KST): %s\n- Evidence: %s\n- GitHub Actions: %s\n- Status: UNPUBLISHED (not an invented backfill)\n\nDiagnose the existing ChatGPT morning automation run and same-session canonical readiness, then publish a source-verified report through the existing atomic PR/CI/Pages path only. Do not insert unverified numbers or release an autonomous trading signal.\n' "$expected" "$reason" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          echo "MORNING_BRIEF_INCIDENT=OPENED date=$expected"
