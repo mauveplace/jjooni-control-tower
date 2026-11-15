@@ -106,10 +106,11 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     delete window.__JJOONI_LIVE_PAYLOAD.snapshot_id;
     document.dispatchEvent(new Event('jjooni:live-applied'));
    });
-   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('계좌 동기화 불일치'));
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('계좌 동기화 확인 대기'));
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'합산 확인 대기');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'확인 대기');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'동기화 확인 대기');
+   assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/계좌 동기화 불일치/,'missing source is not proven mismatched data');
    await page.evaluate(()=>{
     const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD;
     L.snapshot_id=C.snapshot_id;
@@ -117,7 +118,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     document.dispatchEvent(new Event('jjooni:live-applied'));
    });
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2QuickMetric strong')?.textContent==='합산 확인 대기');
-   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/동기화 불일치/);
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/동기화 확인 대기/);
    await page.evaluate(()=>{
     window.__JJOONI_CANONICAL_SSOT.snapshot_id='synthetic';
     document.dispatchEvent(new Event('jjooni:live-applied'));
