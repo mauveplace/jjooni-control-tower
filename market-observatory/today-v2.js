@@ -119,12 +119,16 @@
     const groups = (glance.groups || []).map(g => ({ name: g.name, rows: (g.items || []).map(it => {
       const st = rowState(it, ctx);
       const unit = it.d1_bp != null ? 'bp' : it.d1_pt != null ? 'pt' : '%';
-      const d1 = it.d1_pct ?? it.d1_bp ?? it.d1_pt ?? null, w1 = it.w1_pct ?? it.w1_bp ?? null;
+      const d1 = it.d1_pct ?? it.d1_bp ?? it.d1_pt ?? null;
+      const w1 = it.w1_pct ?? it.w1_bp ?? null;
+      const m1 = it.m1_pct ?? it.m1_bp ?? it.m1_pt ?? null;
       const groupSource = (fresh.groups || {})[sourceGroupFor(it.key)] || {};
       const provenance = [groupSource.source || it.source || '제공자 원장', '시장일자 ' + (it.date || '미확인'),
         groupSource.state || '출처 상태 미확인'].join(' · ');
       return { key: it.key, label: it.label || it.key, value: num(it.value, it.key.startsWith('US') || it.key.startsWith('KR') ? 3 : 2) + (unit === 'bp' ? '%' : ''),
-        d1: fmtChange(d1, unit), w1: fmtChange(w1, unit), d1n: d1, unit, date: it.date, state: st,
+        d1: fmtChange(d1, unit), w1: fmtChange(w1, unit), m1: fmtChange(m1, unit),
+        d1n: d1, w1n: w1, m1n: m1, m1BaseDate: it.m1_base_date || null,
+        unit, date: it.date, state: st,
         tag: STATE[st].tag, provenance };
     }) }));
 
@@ -198,8 +202,14 @@
 .tV2Tag.official{background:#e7f4ea;color:#1b5e2b;border-color:#bfe0c7}.tV2Tag.ref{background:#fff4db;color:#7a4a00;border-color:#f0d49a}
 .tV2Tag.hold{background:#eef1f5;color:#3a4656;border-color:#c9d1dc}.tV2Tag.delay{background:#fdecec;color:#7a1414;border-color:#f3c4c4}
 .tV2Scroll{overflow-x:auto}
+.tV2PeriodSwitch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tV2PeriodSwitch button{min-height:40px;padding:7px 4px;border:1px solid #c5d5e8;background:#f5f9ff;border-radius:9px;color:#173e6e;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.tV2PeriodSwitch button[aria-pressed="true"]{color:#fff;background:#204c81;border-color:#204c81}
+.tV2PeriodSwitch button:focus-visible{outline:3px solid #f9bd50;outline-offset:2px}
+.tV2PeriodNote{font-size:11px;line-height:1.45;color:#52657b}
+.tV2Change{font-variant-numeric:tabular-nums}
 .tV2Tag .s{display:none}
-@media(max-width:520px){.tV2Table .w1{display:none}.tV2Tag .l{display:none}.tV2Tag .s{display:inline}.tV2Table th,.tV2Table td{padding:6px 5px}}
+@media(max-width:520px){.tV2Tag .l{display:none}.tV2Tag .s{display:inline}.tV2Table th,.tV2Table td{padding:6px 5px}.tV2Table th[scope=row]{white-space:normal;min-width:94px;max-width:148px;word-break:keep-all;overflow-wrap:anywhere}.tV2Table .dt{display:none}}
 .tV2Event{display:grid;grid-template-columns:96px 1fr;gap:8px;font-size:13px}.tV2Event span:first-child{color:#5b6878}
 .tV2Vintage{font-size:12px;line-height:1.55;color:#44556c}
 .tV2SectorRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;border-top:1px solid #edf0f4;padding:8px 0;font-size:12px}
@@ -224,6 +234,33 @@
     return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso)) + ' KST';
   }
   function fmtPoint(n) { return (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2) + '%'; }
+  const PERIODS = {
+    d1: { label: '전영업일', column: '1D', note: '전영업일 대비 · 각 시장의 마지막 완료 거래일 기준' },
+    w1: { label: '전주 대비', column: '1W', note: '최근 5거래일 대비 · 거래소별 완료 일봉 기준' },
+    m1: { label: '전월 대비', column: '1M', note: '한 달 전 같은 날짜(휴장 시 이전 완료 거래일) 대비 · 과거값 없으면 —' }
+  };
+  let selectedPeriod = 'd1'; // New page visits default to previous business session.
+  function periodChange(row, period) {
+    const v = row[period + 'n'];
+    return { value: row[period], cls: typeof v === 'number' ? (v > 0 ? 'up' : v < 0 ? 'dn' : '') : '',
+      title: period === 'm1' ? (row.m1BaseDate ? '비교 기준일 ' + row.m1BaseDate : '전월 비교 가능한 완료 일봉 없음') : PERIODS[period].note };
+  }
+  function applyPeriod(wrap, vm, period) {
+    if (!PERIODS[period]) return;
+    selectedPeriod = period;
+    wrap.querySelectorAll('[data-period]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.period === period)));
+    const head = wrap.querySelector('.tV2ChangeHead'); if (head) head.textContent = PERIODS[period].column;
+    const note = wrap.querySelector('.tV2PeriodNote'); if (note) note.textContent = PERIODS[period].note;
+    const trs = [...wrap.querySelectorAll('.tV2Table tr[data-key]')];
+    for (const row of vm.groups.flatMap(g => g.rows)) {
+      const tr = trs.find(n => n.dataset.key === row.key);
+      const cell = tr?.querySelector('.tV2Change'); if (!cell) continue;
+      const v = periodChange(row, period);
+      cell.textContent = v.value;
+      cell.className = 'tV2Change ' + v.cls;
+      cell.title = v.title;
+    }
+  }
   function render(vm) {
     const tabs = document.getElementById('tabs'); if (!tabs) return;
     document.querySelector('.todayV2')?.remove();
@@ -282,17 +319,25 @@
 
     const tbody = el('tbody');
     for (const g of vm.groups) {
-      tbody.append(el('tr', { class: 'grp' }, el('th', { colspan: '5', scope: 'rowgroup' }, g.name)));
+      tbody.append(el('tr', { class: 'grp' }, el('th', { colspan: '4', scope: 'rowgroup' }, g.name)));
       for (const r of g.rows) {
-        const cls = typeof r.d1n === 'number' ? (r.d1n > 0 ? 'up' : r.d1n < 0 ? 'dn' : '') : '';
+        const ch = periodChange(r, selectedPeriod);
         tbody.append(el('tr', { 'data-key': r.key }, el('th', { scope: 'row' }, r.label), el('td', null, r.value),
-          el('td', { class: cls }, r.d1), el('td', { class: 'w1' }, r.w1),
+          el('td', { class: 'tV2Change ' + ch.cls, title: ch.title }, ch.value),
           el('td', null, el('span', { class: 'tV2Tag tV2Source ' + STATE[r.state].cls, title: r.tag + ' · ' + r.provenance }, el('span', { class: 'l' }, r.tag), el('span', { class: 's' }, STATE[r.state].short)), el('span', { class: 'dt' }, ' ' + (r.date || '').slice(5)))));
       }
     }
     const table = el('table', { class: 'tV2Table' },
-      el('thead', null, el('tr', null, el('th', { scope: 'col', style: 'text-align:left' }, '항목'), el('th', { scope: 'col' }, '최신'), el('th', { scope: 'col' }, '1D'), el('th', { scope: 'col', class: 'w1' }, '1W'), el('th', { scope: 'col' }, '상태 · 기준일'))), tbody);
-    const market = el('article', { class: 'tV2Card' }, el('div', { class: 'tV2Eyebrow' }, '시장 요약 · 색은 방향만(+ 빨강 / − 파랑)'), el('div', { class: 'tV2Scroll' }, table));
+      el('thead', null, el('tr', null, el('th', { scope: 'col', style: 'text-align:left' }, '항목'),
+        el('th', { scope: 'col' }, '최신'), el('th', { scope: 'col', class: 'tV2ChangeHead' }, PERIODS[selectedPeriod].column),
+        el('th', { scope: 'col' }, '상태 · 기준일'))), tbody);
+    const market = el('article', { class: 'tV2Card' },
+      el('div', { class: 'tV2Eyebrow' }, '시장 요약 · 색은 방향만(+ 빨강 / − 파랑)'),
+      el('div', { class: 'tV2PeriodSwitch', role: 'group', 'aria-label': '시장 등락 비교 기간' },
+        ...Object.entries(PERIODS).map(([key, meta]) => el('button', { type: 'button',
+          'data-period': key, 'aria-pressed': String(key === selectedPeriod) }, meta.label))),
+      el('div', { class: 'tV2PeriodNote', 'aria-live': 'polite' }, PERIODS[selectedPeriod].note),
+      el('div', { class: 'tV2Scroll' }, table));
     const events = el('article', { class: 'tV2Card' }, el('div', { class: 'tV2Eyebrow' }, '다음 일정 (KST)'),
       ...(vm.events.length ? vm.events.map(e => el('div', { class: 'tV2Event' }, el('span', null, e.when), el('span', null, e.country + ' · ' + e.title))) : [el('div', null, '예정된 주요 일정 없음')]));
     wrap.append(el('div', { class: 'tV2Grid' }, market, events));
@@ -304,6 +349,7 @@
     wrap.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', () =>
       document.querySelector('#tabs button[data-tab="' + btn.dataset.go + '"]')?.click()));
     wrap.querySelector('[data-refresh="today"]')?.addEventListener('click', () => root.__JJOONI_TODAY_V2.refresh?.());
+    wrap.querySelectorAll('[data-period]').forEach(btn => btn.addEventListener('click', () => applyPeriod(wrap, vm, btn.dataset.period)));
     root.__JJOONI_TODAY_V2.rendered = true;
     root.__JJOONI_TODAY_V2.vm = vm;
   }

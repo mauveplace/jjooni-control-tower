@@ -43,6 +43,40 @@ def brief(close, market_date="2026-11-06", status="VERIFIED", official="VERIFIED
 
 
 class DailyGlance(unittest.TestCase):
+    def test_month_comparison_uses_completed_bar_and_correct_units(self):
+        bars = [{"date": "2026-10-13", "value": 100},
+                {"date": "2026-11-11", "value": 105},
+                {"date": "2026-11-12", "value": 108},
+                {"date": "2026-11-13", "value": 110},
+                {"date": "2026-11-14", "value": 500, "session_status": "IN_PROGRESS"}]
+        index = glance.metric("NASDAQ100", "나스닥100", bars)
+        self.assertEqual(index["date"], "2026-11-13")
+        self.assertEqual(index["m1_base_date"], "2026-10-13")
+        self.assertEqual(index["m1_pct"], 10.0)
+        rate = glance.metric("US2Y", "2y", [dict(b, value=b["value"]/100) for b in bars])
+        self.assertEqual(rate["m1_bp"], 10.0)
+        fear = glance.metric("FEAR_GREED", "FG", bars)
+        self.assertEqual(fear["m1_pt"], 10.0)
+        self.assertIsNone(glance.metric("SP500", "S&P500", bars[1:-1])["m1_pct"])
+
+    def test_month_comparison_clamps_calendar_month_and_guards_currency(self):
+        rows = [{"date": "2026-02-27", "value": 100},
+                {"date": "2026-03-27", "value": 115},
+                {"date": "2026-03-30", "value": 120},
+                {"date": "2026-03-31", "value": 125}]
+        m = glance.metric("SP500", "S&P", rows)
+        self.assertEqual(m["m1_base_date"], "2026-02-27")
+        self.assertEqual(m["m1_pct"], 25)
+        missing = glance.metric("SP500", "S&P", [
+            {"date": "2026-02-01", "value": 100}, *rows[1:]])
+        self.assertIsNone(missing["m1_pct"])
+        crypto = glance.metric("BTCUSD", "Bitcoin", [
+            {"date": "2026-10-13", "value": 100, "quote_currency": "USD"},
+            {"date": "2026-11-12", "value": 105, "quote_currency": "USDT"},
+            {"date": "2026-11-13", "value": 110, "quote_currency": "USDT"}])
+        self.assertIsNone(crypto["m1_pct"])
+        self.assertIsNone(crypto["m1_base_date"])
+
     def test_tripod_lines_match_rule_thresholds(self):
         tri = glance.build(observatory())["tripod"]
         self.assertEqual(tri["pod"], "BIPOD")
