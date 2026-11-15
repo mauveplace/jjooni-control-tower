@@ -32,6 +32,7 @@ const {targets,verifiedTargetActualsReady}=require('./calendar-actual-production
       (document.body.classList.contains('navV2')||
        document.querySelector('#tabs button[data-tab="calendar"]')));
    const modern=await page.locator('body').evaluate(el=>el.classList.contains('navV2'));
+   assert(modern,'Observatory new visits must open default V2; cannot silently validate legacy UI');
    const menu=page.locator(modern
       ? '.navV2Main button[data-group="calendar"]'
       : '#tabs button[data-tab="calendar"]');
