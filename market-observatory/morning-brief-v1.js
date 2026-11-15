@@ -161,7 +161,33 @@ function render(d){
  document.getElementById('briefContents').onclick=e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth',block:'start'})};
  const status=document.getElementById('briefLoadStatus');status.textContent='미국장 '+d.market_date_us+' 기준 보관 자료입니다. 현재 시장값과 다를 수 있습니다. 검증 통과한 새 공개본은 60초마다 확인합니다.';
 }
-function renderHistory(){const select=document.getElementById('briefHistory');if(!select)return;const chosen=select.value||'latest';const entries=Array.isArray(INDEX?.entries)?INDEX.entries:[];select.innerHTML='<option value="latest">최신 공개본</option>'+entries.filter(e=>/^\d{4}-\d{2}-\d{2}$/.test(e.report_date_kst||'')).slice(0,120).map(e=>`<option value="${esc(e.report_date_kst)}">${esc(e.report_date_kst)} · 미국 ${esc(e.market_date_us||'—')}</option>`).join('');select.value=[...select.options].some(o=>o.value===chosen)?chosen:'latest'}
+// Derived from published index only. Never invent or backfill a report; show
+// unexplained Tue-Sat (KST) publication gaps as disabled, non-clickable entries.
+function archiveDates(entries,limit=120){
+ const valid=Array.isArray(entries)?entries.filter(e=>/^\d{4}-\d{2}-\d{2}$/.test(e?.report_date_kst||'')
+  &&new Date(e.report_date_kst+'T00:00:00Z').toISOString().slice(0,10)===e.report_date_kst):[];
+ const byDate=new Map(valid.map(e=>[e.report_date_kst,e]));
+ const days=[...byDate.keys()].sort((a,b)=>b.localeCompare(a));
+ if(!days.length)return [];
+ const out=[],min=Date.parse(days[days.length-1]+'T00:00:00Z');
+ for(let ms=Date.parse(days[0]+'T00:00:00Z');ms>=min&&out.length<limit;ms-=86400000){
+  const d=new Date(ms).toISOString().slice(0,10),entry=byDate.get(d);
+  // Sunday and Monday are not expected for the public Tue-Sat morning-brief reader.
+  const dow=new Date(ms).getUTCDay();
+  if(entry)out.push({date:d,entry,missing:false});
+  else if(dow>=2&&dow<=6)out.push({date:d,entry:null,missing:true});
+ }
+ return out;
+}
+function renderHistory(){
+ const select=document.getElementById('briefHistory');if(!select)return;
+ const chosen=select.value||'latest',entries=archiveDates(INDEX?.entries);
+ select.innerHTML='<option value="latest">최신 공개본</option>'+entries.map(({date,entry,missing})=>
+  missing?`<option value="unpublished-${esc(date)}" disabled>${esc(date)} · 미게시 (사유 확인 필요)</option>`:
+  `<option value="${esc(date)}">${esc(date)} · 미국 ${esc(entry.market_date_us||'—')}</option>`
+ ).join('');
+ select.value=[...select.options].some(o=>o.value===chosen&&!o.disabled)?chosen:'latest';
+}
 async function load(selected){const p=ensure();if(!p)return;const value=selected||document.getElementById('briefHistory').value||'latest';if(value!=='latest'&&!/^\d{4}-\d{2}-\d{2}$/.test(value))return;const id=++request,button=document.getElementById('briefRefresh');button.disabled=true;const status=document.getElementById('briefLoadStatus');status.textContent='브리핑을 읽는 중입니다…';
  const path=value==='latest'?LATEST:ROOT+value.replace(/-/g,'')+'.json';
  const results=await Promise.allSettled([fetchJSON(path).then(validate),fetchJSON(HISTORY),fetchJSON('./data/daily-glance.json'),fetchJSON('./data/daily-market-pulse.json')]);if(id!==request)return;
