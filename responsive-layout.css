@@ -235,7 +235,7 @@ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"]::before,ht
    new bottom bar on narrow viewports. This wins over all legacy sticky tabs
    (including the 2-row phone override above), even before V2 CSS loads. */
 @media(max-width:767px){
- html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs{
+ html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs{
   display:none!important;visibility:hidden!important;pointer-events:none!important
  }
  html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body #ctMoreMenu{
