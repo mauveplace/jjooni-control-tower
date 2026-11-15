@@ -17,6 +17,9 @@ on:
       - docs/morning-brief-roy-jjooni-template-v2-20261114.md
       - docs/pb-morning-intelligence-prompt-v2.2.md
       - docs/morning-brief-publishing.md
+      - tools/check_morning_publication.py
+      - tests/test_check_morning_publication.py
+      - .github/workflows/morning-publication-watchdog.yml
       - tools/observatory_session.py
       - docs/song-daily-editorial-contract.md
       - .github/workflows/morning-brief-contract.yml
@@ -32,6 +35,9 @@ on:
       - docs/morning-brief-roy-jjooni-template-v2-20261114.md
       - docs/pb-morning-intelligence-prompt-v2.2.md
       - docs/morning-brief-publishing.md
+      - tools/check_morning_publication.py
+      - tests/test_check_morning_publication.py
+      - .github/workflows/morning-publication-watchdog.yml
       - tools/check_morning_brief_readiness.py
       - tests/test_morning_brief_readiness.py
       - tools/observatory_session.py
@@ -58,6 +64,8 @@ jobs:
           node-version: '22'
       - name: Validate full text, dates, latest and archives
         run: python tools/validate_morning_brief.py
+      - name: Verify market-calendar publication watchdog regressions
+        run: python -m unittest discover -s tests -p test_check_morning_publication.py -v
       - name: Verify editorial and completed-session regression cases
         run: python -m unittest discover -s tests -p test_morning_brief_editorial.py
       - name: Verify P0 prepublication source readiness regressions
