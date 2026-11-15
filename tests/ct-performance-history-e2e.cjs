@@ -2,7 +2,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const read=p=>fs.readFileSync(p,'utf8');
-const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui}.app{padding:15px;width:100%}#panel-compare{display:block}</style></head><body><main class="app"><section id="panel-compare"><div id="ctCurrentPerformance"><h2>기존 성과분석 보존</h2></div></section></main></body></html>';
+const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui}.app{padding:15px;width:100%}#panel-compare{display:block}</style></head><body><main class="app"><section id="panel-compare"><div id="ctCurrentPerformance"><h2>기존 성과분석 보존</h2></div></section></main></body></html>';
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
