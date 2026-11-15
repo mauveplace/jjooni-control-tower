@@ -41,6 +41,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await driverRows.count(),4,'all four original accounts remain represented');
    assert.match(await driverRows.first().innerText(),/IRP/,'comparable P&L sorted by absolute impact');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths button').count(),5,'relevant original analysis panels accessible');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths').isVisible(),width>=768,
+    'Overview quick-link bar must not duplicate mobile primary navigation');
    if(width>=1080)assert.equal(await page.locator('#ctHumanQuickV2').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2,'desktop has two-column concise insight');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
