@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import publish_observatory_data as pub
 import build_public_market_daily as public
 import build_daily_market_pulse as pulse
+import build_daily_glance as glance
 from observatory_history_views import encoded
 
 
@@ -101,6 +102,8 @@ class AtomicSessionTest(unittest.TestCase):
                     (local / rel).write_text(json.dumps({'source_generated_kst': source['generated_kst']}))
             with patch.object(pub, 'ROOT', local), patch.object(public, 'OUT'), \
                  patch.object(pulse, 'DATA'), patch.object(pulse, 'OUT'), \
+                 patch.object(glance, 'DATA', local / pub.DATA), \
+                 patch.object(glance, 'OUT', local / pub.DATA / 'daily-glance.json'), \
                  patch.object(pub, 'materialize_health', side_effect=derive_test_health):
                 pub.publish(paths, 'repair market sources and consumers')
             for rel in health:
@@ -111,6 +114,10 @@ class AtomicSessionTest(unittest.TestCase):
             self.assertEqual(obs['generated_kst'], newer['generated_kst'])
             self.assertEqual(obs['tripod_latest']['session_date'], report['market_date_us'])
             self.assertEqual(sidecar['tripod_signal']['session_date'], report['market_date_us'])
+            card = json.loads((local / pub.DATA / 'daily-glance.json').read_text())
+            self.assertEqual(card['us_session'], report['market_date_us'])
+            self.assertEqual(card['source_generated_kst'], obs['generated_kst'])
+            self.assertTrue(card['read_only'] and card['no_trade'])
             archived = {k: v for k, v in report.items() if k != 'history'}
             archived['archive_contract'] = 'IMMUTABLE_FACTS_AND_RULES_NOT_AI_COMMENTARY_V1'
             digest = hashlib.sha256(encoded(archived)).hexdigest()
