@@ -3,12 +3,12 @@
   "available_to": "2026-11-16",
   "backfill": {
     "canonical_rows_matched": 5,
-    "checked_kst": "2026-11-14T11:55:03+09:00",
+    "checked_kst": "2026-11-16T08:10:44+09:00",
     "coverage_scope": "FETCHED_WEEKS_NOT_PER_SERIES_COMPLETENESS",
     "errors": [],
     "failed_weeks": [],
-    "generic_rows_retained": 58,
-    "previous_available_from": "2016-11-16",
+    "generic_rows_retained": 75,
+    "previous_available_from": "2016-11-18",
     "recent_completed_weeks": [
       "2016-10-16",
       "2016-11-13",
@@ -70,24 +70,25 @@
       "2026-10-11",
       "2026-10-18",
       "2026-10-25",
-      "2026-11-01"
+      "2026-11-01",
+      "2026-11-08"
     ],
-    "requested_window_start": "2016-11-16",
+    "requested_window_start": "2016-11-18",
     "resumable": true,
-    "rows_inserted": 21,
-    "rows_merged": 42,
-    "rows_parsed": 63,
-    "source_count": 1,
+    "rows_inserted": 0,
+    "rows_merged": 80,
+    "rows_parsed": 145,
+    "source_count": 2,
     "source_pattern": "https://www.forexfactory.com/calendar?week=<week>",
-    "weeks_fetched": 1,
-    "weeks_requested": 1
+    "weeks_fetched": 2,
+    "weeks_requested": 2
   },
   "backfill_contract": "FOREXFACTORY_HISTORICAL_10Y_RESUMABLE_V2",
   "backfill_status": "COMPLETE",
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-16T06:30:28+09:00",
+  "generated_kst": "2026-11-16T08:10:44+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
   "row_count": 37837,
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
@@ -15335,6 +15336,8 @@
           "canonical_match": false,
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T00:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "CB Leading Index m/m",
           "previous": "-0.5%",
           "previous_source": "ForexFactory historical calendar",
@@ -15342,8 +15345,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "9:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -41609,8 +41612,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:00pm",
-          "source_timezone": "America/Denver",
+          "source_time": "6:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -49439,8 +49442,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "6:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -65604,8 +65607,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -69625,8 +69628,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -73377,7 +73380,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Common CPI y/y",
           "previous": "2.4%",
           "previous_source": "ForexFactory historical calendar",
@@ -73385,8 +73390,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -76032,7 +76037,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Core CPI m/m",
           "previous": "0.0%",
           "previous_source": "ForexFactory historical calendar",
@@ -76040,8 +76047,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -82692,7 +82699,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "CPI m/m",
           "previous": "0.1%",
           "previous_source": "ForexFactory historical calendar",
@@ -82700,8 +82709,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -107313,8 +107322,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -110125,7 +110134,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Median CPI y/y",
           "previous": "1.9%",
           "previous_source": "ForexFactory historical calendar",
@@ -110133,8 +110144,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -126385,7 +126396,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Trimmed CPI y/y",
           "previous": "1.8%",
           "previous_source": "ForexFactory historical calendar",
@@ -126393,8 +126406,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -132153,8 +132166,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -147487,8 +147500,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -170662,8 +170675,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -173286,7 +173299,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T06:00+09:00",
+          "datetime_kst": "2026-11-16T11:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Fixed Asset Investment ytd/y",
           "previous": "-7.2%",
           "previous_source": "ForexFactory historical calendar",
@@ -173294,8 +173309,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:00pm",
-          "source_timezone": "Europe/London",
+          "source_time": "8:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -179467,7 +179482,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T06:00+09:00",
+          "datetime_kst": "2026-11-16T11:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Industrial Production y/y",
           "previous": "5.5%",
           "previous_source": "ForexFactory historical calendar",
@@ -179475,8 +179492,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:00pm",
-          "source_timezone": "Europe/London",
+          "source_time": "8:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -182407,8 +182424,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "3:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -187526,7 +187543,9 @@
           "actual": null,
           "canonical_match": false,
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T05:30+09:00",
+          "datetime_kst": "2026-11-16T10:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "New Home Prices m/m",
           "previous": "-0.14%",
           "previous_source": "ForexFactory historical calendar",
@@ -187534,8 +187553,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -190466,8 +190485,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "3:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -196170,8 +196189,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -204528,7 +204547,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T06:00+09:00",
+          "datetime_kst": "2026-11-16T11:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Retail Sales y/y",
           "previous": "1.1%",
           "previous_source": "ForexFactory historical calendar",
@@ -204536,8 +204557,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:00pm",
-          "source_timezone": "Europe/London",
+          "source_time": "8:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -207284,8 +207305,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:33pm",
-          "source_timezone": "America/Denver",
+          "source_time": "8:33pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -209524,7 +209545,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T06:00+09:00",
+          "datetime_kst": "2026-11-16T11:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Unemployment Rate",
           "previous": "5.2%",
           "previous_source": "ForexFactory historical calendar",
@@ -209532,8 +209555,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "9:00pm",
-          "source_timezone": "Europe/London",
+          "source_time": "8:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -212280,8 +212303,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:32pm",
-          "source_timezone": "America/Denver",
+          "source_time": "8:32pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -239838,8 +239861,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "3:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "4:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -240815,8 +240838,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "3:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "4:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -254831,8 +254854,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:45am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:45am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -286960,8 +286983,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "3:35am",
-          "source_timezone": "America/Denver",
+          "source_time": "4:35am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -292696,8 +292719,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -329035,8 +329058,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -334773,8 +334796,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -340479,7 +340502,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T14:00+09:00",
+          "datetime_kst": "2026-11-16T19:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Industrial Production m/m",
           "previous": "-0.5%",
           "previous_source": "ForexFactory historical calendar",
@@ -340487,8 +340512,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:00am",
-          "source_timezone": "Europe/London",
+          "source_time": "4:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -345894,8 +345919,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "3:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -365078,8 +365103,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "3:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -383832,8 +383857,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "3:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -403282,8 +403307,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "3:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "4:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -412844,8 +412869,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "3:02am",
-          "source_timezone": "America/Denver",
+          "source_time": "4:02am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -419610,8 +419635,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:01pm",
-          "source_timezone": "America/Denver",
+          "source_time": "6:01pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -424893,8 +424918,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "8:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -436349,8 +436374,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -459907,8 +459932,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -465733,8 +465758,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -473421,8 +473446,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -476291,8 +476316,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -484895,8 +484920,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -505424,8 +505449,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -506401,8 +506426,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -515961,8 +515986,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "5:01pm",
-          "source_timezone": "America/Denver",
+          "source_time": "6:01pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -518502,7 +518527,9 @@
           "actual": null,
           "canonical_match": false,
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T04:01+09:00",
+          "datetime_kst": "2026-11-16T09:01+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Rightmove HPI m/m",
           "previous": "1.0%",
           "previous_source": "ForexFactory historical calendar",
@@ -518510,8 +518537,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "7:01pm",
-          "source_timezone": "Europe/London",
+          "source_time": "6:01pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -529626,8 +529653,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:35pm",
-          "source_timezone": "America/Denver",
+          "source_time": "9:35pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -536520,8 +536547,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:50pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -549932,8 +549959,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:50pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -552800,8 +552827,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "10:00pm",
-          "source_timezone": "America/Denver",
+          "source_time": "11:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -563362,8 +563389,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -569098,8 +569125,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-08",
           "source_tier": "MARKET_FEED",
-          "source_time": "10:00pm",
-          "source_timezone": "America/Denver",
+          "source_time": "11:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -571968,8 +571995,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:50pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -580568,8 +580595,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:50pm",
-          "source_timezone": "America/Denver",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -581535,7 +581562,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T03:50+09:00",
+          "datetime_kst": "2026-11-16T08:50+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Prelim GDP Price Index y/y",
           "previous": "2.6%",
           "previous_source": "ForexFactory historical calendar",
@@ -581543,8 +581572,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -582510,7 +582539,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T03:50+09:00",
+          "datetime_kst": "2026-11-16T08:50+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Prelim GDP q/q",
           "previous": "0.4%",
           "previous_source": "ForexFactory historical calendar",
@@ -582518,8 +582549,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:50pm",
-          "source_timezone": "Europe/London",
+          "source_time": "5:50pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -587999,10 +588030,10 @@
           "previous_source": "ForexFactory historical calendar",
           "previous_source_tier": "MARKET_FEED",
           "source": "ForexFactory historical calendar",
-          "source_date": "2026-11-10",
+          "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "11:00pm",
-          "source_timezone": "America/Denver",
+          "source_time": "12:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -593729,7 +593760,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T08:30+09:00",
+          "datetime_kst": "2026-11-16T13:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "Revised Industrial Production m/m",
           "previous": "2.2%",
           "previous_source": "ForexFactory historical calendar",
@@ -593737,8 +593770,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "11:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "10:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -620329,8 +620362,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:30pm",
-          "source_timezone": "America/Denver",
+          "source_time": "3:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -620348,7 +620381,7 @@
       "label": "BusinessNZ Services Index",
       "metric_key": null,
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
@@ -622911,10 +622944,12 @@
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
         {
-          "actual": null,
+          "actual": "51.7",
           "canonical_match": false,
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T01:30+09:00",
+          "datetime_kst": "2026-11-16T06:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-15",
           "label": "BusinessNZ Services Index",
           "previous": "50.9",
           "previous_source": "ForexFactory historical calendar",
@@ -622922,8 +622957,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-15",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:30pm",
-          "source_timezone": "Europe/London",
+          "source_time": "3:30pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -654262,8 +654297,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-11",
           "source_tier": "MARKET_FEED",
-          "source_time": "2:45pm",
-          "source_timezone": "America/Denver",
+          "source_time": "3:45pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -657805,6 +657840,8 @@
           "canonical_match": false,
           "date": "2026-11-11",
           "datetime_kst": "2026-11-11T03:01+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-10",
           "label": "10-y Bond Auction",
           "previous": "5.30|2.8",
           "previous_source": "ForexFactory historical calendar",
@@ -657812,8 +657849,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "11:01am",
-          "source_timezone": "America/Denver",
+          "source_time": "12:01pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -660437,6 +660474,8 @@
           "canonical_match": false,
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T03:01+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "30-y Bond Auction",
           "previous": "5.62|2.5",
           "previous_source": "ForexFactory historical calendar",
@@ -660444,8 +660483,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "11:01am",
-          "source_timezone": "America/Denver",
+          "source_time": "12:01pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -664178,8 +664217,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "6:15am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:15am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         },
@@ -664187,7 +664226,9 @@
           "actual": "19.5K",
           "canonical_match": false,
           "date": "2026-11-11",
-          "datetime_kst": "2026-11-11T04:00+09:00",
+          "datetime_kst": "2026-11-11T03:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-10",
           "label": "ADP Weekly Employment Change",
           "previous": "16.8K",
           "previous_source": "ForexFactory historical calendar",
@@ -664196,7 +664237,7 @@
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
           "source_time": "oct 17th",
-          "source_timezone": "America/Denver",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -707069,6 +707110,8 @@
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T02:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Crude Oil Inventories",
           "previous": "-0.9M",
           "previous_source": "ForexFactory historical calendar",
@@ -707076,8 +707119,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "10:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "11:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -713786,7 +713829,9 @@
           "consensus_source": "ForexFactory historical calendar",
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-16",
-          "datetime_kst": "2026-11-16T17:30+09:00",
+          "datetime_kst": "2026-11-16T22:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-16",
           "label": "Empire State Manufacturing Index",
           "previous": "25.5",
           "previous_source": "ForexFactory historical calendar",
@@ -713794,8 +713839,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-16",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "Europe/London",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -716703,6 +716748,8 @@
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T00:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Existing Home Sales",
           "previous": "3.97M",
           "previous_source": "ForexFactory historical calendar",
@@ -716710,8 +716757,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "9:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -722534,6 +722581,8 @@
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-13",
           "datetime_kst": "2026-11-13T04:00+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-12",
           "label": "Federal Budget Balance",
           "previous": "-26.9B",
           "previous_source": "ForexFactory historical calendar",
@@ -722541,8 +722590,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-12",
           "source_tier": "MARKET_FEED",
-          "source_time": "12:00pm",
-          "source_timezone": "America/Denver",
+          "source_time": "1:00pm",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -727389,8 +727438,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-09",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "9:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -757867,6 +757916,8 @@
           "consensus_source_tier": "MARKET_FEED",
           "date": "2026-11-14",
           "datetime_kst": "2026-11-14T00:30+09:00",
+          "historical_market_source": "ForexFactory historical calendar",
+          "historical_source_date": "2026-11-13",
           "label": "Natural Gas Storage",
           "previous": "77B",
           "previous_source": "ForexFactory historical calendar",
@@ -757874,8 +757925,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-13",
           "source_tier": "MARKET_FEED",
-          "source_time": "8:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "9:30am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -763573,8 +763624,8 @@
           "source": "ForexFactory historical calendar",
           "source_date": "2026-11-10",
           "source_tier": "MARKET_FEED",
-          "source_time": "4:00am",
-          "source_timezone": "America/Denver",
+          "source_time": "5:00am",
+          "source_timezone": "America/Chicago",
           "value_vintage": "BACKFILLED_VINTAGE_UNVERIFIED",
           "verification_status": "HISTORICAL_MARKET_REPORTED"
         }
@@ -803356,8 +803407,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
           "source_tier": "OFFICIAL",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -809255,8 +809306,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-10",
           "source_tier": "OFFICIAL",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -843360,8 +843411,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-13",
           "source_tier": "OFFICIAL",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD49104?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -846647,8 +846698,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-13",
           "source_tier": "OFFICIAL",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/WPSFD4?startyear=2025&endyear=2026",
           "value_vintage": "LATEST_REVISION",
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
@@ -884600,8 +884651,8 @@
           "source": "FairEconomy/ForexFactory",
           "source_date": "2026-11-12",
           "source_tier": "OFFICIAL",
-          "source_time": "6:30am",
-          "source_timezone": "America/Denver",
+          "source_time": "7:30am",
+          "source_timezone": "America/Chicago",
           "source_url": "https://oui.doleta.gov/press/2026/111226.pdf",
           "verification_status": "VERIFIED_OFFICIAL"
         }
