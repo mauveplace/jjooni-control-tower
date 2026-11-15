@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
-const HUMAN_SCRIPT='ct-human-v2.js?v=5';
+const HUMAN_SCRIPT='ct-human-v2.js?v=6';
 const humanGuard=script=>{assert(script.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');assert(script.includes('⚠ 계좌 동기화 확인 대기')&&script.includes('⚠ 계좌 동기화 불일치'),'HUMAN_SYNC_COPY_NOT_CONDITIONAL');};
 const guard=script=>{
  assert(script.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'PERF_BRIDGE_TOLERANCE_NOT_FIXED');
