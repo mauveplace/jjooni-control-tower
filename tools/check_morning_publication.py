@@ -9,17 +9,18 @@ the 06:25 KST publication target and turns a silent miss into a failed run.
 from __future__ import annotations
 import json
 import sys
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from observatory_session import expected_completed_session  # noqa: E402
+from observatory_session import expected_completed_session, trading_day  # noqa: E402
 
 KST = ZoneInfo('Asia/Seoul')
 DEADLINE = time(7, 0)
-# Regular edition Tue-Sun. Monday has its own combined edition and schedule.
-PUBLICATION_WEEKDAYS = {1, 2, 3, 4, 5, 6}
+# Public US-session edition is Tue-Sat KST. Sunday has no new Friday/Saturday US close;
+# Monday's separate edition is not a mandatory public Tue-Sat report.
+PUBLICATION_WEEKDAYS = {1, 2, 3, 4, 5}
 
 
 def decide(now, latest, observatory):
@@ -29,7 +30,12 @@ def decide(now, latest, observatory):
     actual = observatory.get('us_completed_session_date')
     if actual != expected:
         problems.append(f'US_CLOSE_STALE expected={expected} actual={actual}')
-    if now.weekday() in PUBLICATION_WEEKDAYS and now.time() >= DEADLINE:
+    # A local KST report day corresponds to the preceding NYSE session date.
+    # On full market holidays a new market brief is not required; early closes
+    # are still trading sessions, so the normal publication check applies.
+    us_day = now.date() - timedelta(days=1)
+    if (now.weekday() in PUBLICATION_WEEKDAYS
+            and trading_day(us_day) and now.time() >= DEADLINE):
         today = now.date().isoformat()
         if latest.get('report_date_kst') != today:
             problems.append(f"BRIEF_MISSING expected={today} latest={latest.get('report_date_kst')}")
