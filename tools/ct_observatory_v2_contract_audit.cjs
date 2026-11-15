@@ -12,6 +12,7 @@ const OBS_LABELS=['오늘','시장','전략','일정','시황'];
 
 function inspect(){
  const human=read('ct-human-v2.js'),humanCss=read('ct-human-v2.css');
+ const legacyResponsive=read('responsive-layout.css');
  const rootHtml=read('index.html'),reference=read('ct-reference-nav-history-v1.js');
  const performance=read('ct-performance-history-v1.js');
  const obsHtml=read('market-observatory/index.html');
@@ -33,6 +34,12 @@ function inspect(){
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
  assert(rootHtml.includes('ct-human-v2.js?v=6'),'Human V2 cache version drift');
+ assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
+ assert(human.includes('function syncNavigationOwner()')&&human.includes("tabs.style.setProperty('display','none','important')")&&human.includes("bottom.style.setProperty('display','none','important')"),
+   'single-nav viewport arbiter missing');
+ assert(legacyResponsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs'),
+   'V2 mobile hide guard missing from competing responsive stylesheet');
+ assert(legacyResponsive.includes('#ctMoreMenu'),'orphan legacy mobile popup needs suppression');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
