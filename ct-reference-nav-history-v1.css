@@ -53,3 +53,33 @@ html[data-ct-human-ui="v2"] .ctRefNavScroll :is(th,td):nth-child(3){text-align:r
   html[data-ct-human-ui="v2"] .ctRefNavHeader h2{font-size:17px}
   html[data-ct-human-ui="v2"] .ctRefNavValues{font-size:13px}
 }
+
+/* Discoverability on the exact "오늘" tab shown on approved mobile devices. */
+html[data-ct-human-ui="v2"] #ctReferenceNavOverviewV1{
+ display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+ margin:12px 0 16px;padding:12px 14px;border:1px solid #d6e4ef;
+ background:#f7faff;border-radius:12px;color:#1f3854;min-width:0
+}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewTitle{
+ font-weight:800;font-size:14px;line-height:1.4
+}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewInfo{
+ font-size:12px;color:#566b82;line-height:1.5;flex:1 1 180px
+}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen{
+ font-size:13px;font-weight:760;min-height:44px;cursor:pointer;
+ border:1px solid #b9cee7;background:#fff;color:#1b568d;
+ padding:9px 12px;border-radius:10px
+}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen:focus-visible{
+ outline:3px solid #347ed3;outline-offset:2px
+}
+@media(max-width:479px){
+ html[data-ct-human-ui="v2"] #ctReferenceNavOverviewV1{
+   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+   gap:4px 8px;padding:12px
+ }
+ html[data-ct-human-ui="v2"] .ctRefNavOverviewTitle{grid-column:1}
+ html[data-ct-human-ui="v2"] .ctRefNavOverviewInfo{grid-column:1;grid-row:2}
+ html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen{grid-column:2;grid-row:1/3;max-width:128px}
+}
