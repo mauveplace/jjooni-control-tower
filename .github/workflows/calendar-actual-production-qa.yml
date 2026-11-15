@@ -8,6 +8,10 @@ on:
     paths:
       - tests/calendar-actual-production.cjs
       - .github/workflows/calendar-actual-production-qa.yml
+  pull_request:
+    paths:
+      - tests/calendar-actual-production.cjs
+      - .github/workflows/calendar-actual-production-qa.yml
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,7 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          # PR validates the proposed test, not a stale copy from main.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

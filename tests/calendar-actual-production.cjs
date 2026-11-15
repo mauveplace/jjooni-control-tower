@@ -25,8 +25,28 @@ const {targets,verifiedTargetActualsReady}=require('./calendar-actual-production
   for(const width of [390,1280]){
    const page=await browser.newPage({viewport:{width,height:900}});
    await page.goto(base,{waitUntil:'networkidle',timeout:90000});
-   await page.click('button[data-tab="calendar"]');
-   await page.waitForSelector('#events .event');
+   // V2 hides #tabs intentionally (body.navV2 #tabs{display:none!important}).
+   // Clicking the legacy menu is impossible for a real user and has caused
+   // repeated 30s Playwright false failures. Exercise the VISIBLE real menu.
+   await page.waitForFunction(()=>document.querySelector('#tabs')&&
+      (document.body.classList.contains('navV2')||
+       document.querySelector('#tabs button[data-tab="calendar"]')));
+   const modern=await page.locator('body').evaluate(el=>el.classList.contains('navV2'));
+   assert(modern,'Observatory new visits must open default V2; cannot silently validate legacy UI');
+   const menu=page.locator(modern
+      ? '.navV2Main button[data-group="calendar"]'
+      : '#tabs button[data-tab="calendar"]');
+   assert(await menu.isVisible(),modern
+      ? 'V2 calendar navigation is inaccessible in the visible main bar'
+      : 'Legacy calendar navigation is inaccessible');
+   await menu.click();
+   await page.waitForFunction(()=>document.querySelector('#calendar.panel.on')&&
+       document.querySelector('#events .event'));
+   if(modern){
+      assert.equal(await page.locator('.navV2Main button[data-group="calendar"][aria-current="page"]').count(),1,
+       'V2 visible calendar navigation must be selected');
+   }
+   console.log('CALENDAR_PRODUCTION_VISIBLE_NAV=PASS width='+width+' ui='+(modern?'V2':'V1'));
    // The UI correctly opens the current month. Navigate to the historical
    // release month explicitly so this regression survives month rollover.
    const targetMonth=targets[0][0].slice(0,7);
