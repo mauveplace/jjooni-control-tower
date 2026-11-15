@@ -10,7 +10,7 @@ const navGuard=(script,style)=>{
  assert(script.includes('function syncNavigationOwner()'),'HUMAN_NAV_OWNER_MISSING');
  assert(script.includes("tabs.style.setProperty('display','none','important')"),'MOBILE_DUPLICATE_NAV_GUARD_MISSING');
  assert(script.includes("bottom.style.setProperty('display','none','important')"),'DESKTOP_DUPLICATE_NAV_GUARD_MISSING');
- assert(style.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs'),
+ assert(style.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs'),
    'RESPONSIVE_NAV_GUARD_MISSING');
 };
 const guard=script=>{
@@ -47,7 +47,7 @@ const fetchText=async path=>{
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
    fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation')
   ]);
-  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs')){ready=true;break}
+  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
  }
  assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
