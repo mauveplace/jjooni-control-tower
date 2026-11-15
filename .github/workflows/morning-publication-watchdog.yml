@@ -6,8 +6,8 @@ name: Morning Publication Watchdog
 # close watchdog once (workflow_dispatch is allowed from GITHUB_TOKEN).
 on:
   schedule:
-    - cron: '7,37 22 * * 1-6'   # 07:07 / 07:37 KST Tue-Sun
-    - cron: '7 23 * * 1-6'      # 08:07 KST Tue-Sun
+    - cron: '7,37 22 * * 1-5'   # 07:07 / 07:37 KST Tue-Sat
+    - cron: '7 23 * * 1-5'      # 08:07 KST Tue-Sat
   workflow_dispatch:
 
 permissions:
@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Regress publication calendar before checking live status
+        run: python -m unittest discover -s tests -p test_check_morning_publication.py -v
       - name: Check brief and US-close deadlines
         id: check
         run: python tools/check_morning_publication.py
