@@ -170,21 +170,39 @@ function archiveDates(entries,limit=120){
  const byDate=new Map(valid.map(e=>[e.report_date_kst,e]));
  const days=[...byDate.keys()].sort((a,b)=>b.localeCompare(a));
  if(!days.length)return [];
+ // Official NYSE/Nasdaq full market closures, as published for 2026–2028.
+ // https://www.nyse.com/trade/hours-calendars
+ // Dates here are US exchange-local SESSION dates, not KST report dates.
+ // An early-close session (e.g. 2026-11-27 ET) is still a trading day.
+ const nyseClosed={
+  '2026':['2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19','2026-07-03','2026-09-07','2026-11-26','2026-12-25'],
+  '2027':['2027-01-01','2027-01-18','2027-02-15','2027-03-26','2027-05-31','2027-06-18','2027-07-05','2027-09-06','2027-11-25','2027-12-24'],
+  '2028':['2028-01-17','2028-02-21','2028-04-14','2028-05-29','2028-06-19','2028-07-04','2028-09-04','2028-11-23','2028-12-25']
+ };
  const out=[],min=Date.parse(days[days.length-1]+'T00:00:00Z');
  for(let ms=Date.parse(days[0]+'T00:00:00Z');ms>=min&&out.length<limit;ms-=86400000){
   const d=new Date(ms).toISOString().slice(0,10),entry=byDate.get(d);
   // Sunday and Monday are not expected for the public Tue-Sat morning-brief reader.
   const dow=new Date(ms).getUTCDay();
   if(entry)out.push({date:d,entry,missing:false});
-  else if(dow>=2&&dow<=6)out.push({date:d,entry:null,missing:true});
+  else if(dow>=2&&dow<=6){
+   // Public morning briefs in Korea refer to the PREVIOUS US trading date.
+   const usDate=new Date(ms-86400000).toISOString().slice(0,10);
+   const closedDates=nyseClosed[usDate.slice(0,4)];
+   if(!closedDates)out.push({date:d,entry:null,missing:false,calendarUnknown:true});
+   else if(closedDates.includes(usDate))out.push({date:d,entry:null,missing:false,marketHoliday:true,sessionDate:usDate});
+   else out.push({date:d,entry:null,missing:true,sessionDate:usDate});
+  }
  }
  return out;
 }
 function renderHistory(){
  const select=document.getElementById('briefHistory');if(!select)return;
  const chosen=select.value||'latest',entries=archiveDates(INDEX?.entries);
- select.innerHTML='<option value="latest">최신 공개본</option>'+entries.map(({date,entry,missing})=>
+ select.innerHTML='<option value="latest">최신 공개본</option>'+entries.map(({date,entry,missing,marketHoliday,calendarUnknown})=>
   missing?`<option value="unpublished-${esc(date)}" disabled>${esc(date)} · 미게시 (사유 확인 필요)</option>`:
+  marketHoliday?`<option value="holiday-${esc(date)}" disabled>${esc(date)} · 미국장 휴장 · 발행 대상 아님</option>`:
+  calendarUnknown?`<option value="calendar-unknown-${esc(date)}" disabled>${esc(date)} · 미국장 일정 확인 필요</option>`:
   `<option value="${esc(date)}">${esc(date)} · 미국 ${esc(entry.market_date_us||'—')}</option>`
  ).join('');
  select.value=[...select.options].some(o=>o.value===chosen&&!o.disabled)?chosen:'latest';
