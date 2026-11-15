@@ -1,0 +1,65 @@
+/* Verified history charts: neutral surfaces, explicit provenance, no mock series. */
+html[data-ct-human-ui="v2"] #ctVerifiedPerformanceHistoryV1{
+ color:#20334c;background:#fff;border:1px solid #dce5ef;border-radius:16px;
+ padding:16px;margin:16px 0;min-width:0
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryHeader h2{margin:0 0 7px;font-size:20px;line-height:1.35}
+html[data-ct-human-ui="v2"] .ctPerfHistoryHeader p{margin:0 0 8px;font-size:13px;line-height:1.5;color:#53657b}
+html[data-ct-human-ui="v2"] .ctPerfHistoryHeader .ctPerfHistorySource{
+ font-size:12px;border-top:1px solid #e1e8f0;padding-top:8px;color:#50647a
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryGrid{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+ align-items:stretch;gap:12px;margin-top:12px
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryCard{
+ min-width:0;padding:15px;border:1px solid #e0e8f1;border-radius:14px;background:#fafcff
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryCardHead h3{
+ font-size:16px;font-weight:850;line-height:1.4;margin:0 0 3px;color:#20334c
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryCardHead small{
+ display:block;font-size:12px;line-height:1.4;color:#69778a;margin-bottom:12px
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryCard svg{
+ display:block;width:100%;height:auto;max-height:190px;overflow:visible
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryCard p{
+ margin:10px 0 0;font-size:12px;line-height:1.5;color:#4e6278
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryPending{
+ padding:18px 12px;border:1px dashed #cdd8e5;border-radius:10px;
+ background:#f5f7fa;color:#586b80!important;font-weight:650;
+ min-height:70px;display:flex;align-items:center;overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] .ctPerfContributionList{
+ margin:12px 0 0;padding:0;list-style:none;display:grid;gap:6px
+}
+html[data-ct-human-ui="v2"] .ctPerfContributionList li{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ border-top:1px solid #e1e9f2;padding-top:6px;font-size:12px
+}
+html[data-ct-human-ui="v2"] .ctPerfContributionList strong{
+ font-size:13px;font-variant-numeric:tabular-nums;text-align:right
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryDetail{
+ margin-top:15px;border-top:1px solid #dce5f1;padding-top:10px
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryDetail summary{
+ min-height:44px;display:flex;align-items:center;
+ font-size:14px;font-weight:800;cursor:pointer;color:#175a9c
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryTableScroll{max-width:100%;overflow-x:auto}
+html[data-ct-human-ui="v2"] .ctPerfHistoryDetail table{
+ border-collapse:collapse;min-width:500px;width:100%;font-size:12px
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryDetail :is(th,td){
+ border-bottom:1px solid #e4eaf1;padding:9px;text-align:right;
+ font-variant-numeric:tabular-nums
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryDetail :is(th,td):first-child{text-align:left}
+@media(max-width:767px){
+ html[data-ct-human-ui="v2"] #ctVerifiedPerformanceHistoryV1{padding:12px}
+ html[data-ct-human-ui="v2"] .ctPerfHistoryCard{padding:12px}
+ html[data-ct-human-ui="v2"] .ctPerfHistoryGrid{grid-template-columns:minmax(0,1fr)}
+}
