@@ -56,6 +56,22 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     // A late legacy stylesheet used to reintroduce the sticky top tabs.
     // A real viewport/cascade check must enforce exactly one visible menu.
     if(width===390){
+     // Reproduce both real owners in the same document: the legacy loader
+     // canonicalizes top navigation and observes late tab style mutations.
+     const legacy=read('trade-review-loader.js');
+     const legacyTest=legacy.slice(0,legacy.lastIndexOf('boot();'))+
+      'window.__ctLegacyNavTest={canonicalizeNavigation,lockNavigation};})();';
+     await page.addScriptTag({content:legacyTest});
+     await page.evaluate(()=>window.__ctLegacyNavTest.lockNavigation());
+     await page.waitForTimeout(120);
+     assert.equal(await page.locator('.tabs').isVisible(),false,'legacy loader may not re-show top tabs');
+     assert.equal(await nav.isVisible(),true,'Human V2 retains one bottom nav');
+     await page.evaluate(()=>{
+      document.querySelector('.tabs').style.setProperty('display','grid','important');
+      document.querySelector('.tabs .tab').style.setProperty('display','flex','important');
+     });
+     await page.waitForTimeout(200);
+     assert.equal(await page.locator('.tabs').isVisible(),false,'legacy mutation observer must restore V2 nav ownership');
      await page.addStyleTag({content:'html[data-ct-layout="mobile-first"] body .tabs {display:grid!important}'});
      assert.equal(await page.locator('.tabs').isVisible(),false,'late legacy sheet must not bring top tabs back');
      await page.setViewportSize({width:820,height:900});
