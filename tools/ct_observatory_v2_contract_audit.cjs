@@ -32,7 +32,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=4'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=5'),'Human V2 cache version drift');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
@@ -45,7 +45,7 @@ function inspect(){
  const moreTab=human.includes("button('더보기','more'")&&human.includes('nav.append(more)')?1:0;
  const humanMobileTabs=primaryTabs.length+moreTab;
  assert.equal(humanMobileTabs,5,'Human mobile bottom menu lost a tab');
- assert(human.includes('동기화 확인 대기'),'mismatch must be understandable to users');
+ assert(human.includes("'⚠ 계좌 동기화 확인 대기 · '")&&human.includes("'⚠ 계좌 동기화 불일치 · '"),'pending versus proven snapshot mismatch must be distinguished');
  assert(human.includes('M.aggregate(C.accounts,IDS)'),'four-account total source contract absent');
  assert(human.includes("['overview','오늘'")&&human.includes("['accounts','계좌'"),'five-menu contract drift');
  assert(humanCss.includes('safe-area-inset-bottom'),'Human safe area missing');
