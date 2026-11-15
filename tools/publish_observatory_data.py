@@ -441,6 +441,37 @@ def materialize_sector_dependents(paths):
         render(digest), encoding='utf-8')
 
 
+def validate_market_bundle(source, pulse, sidecar, card):
+    """Before any public write, require one completed-session source chain.
+
+    Reject mismatched date/version instead of letting editorial Work see stale
+    Glance and silently skip the public morning brief. Derived-only, no trading.
+    """
+    from datetime import datetime as _datetime
+    session=source.get('us_completed_session_date')
+    if not (session and session==pulse.get('market_date_us')
+            ==(sidecar.get('tripod_signal') or {}).get('date')
+            ==card.get('us_session')
+            and card.get('source_generated_kst')==source.get('generated_kst')
+            and pulse.get('snapshot_status')=='FINAL'
+            and card.get('read_only') is True
+            and card.get('no_trade') is True
+            and card.get('consistency',{}).get('status')=='OK'):
+        raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED session_or_source_mismatch')
+    clocks=[]
+    for obj in (source,pulse,card):
+        try:
+            stamp=_datetime.fromisoformat(str(obj['generated_kst']).replace('Z','+00:00'))
+        except (ValueError,KeyError,TypeError):
+            raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED invalid_clock') from None
+        if stamp.utcoffset() is None:
+            raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED naive_clock')
+        clocks.append(stamp)
+    if clocks!=sorted(clocks):
+        raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED clock_order')
+    print('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=PASS session='+session)
+
+
 def materialize_publication(paths):
     """One order before commit AND after every rebase: derive, archive, audit."""
     materialize_calendar_fedwatch(paths)
@@ -455,37 +486,13 @@ def materialize_publication(paths):
     if DATA+'daily-glance.json' in paths:
         import build_daily_glance
         build_daily_glance.main()
-        # The real source/derived files must agree, not merely exist.
-        # In particular, no later crypto/other writer may leave a misleading
-        # new generated time on a source without the same-session card.
+        # Rejection stays in the same write/rebase transaction, before commit.
         if set(MARKET_BUNDLE).issubset(paths):
-            from datetime import datetime as _datetime
             source=json.loads((ROOT/(DATA+'observatory.json')).read_text(encoding='utf-8'))
             pulse=json.loads((ROOT/(DATA+'daily-market-pulse.json')).read_text(encoding='utf-8'))
             sidecar=json.loads((ROOT/'public-market-daily.json').read_text(encoding='utf-8'))
             card=json.loads((ROOT/(DATA+'daily-glance.json')).read_text(encoding='utf-8'))
-            session=source.get('us_completed_session_date')
-            if not (session and session==pulse.get('market_date_us')
-                    ==(sidecar.get('tripod_signal') or {}).get('date')
-                    ==card.get('us_session')
-                    and card.get('source_generated_kst')==source.get('generated_kst')
-                    and pulse.get('snapshot_status')=='FINAL'
-                    and card.get('read_only') is True
-                    and card.get('no_trade') is True
-                    and card.get('consistency',{}).get('status')=='OK'):
-                raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED session_or_source_mismatch')
-            times=[]
-            for obj,key in ((source,'generated_kst'),(pulse,'generated_kst'),(card,'generated_kst')):
-                try:
-                    stamp=_datetime.fromisoformat(str(obj[key]).replace('Z','+00:00'))
-                except (ValueError,KeyError,TypeError):
-                    raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED invalid_clock')
-                if stamp.utcoffset() is None:
-                    raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED naive_clock')
-                times.append(stamp)
-            if times!=sorted(times):
-                raise RuntimeError('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=BLOCKED clock_order')
-            print('MORNING_CANONICAL_ATOMIC_BUNDLE_GATE=PASS session='+session)
+            validate_market_bundle(source,pulse,sidecar,card)
     if DATA+'fed-watch.json' in paths and DATA+'fedwatch-history/index.json' in paths:
         from archive_fedwatch import archive_snapshot
         archive_snapshot(json.loads((ROOT/(DATA+'fed-watch.json')).read_text()), ROOT/DATA)
