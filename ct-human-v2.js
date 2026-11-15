@@ -151,6 +151,9 @@ function ensureQuickView(){
  const panel=qs('#panel-overview'),C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD,M=window.JjooniMetrics;
  if(!panel||!C?.accounts||!M?.aggregate||!M?.freshness)return;
  const m=M.aggregate(C.accounts,IDS);
+ // Both IDs are available in canonical/live production feeds. When they
+ // disagree, do not show numbers from different account snapshots together.
+ const snapshotAligned=!(C.snapshot_id&&L?.snapshot_id)||String(C.snapshot_id)===String(L.snapshot_id);
  let box=qs('#ctHumanQuickV2',panel);
  if(!box){
   box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','오늘의 투자 변화');
@@ -160,25 +163,25 @@ function ensureQuickView(){
    const b=e.target.closest('button[data-ct-open]');if(b)activate(b.dataset.ctOpen);
   });
  }
- const comparable=m.known_day===4&&m.day_quality?.comparable_period&&m.day!=null;
+ const comparable=snapshotAligned&&m.known_day===4&&m.day_quality?.comparable_period&&m.day!=null;
  const dayText=comparable?formattedAmount(m.day):'합산 확인 대기';
  const dayTrust={BROKER_MEASURED:'증권사 실측',MODELED:'계산값',MIXED:'실측·계산 혼합',UNKNOWN:'원천 신뢰도 확인 필요'}[m.day_quality?.state]||'원천 검증 대기';
- const dayNote=comparable?('동일 기간 4계좌 · '+dayTrust):('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
- const flowText=m.flow==null?'확인 대기':formattedAmount(m.flow);
+ const dayNote=!snapshotAligned?'현재 계좌 스냅샷 정합성 확인 대기':comparable?('동일 기간 4계좌 · '+dayTrust):('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
+ const flowText=!snapshotAligned||m.flow==null?'확인 대기':formattedAmount(m.flow);
  const accounts=IDS.map((id,index)=>{
-  const a=C.accounts[id]||{},day=M.number(a.today_pnl);
+  const a=C.accounts[id]||{},day=snapshotAligned?M.number(a.today_pnl):null;
   return {id,label:{TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'}[id],day,scope:String(a.today_pnl_scope||''),kind:String(a.today_pnl_quality||'UNKNOWN'),index};
  });
  const ordered=comparable?accounts.slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)||a.index-b.index):accounts;
  const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
  const accountSignature=accounts.map(a=>[a.id,a.day,a.kind,a.scope].join(':')).join(',');
- const signature=[C.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature].join('|');
+ const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
  box.replaceChildren();
  const heading=document.createElement('div');heading.className='ctHumanV2QuickHead';
  const title=document.createElement('strong');title.textContent='오늘의 투자 변화';
- const stamp=document.createElement('span');stamp.textContent=statusText(L||{},M);
+ const stamp=document.createElement('span');stamp.textContent=(snapshotAligned?'':'⚠ 계좌 동기화 불일치 · ')+statusText(L||{},M);
  heading.append(title,stamp);
  const grid=document.createElement('div');grid.className='ctHumanV2QuickGrid';
  for(const [label,amount,note] of [['투자손익',dayText,dayNote],['순입출금',flowText,'투자손익과 분리 · 원천 제공 기간']]){
@@ -197,7 +200,7 @@ function ensureQuickView(){
  drivers.setAttribute('aria-label','계좌별 투자손익 영향');
  const driverHeader=document.createElement('div');driverHeader.className='ctHumanV2DriversHeader';
  const driverTitle=document.createElement('strong');driverTitle.textContent='계좌별 손익 영향';
- const driverMeta=document.createElement('small');driverMeta.textContent=comparable?'동일 기준기간 · 손익규모순':'계좌별 참고 · 합산 비교 불가';
+ const driverMeta=document.createElement('small');driverMeta.textContent=!snapshotAligned?'스냅샷 불일치 · 계좌 비교 중단':comparable?'동일 기준기간 · 손익규모순':'계좌별 참고 · 합산 비교 불가';
  driverHeader.append(driverTitle,driverMeta);
  const list=document.createElement('div');list.className='ctHumanV2DriverRows';
  for(const a of ordered){
@@ -209,10 +212,10 @@ function ensureQuickView(){
   const bar=document.createElement('span');bar.className='ctHumanV2DriverBar';
   if(a.day!=null&&maxDay>0){bar.style.width=(100*Math.abs(a.day)/maxDay).toFixed(1)+'%';bar.dataset.direction=a.day<0?'down':a.day>0?'up':'flat'}
   track.append(bar);
-  const amount=document.createElement('strong');amount.textContent=a.day==null?'자료 없음':formattedAmount(a.day);
+  const amount=document.createElement('strong');amount.textContent=!snapshotAligned?'동기화 확인 대기':a.day==null?'자료 없음':formattedAmount(a.day);
   amount.dataset.direction=a.day==null?'unknown':a.day<0?'down':a.day>0?'up':'flat';
   const source=document.createElement('small');
-  source.textContent={BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요';
+  source.textContent=!snapshotAligned?'원천 동기화 확인 필요':({BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요');
   item.append(name,track,amount,source);list.append(item);
  }
  drivers.append(driverHeader,list);
