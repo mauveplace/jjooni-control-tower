@@ -165,6 +165,7 @@ function render(d){
 // unexplained Tue-Sat (KST) publication gaps as disabled, non-clickable entries.
 function archiveDates(entries,limit=120){
  const valid=Array.isArray(entries)?entries.filter(e=>/^\d{4}-\d{2}-\d{2}$/.test(e?.report_date_kst||'')
+  &&Number.isFinite(Date.parse(e.report_date_kst+'T00:00:00Z'))
   &&new Date(e.report_date_kst+'T00:00:00Z').toISOString().slice(0,10)===e.report_date_kst):[];
  const byDate=new Map(valid.map(e=>[e.report_date_kst,e]));
  const days=[...byDate.keys()].sort((a,b)=>b.localeCompare(a));
