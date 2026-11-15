@@ -1,6 +1,6 @@
 {
   "actual_backfill": {
-    "checked_kst": "2026-11-15T11:06:01+09:00",
+    "checked_kst": "2026-11-15T20:53:42+09:00",
     "checks": [],
     "lookback_days": 14,
     "quarantined": [
@@ -83,7 +83,7 @@
     ]
   },
   "actual_freshness": {
-    "checked_kst": "2026-11-15T11:06:08+09:00",
+    "checked_kst": "2026-11-15T20:53:54+09:00",
     "grace_minutes": 45,
     "official_checks": [],
     "overdue_count": 0,
@@ -94,18 +94,18 @@
     "unresolved_expiry": null
   },
   "all_event_enrichment": {
-    "checked_kst": "2026-11-15T11:06:03+09:00",
+    "checked_kst": "2026-11-15T20:53:45+09:00",
     "eligible_events": 199,
-    "field_updates": 0,
-    "matched_events": 3,
-    "matched_metric_rows": 5,
+    "field_updates": 1,
+    "matched_events": 2,
+    "matched_metric_rows": 2,
     "missing_policy": "NEVER_INVENT_VALUES; NOT_PUBLISHED means source has not supplied a usable value",
     "row_reuse_contract": "REUSE_PRIMARY_ENRICHER_FETCH_V1",
     "vendor_rows": 65
   },
   "all_event_enrichment_contract": "ALL_CALENDAR_EVENTS_GENERIC_MARKET_MATCH_V1",
   "collection_health": {
-    "checked_kst": "2026-11-15T11:06:04+09:00",
+    "checked_kst": "2026-11-15T20:53:45+09:00",
     "contract": "PRIMARY_SOURCE_FAILURES_SEPARATE_FROM_OPTIONAL_OVERLAY_AVAILABILITY_V2",
     "failed_sources": [],
     "optional_source_warnings": [
@@ -149,8 +149,8 @@
     }
   ],
   "enrichment_matched": {
-    "faireconomy_events": 3,
-    "faireconomy_metrics": 4,
+    "faireconomy_events": 2,
+    "faireconomy_metrics": 1,
     "trading_economics": 0
   },
   "enrichment_note": "Official agencies remain schedule authority. U.S. releases are decomposed into granular market_metrics from FairEconomy/ForexFactory. Captured observations persist after weekly feeds roll forward; missing values are never invented.",
@@ -160,7 +160,7 @@
   ],
   "enrichment_updates": {
     "actual": 0,
-    "forecast": 0
+    "forecast": 3
   },
   "events": [
     {
@@ -692,7 +692,7 @@
       "official_url": "https://www.bok.or.kr/portal/cmmn/file/fileDown.do?menuNo=200755&atchFileId=f514048c945f4e19ba9688a0a3ecb105&fileSn=2",
       "previous": null,
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -1640,7 +1640,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-02-26",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_corrected_from": "2026-02-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -2795,7 +2795,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -3930,7 +3930,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-05-28",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_corrected_from": "2026-05-14T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -5175,7 +5175,7 @@
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -5807,7 +5807,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -6207,7 +6207,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "release_date": "2026-08-27",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_corrected_from": "2026-08-13T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
@@ -6716,7 +6716,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -7786,7 +7786,7 @@
         }
       ],
       "market_value_status": "ACTUAL_AVAILABLE",
-      "official_reconcile_failed_kst": "2026-11-15T10:45:44+09:00",
+      "official_reconcile_failed_kst": "2026-11-15T20:53:47+09:00",
       "previous": "7.34M",
       "reference_period": "",
       "source": "BLS",
@@ -7944,7 +7944,7 @@
             },
             "previous": {
               "copied_from": "personal_spending",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.1%"
             }
@@ -8299,7 +8299,7 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "avg_hourly_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -8992,13 +8992,13 @@
           "quarantined_values": {
             "consensus": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.9%"
             },
             "previous": {
               "copied_from": "us_import_price_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.5%"
             }
@@ -9080,7 +9080,7 @@
       "previous_value_source": "BOK_RATE official release",
       "reference_period": "",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK_RATE official release",
       "source_tier": "OFFICIAL",
@@ -9456,13 +9456,13 @@
             },
             "consensus": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             },
             "previous": {
               "copied_from": "core_pce_mom",
-              "quarantined_kst": "2026-11-15T11:06:01+09:00",
+              "quarantined_kst": "2026-11-15T20:53:42+09:00",
               "reason": "CROSS_METRIC_COPY_BEFORE_IDENTITY_GUARD",
               "value": "0.3%"
             }
@@ -10669,29 +10669,41 @@
       "actual_due_kst": "2026-11-17T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
+      "actual_source": "FairEconomy/ForexFactory",
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "물가/고용",
-      "consensus": null,
+      "checked_kst": "2026-11-15T20:53:42+09:00",
+      "consensus": "0.7%",
       "country": "US",
       "datetime_kst": "2026-11-17T22:30+09:00",
+      "ff_match_score": 40,
       "history_ref": "US::u-s-import-and-export-price-indexes",
       "importance": 2,
       "market_data_source": "BLS_ximpim official release + FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "actual": null,
-          "consensus": null,
+          "actual_source": "FairEconomy/ForexFactory",
+          "checked_kst": "2026-11-15T20:53:45+09:00",
+          "consensus": "0.7%",
+          "datetime_source": "2026-11-17T08:30:00-05:00",
+          "event_title": "Import Prices m/m",
+          "generic_match_score": 101.08,
           "history_ref": "US::u-s-import-and-export-price-indexes::us_import_price_mom",
+          "impact": "Low",
           "key": "us_import_price_mom",
           "label": "U.S. Import Prices MoM",
-          "market_value_source": "BLS_ximpim official release",
-          "market_value_status": "PREVIOUS_ONLY",
+          "market_value_source": "FairEconomy/ForexFactory",
+          "market_value_status": "CONSENSUS_AVAILABLE",
           "previous": "1.1%",
           "previous_observed_date": "2026-10-16",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
           "previous_value_source": "FairEconomy/ForexFactory",
-          "source": "FairEconomy/ForexFactory"
+          "source": "FairEconomy/ForexFactory",
+          "source_tier": "MARKET_FEED",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+          "verification_status": "MARKET_REPORTED"
         },
         {
           "actual": null,
@@ -10708,7 +10720,7 @@
           "source": "FairEconomy/ForexFactory"
         }
       ],
-      "market_value_status": "PREVIOUS_ONLY",
+      "market_value_status": "CONSENSUS_AVAILABLE",
       "previous": "1.1%",
       "previous_observed_date": "2026-10-16",
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
@@ -10717,39 +10729,56 @@
       "representative_metric_key": "us_import_price_mom",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
       "source": "BLS",
+      "source_tier": "MARKET_FEED",
+      "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
       "surprise": null,
       "te_forecast": null,
-      "title": "U.S. Import and Export Price Indexes"
+      "title": "U.S. Import and Export Price Indexes",
+      "verification_status": "MARKET_REPORTED"
     },
     {
       "actual": null,
       "actual_due_kst": "2026-11-19T23:15:00+09:00",
       "actual_due_policy": "RELEASE_PLUS_GRACE",
       "actual_expected": true,
+      "actual_source": "FairEconomy/ForexFactory",
       "actual_status": "SCHEDULED",
       "actual_watch": true,
       "category": "고용",
+      "checked_kst": "2026-11-15T20:53:42+09:00",
+      "consensus": "199K",
       "country": "US",
       "datetime_kst": "2026-11-19T22:30+09:00",
+      "ff_match_score": 37,
       "history_ref": "US::u-s-initial-jobless-claims",
       "importance": 2,
-      "market_data_source": "DOL official release",
+      "market_data_source": "DOL official release + FairEconomy/ForexFactory",
       "market_metrics": [
         {
           "actual": null,
+          "actual_source": "FairEconomy/ForexFactory",
+          "checked_kst": "2026-11-15T20:53:45+09:00",
+          "consensus": "199K",
+          "datetime_source": "2026-11-19T08:30:00-05:00",
+          "event_title": "Unemployment Claims",
+          "generic_match_score": 104.67,
           "history_ref": "US::u-s-initial-jobless-claims::initial_claims",
+          "impact": "Medium",
           "key": "initial_claims",
-          "label": "initial_claims",
-          "market_value_source": "DOL official release",
-          "market_value_status": "PREVIOUS_ONLY",
+          "label": "Initial Jobless Claims",
+          "market_value_source": "FairEconomy/ForexFactory",
+          "market_value_status": "CONSENSUS_AVAILABLE",
           "previous": "200K",
           "previous_observed_date": "2026-11-12",
           "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
           "previous_value_source": "FairEconomy/ForexFactory",
-          "source": "DOL official release"
+          "source": "FairEconomy/ForexFactory",
+          "source_tier": "MARKET_FEED",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+          "verification_status": "MARKET_REPORTED"
         }
       ],
-      "market_value_status": "PREVIOUS_ONLY",
+      "market_value_status": "CONSENSUS_AVAILABLE",
       "previous": "200K",
       "previous_observed_date": "2026-11-12",
       "previous_source": "CALENDAR_HISTORY_LAST_ACTUAL",
@@ -10759,7 +10788,10 @@
       "schedule_rule": "WEEKLY_THURSDAY_0830_ET_HOLIDAY_ADJUSTED",
       "schedule_source_url": "https://www.dol.gov/ui/data.pdf",
       "source": "U.S. Department of Labor",
-      "title": "U.S. Initial Jobless Claims"
+      "source_tier": "MARKET_FEED",
+      "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+      "title": "U.S. Initial Jobless Claims",
+      "verification_status": "MARKET_REPORTED"
     },
     {
       "actual": null,
@@ -10956,7 +10988,7 @@
       "reference_period": "",
       "release_date": "2026-11-26",
       "representative_value_contract": "EVENT_LEVEL_VALUE_V1",
-      "schedule_checked_kst": "2026-11-15T11:06:01+09:00",
+      "schedule_checked_kst": "2026-11-15T20:53:42+09:00",
       "schedule_corrected_from": "2026-11-12T10:00+09:00",
       "schedule_source_url": "https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&mtgSe=A",
       "source": "BOK",
@@ -13537,23 +13569,23 @@
       "title": "FOMC 정책결정"
     }
   ],
-  "generated_kst": "2026-11-15T11:06:04+09:00",
+  "generated_kst": "2026-11-15T20:53:46+09:00",
   "importance_contract": "3=market_moving,2=major,1=reference",
   "key_event_contract": "VERIFIED_KST_POLICY_AND_SENTIMENT_CALENDAR_V1",
   "key_event_seeded_kst": "2026-11-15T11:06:01+09:00",
   "market_event_refresh": {
     "dynamic_metric_matches": 1,
-    "faireconomy_rows": 106,
+    "faireconomy_rows": 119,
     "fedwatch_forecast_applied": true,
-    "refreshed_kst": "2026-11-15T11:06:04+09:00",
+    "refreshed_kst": "2026-11-15T20:53:46+09:00",
     "representative_values_synced": 1,
     "verified_overrides_applied": 135
   },
   "note": "All displayed times are KST. Official schedules may change; builder refreshes automatically.",
   "official_actual_contract": "OFFICIAL_REGISTRY_BACKFILL_V2",
-  "official_actual_updated_kst": "2026-11-15T11:06:04+09:00",
+  "official_actual_updated_kst": "2026-11-15T20:53:46+09:00",
   "official_macro_calendar_bridge": {
-    "checked_kst": "2026-11-15T11:06:04+09:00",
+    "checked_kst": "2026-11-15T20:53:46+09:00",
     "checks": [
       {
         "metric": "KR_CPI",
@@ -13637,7 +13669,7 @@
     }
   },
   "recent_historical_recovery": {
-    "checked_kst": "2026-11-15T11:06:04+09:00",
+    "checked_kst": "2026-11-15T20:53:46+09:00",
     "contract": "MARKET_FEED_RECOVERY_NEVER_OVERRIDES_HIGHER_TIER_ACTUALS",
     "fetch_errors": [],
     "fetched_weeks": [],
@@ -13658,7 +13690,7 @@
     "probability_overlay_events_guarded": 2
   },
   "retention_contract": "PERSIST_RELEASED_VALUES_ACROSS_ROLLING_FEEDS_V1",
-  "retention_kst": "2026-11-15T11:06:04+09:00",
+  "retention_kst": "2026-11-15T20:53:46+09:00",
   "retention_note": "Previously captured previous/consensus/actual values are carried forward when short-horizon market feeds roll off; official observations take precedence over lower-tier updates.",
   "retention_preserved": {
     "event_fields": 0,
