@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
+from calendar import monthrange
 from datetime import datetime, date, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -52,6 +53,18 @@ def pct(a, b):
     return round((a / b - 1) * 100, 2) if a and b else None
 
 
+def monthly_reference(rows):
+    """Last completed observation on/before the same calendar day one month ago."""
+    if not rows:
+        return None
+    latest = date.fromisoformat(rows[-1]["date"])
+    year, month = (latest.year - 1, 12) if latest.month == 1 else (latest.year, latest.month - 1)
+    anchor = date(year, month, min(latest.day, monthrange(year, month)[1]))
+    return next((r for r in reversed(rows[:-1])
+                 if r.get("date") and r["date"] <= anchor.isoformat()
+                 and (anchor - date.fromisoformat(r["date"])).days <= 7), None)
+
+
 def metric(key, label, series, crypto=None):
     rows = completed(series)
     # A 24/7 spot observation may be current but is not a completed UTC day.
@@ -78,13 +91,15 @@ def metric(key, label, series, crypto=None):
                     "source":crypto.get("source"),"observed_kst":crypto.get("quote_as_of_kst"),
                     "comparison_status":"SAME_CURRENCY_COMPLETED" if same else "CURRENCY_BASIS_UNAVAILABLE",
                     "d1_pct":pct(current["value"],reference) if same else None,
-                    "w1_pct":None}
+                    "w1_pct":None, "m1_pct":None, "m1_base_date":None}
             return result
     if len(rows) < 2:
         return {"key": key, "label": label, "status": "MISSING"}
     last, prev = rows[-1], rows[-2]
     week = rows[-6] if len(rows) >= 6 else None
-    item = {"key": key, "label": label, "date": last["date"], "value": round(last["value"], 4)}
+    month = monthly_reference(rows)
+    item = {"key": key, "label": label, "date": last["date"], "value": round(last["value"], 4),
+            "m1_base_date": month["date"] if month else None}
     if key in ("BTCUSD","ETHUSD"):
         currency=last.get("quote_currency")
         same=(currency in ("USD","USDT") and prev.get("quote_currency")==currency
@@ -95,15 +110,21 @@ def metric(key, label, series, crypto=None):
         seven_days_ago=(date.fromisoformat(last["date"])-timedelta(days=7)).isoformat()
         prior_week=next((r for r in reversed(rows[:-1]) if r.get("date")==seven_days_ago),None)
         item["w1_pct"]=pct(last["value"],prior_week["value"]) if prior_week and prior_week.get("quote_currency")==currency else None
+        item["m1_pct"]=pct(last["value"],month["value"]) if month and month.get("quote_currency")==currency else None
+        if item["m1_pct"] is None:
+            item["m1_base_date"] = None
         return item
     if key in RATE_KEYS:
         item["d1_bp"] = round((last["value"] - prev["value"]) * 100, 1)
         item["w1_bp"] = round((last["value"] - week["value"]) * 100, 1) if week else None
+        item["m1_bp"] = round((last["value"] - month["value"]) * 100, 1) if month else None
     elif key in LEVEL_KEYS:
         item["d1_pt"] = round(last["value"] - prev["value"], 1)
+        item["m1_pt"] = round(last["value"] - month["value"], 1) if month else None
     else:
         item["d1_pct"] = pct(last["value"], prev["value"])
         item["w1_pct"] = pct(last["value"], week["value"]) if week else None
+        item["m1_pct"] = pct(last["value"], month["value"]) if month else None
     return item
 
 
