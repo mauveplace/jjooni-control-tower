@@ -77,6 +77,11 @@ function canonicalizeNavigation(){
   }
  }
  tabs.dataset.ctCanonicalNavOwner='TRADE_REVIEW_LOADER_V14';document.documentElement.dataset.ctNavOwner='v14';
+ // Canonicalize tab DATA and click routing, but delegate V2 mobile VISIBILITY.
+ // Reassert ownership after late legacy mutations as well as initial boot.
+ const humanV2=window.__JJOONI_CT_HUMAN_V2;
+ if(humanV2?.mode==='v2'&&typeof humanV2.enforceNavigation==='function')
+  humanV2.enforceNavigation();
  BOOT.nav_signature=canonical.filter(e=>getComputedStyle(e).display!=='none').map(e=>String(e.dataset.tab)+':'+String(e.textContent||'').trim()).join('|');return true;
 }
 function lockNavigation(){
