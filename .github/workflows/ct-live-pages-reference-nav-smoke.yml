@@ -1,0 +1,28 @@
+name: CT Live Pages Reference NAV Discovery Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - tests/ct-live-pages-reference-nav-smoke.cjs
+      - .github/workflows/ct-live-pages-reference-nav-smoke.yml
+  pull_request:
+    paths:
+      - tests/ct-live-pages-reference-nav-smoke.cjs
+      - .github/workflows/ct-live-pages-reference-nav-smoke.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ct-live-pages-discovery-smoke
+  cancel-in-progress: true
+jobs:
+  public-pages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify REAL public GitHub Pages current V2 assets, without private login
+        run: node tests/ct-live-pages-reference-nav-smoke.cjs
