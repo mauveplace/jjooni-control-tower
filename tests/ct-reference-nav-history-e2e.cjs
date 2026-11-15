@@ -2,7 +2,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const read=p=>fs.readFileSync(p,'utf8');
-const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui}.app{padding:15px;width:100%}#panel-compare{display:block}</style></head><body><main class="app"><section id="panel-compare"><div id="ctLegacyCompare">기존 성과분석 유지</div><section id="ctVerifiedPerformanceHistoryV1">별도 검증된 성과 그래프</section></section></main></body></html>';
+const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui}.app{padding:15px;width:100%}#panel-compare{display:block}</style></head><body><main class="app"><nav class="tabs"><button class="tab on" data-tab="overview">오늘</button><button class="tab" data-tab="compare">성과</button></nav><section id="panel-overview"><div class="ctOvHero">순자산 요약</div></section><section id="panel-compare"><div id="ctLegacyCompare">기존 성과분석 유지</div><section id="ctVerifiedPerformanceHistoryV1">별도 검증된 성과 그래프</section></section></main></body></html>';
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
@@ -11,7 +11,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.route('https://reference.fixture.test/**',route=>{
-     if(route.request().url().endsWith('.css?v=1'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
+     if(route.request().url().endsWith('.css?v=2'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
      return route.fulfill({contentType:'text/html',body:fixture});
    });
    await page.goto('https://reference.fixture.test/?ctui=v2');
@@ -20,6 +20,18 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
      window.__JJOONI_LIVE_PAYLOAD={snapshot_id:'synthetic'};});
    await page.addScriptTag({content:read('ct-reference-nav-history-v1.js')});
    await page.waitForSelector('#ctReferenceNavHistoryV1');
+   await page.waitForSelector('#ctReferenceNavOverviewV1');
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/참고 NAV 검증 대기/);
+   assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'no duplicate private financial graph on Overview');
+   await page.evaluate(()=>{
+    window.__NAV_CLICK_COUNT=0;
+    document.querySelector('.tabs .tab[data-tab="compare"]').addEventListener('click',()=>{
+      window.__NAV_CLICK_COUNT++;
+    });
+   });
+   await page.locator('#ctReferenceNavOverviewV1 button').click();
+   assert.equal(await page.evaluate(()=>window.__NAV_CLICK_COUNT),1,'Overview shortcut opens actual Performance tab');
+
    assert.match(await page.locator('#ctReferenceNavHistoryV1').innerText(),/검증 대기/);
    assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg').count(),0);
    await page.evaluate(()=>{
@@ -41,6 +53,10 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    });
    await page.waitForFunction(()=>document.querySelectorAll('#ctReferenceNavHistoryV1 svg').length===1);
    assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg circle').count(),3);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/수집된 NAV 3일/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자손익 아님/);
+   assert.equal(await page.locator('#ctReferenceNavOverviewV1').count(),1);
+
    assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg polyline').count(),1,'missing-day lines must not connect across gap');
    assert.match(await page.locator('#ctReferenceNavHistoryV1').innerText(),/투자손익 아님/);
    assert.match(await page.locator('#ctReferenceNavHistoryV1').innerText(),/기록 없는 날짜/);
@@ -50,6 +66,9 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    assert(layout.scroll<=layout.inner+1,JSON.stringify(layout));
    await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.reference_nav_history.bound_snapshot_id='wrong';document.dispatchEvent(new Event('jjooni:live-applied'))});
    await page.waitForFunction(()=>document.querySelectorAll('#ctReferenceNavHistoryV1 svg').length===0);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/검증 대기/);
+   assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/수집된 NAV 3일/);
+
    assert.equal(await page.locator('#ctReferenceNavHistoryV1').count(),1);
    assert.deepEqual(errors,[],'errors: '+errors.join(','));
    await context.close();
@@ -62,6 +81,8 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
   await page.addScriptTag({content:read('ct-reference-nav-history-v1.js')});
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#ctReferenceNavHistoryV1').count(),0);
+  assert.equal(await page.locator('#ctReferenceNavOverviewV1').count(),0);
+
   await ctx.close();
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
