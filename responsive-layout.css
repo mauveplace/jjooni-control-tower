@@ -229,3 +229,22 @@ html[data-ct-layout="mobile-first"] body .tabs>.tab[data-primary="1"]::before,ht
  html[data-ct-layout="mobile-first"] body .tabs>.tab[data-tab="tripod"]{grid-column:1/4!important;grid-row:2!important}
  html[data-ct-layout="mobile-first"] body .tabs>#ctMoreTab{grid-column:4/7!important;grid-row:2!important}
 }
+
+
+/* Human V2 navigation ownership: do not show old top tabs alongside the
+   new bottom bar on narrow viewports. This wins over all legacy sticky tabs
+   (including the 2-row phone override above), even before V2 CSS loads. */
+@media(max-width:767px){
+ html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs{
+  display:none!important;visibility:hidden!important;pointer-events:none!important
+ }
+ html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body #ctMoreMenu{
+  display:none!important;visibility:hidden!important;pointer-events:none!important
+ }
+}
+@media(min-width:768px){
+ html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body #ctHumanBottomV2,
+ html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body #ctHumanV2More{
+  display:none!important
+ }
+}
