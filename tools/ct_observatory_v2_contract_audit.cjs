@@ -41,6 +41,12 @@ function inspect(){
    'V2 mobile hide guard missing from competing responsive stylesheet');
  assert(legacyResponsive.includes('#ctMoreMenu'),'orphan legacy mobile popup needs suppression');
  assert(read('trade-review-loader.js').includes('humanV2.enforceNavigation()'),'legacy owner must delegate V2 visibility after tab mutations');
+ assert(human.includes("attributeFilter:['class','style','aria-selected','data-tab']"),
+   'Human V2 must reassert bottom-only nav after legacy inline style writes');
+ assert(read('boot-coordinator-v33.js').includes('trade-review-loader.js?v=14.38-single-navigation'),
+   'actual boot loader cache version must be bumped with nav handoff');
+ assert(read('ui-refactor.js').includes('responsive-layout.css?v=1.8-single-navigation'),
+   'secondary CSS injection fallback still exposes stale layout');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
