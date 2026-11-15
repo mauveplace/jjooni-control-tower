@@ -1,0 +1,36 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261115-CT-OBS-V2-FINAL-063",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "User on 2026-11-15 directly requested ROY's independently evidenced FINAL audit with JJOONI for Investment Control Tower Human V2 and Market Observatory V2. Review currently merged public main fed4b684909a0fedb0f3edb9bf8f73eae0d26e87, private CT postwrite proof d42914549d8b92f5628111b5c112a5ac64075f72 as accessible, and this read-only source contract auditor/test on the PR exact HEAD. Challenge controls, information architecture, mobile/desktop UX, reference vs verified investment history, and observable 34-sector + dated daily brief. Do not treat the read-only audit harness as real authenticated browser verification or full source proof.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ct_observatory_v2_cross_surface_ux_independent_final_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Current owner request: '로이 살아났다 검증시켜서 최종확인하고 누락된거 없는지 ui/ux도 로이갈 같이 검증해서 봐바'. Owner authorizes JJOONI development and ROY independent read-only review, not automatic trade/secret disclosure.",
+  "acceptance": [
+    "Confirm existing public main fed4b684909a0fedb0f3edb9bf8f73eae0d26e87 has postmerge 7/7 actual Actions PASS and LIVE Pages origin smoke human_snapshot_guard=true; no authenticated real device proof claimed.",
+    "Review exact HEAD of this PR and run node --test tests/ct-observatory-v2-contract-audit.test.cjs plus existing Human/Observatory mobile UI tests. Independently inspect source, do not infer PASS from green synthetic checks alone.",
+    "Audit Human V2 five bottom menus and all existing desktop/More destinations, real active-tab behavior, safe-area/44px, focus/back/deep-links/scroll/long amounts, Overview ↔ Performance reference NAV discovery, missing data fail-closed and V1 fallback.",
+    "Audit Human V2 canonical/live snapshot mismatches: #487 must suppress total investment PnL, net external flow and per-account figures if known IDs disagree, show explicit warning, restore after alignment. Assess risk of one or both snapshot IDs missing and actual encrypted browser not independently verified.",
+    "Audit verified 3 charts only from official complete 4-account close NAV + cash-flow receipts; reference NAV (63 private samples, 62 last Sunday encrypted) is not verified PnL. Document official close receipts 0, flow coverage 0/4 and future Monday 09:17 acceptance gate pending.",
+    "Audit Market Observatory 5 nav groups, exactly 13 legacy destinations including 2 dynamically inserted, 34 source-matched vertical sector rows, same completed session and source confidence, V2 default and V1 fallback.",
+    "Audit 2026-11-15 missing Morning Brief despite current Glance 2026-11-15T16:37:51+09:00 and 2026-11-14 latest.json, NDX/SOX official close verification gaps; don't silently certify daily report, invent facts or disable source gates.",
+    "Audit current production Calendar QA and Freshness PASS independently from actual run logs, and mobile/desktop 390/1363 with source-level or browser-level evidence when accessible.",
+    "Reply exactly once on this PR with source-anchored top 1–5 P0/P1/P2 findings and ROY_CT_OBS_UX_REVIEW=PASS|NEEDS_CHANGES|BLOCKED plus reviewed_head full SHA, authenticated_screen=UNVERIFIED unless tested. No self-certification."
+  ],
+  "forbidden": [
+    "No account/portfolio/transactions/passwords/snapshots/private data in public source or comments",
+    "No orders, automated trading, new paid external APIs, Cloud Run services, security credential modifications",
+    "No ROY branch edits or auto merge/deploy; ROY read-only review, JJOONI implements approved fixes",
+    "Do not reuse old ROY comments/HEADs as approval, and do not create duplicate follow-up issues"
+  ],
+  "coordination_notes": "This is the sole compliant fresh opt-in [AI-COLLAB] PR for ROY PR-opened Routine; old Issue #486 lacked exact expected PR marker and is coordination-only. The owner-connected JJOONI is responsible for code/tests/CI. ROY should inspect current code and return independent evidence, not a ceremonial PASS."
+}

@@ -25,7 +25,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     const keys=['TOSS','ISA','PENSION','IRP'];
     const accounts=Object.fromEntries(keys.map((id,i)=>[id,{nav:1000,today_pnl:(i+1)*10,net_flow:i===0?500:0,today_pnl_scope:'SAME_SESSION',today_pnl_quality:'BROKER_MEASURED'}]));
     window.__JJOONI_CANONICAL_SSOT={snapshot_id:'synthetic',accounts};
-    window.__JJOONI_LIVE_PAYLOAD={generated_kst:at,stale_after_kst:new Date(Date.now()+600000).toISOString()};
+    window.__JJOONI_LIVE_PAYLOAD={snapshot_id:'synthetic',generated_kst:at,stale_after_kst:new Date(Date.now()+600000).toISOString()};
     document.querySelectorAll('.tabs .tab').forEach(tab=>tab.addEventListener('click',()=>{
      document.querySelectorAll('.tabs .tab').forEach(x=>x.classList.toggle('on',x===tab));
      document.querySelectorAll('.tabPanel').forEach(x=>x.classList.toggle('on',x.id==='panel-'+tab.dataset.tab));
@@ -101,6 +101,31 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    });
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2QuickMetric strong')?.textContent==='+₩100');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
+   // Missing ID is not the same as equal IDs. Both cases fail closed.
+   await page.evaluate(()=>{
+    delete window.__JJOONI_LIVE_PAYLOAD.snapshot_id;
+    document.dispatchEvent(new Event('jjooni:live-applied'));
+   });
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('계좌 동기화 확인 대기'));
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'합산 확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'동기화 확인 대기');
+   assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/계좌 동기화 불일치/,'missing source is not proven mismatched data');
+   await page.evaluate(()=>{
+    const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD;
+    L.snapshot_id=C.snapshot_id;
+    delete C.snapshot_id;
+    document.dispatchEvent(new Event('jjooni:live-applied'));
+   });
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2QuickMetric strong')?.textContent==='합산 확인 대기');
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/동기화 확인 대기/);
+   await page.evaluate(()=>{
+    window.__JJOONI_CANONICAL_SSOT.snapshot_id='synthetic';
+    document.dispatchEvent(new Event('jjooni:live-applied'));
+   });
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2QuickMetric strong')?.textContent==='+₩100');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
+
 
    assert.deepEqual(errors,[],'no browser exceptions '+width+': '+errors.join(';'));
    await context.close();

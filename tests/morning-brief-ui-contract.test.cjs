@@ -48,7 +48,7 @@ test('mobile reader has correction detail, consistent latest-publication wording
  assert.match(src,/briefSourceDetails/);
  assert.match(src,/briefTools\{display:grid/);
  assert.match(src,/공식 EOD 확인/);
- assert.match(html,/morning-brief-v1\.js\?v=20261110-reference-prices-v1/);
+ assert.match(html,/morning-brief-v1\.js\?v=20261115-nyse-holidays-v3/);
  assert.match(html,/<option value="latest">최신 공개본<\/option>/);
 });
 
@@ -172,4 +172,59 @@ test('optional SOX market bar only appears as a single-source reference on exact
  g.groups[0].items.at(-1).source='Unverified visitor quote';
  x=projection(reportRace,g);
  assert.equal(x.sox,null);
+});
+
+
+const archiveStart=src.indexOf('function archiveDates(');
+const archiveEnd=src.indexOf('\nfunction renderHistory(',archiveStart);
+assert.ok(archiveStart>=0&&archiveEnd>archiveStart,'reader exposes date-gap projector');
+const archiveSource=src.slice(archiveStart,archiveEnd);
+function archive(entries){return vm.runInNewContext(archiveSource+'\narchiveDates(entries)',{entries,Date});}
+test('missing published Friday is shown but Sunday and Monday are not falsely flagged',()=>{
+ const entries=[{report_date_kst:'2026-11-17',market_date_us:'2026-11-16'},
+  {report_date_kst:'2026-11-14',market_date_us:'2026-11-13'},
+  {report_date_kst:'2026-11-12',market_date_us:'2026-11-11'}];
+ const rows=archive(entries);
+ assert(rows.some(x=>x.date==='2026-11-13'&&x.missing),'Friday archive missing');
+ assert(!rows.some(x=>x.date==='2026-11-15'&&x.missing),'Sunday is not required');
+ assert(!rows.some(x=>x.date==='2026-11-16'&&x.missing),'Monday uses separate investment board');
+ assert(rows.some(x=>x.date==='2026-11-17'&&!x.missing));
+ assert.match(src,/unpublished-\$\{esc\(date\)\}.*disabled/,'missing entries must not be clickable');
+});
+test('real archive is missing Friday Nov 13, and invalid dates cannot crash the selector',()=>{
+ const index=JSON.parse(fs.readFileSync('market-observatory/data/morning-brief/index.json','utf8'));
+ const rows=archive([...index.entries,{report_date_kst:'2026-19-99',market_date_us:'2026-11-13'}]);
+ assert(rows.some(x=>x.date==='2026-11-13'&&x.missing));
+ assert(!rows.some(x=>x.date==='2026-19-99'));
+ assert(!rows.some(x=>x.date==='2026-11-15'&&x.missing));
+});
+
+test('2026 Thanksgiving NYSE full closure is not a missing report, next-day early close is still a session',()=>{
+ const records=[{report_date_kst:'2026-12-01',market_date_us:'2026-11-30'},
+  {report_date_kst:'2026-11-25',market_date_us:'2026-11-24'}];
+ const dates=archive(records);
+ const thanksgiving=dates.find(x=>x.date==='2026-11-27');
+ assert.equal(thanksgiving?.marketHoliday,true,'Nov 27 KST reports Nov 26 ET Thanksgiving');
+ assert.equal(thanksgiving?.sessionDate,'2026-11-26');
+ assert.equal(thanksgiving?.missing,false);
+ const earlyClose=dates.find(x=>x.date==='2026-11-28');
+ assert.equal(earlyClose?.missing,true,'Nov 28 KST reports Nov 27 ET early-close trading session');
+ assert.equal(earlyClose?.sessionDate,'2026-11-27');
+ assert.equal(dates.find(x=>x.date==='2026-11-26')?.missing,true);
+ assert(!dates.some(x=>x.date==='2026-11-29'&&x.missing));
+ assert(!dates.some(x=>x.date==='2026-11-30'&&x.missing));
+ assert.match(src,/미국장 휴장 · 발행 대상 아님/);
+});
+test('NYSE 2027 and 2028 observed market holidays do not flag missing morning reports',()=>{
+ const d27=archive([{report_date_kst:'2027-06-22'},{report_date_kst:'2027-06-17'}]);
+ assert.equal(d27.find(x=>x.date==='2027-06-19')?.marketHoliday,true,'2027 Juneteenth Fri observed');
+ const d28=archive([{report_date_kst:'2028-01-20'},{report_date_kst:'2028-01-14'}]);
+ assert.equal(d28.find(x=>x.date==='2028-01-18')?.marketHoliday,true,'2028 MLK observed');
+});
+test('unknown future market calendar does not invent a publication obligation',()=>{
+ const dates=archive([{report_date_kst:'2029-11-29'},{report_date_kst:'2029-11-22'}]);
+ const day=dates.find(x=>x.date==='2029-11-23');
+ assert.equal(day?.calendarUnknown,true);
+ assert.equal(day?.missing,false);
+ assert.match(src,/미국장 일정 확인 필요/);
 });

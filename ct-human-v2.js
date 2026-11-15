@@ -151,9 +151,9 @@ function ensureQuickView(){
  const panel=qs('#panel-overview'),C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD,M=window.JjooniMetrics;
  if(!panel||!C?.accounts||!M?.aggregate||!M?.freshness)return;
  const m=M.aggregate(C.accounts,IDS);
- // Both IDs are available in canonical/live production feeds. When they
- // disagree, do not show numbers from different account snapshots together.
- const snapshotAligned=!(C.snapshot_id&&L?.snapshot_id)||String(C.snapshot_id)===String(L.snapshot_id);
+ // Both source snapshot IDs are required before a combined financial display.
+ // Missing IDs or divergent snapshots suppress P&L and net flows together.
+ const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
  let box=qs('#ctHumanQuickV2',panel);
  if(!box){
   box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','오늘의 투자 변화');
@@ -181,7 +181,7 @@ function ensureQuickView(){
  box.replaceChildren();
  const heading=document.createElement('div');heading.className='ctHumanV2QuickHead';
  const title=document.createElement('strong');title.textContent='오늘의 투자 변화';
- const stamp=document.createElement('span');stamp.textContent=(snapshotAligned?'':'⚠ 계좌 동기화 불일치 · ')+statusText(L||{},M);
+ const stamp=document.createElement('span');const syncNotice=snapshotAligned?'':(!C.snapshot_id||!L?.snapshot_id?'⚠ 계좌 동기화 확인 대기 · ':'⚠ 계좌 동기화 불일치 · ');stamp.textContent=syncNotice+statusText(L||{},M);
  heading.append(title,stamp);
  const grid=document.createElement('div');grid.className='ctHumanV2QuickGrid';
  for(const [label,amount,note] of [['투자손익',dayText,dayNote],['순입출금',flowText,'투자손익과 분리 · 원천 제공 기간']]){
