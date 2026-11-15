@@ -43,6 +43,9 @@ function inspect(){
  assert(read('trade-review-loader.js').includes('humanV2.enforceNavigation()'),'legacy owner must delegate V2 visibility after tab mutations');
  assert(human.includes("attributeFilter:['class','style','aria-selected','data-tab']"),
    'Human V2 must reassert bottom-only nav after legacy inline style writes');
+ assert(rootHtml.includes('ui-bootstrap-v1.js?v=4-single-navigation'),'entry must cache bust UI boot');
+ assert(read('ui-bootstrap-v1.js').includes('boot-coordinator-v33.js?v=33.2-single-navigation'),
+   'UI boot must cache bust boot coordinator');
  assert(read('boot-coordinator-v33.js').includes('trade-review-loader.js?v=14.38-single-navigation'),
    'actual boot loader cache version must be bumped with nav handoff');
  assert(read('ui-refactor.js').includes('responsive-layout.css?v=1.8-single-navigation'),
