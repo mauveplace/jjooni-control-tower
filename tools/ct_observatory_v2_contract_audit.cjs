@@ -32,10 +32,19 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=3'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=4'),'Human V2 cache version drift');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
- assert(human.includes('const snapshotAligned='),'current/live snapshot mismatch not gated');
+ // Audit the actual fail-closed expression, not just its existence.
+ assert(human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),
+   'live or canonical missing snapshot IDs must block account figures');
+ const primary=human.match(/const PRIMARY=(\[[^\n]+\]);/);
+ assert(primary,'Human V2 primary tab source missing');
+ const primaryTabs=Array.from(primary[1].matchAll(/\['([^']+)','([^']+)','[^']+'\]/g),m=>m[1]);
+ assert.deepEqual(primaryTabs,['overview','accounts','compare','tripod'],'primary tab order changed');
+ const moreTab=human.includes("button('더보기','more'")&&human.includes('nav.append(more)')?1:0;
+ const humanMobileTabs=primaryTabs.length+moreTab;
+ assert.equal(humanMobileTabs,5,'Human mobile bottom menu lost a tab');
  assert(human.includes('동기화 확인 대기'),'mismatch must be understandable to users');
  assert(human.includes('M.aggregate(C.accounts,IDS)'),'four-account total source contract absent');
  assert(human.includes("['overview','오늘'")&&human.includes("['accounts','계좌'"),'five-menu contract drift');
@@ -49,9 +58,16 @@ function inspect(){
  assert(performance.includes("history.status!=='VERIFIED'"),'unverified investment charts enabled');
 
  assert(Array.isArray(sectors.groups),'sector board source missing');
+ // Independent canonical 11 US / 10 KR / 13 thematic rows. Do not trust
+ // expected_count taken from the same JSON being audited.
+ const expectedGroups={classic:11,kr_sector:10,semiconductor:2,software:3,
+   biotech:1,financial:1,defense_infra:4,robotics:2};
+ assert.deepEqual(sectors.groups.map(g=>g.key).sort(),Object.keys(expectedGroups).sort(),
+   'sector group identifiers changed');
  const sectorCount=sectors.groups.reduce((sum,g)=>{
   assert(Array.isArray(g.rows),'sector group missing rows');
-  assert.equal(g.rows.length,g.expected_count,'sector source group incomplete '+g.key);
+  assert.equal(g.rows.length,expectedGroups[g.key],'independent sector group count: '+g.key);
+  assert.equal(g.expected_count,expectedGroups[g.key],'self-declared sector count drift: '+g.key);
   return sum+g.rows.length;
  },0);
  assert.equal(sectorCount,34,'vertical 34-sector board incomplete');
@@ -59,7 +75,7 @@ function inspect(){
    'performance proxy must not be called actual money inflow');
  return Object.freeze({
   state:'SOURCE_CONTRACT_PASS',
-  human_mobile_destinations:5,
+  human_mobile_destinations:humanMobileTabs,
   observatory_groups:obsNav.IA.length,
   observatory_legacy_destinations:flattened.length,
   sector_rows:sectorCount,
