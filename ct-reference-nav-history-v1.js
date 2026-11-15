@@ -73,6 +73,42 @@ function makeChart(rows){
  svg.append(el('text',{x:645,y:176,'font-size':12,fill:'#54657b','text-anchor':'end'},rows[rows.length-1].date));
  return svg;
 }
+function overviewShortcut(report){
+ const overview=document.querySelector('#panel-overview');
+ if(!overview)return;
+ let card=document.querySelector('#ctReferenceNavOverviewV1');
+ if(!card){
+  card=document.createElement('section');card.id='ctReferenceNavOverviewV1';
+  card.setAttribute('aria-label','참고용 순자산 그래프 위치 안내');
+  const title=document.createElement('strong');title.textContent='참고용 순자산 추이';
+  title.className='ctRefNavOverviewTitle';
+  const info=document.createElement('span');info.className='ctRefNavOverviewInfo';
+  const button=document.createElement('button');button.type='button';
+  button.textContent='그래프 보기 · 성과 탭';button.className='ctRefNavOverviewOpen';
+  button.addEventListener('click',()=>{
+   const tab=document.querySelector('.tabs .tab[data-tab="compare"]');
+   if(!tab)return;
+   tab.click();
+   setTimeout(()=>{
+    const section=document.querySelector('#ctReferenceNavHistoryV1');
+    if(section&&section.getClientRects().length)section.scrollIntoView({block:'start',behavior:'smooth'});
+   },180);
+  });
+  card.append(title,info,button);
+ }
+ const anchor=document.querySelector('#ctHumanQuickV2')||overview.querySelector('.ctOvHero');
+ if(anchor&&anchor.parentElement===overview){
+  if(anchor.nextElementSibling!==card)anchor.insertAdjacentElement('afterend',card);
+ }else if(card.parentElement!==overview)overview.prepend(card);
+ const info=card.querySelector('.ctRefNavOverviewInfo');
+ if(report.ok){
+  info.textContent='수집된 NAV '+report.rows.length+'일 · 투자손익 아님'+(report.stale?' · 최근 관측 갱신 확인 필요':'');
+  card.dataset.ctReference='REFERENCE_ONLY';
+ }else{
+  info.textContent='참고 NAV 검증 대기 · 성과 탭에서 상태 확인';
+  card.dataset.ctReference='WAITING';
+ }
+}
 function render(){
  if(root.__JJOONI_CT_HUMAN_V2?.mode!=='v2')return;
  const host=document.querySelector('#panel-compare');if(!host)return;
@@ -85,6 +121,7 @@ function render(){
  const live=root.__JJOONI_LIVE_PAYLOAD||{},canonical=root.__JJOONI_CANONICAL_SSOT||{};
  const report=audit(live.reference_nav_history,{live,canonical});
  root.__JJOONI_REFERENCE_NAV_AUDIT={state:report.ok?'REFERENCE_ONLY':'WAITING',reason:report.reason,points:report.rows.length};
+ overviewShortcut(report);
  const sig=[live.snapshot_id,canonical.snapshot_id,live.reference_nav_history?.generated_at_kst,report.ok,report.reason,
    report.rows.map(r=>[r.date,r.nav,r.source_at]).join('|')].join('|');
  if(section.dataset.signature===sig)return;section.dataset.signature=sig;
