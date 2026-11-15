@@ -181,6 +181,17 @@ class DailyGlance(unittest.TestCase):
         self.assertEqual(glance.build(observatory(tripod_latest=price_only))["consistency"]["status"], "CONFLICT")
         self.assertEqual(glance.build(observatory())["consistency"]["status"], "OK")
 
+    def test_glance_refreshes_on_canonical_pulse_commit_even_if_workflow_run_is_late(self):
+        # A later same-session canonical pulse can otherwise make the
+        # previous Glance source-vintage older and block morning publication.
+        wf = (ROOT / ".github/workflows/market-observatory-daily-glance.yml").read_text(encoding="utf-8")
+        push = wf.split("  push:", 1)[1].split("  pull_request:", 1)[0]
+        self.assertIn("- market-observatory/data/daily-market-pulse.json", push)
+        self.assertIn('workflows: ["Market Observatory Daily Pulse"]', wf)
+        self.assertIn("python tools/build_daily_glance.py", wf)
+        self.assertIn("python tools/publish_observatory_data.py", wf)
+        self.assertIn("contents: read", wf.split("jobs:")[0])
+
     def test_workflow_write_token_only_in_publish_job(self):
         wf = (ROOT / ".github/workflows/market-observatory-daily-glance.yml").read_text(encoding="utf-8")
         top = wf.split("jobs:")[0]
