@@ -89,6 +89,46 @@ function ensureMenuItems(){
  sep.append(legacy);
  menu.replaceChildren(header,items,sep);
 }
+// V2 owns exactly one visible global navigation surface at a time.
+// The original mobile-first stylesheet also sets .tabs to display:grid!important;
+// explicitly arbitrate CSS-owner races, including a late injected legacy sheet.
+function syncNavigationOwner(){
+ if(!enabled)return;
+ const tabs=qs('.tabs'),bottom=qs('#ctHumanBottomV2'),legacyMore=qs('#ctMoreMenu');
+ if(!tabs||!bottom)return;
+ const mobile=window.matchMedia
+  ?window.matchMedia('(max-width: 767px)').matches:window.innerWidth<768;
+ // The legacy loader observes style mutations; keep ownership changes
+ // idempotent or both observers can schedule a re-render loop.
+ const force=(node,display)=>{
+  if(node.style.getPropertyValue('display')!==display||node.style.getPropertyPriority('display')!=='important')
+   node.style.setProperty('display',display,'important');
+ };
+ const clear=node=>{if(node.style.getPropertyValue('display'))node.style.removeProperty('display')};
+ const hideAria=node=>{if(node.getAttribute('aria-hidden')!=='true')node.setAttribute('aria-hidden','true')};
+ const showAria=node=>{if(node.hasAttribute('aria-hidden'))node.removeAttribute('aria-hidden')};
+ if(mobile){
+  // Inline !important overrides historical .tabs !important rules, including
+  // those injected after ct-human-v2.css. Hidden tab buttons stay clickable
+  // programmatically, preserving legacy panel routing without duplicate UI.
+  force(tabs,'none');hideAria(tabs);
+  force(bottom,'grid');showAria(bottom);
+  if(legacyMore){
+   if(legacyMore.classList.contains('open'))legacyMore.classList.remove('open');
+   force(legacyMore,'none');hideAria(legacyMore);
+  }
+ }else{
+  clear(tabs);showAria(tabs);
+  force(bottom,'none');hideAria(bottom);
+  if(legacyMore){
+   if(legacyMore.classList.contains('open'))legacyMore.classList.remove('open');
+   clear(legacyMore);showAria(legacyMore);
+  }
+  closeMenu();
+ }
+ window.__JJOONI_CT_HUMAN_V2.navigation=mobile?'MOBILE_BOTTOM_5':'DESKTOP_TOP_ONLY';
+}
+window.__JJOONI_CT_HUMAN_V2.enforceNavigation=syncNavigationOwner;
 function ensureNav(){
  if(!enabled)return;
  const tabs=qs('.tabs');if(!tabs)return;
@@ -119,12 +159,12 @@ function ensureNav(){
   });
  }
  ensureMenuItems();
+ syncNavigationOwner();
  if(!observer){
   observer=new MutationObserver(()=>queueUpdate());
-  observer.observe(tabs,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-selected','data-tab']});
+  observer.observe(tabs,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','aria-selected','data-tab']});
  }
  updateSelection();
- window.__JJOONI_CT_HUMAN_V2.navigation='MOBILE_BOTTOM_5';
 }
 function updateSelection(){
  const active=selected();
@@ -245,13 +285,14 @@ function queueUpdate(){
 }
 if(enabled){
  document.documentElement.dataset.ctHumanUi='v2';
- const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=2';
+ const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=3';
  (document.head||document.documentElement).append(link);
 }
 document.addEventListener('jjooni:live-applied',queueUpdate);
 document.addEventListener('click',e=>{if(e.target.closest?.('.tabs .tab[data-tab],#ctMoreMenu button'))window.setTimeout(updateSelection,120)});
 window.addEventListener('hashchange',queueUpdate);
-window.addEventListener('resize',queueUpdate,{passive:true});
+window.addEventListener('resize',()=>{syncNavigationOwner();queueUpdate()},{passive:true});
+window.addEventListener('orientationchange',()=>{syncNavigationOwner();queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueUpdate()});
 window.setTimeout(update,0);
 window.setTimeout(update,800);

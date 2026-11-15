@@ -41,6 +41,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await driverRows.count(),4,'all four original accounts remain represented');
    assert.match(await driverRows.first().innerText(),/IRP/,'comparable P&L sorted by absolute impact');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths button').count(),5,'relevant original analysis panels accessible');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths').isVisible(),width>=768,
+    'Overview quick-link bar must not duplicate mobile primary navigation');
    if(width>=1080)assert.equal(await page.locator('#ctHumanQuickV2').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2,'desktop has two-column concise insight');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
@@ -48,8 +50,41 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     const r=await nav.boundingBox();
     assert(r.y>700,'mobile nav at viewport bottom '+width+': '+JSON.stringify(r));
     assert(r.height>=60);
-    assert.equal(await page.locator('.tabs').isVisible(),false);
+    assert.equal(await page.locator('.tabs').isVisible(),false,'original top tabs must be fully suppressed');
+    assert.equal(await page.locator('.tabs').getAttribute('aria-hidden'),'true');
+    assert.equal(await nav.getAttribute('aria-hidden'),null);
+    assert.equal(await page.evaluate(()=>window.__JJOONI_CT_HUMAN_V2.navigation),'MOBILE_BOTTOM_5');
     assert.equal(await nav.locator('button').count(),5);
+    // A late legacy stylesheet used to reintroduce the sticky top tabs.
+    // A real viewport/cascade check must enforce exactly one visible menu.
+    if(width===390){
+     // Reproduce both real owners in the same document: the legacy loader
+     // canonicalizes top navigation and observes late tab style mutations.
+     const legacy=read('trade-review-loader.js');
+     const legacyTest=legacy.slice(0,legacy.lastIndexOf('boot();'))+
+      'window.__ctLegacyNavTest={canonicalizeNavigation,lockNavigation};})();';
+     await page.addScriptTag({content:legacyTest});
+     await page.evaluate(()=>window.__ctLegacyNavTest.lockNavigation());
+     await page.waitForTimeout(120);
+     assert.equal(await page.locator('.tabs').isVisible(),false,'legacy loader may not re-show top tabs');
+     assert.equal(await nav.isVisible(),true,'Human V2 retains one bottom nav');
+     await page.evaluate(()=>{
+      document.querySelector('.tabs').style.setProperty('display','grid','important');
+      document.querySelector('.tabs .tab').style.setProperty('display','flex','important');
+     });
+     await page.waitForTimeout(200);
+     assert.equal(await page.locator('.tabs').isVisible(),false,'legacy mutation observer must restore V2 nav ownership');
+     await page.addStyleTag({content:'html[data-ct-layout="mobile-first"] body .tabs {display:grid!important}'});
+     assert.equal(await page.locator('.tabs').isVisible(),false,'late legacy sheet must not bring top tabs back');
+     await page.setViewportSize({width:820,height:900});
+     await page.waitForFunction(()=>window.__JJOONI_CT_HUMAN_V2.navigation==='DESKTOP_TOP_ONLY');
+     assert.equal(await nav.isVisible(),false,'rotated/wide view hides bottom tabs');
+     assert.equal(await page.locator('.tabs').isVisible(),true,'wide view restores original top tabs');
+     await page.setViewportSize({width:390,height:900});
+     await page.waitForFunction(()=>window.__JJOONI_CT_HUMAN_V2.navigation==='MOBILE_BOTTOM_5');
+     assert.equal(await nav.isVisible(),true,'return to phone restores bottom nav');
+     assert.equal(await page.locator('.tabs').isVisible(),false,'return to phone suppresses top nav');
+    }
     assert((await nav.locator('button').evaluateAll(xs=>xs.every(x=>x.getBoundingClientRect().height>=44))));
     await driverRows.first().click();
     assert(await page.locator('#panel-accounts').isVisible(),'account impact navigates to canonical accounts');
@@ -67,6 +102,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     assert(await page.locator('#panel-overview').isVisible(),'return to Overview from strategy');
    }else{
     assert.equal(await nav.isVisible(),false,'desktop retains current nav');
+    assert.equal(await nav.getAttribute('aria-hidden'),'true');
+    assert.equal(await page.evaluate(()=>window.__JJOONI_CT_HUMAN_V2.navigation),'DESKTOP_TOP_ONLY');
     assert(await page.locator('.tabs').isVisible());
    }
    await page.evaluate(()=>{

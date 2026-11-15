@@ -1,0 +1,33 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261116-CT-SINGLE-NAV-064",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "User on 2026-11-16 reports two simultaneous navigation tab bars (top and bottom) in the actual JJOONI Investment Control Tower screen; asks if JJOONI and ROY truly discussed and improved UX. Design issue #403 agreed mobile bottom 5 vs wide top-only, but independent PR #488 review only exercised synthetic code; authenticated device was unverified. Independently verify PR #494 single navigation ownership and test, inspect potential regressions; treat the user's report as evidence of a UX defect, not an optional visual preference.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ct_human_v2_single_navigation_owner_independent_ux_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User: '컨트롤타워 화면 보면 상단에서ㅜ탭이 있고 하단에도 탭이 있어서 이거 뭐야 싶은데.이거 로이랑 논의하고 개선한거 맞아?' JJOONI initiated scope-limited UX bugfix and independent ROY consultation; no actual authenticated phone screenshot available.",
+  "acceptance": [
+    "On exact PR HEAD independently inspect ct-human-v2.js syncNavigationOwner() and responsive-layout.css phone/touch rules. For <768px, legacy top .tabs and orphan #ctMoreMenu must be hidden, only #ctHumanBottomV2 5 items visible. For >=768px, top tabs restored and bottom bar hidden.",
+    "Inspect CSS inline !important vs the legacy mobile-first stylesheet's repeated sticky .tabs display:grid!important, including late stylesheet arrival and 390→820→390 rotation; confirm no interactive duplicate nav for narrow/landscape tablet.",
+    "Run synthetic browser Playwright tests at 360,390,599,767,820,1363 as CI permits. Inspect the targeted late conflicting CSS injection and dynamic width test. Verify More routes, original 13/10 existing panels, V1 rollback, SPA selection/deeplink and menu accessibility; report any gaps.",
+    "Independently verify index.html boot chain includes ct-human-v2.js?v=6 and responsive-layout.css?v=1.8-single-navigation; ct-human-v2.css?v=3; shipped Pages smoke asserts both updated JS and CSS after deployment. Distinguish premerge local source check from postmerge actual public CDN.",
+    "Check no modification to monetary calculations, canonical snapshot, trade execution, privacy or Cloud Run budgets. Authenticated encrypted phone UI is UNVERIFIED unless ROY actually authoritatively opens it.",
+    "Respond exactly once on PR #494 with ROY_CT_NAV_SINGLE_OWNER_REVIEW=PASS|NEEDS_CHANGES|BLOCKED, reviewed_head exact full SHA, top P0/P1/P2 evidence, tests run and authenticated_screen=UNVERIFIED unless genuinely authenticated."
+  ],
+  "forbidden": [
+    "Do not edit, merge or deploy code as ROY; read-only review only",
+    "Do not access or disclose any private account values, encryption keys, authentication, balances or live financial state",
+    "No orders, trading, paid infra or unverified claim of real authenticated UI PASS",
+    "Do not create duplicate issues/third review tickets or declare ROY PASS from GitHub issue receipt"
+  ],
+  "coordination_notes": "Single new focused ROY review of PR #494 at latest exact HEAD only. All first-party code/test changes owned by JJOONI, including regression fixes. Source-level and synthetic browser pass cannot guarantee that the real authenticated phone UI displays correctly; owner reported real duplication."
+}
