@@ -9,7 +9,7 @@ function fixture(){
   {date:'2026-11-12',nav_krw:1105,investment_pnl_krw:55,net_cash_flow_krw:50,asset_class_contributions_krw:{KR_STOCK:15,US_STOCK:40}},
   {date:'2026-11-13',nav_krw:1150,investment_pnl_krw:45,net_cash_flow_krw:0,asset_class_contributions_krw:{KR_STOCK:20,US_STOCK:25}}
  ];
- return {source:{schema,status:'VERIFIED',accounts:ids,bound_snapshot_id:'snap1',verified_at_kst:verifiedAt,asset_class_partition:'DISJOINT',rows},
+ return {source:{schema,status:'VERIFIED',accounts:ids.slice(),bound_snapshot_id:'snap1',verified_at_kst:verifiedAt,asset_class_partition:'DISJOINT',rows},
   context:{live:{snapshot_id:'snap1',source_health:{pb_history:{state:'VERIFIED'}}},canonical:{snapshot_id:'snap1'}}};
 }
 test('verified reconciliation renders 3 chart data series only when source, 4 accounts, NAV bridge and classification all attest',()=>{
