@@ -162,7 +162,7 @@ function ensureNav(){
  syncNavigationOwner();
  if(!observer){
   observer=new MutationObserver(()=>queueUpdate());
-  observer.observe(tabs,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-selected','data-tab']});
+  observer.observe(tabs,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','aria-selected','data-tab']});
  }
  updateSelection();
 }
