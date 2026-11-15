@@ -57,3 +57,33 @@ test('financial history must not use legacy current-observation rows or TRI-POD 
  x.source.accounts.push('TRIPOD');
  assert.equal(audit(x.source,x.context).ok,false);
 });
+
+test('verified_at_kst requires an explicit timezone; date-only or local-ambiguous times cannot certify broker history',()=>{
+ for(const unzoned of ['2026-11-15','2026-11-15T09:00:00','2026-11-15T09:00']){
+  const {source,context}=fixture();source.verified_at_kst=unzoned;
+  const result=audit(source,context);
+  assert.equal(result.ok,false,'must reject timezone-free '+unzoned);
+  assert.match(result.reason,/검증 시각/);
+ }
+ const {source,context}=fixture();
+ source.verified_at_kst='2026-11-15T00:00:00Z';
+ assert.equal(audit(source,context).ok,true,'valid explicit UTC should remain accepted');
+});
+
+test('NAV-to-PnL bridge accepts 1 KRW rounding but blocks asset-size-relative multiwon errors',()=>{
+ const a=fixture();
+ a.source.rows.forEach((row,index)=>{
+  row.nav_krw*=100000000;
+  row.investment_pnl_krw*=100000000;
+  row.net_cash_flow_krw*=100000000;
+  row.asset_class_contributions_krw.KR_STOCK*=100000000;
+  row.asset_class_contributions_krw.US_STOCK*=100000000;
+ });
+ assert.equal(audit(a.source,a.context).ok,true);
+ a.source.rows[1].nav_krw+=1;
+ assert.equal(audit(a.source,a.context).ok,true,'1 KRW rounding difference is allowed');
+ a.source.rows[1].nav_krw+=2;
+ const wrong=audit(a.source,a.context);
+ assert.equal(wrong.ok,false,'3 KRW difference must not be excused by large portfolio NAV');
+ assert.match(wrong.reason,/NAV 증감/);
+});

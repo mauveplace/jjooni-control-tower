@@ -13,7 +13,8 @@ const day=v=>{
  const d=new Date(v+'T00:00:00Z');
  return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===v;
 };
-const near=(a,b)=>Math.abs(a-b)<=Math.max(2,Math.max(Math.abs(a),Math.abs(b))*0.00000005);
+const near=(a,b)=>Math.abs(a-b)<=2; // Only KRW rounding, never asset-size-relative reconciliation tolerance.
+const zonedTime=v=>typeof v==='string'&&v.includes('T')&&/(?:Z|[+-]\d{2}:\d{2})$/.test(v)&&Number.isFinite(Date.parse(v));
 const fail=(reason,extra={})=>({ok:false,reason,rows:[],contributionOk:false,...extra});
 
 function audit(history,{live={},canonical={}}={}){
@@ -24,7 +25,7 @@ function audit(history,{live={},canonical={}}={}){
  if(!['OK','VERIFIED'].includes(health))return fail('성과 원장 신선도 검증 대기');
  const snapshot=String(history.bound_snapshot_id||'');
  if(!snapshot||snapshot!==String(live.snapshot_id||'')||snapshot!==String(canonical.snapshot_id||''))return fail('성과 이력과 현재 스냅샷 불일치');
- if(!Number.isFinite(Date.parse(history.verified_at_kst))||Date.parse(history.verified_at_kst)>Date.now()+120000)return fail('이력 검증 시각 확인 필요');
+ if(!zonedTime(history.verified_at_kst)||Date.parse(history.verified_at_kst)>Date.now()+120000)return fail('이력 검증 시각 확인 필요');
  if(!Array.isArray(history.accounts)||history.accounts.length!==4||ACCOUNTS.some(a=>!history.accounts.includes(a))||new Set(history.accounts).size!==4)return fail('4계좌 원장 범위 확인 필요');
  if(!Array.isArray(history.rows)||history.rows.length<2||history.rows.length>366)return fail('일별 성과 이력 최소 2일 필요');
  const rows=[],seen=new Set();
