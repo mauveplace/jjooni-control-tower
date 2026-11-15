@@ -2,6 +2,12 @@
 // Unlike synthetic E2E, this checks EXACT GitHub Pages CDN delivery after deploy.
 'use strict';
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
+const guard=script=>{
+ assert(script.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'PERF_BRIDGE_TOLERANCE_NOT_FIXED');
+ assert(script.includes('zonedTime(history.verified_at_kst)'),'PERF_VERIFICATION_TIMEZONE_NOT_GATED');
+};
 const BASE='https://mauveplace.github.io/jjooni-control-tower/';
 const fetchText=async path=>{
  const u=BASE+path+(path.includes('?')?'&':'?')+'ct_live_smoke='+Date.now();
@@ -12,12 +18,30 @@ const fetchText=async path=>{
  return t;
 };
 (async()=>{
- const [index,js,css]=await Promise.all([
-  fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),fetchText('ct-reference-nav-history-v1.css?v=2')
- ]);
+ if(process.env.GITHUB_EVENT_NAME==='pull_request'){
+  // Pages has not deployed this PR. A local source contract is the truthful pre-merge check.
+  const localIndex=fs.readFileSync('index.html','utf8');
+  const localVerified=fs.readFileSync('ct-performance-history-v1.js','utf8');
+  assert(localIndex.includes(VERIFIED_SCRIPT),'PR_ENTRY_MISSING_VERSIONED_PERFORMANCE_SCRIPT');
+  guard(localVerified);
+  console.log('CT_PREDEPLOY_VERIFIED_HISTORY_ASSET=PASS');
+  return;
+ }
+ // Post-merge Pages deploy may race this workflow: retry bounded, no background polling.
+ let ready=false,index='',js='',css='',verified='';
+ for(let attempt=0;attempt<10;attempt++){
+  [index,js,css,verified]=await Promise.all([
+   fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
+   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT)
+  ]);
+  if(index.includes(VERIFIED_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')){ready=true;break}
+  if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
+ }
+ assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
+ guard(verified);
  assert(index.includes('ct-reference-nav-history-v1.js?v=2'),'PAGES_ENTRY_OLD_REFERENCE_SCRIPT');
  assert(index.includes('ct-human-v2.js?v=2'),'PAGES_ENTRY_MISSING_V2');
- assert(index.includes('ct-performance-history-v1.js?v=1'),'PAGES_ENTRY_MISSING_VERIFIED_HISTORY');
+ assert(index.includes(VERIFIED_SCRIPT),'PAGES_ENTRY_MISSING_VERIFIED_HISTORY');
  assert(js.includes('function overviewShortcut(report)'),'LIVE_JS_MISSING_OVERVIEW_LINK');
  assert(js.includes('그래프 보기 · 성과 탭'),'LIVE_JS_MISSING_PERFORMANCE_NAV');
  assert(js.includes("tab.click()"),'LIVE_JS_MISSING_REAL_TAB_ACTION');
@@ -27,8 +51,10 @@ const fetchText=async path=>{
  assert(css.includes('ctReferenceNavOverviewV1'),'LIVE_CSS_MISSING_OVERVIEW_CARD');
  assert(css.includes('@media(max-width:479px)'),'LIVE_CSS_MISSING_PHONE_LAYOUT');
  new Function(js);
+ new Function(verified);
  const expected={production_shell:true,reference_js_current:true,reference_css_current:true,
                    direct_performance_navigation:true,reference_no_data_fail_closed:true,
+                   verified_history_js_current:true,strict_nav_bridge_and_time:true,
                    approved_browser_decryption:'NOT_TESTED',private_nav_values_logged:false};
  console.log('CT_LIVE_PAGES_REFERENCE_NAV_DISCOVERY=PASS '+JSON.stringify(expected));
 })().catch(e=>{console.error('CT_LIVE_PAGES_REFERENCE_NAV_DISCOVERY=FAIL '+e.message);process.exit(1)});
