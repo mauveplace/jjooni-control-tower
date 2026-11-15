@@ -37,7 +37,7 @@ function inspect(){
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("tabs.style.setProperty('display','none','important')")&&human.includes("bottom.style.setProperty('display','none','important')"),
    'single-nav viewport arbiter missing');
- assert(legacyResponsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body nav.tabs'),
+ assert(legacyResponsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs'),
    'V2 mobile hide guard missing from competing responsive stylesheet');
  assert(legacyResponsive.includes('#ctMoreMenu'),'orphan legacy mobile popup needs suppression');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
