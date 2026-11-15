@@ -1,0 +1,73 @@
+'use strict';
+// Cross-surface, read-only UI/UX contract audit for independent JJOONI ↔ ROY review.
+// This is NOT an authenticated browser acceptance or investment-performance proof.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const ROOT=path.resolve(__dirname,'..');
+const read=name=>fs.readFileSync(path.join(ROOT,name),'utf8');
+const OBS_TABS=['overview','indices','official-macro','rates','fx','energy','sectors',
+ 'tripod','jjooni-tripod','regime','calendar','morning-brief','analysis-lab'];
+const OBS_LABELS=['오늘','시장','전략','일정','시황'];
+
+function inspect(){
+ const human=read('ct-human-v2.js'),humanCss=read('ct-human-v2.css');
+ const rootHtml=read('index.html'),reference=read('ct-reference-nav-history-v1.js');
+ const performance=read('ct-performance-history-v1.js');
+ const obsHtml=read('market-observatory/index.html');
+ const obsSource=read('market-observatory/observatory-nav-v2.js');
+ const obsNav=require(path.join(ROOT,'market-observatory/observatory-nav-v2.js'));
+ const sectors=JSON.parse(read('market-observatory/data/sector-rotation-brief.json'));
+
+ assert.deepEqual(obsNav.IA.map(x=>x.label),OBS_LABELS,'V2 5-group contract drift');
+ const flattened=obsNav.IA.flatMap(x=>x.tabs);
+ assert.equal(new Set(flattened).size,13,'duplicate or missing Observatory tabs');
+ assert.deepEqual([...flattened].sort(),[...OBS_TABS].sort(),'all old destinations must remain reachable');
+ for(const tab of OBS_TABS)assert(obsNav.groupOf(tab),'orphan Observatory destination '+tab);
+ assert.equal(obsNav.enabled('',null),true,'new visitors must default to V2');
+ assert.equal(obsNav.enabled('?ui=v1','v2'),false,'V1 rollback must override storage');
+ assert.equal(obsNav.enabled('?ui=v2','v1'),true,'V2 recovery must override storage');
+ assert(obsHtml.includes('observatory-nav-v2.js'),'actual Observatory shell missing V2 nav');
+ assert(obsSource.includes('body.navV2 #tabs{display:none!important}'),'V2 legacy menu hiding changed');
+ assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
+ assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
+
+ assert(rootHtml.includes('ct-human-v2.js?v=3'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
+ assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
+ assert(human.includes('const snapshotAligned='),'current/live snapshot mismatch not gated');
+ assert(human.includes('동기화 확인 대기'),'mismatch must be understandable to users');
+ assert(human.includes('M.aggregate(C.accounts,IDS)'),'four-account total source contract absent');
+ assert(human.includes("['overview','오늘'")&&human.includes("['accounts','계좌'"),'five-menu contract drift');
+ assert(humanCss.includes('safe-area-inset-bottom'),'Human safe area missing');
+ assert(humanCss.includes('min-height:52px'),'Human tap target protection missing');
+ assert(reference.includes('function overviewShortcut(report)'),'reference NAV not discoverable from Overview');
+ assert(reference.includes('그래프 보기 · 성과 탭'),'missing direct NAV graph link');
+ assert(reference.includes('REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE'),'reference NAV mislabeled as profit');
+ assert(performance.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'KRW bridge tolerance weakened');
+ assert(performance.includes('zonedTime(history.verified_at_kst)'),'untrusted history timestamp');
+ assert(performance.includes("history.status!=='VERIFIED'"),'unverified investment charts enabled');
+
+ assert(Array.isArray(sectors.groups),'sector board source missing');
+ const sectorCount=sectors.groups.reduce((sum,g)=>{
+  assert(Array.isArray(g.rows),'sector group missing rows');
+  assert.equal(g.rows.length,g.expected_count,'sector source group incomplete '+g.key);
+  return sum+g.rows.length;
+ },0);
+ assert.equal(sectorCount,34,'vertical 34-sector board incomplete');
+ assert(sectors.flow_evidence==='PRICE_PERFORMANCE_PROXY_ONLY_NOT_NET_INFLOWS',
+   'performance proxy must not be called actual money inflow');
+ return Object.freeze({
+  state:'SOURCE_CONTRACT_PASS',
+  human_mobile_destinations:5,
+  observatory_groups:obsNav.IA.length,
+  observatory_legacy_destinations:flattened.length,
+  sector_rows:sectorCount,
+  reference_nav_quality:'REFERENCE_ONLY',
+  verified_pnl_history:'EVIDENCE_REQUIRED_NOT_ASSERTED',
+  authenticated_private_browser:'UNVERIFIED',
+  actual_pages_origin:'SEPARATE_LIVE_SMOKE_REQUIRED'
+ });
+}
+if(require.main===module)console.log('CT_OBS_V2_CROSS_UI_AUDIT '+JSON.stringify(inspect()));
+module.exports={inspect};
