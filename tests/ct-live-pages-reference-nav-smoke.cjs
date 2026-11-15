@@ -4,8 +4,8 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
-const HUMAN_SCRIPT='ct-human-v2.js?v=3';
-const humanGuard=script=>assert(script.includes('const snapshotAligned='),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');
+const HUMAN_SCRIPT='ct-human-v2.js?v=4';
+const humanGuard=script=>assert(script.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');
 const guard=script=>{
  assert(script.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'PERF_BRIDGE_TOLERANCE_NOT_FIXED');
  assert(script.includes('zonedTime(history.verified_at_kst)'),'PERF_VERIFICATION_TIMEZONE_NOT_GATED');
@@ -38,7 +38,7 @@ const fetchText=async path=>{
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
    fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT)
   ]);
-  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=')){ready=true;break}
+  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
  }
  assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
