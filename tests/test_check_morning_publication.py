@@ -57,6 +57,18 @@ class MorningPublication(unittest.TestCase):
         self.assertEqual(decide(now, {'report_date_kst': '2026-11-14'},
                                 {'us_completed_session_date': '2026-11-13'}), [])
 
+    def test_watchdog_schedule_and_issue_recovery_contract(self):
+        root = pathlib.Path(__file__).resolve().parents[1]
+        workflow = (root / '.github/workflows/morning-publication-watchdog.yml').read_text(encoding='utf-8')
+        self.assertIn("cron: '7,37 22 * * 1-5'", workflow)
+        self.assertIn("cron: '7 23 * * 1-5'", workflow)
+        self.assertNotIn("cron: '7,37 22 * * 1-6'", workflow)
+        self.assertIn('github.event.schedule == \'7 23 * * 1-5\'', workflow)
+        self.assertIn('MORNING_PUBLICATION=FAIL BRIEF_MISSING', workflow)
+        self.assertIn('gh issue list --repo', workflow)
+        self.assertIn('gh issue create --repo', workflow)
+        self.assertIn('MORNING_BRIEF_INCIDENT=ALREADY_TRACKED', workflow)
+
     def test_monday_brief_not_checked(self):
         now = datetime(2026, 11, 16, 7, 7, tzinfo=KST)  # Monday: separate edition
         p = decide(now, {'report_date_kst': '2026-11-15'}, {'us_completed_session_date': '2026-11-13'})
