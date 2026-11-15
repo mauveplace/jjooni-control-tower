@@ -29,6 +29,23 @@ test('unverified NDX: top alert, NDX row is ? 검증 보류', () => {
   assert.equal(ndx.tag, '? 검증 보류');
 });
 
+test('market compare view-model retains distinct 1D/1W/1M and absent data', () => {
+  const g = structuredClone(glance);
+  g.groups[0].items[0].m1_pct = 4.25;
+  g.groups[0].items[0].m1_base_date = '2026-10-11';
+  g.groups[2].items[0].m1_bp = -12.5;
+  const vm = viewModel({ glance: g, brief, calendar }, NOW);
+  const ndx = vm.groups[0].rows[0], us2y = vm.groups[2].rows[0];
+  assert.equal(ndx.d1, '+2.28%');
+  assert.equal(ndx.w1, '−0.22%');
+  assert.equal(ndx.m1, '+4.25%');
+  assert.equal(ndx.m1n, 4.25);
+  assert.equal(ndx.m1BaseDate, '2026-10-11');
+  assert.equal(us2y.m1, '−12.5bp');
+  assert.equal(vm.groups[1].rows[0].m1, '—');
+  assert.equal(vm.groups[1].rows[0].m1n, null);
+});
+
 test('TRI-POD: breached −9% shown as exceeded, not as a distance', () => {
   const vm = viewModel({ glance, brief, calendar }, NOW);
   const dd = vm.tripod.conds[0];
