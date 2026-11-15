@@ -35,11 +35,12 @@ function inspect(){
 
  assert(rootHtml.includes('ct-human-v2.js?v=6'),'Human V2 cache version drift');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
- assert(human.includes('function syncNavigationOwner()')&&human.includes("tabs.style.setProperty('display','none','important')")&&human.includes("bottom.style.setProperty('display','none','important')"),
+ assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');
  assert(legacyResponsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs'),
    'V2 mobile hide guard missing from competing responsive stylesheet');
  assert(legacyResponsive.includes('#ctMoreMenu'),'orphan legacy mobile popup needs suppression');
+ assert(read('trade-review-loader.js').includes('humanV2.enforceNavigation()'),'legacy owner must delegate V2 visibility after tab mutations');
  assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
