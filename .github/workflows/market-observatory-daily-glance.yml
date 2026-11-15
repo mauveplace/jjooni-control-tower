@@ -9,6 +9,10 @@ on:
   push:
     branches: [main]
     paths:
+      # Direct source commit trigger backs up workflow_run. Otherwise a
+      # same-session Pulse republish can advance the canonical clock without
+      # refreshing Glance, blocking the next editorial publication.
+      - market-observatory/data/daily-market-pulse.json
       - market-observatory/data/morning-brief/latest.json
       - tools/build_daily_glance.py
       - .github/workflows/market-observatory-daily-glance.yml
