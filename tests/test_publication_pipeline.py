@@ -27,7 +27,7 @@ class PublicationPipelineTest(unittest.TestCase):
     def test_daily_consumer_closes_market_group_but_crypto_remains_independent(self):
         health = {pub.DATA + 'data-audit.json', pub.DATA + 'freshness-status.json'}
         for consumer in pub.MARKET_BUNDLE[1:]:
-            self.assertEqual(set(pub.publication_paths([consumer])), set(pub.MARKET_BUNDLE) | health)
+            self.assertEqual(set(pub.publication_paths([consumer])), set(pub.MARKET_BUNDLE) | health | {pub.DATA + 'daily-glance.json'})
         self.assertEqual(set(pub.publication_paths([pub.MARKET_BUNDLE[0]])),
                          {pub.MARKET_BUNDLE[0]} | health)
 
