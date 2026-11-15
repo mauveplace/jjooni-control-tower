@@ -1,0 +1,55 @@
+/* Reference NAV is a different, lower-trust dataset from reconciled investment P&L. */
+html[data-ct-human-ui="v2"] #ctReferenceNavHistoryV1{
+  min-width:0;margin:16px 0;padding:16px;background:#fff;border:1px solid #d6e4ef;
+  border-radius:16px;color:#20334c;box-shadow:0 2px 14px #142b4408
+}
+html[data-ct-human-ui="v2"] .ctRefNavHeader{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap
+}
+html[data-ct-human-ui="v2"] .ctRefNavHeader h2{
+  margin:0;font-size:19px;font-weight:850;line-height:1.4
+}
+html[data-ct-human-ui="v2"] .ctRefNavTag{
+  display:inline-block;border:1px solid #c6d8ee;border-radius:40px;
+  padding:4px 9px;font-size:11px;font-weight:800;color:#345a86;background:#f3f7fc
+}
+html[data-ct-human-ui="v2"] .ctRefNavHeader p{
+  width:100%;margin:0 0 9px;font-size:12px;color:#556a81;line-height:1.6
+}
+html[data-ct-human-ui="v2"] .ctRefNavMeta{
+  font-size:12px;line-height:1.5;color:#5b6c80;margin:8px 0
+}
+html[data-ct-human-ui="v2"] #ctReferenceNavHistoryV1 svg{
+  width:100%;display:block;max-height:220px;overflow:visible
+}
+html[data-ct-human-ui="v2"] .ctRefNavValues{
+  margin:7px 0 0;font-size:14px;font-weight:800;overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] .ctRefNavDisclaimer{
+  margin:11px 0;padding:12px;background:#f5f8fc;border-radius:10px;
+  border-left:3px solid #608cbb;color:#4e647d;line-height:1.55;font-size:12px
+}
+html[data-ct-human-ui="v2"] .ctRefNavWaiting{
+  margin:12px 0 0;padding:16px;background:#f5f7fa;border-radius:10px;
+  border:1px dashed #bdcfe0;color:#506680;font-size:13px;line-height:1.5
+}
+html[data-ct-human-ui="v2"] .ctRefNavDetails{border-top:1px solid #dbe5ef;padding-top:7px}
+html[data-ct-human-ui="v2"] .ctRefNavDetails summary{
+  min-height:44px;display:flex;align-items:center;cursor:pointer;
+  font-weight:750;font-size:13px;color:#1b659f
+}
+html[data-ct-human-ui="v2"] .ctRefNavScroll{width:100%;overflow-x:auto}
+html[data-ct-human-ui="v2"] .ctRefNavScroll table{
+  width:100%;min-width:430px;border-collapse:collapse;font-size:12px
+}
+html[data-ct-human-ui="v2"] .ctRefNavScroll :is(th,td){
+  text-align:left;border-bottom:1px solid #e4eaf2;padding:8px 7px;
+  font-variant-numeric:tabular-nums
+}
+html[data-ct-human-ui="v2"] .ctRefNavScroll :is(th,td):nth-child(2){text-align:right}
+html[data-ct-human-ui="v2"] .ctRefNavScroll :is(th,td):nth-child(3){text-align:right}
+@media(max-width:767px){
+  html[data-ct-human-ui="v2"] #ctReferenceNavHistoryV1{padding:12px;margin:12px 0}
+  html[data-ct-human-ui="v2"] .ctRefNavHeader h2{font-size:17px}
+  html[data-ct-human-ui="v2"] .ctRefNavValues{font-size:13px}
+}
