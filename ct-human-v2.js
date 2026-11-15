@@ -98,33 +98,37 @@ function syncNavigationOwner(){
  if(!tabs||!bottom)return;
  const mobile=window.matchMedia
   ?window.matchMedia('(max-width: 767px)').matches:window.innerWidth<768;
+ // The legacy loader observes style mutations; keep ownership changes
+ // idempotent or both observers can schedule a re-render loop.
+ const force=(node,display)=>{
+  if(node.style.getPropertyValue('display')!==display||node.style.getPropertyPriority('display')!=='important')
+   node.style.setProperty('display',display,'important');
+ };
+ const clear=node=>{if(node.style.getPropertyValue('display'))node.style.removeProperty('display')};
+ const hideAria=node=>{if(node.getAttribute('aria-hidden')!=='true')node.setAttribute('aria-hidden','true')};
+ const showAria=node=>{if(node.hasAttribute('aria-hidden'))node.removeAttribute('aria-hidden')};
  if(mobile){
   // Inline !important overrides historical .tabs !important rules, including
   // those injected after ct-human-v2.css. Hidden tab buttons stay clickable
   // programmatically, preserving legacy panel routing without duplicate UI.
-  tabs.style.setProperty('display','none','important');
-  tabs.setAttribute('aria-hidden','true');
-  bottom.style.setProperty('display','grid','important');
-  bottom.removeAttribute('aria-hidden');
+  force(tabs,'none');hideAria(tabs);
+  force(bottom,'grid');showAria(bottom);
   if(legacyMore){
-   legacyMore.classList.remove('open');
-   legacyMore.style.setProperty('display','none','important');
-   legacyMore.setAttribute('aria-hidden','true');
+   if(legacyMore.classList.contains('open'))legacyMore.classList.remove('open');
+   force(legacyMore,'none');hideAria(legacyMore);
   }
  }else{
-  tabs.style.removeProperty('display');
-  tabs.removeAttribute('aria-hidden');
-  bottom.style.setProperty('display','none','important');
-  bottom.setAttribute('aria-hidden','true');
+  clear(tabs);showAria(tabs);
+  force(bottom,'none');hideAria(bottom);
   if(legacyMore){
-   legacyMore.classList.remove('open');
-   legacyMore.style.removeProperty('display');
-   legacyMore.removeAttribute('aria-hidden');
+   if(legacyMore.classList.contains('open'))legacyMore.classList.remove('open');
+   clear(legacyMore);showAria(legacyMore);
   }
   closeMenu();
  }
  window.__JJOONI_CT_HUMAN_V2.navigation=mobile?'MOBILE_BOTTOM_5':'DESKTOP_TOP_ONLY';
 }
+window.__JJOONI_CT_HUMAN_V2.enforceNavigation=syncNavigationOwner;
 function ensureNav(){
  if(!enabled)return;
  const tabs=qs('.tabs');if(!tabs)return;
