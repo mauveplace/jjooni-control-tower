@@ -11,7 +11,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.route('https://reference.fixture.test/**',route=>{
-     if(route.request().url.endsWith('.css?v=1'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
+     if(route.request().url().endsWith('.css?v=1'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
      return route.fulfill({contentType:'text/html',body:fixture});
    });
    await page.goto('https://reference.fixture.test/?ctui=v2');
