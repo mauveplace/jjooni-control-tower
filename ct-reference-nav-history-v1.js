@@ -6,7 +6,7 @@ const QUALITY='REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE';
 const ACCOUNTS=['TOSS','ISA','PENSION','IRP'];
 const NS='http://www.w3.org/2000/svg';
 const money=v=>Math.round(v).toLocaleString('ko-KR')+'원';
-const dateOk=v=>typeof v==='string'&&/^20\d\d-\d\d-\d\d$/.test(v)&&new Date(v+'T00:00:00Z').toISOString().slice(0,10)===v;
+const dateOk=v=>{if(typeof v!=='string'||!/^20\d\d-\d\d-\d\d$/.test(v))return false;const d=new Date(v+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===v;};
 const timeOk=v=>typeof v==='string'&&/(Z|[+-]\d\d:\d\d)$/.test(v)&&Number.isFinite(Date.parse(v));
 const failure=(reason)=>({ok:false,reason,rows:[]});
 function audit(history,{live={},canonical={},now=Date.now()}={}){
