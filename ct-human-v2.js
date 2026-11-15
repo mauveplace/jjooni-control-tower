@@ -153,7 +153,7 @@ function ensureQuickView(){
  const m=M.aggregate(C.accounts,IDS);
  // Both IDs are available in canonical/live production feeds. When they
  // disagree, do not show numbers from different account snapshots together.
- const snapshotAligned=!(C.snapshot_id&&L?.snapshot_id)||String(C.snapshot_id)===String(L.snapshot_id);
+ const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
  let box=qs('#ctHumanQuickV2',panel);
  if(!box){
   box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','오늘의 투자 변화');
