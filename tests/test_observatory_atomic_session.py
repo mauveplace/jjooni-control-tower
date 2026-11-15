@@ -15,10 +15,11 @@ import build_public_market_daily as public
 import build_daily_market_pulse as pulse
 import build_daily_glance as glance
 from observatory_history_views import encoded
+from observatory_session import expected_completed_session
 
 
 def observation():
-    end = datetime.now(public.KST).date() - timedelta(days=1)
+    end = datetime.fromisoformat(expected_completed_session()).date()
     dates = [(end - timedelta(days=n)).isoformat() for n in range(399, -1, -1)]
     series = {k: [{'date': d, 'value': (20000 + i if k == 'NASDAQ100' else 20.0)}
                   for i, d in enumerate(dates)] for k in ('NASDAQ100', 'SP500', 'VIX', 'DXY', 'USDKRW', 'US10Y_OFFICIAL', 'FEAR_GREED')}
