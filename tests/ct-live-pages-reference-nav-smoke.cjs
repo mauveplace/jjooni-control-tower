@@ -46,7 +46,7 @@ const fetchText=async path=>{
  for(let attempt=0;attempt<10;attempt++){
   [index,js,css,verified,human,responsive,legacy]=await Promise.all([
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
-   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=2-single-navigation')
+   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=14.38-single-navigation')
   ]);
   if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')&&legacy.includes('humanV2.enforceNavigation()')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
