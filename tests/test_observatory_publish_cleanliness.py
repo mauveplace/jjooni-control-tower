@@ -23,6 +23,46 @@ class ObservatoryPublisherCleanlinessTest(unittest.TestCase):
         self.assertTrue({source, audit, status, 'public-market-daily.json',
                          'market-observatory/data/daily-market-pulse.json'}.issubset(set(bundle)))
 
+    def test_completed_market_source_and_glance_are_one_atomic_publication(self):
+        expected=pub.DATA + 'daily-glance.json'
+        for consumer in ('public-market-daily.json',pub.DATA+'daily-market-pulse.json'):
+            paths=pub.publication_paths([consumer])
+            self.assertIn(expected,paths,'dependent Glance absent from canonical commit')
+            self.assertTrue(set(pub.MARKET_BUNDLE).issubset(paths))
+            self.assertIn(pub.DATA+'data-audit.json',paths)
+            self.assertIn(pub.DATA+'freshness-status.json',paths)
+        # Independent BTC/ETH source-only refresh keeps its preexisting contract.
+        self.assertNotIn(expected,pub.publication_paths([pub.DATA+'observatory.json']))
+
+    def test_atomic_market_chain_rejects_stale_card_and_wrong_source(self):
+        market={'us_completed_session_date':'2026-11-13',
+                'generated_kst':'2026-11-14T21:23:56+09:00'}
+        pulse={'market_date_us':'2026-11-13','snapshot_status':'FINAL',
+               'generated_kst':'2026-11-14T21:24:38+09:00'}
+        sidecar={'tripod_signal':{'date':'2026-11-13'}}
+        card={'us_session':'2026-11-13','source_generated_kst':market['generated_kst'],
+              'generated_kst':'2026-11-14T21:24:39+09:00',
+              'consistency':{'status':'OK'},'no_trade':True,'read_only':True}
+        pub.validate_market_bundle(market,pulse,sidecar,card)
+        # This exact class caused the actual 11/15 editorial BLOCKED.
+        stale=dict(card,generated_kst='2026-11-14T12:07:34+09:00')
+        with self.assertRaisesRegex(RuntimeError,'clock_order'):
+            pub.validate_market_bundle(market,pulse,sidecar,stale)
+        wrong=dict(card,source_generated_kst='2026-11-14T12:07:34+09:00')
+        with self.assertRaisesRegex(RuntimeError,'session_or_source_mismatch'):
+            pub.validate_market_bundle(market,pulse,sidecar,wrong)
+        mismatched=dict(pulse,market_date_us='2026-11-12')
+        with self.assertRaisesRegex(RuntimeError,'session_or_source_mismatch'):
+            pub.validate_market_bundle(market,mismatched,sidecar,card)
+        pending=dict(pulse,snapshot_status='PROVISIONAL')
+        with self.assertRaisesRegex(RuntimeError,'session_or_source_mismatch'):
+            pub.validate_market_bundle(market,pending,sidecar,card)
+        with self.assertRaisesRegex(RuntimeError,'naive_clock'):
+            pub.validate_market_bundle(dict(market,generated_kst='2026-11-14T21:23:56'),
+                                       pulse,sidecar,dict(card,source_generated_kst='2026-11-14T21:23:56'))
+        with self.assertRaisesRegex(RuntimeError,'session_or_source_mismatch'):
+            pub.validate_market_bundle(market,pulse,sidecar,dict(card,no_trade=False))
+
     def test_sector_source_publishes_atomic_json_and_markdown(self):
         source = pub.DATA + 'sector-etf.json'
         self.assertEqual(pub.publication_paths([source]), [

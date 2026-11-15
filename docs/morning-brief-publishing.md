@@ -84,3 +84,12 @@
 - **수정:** 공개 미국장 시황 워치독은 KST 화~토 07:07/07:37/08:07만 실행. 미국 현지 직전 날짜가 NYSE 실제 거래일일 때만 오늘 신규 보고서를 요구한다. 미국장 휴장일은 제외, 조기 폐장일은 정상 거래일로 확인. 월요일 별도 투자보드는 발행 의무 판정 대상에서 제외한다.
 - **한 건 복구 접수:** 마지막 08:07 감시에서도 실제 BRIEF_MISSING이면 동일 YYYY-MM-DD에 대해 공개 GitHub 조치 이슈 한 건을 만들고 원본 Run 링크만 기록한다. 동일 날짜 중복 생성 금지. 감시 도구는 기사·종가를 추측하여 자동으로 생성하거나 게시하지 않는다. 원천 품질, 8개 편집 섹션, 비밀정보 금지 및 원자적 PR/CI/Pages 경로를 통과해야만 발행된다.
 - **테스트:** tests/test_check_morning_publication.py가 실제 11/13 미게시, 11/15 오탐, Thanksgiving 휴장, 익일 NYSE 조기 폐장, 월요일 비대상을 검증한다. GitHub 워치독 이슈 접수는 실제 시황 발행 성공의 증거가 아니다.
+
+
+## 2026-11-16 P0 — 원천 3단계 게시 경합 구조 개선
+
+- **확인된 원인:** 2026-11-15 Work 실행은 Observatory(최신), Daily Pulse(최신), Daily Glance(과거 시각)의 원천 생성 순서 불일치로 `CANONICAL_NOT_READY`를 보고하며 공개 시황 발행을 차단했다. 개별 워크플로 성공과 Work 게시 완료는 별개의 사건.
+- **구조 변경:** `tools/publish_observatory_data.py`에서 canonical market consumer(`daily-market-pulse.json` 또는 `public-market-daily.json`) 게시를 요청하면 **동일 atomic git commit**으로 `observatory.json`, `daily-market-pulse.json`, `public-market-daily.json`, `daily-glance.json`, freshness/audit를 묶어 게시한다. 리베이스마다 현재 소스에서 Pulse, TRI-POD, Glance를 다시 만든다. Glance는 별도의 workflow_run 또는 GitHub bot push 후속 실행을 기다리지 않는다.
+- **게시 전 fail-closed 조건:** 원천 미국 완료 세션, Pulse 세션, 공개 TRI-POD 세션, Glance 세션이 모두 같아야 한다. Glance의 source_generated_kst는 그 커밋의 Observatory generated_kst와 동일해야 한다. source→pulse→glance generated clocks는 유효한 timezone-aware ISO이고 그 순서대로야 한다. Pulse FINAL, Glance read_only/no_trade/consistency OK만 허용. 조건 위반 시 **부분 공개 없이** 실패한다.
+- **분리되는 경로:** 개별 BTC/ETH quote-only `observatory.json` 쓰기는 기존 경량 source+audit+freshness 경로를 그대로 사용한다. 뒤늦은 quote-only refresh가 Observatory 자체 generated_kst를 바꾸면 전체 bundle producer 다음 실행 전에 editorial mismatch를 겪을 가능성은 별도로 감시한다. 시황 작성자는 직접 old/new Glance를 섞어 검증됐다고 표시하지 않는다.
+- **구분해야 할 미해결:** 이 변경은 원천 게시 단절 경로 하나를 제거하는 것이지, 외부 Work 자동화가 실제 8절 보고서를 작성·PR 제출·병합·Pages 게시한다는 최종 E2E 증빙이 아니다. 2026-11-13 미게시 사건은 별도 #492에서 실제 실행 로그로 추적한다. 새로운 미국 거래세션 첫 성공 사례로 atomic bundle+Work 게시 완료를 확인하기 전 전체 근본 원인 100% 해결로 보고하지 않는다.
