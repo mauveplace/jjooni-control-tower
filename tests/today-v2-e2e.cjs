@@ -41,7 +41,10 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     assert.ok(await page.locator('.todayV2 .tV2NoTrade').isVisible());
     assert.equal(await page.locator('.todayV2 .tV2Cond').count(), vm.tripod.conds.length);
     if (glance.brief_check?.official_status !== 'VERIFIED') {
-      assert.ok(await page.locator('.todayV2 .tV2Alert').isVisible(), 'unverified NDX raises the alert band');
+      const ndxNotice = vm.alerts.find(a => a.title === 'NDX 공식 종가 미검증');
+      assert.ok(ndxNotice, 'unverified NDX has an explicit status notice');
+      const bannerClass = ndxNotice.level === 'HIGH' ? '.tV2Alert' : '.tV2Notice';
+      assert.ok(await page.locator('.todayV2 ' + bannerClass).isVisible(), 'NDX source status is visible with appropriate severity');
       const row = vm.groups.flatMap(g => g.rows).find(x => x.key === 'NASDAQ100');
       assert.ok(row && ['ref', 'hold', 'delay'].includes(row.state), 'unverified NDX is never official');
       assert.ok((await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').getAttribute('title')).startsWith(row.tag + ' · '));
