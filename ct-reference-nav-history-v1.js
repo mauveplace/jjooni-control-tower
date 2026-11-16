@@ -79,12 +79,12 @@ function overviewShortcut(report){
  let card=document.querySelector('#ctReferenceNavOverviewV1');
  if(!card){
   card=document.createElement('section');card.id='ctReferenceNavOverviewV1';
-  card.setAttribute('aria-label','참고용 순자산 그래프 위치 안내');
-  const title=document.createElement('strong');title.textContent='참고용 순자산 추이';
+  card.setAttribute('aria-label','4계좌 관측 순자산 그래프');
+  const title=document.createElement('strong');title.textContent='4계좌 순자산 추이 · 참고용';
   title.className='ctRefNavOverviewTitle';
   const info=document.createElement('span');info.className='ctRefNavOverviewInfo';
   const button=document.createElement('button');button.type='button';
-  button.textContent='그래프 보기 · 성과 탭';button.className='ctRefNavOverviewOpen';
+  button.textContent='상세 그래프 · 성과 탭';button.className='ctRefNavOverviewOpen';
   button.addEventListener('click',()=>{
    const tab=document.querySelector('.tabs .tab[data-tab="compare"]');
    if(!tab)return;
@@ -94,7 +94,9 @@ function overviewShortcut(report){
     if(section&&section.getClientRects().length)section.scrollIntoView({block:'start',behavior:'smooth'});
    },180);
   });
-  card.append(title,info,button);
+  const plot=document.createElement('div');plot.className='ctRefNavOverviewChart';
+  plot.setAttribute('aria-label','검증된 기준시각의 관측 NAV만 표시하고 누락된 날짜는 연결하지 않는 그래프');
+  card.append(title,info,button,plot);
  }
  const anchor=document.querySelector('#ctHumanQuickV2')||overview.querySelector('.ctOvHero');
  if(anchor&&anchor.parentElement===overview){
@@ -102,11 +104,15 @@ function overviewShortcut(report){
  }else if(card.parentElement!==overview)overview.prepend(card);
  const info=card.querySelector('.ctRefNavOverviewInfo');
  if(report.ok){
-  info.textContent='수집된 NAV '+report.rows.length+'일 · 투자손익 아님'+(report.stale?' · 최근 관측 갱신 확인 필요':'');
+  info.textContent='실제 관측 '+report.rows.length+'일 · 투자수익률·손익 아님'+(report.gaps?' · 관측 공백 '+report.gaps+'일':'')+(report.stale?' · 최신 관측 지연':'');
   card.dataset.ctReference='REFERENCE_ONLY';
+  const plot=card.querySelector('.ctRefNavOverviewChart');
+  if(plot){plot.replaceChildren(makeChart(report.rows));plot.hidden=false}
  }else{
-  info.textContent='참고 NAV 검증 대기 · 성과 탭에서 상태 확인';
+  info.textContent='관측 NAV 그래프 표시 불가 · '+report.reason;
   card.dataset.ctReference='WAITING';
+  const plot=card.querySelector('.ctRefNavOverviewChart');
+  if(plot){plot.replaceChildren();plot.hidden=true}
  }
 }
 function render(){
