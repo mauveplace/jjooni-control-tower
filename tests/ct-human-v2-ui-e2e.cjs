@@ -192,7 +192,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     });
     await page.addScriptTag({content:read('tripod-daily-freshness-v35.js')});
     await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='VERIFIED');
-    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \\+ QLD 50%/);
+    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \+ QLD 50%/);
     assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/실제 보유·주문 아님/);
     assert.equal(await page.locator('#ctHumanTripodHomeV1').getByRole('button',{name:'전략 상세'}).count(),1);
     assert.equal(await page.evaluate(()=>window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted),true);
