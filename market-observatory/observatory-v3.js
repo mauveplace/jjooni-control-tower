@@ -128,7 +128,7 @@ function mount(){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
  const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261117-v3a';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
- shell.addEventListener('click',e=>{
+ document.addEventListener('click',e=>{
   const btn=e.target.closest('button[data-ov3-tab]');
   if(!btn)return;
   if(btn.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
@@ -148,7 +148,9 @@ function mount(){
   if(changes.some(c=>[...c.addedNodes].some(x=>x.nodeType===1&&
    (x.classList?.contains('todayV2')||x.querySelector?.('.todayV2')))))draw(current);
  });
- observer.observe(shell,{childList:true,subtree:true});
+ // Today V2 lives before #tabs as a body child, not inside main.wrap.
+ // Watching only main.wrap misses refresh-created Today and its shortcuts.
+ observer.observe(document.body,{childList:true,subtree:true});
  update(true);
  const tabs=document.getElementById('tabs');
  if(tabs)tabs.addEventListener('click',e=>{
