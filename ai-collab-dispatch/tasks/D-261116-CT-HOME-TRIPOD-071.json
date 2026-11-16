@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261116-CT-HOME-TRIPOD-071",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "User approved original decision-first CT Home A layout and explicitly requested TRI-POD summary added, ROY's judgment and proceed. Review updated docs/ct-home-approved-a-plus-tripod-20261116.md against previous ROY review issue #506 comment 6909198528. Decide whether this is a trustworthy, efficient layout and where source/risk pitfalls remain before JJOONI implementation.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ct_home_ux_tripod_refinement_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User 2026-11-16 17:34 KST: '좋아 저기에 트라이팟만 추가해서 넣어줘 로이판단받고 진행해'. Owner approves A+TRI-POD direction and code after positive ROY judgment + mandatory tests; no authorization for orders/secret disclosure.",
+  "acceptance": [
+    "Read amended A+TRI-POD design and actual source daily signal module, compare with previous ROY criticisms, do not simply copy last opinion.",
+    "Determine whether trustworthy signal event last.trusted is sufficient to show regime/target/action on the Home, verify selected market date and never mistake intended target for actual traded position.",
+    "Challenge NAV duplication, 4-account account scope, chart min/max distortion and first-screen mobile information density; propose exact minimal UX revisions for A+TRI-POD.",
+    "Report PASS / NEEDS_CHANGES / BLOCKED with source anchors, and implementation safeguards. No private authenticated shell claims.",
+    "Post exactly one review on PR #505 with ROY_CT_HOME_TRIPOD_REVIEW=PASS|NEEDS_CHANGES|BLOCKED and reviewed_head full SHA; owner already approved concept, but implementation PR has independent code/CI and production gates."
+  ],
+  "forbidden": [
+    "No trading, private account data, paid resources, unapproved code/merge/deployment.",
+    "No duplicate review for already reviewed HEAD/task",
+    "Do not claim source review proves actual encrypted UI."
+  ],
+  "coordination_notes": "This is a materially new requirement after original #506 review and a new current PR HEAD. One follow-up via issue-opened routine, not a comment pretending to trigger Claude."
+}
