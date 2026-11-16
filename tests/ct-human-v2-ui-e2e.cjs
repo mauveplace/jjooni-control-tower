@@ -33,6 +33,9 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    });
    await page.addScriptTag({content:read('ct-human-v2.js')});
    await page.waitForSelector('#ctHumanQuickV2');
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/당일 투자손익/,'daily investment P&L is labelled independently of flows');
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/순입출금/,'external flows stay visible as a distinct concept');
+   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2NavHero').innerText(),/4계좌 순자산/);
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'+₩100');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric small').first().innerText(),'동일 기간 4계좌 · 증권사 실측');
@@ -45,6 +48,19 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await page.locator('#ctHumanTripodHomeV1').getAttribute('data-ct-tripod-trust'),'BLOCKED');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2NavHero strong').innerText(),'₩4,000');
    assert.equal(await page.locator('#panel-overview .ctOvHero').isVisible(),false,'no duplicated legacy Hero in V2');
+   if(width<=479){
+    const row=await driverRows.first().evaluate(e=>{
+     const name=e.querySelector('.ctHumanV2DriverLabel').getBoundingClientRect();
+     const amount=e.querySelector('strong').getBoundingClientRect();
+     const track=e.querySelector('.ctHumanV2DriverTrack').getBoundingClientRect();
+     return {nameY:name.y,amountY:amount.y,trackY:track.y,width:e.getBoundingClientRect().width};
+    });
+    assert(row.trackY>row.nameY+10,'mobile account NAV bar should have a dedicated line: '+JSON.stringify(row));
+    assert(Math.abs(row.nameY-row.amountY)<20,'mobile account name and NAV should share a readable first line');
+    assert.equal(await page.locator('#ctHumanTripodHomeV1 .ctHumanV2TripodHead button').count(),1,'single in-card route, not another tab bar');
+    const x=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,inner:innerWidth}));
+    assert(x.scroll<=x.inner+1,'no horizontal scroll on compact phone: '+JSON.stringify(x));
+   }
    if(width>=1080)assert.equal(await page.locator('#ctHumanQuickV2').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2,'desktop has two-column concise insight');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
@@ -193,6 +209,9 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     await page.addScriptTag({content:read('tripod-daily-freshness-v35.js')});
     await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='VERIFIED');
     assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \+ QLD 50%/);
+    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/신호 판단 · 유지 · 신규 주문 없음/);
+    const hero=await page.locator('#ctHumanTripodHomeV1').boundingBox();
+    assert(hero&&hero.y<800,'TRI-POD decision must appear above bottom navigation without multi-screen scrolling');
     assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/실제 보유·주문 아님/);
     assert.equal(await page.locator('#ctHumanTripodHomeV1').getByRole('button',{name:'전략 상세'}).count(),1);
     assert.equal(await page.evaluate(()=>window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted),true);
