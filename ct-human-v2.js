@@ -190,7 +190,7 @@ function homeTripodCard(tp){
  const card=document.createElement('section');card.id='ctHumanTripodHomeV1';card.className='ctHumanV2Tripod';
  card.setAttribute('aria-label','TRI-POD 전략 요약');
  const header=document.createElement('div');header.className='ctHumanV2TripodHead';
- const title=document.createElement('strong');title.textContent='TRI-POD · 전략 요약';
+ const title=document.createElement('strong');title.textContent='TRI-POD · 최근 전략 신호';
  const link=document.createElement('button');link.type='button';link.dataset.ctOpen='tripod';link.textContent='전략 상세';
  header.append(title,link);card.append(header);
  const date=String(tp?.date||'');
@@ -208,13 +208,15 @@ function homeTripodCard(tp){
  }
  card.dataset.ctTripodTrust='VERIFIED';
  const regime=String(tp.regime||'').trim(),target=String(tp.target||'').trim();
- value.textContent=(regime||'레짐 확인 필요')+' · '+(target||'목표비중 확인 필요');
- const action=tp.action==='HOLD_NO_TRADE'?'신호상 유지 · 주문 없음':String(tp.action||'조치 확인 필요');
- status.textContent='기준 '+tp.date+' 완료 일봉 · '+action+' · 전략 목표(실제 보유·주문 아님)';
- card.append(value,status);
+ value.textContent='목표 구성 · '+(target||'목표비중 확인 필요');
+ const action=tp.action==='HOLD_NO_TRADE'?'유지 · 신규 주문 없음':String(tp.action||'조치 확인 필요');
+ const decision=document.createElement('p');decision.className='ctHumanV2TripodDecision';
+ decision.textContent='신호 판단 · '+action;
+ status.textContent=regime+' 레짐 · 기준 '+tp.date+' 완료 일봉 · 전략 목표(실제 보유·주문 아님)';
+ card.append(decision,value,status);
  const cells=[];
  const fmt=(v)=>typeof v==='number'&&Number.isFinite(v)?(v>=0?'+':'')+v.toFixed(2)+'%':null;
- if(fmt(tp.ma250_gap_pct)!=null)cells.push(['NDX / MA250',fmt(tp.ma250_gap_pct)]);
+ if(fmt(tp.ma250_gap_pct)!=null)cells.push(['NDX/MA250 괴리',fmt(tp.ma250_gap_pct)]);
  if(typeof tp.vix10==='number'&&Number.isFinite(tp.vix10))cells.push(['VIX 10일 평균',tp.vix10.toFixed(2)]);
  if(fmt(tp.drawdown_52w_pct)!=null)cells.push(['52주 고점 대비',fmt(tp.drawdown_52w_pct)]);
  if(cells.length){
@@ -226,7 +228,7 @@ function homeTripodCard(tp){
   card.append(metrics);
  }
  const foot=document.createElement('small');foot.className='ctHumanV2TripodFoot';
- foot.textContent='Toss 계좌 내 전략 · 총자산 중복 합산 없음 · 관찰용(자동주문 없음)';
+ foot.textContent='Toss 내 전략 · 총자산 중복합산 없음 · 자동주문 없음';
  card.append(foot);return card;
 }
 function ensureQuickView(){
@@ -242,7 +244,7 @@ function ensureQuickView(){
  const snapshotAligned=isFresh&&Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
  let box=qs('#ctHumanQuickV2',panel);
  if(!box){
-  box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','오늘의 투자 변화');
+  box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','내 투자자산 및 TRI-POD 전략 요약');
   const hero=qs('.ctOvHero',panel);
   if(hero)hero.insertAdjacentElement('beforebegin',box);else panel.prepend(box);
   box.addEventListener('click',e=>{
@@ -271,11 +273,12 @@ function ensureQuickView(){
  box.dataset.signature=signature;
  box.replaceChildren();
  const heading=document.createElement('div');heading.className='ctHumanV2QuickHead';
- const title=document.createElement('strong');title.textContent='내 투자자산 · 4계좌';
- const stamp=document.createElement('span');const syncNotice=!isFresh?'⚠ 원천 최신성 확인 필요 · ':snapshotAligned?'':(!C.snapshot_id||!L?.snapshot_id?'⚠ 계좌 동기화 확인 대기 · ':'⚠ 계좌 동기화 불일치 · ');stamp.textContent=syncNotice+statusText(L||{},M);
+ const title=document.createElement('strong');title.textContent='내 투자 현황';
+ const stamp=document.createElement('span');const syncNotice=!isFresh?'':snapshotAligned?'':(!C.snapshot_id||!L?.snapshot_id?'⚠ 계좌 동기화 확인 대기 · ':'⚠ 계좌 동기화 불일치 · ');stamp.textContent=syncNotice+statusText(L||{},M);
+ if(!snapshotAligned)stamp.dataset.ctFreshness='BLOCKED';
  heading.append(title,stamp);
  const heroNav=document.createElement('div');heroNav.className='ctHumanV2NavHero';
- const navLabel=document.createElement('small');navLabel.textContent='Toss · ISA · 연금저축 · IRP 순자산';
+ const navLabel=document.createElement('small');navLabel.textContent='4계좌 순자산 · Toss / ISA / 연금저축 / IRP';
  const navNumber=document.createElement('strong');
  const navReady=snapshotAligned&&m.nav>0&&IDS.every(id=>M.number(C.accounts[id]?.nav)!=null)&&
   Math.abs(IDS.reduce((sum,id)=>sum+Number(C.accounts[id].nav),0)-m.nav)<=2;
@@ -285,7 +288,7 @@ function ensureQuickView(){
   '동기화·최신성 또는 4계좌 NAV 확인 필요 · 검증 전 총액 숨김';
  heroNav.append(navLabel,navNumber,navNote);
  const grid=document.createElement('div');grid.className='ctHumanV2QuickGrid';
- for(const [label,amount,note] of [['투자손익',dayText,dayNote],['순입출금',flowText,'투자손익과 분리 · 원천 제공 기간']]){
+ for(const [label,amount,note] of [['당일 투자손익',dayText,dayNote],['순입출금',flowText,'투자손익 제외 · 원천 제공 기간']]){
   const item=document.createElement('div');item.className='ctHumanV2QuickMetric';
   const l=document.createElement('span');l.textContent=label;
   const v=document.createElement('strong');v.textContent=amount;
@@ -294,10 +297,10 @@ function ensureQuickView(){
   item.append(l,v,n);grid.append(item);
  }
  const drivers=document.createElement('section');drivers.className='ctHumanV2Drivers';
- drivers.setAttribute('aria-label','계좌별 투자손익 영향');
+ drivers.setAttribute('aria-label','4계좌 현재 순자산 구성');
  const driverHeader=document.createElement('div');driverHeader.className='ctHumanV2DriversHeader';
  const driverTitle=document.createElement('strong');driverTitle.textContent=navShareReady?'4계좌 현재 순자산 비중':'4계좌 자산구성 확인 대기';
- const driverMeta=document.createElement('small');driverMeta.textContent=navShareReady?'현재 NAV 큰 순서 · 투자손익 막대가 아님':'스냅샷/4계좌 NAV 검증 전 비중 미표시';
+ const driverMeta=document.createElement('small');driverMeta.textContent=navShareReady?'현재 자산 비중 · 투자손익 막대가 아님':'스냅샷/4계좌 NAV 검증 전 비중 미표시';
  driverHeader.append(driverTitle,driverMeta);
  const list=document.createElement('div');list.className='ctHumanV2DriverRows';
  for(const a of ordered){
