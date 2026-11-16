@@ -57,6 +57,7 @@ test('freshly published status cannot misreport Friday as LIVE after Monday clos
    assert.equal(m.groups[k].reported_state,'LIVE');
   }
   assert.equal(m.overall,'DEGRADED');
+  assert.equal(m.groups.kr_equity.state,'LIVE','US close lag cannot invalidate independent KR equity group');
   for(const k of ['market','pulse','tripod'])s.groups[k].as_of='2026-11-16';
   assert.equal(evaluate(s,{},after).groups.market.state,'LIVE');
  }finally{
