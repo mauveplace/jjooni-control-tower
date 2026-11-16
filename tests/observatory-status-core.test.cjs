@@ -48,7 +48,7 @@ test('freshly published status cannot misreport Friday as LIVE after Monday clos
   const before=Date.parse('2026-11-16T21:14:00Z');
   const after=Date.parse('2026-11-16T21:26:00Z');
   const s=status();
-  s.generated_kst=new Date(after-30000).toISOString();
+  s.generated_kst=new Date(before-30000).toISOString();
   for(const k of ['market','pulse','tripod'])s.groups[k]={state:'LIVE',critical:true,as_of:'2026-11-13'};
   assert.equal(evaluate(s,{},before).groups.market.state,'LIVE');
   const m=evaluate(s,{},after);
