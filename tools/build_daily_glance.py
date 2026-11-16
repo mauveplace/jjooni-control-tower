@@ -241,9 +241,17 @@ def brief_check(brief, by_key, us_session):
                              f"{canonical:,.2f}은 {'일치' if matched else f'{diff:+.3f}% 불일치'}합니다. "
                              "공식 확정 종가 검증은 별도이며 매매 신호로 승격하지 않습니다.")}
     if not ndx or not isinstance(ndx.get("close"), (int, float)) or obs.get("date") != us_session:
+        provider = obs.get("value") if obs.get("date") == us_session else None
+        valid_provider = (isinstance(provider, (int, float)) and not isinstance(provider, bool)
+                          and 0 < provider < float("inf"))
         return {**result, "status": "NOT_COMPARABLE",
-                "text": "NDX 공식 종가 교차검증에 필요한 값 또는 완료 세션이 부족합니다. "
-                        "옵저버토리 저장값은 별도로 표시합니다."}
+                "reference_ndx": provider if valid_provider else None,
+                "official_eod_verified": False, "trade_signal_eligible": False,
+                "text": (f"NDX {us_session} 제공자 완료 일봉 {provider:,.2f}은 수집됐습니다. "
+                         "다만 Nasdaq 공식 종가의 독립 교차검증 자료가 없어 공식 확인은 보류합니다. "
+                         "참고값을 매매 신호로 사용하지 마세요." if valid_provider else
+                         "NDX 제공자 완료 일봉 또는 공식 종가 교차검증 자료가 부족합니다. "
+                         "최신 완료 세션과 원천 수집 상태를 확인하세요.")}
     if ndx.get("status") != "VERIFIED" or ndx.get("official_status") not in (None, "VERIFIED"):
         return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
                 "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
