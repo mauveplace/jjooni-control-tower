@@ -29,6 +29,30 @@ test('unverified NDX: top alert, NDX row is ? 검증 보류', () => {
   assert.equal(ndx.tag, '? 검증 보류');
 });
 
+test('aligned NDX provider bar is visible as reference, not missing or official', () => {
+  const fresh = { overall: 'LIVE_WITH_WARNINGS', critical_bad: [],
+    groups: { market: { state: 'LIVE', as_of: '2026-11-11', source: 'observatory.json' } } };
+  const vm = viewModel({ glance, brief, freshness: fresh, calendar }, NOW);
+  const ndx = vm.groups[0].rows[0];
+  assert.equal(ndx.state, 'ref');
+  assert.equal(ndx.tag, '◐ 참고·완료 일봉');
+  assert.equal(ndx.value, '28,374.25');
+  assert.equal(vm.alerts[0].level, 'MID');
+  assert.match(vm.alerts[0].body, /완료 일봉은 수집됨/);
+  assert.match(vm.tripod.verification, /공식 종가 미검증/);
+  assert.match(vm.noTrade, /자동주문 없음/);
+});
+
+test('stale or misaligned NDX source cannot become a current reference', () => {
+  const fresh = { groups: { market: { state: 'LAGGING', as_of: '2026-11-10', source: 'observatory.json' } } };
+  const vm = viewModel({ glance, brief, freshness: fresh, calendar }, NOW);
+  assert.equal(vm.groups[0].rows[0].state, 'delay');
+  assert.equal(vm.alerts[0].level, 'HIGH');
+  const bad = structuredClone(glance); bad.consistency.status = 'MISALIGNED';
+  const live = { groups: { market: { state: 'LIVE', as_of: '2026-11-11', source: 'observatory.json' } } };
+  assert.equal(viewModel({ glance: bad, brief, freshness: live, calendar }, NOW).groups[0].rows[0].state, 'hold');
+});
+
 test('market compare view-model retains distinct 1D/1W/1M and absent data', () => {
   const g = structuredClone(glance);
   g.groups[0].items[0].m1_pct = 4.25;
