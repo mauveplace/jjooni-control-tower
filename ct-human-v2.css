@@ -174,3 +174,60 @@ html[data-ct-human-ui="v2"] :is(.ctHumanV2DriverRow,.ctHumanV2QuickPaths button)
  html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
  html[data-ct-human-ui="v2"] .ctHumanV2QuickPaths button{padding:7px 5px}
 }
+/* User-approved Home A: source-verified, read-only TRI-POD quick summary.
+   Single in-card strategy deep link, not another global navigation. */
+html[data-ct-human-ui="v2"] #ctHumanTripodHomeV1{
+ margin:12px 0 0;padding:14px;border:1px solid #cadbed;
+ border-radius:14px;background:#f7faff;color:#1f3654;min-width:0
+}
+html[data-ct-human-ui="v2"] #ctHumanTripodHomeV1[data-ct-tripod-trust="BLOCKED"]{
+ border-color:#eed7aa;background:#fffaf0
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead{
+ display:flex;align-items:center;justify-content:space-between;gap:10px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead strong{font-size:15px;font-weight:850}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead button{
+ background:transparent;color:#175ca9;border:1px solid #b9cee9;
+ border-radius:10px;padding:7px 11px;min-height:44px;font-size:12px;font-weight:750;cursor:pointer
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodValue{
+ display:block;margin-top:9px;font-size:17px;font-weight:850;
+ line-height:1.45;overflow-wrap:anywhere;font-variant-numeric:tabular-nums
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodNote{
+ margin:5px 0 0;font-size:12px;color:#536985;line-height:1.5
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts>div{
+ background:#fff;padding:9px;border:1px solid #dce6f3;border-radius:10px;min-width:0
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts small{
+ display:block;color:#60728a;font-size:10px;line-height:1.4
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts b{
+ display:block;color:#1d3556;margin-top:4px;font-size:13px;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFoot{
+ display:block;margin-top:10px;color:#63768d;font-size:10px;line-height:1.5
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead button:focus-visible{
+ outline:3px solid #3c82d1;outline-offset:2px
+}
+@media(min-width:1080px){
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 #ctHumanTripodHomeV1{
+  grid-column:1;grid-row:3;margin-top:0
+ }
+ html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2QuickFoot{
+  grid-row:4
+ }
+}
+@media(max-width:420px){
+ html[data-ct-human-ui="v2"] #ctHumanTripodHomeV1{padding:11px}
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts{gap:5px}
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts>div{padding:7px 5px}
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts b{font-size:12px}
+}
