@@ -75,7 +75,7 @@ class LowFrequencyWriterTests(unittest.TestCase):
 
     def test_market_close_jobs_remain_independent(self):
         daily = ".github/workflows/market-observatory-daily.yml"
-        self.assertEqual(schedules(daily), ["20 20,21 * * 0-5", "10 7 * * 1-5"])
+        self.assertEqual(schedules(daily), ["18,35 20,21 * * 0-5", "10 7 * * 1-5"])
         content = read(daily)
         self.assertIn("inputs.heartbeat", content)
         self.assertNotIn("  workflow_run:", content)
