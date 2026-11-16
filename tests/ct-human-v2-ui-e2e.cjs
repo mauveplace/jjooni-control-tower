@@ -113,10 +113,16 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     document.dispatchEvent(new Event('jjooni:live-applied'));
    });
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('합산 확인 대기'));
-   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriversHeader').innerText(),/합산 비교 불가/,'incomparable account dates never imply a ranked contribution');
-   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/자료 없음/,'missing account P&L is not represented as zero');
+   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriversHeader').innerText(),/현재 NAV 구성 · 투자손익 아님/,'incomparable daily PnL must be replaced with current NAV allocation');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack[data-ct-metric="NAV_SHARE"]').count(),4);
+   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow').first().innerText(),/25\.0%/);
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'must not display invented full day P&L when missing');
+   await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.IRP.nav=null;document.dispatchEvent(new Event('jjooni:live-applied'))});
+   await page.waitForFunction(()=>document.querySelector('.ctHumanV2DriverTrack[hidden]'));
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack:not([hidden])').count(),0,'missing NAV and PnL cannot produce fake bars');
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/빈 그래프는 숨김/);
+   await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.IRP.nav=1000;document.dispatchEvent(new Event('jjooni:live-applied'))});
 
    // If canonical and browser-live IDs diverge, every displayed day/flow
    // amount must fail closed, even when all 4 accounting fields exist.
