@@ -266,7 +266,7 @@ function ensureQuickView(){
    &&Math.abs(accounts.reduce((v,a)=>v+a.nav,0)-m.nav)<=2;
  const ordered=navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
  const accountSignature=accounts.map(a=>[a.id,a.day,a.nav,a.kind,a.scope].join(':')).join(',');
- const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,m.nav,isFresh,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
+ const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,m.nav,isFresh,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.marketDate,tp?.age,tp?.reason,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
  box.replaceChildren();
