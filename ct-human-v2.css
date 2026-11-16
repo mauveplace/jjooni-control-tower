@@ -113,6 +113,7 @@ html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader{
 }
 html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader strong{font-size:15px;line-height:1.45}
 html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader small{font-size:12px;color:#62768d;line-height:1.45}
+html[data-ct-human-ui="v2"] .ctHumanV2DriversHeader strong{overflow-wrap:anywhere}
 html[data-ct-human-ui="v2"] .ctHumanV2DriverRows{display:grid;gap:6px}
 html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{
  box-sizing:border-box;border:1px solid transparent;background:#fff;border-radius:10px;
@@ -129,6 +130,8 @@ html[data-ct-human-ui="v2"] .ctHumanV2DriverBar{
 }
 html[data-ct-human-ui="v2"] .ctHumanV2DriverBar[data-direction="up"]{background:#c54346}
 html[data-ct-human-ui="v2"] .ctHumanV2DriverBar[data-direction="down"]{background:#347cc8}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverBar[data-direction="nav"]{background:#247c9f}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverTrack[hidden]{display:none!important}
 html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong{
  font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere
 }
