@@ -144,8 +144,27 @@ function render(){
   panel('② 일별 투자손익','입출금 제외 · 원 단위'),
   panel('③ 자산군별 수익 기여','서로 중복 없는 자산군 분류 필요')
  ];
- if(!report.ok){for(const card of tiles)waiting(card,report.reason)}
- else{
+ if(!report.ok){
+  // One actionable provenance state, not three tall empty "graphs".
+  const state=document.createElement('section');state.className='ctPerfHistoryUnavailable';
+  state.dataset.ctVerification='BLOCKED';
+  const heading=document.createElement('h3');heading.textContent='투자성과 3종 그래프 · 원장 검증 전 미표시';
+  const why=document.createElement('p');why.textContent='현재 차단 사유: '+report.reason;
+  const explain=document.createElement('p');explain.textContent='정확한 일별 투자손익을 계산하려면 증권사 공식 마감 NAV와 4계좌 외부 입출금 증빙을 같은 날짜로 대사해야 합니다. 현재 잔액 변화나 참고 NAV를 수익률로 대체하지 않습니다.';
+  const pending=document.createElement('p');pending.className='ctPerfHistoryNeeds';
+  pending.textContent='대기 중: ① 공식 일별 순자산 ② 입출금 차감 후 투자손익 ③ 중복 없는 자산군 수익 기여도';
+  state.append(heading,why,explain,pending);
+  const ref=document.querySelector('#ctReferenceNavHistoryV1');
+  if(ref){
+   const go=document.createElement('button');go.type='button';
+   go.textContent='관측 NAV 그래프 보기 · 참고용';
+   go.addEventListener('click',()=>ref.scrollIntoView({block:'start',behavior:'smooth'}));
+   state.append(go);
+  }
+  container.append(state);
+  return;
+ }
+ {
   const a=document.createElement('p');a.className='ctPerfHistorySource';a.textContent='검증 이력 '+report.rows.length+'일 · '+report.rows[0].date+'~'+report.rows[report.rows.length-1].date+' · 검증시각 '+report.source_at;
   top.append(a);
   tiles[0].append(lineChart(report.rows));
