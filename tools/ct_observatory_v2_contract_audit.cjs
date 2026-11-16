@@ -33,7 +33,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=8-home-tripod'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=9-home-ux'),'Human V2 cache version drift');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');
