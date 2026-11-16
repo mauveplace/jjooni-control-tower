@@ -167,7 +167,7 @@ let pending=false;function schedule(){if(pending)return;pending=true;setTimeout(
 if(typeof document!=='undefined'){
  const init=()=>{
   if(!document.getElementById('ctReferenceNavStyle')){
-    const link=document.createElement('link');link.id='ctReferenceNavStyle';link.rel='stylesheet';link.href='ct-reference-nav-history-v1.css?v=2';
+    const link=document.createElement('link');link.id='ctReferenceNavStyle';link.rel='stylesheet';link.href='ct-reference-nav-history-v1.css?v=3';
     (document.head||document.documentElement).append(link);
   }
   render();
