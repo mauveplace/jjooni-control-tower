@@ -34,6 +34,8 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   if(state.ready)assert.equal(state.thresholds,4,'all four thresholds with source guard');
   assert.ok(state.docWidth<=state.screenWidth+3,'V3 horizontal overflow '+width+': '+JSON.stringify(state));
   assert.match(state.v2Return||'',/ui=v2/);
+  await page.screenshot({path:'/tmp/obs-v3-home-'+width+'.png'});
+  if(state.ready)await page.locator('#ov3TripodRail .ov3Rail').screenshot({path:'/tmp/obs-v3-tripod-'+width+'.png'});
   if(state.ready){
    const detail=page.locator('.todayV2 button[data-ov3-tab="jjooni-tripod"]');
    assert.ok(await detail.isVisible(),'fixed-anchor detail shortcut visible');
