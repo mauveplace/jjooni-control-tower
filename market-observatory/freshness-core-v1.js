@@ -22,10 +22,18 @@ function effective(key,raw,now=Date.now()){
 }
 function evaluate(status,watchdog,now=Date.now(),errors=[]){
  const s=status||{},published=ms(s.generated_kst),limit=Number(s.freshness_policy?.max_status_age_seconds)>0?Number(s.freshness_policy.max_status_age_seconds):7200;
+ // A recent status file can still certify Friday after Monday's close.
+ // Re-evaluate the known US exchange calendar at browser view time.
+ const clock=typeof window==='object'?window.JjooniTripodCore:null;
+ const expectedUs=clock&&typeof clock.expectedCompletedSession==='function'
+  ?clock.expectedCompletedSession(new Date(now)):null;
  const age=(now-published)/1000,valid=Number.isFinite(age)&&age>=-60,stale=valid&&age>limit;
  const groups=Object.fromEntries([...new Set([...ORDER,...Object.keys(s.groups||{})])].map(key=>{
   const raw=s.groups?.[key]||{state:'UNAVAILABLE',critical:['market','kr_equity','pulse','tripod','audit'].includes(key)};
   const g=effective(key,raw,now);
+  if(expectedUs&&['market','pulse','tripod'].includes(key)&&String(g.as_of||'')<expectedUs){
+   g.state='STALE';g.detail=['필요 미국 완료세션 '+expectedUs,'게시 기준일 '+String(g.as_of||'없음'),'마감 후 갱신 대기'].join(' · ');
+  }
   if((!valid||stale)&&good.has(g.state)&&!['crypto','market_regime'].includes(key)){g.state='CHECK_REQUIRED';g.detail=[g.detail,'게시된 판정의 유효시간 경과 · 재점검 필요'].filter(Boolean).join(' · ')}
   return[key,g];
  }));
