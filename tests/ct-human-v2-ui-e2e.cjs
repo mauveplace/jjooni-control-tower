@@ -176,18 +176,33 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
 
 
    if(width===390){
+    // Real publisher integration: mount Home with no strategy panel,
+    // then load the actual source guard and ensure it drives the Home.
     await page.evaluate(()=>{
+     document.querySelector('#panel-tripod')?.remove();
      const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-     window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35={last:{trusted:true,date,marketDate:date,regime:'상승',target:'QQQ 50% + QLD 50%',action:'HOLD_NO_TRADE',vix10:20.5,ma250_gap_pct:1.25,drawdown_52w_pct:-10.5}};
-     document.dispatchEvent(new Event('jjooni:tripod-daily-verified'));
+     window.__JJOONI_PUBLIC_MARKET_DAILY={
+      market_context:{items:{VIX:{value:21,session_date:date}}},
+      tripod_signal:{source:'PUBLIC_MARKET_DAILY_V1',ok:true,date,session_date:date,
+       vix_basis:'LAST_10_DAILY_CLOSES_ARITHMETIC_MEAN',vix_window_count:10,
+       data_alignment:'NDX_VIX_SAME_COMPLETED_SESSION',vix10:20.5,
+       vix_latest_close:21,ndx:28000,ma250:27000,drawdown_52w_pct:-10.5,
+       regime:'상승',target:'QQQ 50% + QLD 50%',action:'HOLD_NO_TRADE'}
+     };
     });
+    await page.addScriptTag({content:read('tripod-daily-freshness-v35.js')});
     await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='VERIFIED');
-    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \+ QLD 50%/);
+    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \\+ QLD 50%/);
     assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/실제 보유·주문 아님/);
     assert.equal(await page.locator('#ctHumanTripodHomeV1').getByRole('button',{name:'전략 상세'}).count(),1);
-    await page.evaluate(()=>{window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted=false;document.dispatchEvent(new Event('jjooni:tripod-daily-verified'))});
+    assert.equal(await page.evaluate(()=>window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted),true);
+    await page.evaluate(()=>{
+     window.__JJOONI_PUBLIC_MARKET_DAILY.market_context.items.VIX.session_date='2026-11-01';
+     document.dispatchEvent(new Event('jjooni:public-market-loaded'));
+    });
     await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='BLOCKED');
-    assert.doesNotMatch(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50%/,'untrusted signal must not show old target');
+    assert.equal(await page.evaluate(()=>window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted),false);
+    assert.doesNotMatch(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50%/,'invalid market reference must revoke prior target');
    }
    assert.deepEqual(errors,[],'no browser exceptions '+width+': '+errors.join(';'));
    await context.close();
