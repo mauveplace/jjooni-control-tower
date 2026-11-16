@@ -186,11 +186,51 @@ function statusText(L,M){
  if(date&&Number.isFinite(date.getTime()))when=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
  return (f.state==='STALE'||f.state==='UNKNOWN'?'⚠ 이전 수집 기준 · ':'')+when+' · '+f.text;
 }
+function homeTripodCard(tp){
+ const card=document.createElement('section');card.id='ctHumanTripodHomeV1';card.className='ctHumanV2Tripod';
+ card.setAttribute('aria-label','TRI-POD 전략 요약');
+ const header=document.createElement('div');header.className='ctHumanV2TripodHead';
+ const title=document.createElement('strong');title.textContent='TRI-POD · 전략 요약';
+ const link=document.createElement('button');link.type='button';link.dataset.ctOpen='tripod';link.textContent='전략 상세';
+ header.append(title,link);card.append(header);
+ const trusted=tp?.trusted===true&&typeof tp.date==='string'&&tp.date.length===10;
+ const value=document.createElement('strong');value.className='ctHumanV2TripodValue';
+ const status=document.createElement('p');status.className='ctHumanV2TripodNote';
+ if(!trusted){
+  card.dataset.ctTripodTrust='BLOCKED';
+  value.textContent='일별 신호 검증 대기';
+  status.textContent='완료 일봉·기준일·원천 검증 전에는 과거 목표를 현재 전략으로 표시하지 않습니다.';
+  card.append(value,status);return card;
+ }
+ card.dataset.ctTripodTrust='VERIFIED';
+ const regime=String(tp.regime||'').trim(),target=String(tp.target||'').trim();
+ value.textContent=(regime||'레짐 확인 필요')+' · '+(target||'목표비중 확인 필요');
+ const action=tp.action==='HOLD_NO_TRADE'?'신호상 유지 · 주문 없음':String(tp.action||'조치 확인 필요');
+ status.textContent='기준 '+tp.date+' 완료 일봉 · '+action+' · 전략 목표(실제 보유·주문 아님)';
+ card.append(value,status);
+ const cells=[];
+ const fmt=(v)=>typeof v==='number'&&Number.isFinite(v)?(v>=0?'+':'')+v.toFixed(2)+'%':null;
+ if(fmt(tp.ma250_gap_pct)!=null)cells.push(['NDX / MA250',fmt(tp.ma250_gap_pct)]);
+ if(typeof tp.vix10==='number'&&Number.isFinite(tp.vix10))cells.push(['VIX 10일 평균',tp.vix10.toFixed(2)]);
+ if(fmt(tp.drawdown_52w_pct)!=null)cells.push(['52주 고점 대비',fmt(tp.drawdown_52w_pct)]);
+ if(cells.length){
+  const metrics=document.createElement('div');metrics.className='ctHumanV2TripodFacts';
+  for(const [label,value] of cells){
+   const item=document.createElement('div');const a=document.createElement('small');a.textContent=label;
+   const b=document.createElement('b');b.textContent=value;item.append(a,b);metrics.append(item);
+  }
+  card.append(metrics);
+ }
+ const foot=document.createElement('small');foot.className='ctHumanV2TripodFoot';
+ foot.textContent='Toss 계좌 내 전략 · 총자산 중복 합산 없음 · 관찰용(자동주문 없음)';
+ card.append(foot);return card;
+}
 function ensureQuickView(){
  if(!enabled)return;
  const panel=qs('#panel-overview'),C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD,M=window.JjooniMetrics;
  if(!panel||!C?.accounts||!M?.aggregate||!M?.freshness)return;
  const m=M.aggregate(C.accounts,IDS);
+ const tp=window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35?.last||null;
  // Both source snapshot IDs are required before a combined financial display.
  // Missing IDs or divergent snapshots suppress P&L and net flows together.
  const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
@@ -222,7 +262,7 @@ function ensureQuickView(){
    navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
  const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
  const accountSignature=accounts.map(a=>[a.id,a.day,a.nav,a.kind,a.scope].join(':')).join(',');
- const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature].join('|');
+ const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
  box.replaceChildren();
@@ -287,7 +327,7 @@ function ensureQuickView(){
   const action=document.createElement('button');action.type='button';action.dataset.ctOpen=id;action.textContent=label;
   actions.append(action);
  }
- box.append(heading,grid,drivers,footer,actions);
+ box.append(heading,grid,homeTripodCard(tp),drivers,footer,actions);
 }
 function showOldModeShortcut(){
  const top=qs('.top');if(!top||qs('#ctHumanV2Activate'))return;
@@ -306,10 +346,11 @@ function queueUpdate(){
 }
 if(enabled){
  document.documentElement.dataset.ctHumanUi='v2';
- const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=4';
+ const link=document.createElement('link');link.rel='stylesheet';link.href='ct-human-v2.css?v=5-home-tripod';
  (document.head||document.documentElement).append(link);
 }
 document.addEventListener('jjooni:live-applied',queueUpdate);
+document.addEventListener('jjooni:tripod-daily-verified',queueUpdate);
 document.addEventListener('click',e=>{if(e.target.closest?.('.tabs .tab[data-tab],#ctMoreMenu button'))window.setTimeout(updateSelection,120)});
 window.addEventListener('hashchange',queueUpdate);
 window.addEventListener('resize',()=>{syncNavigationOwner();queueUpdate()},{passive:true});
