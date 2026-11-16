@@ -207,7 +207,7 @@ if(typeof document!=='undefined'){
  const boot=()=>{
   if(!document.getElementById('ctPerfHistoryStylesheet')){
    const link=document.createElement('link');link.id='ctPerfHistoryStylesheet';link.rel='stylesheet';
-   link.href='ct-performance-history-v1.css?v=1';(document.head||document.documentElement).append(link);
+   link.href='ct-performance-history-v1.css?v=2';(document.head||document.documentElement).append(link);
   }
   render();
  };
