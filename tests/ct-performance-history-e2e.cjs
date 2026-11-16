@@ -23,7 +23,9 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    });
    await page.addScriptTag({content:read('ct-performance-history-v1.js')});
    await page.waitForSelector('#ctVerifiedPerformanceHistoryV1');
-   assert.equal(await page.locator('.ctPerfHistoryCard[data-ct-verification="PENDING"]').count(),3);
+   assert.equal(await page.locator('.ctPerfHistoryCard[data-ct-verification="PENDING"]').count(),0,'no repeated fake empty charts');
+   assert.equal(await page.locator('.ctPerfHistoryUnavailable[data-ct-verification="BLOCKED"]').count(),1);
+   assert.match(await page.locator('.ctPerfHistoryUnavailable').innerText(),/공식 마감 NAV/);
    assert.equal(await page.locator('#ctVerifiedPerformanceHistoryV1 svg').count(),0,'unverified history may not render even one plot');
    await page.evaluate(()=>{
     window.__JJOONI_LIVE_PAYLOAD.performance_history={
@@ -58,6 +60,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    });
    await page.waitForFunction(()=>document.querySelectorAll('#ctVerifiedPerformanceHistoryV1 svg').length===0);
    assert.match(await page.locator('#ctVerifiedPerformanceHistoryV1').innerText(),/NAV 증감/);
+   assert.equal(await page.locator('.ctPerfHistoryUnavailable').count(),1,'invalid reconciliation returns to single blocker');
    assert.equal(await page.locator('#ctVerifiedPerformanceHistoryV1').count(),1,'no duplicate card after refresh');
    assert.deepEqual(errors,[],'runtime errors: '+errors.join(','));
    await context.close();
