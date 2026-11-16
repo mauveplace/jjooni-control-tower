@@ -186,6 +186,9 @@ if(typeof document!=='undefined'){
  };
  document.addEventListener('jjooni:live-applied',schedule);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
+ // The live freshness deadline may pass without any incoming data event.
+ // Keep the Home reference NAV synchronized with the primary Hero clock.
+ setInterval(()=>{if(!document.hidden)schedule()},60000);
  document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctHumanBottomV2,#ctHumanV2More'))schedule()});
  setTimeout(init,0);setTimeout(init,900);setTimeout(init,2300);
 }
