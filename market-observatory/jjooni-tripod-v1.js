@@ -11,6 +11,31 @@
     execution: 'NEXT_COMPLETED_SESSION_CLOSE',
     version: 'JJOONI_NOPOD_QLD_V2'
   });
+  // Conservative NYSE completed-session gate; never certify a pre-refresh
+  // Friday snapshot after a new Monday US close. Known exchange closures
+  // match the 2026–2028 public Observatory calendar.
+  const NYSE_CLOSED = Object.freeze({
+    '2026': ['2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19','2026-07-03','2026-09-07','2026-11-26','2026-12-25'],
+    '2027': ['2027-01-01','2027-01-18','2027-02-15','2027-03-26','2027-05-31','2027-06-18','2027-07-05','2027-09-06','2027-11-25','2027-12-24'],
+    '2028': ['2028-01-17','2028-02-21','2028-04-14','2028-05-29','2028-06-19','2028-07-04','2028-09-04','2028-11-23','2028-12-25']
+  });
+  const NYSE_EARLY_CLOSE = new Set(['2026-11-27','2026-12-24','2027-11-26','2028-07-03','2028-11-24']);
+  function expectedCompletedSession(at=new Date()) {
+    if (!(at instanceof Date) || !Number.isFinite(at.valueOf())) return null;
+    const ny = Object.fromEntries(new Intl.DateTimeFormat('en-US',{
+      timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',
+      hour:'2-digit',minute:'2-digit',hourCycle:'h23'
+    }).formatToParts(at).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+    const year = Number(ny.year);
+    if (!NYSE_CLOSED[String(year)]) return null; // no guessed calendar
+    const d = new Date(Date.UTC(year,Number(ny.month)-1,Number(ny.day)));
+    const iso = () => d.toISOString().slice(0,10);
+    const closeMinute = (NYSE_EARLY_CLOSE.has(iso()) ? 13 : 16)*60+15;
+    if (Number(ny.hour)*60+Number(ny.minute)<closeMinute) d.setUTCDate(d.getUTCDate()-1);
+    while (d.getUTCDay()===0 || d.getUTCDay()===6 ||
+      (NYSE_CLOSED[iso().slice(0,4)]||[]).includes(iso())) d.setUTCDate(d.getUTCDate()-1);
+    return iso();
+  }
   const finite = v => v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v);
   const cashTarget = row => String(row && row.target || '') === '현금 100%';
   const stage = row => {
@@ -125,8 +150,8 @@
         'NDX 일간 -1.5% 이하 하락 시 다음 거래일 종가 분할매수 대기'
     });
   }
-  root.JjooniTripodCore = {POLICY, stage, evaluate};
-  if (typeof module !== 'undefined' && module.exports) module.exports = {POLICY, stage, evaluate};
+  root.JjooniTripodCore = {POLICY, stage, evaluate, expectedCompletedSession};
+  if (typeof module !== 'undefined' && module.exports) module.exports = {POLICY, stage, evaluate, expectedCompletedSession};
   if (typeof document === 'undefined') return;
   const esc = x => String(x == null ? '' : x).replace(/[&<>"']/g,
     c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -162,7 +187,11 @@
     if (!data) { host.textContent = '시장 완료세션 데이터를 불러오는 중입니다.'; return; }
     const m = evaluate(data);
     const c = m.cycle;
-    const label = m.status === 'UNCERTIFIED' ? '완료세션 검증 대기' :
+    const expectedSession = expectedCompletedSession();
+    const sessionDelayed = Boolean(expectedSession && m.session && m.session < expectedSession);
+    const previousCycle = m.lastCycle && m.lastCycle.anchorVerified ? m.lastCycle : null;
+    const label = sessionDelayed ? '미국 ' + expectedSession + ' 완료세션 미반영' :
+      m.status === 'UNCERTIFIED' ? '완료세션 검증 대기' :
       m.status === 'INSUFFICIENT_HISTORY' ? '히스토리 부족' :
       m.status === 'UNVERIFIED_ANCHOR' ? '노팟 전환가격 미확인' :
       m.status === 'STOPPED' ? '손절 후 재진입 금지' :
@@ -171,26 +200,36 @@
       .map(x => '<span class="' + (m.officialStage === x ? 'on' : '') + '">' + stageName(x) + '</span>').join('');
     const foot = '<p class="jtIntro">송팀장 TRI-POD 엔진은 변경하지 않습니다. 노팟 구간에만 적용하는 쭈니 스타일 QLD 분할매수 연구 오버레이입니다. '
       + '아래 비중은 <b>기준투자금 대비 누적 투입 가정치</b>이며 현재 평가비중·실현수익률·실계좌 잔고가 아닙니다.</p>';
-    const safe = m.valid && m.status !== 'INSUFFICIENT_HISTORY' && m.status !== 'UNVERIFIED_ANCHOR';
+    const verifiedSnapshot = m.valid && m.status !== 'INSUFFICIENT_HISTORY' && m.status !== 'UNVERIFIED_ANCHOR';
+    const safe = verifiedSnapshot && !sessionDelayed;
     const metrics = [
-      card('공식 전략 단계',stageName(m.officialStage), m.date + ' 미국 완료세션'),
+      card('공식 전략 단계',stageName(m.officialStage),m.date + ' 미국 완료세션' + (sessionDelayed?' · 최신 마감 미반영':'')),
       card('나스닥100 일간 변화', safe && m.dailyPct !== null ? (m.dailyPct > 0 ? '+' : '')+fmt(m.dailyPct)+'%' : '—', '하락 트리거 ≤ -1.5%'),
       card('QLD 누적 투입 가정',safe && c ? String(c.boughtPct)+'%' : (safe ? '0%' : '—'),'기준원금 대비 · 최대 25%'),
       card('다음 거래일 매수 대기',safe && c && c.pending ? '5%' : (safe ? '없음' : '—'),'신호 다음 완료거래일 종가 가정'),
       card('NO-POD 진입일',safe && c ? c.entryDate : '—', '공식 전환선 계산 기준일'),
-      card('공식 노팟 전환가격',safe ? fmt(c ? c.noPodLine : m.prospectiveNoPodLine) : '—',
-        c ? '진입일 MA250 × 0.95 · 사이클 내 고정' : '예상 · 현재 MA250 × 0.95'),
-      card('손절 판정선',safe ? fmt(c ? c.stopNdx : m.prospectiveStopNdx) : '—',
-        c ? '확정 · NDX < 고정 전환가격 × 0.88' : '예상 · 노팟 미진입, 전환 시 재확정'),
+      card(c?'진행 중 NO-POD 확정 진입선':'다음 NO-POD 예상 진입선',
+        verifiedSnapshot ? fmt(c ? c.noPodLine : m.prospectiveNoPodLine) : '—',
+        c ? '진입일 MA250 × 0.95 · 사이클 고정' :
+          '마지막 확인 '+m.date+' MA250 × 0.95' + (sessionDelayed?' · 갱신 대기':'')),
+      card(c?'진행 중 NO-POD 확정 손절선':'NO-POD 진입 시 손절선 추정',
+        verifiedSnapshot ? fmt(c ? c.stopNdx : m.prospectiveStopNdx) : '—',
+        c ? '확정 · 고정 진입선 × 0.88' : '예상 · 실제 진입 시 재산정'),
+      card('직전 확정 NO-POD 진입선',previousCycle ? fmt(previousCycle.noPodLine) : '—',
+        previousCycle ? previousCycle.entryDate+' 확정 · '+(previousCycle.exitDate||'종료일 미확인')+' 종료' : '과거 공식 전환 이력 없음'),
+      card('직전 확정 NO-POD 손절선',previousCycle ? fmt(previousCycle.stopNdx) : '—',
+        previousCycle ? '과거 사이클 · 현재 매매 기준 아님' : '과거 공식 전환 이력 없음'),
       card('QLD 누적 분할 횟수',safe && c ? String(c.buyCount)+'회' : (safe ? '0회' : '—'),'매회 기준원금 5%p')
     ].join('');
-    const flags = !safe ?
-      '<div class="jtNote jtDisabled">확정 일봉·전환 이력이 검증되지 않아 매수/손절 가격을 임의 생성하지 않습니다.</div>' :
+    const flags = sessionDelayed ?
+      '<div class="jtNote jtDisabled"><b>미국 완료세션 갱신 대기:</b> 필요 기준일 '+esc(expectedSession)+
+      ' / 마지막 확인 '+esc(m.session)+'. 아래 예상 진입선은 과거 세션의 참고값이며, 최신 매매 신호·확정 손절선이 아닙니다.</div>' :
+      !safe ? '<div class="jtNote jtDisabled">확정 일봉·전환 이력이 검증되지 않아 매수/손절 가격을 임의 생성하지 않습니다.</div>' :
       '<div class="jtNote"><b>다음 행동:</b> '+esc(m.nextAction)+
       '<div>판정은 NDX 미국 완료 일봉 기준 · 손절은 진입일 공식 노팟 전환가격(MA250 × 0.95) × 0.88 미만 · 손절 후 같은 NO-POD 사이클 재매수 금지</div></div>';
     const log = (m.events || []).slice().reverse().map(e =>
       '<div class="jtEvent"><b>'+esc(e.date)+'</b><em>'+esc(e.type)+'</em><span>'+esc(e.text)+'</span></div>').join('');
-    host.innerHTML = '<div class="card"><div class="jtHead"><h3>쭈니 스타일 TRI-POD · NO-POD 바이더딥</h3><span class="jtPill">'+esc(label)+'</span></div>'
+    host.innerHTML = '<div class="card"><div class="jtHead"><h3>쭈니 스타일 TRI-POD · NO-POD 기준점·바이더딥</h3><span class="jtPill">'+esc(label)+'</span></div>'
       + foot + '<div class="jtPod">'+pods+'</div><div class="jtGrid">'+metrics+'</div>'
       + flags + '<div class="jtLog"><h3>시뮬레이션 신호 이력</h3>'
       + (log || '<p class="meta">현재 조회 가능한 전환·분할매수 이벤트가 없습니다.</p>') + '</div>'
