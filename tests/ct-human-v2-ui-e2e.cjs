@@ -48,6 +48,11 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await page.locator('#ctHumanTripodHomeV1').getAttribute('data-ct-tripod-trust'),'BLOCKED');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2NavHero strong').innerText(),'₩4,000');
    assert.equal(await page.locator('#panel-overview .ctOvHero').isVisible(),false,'no duplicated legacy Hero in V2');
+   // Synthetic portfolio fixtures only: retain visual QA screenshots of the
+   // actual amended Home DOM at phone + desktop widths.
+   if(width===390||width===1363)
+    await page.locator('#ctHumanQuickV2').screenshot({path:'/tmp/ct-ui-home-'+width+'.png'});
+
    if(width<=479){
     const row=await driverRows.first().evaluate(e=>{
      const name=e.querySelector('.ctHumanV2DriverLabel').getBoundingClientRect();
@@ -215,6 +220,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/실제 보유·주문 아님/);
     assert.equal(await page.locator('#ctHumanTripodHomeV1').getByRole('button',{name:'전략 상세'}).count(),1);
     assert.equal(await page.evaluate(()=>window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted),true);
+    await page.locator('#ctHumanQuickV2').screenshot({path:'/tmp/ct-ui-home-tripod-verified-390.png'});
     await page.evaluate(()=>{
      window.__JJOONI_PUBLIC_MARKET_DAILY.market_context.items.VIX.session_date='2026-11-01';
      document.dispatchEvent(new Event('jjooni:public-market-loaded'));
