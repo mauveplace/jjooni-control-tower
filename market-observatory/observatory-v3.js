@@ -29,8 +29,8 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
   &&line.ma250_lower>0&&line.tripod_return>line.ma250_lower
   &&g.state==='LIVE'&&g.source==='observatory.json'
   &&g.as_of===glance.us_session&&fresh?.session_alignment?.aligned===true
-  &&expected===glance.us_session&&statusOk;
- if(!ready)return {ready:false,reason:!statusOk?'최신성 확인 시각이 경과했거나 상태 원장이 누락됐습니다.':'완료 세션·NDX·TRI-POD·신선도 원장 정합성 확인 대기',
+  &&expected===glance.us_session;
+ if(!ready)return {ready:false,reason:'완료 세션·NDX·TRI-POD·신선도 원장 정합성 확인 대기',
   session:glance?.us_session||'—'};
  const axis={lower:line.ma250_lower,upper:line.ma250_upper,tri:line.tripod_return,now:ndx.value};
  const span=axis.tri-axis.lower, min=Math.min(axis.lower,axis.now)-span*.12,max=Math.max(axis.tri,axis.now)+span*.12;
@@ -49,11 +49,13 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
   ndx:axis.now,ndxPct:ndx.d1_pct,axis,points:Object.fromEntries(Object.entries(axis).map(([key,value])=>[key,position(value)])),
   differences:{lower:dist(axis.lower),upper:dist(axis.upper),tri:dist(axis.tri)},
   us,sectorReady,sectors:sectorReady?[...rows.find(x=>x.key==='classic').rows].sort((a,b)=>b.current_return_pct-a.current_return_pct):[],
-  generated:glance.generated_kst,officialVerified:false,referenceOnly:true,noTrade:true};
+  generated:glance.generated_kst,freshnessGenerated:fresh.generated_kst,freshnessCurrent:statusOk,
+  officialVerified:false,referenceOnly:true,noTrade:true};
 }
 function rail(m){
  const points=Object.entries(m.points).map(([key,where])=>'<i class="ov3Mark '+key+'" style="left:'+where.toFixed(2)+'%" aria-hidden="true"></i>').join('');
  return '<section class="ov3Rail" aria-label="TRI-POD 지수 기준점">'
+  +(m.freshnessCurrent?'':'<p class="ov3Stale" role="status">최신성 재확인 필요 · 아래 수치는 '+escapeHtml(m.session)+' 완료일봉의 마지막 게시 참고값입니다.</p>')
   +'<div class="ov3RailHeading"><strong>전환 기준점 한눈에 보기</strong><small>미국 '+escapeHtml(m.session)+' 완료 일봉 참고 · 가격 간격 비례</small></div>'
   +'<div class="ov3Track" role="img" aria-label="하락 후보 '+fmt(m.axis.lower)+' 현재 '+fmt(m.axis.now)+' 상승 복귀 참고 '+fmt(m.axis.upper)+' TRIPOD 복귀 필요 '+fmt(m.axis.tri)+'"><span></span>'+points+'</div>'
   +'<div class="ov3Thresholds">'
@@ -63,12 +65,12 @@ function rail(m){
   +note('TRIPOD 낙폭 조건 · DD -9%',m.axis.tri,m.differences.tri)
   +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
   +'TRIPOD은 상승 레짐·DD -9% 이내·VIX10&lt;28을 함께 확인하며, NOPOD도 하락 레짐과 VIX10≥18 확인이 필요합니다.</p>'
-  +'<p class="ov3Small">공식 Nasdaq EOD 독립검증 전 · 이전값 자동 승격 금지 · 주문 신호 아님</p></section>';
+  +'<p class="ov3Small">공식 Nasdaq EOD 독립검증 전 · 완료세션 날짜 유지 · 주문 신호 아님</p></section>';
 }
 function marketStrip(m){
  const picks=['NASDAQ100','SP500','SOX','VIX'].map(k=>m.us.find(x=>x.key===k)).filter(x=>x&&finite(x.value)&&x.date===m.session);
  return '<section class="ov3MarketStrip" aria-label="오늘의 지수">'
-  +'<div class="ov3StripTitle"><strong>MARKET CLOSE</strong><small>미국 '+escapeHtml(m.session)+' · 제공자 완료일봉 참고</small></div>'
+  +'<div class="ov3StripTitle"><strong>MARKET CLOSE</strong><small>미국 '+escapeHtml(m.session)+' · '+(m.freshnessCurrent?'제공자 완료일봉 참고':'상태 최신성 재확인 필요 · 마지막 게시 참고')+'</small></div>'
   +'<div class="ov3StripData">'+picks.map(x=>'<div class="ov3StripTile"><span>'+escapeHtml(x.label)+'</span><strong>'+fmt(x.value)+'</strong><small class="'+changeClass(x.d1_pct)+'">'+pct(x.d1_pct)+'</small></div>').join('')+'</div></section>';
 }
 function sectorChart(m){
