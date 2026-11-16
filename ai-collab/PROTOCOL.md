@@ -28,6 +28,8 @@ Required acknowledgment format (one per review actor + target revision + stage; 
 4. For confidential business documents, post only non-sensitive identifiers/status. Never attach private files, audio, transcripts, signed URLs, or private source contents to a public GitHub issue. Detailed findings use owner-authorized non-public channels.
 5. Do not add new review triggers, repeat event tickets, or assume an external Claude Routine/Work schedule was changed by this markdown rule. Ensure the **actual external executor** copies this policy into its installed instructions; test with a real review event and first-action comment. Existing owner approval, CI, dedupe and read-only gates remain unchanged.
 
+For confidential non-code reviews, use the separate [private-ticket workflow](./PRIVATE_TICKET_PROTOCOL.md). Never place private sources in public PR/Issue content; a ticket is not evidence of a ROY review start.
+
 ## Ownership and agents
 
 - **User:** owns objectives, budget constraints and final approval for main merges/deploys.
