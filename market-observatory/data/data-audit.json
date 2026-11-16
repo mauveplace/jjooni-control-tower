@@ -1,23 +1,23 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-16T08:58:46+09:00",
+  "generated_kst": "2026-11-16T09:01:01+09:00",
   "overall": "PASS",
   "critical_count": 0,
   "warning_count": 0,
   "observatory_session": "2026-11-13",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-11-16T08:20:33+09:00",
+      "generated_kst": "2026-11-16T09:00:24+09:00",
       "session": "2026-11-13",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-16T08:21:14+09:00",
+      "generated_kst": "2026-11-16T09:01:00+09:00",
       "session": "2026-11-13",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-16T08:21:14+09:00",
+      "generated_kst": "2026-11-16T09:01:00+09:00",
       "session": "2026-11-13",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
@@ -33,7 +33,7 @@
       "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-11-16T08:20:38+09:00",
+      "generated_kst": "2026-11-16T09:00:30+09:00",
       "events": 199,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-16T08:20:50+09:00",
+      "generated_kst": "2026-11-16T09:00:45+09:00",
       "as_of_date": "2026-11-13",
       "priced_count": 46
     },
@@ -68,10 +68,15 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-16T08:58:45+09:00",
-      "overall": "LIVE",
+      "generated_kst": "2026-11-16T09:00:57+09:00",
+      "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
-      "warnings": []
+      "warnings": [
+        "energy",
+        "fx",
+        "metals",
+        "audit"
+      ]
     },
     "watchdog": {
       "checked_kst": "2026-11-14T09:57:14+09:00",
@@ -501,19 +506,19 @@
       "critical": false,
       "items": {
         "BTCUSD": {
-          "count": 1111,
-          "last_date": "2026-11-15",
-          "last_value": 64928.01,
+          "count": 1112,
+          "last_date": "2026-11-16",
+          "last_value": 65332.0,
           "group": "crypto",
-          "latest_value": 64928.01,
+          "latest_value": 65332.0,
           "latest_matches": true
         },
         "ETHUSD": {
-          "count": 1111,
-          "last_date": "2026-11-15",
-          "last_value": 1821.32,
+          "count": 1112,
+          "last_date": "2026-11-16",
+          "last_value": 1834.89,
           "group": "crypto",
-          "latest_value": 1821.32,
+          "latest_value": 1834.89,
           "latest_matches": true
         }
       },
@@ -557,15 +562,15 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-16T08:20:47+09:00",
-      "current_quote_age_seconds": 2279,
+      "quote_as_of_kst": "2026-11-16T09:00:40+09:00",
+      "current_quote_age_seconds": 21,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-16T08:20:46+09:00",
-      "current_quote_age_seconds": 2280,
+      "quote_as_of_kst": "2026-11-16T09:00:40+09:00",
+      "current_quote_age_seconds": 21,
       "captured_quote_age_seconds": 0
     }
   },
