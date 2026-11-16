@@ -73,6 +73,13 @@ class LowFrequencyWriterTests(unittest.TestCase):
         self.assertNotIn("sleep", content)
         self.assertIn("observatory_heartbeat_decision.py", content)
 
+    def test_freshness_pull_request_checks_latest_merged_market_data(self):
+        # Prevent a PR opened before the US close from carrying an obsolete
+        # observatory.json snapshot into freshness acceptance after main recovers.
+        workflow = read(".github/workflows/market-observatory-freshness-ui.yml")
+        self.assertIn("github.event_name == 'pull_request' && github.ref || 'main'", workflow)
+        self.assertNotIn("github.event.pull_request.head.sha || 'main'", workflow)
+
     def test_market_close_jobs_remain_independent(self):
         daily = ".github/workflows/market-observatory-daily.yml"
         self.assertEqual(schedules(daily), ["18,35 20,21 * * 0-5", "10 7 * * 1-5"])
