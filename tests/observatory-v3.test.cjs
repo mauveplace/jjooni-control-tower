@@ -38,8 +38,11 @@ test('V3 fail closed on stale freshness even if cached NDX looks plausible', () 
  const f=fixture();
  const expired=Date.parse(f.freshness.generated_kst)+7200001;
  const m=model(f.glance,f.freshness,f.sector,expired);
- assert.equal(m.ready,false);
- assert.match(m.reason,/최신성/);
+ assert.equal(m.ready,true);
+ assert.equal(m.freshnessCurrent,false);
+ assert.equal(m.referenceOnly,true);
+ assert.equal(m.tradeEligible,undefined);
+ assert.match(rail(m),/최신성 재확인 필요/);
 });
 test('V3 fail closed on wrong session, mismatched price, or non LIVE', () => {
  const f=fixture();
