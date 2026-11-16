@@ -175,6 +175,20 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'+₩500');
 
 
+   if(width===390){
+    await page.evaluate(()=>{
+     const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+     window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35={last:{trusted:true,date,marketDate:date,regime:'상승',target:'QQQ 50% + QLD 50%',action:'HOLD_NO_TRADE',vix10:20.5,ma250_gap_pct:1.25,drawdown_52w_pct:-10.5}};
+     document.dispatchEvent(new Event('jjooni:tripod-daily-verified'));
+    });
+    await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='VERIFIED');
+    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50% \+ QLD 50%/);
+    assert.match(await page.locator('#ctHumanTripodHomeV1').innerText(),/실제 보유·주문 아님/);
+    assert.equal(await page.locator('#ctHumanTripodHomeV1').getByRole('button',{name:'전략 상세'}).count(),1);
+    await page.evaluate(()=>{window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35.last.trusted=false;document.dispatchEvent(new Event('jjooni:tripod-daily-verified'))});
+    await page.waitForFunction(()=>document.querySelector('#ctHumanTripodHomeV1')?.dataset.ctTripodTrust==='BLOCKED');
+    assert.doesNotMatch(await page.locator('#ctHumanTripodHomeV1').innerText(),/QQQ 50%/,'untrusted signal must not show old target');
+   }
    assert.deepEqual(errors,[],'no browser exceptions '+width+': '+errors.join(';'));
    await context.close();
    console.log('CT_HUMAN_V2_PASS',width);
