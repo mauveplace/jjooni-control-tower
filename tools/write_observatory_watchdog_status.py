@@ -39,7 +39,7 @@ def next_check_due(checked):
         if date.weekday() == 5:  # UTC Saturday has no scheduled close candidate.
             continue
         for hour in (20, 21):
-            for minute in (10, 20, 35, 50):
+            for minute in (20, 50):
                 candidate = date.replace(hour=hour, minute=minute, second=0, microsecond=0)
                 if candidate > utc:
                     return (candidate + timedelta(hours=3)).astimezone(KST).isoformat(timespec='seconds')

@@ -33,12 +33,11 @@ on:
   schedule:
     # No intraday heartbeat: public quotes use on-demand API reads.
     # Keep official US and Korea close publication only.
-    # US regular-session close +20m, DST-safe candidate slots.
-    # Sunday ET candidate refreshes the last completed US session for Monday KST.
-    # 20:20 UTC = 05:20 KST while New York is on EDT; 21:20 UTC = 06:20 KST while on EST.
-    # Sunday UTC candidate intentionally refreshes Monday KST using the last completed Friday US session.
-    # us_close_gate permits execution after 16:20 so delayed scheduled runs still collect.
-    - cron: '20 20,21 * * 0-5'
+    # US close +18m primary and +35m recovery candidates, DST safe.
+    # A completed-session check below prevents a second heavy build when the
+    # primary has already published. GitHub schedule starts may be delayed.
+    # 20 UTC runs in EDT; 21 UTC in EST (KST next day 05/06).
+    - cron: '18,35 20,21 * * 0-5'
     # 16:10 KST: Korea market close refresh for KOSPI/KOSDAQ and KR reference data.
     - cron: '10 7 * * 1-5'
   workflow_dispatch:
@@ -59,7 +58,7 @@ env:
 
 jobs:
   us_close_gate:
-    if: ${{ github.event_name == 'schedule' && github.event.schedule == '20 20,21 * * 0-5' }}
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '18,35 20,21 * * 0-5' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.close.outputs.should_run }}
@@ -70,15 +69,43 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ny_time="$(TZ=America/New_York date +%H%M)"
-          echo "ny_time=$ny_time" >> "$GITHUB_OUTPUT"
-          if [ "$ny_time" -ge "1620" ]; then
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-            echo "US_CLOSE_PLUS_20_GATE=PASS ny_time=$ny_time"
-          else
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-            echo "US_CLOSE_PLUS_20_GATE=SKIP ny_time=$ny_time"
-          fi
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          from pathlib import Path
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          sys.path.insert(0,'tools')
+          from observatory_session import readiness
+          now=datetime.now(ZoneInfo('America/New_York'))
+          ny_time=now.strftime('%H%M')
+          ready=int(ny_time)>=1615
+          def load(path):
+              try: return json.loads(Path(path).read_text(encoding='utf-8'))
+              except (OSError, ValueError): return {}
+          if ready:
+              obs=load('market-observatory/data/observatory.json')
+              pulse=load('market-observatory/data/daily-market-pulse.json')
+              public=load('public-market-daily.json')
+              check=readiness(obs,pulse,public,now)
+              healthy=check['healthy']
+              # Keep the Sunday ET refresh of Friday data once, for the
+              # following Monday KST briefing; the backup candidate no-ops.
+              sunday=now.weekday()==6
+              stamp=str(obs.get('generated_kst') or '')
+              try:
+                  last=datetime.fromisoformat(stamp).astimezone(now.tzinfo).date()
+              except (ValueError,TypeError):
+                  last=None
+              sunday_due=sunday and last!=now.date()
+          else:
+              healthy=False; sunday_due=False
+          should_run=ready and (not healthy or sunday_due)
+          print('ny_time='+ny_time)
+          print('should_run='+str(should_run).lower())
+          print('US_CLOSE_GATE ready='+str(ready)+' healthy='+str(healthy)+
+                ' sunday_due='+str(sunday_due)+' should_run='+str(should_run),
+                file=sys.stderr)
+          PY
 
   hourly_gate:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.heartbeat }}
@@ -217,7 +244,7 @@ jobs:
       group: economic-calendar-canonical-writer
       cancel-in-progress: false
     needs: [us_close_gate]
-    if: ${{ always() && github.event_name != 'workflow_run' && !(github.event_name == 'workflow_dispatch' && inputs.heartbeat) && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') && (github.event_name != 'schedule' || github.event.schedule != '20 20,21 * * 0-5' || needs.us_close_gate.outputs.should_run == 'true') }}
+    if: ${{ always() && github.event_name != 'workflow_run' && !(github.event_name == 'workflow_dispatch' && inputs.heartbeat) && (github.event_name != 'schedule' || github.event.schedule != '7,22,37,52 * * * *') && (github.event_name != 'schedule' || github.event.schedule != '18,35 20,21 * * 0-5' || needs.us_close_gate.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

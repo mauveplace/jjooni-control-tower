@@ -1,6 +1,6 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
-const {evaluate, POLICY} = require('../market-observatory/jjooni-tripod-v1.js');
+const {evaluate, POLICY, expectedCompletedSession} = require('../market-observatory/jjooni-tripod-v1.js');
 const TRI='TQQQ 100%', CASH='현금 100%', BI='QQQ 50% + QLD 50%';
 const row=(date,ndx,target=CASH,ma250=100)=>({date,ndx,target,ma250});
 function model(rows, latestOverrides={}) {
@@ -136,4 +136,23 @@ test('pre-entry projected stop is visible only as provisional and re-estimated f
   assert(Math.abs(b.prospectiveStopNdx-108.68)<1e-9);
   const c=model([row('2026-10-01',100,TRI),row('2026-10-02',102,BI)],{ok:false});
   assert.equal(c.prospectiveStopNdx,null);
+});
+
+
+test('US close gate rejects Friday data after Monday 16:15 ET and respects exchange holidays',()=>{
+  assert.equal(expectedCompletedSession(new Date('2026-11-16T21:14:00Z')),'2026-11-13');
+  assert.equal(expectedCompletedSession(new Date('2026-11-16T21:26:00Z')),'2026-11-16');
+  assert.equal(expectedCompletedSession(new Date('2026-11-26T23:00:00Z')),'2026-11-25');
+  assert.equal(expectedCompletedSession(new Date('2026-11-27T18:16:00Z')),'2026-11-27');
+});
+test('past completed NO-POD cycle retains historical entry anchor after returning to BIPOD',()=>{
+  const r=model([row('2025-04-02',100,BI,110),row('2025-04-03',93,CASH,110),
+    row('2025-04-04',94,CASH,111),row('2025-04-07',104,BI,112)]);
+  assert.equal(r.status,'BASE_STRATEGY');
+  assert.equal(r.cycle,null);
+  assert.equal(r.lastCycle.entryDate,'2025-04-03');
+  assert.equal(r.lastCycle.exitDate,'2025-04-07');
+  assert.equal(r.lastCycle.noPodLine,104.5);
+  assert.equal(r.lastCycle.stopNdx,104.5*.88);
+  assert.equal(r.prospectiveNoPodLine,112*.95);
 });
