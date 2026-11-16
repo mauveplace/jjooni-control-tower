@@ -40,3 +40,26 @@ test('regime starts, ends and malformed intervals are checked without upgrading 
  assert.equal(effective('market_regime',{state:'LIVE',consensus_status:'PARTIAL_PENDING_JJANGGU',valid_until_kst:iso(now+100)},now).state,'PROVISIONAL');
  assert.equal(effective('market_regime',{state:'LIVE',valid_until_kst:iso(now+100)},now).state,'UNAVAILABLE');
 });
+
+test('freshly published status cannot misreport Friday as LIVE after Monday close',()=>{
+ const original=global.window;
+ try{
+  global.window={JjooniTripodCore:require('../market-observatory/jjooni-tripod-v1.js')};
+  const before=Date.parse('2026-11-16T21:14:00Z');
+  const after=Date.parse('2026-11-16T21:26:00Z');
+  const s=status();
+  s.generated_kst=new Date(after-30000).toISOString();
+  for(const k of ['market','pulse','tripod'])s.groups[k]={state:'LIVE',critical:true,as_of:'2026-11-13'};
+  assert.equal(evaluate(s,{},before).groups.market.state,'LIVE');
+  const m=evaluate(s,{},after);
+  for(const k of ['market','pulse','tripod']){
+   assert.equal(m.groups[k].state,'STALE');
+   assert.equal(m.groups[k].reported_state,'LIVE');
+  }
+  assert.equal(m.overall,'DEGRADED');
+  for(const k of ['market','pulse','tripod'])s.groups[k].as_of='2026-11-16';
+  assert.equal(evaluate(s,{},after).groups.market.state,'LIVE');
+ }finally{
+  if(original===undefined)delete global.window; else global.window=original;
+ }
+});
