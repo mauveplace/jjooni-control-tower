@@ -60,18 +60,24 @@ const fetchText=async path=>{
  assert(index.includes(HUMAN_SCRIPT),'PAGES_ENTRY_MISSING_V2');
  assert(index.includes(VERIFIED_SCRIPT),'PAGES_ENTRY_MISSING_VERIFIED_HISTORY');
  assert(js.includes('function overviewShortcut(report)'),'LIVE_JS_MISSING_OVERVIEW_LINK');
- assert(js.includes('그래프 보기 · 성과 탭'),'LIVE_JS_MISSING_PERFORMANCE_NAV');
+ assert(js.includes('상세 그래프 · 성과 탭'),'LIVE_JS_MISSING_PERFORMANCE_NAV');
+ assert(js.includes('plot.replaceChildren(makeChart(report.rows))'),'LIVE_OVERVIEW_NAV_SVG_NOT_DRAWN');
+ assert(js.includes('plot.replaceChildren();plot.hidden=true'),'LIVE_STALE_OVERVIEW_NAV_SVG_NOT_CLEARED');
+ assert(js.includes('관측 NAV 그래프 표시 불가 · '),'LIVE_NAV_UNAVAILABLE_REASON_NOT_SHOWN');
  assert(js.includes("tab.click()"),'LIVE_JS_MISSING_REAL_TAB_ACTION');
  assert(js.includes("'#panel-compare'"),'LIVE_JS_MISSING_PERFORMANCE_TARGET');
  assert(js.includes("overviewShortcut(report);"),'LIVE_JS_MISSING_UPDATE_HOOK');
- assert(js.includes('참고 NAV 검증 대기'),'LIVE_JS_MISSING_NO_DATA_DISCLOSURE');
+ assert(js.includes('관측 NAV 그래프 표시 불가 · '),'LIVE_JS_MISSING_NO_DATA_DISCLOSURE');
+ assert(verified.includes('ctPerfHistoryUnavailable'),'LIVE_VERIFIED_CHART_BLOCKER_MISSING');
+ assert(verified.includes('투자성과 3종 그래프 · 원장 검증 전 미표시'),'LIVE_PERFORMANCE_PROVENANCE_LABEL_MISSING');
+ assert(css.includes('ctRefNavOverviewChart'),'LIVE_CSS_MISSING_REAL_OVERVIEW_PLOT');
  assert(css.includes('ctReferenceNavOverviewV1'),'LIVE_CSS_MISSING_OVERVIEW_CARD');
  assert(css.includes('@media(max-width:479px)'),'LIVE_CSS_MISSING_PHONE_LAYOUT');
  new Function(js);
  new Function(verified);
  new Function(human);
  const expected={production_shell:true,reference_js_current:true,reference_css_current:true,
-                   direct_performance_navigation:true,reference_no_data_fail_closed:true,
+                   direct_performance_navigation:true,actual_reference_nav_svg_if_verified:true,reference_no_data_fail_closed:true,
                    verified_history_js_current:true,strict_nav_bridge_and_time:true,human_snapshot_guard:true,
                    approved_browser_decryption:'NOT_TESTED',private_nav_values_logged:false};
  console.log('CT_LIVE_PAGES_REFERENCE_NAV_DISCOVERY=PASS '+JSON.stringify(expected));
