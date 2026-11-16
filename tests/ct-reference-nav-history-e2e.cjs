@@ -18,6 +18,13 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    await page.evaluate(()=>{window.__JJOONI_CT_HUMAN_V2={mode:'v2'};
      window.__JJOONI_CANONICAL_SSOT={snapshot_id:'synthetic'};
      window.__JJOONI_LIVE_PAYLOAD={snapshot_id:'synthetic'};window.JjooniMetrics={freshness:l=>({state:l.__stale?'STALE':'LIVE'})};});
+   if(width===390)await page.evaluate(()=>{
+     const original=window.setInterval;
+     window.setInterval=function(callback,interval,...args){
+       if(interval===60000)window.__referenceNavClockTick=callback;
+       return original.call(window,callback,interval,...args);
+     };
+   });
    await page.addScriptTag({content:read('ct-reference-nav-history-v1.js')});
    await page.waitForSelector('#ctReferenceNavHistoryV1');
    await page.waitForSelector('#ctReferenceNavOverviewV1');
@@ -68,6 +75,34 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    assert.match(await page.locator('#ctVerifiedPerformanceHistoryV1').innerText(),/별도 검증된 성과 그래프/);
    const layout=await page.evaluate(()=>({inner:innerWidth,scroll:document.documentElement.scrollWidth}));
    assert(layout.scroll<=layout.inner+1,JSON.stringify(layout));
+   if(width===390){
+    // Real freshness source, clock-only expiry and NO live-applied event.
+    // Execute the module's captured real periodic callback instead of
+    // forcing a 60-second wall-clock wait in CI.
+    assert.equal(await page.evaluate(()=>typeof window.__referenceNavClockTick),'function');
+    await page.addScriptTag({content:read('canonical-metrics.js')});
+    await page.evaluate(()=>{
+      window.__JJOONI_LIVE_PAYLOAD.generated_kst=new Date().toISOString();
+      window.__JJOONI_LIVE_PAYLOAD.stale_after_kst=new Date(Date.now()+500).toISOString();
+    });
+    assert.equal(await page.evaluate(()=>JjooniMetrics.freshness(window.__JJOONI_LIVE_PAYLOAD).state),'LIVE');
+    await page.waitForTimeout(750);
+    assert.equal(await page.evaluate(()=>JjooniMetrics.freshness(window.__JJOONI_LIVE_PAYLOAD).state),'STALE');
+    // Existing SVG is still there until the scheduled clock tick (the bug).
+    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),1);
+    await page.evaluate(()=>window.__referenceNavClockTick());
+    await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='WAITING');
+    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'clock-only source staleness must hide reference chart');
+    assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/최초 ₩/,'stale source cannot retain overview monetary facts');
+    await page.evaluate(()=>{
+      window.__JJOONI_LIVE_PAYLOAD.stale_after_kst=new Date(Date.now()+600000).toISOString();
+      window.__referenceNavClockTick();
+    });
+    await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='REFERENCE_ONLY');
+    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg circle').count(),7);
+    // Restore test's controlled freshness for subsequent flag-based checks.
+    await page.evaluate(()=>{window.JjooniMetrics={freshness:l=>({state:l.__stale?'STALE':'LIVE'})}});
+   }
    await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.__stale=true;document.dispatchEvent(new Event('jjooni:live-applied'))});
    await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='WAITING');
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'stale live account facts must suppress overview NAV chart');
