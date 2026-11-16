@@ -15,7 +15,7 @@
   function groupOf(tab) { return IA.find(g => g.tabs.includes(tab)) || null; }
   function enabled(search, stored) {
     const ui = new URLSearchParams(search || '').get('ui');
-    if (ui === 'v2') return true;
+    if (ui === 'v2' || ui === 'v3') return true;
     if (ui === 'v1') return false;
     return stored !== 'v1';
   }
