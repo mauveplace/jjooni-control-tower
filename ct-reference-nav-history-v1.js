@@ -103,7 +103,12 @@ function overviewShortcut(report){
   if(anchor.nextElementSibling!==card)anchor.insertAdjacentElement('afterend',card);
  }else if(card.parentElement!==overview)overview.prepend(card);
  const info=card.querySelector('.ctRefNavOverviewInfo');
- const canPreview=report.ok&&report.rows.length>=7&&!report.stale;
+ const live=root.__JJOONI_LIVE_PAYLOAD||{};
+ const freshState=root.JjooniMetrics?.freshness?.(live)?.state||'UNKNOWN';
+ // A stale/unknown live source must block both the primary 4-account Hero
+ // and monetary figures in the Overview reference chart.
+ const sourceFresh=freshState==='LIVE'||freshState==='CLOSED';
+ const canPreview=report.ok&&report.rows.length>=7&&!report.stale&&sourceFresh;
  const plot=card.querySelector('.ctRefNavOverviewChart');
  if(canPreview){
   const rows=report.rows,first=rows[0],last=rows[rows.length-1];
@@ -116,7 +121,7 @@ function overviewShortcut(report){
   card.dataset.ctReference='REFERENCE_ONLY';
   if(plot){plot.replaceChildren(makeChart(rows));plot.hidden=false}
  }else{
-  info.textContent='참고 NAV 미표시 · '+(!report.ok?report.reason:report.stale?'최신 관측 지연':'관측 7일 미만')+
+  info.textContent='참고 NAV 미표시 · '+(!report.ok?report.reason:!sourceFresh?'현재 계좌 원천 최신성 검증 대기':report.stale?'최신 관측 지연':'관측 7일 미만')+
    ' · 투자수익률·손익과 구분';
   card.dataset.ctReference='WAITING';
   if(plot){plot.replaceChildren();plot.hidden=true}
