@@ -221,3 +221,132 @@ html[data-ct-human-ui="v2"] .ctHumanV2NavHero strong[data-ct-nav-trust="BLOCKED"
  html[data-ct-human-ui="v2"] #ctHumanQuickV2 #ctHumanTripodHomeV1{grid-column:1;grid-row:4}
  html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2Drivers{grid-column:2;grid-row:3/5}
 }
+
+/* Decision-first UX polish, 2026-11-16. Presentational only. No source calculations. */
+html[data-ct-human-ui="v2"] #ctHumanQuickV2{
+ padding:18px;border-color:#dbe3ec;border-radius:18px;
+ box-shadow:0 5px 20px rgba(18,42,74,.045)
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickHead{margin-bottom:4px}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickHead>strong{
+ font-size:18px;letter-spacing:-.025em;color:#192e47
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickHead>span{
+ color:#66758a;font-size:11px;line-height:1.55
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickHead>span[data-ct-freshness="BLOCKED"]{
+ color:#99621d;font-weight:750
+}
+html[data-ct-human-ui="v2"] #ctHumanQuickV2 .ctHumanV2NavHero{
+ margin:0 0 12px;padding:10px 0 16px;border-bottom:1px solid #e6ebf2;gap:4px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2NavHero small:first-child{font-size:12px;color:#536883}
+html[data-ct-human-ui="v2"] .ctHumanV2NavHero strong{
+ font-size:clamp(27px,5.3vw,39px);letter-spacing:-.035em
+}
+html[data-ct-human-ui="v2"] .ctHumanV2NavHero small:last-child{
+ font-size:11px;color:#6c7f94
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickGrid{gap:9px}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric{
+ padding:12px;background:#f4f7fb;border:1px solid #edf1f6;border-radius:12px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric>span{
+ font-size:12px;font-weight:750;color:#53647a
+}
+html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric>strong{
+ font-size:clamp(19px,3vw,24px);color:#1d334e;margin:5px 0
+}
+html[data-ct-human-ui="v2"] #ctHumanTripodHomeV1{
+ margin-top:12px;border-radius:13px;border-color:#d7e3f0;background:#f8fbff;
+ padding:14px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead strong{
+ font-size:14px;letter-spacing:-.015em
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodHead button{
+ font-size:12px;background:#fff;min-height:44px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodDecision{
+ display:inline-block;max-width:100%;margin:11px 0 0;
+ padding:7px 10px;background:#e8f0fa;color:#224c78;
+ border-radius:8px;font-size:12px;font-weight:820;line-height:1.5;
+ overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] #ctHumanTripodHomeV1[data-ct-tripod-trust="BLOCKED"]{
+ background:#fffaf3;border-color:#ead8b9
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodValue{
+ font-size:17px;margin-top:9px;color:#182f4a;line-height:1.4
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodNote{
+ font-size:11px;line-height:1.55;color:#61748b
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts{
+ margin-top:12px;gap:7px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts>div{
+ border-color:#e2eaf4;border-radius:9px;padding:9px 10px
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts small{
+ font-size:11px;color:#64748b
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts b{
+ font-size:14px;color:#1d385b
+}
+html[data-ct-human-ui="v2"] .ctHumanV2TripodFoot{font-size:11px}
+html[data-ct-human-ui="v2"] .ctHumanV2Drivers{
+ padding:12px;border-color:#e1e8f0;background:#f8fafc
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRows{gap:7px}
+html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{
+ border-color:#edf0f5;border-radius:11px;transition:border-color .15s ease,background .15s ease
+}
+html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow:hover{
+ background:#f6faff;border-color:#cedbea
+}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverTrack{height:9px}
+html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong{
+ color:#233d5b
+}
+@media(max-width:479px){
+ html[data-ct-human-ui="v2"] body #ctHumanQuickV2{
+  padding:13px;margin:8px 0 12px;border-radius:15px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickHead{gap:3px;align-items:flex-start}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickHead>strong{font-size:17px}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickHead>span{font-size:10px;width:100%}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric{padding:10px 9px}
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric>strong{
+  font-size:18px;line-height:1.3
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2QuickMetric>small{font-size:11px}
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:6px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts>div:last-child:nth-child(odd){
+  grid-column:1/-1
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts>div{
+  padding:8px 10px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2TripodFacts b{font-size:14px}
+ html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{
+  grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;padding:10px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2DriverLabel{
+  grid-column:1;grid-row:1;font-size:13px
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2DriverRow strong{
+  grid-column:2;grid-row:1;font-size:13px;text-align:right
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2DriverTrack{
+  grid-column:1/-1;grid-row:2
+ }
+ html[data-ct-human-ui="v2"] .ctHumanV2DriverRow small{
+  grid-column:1/-1;grid-row:3;text-align:left
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-ct-human-ui="v2"] button.ctHumanV2DriverRow{transition:none}
+}
