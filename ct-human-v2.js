@@ -261,12 +261,10 @@ function ensureQuickView(){
  // A blank day-P&L bar is not a data visualization. When a common-day P&L
  // cannot be reconciled, use independently available same-snapshot account NAV
  // to show allocation instead (NOT profit, period change or investment return).
- const navShareReady=!comparable&&snapshotAligned&&m.nav>0
+ const navShareReady=snapshotAligned&&m.nav>0
    &&accounts.every(a=>a.nav!=null&&a.nav>=0)
    &&Math.abs(accounts.reduce((v,a)=>v+a.nav,0)-m.nav)<=2;
- const ordered=comparable?accounts.slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)||a.index-b.index):
-   navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
- const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
+ const ordered=navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
  const accountSignature=accounts.map(a=>[a.id,a.day,a.nav,a.kind,a.scope].join(':')).join(',');
  const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,m.nav,isFresh,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
  if(box.dataset.signature===signature)return;
@@ -295,16 +293,11 @@ function ensureQuickView(){
   if(amount==='합산 확인 대기'||amount==='확인 대기')v.classList.add('is-pending');
   item.append(l,v,n);grid.append(item);
  }
- const footer=document.createElement('div');footer.className='ctHumanV2QuickFoot';
- const text=document.createElement('span');text.textContent='TRI-POD는 별도 계좌가 아닌 Toss 내 전략입니다.';
- const link=document.createElement('button');link.type='button';link.dataset.ctOpen='compare';link.textContent='성과 자세히 보기';
- footer.append(text,link);
  const drivers=document.createElement('section');drivers.className='ctHumanV2Drivers';
  drivers.setAttribute('aria-label','계좌별 투자손익 영향');
  const driverHeader=document.createElement('div');driverHeader.className='ctHumanV2DriversHeader';
- const driverTitle=document.createElement('strong');driverTitle.textContent=comparable?'계좌별 손익 영향':navShareReady?'4계좌 현재 순자산 비중':'계좌별 손익 검증 대기';
- const driverMeta=document.createElement('small');driverMeta.textContent=!snapshotAligned?'스냅샷 연결 확인 필요 · 그래프 미표시':comparable?'동일 기준기간 · 손익규모순':
-  navShareReady?'동일 스냅샷의 현재 NAV 구성 · 투자손익 아님':'손익·NAV 원천 확인 대기 · 빈 그래프는 숨김';
+ const driverTitle=document.createElement('strong');driverTitle.textContent=navShareReady?'4계좌 현재 순자산 비중':'4계좌 자산구성 확인 대기';
+ const driverMeta=document.createElement('small');driverMeta.textContent=navShareReady?'현재 NAV 큰 순서 · 투자손익 막대가 아님':'스냅샷/4계좌 NAV 검증 전 비중 미표시';
  driverHeader.append(driverTitle,driverMeta);
  const list=document.createElement('div');list.className='ctHumanV2DriverRows';
  for(const a of ordered){
@@ -314,11 +307,7 @@ function ensureQuickView(){
   const track=document.createElement('span');track.className='ctHumanV2DriverTrack';
   track.setAttribute('aria-hidden','true');
   const bar=document.createElement('span');bar.className='ctHumanV2DriverBar';
-  if(comparable&&a.day!=null&&maxDay>0){
-   bar.style.width=(100*Math.abs(a.day)/maxDay).toFixed(1)+'%';
-   bar.dataset.direction=a.day<0?'down':a.day>0?'up':'flat';
-   track.dataset.ctMetric='DAY_PNL_MAGNITUDE';
-  }else if(navShareReady){
+  if(navShareReady){
    bar.style.width=(100*a.nav/m.nav).toFixed(1)+'%';
    bar.dataset.direction='nav';
    track.dataset.ctMetric='NAV_SHARE';
@@ -327,23 +316,15 @@ function ensureQuickView(){
   }
   track.append(bar);
   const amount=document.createElement('strong');
-  amount.textContent=!snapshotAligned?'동기화 확인 대기':comparable?formattedAmount(a.day):
-   navShareReady?('₩'+Math.round(a.nav).toLocaleString('ko-KR')+' · '+(100*a.nav/m.nav).toFixed(1)+'%'):'손익 비교 대기';
-  amount.dataset.direction=comparable?(a.day<0?'down':a.day>0?'up':'flat'):'unknown';
+  amount.textContent=navShareReady?('₩'+Math.round(a.nav).toLocaleString('ko-KR')+' · '+(100*a.nav/m.nav).toFixed(1)+'%'):'금액 검증 대기';
+  amount.dataset.direction='unknown';
   const source=document.createElement('small');
-  source.textContent=!snapshotAligned?'원천 동기화 확인 필요':comparable?({BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요'):
-   navShareReady?'현재 NAV 잔액의 구성비 · 수익률 아님':'동일 기간 4계좌 손익 대사 필요';
+  source.textContent=!navShareReady?'동기화·원천 확인 필요':comparable&&a.day!=null?
+   ('같은 기간 투자손익 '+formattedAmount(a.day)+' · 현재 NAV와 별개'):'현재 NAV 비중 · 손익기간 비교 대기';
   item.append(name,track,amount,source);list.append(item);
  }
  drivers.append(driverHeader,list);
- const actions=document.createElement('nav');actions.className='ctHumanV2QuickPaths';
- actions.setAttribute('aria-label','자주 찾는 투자 분석');
- for(const [id,label] of [['accounts','계좌 상세'],['portfolio','보유분석'],['compare','성과분석'],['tripod','TRI-POD'],['quality','데이터품질']]){
-  if(!knownTabs().some(t=>t.dataset.tab===id))continue;
-  const action=document.createElement('button');action.type='button';action.dataset.ctOpen=id;action.textContent=label;
-  actions.append(action);
- }
- box.append(heading,heroNav,grid,homeTripodCard(tp),drivers,footer,actions);
+ box.append(heading,heroNav,grid,homeTripodCard(tp),drivers);
 }
 function showOldModeShortcut(){
  const top=qs('.top');if(!top||qs('#ctHumanV2Activate'))return;
