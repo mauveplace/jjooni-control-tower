@@ -65,7 +65,8 @@ function rail(m){
   +note('TRIPOD 낙폭 조건 · DD -9%',m.axis.tri,m.differences.tri)
   +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
   +'TRIPOD은 상승 레짐·DD -9% 이내·VIX10&lt;28을 함께 확인하며, NOPOD도 하락 레짐과 VIX10≥18 확인이 필요합니다.</p>'
-  +'<p class="ov3Small">공식 Nasdaq EOD 독립검증 전 · 완료세션 날짜 유지 · 주문 신호 아님</p></section>';
+  +'<p class="ov3Small">하락 레짐 전환 후보와 NO-POD 과거 진입일 고정선·손절선은 다른 값입니다. 공식 Nasdaq EOD 독립검증 전 · 완료세션 날짜 유지 · 주문 신호 아님</p>'
+   +'<button class="ov3DetailLink" type="button" data-ov3-tab="jjooni-tripod">NO-POD 진입 고정 기준점·손절선 상세 보기</button></section>';
 }
 function marketStrip(m){
  const picks=['NASDAQ100','SP500','SOX','VIX'].map(k=>m.us.find(x=>x.key===k)).filter(x=>x&&finite(x.value)&&x.date===m.session);
@@ -127,6 +128,11 @@ function mount(){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
  const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261117-v3a';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
+ shell.addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-ov3-tab]');
+  if(!btn)return;
+  if(btn.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
+ });
  let current=null,pending=null,last=0;
  async function update(force=false){
   if(pending)return pending;
