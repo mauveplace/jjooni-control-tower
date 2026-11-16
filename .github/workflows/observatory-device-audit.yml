@@ -31,6 +31,13 @@ jobs:
       - run: node --test tests/today-v2.test.cjs && node tests/today-v2-e2e.cjs
       - run: node tests/observatory-v2-skin-e2e.cjs
       - run: node tests/observatory-v3-e2e.cjs
+      - name: Upload V3 preview screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-v3-preview
+          path: /tmp/obs-v3-*.png
+          if-no-files-found: ignore
       - run: node tests/observatory-status-e2e.cjs
       - run: node tests/collector-schedule-e2e.cjs
       - run: node tests/regime-consensus-e2e.cjs
