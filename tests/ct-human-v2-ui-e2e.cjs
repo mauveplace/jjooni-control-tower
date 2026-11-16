@@ -39,10 +39,12 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.equal(await page.locator('#ctHumanV2QuickV2').count(),0,'no duplicate overview');
    const driverRows=page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow');
    assert.equal(await driverRows.count(),4,'all four original accounts remain represented');
-   assert.match(await driverRows.first().innerText(),/IRP/,'comparable P&L sorted by absolute impact');
-   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths button').count(),5,'relevant original analysis panels accessible');
-   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths').isVisible(),width>=768,
-    'Overview quick-link bar must not duplicate mobile primary navigation');
+   assert.match(await driverRows.first().innerText(),/Toss/,'allocation stays NAV ordered');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickPaths').count(),0,'duplicate quick links removed');
+   assert.equal(await page.locator('#ctHumanTripodHomeV1').count(),1,'one TRI-POD overview card');
+   assert.equal(await page.locator('#ctHumanTripodHomeV1').getAttribute('data-ct-tripod-trust'),'BLOCKED');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2NavHero strong').innerText(),'₩4,000');
+   assert.equal(await page.locator('#panel-overview .ctOvHero').isVisible(),false,'no duplicated legacy Hero in V2');
    if(width>=1080)assert.equal(await page.locator('#ctHumanQuickV2').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2,'desktop has two-column concise insight');
    const nav=page.locator('#ctHumanBottomV2');
    if(width<768){
@@ -113,15 +115,18 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
     document.dispatchEvent(new Event('jjooni:live-applied'));
    });
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('합산 확인 대기'));
-   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriversHeader').innerText(),/현재 NAV 구성 · 투자손익 아님/,'incomparable daily PnL must be replaced with current NAV allocation');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2NavHero strong').innerText(),'원천 검증 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack:not([hidden])').count(),0);
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
+   assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'no stale performance amount');
+   await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.stale_after_kst=new Date(Date.now()+600000).toISOString();document.dispatchEvent(new Event('jjooni:live-applied'))});
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2DriverTrack[data-ct-metric="NAV_SHARE"]'));
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack[data-ct-metric="NAV_SHARE"]').count(),4);
    assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow').first().innerText(),/25\.0%/);
-   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
-   assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'must not display invented full day P&L when missing');
    await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.IRP.nav=null;document.dispatchEvent(new Event('jjooni:live-applied'))});
    await page.waitForFunction(()=>document.querySelector('.ctHumanV2DriverTrack[hidden]'));
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack:not([hidden])').count(),0,'missing NAV and PnL cannot produce fake bars');
-   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/빈 그래프는 숨김/);
+   assert.match(await page.locator('#ctHumanQuickV2').innerText(),/NAV 검증 전 비중 미표시/);
    await page.evaluate(()=>{window.__JJOONI_CANONICAL_SSOT.accounts.IRP.nav=1000;document.dispatchEvent(new Event('jjooni:live-applied'))});
 
    // If canonical and browser-live IDs diverge, every displayed day/flow
@@ -136,7 +141,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/스냅샷 정합성 확인 대기/);
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'합산 확인 대기');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'확인 대기');
-   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'동기화 확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'금액 검증 대기');
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100|\+₩500/,'mismatched sources must not show live values');
    await page.evaluate(()=>{
     window.__JJOONI_LIVE_PAYLOAD.snapshot_id=window.__JJOONI_CANONICAL_SSOT.snapshot_id;
@@ -152,7 +157,7 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('계좌 동기화 확인 대기'));
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').first().innerText(),'합산 확인 대기');
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric strong').nth(1).innerText(),'확인 대기');
-   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'동기화 확인 대기');
+   assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow strong').first().innerText(),'금액 검증 대기');
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/계좌 동기화 불일치/,'missing source is not proven mismatched data');
    await page.evaluate(()=>{
     const C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD;
