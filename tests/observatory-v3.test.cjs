@@ -30,6 +30,7 @@ test('V3 threshold numbers from same-session published canonical, never generate
  assert.equal(m.referenceOnly,true);
  assert.equal(m.noTrade,true);
  assert.match(rail(m),/NO.*TRADE|주문 신호 아님/);
+ assert.match(rail(m),/NO-POD 진입 고정 기준점·손절선 상세 보기/);
  assert.match(marketStrip(m),/MARKET CLOSE/);
  assert.equal(m.sectors.length,11);
  assert.match(sectorChart(m),/자금흐름 아님/);
