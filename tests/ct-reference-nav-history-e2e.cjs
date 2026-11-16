@@ -17,11 +17,11 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    await page.goto('https://reference.fixture.test/?ctui=v2');
    await page.evaluate(()=>{window.__JJOONI_CT_HUMAN_V2={mode:'v2'};
      window.__JJOONI_CANONICAL_SSOT={snapshot_id:'synthetic'};
-     window.__JJOONI_LIVE_PAYLOAD={snapshot_id:'synthetic'};});
+     window.__JJOONI_LIVE_PAYLOAD={snapshot_id:'synthetic'};window.JjooniMetrics={freshness:l=>({state:l.__stale?'STALE':'LIVE'})};});
    await page.addScriptTag({content:read('ct-reference-nav-history-v1.js')});
    await page.waitForSelector('#ctReferenceNavHistoryV1');
    await page.waitForSelector('#ctReferenceNavOverviewV1');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/관측 NAV 그래프 표시 불가/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/참고 NAV 미표시/);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'unverified history may not draw a NAV plot');
    await page.evaluate(()=>{
     window.__NAV_CLICK_COUNT=0;
@@ -38,7 +38,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
       const quality='REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE';
       const now=new Date(),midnight=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate());
       const kstDate=millis=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(millis));
-      const days=[4,2,1].map((offset,i)=>{
+      const days=[9,8,7,6,3,2,1].map((offset,i)=>{
        const ms=midnight-offset*86400000;
        const d=kstDate(ms);
        return {date:d,generated_kst:d+'T09:00:00+09:00',source_snapshot_id:'test'+i,source_quality:quality,legacy_tripod_excluded:i===0,total_four_nav_krw:1000+i*123};
@@ -52,27 +52,34 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
       document.dispatchEvent(new Event('jjooni:live-applied'));
    });
    await page.waitForFunction(()=>document.querySelectorAll('#ctReferenceNavHistoryV1 svg').length===1);
-   assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg circle').count(),3);
+   assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg circle').count(),7);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),1,'Overview must display real sourced NAV chart, not only a button');
-   assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg circle').count(),3,'source-only points and no invented interpolation');
+   assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg circle').count(),7,'source-only points and no invented interpolation');
    assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자수익률·손익 아님/);
    assert((await page.locator('#ctReferenceNavOverviewV1 svg').boundingBox()).height>60,'visible plot height required');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/실제 관측 3일/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/7일 관측/);
    assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자수익률·손익 아님/);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1').count(),1);
 
-   assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg polyline').count(),1,'missing-day lines must not connect across gap');
+   assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg polyline').count(),2,'missing-day lines must not connect across gap');
    assert.match(await page.locator('#ctReferenceNavHistoryV1').innerText(),/투자손익 아님/);
    assert.match(await page.locator('#ctReferenceNavHistoryV1').innerText(),/기록 없는 날짜/);
    assert.match(await page.locator('#ctLegacyCompare').innerText(),/기존 성과분석 유지/);
    assert.match(await page.locator('#ctVerifiedPerformanceHistoryV1').innerText(),/별도 검증된 성과 그래프/);
    const layout=await page.evaluate(()=>({inner:innerWidth,scroll:document.documentElement.scrollWidth}));
    assert(layout.scroll<=layout.inner+1,JSON.stringify(layout));
+   await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.__stale=true;document.dispatchEvent(new Event('jjooni:live-applied'))});
+   await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='WAITING');
+   assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'stale live account facts must suppress overview NAV chart');
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/현재 계좌 원천 최신성 검증 대기/);
+   await page.evaluate(()=>{delete window.__JJOONI_LIVE_PAYLOAD.__stale;document.dispatchEvent(new Event('jjooni:live-applied'))});
+   await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='REFERENCE_ONLY');
+   assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg circle').count(),7,'fresh live source restores real points');
    await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.reference_nav_history.bound_snapshot_id='wrong';document.dispatchEvent(new Event('jjooni:live-applied'))});
    await page.waitForFunction(()=>document.querySelectorAll('#ctReferenceNavHistoryV1 svg').length===0);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'invalid binding must immediately clear Overview chart');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/관측 NAV 그래프 표시 불가/);
-   assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/실제 관측 3일/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/참고 NAV 미표시/);
+   assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/7일 관측/);
 
    assert.equal(await page.locator('#ctReferenceNavHistoryV1').count(),1);
    assert.deepEqual(errors,[],'errors: '+errors.join(','));
