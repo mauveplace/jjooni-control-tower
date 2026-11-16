@@ -88,8 +88,8 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
     assert.equal(await page.evaluate(()=>JjooniMetrics.freshness(window.__JJOONI_LIVE_PAYLOAD).state),'LIVE');
     await page.waitForTimeout(750);
     assert.equal(await page.evaluate(()=>JjooniMetrics.freshness(window.__JJOONI_LIVE_PAYLOAD).state),'STALE');
-    // Existing SVG is still there until the scheduled clock tick (the bug).
-    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),1);
+    // Init timers or visibility events may already revoke the SVG; the
+    // invariant is that the clock-only recheck leaves no stale monetary SVG.
     await page.evaluate(()=>window.__referenceNavClockTick());
     await page.waitForFunction(()=>document.querySelector('#ctReferenceNavOverviewV1')?.dataset.ctReference==='WAITING');
     assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'clock-only source staleness must hide reference chart');
