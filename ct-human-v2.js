@@ -193,7 +193,11 @@ function homeTripodCard(tp){
  const title=document.createElement('strong');title.textContent='TRI-POD · 전략 요약';
  const link=document.createElement('button');link.type='button';link.dataset.ctOpen='tripod';link.textContent='전략 상세';
  header.append(title,link);card.append(header);
- const trusted=tp?.trusted===true&&typeof tp.date==='string'&&tp.date.length===10;
+ const date=String(tp?.date||'');
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const age=/^20\d{2}-\d\d-\d\d$/.test(date)?Math.round((Date.parse(today+'T12:00:00+09:00')-Date.parse(date+'T12:00:00+09:00'))/86400000):null;
+ const trusted=tp?.trusted===true&&tp?.marketDate===date&&age!=null&&age>=0&&age<=4&&
+  ['regime','target','action'].every(k=>typeof tp[k]==='string'&&tp[k].trim().length>0);
  const value=document.createElement('strong');value.className='ctHumanV2TripodValue';
  const status=document.createElement('p');status.className='ctHumanV2TripodNote';
  if(!trusted){
@@ -230,15 +234,17 @@ function ensureQuickView(){
  const panel=qs('#panel-overview'),C=window.__JJOONI_CANONICAL_SSOT,L=window.__JJOONI_LIVE_PAYLOAD,M=window.JjooniMetrics;
  if(!panel||!C?.accounts||!M?.aggregate||!M?.freshness)return;
  const m=M.aggregate(C.accounts,IDS);
+ const f=M.freshness(L||{});
+ const isFresh=f.state==='LIVE'||f.state==='CLOSED';
  const tp=window.__JJOONI_TRIPOD_DAILY_FRESHNESS_V35?.last||null;
  // Both source snapshot IDs are required before a combined financial display.
  // Missing IDs or divergent snapshots suppress P&L and net flows together.
- const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
+ const snapshotAligned=isFresh&&Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);
  let box=qs('#ctHumanQuickV2',panel);
  if(!box){
   box=document.createElement('section');box.id='ctHumanQuickV2';box.setAttribute('aria-label','오늘의 투자 변화');
   const hero=qs('.ctOvHero',panel);
-  if(hero)hero.insertAdjacentElement('afterend',box);else panel.prepend(box);
+  if(hero)hero.insertAdjacentElement('beforebegin',box);else panel.prepend(box);
   box.addEventListener('click',e=>{
    const b=e.target.closest('button[data-ct-open]');if(b)activate(b.dataset.ctOpen);
   });
@@ -262,14 +268,24 @@ function ensureQuickView(){
    navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
  const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
  const accountSignature=accounts.map(a=>[a.id,a.day,a.nav,a.kind,a.scope].join(':')).join(',');
- const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
+ const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,m.nav,isFresh,dayText,dayNote,flowText,statusText(L||{},M),accountSignature,tp?.trusted,tp?.date,tp?.regime,tp?.target,tp?.action,tp?.vix10,tp?.ma250_gap_pct,tp?.drawdown_52w_pct].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
  box.replaceChildren();
  const heading=document.createElement('div');heading.className='ctHumanV2QuickHead';
- const title=document.createElement('strong');title.textContent='오늘의 투자 변화';
- const stamp=document.createElement('span');const syncNotice=snapshotAligned?'':(!C.snapshot_id||!L?.snapshot_id?'⚠ 계좌 동기화 확인 대기 · ':'⚠ 계좌 동기화 불일치 · ');stamp.textContent=syncNotice+statusText(L||{},M);
+ const title=document.createElement('strong');title.textContent='내 투자자산 · 4계좌';
+ const stamp=document.createElement('span');const syncNotice=!isFresh?'⚠ 원천 최신성 확인 필요 · ':snapshotAligned?'':(!C.snapshot_id||!L?.snapshot_id?'⚠ 계좌 동기화 확인 대기 · ':'⚠ 계좌 동기화 불일치 · ');stamp.textContent=syncNotice+statusText(L||{},M);
  heading.append(title,stamp);
+ const heroNav=document.createElement('div');heroNav.className='ctHumanV2NavHero';
+ const navLabel=document.createElement('small');navLabel.textContent='Toss · ISA · 연금저축 · IRP 순자산';
+ const navNumber=document.createElement('strong');
+ const navReady=snapshotAligned&&m.nav>0&&IDS.every(id=>M.number(C.accounts[id]?.nav)!=null)&&
+  Math.abs(IDS.reduce((sum,id)=>sum+Number(C.accounts[id].nav),0)-m.nav)<=2;
+ navNumber.textContent=navReady?'₩'+Math.round(m.nav).toLocaleString('ko-KR'):'원천 검증 대기';
+ navNumber.dataset.ctNavTrust=navReady?'VERIFIED':'BLOCKED';
+ const navNote=document.createElement('small');navNote.textContent=navReady?'동일 스냅샷 4/4계좌 · TRI-POD 중복합산 제외':
+  '동기화·최신성 또는 4계좌 NAV 확인 필요 · 검증 전 총액 숨김';
+ heroNav.append(navLabel,navNumber,navNote);
  const grid=document.createElement('div');grid.className='ctHumanV2QuickGrid';
  for(const [label,amount,note] of [['투자손익',dayText,dayNote],['순입출금',flowText,'투자손익과 분리 · 원천 제공 기간']]){
   const item=document.createElement('div');item.className='ctHumanV2QuickMetric';
@@ -327,7 +343,7 @@ function ensureQuickView(){
   const action=document.createElement('button');action.type='button';action.dataset.ctOpen=id;action.textContent=label;
   actions.append(action);
  }
- box.append(heading,grid,homeTripodCard(tp),drivers,footer,actions);
+ box.append(heading,heroNav,grid,homeTripodCard(tp),drivers,footer,actions);
 }
 function showOldModeShortcut(){
  const top=qs('.top');if(!top||qs('#ctHumanV2Activate'))return;
@@ -359,4 +375,5 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueUpdat
 window.setTimeout(update,0);
 window.setTimeout(update,800);
 window.setTimeout(update,2200);
+window.setInterval(queueUpdate,60000); // local-only freshness checks, no API calls
 })();
