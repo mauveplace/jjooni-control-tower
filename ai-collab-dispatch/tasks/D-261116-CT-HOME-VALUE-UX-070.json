@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261116-CT-HOME-VALUE-UX-070",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Owner explicitly requests JJOONI and ROY to re-evaluate whether the authenticated Investment Control Tower first Overview screen has real decision value, challenge content priority and UI/UX, develop source-grounded alternatives and ask owner to approve before any UI implementation. Review proposal docs/ct-home-value-first-ux-review-20261116.md and code on this PR exact HEAD. This is NOT the Observatory landing page.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ct_home_first_screen_ux_independent_challenge",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner 2026-11-16: '컨트롤타워 첫 화면.. 이게 진짜 나한테 의미가 있는 화면인지 전체적으로 로이랑 다시 협의하고 점검해봐 개선사항 발굴해서 나한테 확인받아 ui, ux적으로'. Authorizes design critique and review, not UI implementation/merge.",
+  "acceptance": [
+    "Read docs/ct-home-value-first-ux-review-20261116.md and original main ct-human-v2.js, ct-human-v2.css, ct-reference-nav-history-v1.js, ct-performance-history-v1.js, responsive-layout.css, index.html relevant loading portions; do not invent access to encrypted UI.",
+    "Be constructively critical: is first screen organized by owner decision or by whichever metrics happen to be available? Propose what to KEEP, DEMOTE, DELETE/CONSOLIDATE, and PROMOTE; identify exact JS/CSS source anchors.",
+    "Assess A decision-first layout vs B analytical and propose C if superior, including first 390px viewport and desktop IA, 10-second user questions, explicit action/next-click design.",
+    "Challenge NAV, same-snapshot P&L/flows and REFERENCE_ONLY history vs VERIFIED investment P&L tradeoffs, no blank or fabricated charts, overlapping 5 quick buttons / bottom menus, 4-account coverage and TRI-POD double counting.",
+    "List P0/P1/P2 product/UX issues and testability, 360/390/767/820/1363 screens, safe-area, single navigation owner, and legacy rollback. Do not claim authenticated screen verified.",
+    "Leave exactly one substantive ROY opinion on this PR with ROY_CT_HOME_UX_REVIEW=AGREE|AGREE_WITH_CHANGES|DISAGREE, reviewed_head full SHA, and authenticated_screen=UNVERIFIED unless actually measured, plus 3 concrete changes and 2 required validation steps. Source/CI review is not release approval.",
+    "No implementation, merge or deployment; owner explicitly approves final architecture first."
+  ],
+  "forbidden": [
+    "No private account figures, logs, screenshots, keys or personal finance information in public repo or PR",
+    "No new data collection, broker/API access, paid resources, cloud setup, or trading actions",
+    "No agent writes, no automated merge/deploy, no changes to strategy or NAV/P&L methodology",
+    "No duplicate recursive review events and no unsupported claim of actual ROY receipt"
+  ],
+  "coordination_notes": "One PR-opened opt-in task only; JJOONI leads UX proposal, ROY challenges once. Public source is encrypted for authenticated shell; source review must identify that limitation. This PR is docs-only and should remain unmerged pending owner approval."
+}
