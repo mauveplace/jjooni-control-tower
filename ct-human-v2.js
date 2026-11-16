@@ -210,11 +210,18 @@ function ensureQuickView(){
  const flowText=!snapshotAligned||m.flow==null?'확인 대기':formattedAmount(m.flow);
  const accounts=IDS.map((id,index)=>{
   const a=C.accounts[id]||{},day=snapshotAligned?M.number(a.today_pnl):null;
-  return {id,label:{TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'}[id],day,scope:String(a.today_pnl_scope||''),kind:String(a.today_pnl_quality||'UNKNOWN'),index};
+  return {id,label:{TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'}[id],day,nav:snapshotAligned?M.number(a.nav):null,scope:String(a.today_pnl_scope||''),kind:String(a.today_pnl_quality||'UNKNOWN'),index};
  });
- const ordered=comparable?accounts.slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)||a.index-b.index):accounts;
+ // A blank day-P&L bar is not a data visualization. When a common-day P&L
+ // cannot be reconciled, use independently available same-snapshot account NAV
+ // to show allocation instead (NOT profit, period change or investment return).
+ const navShareReady=!comparable&&snapshotAligned&&m.nav>0
+   &&accounts.every(a=>a.nav!=null&&a.nav>=0)
+   &&Math.abs(accounts.reduce((v,a)=>v+a.nav,0)-m.nav)<=2;
+ const ordered=comparable?accounts.slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)||a.index-b.index):
+   navShareReady?accounts.slice().sort((a,b)=>b.nav-a.nav||a.index-b.index):accounts;
  const maxDay=Math.max(0,...accounts.map(a=>a.day==null?0:Math.abs(a.day)));
- const accountSignature=accounts.map(a=>[a.id,a.day,a.kind,a.scope].join(':')).join(',');
+ const accountSignature=accounts.map(a=>[a.id,a.day,a.nav,a.kind,a.scope].join(':')).join(',');
  const signature=[C.snapshot_id,L?.snapshot_id,L?.generated_kst,dayText,dayNote,flowText,statusText(L||{},M),accountSignature].join('|');
  if(box.dataset.signature===signature)return;
  box.dataset.signature=signature;
@@ -239,8 +246,9 @@ function ensureQuickView(){
  const drivers=document.createElement('section');drivers.className='ctHumanV2Drivers';
  drivers.setAttribute('aria-label','계좌별 투자손익 영향');
  const driverHeader=document.createElement('div');driverHeader.className='ctHumanV2DriversHeader';
- const driverTitle=document.createElement('strong');driverTitle.textContent='계좌별 손익 영향';
- const driverMeta=document.createElement('small');driverMeta.textContent=!snapshotAligned?'스냅샷 불일치 · 계좌 비교 중단':comparable?'동일 기준기간 · 손익규모순':'계좌별 참고 · 합산 비교 불가';
+ const driverTitle=document.createElement('strong');driverTitle.textContent=comparable?'계좌별 손익 영향':navShareReady?'4계좌 현재 순자산 비중':'계좌별 손익 검증 대기';
+ const driverMeta=document.createElement('small');driverMeta.textContent=!snapshotAligned?'스냅샷 연결 확인 필요 · 그래프 미표시':comparable?'동일 기준기간 · 손익규모순':
+  navShareReady?'동일 스냅샷의 현재 NAV 구성 · 투자손익 아님':'손익·NAV 원천 확인 대기 · 빈 그래프는 숨김';
  driverHeader.append(driverTitle,driverMeta);
  const list=document.createElement('div');list.className='ctHumanV2DriverRows';
  for(const a of ordered){
@@ -250,12 +258,25 @@ function ensureQuickView(){
   const track=document.createElement('span');track.className='ctHumanV2DriverTrack';
   track.setAttribute('aria-hidden','true');
   const bar=document.createElement('span');bar.className='ctHumanV2DriverBar';
-  if(a.day!=null&&maxDay>0){bar.style.width=(100*Math.abs(a.day)/maxDay).toFixed(1)+'%';bar.dataset.direction=a.day<0?'down':a.day>0?'up':'flat'}
+  if(comparable&&a.day!=null&&maxDay>0){
+   bar.style.width=(100*Math.abs(a.day)/maxDay).toFixed(1)+'%';
+   bar.dataset.direction=a.day<0?'down':a.day>0?'up':'flat';
+   track.dataset.ctMetric='DAY_PNL_MAGNITUDE';
+  }else if(navShareReady){
+   bar.style.width=(100*a.nav/m.nav).toFixed(1)+'%';
+   bar.dataset.direction='nav';
+   track.dataset.ctMetric='NAV_SHARE';
+  }else{
+   track.hidden=true;
+  }
   track.append(bar);
-  const amount=document.createElement('strong');amount.textContent=!snapshotAligned?'동기화 확인 대기':a.day==null?'자료 없음':formattedAmount(a.day);
-  amount.dataset.direction=a.day==null?'unknown':a.day<0?'down':a.day>0?'up':'flat';
+  const amount=document.createElement('strong');
+  amount.textContent=!snapshotAligned?'동기화 확인 대기':comparable?formattedAmount(a.day):
+   navShareReady?('₩'+Math.round(a.nav).toLocaleString('ko-KR')+' · '+(100*a.nav/m.nav).toFixed(1)+'%'):'손익 비교 대기';
+  amount.dataset.direction=comparable?(a.day<0?'down':a.day>0?'up':'flat'):'unknown';
   const source=document.createElement('small');
-  source.textContent=!snapshotAligned?'원천 동기화 확인 필요':({BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요');
+  source.textContent=!snapshotAligned?'원천 동기화 확인 필요':comparable?({BROKER_MEASURED:'증권사 측정',MODELED:'모델 계산'}[a.kind]||'산정방식 확인 필요'):
+   navShareReady?'현재 NAV 잔액의 구성비 · 수익률 아님':'동일 기간 4계좌 손익 대사 필요';
   item.append(name,track,amount,source);list.append(item);
  }
  drivers.append(driverHeader,list);
