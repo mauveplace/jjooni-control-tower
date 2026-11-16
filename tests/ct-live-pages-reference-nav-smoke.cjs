@@ -3,8 +3,8 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=2';
-const HUMAN_SCRIPT='ct-human-v2.js?v=6';
+const VERIFIED_SCRIPT='ct-performance-history-v1.js?v=3';
+const HUMAN_SCRIPT='ct-human-v2.js?v=7';
 const humanGuard=script=>{assert(script.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),'HUMAN_SNAPSHOT_MISMATCH_GUARD_NOT_FOUND');assert(script.includes('⚠ 계좌 동기화 확인 대기')&&script.includes('⚠ 계좌 동기화 불일치'),'HUMAN_SYNC_COPY_NOT_CONDITIONAL');};
 const navGuard=(script,style,legacy)=>{
  assert(script.includes('function syncNavigationOwner()'),'HUMAN_NAV_OWNER_MISSING');
@@ -45,8 +45,8 @@ const fetchText=async path=>{
  let ready=false,index='',js='',css='',verified='',human='',responsive='',legacy='';
  for(let attempt=0;attempt<10;attempt++){
   [index,js,css,verified,human,responsive,legacy]=await Promise.all([
-   fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=2'),
-   fetchText('ct-reference-nav-history-v1.css?v=2'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=14.38-single-navigation')
+   fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=3'),
+   fetchText('ct-reference-nav-history-v1.css?v=3'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=14.38-single-navigation')
   ]);
   if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')&&legacy.includes('humanV2.enforceNavigation()')){ready=true;break}
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
@@ -56,7 +56,7 @@ const fetchText=async path=>{
  humanGuard(human);
  navGuard(human,responsive,legacy);
  assert(index.includes('responsive-layout.css?v=1.8-single-navigation'),'PAGES_ENTRY_OLD_RESPONSIVE_LAYOUT');
- assert(index.includes('ct-reference-nav-history-v1.js?v=2'),'PAGES_ENTRY_OLD_REFERENCE_SCRIPT');
+ assert(index.includes('ct-reference-nav-history-v1.js?v=3'),'PAGES_ENTRY_OLD_REFERENCE_SCRIPT');
  assert(index.includes(HUMAN_SCRIPT),'PAGES_ENTRY_MISSING_V2');
  assert(index.includes(VERIFIED_SCRIPT),'PAGES_ENTRY_MISSING_VERIFIED_HISTORY');
  assert(js.includes('function overviewShortcut(report)'),'LIVE_JS_MISSING_OVERVIEW_LINK');

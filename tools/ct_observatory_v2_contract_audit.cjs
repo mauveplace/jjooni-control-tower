@@ -33,7 +33,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=6'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=7'),'Human V2 cache version drift');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');
@@ -50,8 +50,8 @@ function inspect(){
    'actual boot loader cache version must be bumped with nav handoff');
  assert(read('ui-refactor.js').includes('responsive-layout.css?v=1.8-single-navigation'),
    'secondary CSS injection fallback still exposes stale layout');
- assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
- assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
+ assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=3'),'reference NAV module missing');
+ assert(rootHtml.includes('ct-performance-history-v1.js?v=3'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
  assert(human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),
    'live or canonical missing snapshot IDs must block account figures');
@@ -68,7 +68,13 @@ function inspect(){
  assert(humanCss.includes('safe-area-inset-bottom'),'Human safe area missing');
  assert(humanCss.includes('min-height:52px'),'Human tap target protection missing');
  assert(reference.includes('function overviewShortcut(report)'),'reference NAV not discoverable from Overview');
- assert(reference.includes('그래프 보기 · 성과 탭'),'missing direct NAV graph link');
+ assert(reference.includes('상세 그래프 · 성과 탭'),'reference NAV details link unavailable');
+ assert(reference.includes("plot.replaceChildren(makeChart(report.rows))")&&reference.includes("plot.replaceChildren();plot.hidden=true"),
+   'Overview reference plot must appear only for source-audited history and clear on mismatch');
+ assert(human.includes("track.dataset.ctMetric='NAV_SHARE'")&&human.includes('navShareReady'),
+   'comparable NAV allocation fallback missing when P&L evidence cannot be reconciled');
+ assert(performance.includes('ctPerfHistoryUnavailable')&&performance.includes('return;'),
+   'unverified 3 charts must collapse into explicit evidence blocker');
  assert(reference.includes('REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE'),'reference NAV mislabeled as profit');
  assert(performance.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'KRW bridge tolerance weakened');
  assert(performance.includes('zonedTime(history.verified_at_kst)'),'untrusted history timestamp');

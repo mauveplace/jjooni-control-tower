@@ -66,6 +66,17 @@ html[data-ct-human-ui="v2"] .ctRefNavOverviewTitle{
 html[data-ct-human-ui="v2"] .ctRefNavOverviewInfo{
  font-size:12px;color:#566b82;line-height:1.5;flex:1 1 180px
 }
+/* Real reference observations belong in the default screen, not behind a
+   second tap. No price/P&L can be inferred from these cash-flow-blind NAVs. */
+html[data-ct-human-ui="v2"] .ctRefNavOverviewChart{
+ width:100%;flex:1 1 100%;min-width:0;margin:5px 0 2px;padding:9px 8px 5px;
+ border:1px solid #e0eaf5;background:#fff;border-radius:11px
+}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewChart[hidden]{display:none!important}
+html[data-ct-human-ui="v2"] .ctRefNavOverviewChart svg{
+ display:block;width:100%;height:auto;max-height:205px;min-height:95px;
+ overflow:visible
+}
 html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen{
  font-size:13px;font-weight:760;min-height:44px;cursor:pointer;
  border:1px solid #b9cee7;background:#fff;color:#1b568d;
@@ -82,4 +93,5 @@ html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen:focus-visible{
  html[data-ct-human-ui="v2"] .ctRefNavOverviewTitle{grid-column:1}
  html[data-ct-human-ui="v2"] .ctRefNavOverviewInfo{grid-column:1;grid-row:2}
  html[data-ct-human-ui="v2"] .ctRefNavOverviewOpen{grid-column:2;grid-row:1/3;max-width:128px}
+ html[data-ct-human-ui="v2"] .ctRefNavOverviewChart{grid-column:1/-1;grid-row:auto;padding:7px}
 }
