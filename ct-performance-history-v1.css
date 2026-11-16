@@ -63,3 +63,22 @@ html[data-ct-human-ui="v2"] .ctPerfHistoryDetail :is(th,td):first-child{text-ali
  html[data-ct-human-ui="v2"] .ctPerfHistoryCard{padding:12px}
  html[data-ct-human-ui="v2"] .ctPerfHistoryGrid{grid-template-columns:minmax(0,1fr)}
 }
+/* A data-contract BLOCKED state is not an empty chart: one readable decision. */
+html[data-ct-human-ui="v2"] .ctPerfHistoryUnavailable{
+ padding:16px;margin-top:11px;border-radius:12px;
+ border:1px solid #d5dfeb;background:#f7f9fc;color:#293c57
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryUnavailable h3{
+ margin:0 0 10px;font-size:16px;line-height:1.5
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryUnavailable p{
+ margin:8px 0;font-size:13px;line-height:1.6;overflow-wrap:anywhere
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryUnavailable .ctPerfHistoryNeeds{
+ color:#52667e;border-top:1px solid #dbe5f0;padding-top:9px;font-weight:700
+}
+html[data-ct-human-ui="v2"] .ctPerfHistoryUnavailable button{
+ min-height:44px;margin-top:8px;background:#fff;color:#1c619c;
+ padding:8px 14px;font:750 13px/1.4 system-ui,sans-serif;
+ border:1px solid #b7cde6;border-radius:9px;cursor:pointer
+}
