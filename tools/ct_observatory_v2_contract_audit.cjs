@@ -33,7 +33,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=6'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=7'),'Human V2 cache version drift');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');
@@ -50,8 +50,8 @@ function inspect(){
    'actual boot loader cache version must be bumped with nav handoff');
  assert(read('ui-refactor.js').includes('responsive-layout.css?v=1.8-single-navigation'),
    'secondary CSS injection fallback still exposes stale layout');
- assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=2'),'reference NAV module missing');
- assert(rootHtml.includes('ct-performance-history-v1.js?v=2'),'verified P&L module missing');
+ assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=3'),'reference NAV module missing');
+ assert(rootHtml.includes('ct-performance-history-v1.js?v=3'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
  assert(human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),
    'live or canonical missing snapshot IDs must block account figures');
