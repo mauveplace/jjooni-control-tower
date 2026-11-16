@@ -68,7 +68,13 @@ function inspect(){
  assert(humanCss.includes('safe-area-inset-bottom'),'Human safe area missing');
  assert(humanCss.includes('min-height:52px'),'Human tap target protection missing');
  assert(reference.includes('function overviewShortcut(report)'),'reference NAV not discoverable from Overview');
- assert(reference.includes('그래프 보기 · 성과 탭'),'missing direct NAV graph link');
+ assert(reference.includes('상세 그래프 · 성과 탭'),'reference NAV details link unavailable');
+ assert(reference.includes("plot.replaceChildren(makeChart(report.rows))")&&reference.includes("plot.replaceChildren();plot.hidden=true"),
+   'Overview reference plot must appear only for source-audited history and clear on mismatch');
+ assert(human.includes("track.dataset.ctMetric='NAV_SHARE'")&&human.includes('navShareReady'),
+   'comparable NAV allocation fallback missing when P&L evidence cannot be reconciled');
+ assert(performance.includes('ctPerfHistoryUnavailable')&&performance.includes('return;'),
+   'unverified 3 charts must collapse into explicit evidence blocker');
  assert(reference.includes('REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE'),'reference NAV mislabeled as profit');
  assert(performance.includes('const near=(a,b)=>Math.abs(a-b)<=2;'),'KRW bridge tolerance weakened');
  assert(performance.includes('zonedTime(history.verified_at_kst)'),'untrusted history timestamp');
