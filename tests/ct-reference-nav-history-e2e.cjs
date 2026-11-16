@@ -11,7 +11,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.route('https://reference.fixture.test/**',route=>{
-     if(route.request().url().endsWith('.css?v=2'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
+     if(route.request().url().endsWith('.css?v=3'))return route.fulfill({contentType:'text/css',body:read('ct-reference-nav-history-v1.css')});
      return route.fulfill({contentType:'text/html',body:fixture});
    });
    await page.goto('https://reference.fixture.test/?ctui=v2');
@@ -21,7 +21,7 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    await page.addScriptTag({content:read('ct-reference-nav-history-v1.js')});
    await page.waitForSelector('#ctReferenceNavHistoryV1');
    await page.waitForSelector('#ctReferenceNavOverviewV1');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/참고 NAV 검증 대기/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/관측 NAV 그래프 표시 불가/);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'unverified history may not draw a NAV plot');
    await page.evaluate(()=>{
     window.__NAV_CLICK_COUNT=0;
@@ -57,8 +57,8 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg circle').count(),3,'source-only points and no invented interpolation');
    assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자수익률·손익 아님/);
    assert((await page.locator('#ctReferenceNavOverviewV1 svg').boundingBox()).height>60,'visible plot height required');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/수집된 NAV 3일/);
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자손익 아님/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/실제 관측 3일/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/투자수익률·손익 아님/);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1').count(),1);
 
    assert.equal(await page.locator('#ctReferenceNavHistoryV1 svg polyline').count(),1,'missing-day lines must not connect across gap');
@@ -71,8 +71,8 @@ const fixture='<!doctype html><html lang="ko" data-ct-human-ui="v2"><head><meta 
    await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.reference_nav_history.bound_snapshot_id='wrong';document.dispatchEvent(new Event('jjooni:live-applied'))});
    await page.waitForFunction(()=>document.querySelectorAll('#ctReferenceNavHistoryV1 svg').length===0);
    assert.equal(await page.locator('#ctReferenceNavOverviewV1 svg').count(),0,'invalid binding must immediately clear Overview chart');
-   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/검증 대기/);
-   assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/수집된 NAV 3일/);
+   assert.match(await page.locator('#ctReferenceNavOverviewV1').innerText(),/관측 NAV 그래프 표시 불가/);
+   assert.doesNotMatch(await page.locator('#ctReferenceNavOverviewV1').innerText(),/실제 관측 3일/);
 
    assert.equal(await page.locator('#ctReferenceNavHistoryV1').count(),1);
    assert.deepEqual(errors,[],'errors: '+errors.join(','));
