@@ -34,7 +34,15 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   if(state.ready)assert.equal(state.thresholds,4,'all four thresholds with source guard');
   assert.ok(state.docWidth<=state.screenWidth+3,'V3 horizontal overflow '+width+': '+JSON.stringify(state));
   assert.match(state.v2Return||'',/ui=v2/);
-  await page.locator('.navV2Main button[data-group="strategy"]').click();
+  if(state.ready){
+   const detail=page.locator('.todayV2 button[data-ov3-tab="jjooni-tripod"]');
+   assert.ok(await detail.isVisible(),'fixed-anchor detail shortcut visible');
+   await detail.click();
+   await page.waitForFunction(()=>document.querySelector('#jjooni-tripod')?.classList.contains('on'));
+   await page.locator('.navV2Sub button[data-tab="tripod"]').click();
+  }else{
+   await page.locator('.navV2Main button[data-group="strategy"]').click();
+  }
   await page.waitForFunction(()=>document.querySelector('#tripod')?.classList.contains('on'));
   await page.waitForFunction(()=>document.querySelector('#ov3TripodDetail'));
   const strategyRail=await page.locator('#ov3TripodDetail').textContent();
