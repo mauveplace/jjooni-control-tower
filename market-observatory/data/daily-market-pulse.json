@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_DAILY_MARKET_PULSE_V1",
-  "generated_kst": "2026-11-17T10:06:45+09:00",
+  "generated_kst": "2026-11-17T12:43:22+09:00",
   "market_date_us": "2026-11-16",
   "snapshot_status": "FINAL",
   "session_gate": {
@@ -185,55 +185,55 @@
           "rank": 1,
           "ticker": "AAPL",
           "name": "Apple Inc.",
-          "weight_pct": 13.05
+          "weight_pct": 13.27
         },
         {
           "rank": 2,
-          "ticker": "NVDA",
-          "name": "Nvidia Corp",
-          "weight_pct": 9.91
+          "ticker": "MSFT",
+          "name": "Microsoft Corp",
+          "weight_pct": 9.96
         },
         {
           "rank": 3,
-          "ticker": "MSFT",
-          "name": "Microsoft Corp",
-          "weight_pct": 9.81
+          "ticker": "NVDA",
+          "name": "Nvidia Corp",
+          "weight_pct": 9.76
         },
         {
           "rank": 4,
           "ticker": "AMZN",
           "name": "Amazon.Com Inc",
-          "weight_pct": 7.27
+          "weight_pct": 7.21
         },
         {
           "rank": 5,
           "ticker": "SPCX",
           "name": "Space Exploration Technologies Corp. Class A Common Stock",
-          "weight_pct": 4.76
+          "weight_pct": 4.83
         },
         {
           "rank": 6,
           "ticker": "GOOGL",
           "name": "Alphabet Inc. Class A Common Stock",
-          "weight_pct": 4.71
+          "weight_pct": 4.64
         },
         {
           "rank": 7,
           "ticker": "GOOG",
           "name": "Alphabet Inc. Class C Capital Stock",
-          "weight_pct": 4.41
+          "weight_pct": 4.35
         },
         {
           "rank": 8,
-          "ticker": "AVGO",
-          "name": "Broadcom Inc. Common Stock",
-          "weight_pct": 4.18
-        },
-        {
-          "rank": 9,
           "ticker": "META",
           "name": "Meta Platforms, Inc. Class A Common Stock",
           "weight_pct": 4.14
+        },
+        {
+          "rank": 9,
+          "ticker": "AVGO",
+          "name": "Broadcom Inc. Common Stock",
+          "weight_pct": 4.12
         },
         {
           "rank": 10,
@@ -242,11 +242,11 @@
           "weight_pct": 3.89
         }
       ],
-      "top3_weight_pct": 32.77,
-      "top10_weight_pct": 66.13,
+      "top3_weight_pct": 32.99,
+      "top10_weight_pct": 66.17,
       "source": "slickcharts_nasdaq100",
-      "status": "STALE_FALLBACK",
-      "observed_at_kst": "2026-11-16T09:56:08+09:00"
+      "status": "LIVE",
+      "observed_at_kst": "2026-11-17T12:43:16+09:00"
     },
     "fear_greed": {
       "score": 31.0,
@@ -846,7 +846,7 @@
     },
     {
       "market_date_us": "2026-11-16",
-      "generated_kst": "2026-11-17T10:06:45+09:00",
+      "generated_kst": "2026-11-17T12:43:22+09:00",
       "snapshot_status": "FINAL",
       "ndx": 27197.15234375,
       "dxy": 103.58499908,
@@ -856,7 +856,7 @@
       "vix": 22.90999985,
       "breadth_ratio": null,
       "breadth_proxy_ratio": 0.6363636363636364,
-      "top10_weight_pct": 66.13,
+      "top10_weight_pct": 66.17,
       "fear_greed": 31.0,
       "risk": "NEUTRAL"
     }
@@ -874,7 +874,7 @@
       "finviz_sp500_map": "WEB_VERIFICATION_REQUIRED",
       "finviz_calendar": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
       "tradingview": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "slickcharts_nasdaq100": "STALE_FALLBACK",
+      "slickcharts_nasdaq100": "LIVE",
       "cnn_fear_greed": "OBSERVATORY_CANONICAL"
     },
     "missing_value_policy": "NULL_NOT_ESTIMATE"
@@ -883,27 +883,27 @@
     "finviz_sp500_map": {
       "url": "https://finviz.com/map?t=sec",
       "status": "WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-11-17T10:06:45+09:00"
+      "observed_at_kst": "2026-11-17T12:43:22+09:00"
     },
     "finviz_calendar": {
       "url": "https://finviz.com/calendar.ashx",
       "status": "OBSERVATORY_CALENDAR_AVAILABLE_WEB_CROSSCHECK_REQUIRED",
-      "observed_at_kst": "2026-11-17T10:06:45+09:00"
+      "observed_at_kst": "2026-11-17T12:43:22+09:00"
     },
     "tradingview": {
       "url": "https://kr.tradingview.com/",
       "status": "OBSERVATORY_FALLBACK_WEB_VERIFICATION_REQUIRED",
-      "observed_at_kst": "2026-11-17T10:06:45+09:00"
+      "observed_at_kst": "2026-11-17T12:43:22+09:00"
     },
     "slickcharts_nasdaq100": {
       "url": "https://www.slickcharts.com/nasdaq100",
-      "status": "STALE_FALLBACK",
-      "observed_at_kst": "2026-11-17T10:06:45+09:00"
+      "status": "LIVE",
+      "observed_at_kst": "2026-11-17T12:43:22+09:00"
     },
     "cnn_fear_greed": {
       "url": "https://edition.cnn.com/markets/fear-and-greed",
       "status": "OBSERVATORY_CANONICAL",
-      "observed_at_kst": "2026-11-17T10:06:45+09:00"
+      "observed_at_kst": "2026-11-17T12:43:22+09:00"
     }
   },
   "usage_contract": {
