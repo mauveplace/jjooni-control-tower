@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-17T13:28:36+09:00",
+  "generated_kst": "2026-11-17T13:46:55+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -114,7 +114,7 @@
       "state": "LIVE",
       "generated_kst": "2026-11-17T13:20:33+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=485s · ETHUSD age=486s",
+      "detail": "BTCUSD age=1584s · ETHUSD age=1585s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -151,7 +151,7 @@
     "fedwatch": {
       "label": "FedWatch",
       "state": "LAGGING",
-      "generated_kst": "2026-11-17T13:20:12+09:00",
+      "generated_kst": "2026-11-17T13:30:09+09:00",
       "as_of": "2026-11-13",
       "detail": "expected=2026-11-16 · FOMC 2026-12-09",
       "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
@@ -187,8 +187,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-17T13:27:41+09:00",
-      "as_of": "2026-11-17T13:27:41+09:00",
+      "generated_kst": "2026-11-17T13:45:39+09:00",
+      "as_of": "2026-11-17T13:45:39+09:00",
       "detail": "events=199 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -210,7 +210,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-17T13:28:35+09:00",
+      "generated_kst": "2026-11-17T13:46:54+09:00",
       "as_of": "2026-11-16",
       "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
