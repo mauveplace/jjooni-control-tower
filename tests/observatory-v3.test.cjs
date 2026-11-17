@@ -130,3 +130,15 @@ test('V3 digest ages into an explicitly dated reference instead of implying fres
  assert.match(host.innerHTML,/마지막 게시 참고값/);
  assert.match(host.innerHTML,/현재 신호·공식 Nasdaq 종가가 아닙니다/);
 });
+
+test('V3 digest treats a newly republished but stale original source as historical', () => {
+ const f=fixture(),g=structuredClone(f.glance);
+ const nowMs=Date.parse(g.generated_kst)+60000;
+ g.source_generated_kst=new Date(nowMs-7200001).toISOString();
+ const host={hidden:true,innerHTML:''};
+ const m=renderBriefDigest(host,{brief:f.brief,glance:g,pulse:f.pulse,sector:f.sector,latest:true,nowMs});
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.freshnessCurrent,false);
+ assert.match(host.innerHTML,/최신성 재확인 필요/);
+ assert.match(host.innerHTML,/마지막 게시 참고값/);
+});
