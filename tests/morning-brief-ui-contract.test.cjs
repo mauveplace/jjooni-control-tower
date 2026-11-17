@@ -49,7 +49,7 @@ test('mobile reader has correction detail, consistent latest-publication wording
  assert.match(src,/briefTools\{display:grid/);
  assert.match(src,/공식 EOD 확인/);
  assert.match(html,/morning-brief-v1\.js\?v=20261117-v3-roy-p1-fix-1/);
-  assert.match(html,/brief-visual-digest-v1\.js\?v=20261117-market-template-1/);
+  assert.match(html,/brief-visual-digest-v1\.js\?v=20261117-v3-roy-p1-fix-1/);
  assert.match(html,/<option value="latest">최신 공개본<\/option>/);
 });
 
