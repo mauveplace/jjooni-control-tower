@@ -39,6 +39,8 @@ const fetchText=async path=>{
   const refLocal=fs.readFileSync('ct-reference-nav-history-v1.js','utf8');
   const refCssLocal=fs.readFileSync('ct-reference-nav-history-v1.css','utf8');
   assert(refLocal.includes('plot.replaceChildren(makeChart(report.rows))'),'PR_OVERVIEW_CHART_MISSING');
+  assert(refLocal.includes('상세 그래프 · 성과 탭'),'PR_OVERVIEW_PERFORMANCE_NAV_MISSING');
+  assert(refLocal.includes('tab.click()'),'PR_OVERVIEW_TAB_ACTION_MISSING');
   assert(refLocal.includes('plot.replaceChildren();plot.hidden=true'),'PR_OVERVIEW_CHART_STALE_CLEAR_MISSING');
   assert(refCssLocal.includes('.ctRefNavOverviewChart svg'),'PR_OVERVIEW_CHART_STYLE_MISSING');
   navGuard(fs.readFileSync('ct-human-v2.js','utf8'),fs.readFileSync('responsive-layout.css','utf8'),fs.readFileSync('trade-review-loader.js','utf8'));
@@ -53,10 +55,25 @@ const fetchText=async path=>{
    fetchText('?ctui=v2'),fetchText('ct-reference-nav-history-v1.js?v=3'),
    fetchText('ct-reference-nav-history-v1.css?v=3'),fetchText(VERIFIED_SCRIPT),fetchText(HUMAN_SCRIPT),fetchText('responsive-layout.css?v=1.8-single-navigation'),fetchText('trade-review-loader.js?v=14.38-single-navigation')
   ]);
-  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&verified.includes('zonedTime(history.verified_at_kst)')&&human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')&&legacy.includes('humanV2.enforceNavigation()')){ready=true;break}
+  if(index.includes(VERIFIED_SCRIPT)&&index.includes(HUMAN_SCRIPT)&&
+     index.includes('ct-reference-nav-history-v1.js?v=3')&&
+     index.includes('responsive-layout.css?v=1.8-single-navigation')&&
+     verified.includes('zonedTime(history.verified_at_kst)')&&
+     human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);')&&
+     responsive.includes('html[data-ct-layout="mobile-first"][data-ct-human-ui="v2"] body .tabs')&&
+     legacy.includes('humanV2.enforceNavigation()')&&
+     js.includes('function overviewShortcut(report)')&&
+     js.includes('상세 그래프 · 성과 탭')&&
+     js.includes('tab.click()')&&
+     js.includes('plot.replaceChildren(makeChart(report.rows))')&&
+     js.includes('plot.replaceChildren();plot.hidden=true')&&
+     js.includes('overviewShortcut(report);')&&
+     css.includes('.ctRefNavOverviewChart svg')){
+     ready=true;break
+    }
   if(attempt<9)await new Promise(resolve=>setTimeout(resolve,15000));
  }
- assert(ready,'PAGES_ENTRY_OR_ASSET_NOT_YET_DEPLOYED');
+ assert(ready,'PAGES_ENTRY_OR_REQUIRED_JS_CSS_NOT_YET_DEPLOYED_AFTER_BOUNDED_RETRY');
  guard(verified);
  humanGuard(human);
  navGuard(human,responsive,legacy);
