@@ -27,10 +27,10 @@ test('both TRI-POD tracks stay separate tabs under 전략', () => {
   assert.equal(groupOf('jjooni-tripod').id, 'strategy');
 });
 
-test('V2 default; V1 preference persistent, V2 explicitly reactivates', () => {
+test('V3 default navigation; explicit V1/V2 override old localStorage', () => {
   assert.equal(enabled('', null), true);
   assert.equal(enabled('', 'v2'), true);
-  assert.equal(enabled('', 'v1'), false);
+  assert.equal(enabled('', 'v1'), true);
   assert.equal(enabled('?ui=v1', null), false);
   assert.equal(enabled('?ui=v1', 'v2'), false);
   assert.equal(enabled('?ui=v2', 'v1'), true);
