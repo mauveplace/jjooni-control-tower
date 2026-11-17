@@ -35,7 +35,10 @@
     const group = (fresh.groups || {})[sourceGroupFor(item.key)];
     const freshAligned = group?.state === 'LIVE' && group.as_of === item.date;
     if (item.key === 'NASDAQ100') {
-      return ctx.ndxVerified && item.date === ctx.usSession && freshAligned ? 'official' : 'hold';
+      if (ctx.ndxVerified && item.date === ctx.usSession && freshAligned) return 'official';
+      if (ctx.ndxReferenceReady && item.date === ctx.usSession && freshAligned) return 'ref';
+      if (group && group.state !== 'LIVE') return 'delay';
+      return 'hold';
     }
     if (OFFICIAL_KEYS.has(item.key)) {
       if (group && group.state !== 'LIVE') return 'delay';
@@ -74,11 +77,22 @@
     const check = glance.brief_check || {};
     const ndxMarket = (fresh.groups || {}).market;
     const failedCriticalSource = (input.loadErrors || []).some(x => /^(freshness|glance)\b/.test(x));
-    const ndxVerified = check.official_status === 'VERIFIED' && check.official_eod_verified === true
-      && ndxMarket?.state === 'LIVE' && ndxMarket.as_of === glance.us_session && !failedCriticalSource;
+    const ndxBar = (glance.groups || []).flatMap(g => g.items || []).find(x => x.key === 'NASDAQ100');
+    const ndxReferenceReady = !failedCriticalSource && glance.consistency?.status === 'OK'
+      && ndxMarket?.state === 'LIVE' && ndxMarket.as_of === glance.us_session
+      && ndxMarket.source === 'observatory.json'
+      && ndxBar?.date === glance.us_session && Number.isFinite(ndxBar.value) && ndxBar.value > 0
+      && Number.isFinite(ndxBar.d1_pct);
+    const ndxVerified = ndxReferenceReady && check.official_status === 'VERIFIED'
+      && check.official_eod_verified === true;
     const today = kstDate(now);
     const alerts = [];
-    if (!ndxVerified) alerts.push({ level: 'HIGH', title: 'NDX 공식 종가 미검증', body: 'TRI-POD 전환 확정 금지 · 제공자 완료 일봉은 참고값' });
+    if (!ndxVerified) alerts.push({
+      level: ndxReferenceReady ? 'MID' : 'HIGH', title: 'NDX 공식 종가 미검증',
+      body: ndxReferenceReady
+        ? 'NDX ' + glance.us_session + ' 제공자 완료 일봉 수집됨 · Nasdaq 공식 종가 독립검증 대기 · TRI-POD 전환 확정 금지'
+        : 'NDX 최신 원장 정합성 또는 공식 종가 확인 보류 · TRI-POD 전환 확정 금지'
+    });
     if (fresh.overall && !['LIVE', 'LIVE_WITH_WARNINGS'].includes(fresh.overall)) alerts.push({ level: 'HIGH', title: '데이터 신선도 ' + fresh.overall, body: (fresh.critical_bad || []).join(', ') || '상태 파일 확인 필요' });
     // LIVE_WITH_WARNINGS can be caused by noncritical FedWatch/audit warnings.
     // Reserve urgent red alerts for genuinely critical data problems.
@@ -110,11 +124,13 @@
         value: num(t.ndx), note: up ? '하락 전환선 ' + num(t.lines.ma250_lower) + ' (' + fmtPct(t.distance_pct.ma250_lower, true) + ')' : '복귀선 ' + num(t.lines.ma250_upper) + ' (' + fmtPct(t.distance_pct.ma250_upper, true) + ')' });
     }
     const tripod = { pod: t.pod || '—', regime: t.regime || '—', session: t.session || '—', changed: !!t.changed, conds,
-      verification: ndxVerified ? '공식 종가 검증됨' : '검증 보류 — NDX 공식 종가 미확인',
+      verification: ndxVerified ? '공식 종가 검증됨' : ndxReferenceReady
+        ? '제공자 완료 일봉 수집 · 공식 종가 미검증' : '검증 보류 — NDX 최신 원장 확인 필요',
       next: [t.next_up, t.next_down].filter(Boolean) };
 
     const sourceFailed = (input.loadErrors || []).some(x => /^(freshness|glance)\b/.test(x));
-    const ctx = { ndxVerified: ndxVerified && !sourceFailed, today, freshness: sourceFailed ? {} : fresh,
+    const ctx = { ndxVerified: ndxVerified && !sourceFailed, ndxReferenceReady: ndxReferenceReady && !sourceFailed,
+      today, freshness: sourceFailed ? {} : fresh,
       usSession: glance.us_session };
     const groups = (glance.groups || []).map(g => ({ name: g.name, rows: (g.items || []).map(it => {
       const st = rowState(it, ctx);
