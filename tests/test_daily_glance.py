@@ -61,6 +61,67 @@ class DailyGlance(unittest.TestCase):
         self.assertIsNone(result["reference_ndx"])
         self.assertFalse(result["trade_signal_eligible"])
 
+    def test_ndx_integer_part_comparison_never_uses_float_tolerance(self):
+        # Explicit owner rule: truncate decimals, do not round or use %-difference.
+        obs = observatory()
+        for quote, expected in ((26989.01, "MATCH"), (26989.99, "MATCH"),
+                                (26988.99, "MISMATCH"), (26990.01, "MISMATCH")):
+            result = glance.build(obs, brief(quote))["brief_check"]
+            self.assertEqual(result["status"], expected, quote)
+            self.assertEqual(result["match_rule"], "INTEGER_PART_EQUAL")
+
+    def test_integer_reference_crossing_boundary_is_mismatch_even_if_cents_apart(self):
+        d = brief(None, status="CONFLICT", official="CONFLICT")
+        d["editorial_contract"]["reference_quotes"] = [{
+            "symbol": "NDX", "session_date": "2026-11-06",
+            "status": "PROVIDER_REFERENCE_ONLY",
+            "official_eod_verified": False, "trade_signal_eligible": False,
+            "close": 26990.01
+        }]
+        r = glance.build(observatory(), d)["brief_check"]
+        self.assertEqual(r["status"], "REFERENCE_MISMATCH")
+        self.assertEqual(r["match_rule"], "INTEGER_PART_EQUAL")
+        self.assertFalse(r["official_eod_verified"])
+
+    def test_independent_nasdaq_official_evidence_certifies_only_exact_session_integer(self):
+        evidence = {
+            "schema": "JJOONI_NDX_OFFICIAL_EOD_EVIDENCE_V1",
+            "symbol": "NDX", "session_date": "2026-11-06", "close": 26989.01,
+            "source_type": "NASDAQ_INDEXES_OFFICIAL",
+            "source_url": "https://indexes.nasdaqomx.com/Index/Overview/ndx",
+            "observation_kind": "PUBLISHED_COMPLETED_SESSION",
+            "comparison_rule": "TRUNCATE_INTEGER_PART",
+            "observed_at_kst": "2026-11-07T12:00:00+09:00"
+        }
+        for price, matches in ((26989.01, True), (26989.99, True),
+                               (26990.00, False), (26988.99, False)):
+            r = glance.build(observatory(), brief(None, status="MISSING", official="MISSING"),
+                             official={**evidence, "close": price})["brief_check"]
+            self.assertEqual(r["status"], "MATCH" if matches else "MISMATCH")
+            self.assertIs(r["official_eod_verified"], matches)
+            self.assertEqual(r["official_status"], "VERIFIED" if matches else "CONFLICT")
+            self.assertFalse(r["trade_signal_eligible"])
+        for invalid in ({"session_date": "2026-11-05"},
+                        {"source_type": "YAHOO_FINANCE"},
+                        {"source_url": "https://finance.yahoo.com"},
+                        {"observed_at_kst": "2026-11-06T00:01:00+09:00"}):
+            r = glance.build(observatory(), brief(None, status="MISSING", official="MISSING"),
+                             official={**evidence, **invalid})["brief_check"]
+            self.assertEqual(r["status"], "NOT_COMPARABLE")
+            self.assertFalse(r["official_eod_verified"])
+
+    def test_actual_2026_11_16_official_observation_matches_published_canonical(self):
+        obs=json.loads((ROOT/"market-observatory/data/observatory.json").read_text())
+        o=json.loads((ROOT/"market-observatory/data/ndx-official-eod.json").read_text())
+        b=json.loads((ROOT/"market-observatory/data/morning-brief/latest.json").read_text())
+        if obs.get("us_completed_session_date") != "2026-11-16":
+            self.skipTest("published market has advanced to a new completed session")
+        r=glance.build(obs,b,official=o)["brief_check"]
+        self.assertEqual(r["status"],"MATCH")
+        self.assertEqual(r["brief_ndx"],27197.15)
+        self.assertEqual(int(r["pipeline_ndx"]),27197)
+        self.assertTrue(r["official_eod_verified"])
+
     def test_month_comparison_uses_completed_bar_and_correct_units(self):
         bars = [{"date": "2026-10-13", "value": 100},
                 {"date": "2026-11-11", "value": 105},
