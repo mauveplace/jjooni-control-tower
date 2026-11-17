@@ -35,6 +35,8 @@ test('V2 default; V1 preference persistent, V2 explicitly reactivates', () => {
   assert.equal(enabled('?ui=v1', 'v2'), false);
   assert.equal(enabled('?ui=v2', 'v1'), true);
   assert.equal(enabled('?ui=v2', null), true);
+  assert.equal(enabled('?ui=v3', 'v1'), true); // opt-in preview overrides legacy preference
+  assert.equal(enabled('?ui=v3', null), true);
 });
 
 test('module is loaded after the legacy runtime', () => {

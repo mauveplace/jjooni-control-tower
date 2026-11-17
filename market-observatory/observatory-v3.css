@@ -1,0 +1,251 @@
+/* JJOONI OBS V3 — Song-style editorial rhythm, modern terminal density.
+ * Strictly scoped to ?ui=v3. Retains five nav owners and source semantics.
+ * Market direction colors follow the Observatory existing KR convention:
+ * 상승=red, 하락=blue; amber=editorial accent, NOT freshness confirmation.
+ */
+body.obsV3{
+ --navy:#17191c;--navy2:#25272a;--bg:#f5f5f1;--card:#fff;
+ --line:#dee2e7;--text:#1b252f;--muted:#5a6674;--red:#ba322d;--blue:#2759a0;--green:#147452;
+ --ov3-ink:#17191c;--ov3-gold:#f5cf25;--ov3-paper:#fff;
+ background:var(--bg)!important;color:var(--text);font-size:14px;
+}
+body.obsV3 header.top{
+ position:relative;background:#17191c;box-shadow:none;
+ border-bottom:5px solid var(--ov3-gold);padding:13px 18px 11px;
+}
+body.obsV3 header.top .brand{
+ font-size:17px!important;letter-spacing:.015em;color:#fff;
+ line-height:1.4;display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+}
+body.obsV3 header.top .sub{display:none}
+body.obsV3 #pulse{gap:7px;scrollbar-width:none;max-width:100%;flex-wrap:nowrap;overflow-x:auto}
+body.obsV3 #pulse .chip{
+ flex:0 0 auto;border-radius:5px;padding:6px 8px!important;
+ background:#26272b;color:#fff;border:1px solid #47484c;font-size:11px;
+}
+body.obsV3 .obsSwitchUi{display:none!important}
+body.obsV3 .ov3Back,body:not(.obsV3) .ov3Try{
+ display:inline-flex;align-items:center;min-height:36px;
+ text-decoration:none;border:1px solid #767d88;padding:5px 9px;
+ font-size:11px;font-weight:800;color:#ffeb8b;border-radius:6px;
+ white-space:nowrap;
+}
+body:not(.obsV3) .ov3Try{margin-left:9px}
+body.obsV3 header.top .obsNowControls{margin-top:8px;gap:8px}
+body.obsV3 #obsForceRefresh{
+ background:#f6f6f1!important;color:#181a1d!important;border:1px solid #a5aeb9!important;
+ border-radius:7px!important;min-height:42px!important;padding:0 12px!important;
+}
+body.obsV3 #obsNowMessage{color:#ddd!important;font-size:12px;max-width:none;line-height:1.45}
+body.obsV3 .obsCollectControls summary{color:#cdd3dc}
+body.obsV3 .navV2Bar{
+ background:#fff;border-bottom:1px solid #dee2e7;box-shadow:0 5px 20px #1f27310b;
+}
+body.obsV3 .navV2Main{
+ max-width:1200px;padding:2px 12px 0;
+}
+body.obsV3 .navV2Main button{
+ color:#5a6572;font-size:14px;font-weight:850;border-bottom:4px solid transparent;
+}
+body.obsV3 .navV2Main button[aria-current=page]{
+ color:#111;border-bottom-color:var(--ov3-gold);
+}
+body.obsV3 .navV2Sub button{
+ border-radius:6px;background:#f7f7f4;border:1px solid #e1e4e9;
+ color:#263447;font-size:12px;
+}
+body.obsV3 .navV2Sub button[aria-pressed=true]{
+ background:#17191c;color:#fff;border-color:#17191c;box-shadow:inset 0 -3px 0 var(--ov3-gold);
+}
+body.obsV3 .navV2Main button:focus-visible,body.obsV3 .navV2Sub button:focus-visible,
+body.obsV3 button:focus-visible,body.obsV3 a:focus-visible{
+ outline:3px solid #a68000!important;outline-offset:3px!important;
+}
+body.obsV3 main.wrap{max-width:1200px;padding:13px 13px 40px}
+body.obsV3 .panel .card,body.obsV3 .tV2Card,
+body.obsV3 .briefHead,body.obsV3 .briefArticle,
+body.obsV3 .obsEtfCard,body.obsV3 #sectors .obsSectorCard{
+ background:var(--ov3-paper);border:1px solid var(--line);
+ border-radius:12px!important;box-shadow:none!important;
+}
+body.obsV3 .card h3,body.obsV3 .obsSectorCard h3{
+ letter-spacing:-.015em;line-height:1.35;
+}
+body.obsV3 .tV2Card{padding:16px!important;min-width:0}
+body.obsV3 .tV2Eyebrow,body.obsV3 .briefEyebrow{
+ display:block;width:fit-content;max-width:100%;
+ color:#17191c!important;background:var(--ov3-gold)!important;
+ font-size:12px!important;font-weight:950!important;padding:6px 11px;
+ line-height:1.5;border:0!important;border-radius:3px!important;
+ letter-spacing:.035em;
+}
+body.obsV3 .tV2Title{color:#111b25;font-weight:950!important;font-size:23px!important;line-height:1.38!important}
+body.obsV3 .tV2Vintage{color:#657384;font-size:12px}
+body.obsV3 .tV2Pods{gap:7px}
+body.obsV3 .tV2Pod{border-radius:9px;padding:11px}
+body.obsV3 .tV2Pod.main{border-color:#17191c}
+body.obsV3 .tV2Pod strong{font-weight:950}
+body.obsV3 .tV2Cond{padding:5px 0;border-bottom:1px solid #eff1f3;gap:10px}
+body.obsV3 .tV2Table{font-size:13px}
+body.obsV3 .tV2Table th,body.obsV3 .tV2Table td{padding:10px 9px;border-top:1px solid #e9edf1}
+body.obsV3 .tV2Table .grp th{
+ color:#f8da4c;background:#242529;font-weight:950;font-size:12px;
+}
+body.obsV3 .tV2Table .up,body.obsV3 #sectors .up{color:#ba322d}
+body.obsV3 .tV2Table .dn,body.obsV3 #sectors .down{color:#2759a0}
+body.obsV3 .tV2PeriodSwitch button{
+ font-size:12px!important;border-radius:7px;background:#f6f7fa;
+ min-height:44px;
+}
+body.obsV3 .tV2PeriodSwitch button[aria-pressed=true]{
+ background:#1b1d20!important;border-color:#1b1d20!important;
+ color:#ffe45c!important;
+}
+body.obsV3 .tV2Notice{
+ background:#fff8e3;border-color:#e9ce86;color:#6a4c11;
+}
+body.obsV3 .tV2Alert{
+ border-color:#e2aaa8;background:#fff0ef;color:#8f2019;
+}
+body.obsV3 .tV2NoTrade{
+ color:#364557;background:#f1f3f5;border-left:4px solid #aeb7c4;
+}
+body.obsV3 .tV2Grid{gap:12px}
+body.obsV3 .panel .card .chart{height:270px!important}
+body.obsV3 #sectors .obsSectorTableWrap th,
+body.obsV3 #sectors .obsSectorTableWrap th:first-child{
+ background:#27282c!important;color:#fff6c8;
+}
+body.obsV3 #sectors .obsSectorTableWrap tr>*:first-child{z-index:2}
+body.obsV3 .briefHead{border-top:5px solid var(--ov3-gold)!important}
+body.obsV3 .briefArticle h2,body.obsV3 .songEditorial h2{
+ background:#181a1d!important;color:#ffe45c!important;
+ border-left:7px solid #f5cf25!important;border-radius:4px;
+ font-size:19px!important;line-height:1.35;
+}
+body.obsV3 .briefArticle h3,body.obsV3 .songEditorial h3{
+ background:#fff6ca!important;color:#242424!important;padding:10px;
+}
+body.obsV3 .briefFigure{
+ border-radius:9px;background:#212329!important;border-top:3px solid #f5cf25;
+}
+body.obsV3 .briefFigure small{color:#ffe183!important;font-size:12px}
+body.obsV3 .briefContents a{
+ background:#fff6cf;color:#2e3035;font-weight:800;border-radius:6px;
+}
+body.obsV3 .briefTableWrap{overflow-x:auto}
+body.obsV3 .briefArticle th,body.obsV3 .songEditorial th{background:#1b1d20!important;color:#ffe45c!important}
+body.obsV3 .obsV3Details{color:#626c77}
+body.obsV3 .ov3MarketStrip{margin-bottom:14px;min-width:0}
+body.obsV3 .ov3StripTitle{
+ display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;
+ background:#1b1c1f;color:#ffe45c;padding:9px 11px;border-radius:5px 5px 0 0;
+}
+body.obsV3 .ov3StripTitle strong{font-size:12px;letter-spacing:.06em}
+body.obsV3 .ov3StripTitle small{font-size:11px;color:#fff4c2}
+body.obsV3 .ov3StripData{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:0;background:#fff;border:1px solid #e3e5ea;border-top:0;
+ border-radius:0 0 9px 9px;overflow:hidden;
+}
+body.obsV3 .ov3StripTile{
+ display:flex;flex-direction:column;gap:5px;padding:13px;min-width:0;
+ border-right:1px solid #e8ebef;
+}
+body.obsV3 .ov3StripTile:last-child{border-right:0}
+body.obsV3 .ov3StripTile span{font-size:11px;color:#526071;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.obsV3 .ov3StripTile strong{font-size:20px;color:#181a20;font-variant-numeric:tabular-nums}
+body.obsV3 .ov3StripTile small{font-size:13px;font-weight:900}
+body.obsV3 .ov3MarketStrip .gain,body.obsV3 .ov3SectorLine .gain{color:#ba322d}
+body.obsV3 .ov3MarketStrip .loss,body.obsV3 .ov3SectorLine .loss{color:#2759a0}
+body.obsV3 .ov3Sectors{border-top:1px solid #e5e7ed;margin:13px 0;padding-top:10px}
+body.obsV3 .ov3SectorsHead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+body.obsV3 .ov3SectorsHead strong{font-size:13px}
+body.obsV3 .ov3SectorsHead small{font-size:11px;color:#697587}
+body.obsV3 .ov3SectorLine{
+ display:grid;grid-template-columns:minmax(76px,130px) minmax(35px,1fr) 70px;
+ gap:9px;align-items:center;min-height:31px;font-size:12px;border-bottom:1px solid #f0f2f4;
+}
+body.obsV3 .ov3SectorLine>span{font-weight:700}
+body.obsV3 .ov3SectorLine>div{height:8px;border-radius:5px;background:#edf1f5;overflow:hidden}
+body.obsV3 .ov3SectorLine i{display:block;height:100%;border-radius:5px;background:#ba322d}
+body.obsV3 .ov3SectorLine i.loss{background:#2759a0}
+body.obsV3 .ov3SectorLine strong{font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+body.obsV3 .ov3Rail{
+ background:#fff;border:1px solid #e1e4e9;border-radius:10px;
+ padding:13px;margin:12px 0;overflow:hidden;
+}
+body.obsV3 .ov3Stale{background:#fff3c7;border-left:4px solid #a36b00;padding:9px;font-size:12px;line-height:1.5;color:#634400}
+body.obsV3 .ov3RailHeading{display:flex;justify-content:space-between;gap:7px;flex-wrap:wrap}
+body.obsV3 .ov3RailHeading strong{font-size:14px}
+body.obsV3 .ov3RailHeading small{font-size:11px;color:#627080}
+body.obsV3 .ov3Track{height:43px;position:relative;margin:14px 10px 9px}
+body.obsV3 .ov3Track>span{
+ position:absolute;top:18px;left:0;right:0;height:8px;
+ background:linear-gradient(90deg,#bdd0ff,#f2e8c0);border-radius:8px;
+}
+body.obsV3 .ov3Mark{
+ position:absolute;top:12px;transform:translateX(-50%);width:14px;height:21px;
+ border:2px solid #fff;box-shadow:0 0 0 1px #abb5c2;border-radius:5px;background:#9babbc;
+}
+body.obsV3 .ov3Mark.lower{background:#ad3e39}
+body.obsV3 .ov3Mark.upper{background:#556c90}
+body.obsV3 .ov3Mark.tri{background:#247052}
+body.obsV3 .ov3Mark.now{top:6px;width:19px;height:31px;background:#16191d;border-color:#f4d422;box-shadow:0 0 0 2px #16191d;z-index:2}
+body.obsV3 .ov3Thresholds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.obsV3 .ov3Threshold{
+ border:1px solid #e5e8ed;background:#fafbfc;border-radius:7px;
+ padding:9px;display:grid;gap:4px;min-width:0;
+}
+body.obsV3 .ov3Threshold span{font-size:11px;color:#506073;line-height:1.4}
+body.obsV3 .ov3Threshold b{font-size:18px;font-variant-numeric:tabular-nums}
+body.obsV3 .ov3Threshold small{font-size:11px;color:#586981}
+body.obsV3 .ov3RailNote{
+ font-size:12px;line-height:1.65;border-left:4px solid #e4c222;
+ padding:10px;background:#fff9e5;border-radius:4px;
+}
+body.obsV3 .ov3DetailLink{min-height:44px;border:1px solid #1e2730;border-radius:7px;background:#fff7d9;color:#172132;font-size:12px;font-weight:800;cursor:pointer;padding:9px 12px}
+body.obsV3 .ov3DetailLink:hover{background:#ffeb95}
+body.obsV3 .ov3Small{font-size:11px;color:#66778b;line-height:1.6}
+body.obsV3 .ov3Pending{
+ padding:16px;border:1px dashed #d8c28a;background:#fff8e4;border-radius:8px;
+ font-size:13px;color:#4c4e55;
+}
+body.obsV3 #ov3TripodDetail{margin-bottom:12px}
+body.obsV3 .foot{color:#5e6b7c}
+@media(max-width:760px){
+ body.obsV3 header.top{padding:9px 12px;border-bottom-width:4px}
+ body.obsV3 header.top .brand{font-size:15px!important}
+ body.obsV3 header.top .obsNowControls{align-items:center}
+ body.obsV3 #obsNowMessage{-webkit-line-clamp:1}
+ body.obsV3 .ov3StripData{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.obsV3 .ov3StripTile:nth-child(2){border-right:0}
+ body.obsV3 .ov3StripTile:nth-child(-n+2){border-bottom:1px solid #e8ebef}
+ body.obsV3 .ov3StripTile strong{font-size:18px}
+ body.obsV3 .tV2Card{padding:11px!important}
+ body.obsV3 .tV2Title{font-size:20px!important}
+ body.obsV3 .panel .card .chart{height:235px!important}
+ body.obsV3 .ov3Threshold b{font-size:16px}
+ body.obsV3 .navV2Bar{
+  position:fixed;top:auto;bottom:0;left:0;right:0;
+  border-top:2px solid #f4cf28;background:#17191c;box-shadow:0 -5px 18px #0003;
+ }
+ body.obsV3 .navV2Main{padding:2px 4px 0}
+ body.obsV3 .navV2Main button{color:#c7ccd4;font-size:13px;min-height:53px;border-bottom:3px solid transparent}
+ body.obsV3 .navV2Main button[aria-current=page]{color:#ffe45c;border-bottom-color:#ffe45c}
+ body.obsV3 .navV2Sub{background:#25282d;border-top:1px solid #444951}
+ body.obsV3 .navV2Sub button{background:#31343a;border-color:#4b535e;color:#e9edf2}
+ body.obsV3 .navV2Sub button[aria-pressed=true]{background:#f5ce24;color:#17191c;border-color:#f5ce24;box-shadow:none}
+ body.obsV3 main.wrap{padding:10px 10px 28px}
+}
+@media(max-width:390px){
+ body.obsV3 .ov3Thresholds{grid-template-columns:1fr 1fr}
+ body.obsV3 .ov3Threshold{padding:7px}
+ body.obsV3 .ov3Threshold span{font-size:10px}
+ body.obsV3 .ov3Threshold b{font-size:14px}
+ body.obsV3 .ov3SectorLine{grid-template-columns:minmax(68px,96px) minmax(24px,1fr) 64px;gap:5px}
+ body.obsV3 .tV2Title{font-size:19px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.obsV3 *{scroll-behavior:auto!important;transition-duration:0ms!important}
+}

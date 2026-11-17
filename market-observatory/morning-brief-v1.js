@@ -26,7 +26,7 @@ function markdown(body){
 function validate(d){if(d?.schema!==SCHEMA||!/^\d{4}-\d{2}-\d{2}$/.test(d.report_date_kst||'')||typeof d.body_markdown!=='string'||!d.body_markdown.trim()||!d.generated_kst||!d.market_date_us)throw Error('브리핑 파일 형식이 올바르지 않습니다.');return d}
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const time=s=>String(s||'—').replace('T',' ').slice(0,16);
-let DATA=null,INDEX=null,SOURCE_GLANCE=null,SOURCE_PULSE=null,request=0,bound=false;
+let DATA=null,INDEX=null,SOURCE_GLANCE=null,SOURCE_PULSE=null,SOURCE_SECTOR=null,request=0,bound=false;
 const fetchJSON=async path=>{const r=await fetch(path+'?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('게시 파일 조회 실패 ('+r.status+')');return r.json()};
 function activate(){const b=document.querySelector('#tabs button[data-tab="morning-brief"]');if(b)b.click()}
 function ensure(){let panel=document.getElementById('morning-brief');if(!panel)return null;
@@ -156,6 +156,12 @@ function render(d){
    ' / Glance '+esc(time(supplement.glanceGenerated))+' KST · 단일 원장 참고 · 공식 종가 미확인 · NO_TRADE_REVIEW_ONLY</small>';
   noticeElement.textContent+=' · 별도 후속 원장 참고값이 상단에 반영됐습니다. 본문은 최초 발행 시점 기록입니다.';
  }else{catchup.hidden=true;catchup.textContent=''}
+ // The graphic uses only aligned published snapshots; editorial archives remain unchanged.
+ let digest=document.getElementById('briefVisualDigest');
+ if(!digest){digest=document.createElement('div');digest.id='briefVisualDigest';digest.className='briefVisualDigest';document.getElementById('briefArticle').before(digest)}
+ if(new URLSearchParams(location.search).get('ui')==='v3'&&document.getElementById('briefHistory')?.value==='latest'&&window.JjooniBriefVisual){
+   window.JjooniBriefVisual.render(digest,{brief:d,glance:SOURCE_GLANCE,pulse:SOURCE_PULSE,sector:SOURCE_SECTOR,latest:true});
+ }else{digest.hidden=true;digest.textContent=''}
  const article=document.getElementById('briefArticle');article.innerHTML=markdown(d.body_markdown);article.classList.add('songEditorial');
  const heads=[...article.querySelectorAll('h2')];document.getElementById('briefContents').innerHTML=heads.map(h=>`<a href="#${h.id}">${esc(h.textContent)}</a>`).join('');
  document.getElementById('briefContents').onclick=e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth',block:'start'})};
@@ -209,9 +215,10 @@ function renderHistory(){
 }
 async function load(selected){const p=ensure();if(!p)return;const value=selected||document.getElementById('briefHistory').value||'latest';if(value!=='latest'&&!/^\d{4}-\d{2}-\d{2}$/.test(value))return;const id=++request,button=document.getElementById('briefRefresh');button.disabled=true;const status=document.getElementById('briefLoadStatus');status.textContent='브리핑을 읽는 중입니다…';
  const path=value==='latest'?LATEST:ROOT+value.replace(/-/g,'')+'.json';
- const results=await Promise.allSettled([fetchJSON(path).then(validate),fetchJSON(HISTORY),fetchJSON('./data/daily-glance.json'),fetchJSON('./data/daily-market-pulse.json')]);if(id!==request)return;
+ const results=await Promise.allSettled([fetchJSON(path).then(validate),fetchJSON(HISTORY),fetchJSON('./data/daily-glance.json'),fetchJSON('./data/daily-market-pulse.json'),fetchJSON('./data/sector-rotation-brief.json')]);if(id!==request)return;
  SOURCE_GLANCE=results[2].status==='fulfilled'?results[2].value:null;
  SOURCE_PULSE=results[3].status==='fulfilled'?results[3].value:null;
+ SOURCE_SECTOR=results[4].status==='fulfilled'?results[4].value:null;
  if(results[1].status==='fulfilled'){INDEX=results[1].value;renderHistory()}
  if(results[0].status==='fulfilled'){DATA=results[0].value;render(DATA);if(results[1].status==='rejected')status.textContent+=' 지난 브리핑 목록은 조회하지 못했습니다.'}
  else status.textContent=String(results[0].reason?.message||'브리핑 조회 실패')+(DATA?' 이전에 읽은 원문을 유지합니다.':' 아직 게시된 브리핑이 없거나 조회할 수 없습니다.');button.disabled=false;
@@ -222,5 +229,5 @@ const style=document.createElement('style');style.textContent=`
 .songEditorial{background:#fff;color:#191919;font-family:system-ui,-apple-system,'Noto Sans KR',sans-serif}.songEditorial h2{background:#171717;color:#ffe100!important;border-left:9px solid #ffe100;border-bottom:0;border-radius:3px;padding:12px 16px;margin:36px 0 18px;font-size:20px;font-weight:900;letter-spacing:-.025em}.songEditorial h3{background:#fff5b8;color:#101010;padding:10px 12px;border-radius:2px;font-size:17px;font-weight:850;margin-top:30px;border-bottom:2px solid #e9c900}.songEditorial strong{font-weight:850}.songEditorial blockquote{background:#fff8c9;border-left:5px solid #f0c900;color:#222}.songEditorial .briefTableWrap{border:1px solid #ddd;border-radius:7px}.songEditorial th{background:#1d1d1d!important;color:#ffe100!important;border-color:#444!important}.songEditorial td{font-variant-numeric:tabular-nums}.songEditorial p:first-child{font-size:19px;font-weight:750}.songEditorial a{color:#1255a5}.briefEyebrow{color:#181818!important;background:#ffe100;display:inline-block;padding:5px 10px;border-radius:3px}.briefHead{border-top:6px solid #ffe100}.briefHead h1{font-size:30px;letter-spacing:-.035em;max-width:760px}.briefContents a{background:#fff4a3;color:#151515;font-weight:750}.briefBadge{background:#ffe100;color:#151515}.briefArticle{border-top:4px solid #171717}.briefKeyFigures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.briefKeyFigures:empty{display:none}.briefCanonicalCatchup{background:#fff8e5;border:1px solid #ecd79c;border-left:5px solid #e7b820;border-radius:10px;margin-top:14px;padding:12px 16px;font-size:13px;line-height:1.65;color:#26241f}.briefCanonicalCatchup[hidden]{display:none}.briefCanonicalCatchup strong{font-weight:800}.briefCanonicalCatchup p{margin:6px 0}.briefCanonicalCatchup small{font-size:11px;color:#57534e}.briefFigure{background:#171717;color:#fff;border-radius:10px;padding:16px;display:grid;gap:5px}.briefFigure span{color:#d2d5da;font-size:12px}.briefFigure b{font-size:28px;line-height:1.25;font-variant-numeric:tabular-nums}.briefFigure small{color:#ffe100;font-size:15px;font-weight:750}@media(max-width:760px){.songEditorial h2{font-size:17px;padding:11px 12px;margin-top:26px}.songEditorial h3{font-size:15px}.songEditorial .briefTableWrap{margin-left:-10px;margin-right:-10px}.songEditorial td,.songEditorial th{white-space:normal;min-width:85px}.briefArticle{padding:14px}.briefHead h1{font-size:24px}.briefFigure{padding:12px}.briefFigure b{font-size:23px} .briefFigure span{font-size:10px}.briefTools{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);align-items:center}.briefTools label{font-size:12px}.briefTools select{width:100%;font-size:13px}.briefTools button{grid-column:1/3;justify-self:start}.briefBadge{grid-column:1/3;justify-self:start}.briefHead h1{font-size:clamp(21px,5.5vw,24px);line-height:1.4}.briefNotice{font-size:12px}}
 `;document.head.appendChild(style);ensure();if(location.hash==='#morning-brief')activate();
 setInterval(()=>{if(document.querySelector('#tabs button[data-tab="morning-brief"].on')&&document.getElementById('briefHistory')?.value==='latest')load('latest')},60000);
-window.__JJOONI_MORNING_BRIEF={version:'1.2',contract:'SAME_CHAT_BRIEF_PUBLISHED_WITH_DAILY_ARCHIVE',markdown,validate,viewState,load};
+window.__JJOONI_MORNING_BRIEF={version:'1.3',contract:'SAME_CHAT_BRIEF_PUBLISHED_WITH_DAILY_ARCHIVE',markdown,validate,viewState,load};
 })();

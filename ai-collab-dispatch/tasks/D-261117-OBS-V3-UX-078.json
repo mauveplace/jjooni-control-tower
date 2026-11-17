@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261117-OBS-V3-UX-078",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review Observatory V3 code and mobile UI/UX on PR #518 using user-requested Song-team daily market report reference; verify four TRI-POD threshold lines, 11-sector bars, navigation, source freshness, accessible contrast, responsive screenshots, and avoid official-market-data or trading-state misrepresentation. Do not write code; JJOONI owns revisions.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Inspect the exact current PR HEAD and all changed source/tests including docs/observatory-v3-song-inspired-20261117.md; distinguish synthetic/headless browser screenshots from actual authenticated device verification.",
+    "Audit 390px/800px/1363px UI layout, legibility and 5-tab navigation; check V1/V2 default and V3 opt-in and NO-POD shortcut behavior.",
+    "Check four TRI-POD reference points: MA250×0.95, current NDX, MA250×1.01, and DD -9% return line; do not imply price alone triggers trading or replaces VIX10/regime gates.",
+    "Validate 11 sectors share the intended market session and stale/reference label cannot claim official Nasdaq EOD or current investment action; preserve positive-red/negative-blue and accessibility.",
+    "Review current-head GitHub CI, screen captures from observatory-v3-preview if available, and P0 #516 potential index.html integration conflicts; provide P0/P1/P2 issues, ROY_OBS_V3_REVIEW=PASS|NEEDS_CHANGES|BLOCKED, reviewed_head full SHA, exact evidence and verified_scope on PR #518.",
+    "No code modifications, merges, deploys, orders, account/secret/private data access; user approval required before production release."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or non-public bank/account/customer data",
+    "No automated production deploy, merge or trade",
+    "No paid model API or new cloud infrastructure without explicit authorization"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "coordination_notes": "Fix issue #519 malformed follow-up routing; replace it with one owner-authored canonical [AI-COLLAB][ROY-REQUEST] issue pinned to this task's new actual HEAD. This task is for ROY read-only independent UX review only, not production approval."
+}
