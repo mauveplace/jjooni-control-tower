@@ -10,6 +10,13 @@ const fixture = () => ({glance:read('daily-glance.json'), freshness:read('freshn
   sector:read('sector-rotation-brief.json'), pulse:read('daily-market-pulse.json'),
   brief:read('morning-brief/latest.json')});
 const now = f => Date.parse(f.generated_kst)+60000;
+/* Visual-contract tests use an aligned synthetic publication. The live brief may
+ * lag the new US close: that mismatch MUST remain a runtime verification HOLD. */
+const sameSessionFixture=()=>{
+ const f=fixture();
+ f.brief={...f.brief,market_date_us:f.glance.us_session};
+ return f;
+};
 // Build an explicit unverified-close scenario instead of assuming the live
 // fixture will forever be unverified. Nasdaq official evidence legitimately
 // changes daily; this is NOT a contract change and must never be rewritten by
@@ -109,7 +116,7 @@ test('V3 source mismatch suppresses sectors rather than forging capital flow', (
  assert.equal(m.sectors.length,0);
 });
 test('Morning-brief visual digest inherits the same published session, not historical fallback', () => {
- const f=fixture();
+ const f=sameSessionFixture();
  const m=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true});
  assert.equal(m.ready,true,m.reason);
  assert.equal(m.day,f.glance.us_session);
@@ -144,7 +151,7 @@ test('V3 visual digest preserves red gains / blue losses and only mounts for exp
  assert.doesNotMatch(briefCss,/\.bdVisual \.gain\{color:#137c57\}/);
 });
 test('V3 brief digest derives the NDX stage from the actual TRI-POD ledger and formats signed distance', () => {
- const f=fixture(),host={hidden:true,innerHTML:''};
+ const f=sameSessionFixture(),host={hidden:true,innerHTML:''};
  f.glance.tripod.pod='TRIPOD';
  const n=f.glance.tripod.lines.tripod_return+100;
  f.glance.tripod.ndx=n;
@@ -161,7 +168,7 @@ test('V3 brief digest derives the NDX stage from the actual TRI-POD ledger and f
  assert.doesNotMatch(host.innerHTML,/\+-[0-9]/);
 });
 test('V3 digest ages into an explicitly dated reference instead of implying fresh live prices', () => {
- const f=fixture(),host={hidden:true,innerHTML:''};
+ const f=sameSessionFixture(),host={hidden:true,innerHTML:''};
  // Synthetic fresh-source scenario; actual published vintage is independently tested below.
  f.glance.source_generated_kst=f.glance.generated_kst;
  const recent=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
@@ -180,7 +187,7 @@ test('V3 digest ages into an explicitly dated reference instead of implying fres
 });
 
 test('V3 digest treats a newly republished but stale original source as historical', () => {
- const f=fixture(),g=structuredClone(f.glance);
+ const f=sameSessionFixture(),g=structuredClone(f.glance);
  const nowMs=Date.parse(g.generated_kst)+60000;
  g.source_generated_kst=new Date(nowMs-7200001).toISOString();
  const host={hidden:true,innerHTML:''};
@@ -211,4 +218,12 @@ test('V3 four colored interactive markers show signed point and percentage dista
   assert.match(html,/data-ov3-selected/);
   assert.match(html,/현재 대비 .*pt 더 (하락|상승)/);
   assert.match(html,/공식 종가|Nasdaq/);
+});
+
+test('visual digest rejects an older published brief against a newer US close',()=>{
+ const f=sameSessionFixture();
+ f.brief.market_date_us='2000-01-01';
+ const m=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true});
+ assert.equal(m.ready,false);
+ assert.match(m.reason,/동일 거래일|원장 시각/);
 });
