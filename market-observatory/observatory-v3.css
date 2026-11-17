@@ -249,3 +249,96 @@ body.obsV3 .foot{color:#5e6b7c}
 @media(prefers-reduced-motion:reduce){
  body.obsV3 *{scroll-behavior:auto!important;transition-duration:0ms!important}
 }
+
+/* V3 mobile information hierarchy — 2026-11-17 real-device screenshot correction.
+ * No global V1/V2 style changes. Source guards remain legible and actionable. */
+body.obsV3 .ov3DataGuard{
+ display:block;margin-bottom:10px;padding:7px 9px;border-radius:6px;
+ background:#fff4d0;border:1px solid #e1bd51;color:#644600;
+ font-size:11px;font-weight:800;line-height:1.5;
+}
+body.obsV3 .ov3StatusDetails summary{
+ cursor:pointer;display:block;min-height:34px;
+ padding:7px 0;font-size:12px;font-weight:850;line-height:1.45;
+ overflow-wrap:anywhere;list-style:none;
+}
+body.obsV3 .ov3StatusDetails summary::-webkit-details-marker{display:none}
+body.obsV3 .ov3StatusDetails summary::after{content:' ▾';font-size:12px}
+body.obsV3 .ov3StatusDetails[open] summary::after{content:' ▴'}
+body.obsV3 .ov3StatusDetails .ov3StatusItem{
+ padding:8px 2px;border-top:1px solid #e4ce93;
+ font-size:12px;line-height:1.55;overflow-wrap:anywhere;
+}
+body.obsV3 .ov3StatusDetails summary:focus-visible{
+ outline:3px solid #a68000;outline-offset:3px;
+}
+@media(max-width:760px){
+ body.obsV3 header.top{
+  padding:8px 10px 7px!important;border-bottom-width:3px;
+ }
+ body.obsV3 header.top .brand{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:nowrap;gap:6px;font-size:13px!important;line-height:1.2;
+ }
+ body.obsV3 header.top .ov3Back{
+  min-height:30px;padding:4px 7px;font-size:10px;flex-shrink:0;
+ }
+ body.obsV3 header.top #pulse{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;overflow:visible;margin-top:6px;
+ }
+ body.obsV3 header.top #pulse .chip{
+  display:block;min-width:0;max-width:100%;
+  padding:5px 4px!important;font-size:10px!important;
+  line-height:1.25;text-align:center;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;
+ }
+ body.obsV3 header.top .obsNowControls{
+  display:flex;flex-wrap:nowrap;align-items:center;
+  margin-top:5px;gap:7px;min-width:0;
+ }
+ body.obsV3 header.top #obsForceRefresh{
+  width:auto!important;min-height:34px!important;padding:3px 8px!important;
+  flex:0 0 auto;font-size:11px!important;
+ }
+ body.obsV3 header.top .obsNowControls>div{min-width:0;flex:1}
+ body.obsV3 header.top .obsNowControls small{display:none}
+ body.obsV3 header.top #obsNowMessage{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  overflow:hidden;max-width:100%;font-size:11px;line-height:1.4;
+  overflow-wrap:anywhere;
+ }
+ body.obsV3 header.top #obsNowMessage[data-state=FAILED],
+ body.obsV3 header.top #obsNowMessage[data-state=PARTIAL]{
+  display:block;overflow:visible;-webkit-line-clamp:unset;
+ }
+ body.obsV3 header.top .obsCollectControls{margin-top:1px}
+ body.obsV3 header.top .obsCollectControls summary{
+  min-height:28px!important;padding:4px 0!important;
+  font-size:11px;
+ }
+ body.obsV3 .todayV2{
+  gap:8px;margin:5px auto 10px;padding:0 9px;
+ }
+ body.obsV3 .tV2Notice,body.obsV3 .tV2Alert{
+  padding:6px 10px;border-radius:8px;gap:3px;
+ }
+ body.obsV3 #ov3TripodRail{margin:0}
+ body.obsV3 #ov3TripodRail .ov3Rail{
+  margin:0;padding:11px 10px;
+ }
+ body.obsV3 #ov3TripodRail .ov3RailHeading strong{font-size:14px}
+ body.obsV3 #ov3TripodRail .ov3Track{margin:9px 8px 7px}
+ body.obsV3 #ov3TripodRail .ov3Threshold{padding:7px}
+ body.obsV3 #ov3TripodRail .ov3Threshold b{font-size:15px}
+ body.obsV3 #ov3TripodRail .ov3RailNote{
+  font-size:11px;padding:8px;margin:8px 0;
+ }
+ body.obsV3 #ov3MarketStrip{margin:0 0 8px}
+ body.obsV3 .ov3StripTitle{padding:7px 9px}
+ body.obsV3 .ov3StripTile{padding:9px}
+ body.obsV3 .ov3StripTile strong{font-size:16px}
+ body.obsV3 main.wrap{
+  padding:10px 9px calc(38px + env(safe-area-inset-bottom));
+ }
+}
