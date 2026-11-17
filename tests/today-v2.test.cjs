@@ -123,7 +123,7 @@ test('LIVE_WITH_WARNINGS renders noncritical warnings as MID, not urgent HIGH', 
     groups: { market: { state: 'LIVE', as_of: '2026-11-11', source: 'observatory.json' } }
   }, calendar }, NOW);
   assert.equal(vm.alerts.some(a => a.level === 'HIGH'), false);
-  assert.ok(vm.alerts.some(a => a.level === 'MID' && /fedwatch/.test(a.body)));
+  assert.ok(vm.alerts.some(a => a.level === 'MID' && /FedWatch/.test(a.body)));
 });
 
 test('LIVE_WITH_WARNINGS still surfaces a critical_bad as HIGH', () => {
