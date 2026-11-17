@@ -7,10 +7,12 @@ on:
     branches: [main]
     paths:
       - tests/calendar-actual-production.cjs
+      - tests/observatory-v3.test.cjs
       - .github/workflows/calendar-actual-production-qa.yml
   pull_request:
     paths:
       - tests/calendar-actual-production.cjs
+      - tests/observatory-v3.test.cjs
       - .github/workflows/calendar-actual-production-qa.yml
   workflow_dispatch:
 permissions:
