@@ -1,6 +1,10 @@
 // V3 opt-in smoke: actual DOM, stylesheet, data state and mobile nav ownership.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const dataDir=path.join(__dirname,'..','market-observatory','data');
+const fixtureData=['daily-glance.json','freshness-status.json','sector-rotation-brief.json'].map(x=>JSON.parse(fs.readFileSync(path.join(dataDir,x),'utf8')));
 const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
 (async()=>{
  const browser=await chromium.launch();
@@ -54,6 +58,34 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   await page.waitForFunction(()=>document.querySelector('#briefVisualDigest')?.textContent?.length>0,null,{timeout:25000});
   const digest=await page.locator('#briefVisualDigest').textContent();
   assert.ok(digest.includes('트라이팟')||digest.includes('확인 대기'),'morning brief has visual section or safe hold');
+  // Independently force the published same-session fixture through the REAL browser model/rail.
+  // Live state may legitimately HOLD; CI must still prove all four lines render when READY.
+  const fixture=await page.evaluate(([g,f,sec])=>{
+   const api=window.__JJOONI_OBS_V3;
+   const ready=api.model(g,f,sec,Date.parse(f.generated_kst)+60000);
+   if(!ready.ready)return {ready:false,reason:ready.reason};
+   const el=document.createElement('section');el.id='ov3FixtureRail';el.innerHTML=api.rail(ready);
+   document.body.appendChild(el);
+   return {ready:true,count:el.querySelectorAll('.ov3Threshold').length,
+    text:el.textContent,axis:ready.axis,pod:ready.pod};
+  },fixtureData);
+  assert.equal(fixture.ready,true,'published synthetic same-session fixture must render: '+fixture.reason);
+  assert.equal(fixture.count,4,'all FOUR priced TRI-POD thresholds must render in browser DOM');
+  assert.match(fixture.text,/MA250×0\\.95/);
+  assert.match(fixture.text,/MA250×1\\.01/);
+  assert.match(fixture.text,/현재 NDX/);
+  assert.match(fixture.text,/DD -9%/);
+  assert.ok(fixture.text.includes(fixture.pod),'stage must use real ledger');
+  await page.locator('#ov3FixtureRail').evaluate(el=>el.remove());
+  if(width===390){
+   const v2=await ctx.newPage();
+   await v2.goto(BASE+'?ui=v2',{waitUntil:'networkidle'});
+   await v2.locator('.navV2Main button[data-group="brief"]').click();
+   await v2.waitForFunction(()=>document.querySelector('#briefVisualDigest')&&document.querySelector('#briefArticle')?.textContent?.length>0,null,{timeout:25000});
+   assert.equal(await v2.locator('#briefVisualDigest').evaluate(el=>el.hidden),true,
+    'V2 default must NOT display V3 brief digest');
+   await v2.close();
+  }
   assert.deepEqual(errors,[],'no page exceptions');
   console.log('OBS_V3_E2E_PASS width='+width+' visual='+(state.ready?'READY':'HOLD')+' totalNav='+state.navOwner);
   await ctx.close();
