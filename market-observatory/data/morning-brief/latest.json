@@ -1,101 +1,101 @@
 {
   "schema": "JJOONI_MORNING_BRIEF_V1",
-  "title": "반도체가 시장을 끌어내렸다 — NDX -2.67%, SOX -5.28%와 방어주만 남은 위험회피",
-  "report_date_kst": "2026-11-17",
-  "market_date_us": "2026-11-16",
-  "generated_kst": "2026-11-17T06:55:00+09:00",
-  "published_kst": "2026-11-17T06:55:00+09:00",
-  "author": "송팀장 아침 시황 · ChatGPT",
+  "title": "엔비디아 매출 1,158억달러에도 전 업종 약세 — 반도체 상대방어·소프트웨어 하락, VIX 25.46",
+  "report_date_kst": "2026-11-18",
+  "market_date_us": "2026-11-17",
+  "generated_kst": "2026-11-18T08:44:16.355+09:00",
+  "published_kst": "2026-11-18T08:44:17.355+09:00",
+  "author": "JJOONI 공개 시장분석 · 송팀장 방법론 참고",
   "content_status": "WEB_VERIFIED_WITH_DISCLOSED_GAPS",
-  "verification_note": "동일 main SHA 네 원장 체인과 공식 기업 원문을 확인했으며 NDX·SOX는 제공자 참고값, 공식 EOD 미검증으로 공개함",
+  "verification_note": "2026-11-17 미국 완료일봉 원장 4종 동일 SHA 고정. 엔비디아 IR·SEC·JPM SEC·미국 Census 등 공개 원문 조회. 공식 NDX/SOX EOD 독립검증 미완료. ROY 후행 검토 PENDING.",
   "read_only": true,
   "contains_account_data": false,
   "editorial_contract": {
     "version": "SONG_INSPIRED_DAILY_V1",
     "reference_name": "송팀장 Sector Observatory · ROY×JJOONI V2",
-    "reference_date": "2026-11-17",
-    "verified_at_kst": "2026-11-17T06:54:30+09:00",
+    "reference_date": "2026-11-18",
+    "verified_at_kst": "2026-11-18T08:44:15.355+09:00",
     "canonical_source_vintage": {
-      "session": "2026-11-16",
-      "observatory_generated_kst": "2026-11-17T06:48:58+09:00",
-      "pulse_generated_kst": "2026-11-17T06:49:43+09:00",
-      "glance_generated_kst": "2026-11-17T06:49:43+09:00"
+      "session": "2026-11-17",
+      "observatory_generated_kst": "2026-11-18T07:11:46+09:00",
+      "pulse_generated_kst": "2026-11-18T07:12:34+09:00",
+      "glance_generated_kst": "2026-11-18T07:12:34+09:00"
     },
     "close_checks": [
       {
         "symbol": "NDX",
-        "session_date": "2026-11-16",
+        "session_date": "2026-11-17",
         "status": "MISSING",
         "close": null,
-        "previous_close": 27943.74023438,
+        "previous_close": 27197.15234375,
         "change_pct": null,
         "official_status": "NOT_VERIFIED",
         "observation_type": "PROVIDER_REFERENCE_ONLY",
         "source_urls": [
-          "https://github.com/mauveplace/jjooni-control-tower/blob/4caf61d0de6b7a66aa71992caf48af1b6dc87554/market-observatory/data/observatory.json"
+          "https://github.com/mauveplace/jjooni-control-tower/blob/b0ec7a655041014901226c5b3a56289b758ac9a6/public-market-daily.json"
         ],
-        "reason": "Nasdaq 공식 정규장 완료 일봉과 독립 제공자 일봉의 동일값 검증을 완료하지 못함"
+        "reason": "공개 제공자 완료 일봉은 존재하지만 Nasdaq 공식 종가와 독립 제공자 두 출처의 동일 세션 증빙이 없어서 공식 EOD 검증 미완료"
       },
       {
         "symbol": "SOX",
-        "session_date": "2026-11-16",
+        "session_date": "2026-11-17",
         "status": "MISSING",
         "close": null,
-        "previous_close": 10146.3232,
+        "previous_close": 9610.6523,
         "change_pct": null,
         "official_status": "NOT_VERIFIED",
         "observation_type": "PROVIDER_REFERENCE_ONLY",
         "source_urls": [
-          "https://github.com/mauveplace/jjooni-control-tower/blob/4caf61d0de6b7a66aa71992caf48af1b6dc87554/market-observatory/data/observatory.json"
+          "https://github.com/mauveplace/jjooni-control-tower/blob/b0ec7a655041014901226c5b3a56289b758ac9a6/public-market-daily.json"
         ],
-        "reason": "Yahoo 단일 제공자 완료일봉만 확인되어 독립 공식 종가 검증을 완료하지 못함"
+        "reason": "Yahoo ^SOX 단일 제공자 완료일봉 참고값이며 공식 SOX 완료종가 독립검증 미완료"
       }
     ],
     "reference_quotes": [],
     "template_version": "ROY_JJOONI_DAILY_V2",
     "market_metrics": {
       "NDX": {
-        "value": 27197.15234375,
+        "value": 27001.7852,
+        "source": "Observatory canonical completed daily Yahoo ^NDX provider reference",
+        "source_generated_kst": "2026-11-18T07:11:46+09:00",
         "status": "PROVIDER_REFERENCE_ONLY",
-        "source": "Observatory canonical (Yahoo ^NDX)",
-        "session_date": "2026-11-16",
-        "source_generated_kst": "2026-11-17T06:48:58+09:00",
+        "session_date": "2026-11-17",
         "official_eod_verified": false,
         "trade_signal_eligible": false
       },
       "SOX": {
-        "value": 9610.6523,
+        "value": 9642.8779,
+        "source": "Yahoo ^SOX single-provider completed daily",
+        "source_generated_kst": "2026-11-18T07:11:46+09:00",
         "status": "PROVIDER_REFERENCE_ONLY",
-        "source": "Yahoo ^SOX single provider",
-        "session_date": "2026-11-16",
-        "source_generated_kst": "2026-11-17T06:48:58+09:00",
+        "session_date": "2026-11-17",
         "official_eod_verified": false,
         "trade_signal_eligible": false
       },
       "VIX10": {
-        "value": 20.903999901,
+        "value": 21.366999817,
+        "source": "Public market daily completed VIX 10-day average",
+        "source_generated_kst": "2026-11-18T07:12:34+09:00",
         "status": "PROVIDER_REFERENCE_ONLY",
-        "source": "Public market daily same-session calculated",
-        "session_date": "2026-11-16",
-        "source_generated_kst": "2026-11-17T06:49:43+09:00",
+        "session_date": "2026-11-17",
         "official_eod_verified": false,
         "trade_signal_eligible": false
       },
       "MA250": {
-        "value": 27515.3937500002,
+        "value": 27525.38848437516,
+        "source": "Public market daily NDX 250-day average",
+        "source_generated_kst": "2026-11-18T07:12:34+09:00",
         "status": "PROVIDER_REFERENCE_ONLY",
-        "source": "Public market daily same-session calculated",
-        "session_date": "2026-11-16",
-        "source_generated_kst": "2026-11-17T06:49:43+09:00",
+        "session_date": "2026-11-17",
         "official_eod_verified": false,
         "trade_signal_eligible": false
       },
       "DD52W": {
-        "value": -12.897955573567444,
+        "value": -13.523641720043834,
+        "source": "Public market daily NDX 52-week drawdown",
+        "source_generated_kst": "2026-11-18T07:12:34+09:00",
         "status": "PROVIDER_REFERENCE_ONLY",
-        "source": "Public market daily same-session calculated",
-        "session_date": "2026-11-16",
-        "source_generated_kst": "2026-11-17T06:49:43+09:00",
+        "session_date": "2026-11-17",
         "official_eod_verified": false,
         "trade_signal_eligible": false
       }
@@ -104,11 +104,11 @@
       "review_status": "PENDING",
       "roy_report_status": "NOT_FOUND",
       "roy_issue_url": null,
-      "reviewed_source_session": "2026-11-16",
+      "reviewed_source_session": "2026-11-17",
       "comparison": [],
       "verified_by_independent_provider": false
     }
   },
-  "body_markdown": "🚨 TRI-POD 상태: BIPOD 유지(공개 원장 참고·공식 EOD 미검증) | 미국 정규장 거래일 2026-11-16 | NDX 27,197.15(-2.67%) | DD -12.90% | VIX10 20.90 | MA250 상승 레짐 | 주문용 공식 신호 미검증\n🟠 NDX는 MA250 상단선 27,790.55 아래지만 하단선 26,139.62 위다. VIX10은 18을 넘었으나 하단선 이탈 전이므로 NOPOD 전환 확정이 아니다.\n\n## ① 오늘의 시장 이야기\n\n미국 11월 16일 장은 기술·반도체에서 시작한 매도가 대부분 업종으로 번진 날이었다. NDX는 2.67%, SOX는 5.28% 하락했고, S&P500 11개 업종 중 필수소비재와 유틸리티만 플러스를 지켰다. 숫자는 같은 main 커밋에 묶인 원장의 완료일봉 참고값이며 공식 Nasdaq EOD 독립검증은 완료되지 않았다.\n\n검증 사실은 “반도체와 성장주가 시장보다 더 크게 하락했다”는 것이다. 원인 해석은 엔비디아 실적 전 경계, AI 투자 회수기간과 자금조달비용에 대한 할인율 재평가가 겹쳤다는 가설이다. 반론은 금리 하락과 유가 하락이 이어지면 이번 매도가 단기 포지션 축소에 그칠 수 있다는 점이다.\n\n## ② 시장 한눈에\n\n| 지표 | 수준 | 1D | 1W | 1M | 세션·원천·상태 |\n|---|---:|---:|---:|---:|---|\n| NDX | 27,197.15 | -2.67% | -2.55% | -6.82% | 2026-11-16 Observatory 참고 · 공식 EOD 미검증 |\n| SOX | 9,610.65 | -5.28% | -4.22% | -13.71% | 2026-11-16 Yahoo 단일 제공자 참고 · 공식 EOD 미검증 |\n| VIX10 | 20.90 | 해당 없음 | 해당 없음 | 해당 없음 | 완료 10거래일 산술평균 참고 |\n| MA250 | 27,515.39 | 해당 없음 | 해당 없음 | 해당 없음 | NDX 완료 250거래일 산술평균 참고 |\n| DD52W | -12.90 | 해당 없음 | 해당 없음 | 해당 없음 | 52주 최고 대비 종가 낙폭 참고 |\n| S&P500 | 7,416.59 | -1.92% | -1.77% | -3.17% | 2026-11-16 참고 |\n| Nasdaq 종합 | 24,509.76 | -2.49% | -2.94% | -6.24% | 2026-11-16 참고 |\n| VIX | 22.91 | +18.70% | +15.01% | +14.61% | 2026-11-16 참고 |\n| 미국 10년물 | 5.12% | -3bp | 자료 미확인 | 자료 미확인 | 완료 세션 참고 |\n| DXY | 103.58 | +0.16% | +1.90% | +1.71% | 2026-11-16 참고 |\n| USD/KRW | 1,335.46 | +0.13% | -2.00% | -0.41% | 2026-11-16 참고 |\n| KOSPI | 5,100.50 | -3.59% | +1.63% | -10.01% | 한국 2026-11-16 완료일봉 |\n| KOSDAQ | 665.65 | -4.86% | +4.18% | -16.25% | 한국 2026-11-16 완료일봉 |\n\n공포탐욕지수는 31.1로 전일보다 6.3포인트 낮아졌다. Finviz 종목 시장폭과 독립 NDX 집중도는 이번 회차에서 웹 검증을 끝내지 못해 수치로 채우지 않았다.\n\n## ③ 핵심 이슈 깊이 읽기\n\n### 1) 반도체의 이익 기대보다 밸류에이션 축소가 더 빨랐다\n**핵심 숫자:** SOX -5.28%, SOXX -5.41%, SMH -5.11%, XLK -3.24%.\n**무슨 일이 있었나:** 11월 16일 정규장에서 반도체와 기술 ETF가 지수보다 크게 하락했다. 엔비디아는 11월 17일 장후 실적 발표를 공식 예고했다.\n**왜 중요한가:** 장비·GPU·클라우드의 이익 추정치가 유지돼도 자금비용과 회수기간 우려가 커지면 주가수익배수는 먼저 줄 수 있다.\n**반대 해석:** 실적과 다음 분기 가이던스가 공급 제약보다 매출 인식 확대를 증명하면 전일 하락은 이벤트 전 위험 축소로 재해석될 수 있다.\n**다음 확인:** 엔비디아 매출·총마진·재고·데이터센터 매출과 장후 반응을 같은 시각 기준으로 분리 확인한다.\n\n### 2) 금리 하락이 성장주를 살리지 못했다\n**핵심 숫자:** 미국 10년물 참고 5.12%(-3bp), WTI 85.05달러(-3.96%), VIX 22.91(+18.70%).\n**무슨 일이 있었나:** 장기금리와 유가가 하락했지만 기술주와 경기민감주는 동시에 밀렸다.\n**왜 중요한가:** 통상 할인율 하락은 성장주에 우호적이지만, 이 날은 기업 이익·정책·자금조달 불확실성이 금리 효과를 압도했을 가능성이 있다.\n**반대 해석:** 유가 급락이 경기둔화 신호가 아니라 공급·지정학 프리미엄 조정이면 금리 하락은 뒤늦게 성장주에 우호적으로 작용할 수 있다.\n**다음 확인:** 신용스프레드, 다음 세션 국채금리, 기술주 시장폭이 함께 안정되는지 본다.\n\n### 3) 한국 반도체 약세는 미국 장 반영 전에도 이미 컸다\n**핵심 숫자:** 한국 반도체 ETF 091160 -8.96%, KOSPI -3.59%, KOSDAQ -4.86%.\n**무슨 일이 있었나:** 한국 11월 16일 반도체가 급락한 뒤 미국 11월 16일 SOX가 추가 하락했다. 두 시장의 거래시간이 다르다.\n**왜 중요한가:** 다음 KRX 세션에서 단순 추가 하락보다 선반영 정도와 원/달러·외국인 수급의 결합이 중요하다.\n**반대 해석:** 미국 약세가 이미 한국 장중 기대에 반영됐다면 다음 날 지수 반응은 제한될 수 있다.\n**다음 확인:** 한국 반도체의 시가 갭, 장중 낙폭 회복, 원/달러와 거래대금의 동행을 확인한다.\n\n## ④ 글로벌·한국 시장\n\n**송팀장 Sector Observatory · 전체 업종 강약**\n\n완료일봉 기준: 미국 2026-11-16 / 한국 2026-11-16 · 출처: 기존 옵저버토리 Sector ETF 원장 (2026-11-17T06:49:22+09:00)\n\n**수익률 기반 추정**이며 실제 펀드 자금 순유입·기관 순매수액이 아니다. 관측된 상대 강약의 이동만 해석한다.\n\n**미국 S&P500 11개 업종**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| 필수소비재 · XLP | +1.42% | +0.27% | -1.15%p | 강세 지속 |\n| 유틸리티 · XLU | +0.52% | +0.18% | -0.34%p | 강세 지속 |\n| 부동산 · XLRE | +0.02% | -0.27% | -0.29%p | 하락 전환 |\n| 헬스케어 · XLV | +0.54% | -0.51% | -1.06%p | 하락 전환 |\n| 금융 · XLF | +0.81% | -0.85% | -1.66%p | 하락 전환 |\n| 소재 · XLB | -0.21% | -1.46% | -1.24%p | 약세 지속 |\n| 경기소비재 · XLY | -0.40% | -1.53% | -1.13%p | 약세 지속 |\n| 커뮤니케이션 · XLC | +1.05% | -1.72% | -2.77%p | 하락 전환 |\n| 산업재 · XLI | -0.39% | -1.85% | -1.46%p | 약세 지속 |\n| 에너지 · XLE | +0.98% | -1.96% | -2.93%p | 하락 전환 |\n| 기술 · XLK | -2.01% | -3.24% | -1.23%p | 약세 지속 |\n\n**한국 10개 섹터 ETF**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| 필수소비재 · 266410 | -0.18% | +3.28% | +3.46%p | 상승 전환 |\n| 보험 · 140700 | -0.29% | +3.06% | +3.35%p | 상승 전환 |\n| 은행 · 091170 | +3.20% | +1.01% | -2.19%p | 강세 지속 |\n| 미디어·엔터 · 266360 | -2.89% | +0.63% | +3.51%p | 상승 전환 |\n| 자동차 · 091180 | +1.25% | -0.40% | -1.66%p | 하락 전환 |\n| 철강 · 117680 | -1.09% | -2.06% | -0.97%p | 약세 지속 |\n| 건설 · 117700 | +1.88% | -2.10% | -3.98%p | 하락 전환 |\n| 에너지·화학 · 117460 | -0.50% | -2.97% | -2.47%p | 약세 지속 |\n| 기계장비 · 102960 | +1.25% | -3.29% | -4.54%p | 하락 전환 |\n| 반도체 · 091160 | -0.84% | -8.96% | -8.12%p | 약세 지속 |\n\n**주요 테마 ETF**\n\n| 테마 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| 반도체 · SMH | -2.99% | -5.11% | -2.12%p | 약세 지속 |\n| 반도체 · SOXX | -3.67% | -5.41% | -1.74%p | 약세 지속 |\n| 사이버보안 · HACK | -1.00% | -1.22% | -0.22%p | 약세 지속 |\n| 클라우드 · SKYY | -1.09% | -2.10% | -1.02%p | 약세 지속 |\n| 소프트웨어 · IGV | -0.26% | -2.16% | -1.91%p | 약세 지속 |\n| 바이오 · XBI | -0.43% | -3.10% | -2.67%p | 약세 지속 |\n| 지역은행 · KRE | +0.30% | -0.76% | -1.06%p | 하락 전환 |\n| 인프라 · PAVE | -0.84% | -1.90% | -1.06%p | 약세 지속 |\n| 방산 · ITA | -0.31% | -2.46% | -2.15%p | 약세 지속 |\n| 에너지탐사 · XOP | +0.92% | -2.61% | -3.53%p | 하락 전환 |\n| 방산 · XAR | -1.18% | -3.54% | -2.36%p | 약세 지속 |\n| 로봇·AI · BOTZ | -0.60% | -3.55% | -2.95%p | 약세 지속 |\n| 로봇·자동화 · ROBO | -1.12% | -3.90% | -2.77%p | 약세 지속 |\n\n주도권 변화는 네 가지다. 첫째, 미국은 기술뿐 아니라 커뮤니케이션·에너지·금융까지 전일 강세에서 하락으로 돌아섰다. 둘째, 플러스를 지킨 업종은 필수소비재와 유틸리티뿐이라 방어 성격이 강했다. 셋째, 한국은 반도체·기계장비가 무너진 반면 필수소비재·보험·은행이 상대적으로 강했다. 넷째, 테마 ETF는 반도체·로봇·방산·바이오가 동시에 약해 특정 AI 테마만의 조정으로 보기 어렵다.\n\n일본·홍콩·중국 일부 지표는 원장상 2026-11-13 완료일봉이어서 이번 미국 11월 16일 세션과 섞지 않았다.\n\n## ⑤ AI 산업·기업실적\n\n**시장 전체 주요 기업 이벤트 · 발생 시 분석**\n\n상태: MATERIAL_EVENTS_FOUND\n\n탐색 범위는 2026-11-15~16 ET의 주요 시장 뉴스, 실적 일정, SEC·회사 IR 원문, 대형주 이상가격 움직임이다. 나스닥100 전 종목을 개별 전수검사했다고 주장하지 않으며, 나스닥100과 11개 업종 대표주·한국 및 글로벌 대형주를 포괄하는 광범위 피드에서 후보를 찾은 뒤 선택 사건만 공식 원문으로 확인했다.\n\n1. Tyson Foods: 11월 16일 장전 발표. 4분기 매출 145.85억달러, 조정 영업이익 3.61억달러, 조정 EPS 0.61달러였다. 2027 회계연도 가이던스는 조정 영업이익 17억~21.5억달러, FCF 8억~13억달러다. 정규장에서 주가는 8.7% 상승했다는 동시대 시장 보도가 있다. 이익의 질은 Prepared Foods와 Chicken의 회복, Beef 약세, 법률충당 및 53주 효과를 분리해야 한다. [공식 SEC 실적 원문](https://www.sec.gov/Archives/edgar/data/100493/000010049326000077/tsn2026q4exh-991.htm)\n\n2. Summit Therapeutics: 11월 15일 회사가 ivonescimab BLA에 FDA Complete Response Letter를 받았다고 발표했다. 회사 설명상 통계적으로 유의한 전체생존 개선 부재 때문에 현재 형태로 승인할 수 없다는 내용이다. 11월 16일 정규장에서 주가는 16.5% 하락했다는 동시대 시장 보도가 있다. 이는 단순 심리보다 허가 가능성과 현금흐름 시점 재평가에 가깝다. 반대 사례는 다른 적응증 임상과 후속 데이터가 가치를 일부 보존하는 경우다. 다음 확인은 FDA 협의 결과와 재제출 경로다. [회사 공식 원문](https://www.smmttx.com/news/press-releases/news-details/2026/Summit-Therapeutics-Provides-Update-Regarding-Ivonescimab-Biologics-License-Application/default.aspx)\n\n3. Corvex: 11월 16일 SEC 8-K에서 3년 1.03억달러 take-or-pay Blackwell 컴퓨팅 용량 계약을 공시했다. 예상 구축비 7,800만달러 중 고객 선급금 2,600만달러와 약정 부채 3,800만달러로 80% 이상을 조달할 계획이며, 2027년 1분기 1,000개 초과 HGX B200 GPU 공급을 예상했다. 계약금액은 매출 인식 완료액이 아니고 부채조달 종결·장비 인도·고객 수락 위험이 남는다. 정규장 또는 장후 주가 반응은 이번 회차에서 독립 검증하지 못했다. [공식 SEC 8-K](https://www.sec.gov/Archives/edgar/data/1734750/000121390026120168/ea031185401-8k_corvex.htm)\n\n## ⑥ 주요 일정\n\n- 11월 17일 13:20 PT(16:20 ET) 전후: NVIDIA FY2027 3분기 결과 공개 예정.\n- 11월 17일 14:00 PT(17:00 ET): NVIDIA 공식 컨퍼런스콜 예정. [공식 IR 일정](https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Sets-Conference-Call-for-Third-Quarter-Financial-Results/default.aspx)\n- 다음 KRX 세션: 미국 11월 16일 반도체 급락의 추가 반영과 선반영 여부를 구분한다.\n- 경제지표 일정은 이번 회차에서 공식 캘린더 원문 확인을 끝내지 못했으므로 임의로 채우지 않는다.\n\n## ⑦ 투자전략·위험점검·복기\n\n**업종 주도권 변화 · 원인과 다음 확인**\n\n관측된 사실은 방어주만 플러스를 지키고, 기술·반도체·로봇·방산·에너지까지 약세가 확산됐다는 것이다. 첫 가설은 AI 이익 전망 자체보다 높은 밸류에이션과 자금조달비용의 재평가다. 경쟁 가설은 엔비디아 실적 전 일시적 포지션 축소다. 판별 기준은 실적 뒤 SOX·XLK가 시장보다 먼저 안정되는지, 금리 하락에도 신용스프레드가 넓어지는지, 방어주 상대강도가 계속되는지다.\n\n공개 원장의 BIPOD는 유지됐지만 NDX 27,197.15는 MA250 27,515.39와 상단선 27,790.55 아래다. 하단선 26,139.62 이탈과 VIX10 18 이상이 동시에 확인될 때만 NOPOD 후보가 된다. 이 문장은 분석 조건이며 주문 지시가 아니다.\n\n이전 관찰의 “기술 약세가 방어·금융으로 순환할 수 있다”는 가설은 절반만 맞았다. 방어주는 강했지만 금융은 -0.85%로 하락 전환했다. 따라서 단순 순환보다 시장 전반 위험회피 가설의 설명력이 커졌다. ROY 독립 검토는 PENDING이며 공동 검증 완료로 간주하지 않는다.\n\n## ⑧ 원천·데이터 감사\n\n- 고정 main SHA: [4caf61d0de6b7a66aa71992caf48af1b6dc87554](https://github.com/mauveplace/jjooni-control-tower/commit/4caf61d0de6b7a66aa71992caf48af1b6dc87554)\n- Observatory 2026-11-17T06:48:58+09:00 → Daily Pulse 06:49:43 → Daily Glance 06:49:43. 네 원장 세션은 2026-11-16으로 일치했고 read_only/no_trade/FINAL/OK 체인을 통과했다.\n- NDX·SOX는 같은 공급자 계열 참고값이며 공식 Nasdaq 정규장 종가의 독립 이중검증이 아니다. close_checks는 MISSING으로 유지하고 거래신호 적격을 부여하지 않았다.\n- 업종표 원천: [sector-rotation-brief.md](https://github.com/mauveplace/jjooni-control-tower/blob/4caf61d0de6b7a66aa71992caf48af1b6dc87554/market-observatory/data/sector-rotation-brief.md)\n- 시장 반응 보조 확인: [AP 시장 마감 기사](https://apnews.com/article/stocks-markets-ai-nvidia-oil-us-35786b8f539ec95f16ae0500f71cfcc7). 기사에 포함된 확인되지 않은 인물 관련 주장은 본 분석의 사실 근거로 사용하지 않았다.\n- ROY: 동일 세션 독립 원본 코멘트 미확인, review_status=PENDING. 보고서 발행을 보류하지 않으며 이후 한 번만 검토를 요청한다.\n- NO_TRADE_REVIEW_ONLY. 개인 계좌·보유·주문 정보는 공개본에 포함하지 않았다.",
+  "body_markdown": "기준일(KST) **2026-11-18** · 미국 완료 정규장 **2026-11-17** · 원천 생성 KST 2026-11-18T07:11:46+09:00 → 2026-11-18T07:12:34+09:00\n\n🚨 TRI-POD: **BIPOD 유지**(레짐 상승·신호 변경 없음) / NDX 27,001.79 (-0.72%) / VIX10 21.37 / MA250 27,525.39 / DD -13.52%.\n\nNDX·SOX 정규장 데이터는 완료 일봉 **제공자 참고값**. 공식 EOD 독립 검증 미완료 · 자동매매 불가(NO_TRADE_REVIEW_ONLY). 시장의 방향·실적·업종 약세를 검토하는 공개 해설.\n\n**핵심 3줄:** ① 미국 11개 업종 모두 하락하는 위험회피 ② SOX는 소폭 상승, 소프트웨어·금융은 하락 심화 ③ 엔비디아 11/17 장후 실적은 강했으나 경영진·네오클라우드 신용 불확실성 존재.\n\n**다음 확인:** NDX 하락 후보 26,149 / 상방 MA250 27,801 / 낙폭 -9% 조건 28,414, 11/18 미국 정규장 반응, FOMC 의사록.\n\n## ① 오늘의 시장 이야기\n\n**정규장 완료 사실.** 미국 2026-11-17 S&P500 -1.03%, 다우 -1.64%, 나스닥100 -0.72%로 동반 하락했다. 변동성지수 VIX는 25.46(+11.13%)까지 상승했고, 공개 S&P500 11개 섹터 ETF의 **당일 수익률이 전부 음수**였다. 그럼에도 SOX는 +0.34%로 상승해 같은 기술주 안에서도 움직임이 달랐다. [동일 완료 세션 원장](https://github.com/mauveplace/jjooni-control-tower/blob/b0ec7a655041014901226c5b3a56289b758ac9a6/public-market-daily.json).\n\n**원인 가설.** 시장 전체의 위험회피 국면에서 은행·유틸리티·소프트웨어 등 투자자의 이익 가시성 및 할인율 민감도가 높은 업종의 하락이 두드러졌다. 엔비디아 실적 전 기대와 불안이 혼재해 반도체가 상대 방어한 것으로 볼 수 있다. 이는 수익률을 보고 해석한 **가설이지 실제 ETF 순유출입액이나 단일 사건에 의한 인과 확정이 아니다**.\n\n**장후 사실.** 엔비디아가 미국 11월 17일 정규장 마감 이후 FY2027 3분기 매출 **$115.8B(1,158억 달러)** 및 다음 분기 매출전망 **$130B(1,300억 달러, ±3%)**를 발표했다. 장후 발표를 앞선 정규장 종가 원인이라고 소급하지 않는다. [엔비디아 공식 IR](https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx) · [SEC 원문](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/nvda-20261117.htm).\n\n## ② 시장 한눈에\n\n| 지표 | 수준 | 1D | 1W | 1M | 3M | 세션·원천·상태 |\n|---|---:|---:|---:|---:|---:|---|\n| NDX | 27,001.79 | -0.72% | -2.66% | -7.49% | 미확인 | 2026-11-17 완료일봉 참고 · 공식 종가 독립검증 미완료 |\n| SOX | 9,642.88 | +0.34% | -3.56% | -13.42% | 미확인 | 2026-11-17 완료일봉 참고 · 공식 종가 독립검증 미완료 |\n| VIX10 | 21.37 | 해당 없음 | 해당 없음 | 해당 없음 | 미확인 | 2026-11-17 완료일봉 참고 · 공식 종가 독립검증 미완료 |\n| MA250 | 27,525.39 | 해당 없음 | 해당 없음 | 해당 없음 | 미확인 | 2026-11-17 완료일봉 참고 · 공식 종가 독립검증 미완료 |\n| DD52W | -13.52 | 해당 없음 | 해당 없음 | 해당 없음 | 미확인 | 2026-11-17 완료일봉 참고 · 공식 종가 독립검증 미완료 |\n| S&P500 | 7,340.53 | -1.03% | -2.40% | -4.16% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 나스닥종합 | 24,328.38 | -0.74% | -2.94% | -6.93% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 다우 | 50,759.42 | -1.64% | -2.82% | -2.39% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 러셀2000 | 2,701.87 | -1.50% | -4.24% | -0.72% | 미확인 | 2026-11-17 완료일봉 참고 |\n| VIX | 25.46 | +11.13% | +30.83% | +27.36% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 원/달러 | 1,334.90 | +0.12% | -0.67% | -0.45% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 미 10년물 | 5.10% | -1.80bp | +12.00bp | +0.50bp | 미확인 | 2026-11-17 완료일봉 참고 |\n| 코스피 | 4,968.48 | -2.59% | -5.17% | -12.34% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 코스닥 | 650.06 | -2.34% | -2.63% | -18.21% | 미확인 | 2026-11-17 완료일봉 참고 |\n| 공포탐욕 | 25.20 | 해당 없음 | 미확인 | 미확인 | 미확인 | 2026-11-17 완료일봉 참고 |\n\n공포·탐욕 참고지수 **25.20**, 전일 대비 -5.90pt. 11개 업종 중 20일선 상회는 **4개/11개**(ETF 프록시)로, Finviz 개별 종목 상승·하락 건수와 **동일한 지표가 아니다**. 공식 종가·VIX10·MA250·DD 계산 모두 독립 공식 인증 여부가 다르며, 원장 'FINAL'은 동일 거래일 정합성을 뜻할 뿐 공식 Nasdaq 인증이 아니다.\n\n## ③ 핵심 이슈 깊이 읽기\n\n### 1) 광범위한 하락과 반도체의 일시적인 상대 강세\n**핵심 숫자:** NDX -0.72%, SOX +0.34%, IGV -3.29%, XLK -0.91%, VIX +11.13%.\n**무슨 일이 있었나:** S&P500 업종 ETF 11개 모두 마이너스인 날에 반도체지수만 플러스였다. 소프트웨어 ETF IGV 낙폭은 반도체 ETF SOXX(+0.17%)와 달랐다.\n**왜 중요한가:** 기술 내 순환매·이익 기대 분화 가능성; 전체 주식 비중이 줄어드는 위험회피와 반도체 선호가 동시에 나타날 수 있다.\n**반대 해석:** 반도체의 전날 -5%대 급락 이후 기술적 반등일 뿐 수요·매출 전망 개선의 증거는 아닐 수 있다.\n**다음 확인:** 11/18 미국장에서도 SMH·SOXX 대비 IGV의 상대강도가 이어지는지, 섹터 시장폭이 개선되는지 본다.\n\n### 2) 엔비디아 숫자는 기대를 넘었으나 회수기간·신용 위험이 남았다\n**핵심 숫자:** FY27 3Q 매출 $115.8B(+103% YoY), 데이터센터 매출 $107.6B(+110% YoY), 4Q 가이던스 $130B(±3%). [실적 공식 원문](https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx).\n**무슨 일이 있었나:** 정규장 후 분기 실적·가이던스를 공개했고, 매출의 대부분이 데이터센터에서 발생했다. CFO 자료에는 네오클라우드 약정 $32B, 기존 분기 $36B 관련 비교가 존재한다. [CFO 상세 공시](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27cfocommentary.htm).\n**왜 중요한가:** 수요 증가가 실재하는 동시에 GPU·전력·데이터센터 투자 계약의 조건 충족, 자금조달, 설비 가동, 매출채권 회수가 앞으로 **현금흐름 품질**을 좌우한다. 실적 상승과 밸류에이션 프리미엄 확장은 별개다.\n**반대 해석:** 약정 감소가 반드시 수요 붕괴를 뜻하지 않는다. 기존 약정 소진·계약구조 변화 등도 가능하다.\n**다음 확인:** 네오클라우드 관련 조건부 약정, 채권 회수기간·GPU 공급, 하이퍼스케일러의 실제 소비 증가를 다음 분기 CFO 자료로 확인한다.\n\n### 3) 소프트웨어 -3.29%와 금리·소비의 엇갈린 신호\n**핵심 숫자:** IGV -3.29%, XLF -1.91%, 미국 10년물 약 5.10%, 10월 소매판매 +0.2% MoM.\n**무슨 일이 있었나:** 소프트웨어·금융이 동반 약세였지만 미국 10년물은 전 거래일 대비 약 1.8bp 내렸다. 미 상무부는 11/17 발표에서 10월 소매판매가 전월보다 +0.2%라고 발표했다. [미 Census 공식 자료](https://www.census.gov/retail/marts/www/marts_current.pdf?release=20261117).\n**왜 중요한가:** 할인율 하락에도 주가가 반등하지 않는 경우 이익 성장·고객 유지율·AI에 의한 기존 소프트웨어 비즈니스 대체 우려가 금리보다 강할 가능성이 있다.\n**반대 해석:** 하루 가격 차이만으로 SaaS 사업모델의 구조적 붕괴를 증명할 수 없으며, 일부 종목의 단기 포지션 축소일 수 있다.\n**다음 확인:** 업종 실적·유료 좌석수·AI 기능 가격정책과 실질 매출 전망, 장단기 금리와 수익률 스프레드를 함께 비교한다.\n\n### 4) 대형은행 인사 이벤트와 위험회피\n**핵심 숫자:** XLF -1.91% 및 JPM CFO 후임 발표(2027년 1분기 실적 발표 후 승계).\n**무슨 일이 있었나:** JPMorgan Chase가 Bregje de Best의 CFO 승계를 공식 8-K로 공개했다. [SEC 8-K](https://www.sec.gov/Archives/edgar/data/19617/000001961726000407/jpm-20261117.htm).\n**왜 중요한가:** 대형 금융기관의 경영진 변화는 자본·위험정책 연속성 확인 대상이지만 주가하락의 유일한 원인으로 단정할 수 없다.\n**반대 해석:** 승계는 충분히 계획된 인사일 수 있고, 금융업종 전반의 거시 리프라이싱이 더 중요할 수 있다.\n**다음 확인:** 발표 후 공식 경영진 메시지, 다음 실적 및 신용·자본규제 언급, XLF/KRE 상대 흐름.\n\n## ④ 글로벌·한국 시장\n\n**송팀장 Sector Observatory · 전체 업종 강약**\n\n완료일봉 기준: 미국 2026-11-17 / 한국 2026-11-17 · 출처: 기존 옵저버토리 Sector ETF 원장 (2026-11-18T07:12:11+09:00)\n\n**수익률 기반 추정**이며 실제 펀드 자금 순유입·기관 순매수액이 아님. 관측된 상대 강약의 이동만 해석하며, 원장 결측은 미확인으로 남김.\n\n**미국 S&P500 11개 업종**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| 에너지 · XLE | -1.96% | -0.52% | +1.44%p | 약세 지속 |\n| 산업재 · XLI | -1.85% | -0.55% | +1.30%p | 약세 지속 |\n| 경기소비재 · XLY | -1.53% | -0.89% | +0.64%p | 약세 지속 |\n| 기술 · XLK | -3.24% | -0.91% | +2.33%p | 약세 지속 |\n| 소재 · XLB | -1.46% | -1.22% | +0.23%p | 약세 지속 |\n| 필수소비재 · XLP | +0.27% | -1.23% | -1.50%p | 하락 전환 |\n| 헬스케어 · XLV | -0.51% | -1.41% | -0.89%p | 약세 지속 |\n| 커뮤니케이션 · XLC | -1.72% | -1.46% | +0.26%p | 약세 지속 |\n| 부동산 · XLRE | -0.27% | -1.49% | -1.22%p | 약세 지속 |\n| 유틸리티 · XLU | +0.18% | -1.59% | -1.77%p | 하락 전환 |\n| 금융 · XLF | -0.85% | -1.91% | -1.06%p | 약세 지속 |\n\n**한국 10개 섹터 ETF**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| 필수소비재 · 266410 | +3.28% | -0.75% | -4.03%p | 하락 전환 |\n| 은행 · 091170 | +1.01% | -1.30% | -2.31%p | 하락 전환 |\n| 미디어·엔터테인먼트 · 266360 | +0.63% | -1.53% | -2.16%p | 하락 전환 |\n| 반도체 · 091160 | -8.96% | -2.34% | +6.62%p | 약세 지속 |\n| 건설 · 117700 | -2.10% | -2.40% | -0.30%p | 약세 지속 |\n| 자동차 · 091180 | -0.40% | -2.89% | -2.48%p | 약세 지속 |\n| 철강 · 117680 | -2.06% | -3.43% | -1.38%p | 약세 지속 |\n| 보험 · 140700 | +3.06% | -3.70% | -6.77%p | 하락 전환 |\n| 에너지·화학 · 117460 | -2.97% | -3.81% | -0.84%p | 약세 지속 |\n| KODEX 기계장비 · 102960 | -3.29% | -3.84% | -0.56%p | 약세 지속 |\n\n**주요 테마 ETF · 반도체·메모리**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| iShares Semiconductor ETF · SOXX | -5.41% | +0.17% | +5.58%p | 상승 전환 |\n| VanEck Semiconductor ETF · SMH | -5.11% | -0.39% | +4.72%p | 약세 지속 |\n\n**주요 테마 ETF · 소프트웨어·클라우드·사이버**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| ETFMG Prime Cyber Security ETF · HACK | -1.22% | -1.49% | -0.28%p | 약세 지속 |\n| First Trust Cloud Computing ETF · SKYY | -2.10% | -2.85% | -0.74%p | 약세 지속 |\n| iShares Expanded Tech-Software Sector ETF · IGV | -2.16% | -3.29% | -1.13%p | 약세 지속 |\n\n**주요 테마 ETF · 바이오**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| SPDR S&P Biotech ETF · XBI | -3.10% | -0.41% | +2.69%p | 약세 지속 |\n\n**주요 테마 ETF · 지역은행**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| SPDR S&P Regional Banking ETF · KRE | -0.76% | -1.86% | -1.10%p | 약세 지속 |\n\n**주요 테마 ETF · 방산·인프라·에너지**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| iShares U.S. Aerospace & Defense ETF · ITA | -2.46% | -0.22% | +2.25%p | 약세 지속 |\n| Global X U.S. Infrastructure Development ETF · PAVE | -1.90% | -0.86% | +1.04%p | 약세 지속 |\n| SPDR S&P Aerospace & Defense ETF · XAR | -3.54% | -1.07% | +2.48%p | 약세 지속 |\n| SPDR S&P Oil & Gas Exploration & Production ETF · XOP | -2.61% | -1.32% | +1.29%p | 약세 지속 |\n\n**주요 테마 ETF · 로봇·자동화**\n\n| 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |\n|---|---:|---:|---:|---|\n| ROBO Global Robotics and Automation Index ETF · ROBO | -3.90% | -1.24% | +2.66%p | 약세 지속 |\n| Global X Robotics & Artificial Intelligence ETF · BOTZ | -3.55% | -1.36% | +2.19%p | 약세 지속 |\n\n**섹터 전환 해석:** 미국 전 업종 하락 중 **에너지·산업재 낙폭은 상대적으로 작아졌고**, 기술 XLK는 전날 -3.24%에서 -0.91%로 낙폭이 줄었다. 반면 **유틸리티(+0.18→-1.59%), 필수소비재(+0.27→-1.23%)**는 상승에서 하락으로 돌아섰다. '방어주는 항상 강하다'는 가설이 이 날에는 무너졌다. 미국 금융 XLF는 -1.91%로 11개 업종 중 가장 약했다.\n\n한국 최근 완료 세션 **11/17**은 미국 **11/17** 정규장 이전에 종료됐다. 한국 반도체 ETF -2.34%(직전 -8.96%)는 낙폭 축소지만 플러스 전환이 아니며, 보험 -3.70%·기계장비 -3.84% 약세가 두드러졌다. 11/18 국내장 반응은 아직 이 미국장 결과에 대한 다음 확인 대상이다. 모든 업종 등락은 ETF 가격에 근거한 **수익률 기반 추정**이며 확인된 실제 현금 순유입·유출액이 아니다.\n\n## ⑤ AI 산업·기업실적\n\n**시장 전체 주요 기업 이벤트 · 발생 시 분석** — **MATERIAL_EVENTS_FOUND**.\n\n**탐색 범위:** 미국 2026-11-17 정규장 및 장후 공개 IR·SEC 공시, 미국 S&P500 11개 업종 및 NASDAQ100 대형 이슈 후보를 정규장/시간외 구분해 선별. 현재 수집한 공개자료 범위의 검색이며 **NASDAQ100 100개사 전수의 공시 확인 완료를 뜻하지 않는다**. 비공개 강연·녹취·파일은 공개 출처로 인용하지 않는다.\n\n**1. 엔비디아 FY2027 3분기 실적 발표(11/17 16:20 ET).** 공식 IR 매출 $115.8B, 전년비 +103%, 데이터센터 $107.6B(+110%) 및 다음 분기 $130B(±3%). [공식 IR](https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx) · [SEC 실적 공시](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/nvda-20261117.htm). 매출 증가로 AI 구축 수요는 확인되지만, 인프라 구매를 위한 외부조달 비용·네오클라우드 약정 조건은 새로운 핵심 검증점이다. [CFO 해설 원문](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27cfocommentary.htm).\n\n**2. 엔비디아 경영진 리스크(실적 콜 11/17 장후).** 보도에 따르면 Harvey Jones 이사회 의장이 Jensen Huang 전 CEO 재선임 계획이 없다고 밝혔다. [Reuters 회의 보도](https://www.reuters.com/business/nvidia-forecasts-quarterly-revenue-above-estimates-first-report-since-huangs-2026-11-17/). 공식 IR 공시에도 CEO 전환과 독립 이사회 조사 관련 위험요인이 언급된다. 실적 상향과 경영진 공백이 병존할 수 있으며, 추가 증빙 전 혐의 사실관계는 단정하지 않는다.\n\n**3. JPMorgan Chase CFO 승계(11/17 장전 공개).** Bregje de Best가 2027년 1분기 실적 발표 후 Jeremy Barnum 후임 CFO가 될 예정이며, 회사의 [SEC 8-K](https://www.sec.gov/Archives/edgar/data/19617/000001961726000407/jpm-20261117.htm)에서 확인된다. 대형은행 지배구조·전략 연속성 관찰 이벤트이며 XLF 하락의 인과는 별도 검증이 필요하다.\n\n**4. 기타 NASDAQ100/미국 대형기업 사건:** 이번 회차 공개 출처 확인은 주요 지수·SEC/IR 중심의 **부분 스크리닝**이다. 특정 기업을 일일 고정관찰 대상으로 놓지 않았다. 미확인 단일 종목 급등락에 임의 사유를 붙이지 않는다.\n\n## ⑥ 주요 일정\n\n- **11/18(수) 14:00 ET = 11/19(목) 04:00 KST:** FOMC 10월 회의록 공개 예정. 금리인상 논의·물가 위험·소비 둔화 해석. [일정 참고](https://www.usbank.com/content/dam/usbank/en/documents/pdfs/corporate-and-commercial-banking/econ-weekly-pdf-11-13-26.pdf); 공식 발표 후 최종 본문 확인.\n- **11/19(목) 08:30 ET = 11/19(목) 22:30 KST:** 미국 주간 신규 실업수당 청구건수 예정(발표 전 미확인). [Observatory 공개 캘린더](https://github.com/mauveplace/jjooni-control-tower/blob/b0ec7a655041014901226c5b3a56289b758ac9a6/market-observatory/data/daily-market-pulse.json).\n- **11/19(목) 미국 장전:** 대형 유통사 실적은 당일 IR 일정 및 발표 원문으로 재확인 후 소비 전망에 반영; 미확정된 숫자·회계기간을 사전 단정하지 않음.\n- **11/26(목):** 미국 추수감사절로 정규장 휴장. 실제 시장 휴장일에는 새로운 미국 정규장 종가가 없으므로 중복 시황 발행을 요구하지 않음.\n\n## ⑦ 투자전략·위험점검·복기\n\n**업종 주도권 변화 · 원인과 다음 확인**\n\n전일 '반도체 과매도 → 기술주 방어' 가설은 SOX +0.34%와 SMH -0.39%/SOXX +0.17%로 일부만 지지됐다. 미국 시장 전체 회복에는 실패했고 소프트웨어 IGV -3.29%, 금융 XLF -1.91%, 방어주 XLU/XLP도 마이너스여서 시장 위험은 넓었다. 관측 사실(수익률), 원인 가설(AI 기존 SW 대체·금리·AI CAPEX 심리), 반론(전일 반도체 급락에 대한 단기 반등 가능성)을 분리한다.\n\n**TRI-POD 가격 좌표(시장 설명용·주문 금지):** NDX 현재 27,001.79, 하락 레짐 후보 26,149.12까지 **852.67pt 추가 하락(-3.16%)**, 상승 복귀 참고 27,800.64까지 **798.85pt 추가 상승(+2.96%)**, 52주 고점 대비 낙폭 -9% 경계 28,414.27까지 **1,412.48pt 추가 상승(+5.23%)**. 실제 TRI-POD 전환은 MA250×0.95/×1.01의 상태 유지 이력과 VIX10 조건, DD -9% 조건의 조합이며 단일 가격 도달만으로 매매 신호가 아니다. 현재 원장 `BIPOD` 유지, `HOLD_NO_TRADE`.\n\n**ROY vs JJOONI 5축 대조:** 방향 = JJOONI 위험회피 지속, ROY 미확인; 원인 = 기업실적 상향·금리 및 네오클라우드 자금조달, ROY 미확인; 산업 = 반도체 상대 회복·소프트웨어 약세, ROY 미확인; 리스크 = VIX·경영진·CAPEX 회수, ROY 미확인; 다음 확인 = FOMC 의사록·11/18 반응·약정 공시, ROY 미확인. **ROY 독립 분석·원본 댓글 미확인 → PENDING**, 공동 PASS로 표시하지 않는다.\n\n## ⑧ 원천·데이터 감사\n\n- 최초 보고서 KST 2026-11-18; 원본 고정 main: [b0ec7a655041](https://github.com/mauveplace/jjooni-control-tower/commit/b0ec7a655041014901226c5b3a56289b758ac9a6).\n- 미국 2026-11-17 완료 세션. Observatory 원본 생성 2026-11-18T07:11:46+09:00, Daily Pulse 2026-11-18T07:12:34+09:00, Daily Glance 2026-11-18T07:12:34+09:00. 동일 커밋 원장·완료일봉·정합성 FINAL/OK 확인.\n- 핵심 5개 지표 NDX/SOX/VIX10/MA250/DD52W는 제공자 **PROVIDER_REFERENCE_ONLY**, official_eod_verified=false, trade_signal_eligible=false. 공식 Nasdaq/SOX 독립 EOD 검증 미완료. 서로 같은 Yahoo 기반 파생 파일을 독립 두 출처로 계산하지 않음.\n- 34개 섹터 세로표는 [같은 세션 공개 섹터 원장](https://github.com/mauveplace/jjooni-control-tower/blob/b0ec7a655041014901226c5b3a56289b758ac9a6/market-observatory/data/sector-rotation-brief.md), 한국 11/17과 미국 11/17의 거래 시각은 상이.\n- 공시 원문: [NVIDIA IR](https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx), [SEC NVIDIA](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/nvda-20261117.htm), [NVIDIA CFO](https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27cfocommentary.htm), [SEC JPMorgan](https://www.sec.gov/Archives/edgar/data/19617/000001961726000407/jpm-20261117.htm), [Census 소매판매](https://www.census.gov/retail/marts/www/marts_current.pdf?release=20261117). 동시기 공식출처를 우선하고 기사·의견은 구분.\n- 기업 전체 이벤트 탐색은 공개 원문 중심 **부분 스크리닝**, 미확인 종목 사건 누락 가능성 상존. 원문/기사의 발표시각을 정규장과 장후로 구분.\n- ROY 동일 세션 별도 검증은 PENDING; ROY 의견 미확인 상태에서 발행을 지연시키지 않음. 후행 재검토 시 원 발행본을 보존하고 revision으로 보강.\n- 본문은 JJOONI 독립 제작한 공개시장 분석으로, 개인 계좌·녹취 원문·비공개 파일·자동매매 데이터는 포함하지 않음.",
   "revisions": []
 }
