@@ -43,6 +43,24 @@ def brief(close, market_date="2026-11-06", status="VERIFIED", official="VERIFIED
 
 
 class DailyGlance(unittest.TestCase):
+    def test_complete_ndx_provider_bar_can_be_seen_without_falsely_verifying_official_eod(self):
+        g=glance.build(observatory(), brief(None, status="MISSING", official="MISSING"))
+        result=g["brief_check"]
+        self.assertEqual(result["status"], "NOT_COMPARABLE")
+        self.assertEqual(result["reference_ndx"], 26989.99)
+        self.assertFalse(result["official_eod_verified"])
+        self.assertFalse(result["trade_signal_eligible"])
+        self.assertIn("완료 일봉",result["text"])
+        self.assertIn("공식 종가 독립검증",result["text"])
+
+    def test_missing_ndx_bar_does_not_claim_provider_completion(self):
+        obs=observatory()
+        obs["series"]["NASDAQ100"]=[{"date":"2026-11-05","value":26000}]
+        result=glance.build(obs, brief(None, status="MISSING", official="MISSING"))["brief_check"]
+        self.assertEqual(result["status"],"NOT_COMPARABLE")
+        self.assertIsNone(result["reference_ndx"])
+        self.assertFalse(result["trade_signal_eligible"])
+
     def test_month_comparison_uses_completed_bar_and_correct_units(self):
         bars = [{"date": "2026-10-13", "value": 100},
                 {"date": "2026-11-11", "value": 105},
