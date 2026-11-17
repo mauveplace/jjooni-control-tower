@@ -41,8 +41,13 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
     assert.ok(await page.locator('.todayV2 .tV2NoTrade').isVisible());
     assert.equal(await page.locator('.todayV2 .tV2Cond').count(), vm.tripod.conds.length);
     if (glance.brief_check?.official_status !== 'VERIFIED') {
-      assert.ok(await page.locator('.todayV2 .tV2Alert').isVisible(), 'unverified NDX raises the alert band');
-      assert.match(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').getAttribute('title'), /^\? 검증 보류 · .*시장일자/);
+      const sourceStatus = vm.alerts.find(a => a.title === 'NDX 공식 종가 미검증');
+      assert.ok(sourceStatus, 'unverified official NDX must retain explicit warning');
+      const banner = sourceStatus.level === 'HIGH' ? '.tV2Alert' : '.tV2Notice';
+      assert.ok(await page.locator('.todayV2 ' + banner).isVisible(), 'source severity visible');
+      const ndxRow = vm.groups.flatMap(g => g.rows).find(r => r.key === 'NASDAQ100');
+      assert.ok(ndxRow && ['ref','hold','delay'].includes(ndxRow.state), 'never elevate missing official proof');
+      assert.ok((await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').getAttribute('title')).startsWith(ndxRow.tag+' · '));
       assert.ok(await page.locator('.todayV2 tr[data-key="NASDAQ100"] .tV2Tag').isVisible(), 'state tag visible at ' + width);
     }
     const box = await page.locator('.todayV2').boundingBox();
