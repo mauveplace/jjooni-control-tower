@@ -1,7 +1,7 @@
 name: Market Observatory Daily Glance
 
 # 30-second market card built only from already-published Observatory data.
-# Runs after the Daily Pulse publishes; no web scraping, LLM, account data or trading.
+# Runs after Daily Pulse; read-only public Nasdaq official EOD check (fails closed). No LLM, account data or trading.
 on:
   workflow_run:
     workflows: ["Market Observatory Daily Pulse"]
@@ -15,12 +15,17 @@ on:
       - market-observatory/data/daily-market-pulse.json
       - market-observatory/data/morning-brief/latest.json
       - tools/build_daily_glance.py
+      - tools/collect_ndx_official_eod.py
+      - market-observatory/data/ndx-official-eod.json
       - tools/publish_observatory_data.py
       - tests/test_observatory_publish_cleanliness.py
       - .github/workflows/market-observatory-daily-glance.yml
   pull_request:
     paths:
       - tools/build_daily_glance.py
+      - tools/collect_ndx_official_eod.py
+      - tests/test_ndx_official_collector.py
+      - market-observatory/data/ndx-official-eod.json
       - market-observatory/daily-glance-v1.js
       - tests/test_daily_glance.py
       - tests/test_observatory_publish_cleanliness.py
@@ -52,7 +57,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Atomic source-chain and card contract tests
-        run: python -m unittest tests.test_daily_glance tests.test_observatory_publish_cleanliness -v
+        run: python -m unittest tests.test_daily_glance tests.test_ndx_official_collector tests.test_observatory_publish_cleanliness -v
       - name: Build glance (verification only)
         run: python tools/build_daily_glance.py
 
@@ -75,7 +80,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python tools/collect_ndx_official_eod.py
           python tools/build_daily_glance.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python tools/publish_observatory_data.py --message 'data(observatory): refresh 30-second daily glance' market-observatory/data/daily-glance.json
+          python tools/publish_observatory_data.py --message 'data(observatory): refresh 30-second daily glance' market-observatory/data/daily-glance.json market-observatory/data/ndx-official-eod.json
