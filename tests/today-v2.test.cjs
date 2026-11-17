@@ -45,7 +45,7 @@ test('trusted NDX provider bar displays reference and MEDIUM warning, never offi
   assert.match(vm.tripod.verification,/공식 종가 미검증/);
   const extra=vm.alerts.find(x=>x.title==='일부 데이터 확인 필요');
   assert.match(extra.body,/FedWatch 2026-11-10/);
-  assert.match(extra.body,/추가 확인/);
+  assert.match(extra.body,/중복된 원천 경고/);
   assert.match(vm.noTrade,/자동주문 없음/);
 });
 test('mismatched or failed NDX source remains high-priority verification hold', () => {
