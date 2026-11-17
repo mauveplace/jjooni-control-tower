@@ -185,13 +185,33 @@ body.obsV3 .ov3Track>span{
  background:linear-gradient(90deg,#bdd0ff,#f2e8c0);border-radius:8px;
 }
 body.obsV3 .ov3Mark{
- position:absolute;top:12px;transform:translateX(-50%);width:14px;height:21px;
- border:2px solid #fff;box-shadow:0 0 0 1px #abb5c2;border-radius:5px;background:#9babbc;
+  position:absolute;top:0;transform:translateX(-50%);width:42px;height:44px;
+  display:flex;align-items:center;justify-content:center;padding:0;
+  border:0;background:transparent;box-shadow:none;cursor:pointer;touch-action:manipulation;
+  z-index:2;-webkit-tap-highlight-color:transparent;
 }
-body.obsV3 .ov3Mark.lower{background:#ad3e39}
-body.obsV3 .ov3Mark.upper{background:#556c90}
-body.obsV3 .ov3Mark.tri{background:#247052}
-body.obsV3 .ov3Mark.now{top:6px;width:19px;height:31px;background:#16191d;border-color:#f4d422;box-shadow:0 0 0 2px #16191d;z-index:2}
+body.obsV3 .ov3Mark::before{
+  content:'';display:block;width:14px;height:21px;box-sizing:content-box;
+  border:2px solid #fff;box-shadow:0 0 0 1px #abb5c2;border-radius:5px;background:#9babbc;
+}
+body.obsV3 .ov3Mark.lower::before{background:#ad3e39}
+body.obsV3 .ov3Mark.upper::before{background:#556c90}
+body.obsV3 .ov3Mark.tri::before{background:#247052}
+body.obsV3 .ov3Mark.now::before{width:19px;height:31px;background:#16191d;border-color:#f4d422;box-shadow:0 0 0 2px #16191d}
+body.obsV3 .ov3Mark.selected::before{box-shadow:0 0 0 3px #e3b50e,0 0 0 5px #fff}
+body.obsV3 .ov3Mark:focus-visible{outline:3px solid #17191c;outline-offset:1px;border-radius:8px;z-index:4}
+body.obsV3 .ov3SelectedDistance{font-size:12px;font-weight:800;line-height:1.5;color:#283347;margin:0 0 9px;min-height:20px}
+body.obsV3 .ov3Threshold.lower{--ov3-ink:#ad3e39;--ov3-tint:#fff4f3}
+body.obsV3 .ov3Threshold.now{--ov3-ink:#252a30;--ov3-tint:#fff9de}
+body.obsV3 .ov3Threshold.upper{--ov3-ink:#556c90;--ov3-tint:#f1f5ff}
+body.obsV3 .ov3Threshold.tri{--ov3-ink:#247052;--ov3-tint:#effaf4}
+body.obsV3 .ov3Threshold.selected{
+ border:2px solid var(--ov3-ink);background:var(--ov3-tint);
+ box-shadow:0 0 0 2px #ffffff inset;
+ padding:8px;
+}
+body.obsV3 .ov3Threshold .ov3Distance{font-size:11px;line-height:1.55;font-weight:750;overflow-wrap:anywhere}
+body.obsV3 .ov3Threshold.selected .ov3Distance{color:var(--ov3-ink)}
 body.obsV3 .ov3Thresholds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 body.obsV3 .ov3Threshold{
  border:1px solid #e5e8ed;background:#fafbfc;border-radius:7px;
