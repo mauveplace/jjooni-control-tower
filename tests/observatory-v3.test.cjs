@@ -10,10 +10,10 @@ const fixture = () => ({glance:read('daily-glance.json'), freshness:read('freshn
   sector:read('sector-rotation-brief.json'), pulse:read('daily-market-pulse.json'),
   brief:read('morning-brief/latest.json')});
 const now = f => Date.parse(f.generated_kst)+60000;
-test('V3 only on explicit opt-in, no implicit preference change', () => {
+test('V3 is default while explicit V1/V2 remain available', () => {
  assert.equal(enabled('?ui=v3'), true);
  assert.equal(enabled('?ui=v2'), false);
- assert.equal(enabled(''), false);
+ assert.equal(enabled(''), true);
  assert.equal(enabled('?ui=v1'), false);
 });
 test('V3 threshold numbers from same-session published canonical, never generated', () => {
@@ -91,7 +91,7 @@ test('V3 assets and script order: optional skin after V2, visual before morning 
 
 test('V3 visual digest preserves red gains / blue losses and only mounts for explicit opt-in', () => {
  const briefSrc=fs.readFileSync(path.join(root,'morning-brief-v1.js'),'utf8');
- assert.match(briefSrc,/new URLSearchParams\(location\.search\)\.get\('ui'\)==='v3'/);
+ assert.match(briefSrc,/!\['v1','v2'\]\.includes\(new URLSearchParams\(location\.search\)\.get\('ui'\)\)/);
  assert.match(briefCss,/\.bdVisual \.gain\{color:#ba322d\}/);
  assert.match(briefCss,/\.bdVisual \.loss\{color:#2759a0\}/);
  assert.match(briefCss,/\.bdSectorRow em\.loss\{background:#2759a0\}/);
