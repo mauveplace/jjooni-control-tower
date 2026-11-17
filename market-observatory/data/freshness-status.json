@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-17T08:03:58+09:00",
+  "generated_kst": "2026-11-17T09:33:47+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,6 +9,7 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "jp_rates",
     "fedwatch",
     "audit"
   ],
@@ -102,7 +103,7 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-17T07:00:33+09:00",
       "as_of": "2026-11-13",
       "detail": "JP2Y 2026-11-13 · JP5Y 2026-11-13 · JP10Y 2026-11-13 · JP20Y 2026-11-13 · JP30Y 2026-11-13 · JP_2S10S 2026-11-13",
@@ -114,7 +115,7 @@
       "state": "STALE",
       "generated_kst": "2026-11-17T07:00:53+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=3787s · ETHUSD age=3789s",
+      "detail": "BTCUSD age=9175s · ETHUSD age=9177s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
@@ -187,8 +188,8 @@
     "calendar": {
       "label": "Economic Calendar",
       "state": "LIVE",
-      "generated_kst": "2026-11-17T07:00:43+09:00",
-      "as_of": "2026-11-17T07:00:43+09:00",
+      "generated_kst": "2026-11-17T09:33:33+09:00",
+      "as_of": "2026-11-17T09:33:33+09:00",
       "detail": "events=199 · overdue=0 · pending=0 · source_failures=0 · official_probe_blocked=0 · 기존 공식 검증 100건 · 이번 원천 조회 NOT_CHECKED",
       "source": "economic-calendar.json",
       "critical": false,
@@ -210,9 +211,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-17T08:03:58+09:00",
+      "generated_kst": "2026-11-17T09:33:46+09:00",
       "as_of": "2026-11-16",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     },
