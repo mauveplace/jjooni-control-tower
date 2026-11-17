@@ -11,7 +11,22 @@ const escapeHtml = v => String(v??'').replace(/[&<>"']/g, x => ({'&':'&amp;','<'
 const fmt = (v,n=2) => finite(v) ? v.toLocaleString('ko-KR',{minimumFractionDigits:n,maximumFractionDigits:n}) : '—';
 const pct = v => finite(v) ? (v>0?'+':'')+v.toFixed(2)+'%' : '—';
 const changeClass = v => finite(v) ? (v>0?'gain':v<0?'loss':'neutral') : 'neutral';
-const note = (label,price,delta) => '<div class="ov3Threshold"><span>'+escapeHtml(label)+'</span><b>'+fmt(price)+'</b><small>'+pct(delta)+'</small></div>';
+const pointKeys=['lower','now','upper','tri'];
+const pointLabels={lower:'하락 전환 후보 · MA250×0.95',now:'현재 NDX',upper:'상승 복귀 참고 · MA250×1.01',tri:'TRIPOD 낙폭 조건 · DD -9%'};
+let selectedPoint='now';
+const distanceText=(target,now)=>{
+ if(!finite(target)||!finite(now)||now<=0)return '현재 대비 거리 확인 불가';
+ const delta=target-now;
+ if(Math.abs(delta)<0.005)return '현재 위치 · 0.00pt (0.00%)';
+ return '현재 대비 '+fmt(Math.abs(delta))+'pt 더 '+(delta>0?'상승':'하락')+' ('+pct(delta/now*100)+')';
+};
+const pointLabel=(key,m)=>key==='now'?'현재 NDX · '+(m.pod||'—'):pointLabels[key];
+const note=(key,m,scope)=>{
+ const on=selectedPoint===key;
+ return '<div class="ov3Threshold '+key+(on?' selected':'')+'" id="ov3Threshold-'+scope+'-'+key+'" data-ov3-card="'+key+'">'
+ +'<span>'+escapeHtml(pointLabel(key,m))+'</span><b>'+fmt(m.axis[key])+'</b>'
+ +'<small class="ov3Distance">'+escapeHtml(distanceText(m.axis[key],m.axis.now))+'</small></div>';
+};
 function model(glance, fresh, sectors, nowMs=Date.now()) {
  const t=glance?.tripod||{},line=t.lines||{},g=fresh?.groups?.market||{};
  const generated=Date.parse(fresh?.generated_kst||''),expected=fresh?.session_alignment?.expected_session;
@@ -54,21 +69,24 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
    && glance.brief_check.source_date===glance.us_session && glance.brief_check.match_rule==='INTEGER_PART_EQUAL',
   referenceOnly:glance?.brief_check?.official_eod_verified!==true,noTrade:true};
 }
-function rail(m){
- const points=Object.entries(m.points).map(([key,where])=>'<i class="ov3Mark '+key+'" style="left:'+where.toFixed(2)+'%" aria-hidden="true"></i>').join('');
+function rail(m,scope='preview'){
+  const points=pointKeys.map(key=>{
+   const where=m.points[key];
+   return '<button type="button" class="ov3Mark '+key+(selectedPoint===key?' selected':'')+'" style="left:'+where.toFixed(2)+'%"'
+    +' data-ov3-point="'+key+'" aria-pressed="'+(selectedPoint===key)+'" aria-controls="ov3Threshold-'+scope+'-'+key+'"'
+    +' title="'+escapeHtml(pointLabel(key,m))+'" aria-label="'+escapeHtml(pointLabel(key,m)+' · '+distanceText(m.axis[key],m.axis.now))+'"></button>';
+  }).join('');
  return '<section class="ov3Rail" aria-label="TRI-POD 지수 기준점">'
   +'<div class="ov3DataGuard" role="note">'+(m.officialVerified
    ?'NDX Nasdaq 공식 종가 · 정수자리 일치 검증 완료 · TRI-POD 기타 조건 확인 · 자동주문 없음'
    :'제공자 완료 일봉 참고 · NDX 공식 종가 독립검증 대기 · 전환 확정 금지')+'</div>'
   +(m.freshnessCurrent?'':'<p class="ov3Stale" role="status">최신성 재확인 필요 · 아래 수치는 '+escapeHtml(m.session)+' 완료일봉의 마지막 게시 참고값입니다.</p>')
   +'<div class="ov3RailHeading"><strong>전환 기준점 한눈에 보기</strong><small>미국 '+escapeHtml(m.session)+' 완료 일봉 참고 · 가격 간격 비례</small></div>'
-  +'<div class="ov3Track" role="img" aria-label="하락 후보 '+fmt(m.axis.lower)+' 현재 '+fmt(m.axis.now)+' 상승 복귀 참고 '+fmt(m.axis.upper)+' TRIPOD 복귀 필요 '+fmt(m.axis.tri)+'"><span></span>'+points+'</div>'
-  +'<div class="ov3Thresholds">'
-  +note('하락 전환 후보 · MA250×0.95',m.axis.lower,m.differences.lower)
-  +note('현재 NDX · '+escapeHtml(m.pod||'—'),m.axis.now,0)
-  +note('상승 복귀 참고 · MA250×1.01',m.axis.upper,m.differences.upper)
-  +note('TRIPOD 낙폭 조건 · DD -9%',m.axis.tri,m.differences.tri)
-  +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
+  +'<div class="ov3Track" role="group" aria-label="기준점 선택 · 빨강 하락, 검정 현재, 파랑 상승, 초록 낙폭 조건"><span aria-hidden="true"></span>'+points+'</div>'
+   +'<p class="ov3SelectedDistance" role="status" aria-live="polite" data-ov3-selected>'
+   +escapeHtml(pointLabel(selectedPoint,m)+' · '+distanceText(m.axis[selectedPoint],m.axis.now))+'</p>'
+   +'<div class="ov3Thresholds">'+pointKeys.map(key=>note(key,m,scope)).join('')
+   +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
   +'TRIPOD은 상승 레짐·DD -9% 이내·VIX10&lt;28을 함께 확인하며, NOPOD도 하락 레짐과 VIX10≥18 확인이 필요합니다.</p>'
   +'<p class="ov3Small">하락 레짐 전환 후보와 NO-POD 과거 진입일 고정선·손절선은 다른 값입니다. '+(m.officialVerified?'Nasdaq 종가 정수자리 검증 완료':'공식 Nasdaq EOD 독립검증 전')+' · 완료세션 날짜 유지 · 주문 신호 아님</p>'
    +'<button class="ov3DetailLink" type="button" data-ov3-tab="jjooni-tripod">NO-POD 진입 고정 기준점·손절선 상세 보기</button></section>';
@@ -90,6 +108,21 @@ function queryData() {
  return Promise.allSettled(paths.map(path=>fetch(path+'?cb='+Date.now(),{cache:'no-store'})
   .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}))).then(xs=>xs.map(x=>x.status==='fulfilled'?x.value:null));
 }
+function selectPoint(key){
+ if(!pointKeys.includes(key))return;
+ selectedPoint=key;
+ document.querySelectorAll('.ov3Rail').forEach(railEl=>{
+  railEl.querySelectorAll('[data-ov3-point]').forEach(btn=>{
+   const on=btn.dataset.ov3Point===key;
+   btn.classList.toggle('selected',on);
+   btn.setAttribute('aria-pressed',String(on));
+  });
+  railEl.querySelectorAll('[data-ov3-card]').forEach(card=>card.classList.toggle('selected',card.dataset.ov3Card===key));
+  const selected=railEl.querySelector('[data-ov3-selected]');
+  const card=railEl.querySelector('[data-ov3-card="'+key+'"]');
+  if(selected&&card)selected.textContent=card.querySelector('span').textContent+' · '+card.querySelector('.ov3Distance').textContent;
+ });
+}
 function draw(m) {
  const today=document.querySelector('.todayV2');
  if(today){
@@ -100,7 +133,7 @@ function draw(m) {
   // the existing V2 strategy card. Keep V2 data/guards untouched.
   const firstGrid=today.querySelector('.tV2Grid');
   const tri=document.createElement('div');tri.id='ov3TripodRail';
-  tri.innerHTML=m.ready?rail(m):'<div class="ov3Pending">TRI-POD 기준점 검증 대기 · '+escapeHtml(m.reason)+'</div>';
+  tri.innerHTML=m.ready?rail(m,'home'):'<div class="ov3Pending">TRI-POD 기준점 검증 대기 · '+escapeHtml(m.reason)+'</div>';
   const top=document.createElement('div');top.id='ov3MarketStrip';
   top.innerHTML=m.ready?marketStrip(m):'<div class="ov3Pending">시장 지수 검증 대기 · '+escapeHtml(m.reason)+'</div>';
   if(firstGrid){firstGrid.before(tri);tri.after(top);}else today.append(tri,top);
@@ -113,10 +146,10 @@ function draw(m) {
  if(original){
   let r=document.getElementById('ov3TripodDetail');
   if(!r){r=document.createElement('div');r.id='ov3TripodDetail';original.before(r);}
-  r.innerHTML=m.ready?rail(m):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
+  r.innerHTML=m.ready?rail(m,'strategy'):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.1-default',model,rail,marketStrip,sectorChart,enabled:isV3};
+const runtime={version:'3.1-default',model,rail,distanceText,marketStrip,sectorChart,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -130,13 +163,14 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261117-v3-mobile-data-r2';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261118-v3-threshold-tap-1';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
-  const btn=e.target.closest('button[data-ov3-tab]');
-  if(!btn)return;
-  if(btn.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
- });
+   const marker=e.target.closest('button[data-ov3-point]');
+   if(marker){selectPoint(marker.dataset.ov3Point);return;}
+   const btn=e.target.closest('button[data-ov3-tab]');
+   if(btn?.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
+  });
  let current=null,pending=null,last=0;
  async function update(force=false){
   if(pending)return pending;

@@ -104,6 +104,18 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   assert.match(fixture.text,/현재 NDX/);
   assert.match(fixture.text,/DD -9%/);
   assert.ok(fixture.text.includes(fixture.pod),'stage must use real ledger');
+  // Colored markers must select their matching threshold card in the actual browser.
+  for(const key of ['lower','upper','tri','now']){
+    const marker=page.locator('#ov3FixtureRail button[data-ov3-point="'+key+'"]');
+    assert.ok(await marker.isVisible(),'marker '+key+' visible');
+    await marker.click();
+    assert.equal(await marker.getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('#ov3FixtureRail .ov3Threshold.selected').count(),1);
+    assert.equal(await page.locator('#ov3FixtureRail .ov3Threshold.selected').getAttribute('data-ov3-card'),key);
+    const status=await page.locator('#ov3FixtureRail [data-ov3-selected]').textContent();
+    assert.ok(status.includes(key==='now'?'현재 위치':'현재 대비'),'selected distance status '+key);
+  }
+
   await page.locator('#ov3FixtureRail').evaluate(el=>el.remove());
   if(width===390){
    const v2=await ctx.newPage();
