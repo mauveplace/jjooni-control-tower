@@ -12,6 +12,7 @@ import json
 import sys
 from calendar import monthrange
 from datetime import datetime, date, timedelta
+from math import isfinite, trunc
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -24,7 +25,7 @@ SCHEMA = "JJOONI_DAILY_GLANCE_V1"
 # Thresholds mirror tools/tripod_rules.py (regime band and target rule).
 MA_UP, MA_DOWN, DD_LIMIT, VIX_TRI, VIX_NO = 1.01, 0.95, -9.0, 28.0, 18.0
 POD = {"TQQQ 100%": "TRIPOD", "QQQ 50% + QLD 50%": "BIPOD", "현금 100%": "NOPOD"}
-BRIEF_TOLERANCE_PCT = 0.10
+BRIEF_MATCH_RULE = 'INTEGER_PART_EQUAL'  # user-confirmed; not nearest-integer rounding
 SIGNAL_PRICE_TOLERANCE_PCT = 0.01
 
 GROUPS = [
@@ -232,9 +233,10 @@ def brief_check(brief, by_key, us_session):
                 and isinstance(canonical, (int, float)) and not isinstance(canonical, bool)
                 and 0 < price < float("inf") and 0 < canonical < float("inf")):
             diff = round((price / canonical - 1) * 100, 3)
-            matched = abs(diff) <= BRIEF_TOLERANCE_PCT
+            matched = trunc(price) == trunc(canonical)
             return {**result, "status": "REFERENCE_MATCH" if matched else "REFERENCE_MISMATCH",
                     "reference_ndx": price, "pipeline_ndx": canonical, "diff_pct": diff,
+                    "match_rule": BRIEF_MATCH_RULE,
                     "official_status": ndx.get("status"), "official_eod_verified": False,
                     "trade_signal_eligible": False,
                     "text": (f"NDX 제공자 참고 완료 일봉 {price:,.2f}와 옵저버토리 "
@@ -256,8 +258,9 @@ def brief_check(brief, by_key, us_session):
         return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
                 "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
     diff = round((ndx["close"] / obs["value"] - 1) * 100, 3)
-    status = "MATCH" if abs(diff) <= BRIEF_TOLERANCE_PCT else "MISMATCH"
+    status = "MATCH" if trunc(ndx['close']) == trunc(obs['value']) else "MISMATCH"
     return {**result, "status": status, "brief_ndx": ndx["close"], "pipeline_ndx": obs["value"], "diff_pct": diff,
+            "match_rule": BRIEF_MATCH_RULE,
             "text": ("아침 시황의 NDX 종가가 파이프라인 확정치와 일치합니다." if status == "MATCH" else
                      f"아침 시황 NDX {ndx['close']:,.2f}가 파이프라인 확정치 {obs['value']:,.2f}와 {diff:+.3f}% 다릅니다. 카드 수치를 우선하세요.")}
 
