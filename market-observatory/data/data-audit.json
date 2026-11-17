@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-17T10:07:26+09:00",
+  "generated_kst": "2026-11-17T11:55:28+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 1,
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-17T10:07:25+09:00",
+      "generated_kst": "2026-11-17T11:55:27+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -498,7 +498,7 @@
       "published_source_status": "LIVE"
     },
     "crypto": {
-      "state": "LIVE",
+      "state": "STALE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -558,17 +558,17 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-17T10:06:25+09:00",
-      "current_quote_age_seconds": 61,
+      "current_quote_age_seconds": 6543,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
-      "status": "LIVE",
+      "status": "STALE",
       "producer_status": "LIVE",
       "quote_as_of_kst": "2026-11-17T10:06:26+09:00",
-      "current_quote_age_seconds": 60,
+      "current_quote_age_seconds": 6542,
       "captured_quote_age_seconds": 0
     }
   },
@@ -577,6 +577,16 @@
       "code": "GROUP_FEDWATCH_LAGGING",
       "severity": "WARN",
       "detail": "anchor=2026-11-16 dates=FEDWATCH:2026-11-13"
+    },
+    {
+      "code": "CRYPTO_BTCUSD_STALE",
+      "severity": "INFO",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-17T10:06:25+09:00', 'current_quote_age_seconds': 6543, 'captured_quote_age_seconds': 0}"
+    },
+    {
+      "code": "CRYPTO_ETHUSD_STALE",
+      "severity": "INFO",
+      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-17T10:06:26+09:00', 'current_quote_age_seconds': 6542, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
