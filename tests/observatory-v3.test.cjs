@@ -134,6 +134,8 @@ test('V3 brief digest derives the NDX stage from the actual TRI-POD ledger and f
 });
 test('V3 digest ages into an explicitly dated reference instead of implying fresh live prices', () => {
  const f=fixture(),host={hidden:true,innerHTML:''};
+ // Synthetic fresh-source scenario; actual published vintage is independently tested below.
+ f.glance.source_generated_kst=f.glance.generated_kst;
  const recent=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
   nowMs:Date.parse(f.glance.generated_kst)+60000});
  assert.equal(recent.ready,true,recent.reason);
