@@ -10,6 +10,18 @@ const fixture = () => ({glance:read('daily-glance.json'), freshness:read('freshn
   sector:read('sector-rotation-brief.json'), pulse:read('daily-market-pulse.json'),
   brief:read('morning-brief/latest.json')});
 const now = f => Date.parse(f.generated_kst)+60000;
+// Build an explicit unverified-close scenario instead of assuming the live
+// fixture will forever be unverified. Nasdaq official evidence legitimately
+// changes daily; this is NOT a contract change and must never be rewritten by
+// unrelated calendar publishing.
+const unverifiedGlance = glance => {
+ const g = structuredClone(glance);
+ g.brief_check = {
+  ...g.brief_check, status:'NOT_COMPARABLE', official_status:'MISSING',
+  official_eod_verified:false, trade_signal_eligible:false
+ };
+ return g;
+};
 test('V3 is default while explicit V1/V2 remain available', () => {
  assert.equal(enabled('?ui=v3'), true);
  assert.equal(enabled('?ui=v2'), false);
@@ -30,12 +42,14 @@ test('V3 default does not mistake a verified integer official close for unverifi
  assert.match(rail(m),/Nasdaq 공식 종가/);
  assert.match(rail(m),/정수자리 일치 검증 완료/);
  assert.doesNotMatch(rail(m),/공식 종가 독립검증 대기/);
- const stale=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ const stale=model(unverifiedGlance(f.glance),f.freshness,f.sector,now(f.freshness));
  assert.equal(stale.officialVerified,false);
  assert.match(rail(stale),/독립검증 대기/);
 });
 test('V3 threshold numbers from same-session published canonical, never generated', () => {
- const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ const f=fixture();
+ f.glance=unverifiedGlance(f.glance);
+ const m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.ready,true,m.reason);
  assert.equal(m.session,f.glance.us_session);
  assert.equal(m.pod,f.glance.tripod.pod);
@@ -56,12 +70,26 @@ test('V3 threshold numbers from same-session published canonical, never generate
 test('V3 fail closed on stale freshness even if cached NDX looks plausible', () => {
  const f=fixture();
  const expired=Date.parse(f.freshness.generated_kst)+7200001;
- const m=model(f.glance,f.freshness,f.sector,expired);
+ const m=model(unverifiedGlance(f.glance),f.freshness,f.sector,expired);
  assert.equal(m.ready,true);
  assert.equal(m.freshnessCurrent,false);
  assert.equal(m.referenceOnly,true);
  assert.equal(m.tradeEligible,undefined);
  assert.match(rail(m),/최신성 재확인 필요/);
+});
+test('published independent NDX verification is reflected without mutating source fixture', () => {
+ const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true,m.reason);
+ const check=f.glance.brief_check||{};
+ const current=check.status==='MATCH' && check.official_eod_verified===true
+  && check.source_date===f.glance.us_session && check.match_rule==='INTEGER_PART_EQUAL';
+ assert.equal(m.officialVerified,current);
+ assert.equal(m.referenceOnly,!check.official_eod_verified);
+ assert.equal(m.noTrade,true);
+ const forced=unverifiedGlance(f.glance);
+ assert.equal(model(forced,f.freshness,f.sector,now(f.freshness)).officialVerified,false);
+ assert.notDeepEqual(forced.brief_check,f.glance.brief_check,
+  'a test scenario may not mutate the published evidence');
 });
 test('V3 fail closed on wrong session, mismatched price, or non LIVE', () => {
  const f=fixture();
