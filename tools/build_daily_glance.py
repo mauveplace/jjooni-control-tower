@@ -206,7 +206,56 @@ def asia_read(by_key, us_session):
     return out
 
 
-def brief_check(brief, by_key, us_session):
+def official_ndx_evidence(official, obs, us_session):
+    """Only a dated, separately sourced official Nasdaq close may certify Yahoo NDX.
+
+    The agreed close comparison is integer-part truncation, never rounding,
+    percentage tolerance or the same provider recycled as independent.
+    """
+    if not isinstance(official, dict) or not isinstance(obs, dict):
+        return None
+    if (official.get("schema") != "JJOONI_NDX_OFFICIAL_EOD_EVIDENCE_V1"
+            or official.get("symbol") != "NDX"
+            or official.get("source_type") != "NASDAQ_INDEXES_OFFICIAL"
+            or official.get("source_url") != "https://indexes.nasdaqomx.com/Index/Overview/ndx"
+            or official.get("observation_kind") != "PUBLISHED_COMPLETED_SESSION"
+            or official.get("comparison_rule") != "TRUNCATE_INTEGER_PART"
+            or official.get("session_date") != us_session or obs.get("date") != us_session):
+        return None
+    official_price, provider_price = official.get("close"), obs.get("value")
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool)
+               and isfinite(v) and v > 0 for v in (official_price, provider_price)):
+        return None
+    try:
+        observed = datetime.fromisoformat(official["observed_at_kst"])
+        if observed.utcoffset() != timedelta(hours=9):
+            return None
+        if observed.date() <= date.fromisoformat(us_session):
+            return None
+    except (KeyError, TypeError, ValueError):
+        return None
+    matched = trunc(official_price) == trunc(provider_price)
+    return {
+        "status": "MATCH" if matched else "MISMATCH",
+        "brief_ndx": official_price, "pipeline_ndx": provider_price,
+        "official_status": "VERIFIED" if matched else "CONFLICT",
+        "official_eod_verified": matched, "trade_signal_eligible": False,
+        "source_url": official["source_url"], "source_date": us_session,
+        "evidence_observed_kst": official["observed_at_kst"],
+        "source_type": official["source_type"], "match_rule": BRIEF_MATCH_RULE,
+        "text": (f"Nasdaq 공식 종가 {official_price:,.2f} / 제공자 완료일봉 "
+                 f"{provider_price:,.2f}: 정수자리 {trunc(official_price):,} / "
+                 f"{trunc(provider_price):,} {'일치(MATCH)' if matched else '불일치(MISMATCH)'}. "
+                 "완료 종가 검증 결과이며 자동 주문 신호가 아닙니다.")
+    }
+
+
+def brief_check(brief, by_key, us_session, official=None):
+    obs = by_key.get("NASDAQ100", {})
+    evidence = official_ndx_evidence(official, obs, us_session)
+    if evidence:
+        return {"report_date_kst": brief.get("report_date_kst") if brief else None,
+                "market_date_us": us_session, **evidence}
     if not brief:
         return {"status": "NO_BRIEF"}
     checks = {c.get("symbol"): c for c in (brief.get("editorial_contract") or {}).get("close_checks", [])}
@@ -279,7 +328,7 @@ def signal_consistency(tri, ndx, us_session):
     return {"status": "OK" if not reasons else "CONFLICT", "reasons": reasons}
 
 
-def build(obs, brief=None, now=None):
+def build(obs, brief=None, now=None, official=None):
     now = now or datetime.now(KST)
     sig = obs.get("tripod_latest") or {}
     if sig.get("ok") is not True:
@@ -321,7 +370,7 @@ def build(obs, brief=None, now=None):
         "read_only": True, "contains_account_data": False, "no_trade": True,
         "headline": headline, "tripod": tri, "consistency": consistency, "groups": groups,
         "cross_read": asia_read(by_key, us_session),
-        "brief_check": brief_check(brief, by_key, us_session),
+        "brief_check": brief_check(brief, by_key, us_session, official),
         "quality": {"missing": missing, "number_source": "market-observatory/data/observatory.json only",
                     "note": "카드의 모든 숫자는 저장소 수집 파이프라인 확정치이며 웹 검색·LLM 값을 쓰지 않습니다."},
     }
@@ -331,7 +380,9 @@ def main():
     obs = read(DATA / "observatory.json")
     brief_path = DATA / "morning-brief" / "latest.json"
     brief = read(brief_path) if brief_path.exists() else None
-    payload = build(obs, brief)
+    evidence_path = DATA / "ndx-official-eod.json"
+    official = read(evidence_path) if evidence_path.exists() else None
+    payload = build(obs, brief, official=official)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print("DAILY_GLANCE", payload["us_session"], payload["headline"], "brief:", payload["brief_check"]["status"])
     return 0
