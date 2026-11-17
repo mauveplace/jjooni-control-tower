@@ -159,7 +159,7 @@ function render(d){
  // The graphic uses only aligned published snapshots; editorial archives remain unchanged.
  let digest=document.getElementById('briefVisualDigest');
  if(!digest){digest=document.createElement('div');digest.id='briefVisualDigest';digest.className='briefVisualDigest';document.getElementById('briefArticle').before(digest)}
- if(new URLSearchParams(location.search).get('ui')==='v3'&&document.getElementById('briefHistory')?.value==='latest'&&window.JjooniBriefVisual){
+ if(!['v1','v2'].includes(new URLSearchParams(location.search).get('ui'))&&document.getElementById('briefHistory')?.value==='latest'&&window.JjooniBriefVisual){
    window.JjooniBriefVisual.render(digest,{brief:d,glance:SOURCE_GLANCE,pulse:SOURCE_PULSE,sector:SOURCE_SECTOR,latest:true});
  }else{digest.hidden=true;digest.textContent=''}
  const article=document.getElementById('briefArticle');article.innerHTML=markdown(d.body_markdown);article.classList.add('songEditorial');

@@ -10,11 +10,29 @@ const fixture = () => ({glance:read('daily-glance.json'), freshness:read('freshn
   sector:read('sector-rotation-brief.json'), pulse:read('daily-market-pulse.json'),
   brief:read('morning-brief/latest.json')});
 const now = f => Date.parse(f.generated_kst)+60000;
-test('V3 only on explicit opt-in, no implicit preference change', () => {
+test('V3 is default while explicit V1/V2 remain available', () => {
  assert.equal(enabled('?ui=v3'), true);
  assert.equal(enabled('?ui=v2'), false);
- assert.equal(enabled(''), false);
+ assert.equal(enabled(''), true);
  assert.equal(enabled('?ui=v1'), false);
+});
+test('V3 default does not mistake a verified integer official close for unverified', () => {
+ const f=fixture(),g=structuredClone(f.glance);
+ g.brief_check={
+  status:'MATCH',source_date:g.us_session,match_rule:'INTEGER_PART_EQUAL',
+  official_status:'VERIFIED',official_eod_verified:true,trade_signal_eligible:false
+ };
+ const m=model(g,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.officialVerified,true);
+ assert.equal(m.referenceOnly,false);
+ assert.equal(m.noTrade,true);
+ assert.match(rail(m),/Nasdaq 공식 종가/);
+ assert.match(rail(m),/정수자리 일치 검증 완료/);
+ assert.doesNotMatch(rail(m),/공식 종가 독립검증 대기/);
+ const stale=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(stale.officialVerified,false);
+ assert.match(rail(stale),/독립검증 대기/);
 });
 test('V3 threshold numbers from same-session published canonical, never generated', () => {
  const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
@@ -91,7 +109,7 @@ test('V3 assets and script order: optional skin after V2, visual before morning 
 
 test('V3 visual digest preserves red gains / blue losses and only mounts for explicit opt-in', () => {
  const briefSrc=fs.readFileSync(path.join(root,'morning-brief-v1.js'),'utf8');
- assert.match(briefSrc,/new URLSearchParams\(location\.search\)\.get\('ui'\)==='v3'/);
+ assert.match(briefSrc,/!\['v1','v2'\]\.includes\(new URLSearchParams\(location\.search\)\.get\('ui'\)\)/);
  assert.match(briefCss,/\.bdVisual \.gain\{color:#ba322d\}/);
  assert.match(briefCss,/\.bdVisual \.loss\{color:#2759a0\}/);
  assert.match(briefCss,/\.bdSectorRow em\.loss\{background:#2759a0\}/);
@@ -116,6 +134,8 @@ test('V3 brief digest derives the NDX stage from the actual TRI-POD ledger and f
 });
 test('V3 digest ages into an explicitly dated reference instead of implying fresh live prices', () => {
  const f=fixture(),host={hidden:true,innerHTML:''};
+ // Synthetic fresh-source scenario; actual published vintage is independently tested below.
+ f.glance.source_generated_kst=f.glance.generated_kst;
  const recent=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
   nowMs:Date.parse(f.glance.generated_kst)+60000});
  assert.equal(recent.ready,true,recent.reason);

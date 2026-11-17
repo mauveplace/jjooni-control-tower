@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261117-OBS-V3-DEFAULT-NDX-080",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Urgent user-requested Observatory V3 default and correct NDX official EOD independent source verification using exact integer part of same-session official Nasdaq and independent canonical Yahoo. Remove false unverified label when source corroborates, preserve real unavailable/conflict safeguards, automate next-session public source collection; keep no-trade.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Root Observatory URL without ?ui renders V3 and five-tab navigation even with prior saved V1 preference; ?ui=v1 and ?ui=v2 explicitly remain available.",
+    "Official Nasdaq Indexes public NDX 2026-11-16 27,197.15 vs independent Yahoo NDX 27,197.1523 yield MATCH using truncated integer 27197. Never use ratio tolerance or rounding. Difference across integer boundary is MISMATCH even with <=0.02 points difference.",
+    "Official-evidence record includes session date, official Nasdaq source URL, retrieval vintage and source type; no off-session/stale/unauthenticated source can set official_eod_verified=true; no trade ever.",
+    "Publish cycle attempts daily read-only Nasdaq official source; fail closed on HTTP block, missing rendered price/date or session mismatch, preserve dated older proof and never roll forward; tests cover parser and live session proof.",
+    "Daily glance exposes status MATCH, official verified true only when independent dated evidence matches and original market session agrees; V3 guard and Market Close explicitly reflect verified vs unverified, no stale warning for valid official proof.",
+    "CI on exact HEAD: Python glance and official collector tests; Node Observatory V3 and V2 nav tests, Playwright at 390/800/1363px with V3 root default and V2 opt-out; no duplicate nav, no new JS errors.",
+    "Explicit source review from ROY of independent-source evidence, official collector reliability and GitHub workflow publish guards; report P0/P1/P2 and verified scope.",
+    "Do not merge/deploy without owner approval. User authorized urgent fix and release; no order, trading, secrets, personal account data or paid provider access."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-17 user instructions: '옵저버토리는 v3을 기본값으로 가고... 로이랑 당장 확인해서 긴급으로 이것부터 해결해' and '정수자리에서 맞으면 맞는거라고 몇번 이야기 했냐' (same-session integer equality).",
+  "forbidden": [
+    "No trades or order execution",
+    "No fabricated official source evidence or Yahoo-as-independent reuse",
+    "No new paid data infrastructure",
+    "No credentials/private account data"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "coordination_notes": "NDX official Nasdaq public overview observed 2026-11-17 for US session Nov16 27,197.15; Yahoo 27,197.15. Current morning brief editorial close_checks NDX MISSING despite canonical ^NDX Yahoo 27,197.1523. The dated source sidecar is collected independently with public Nasdaq source and is not copied from canonical Yahoo. Future collector failure must not assert fresh VERIFIED. Exact integer truncation matches user definition."
+}

@@ -12,6 +12,7 @@ import json
 import sys
 from calendar import monthrange
 from datetime import datetime, date, timedelta
+from math import isfinite, trunc
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -24,7 +25,7 @@ SCHEMA = "JJOONI_DAILY_GLANCE_V1"
 # Thresholds mirror tools/tripod_rules.py (regime band and target rule).
 MA_UP, MA_DOWN, DD_LIMIT, VIX_TRI, VIX_NO = 1.01, 0.95, -9.0, 28.0, 18.0
 POD = {"TQQQ 100%": "TRIPOD", "QQQ 50% + QLD 50%": "BIPOD", "현금 100%": "NOPOD"}
-BRIEF_TOLERANCE_PCT = 0.10
+BRIEF_MATCH_RULE = 'INTEGER_PART_EQUAL'  # user-confirmed; not nearest-integer rounding
 SIGNAL_PRICE_TOLERANCE_PCT = 0.01
 
 GROUPS = [
@@ -205,7 +206,56 @@ def asia_read(by_key, us_session):
     return out
 
 
-def brief_check(brief, by_key, us_session):
+def official_ndx_evidence(official, obs, us_session):
+    """Only a dated, separately sourced official Nasdaq close may certify Yahoo NDX.
+
+    The agreed close comparison is integer-part truncation, never rounding,
+    percentage tolerance or the same provider recycled as independent.
+    """
+    if not isinstance(official, dict) or not isinstance(obs, dict):
+        return None
+    if (official.get("schema") != "JJOONI_NDX_OFFICIAL_EOD_EVIDENCE_V1"
+            or official.get("symbol") != "NDX"
+            or official.get("source_type") != "NASDAQ_INDEXES_OFFICIAL"
+            or official.get("source_url") != "https://indexes.nasdaqomx.com/Index/Overview/ndx"
+            or official.get("observation_kind") != "PUBLISHED_COMPLETED_SESSION"
+            or official.get("comparison_rule") != "TRUNCATE_INTEGER_PART"
+            or official.get("session_date") != us_session or obs.get("date") != us_session):
+        return None
+    official_price, provider_price = official.get("close"), obs.get("value")
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool)
+               and isfinite(v) and v > 0 for v in (official_price, provider_price)):
+        return None
+    try:
+        observed = datetime.fromisoformat(official["observed_at_kst"])
+        if observed.utcoffset() != timedelta(hours=9):
+            return None
+        if observed.date() <= date.fromisoformat(us_session):
+            return None
+    except (KeyError, TypeError, ValueError):
+        return None
+    matched = trunc(official_price) == trunc(provider_price)
+    return {
+        "status": "MATCH" if matched else "MISMATCH",
+        "brief_ndx": official_price, "pipeline_ndx": provider_price,
+        "official_status": "VERIFIED" if matched else "CONFLICT",
+        "official_eod_verified": matched, "trade_signal_eligible": False,
+        "source_url": official["source_url"], "source_date": us_session,
+        "evidence_observed_kst": official["observed_at_kst"],
+        "source_type": official["source_type"], "match_rule": BRIEF_MATCH_RULE,
+        "text": (f"Nasdaq 공식 종가 {official_price:,.2f} / 제공자 완료일봉 "
+                 f"{provider_price:,.2f}: 정수자리 {trunc(official_price):,} / "
+                 f"{trunc(provider_price):,} {'일치(MATCH)' if matched else '불일치(MISMATCH)'}. "
+                 "완료 종가 검증 결과이며 자동 주문 신호가 아닙니다.")
+    }
+
+
+def brief_check(brief, by_key, us_session, official=None):
+    obs = by_key.get("NASDAQ100", {})
+    evidence = official_ndx_evidence(official, obs, us_session)
+    if evidence:
+        return {"report_date_kst": brief.get("report_date_kst") if brief else None,
+                "market_date_us": us_session, **evidence}
     if not brief:
         return {"status": "NO_BRIEF"}
     checks = {c.get("symbol"): c for c in (brief.get("editorial_contract") or {}).get("close_checks", [])}
@@ -232,9 +282,10 @@ def brief_check(brief, by_key, us_session):
                 and isinstance(canonical, (int, float)) and not isinstance(canonical, bool)
                 and 0 < price < float("inf") and 0 < canonical < float("inf")):
             diff = round((price / canonical - 1) * 100, 3)
-            matched = abs(diff) <= BRIEF_TOLERANCE_PCT
+            matched = trunc(price) == trunc(canonical)
             return {**result, "status": "REFERENCE_MATCH" if matched else "REFERENCE_MISMATCH",
                     "reference_ndx": price, "pipeline_ndx": canonical, "diff_pct": diff,
+                    "match_rule": BRIEF_MATCH_RULE,
                     "official_status": ndx.get("status"), "official_eod_verified": False,
                     "trade_signal_eligible": False,
                     "text": (f"NDX 제공자 참고 완료 일봉 {price:,.2f}와 옵저버토리 "
@@ -256,8 +307,9 @@ def brief_check(brief, by_key, us_session):
         return {**result, "status": "UNVERIFIED", "brief_status": ndx.get("status"),
                 "text": f"아침 시황 NDX 종가가 검증 상태가 아닙니다({ndx.get('status')}). 카드 수치를 기준으로 보세요."}
     diff = round((ndx["close"] / obs["value"] - 1) * 100, 3)
-    status = "MATCH" if abs(diff) <= BRIEF_TOLERANCE_PCT else "MISMATCH"
+    status = "MATCH" if trunc(ndx['close']) == trunc(obs['value']) else "MISMATCH"
     return {**result, "status": status, "brief_ndx": ndx["close"], "pipeline_ndx": obs["value"], "diff_pct": diff,
+            "match_rule": BRIEF_MATCH_RULE,
             "text": ("아침 시황의 NDX 종가가 파이프라인 확정치와 일치합니다." if status == "MATCH" else
                      f"아침 시황 NDX {ndx['close']:,.2f}가 파이프라인 확정치 {obs['value']:,.2f}와 {diff:+.3f}% 다릅니다. 카드 수치를 우선하세요.")}
 
@@ -276,7 +328,7 @@ def signal_consistency(tri, ndx, us_session):
     return {"status": "OK" if not reasons else "CONFLICT", "reasons": reasons}
 
 
-def build(obs, brief=None, now=None):
+def build(obs, brief=None, now=None, official=None):
     now = now or datetime.now(KST)
     sig = obs.get("tripod_latest") or {}
     if sig.get("ok") is not True:
@@ -318,7 +370,7 @@ def build(obs, brief=None, now=None):
         "read_only": True, "contains_account_data": False, "no_trade": True,
         "headline": headline, "tripod": tri, "consistency": consistency, "groups": groups,
         "cross_read": asia_read(by_key, us_session),
-        "brief_check": brief_check(brief, by_key, us_session),
+        "brief_check": brief_check(brief, by_key, us_session, official),
         "quality": {"missing": missing, "number_source": "market-observatory/data/observatory.json only",
                     "note": "카드의 모든 숫자는 저장소 수집 파이프라인 확정치이며 웹 검색·LLM 값을 쓰지 않습니다."},
     }
@@ -328,7 +380,9 @@ def main():
     obs = read(DATA / "observatory.json")
     brief_path = DATA / "morning-brief" / "latest.json"
     brief = read(brief_path) if brief_path.exists() else None
-    payload = build(obs, brief)
+    evidence_path = DATA / "ndx-official-eod.json"
+    official = read(evidence_path) if evidence_path.exists() else None
+    payload = build(obs, brief, official=official)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print("DAILY_GLANCE", payload["us_session"], payload["headline"], "brief:", payload["brief_check"]["status"])
     return 0

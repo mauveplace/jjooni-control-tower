@@ -302,7 +302,7 @@
         ...criticalAlerts.map(a => el('div', null, el('b', null, a.title), ' — ' + a.body))));
     }
     if (advisoryNotices.length) {
-      const v3MobileSummary = new URLSearchParams(location.search).get('ui') === 'v3'
+      const v3MobileSummary = !['v1','v2'].includes(new URLSearchParams(location.search).get('ui'))
         && matchMedia('(max-width:760px)').matches;
       if (v3MobileSummary) {
         const brief = advisoryNotices.map(a => a.title).slice(0, 2).join(' · ');

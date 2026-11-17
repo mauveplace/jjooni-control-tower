@@ -1,4 +1,4 @@
-// V3 opt-in smoke: actual DOM, stylesheet, data state and mobile nav ownership.
+// V3 default smoke: actual DOM, stylesheet, data state, mobile nav and V2 fallback.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -12,8 +12,13 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   const ctx=await browser.newContext({viewport:{width,height:920}});
   const page=await ctx.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(BASE+'?ui=v3',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.0-opt-in');
+  if(width===390){
+    await page.goto(BASE,{waitUntil:'networkidle'});
+    await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
+    assert.equal(await page.locator('.navV2Main button[data-group]').count(),5,'root URL defaults to V3');
+   }
+   await page.goto(BASE+'?ui=v3',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
   await page.waitForFunction(()=>document.querySelector('.todayV2')&&document.querySelector('#ov3MarketStrip'),null,{timeout:25000});
   const state=await page.evaluate(()=>({
    v3:document.body.classList.contains('obsV3'),
@@ -45,7 +50,8 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
      return {
        railBeforeMarket:!!(rail.compareDocumentPosition(market)&Node.DOCUMENT_POSITION_FOLLOWING),
        marketBeforeGrid:!!(market.compareDocumentPosition(grid)&Node.DOCUMENT_POSITION_FOLLOWING),
-       guard:rail.textContent.includes('공식 종가 독립검증 대기')&&rail.textContent.includes('전환 확정 금지'),
+       guard:(rail.textContent.includes('공식 종가 독립검증 대기')&&rail.textContent.includes('전환 확정 금지'))
+          ||(rail.textContent.includes('정수자리 일치 검증 완료')&&rail.textContent.includes('자동주문 없음')),
        headerHeight:document.querySelector('header.top').getBoundingClientRect().height,
        refreshWidth:document.querySelector('#obsForceRefresh')?.getBoundingClientRect().width||0,
        noticeDetails:!!today.querySelector('details.ov3StatusDetails'),
@@ -54,7 +60,7 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
    });
    assert.ok(layout.railBeforeMarket,'TRI-POD rail must precede market summary');
    assert.ok(layout.marketBeforeGrid,'market strip must precede large editorial cards');
-   if(state.ready)assert.ok(layout.guard,'official-EOD-unverified NO_TRADE guard visible');
+   if(state.ready)assert.ok(layout.guard,'source-dependent official EOD status and NO_TRADE guard visible');
    if(width===390){
      assert.ok(layout.headerHeight<245,'mobile header too tall: '+layout.headerHeight);
      assert.ok(layout.refreshWidth<160,'refresh button must not take full mobile width: '+layout.refreshWidth);
@@ -105,7 +111,7 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
    await v2.locator('.navV2Main button[data-group="brief"]').click();
    await v2.waitForFunction(()=>document.querySelector('#briefVisualDigest')&&document.querySelector('#briefArticle')?.textContent?.length>0,null,{timeout:25000});
    assert.equal(await v2.locator('#briefVisualDigest').evaluate(el=>el.hidden),true,
-    'V2 default must NOT display V3 brief digest');
+    'explicit V2 must NOT display V3 brief digest');
    await v2.close();
   }
   assert.deepEqual(errors,[],'no page exceptions');
