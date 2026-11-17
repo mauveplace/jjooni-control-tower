@@ -27,7 +27,8 @@ function build({brief:d,glance:g,pulse:p,sector:s,latest,nowMs=Date.now()}={}){
   &&Date.parse(g.source_generated_kst)<=Date.parse(g.generated_kst)
   &&Date.parse(p.generated_kst)<=Date.parse(g.generated_kst);
  if(!ok)return {ready:false,reason:'NDX·TRI-POD·원장 시각 및 동일 거래일 확인에 실패했습니다.'};
- const statusAge=nowMs-Date.parse(g.generated_kst);
+ const oldestSourceMs=Math.min(Date.parse(g.generated_kst),Date.parse(g.source_generated_kst),Date.parse(p.generated_kst));
+ const statusAge=nowMs-oldestSourceMs;
  const freshnessCurrent=Number.isFinite(statusAge)&&statusAge>=-60000&&statusAge<=7200000;
  const axis={lower:t.lines.ma250_lower,up:t.lines.ma250_upper,tri:t.lines.tripod_return,current:raw.value};
  const gap=axis.tri-axis.lower,min=Math.min(axis.lower,axis.current)-gap*.14,max=Math.max(axis.tri,axis.current)+gap*.14;
