@@ -1,11 +1,11 @@
-/* Observatory V3 opt-in visual system.
+/* Observatory V3 default visual system.
  * Source-first, read-only: does not touch trading, collection, or existing V1/V2.
- * ?ui=v3 is opt-in, and ?ui=v2 returns to the existing production screen.
+ * V3 is default. Explicit ?ui=v2 and ?ui=v1 remain available.
  */
 (function (root) {
 'use strict';
 const V3 = 'v3';
-const isV3 = search => new URLSearchParams(search||'').get('ui') === V3;
+const isV3 = search => !['v1','v2'].includes(new URLSearchParams(search||'').get('ui'));
 const finite = v => typeof v === 'number' && Number.isFinite(v);
 const escapeHtml = v => String(v??'').replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[x]));
 const fmt = (v,n=2) => finite(v) ? v.toLocaleString('ko-KR',{minimumFractionDigits:n,maximumFractionDigits:n}) : '—';
@@ -50,12 +50,16 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
   differences:{lower:dist(axis.lower),upper:dist(axis.upper),tri:dist(axis.tri)},
   us,sectorReady,sectors:sectorReady?[...rows.find(x=>x.key==='classic').rows].sort((a,b)=>b.current_return_pct-a.current_return_pct):[],
   generated:glance.generated_kst,freshnessGenerated:fresh.generated_kst,freshnessCurrent:statusOk,
-  officialVerified:false,referenceOnly:true,noTrade:true};
+  officialVerified:glance?.brief_check?.status==='MATCH' && glance.brief_check.official_eod_verified===true
+   && glance.brief_check.source_date===glance.us_session && glance.brief_check.match_rule==='INTEGER_PART_EQUAL',
+  referenceOnly:glance?.brief_check?.official_eod_verified!==true,noTrade:true};
 }
 function rail(m){
  const points=Object.entries(m.points).map(([key,where])=>'<i class="ov3Mark '+key+'" style="left:'+where.toFixed(2)+'%" aria-hidden="true"></i>').join('');
  return '<section class="ov3Rail" aria-label="TRI-POD 지수 기준점">'
-  +'<div class="ov3DataGuard" role="note">제공자 완료 일봉 참고 · NDX 공식 종가 독립검증 대기 · 전환 확정 금지</div>'
+  +'<div class="ov3DataGuard" role="note">'+(m.officialVerified
+   ?'NDX Nasdaq 공식 종가 · 정수자리 일치 검증 완료 · TRI-POD 기타 조건 확인 · 자동주문 없음'
+   :'제공자 완료 일봉 참고 · NDX 공식 종가 독립검증 대기 · 전환 확정 금지')+'</div>'
   +(m.freshnessCurrent?'':'<p class="ov3Stale" role="status">최신성 재확인 필요 · 아래 수치는 '+escapeHtml(m.session)+' 완료일봉의 마지막 게시 참고값입니다.</p>')
   +'<div class="ov3RailHeading"><strong>전환 기준점 한눈에 보기</strong><small>미국 '+escapeHtml(m.session)+' 완료 일봉 참고 · 가격 간격 비례</small></div>'
   +'<div class="ov3Track" role="img" aria-label="하락 후보 '+fmt(m.axis.lower)+' 현재 '+fmt(m.axis.now)+' 상승 복귀 참고 '+fmt(m.axis.upper)+' TRIPOD 복귀 필요 '+fmt(m.axis.tri)+'"><span></span>'+points+'</div>'
@@ -66,13 +70,13 @@ function rail(m){
   +note('TRIPOD 낙폭 조건 · DD -9%',m.axis.tri,m.differences.tri)
   +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
   +'TRIPOD은 상승 레짐·DD -9% 이내·VIX10&lt;28을 함께 확인하며, NOPOD도 하락 레짐과 VIX10≥18 확인이 필요합니다.</p>'
-  +'<p class="ov3Small">하락 레짐 전환 후보와 NO-POD 과거 진입일 고정선·손절선은 다른 값입니다. 공식 Nasdaq EOD 독립검증 전 · 완료세션 날짜 유지 · 주문 신호 아님</p>'
+  +'<p class="ov3Small">하락 레짐 전환 후보와 NO-POD 과거 진입일 고정선·손절선은 다른 값입니다. '+(m.officialVerified?'Nasdaq 종가 정수자리 검증 완료':'공식 Nasdaq EOD 독립검증 전')+' · 완료세션 날짜 유지 · 주문 신호 아님</p>'
    +'<button class="ov3DetailLink" type="button" data-ov3-tab="jjooni-tripod">NO-POD 진입 고정 기준점·손절선 상세 보기</button></section>';
 }
 function marketStrip(m){
  const picks=['NASDAQ100','SP500','SOX','VIX'].map(k=>m.us.find(x=>x.key===k)).filter(x=>x&&finite(x.value)&&x.date===m.session);
  return '<section class="ov3MarketStrip" aria-label="오늘의 지수">'
-  +'<div class="ov3StripTitle"><strong>MARKET CLOSE</strong><small>미국 '+escapeHtml(m.session)+' · '+(m.freshnessCurrent?'제공자 완료일봉 참고':'상태 최신성 재확인 필요 · 마지막 게시 참고')+'</small></div>'
+  +'<div class="ov3StripTitle"><strong>MARKET CLOSE</strong><small>미국 '+escapeHtml(m.session)+' · '+(m.freshnessCurrent?(m.officialVerified?'Nasdaq 공식 종가 정수자리 일치':'제공자 완료일봉 참고'):'상태 최신성 재확인 필요 · 마지막 게시 참고')+'</small></div>'
   +'<div class="ov3StripData">'+picks.map(x=>'<div class="ov3StripTile"><span>'+escapeHtml(x.label)+'</span><strong>'+fmt(x.value)+'</strong><small class="'+changeClass(x.d1_pct)+'">'+pct(x.d1_pct)+'</small></div>').join('')+'</div></section>';
 }
 function sectorChart(m){
@@ -112,7 +116,7 @@ function draw(m) {
   r.innerHTML=m.ready?rail(m):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.0-opt-in',model,rail,marketStrip,sectorChart,enabled:isV3};
+const runtime={version:'3.1-default',model,rail,marketStrip,sectorChart,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -120,7 +124,7 @@ function mount(){
  if(!isV3(location.search)){
   if(brand&&!brand.querySelector('.ov3Try')){
    const a=document.createElement('a');a.className='ov3Try';a.href='?ui=v3'+(location.hash||'');
-   a.textContent='V3 디자인 보기';a.title='기존 V2를 유지한 채 V3 시안을 미리 봅니다';brand.appendChild(a);}
+   a.textContent='V3 기본화면';a.title='Observatory V3 기본화면으로 이동';brand.appendChild(a);}
   return;
  }
  document.body.classList.add('obsV3');
