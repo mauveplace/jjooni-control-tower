@@ -1,5 +1,5 @@
 {
-  "available_from": "2016-11-19",
+  "available_from": "2016-11-21",
   "available_to": "2026-11-17",
   "backfill": {
     "canonical_rows_matched": 5,
@@ -88,9 +88,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-17T19:20:30+09:00",
+  "generated_kst": "2026-11-18T03:59:44+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37831,
+  "row_count": 37830,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -10822,25 +10822,25 @@
       "sha256": "51816d2aa49d706d77f6fa125812445137415f8f11f5863bc348f36478a12ed8"
     },
     "FF::US::cb-leading-index-m-m": {
-      "available_from": "2016-11-19",
+      "available_from": "2016-12-23",
       "available_to": "2026-10-22",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 118,
       "country": "US",
       "event_title": "CB Leading Index m/m",
       "kind": "event",
       "label": "CB Leading Index m/m",
       "metric_key": null,
-      "path": "./calendar-history/series/bd7e894fd092efa045275535062a30123a87842696ecb1259425f93b6c301960.json",
+      "path": "./calendar-history/series/c3df72f8b63dda7802f6e9dc6575470e88924d0010ff55b59fe130045702997a.json",
       "quality": {
-        "actual_count": 119,
+        "actual_count": 118,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 118,
+        "consensus_count": 117,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 83,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -10855,7 +10855,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::US::cb-leading-index-m-m",
-      "sha256": "bd7e894fd092efa045275535062a30123a87842696ecb1259425f93b6c301960"
+      "sha256": "c3df72f8b63dda7802f6e9dc6575470e88924d0010ff55b59fe130045702997a"
     },
     "FF::US::challenger-job-cuts-y-y": {
       "available_from": "2016-12-01",
@@ -14566,9 +14566,9 @@
       "event_title": "U.S. Import and Export Price Indexes",
       "kind": "event",
       "label": "U.S. Import and Export Price Indexes",
-      "path": "./calendar-history/series/59ccf4bb47296bb40b4168610f6cde65d64956b7255b14a0b18a2639898bc87d.json",
+      "path": "./calendar-history/series/008e8d3a2e437b5d453064058e064ee6445317c5d19622fd4cbf8f3a1520b42d.json",
       "quality": {
-        "actual_count": 11,
+        "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 3,
         "frequency_validation": "NOT_VALIDATED",
@@ -14579,7 +14579,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-import-and-export-price-indexes",
-      "sha256": "59ccf4bb47296bb40b4168610f6cde65d64956b7255b14a0b18a2639898bc87d"
+      "sha256": "008e8d3a2e437b5d453064058e064ee6445317c5d19622fd4cbf8f3a1520b42d"
     },
     "US::u-s-import-and-export-price-indexes::us_export_price_mom": {
       "available_from": "2026-01-15",
@@ -14591,9 +14591,9 @@
       "kind": "metric",
       "label": "U.S. Export Prices MoM",
       "metric_key": "us_export_price_mom",
-      "path": "./calendar-history/series/20badc250fdbf59d6aae0234c5a4782d2b05bf14f56d3c7e6b4fec0c85be323c.json",
+      "path": "./calendar-history/series/d565ed71480c337aa1bf145e48ab1c79255c65145274dee9bd600fd04ba43983.json",
       "quality": {
-        "actual_count": 11,
+        "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 1,
         "frequency_validation": "NOT_VALIDATED",
@@ -14604,7 +14604,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-import-and-export-price-indexes::us_export_price_mom",
-      "sha256": "20badc250fdbf59d6aae0234c5a4782d2b05bf14f56d3c7e6b4fec0c85be323c"
+      "sha256": "d565ed71480c337aa1bf145e48ab1c79255c65145274dee9bd600fd04ba43983"
     },
     "US::u-s-import-and-export-price-indexes::us_import_price_mom": {
       "available_from": "2016-12-13",
@@ -14616,9 +14616,9 @@
       "kind": "metric",
       "label": "U.S. Import Prices MoM",
       "metric_key": "us_import_price_mom",
-      "path": "./calendar-history/series/6e6b55bbd3c3b7c41b038e56eb57c7882bf9440783fa2c1b55e606d042d5542b.json",
+      "path": "./calendar-history/series/50eb8ee97462f255e3518f224f03cf9906fcfd61ca8a8641e1e06df39b7fb9c2.json",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -14639,7 +14639,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-import-and-export-price-indexes::us_import_price_mom",
-      "sha256": "6e6b55bbd3c3b7c41b038e56eb57c7882bf9440783fa2c1b55e606d042d5542b"
+      "sha256": "50eb8ee97462f255e3518f224f03cf9906fcfd61ca8a8641e1e06df39b7fb9c2"
     },
     "US::u-s-initial-jobless-claims": {
       "available_from": "2026-08-27",
@@ -14846,11 +14846,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 439,
-  "snapshot_id": "20b05ce7319514fad4b9d09c4c38d9032e61b71ef545933a8233d92c1bba6aa2",
-  "source_sha256": "20b05ce7319514fad4b9d09c4c38d9032e61b71ef545933a8233d92c1bba6aa2",
+  "snapshot_id": "de07e163db8d56102be5834c122796718c99ba0481a63aa68cc78a8b54cbafc3",
+  "source_sha256": "de07e163db8d56102be5834c122796718c99ba0481a63aa68cc78a8b54cbafc3",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-17",
-  "window_start": "2016-11-19",
+  "window_end": "2026-11-18",
+  "window_start": "2016-11-20",
   "window_years": 10
 }

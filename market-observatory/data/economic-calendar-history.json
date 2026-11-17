@@ -1,5 +1,5 @@
 {
-  "available_from": "2016-11-19",
+  "available_from": "2016-11-21",
   "available_to": "2026-11-17",
   "backfill": {
     "canonical_rows_matched": 5,
@@ -88,9 +88,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-17T19:20:30+09:00",
+  "generated_kst": "2026-11-18T03:59:44+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37831,
+  "row_count": 37830,
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -677356,24 +677356,24 @@
       ]
     },
     "FF::US::cb-leading-index-m-m": {
-      "available_from": "2016-11-19",
+      "available_from": "2016-12-23",
       "available_to": "2026-10-22",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 118,
       "country": "US",
       "event_title": "CB Leading Index m/m",
       "kind": "event",
       "label": "CB Leading Index m/m",
       "metric_key": null,
       "quality": {
-        "actual_count": 119,
+        "actual_count": 118,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 118,
+        "consensus_count": 117,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 83,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -677389,30 +677389,6 @@
       },
       "ref": "FF::US::cb-leading-index-m-m",
       "rows": [
-        {
-          "actual": "0.1%",
-          "canonical_match": false,
-          "consensus": "0.1%",
-          "consensus_source": "ForexFactory historical calendar",
-          "consensus_source_tier": "MARKET_FEED",
-          "date": "2016-11-19",
-          "datetime_kst": "2016-11-19T00:00+09:00",
-          "label": "CB Leading Index m/m",
-          "match_score": null,
-          "metric_key": null,
-          "previous": "0.2%",
-          "previous_source": "ForexFactory historical calendar",
-          "previous_source_tier": "MARKET_FEED",
-          "reference_period": null,
-          "source": "ForexFactory historical calendar",
-          "source_date": "2016-11-18",
-          "source_tier": "MARKET_FEED",
-          "source_time": "9:00am",
-          "source_timezone": "America/Chicago",
-          "surprise": null,
-          "te_forecast": null,
-          "verification_status": "HISTORICAL_MARKET_REPORTED"
-        },
         {
           "actual": "0.0%",
           "canonical_match": false,
@@ -868241,7 +868217,7 @@
       "kind": "event",
       "label": "U.S. Import and Export Price Indexes",
       "quality": {
-        "actual_count": 11,
+        "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 3,
         "frequency_validation": "NOT_VALIDATED",
@@ -868497,21 +868473,25 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         },
         {
-          "actual": null,
-          "checked_kst": "2026-11-17T19:20:24+09:00",
+          "actual": "1.1%",
+          "checked_kst": "2026-11-18T01:52:27+09:00",
           "consensus": "0.7%",
-          "consensus_source": "FairEconomy/ForexFactory",
-          "consensus_source_tier": "MARKET_FEED",
+          "consensus_source": "BLS_ximpim official release",
+          "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-17",
           "datetime_kst": "2026-11-17T22:30+09:00",
           "label": "U.S. Import and Export Price Indexes",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIR?startyear=2025&endyear=2026",
           "previous": "1.1%",
-          "previous_source": "FairEconomy/ForexFactory",
-          "previous_source_tier": "MARKET_FEED",
-          "source": "FairEconomy/ForexFactory",
-          "source_tier": "MARKET_FEED",
-          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-          "verification_status": "MARKET_REPORTED"
+          "previous_source": "BLS_ximpim official release",
+          "previous_source_tier": "OFFICIAL",
+          "series_id": "EIUIR",
+          "source": "BLS_ximpim official release",
+          "source_tier": "OFFICIAL",
+          "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIR?startyear=2025&endyear=2026",
+          "surprise": "actual_vs_consensus",
+          "value_vintage": "LATEST_REVISION",
+          "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ]
     },
@@ -868526,7 +868506,7 @@
       "label": "U.S. Export Prices MoM",
       "metric_key": "us_export_price_mom",
       "quality": {
-        "actual_count": 11,
+        "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 1,
         "frequency_validation": "NOT_VALIDATED",
@@ -868790,19 +868770,23 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         },
         {
-          "actual": null,
-          "checked_kst": "2026-11-17T19:20:24+09:00",
+          "actual": "1.1%",
+          "checked_kst": "2026-11-18T01:52:27+09:00",
           "date": "2026-11-17",
           "datetime_kst": "2026-11-17T22:30+09:00",
           "label": "U.S. Export Prices MoM",
           "metric_key": "us_export_price_mom",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIQ?startyear=2025&endyear=2026",
           "previous": "2.2%",
           "previous_source": "BLS_ximpim official release",
-          "previous_source_tier": "MARKET_FEED",
+          "previous_source_tier": "OFFICIAL",
+          "reference_period": "2026-10",
+          "series_id": "EIUIQ",
           "source": "BLS_ximpim official release",
-          "source_tier": "MARKET_FEED",
-          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-          "verification_status": "MARKET_REPORTED"
+          "source_tier": "OFFICIAL",
+          "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIQ?startyear=2025&endyear=2026",
+          "value_vintage": "LATEST_REVISION",
+          "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ]
     },
@@ -868817,7 +868801,7 @@
       "label": "U.S. Import Prices MoM",
       "metric_key": "us_import_price_mom",
       "quality": {
-        "actual_count": 118,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
@@ -871749,22 +871733,26 @@
           "verification_status": "VERIFIED_OFFICIAL_REVISED"
         },
         {
-          "actual": null,
-          "checked_kst": "2026-11-17T19:20:27+09:00",
+          "actual": "1.1%",
+          "checked_kst": "2026-11-18T01:52:27+09:00",
           "consensus": "0.7%",
           "consensus_source": "FairEconomy/ForexFactory",
-          "consensus_source_tier": "MARKET_FEED",
+          "consensus_source_tier": "OFFICIAL",
           "date": "2026-11-17",
           "datetime_kst": "2026-11-17T22:30+09:00",
           "label": "U.S. Import Prices MoM",
           "metric_key": "us_import_price_mom",
+          "official_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIR?startyear=2025&endyear=2026",
           "previous": "1.1%",
           "previous_source": "FairEconomy/ForexFactory",
-          "previous_source_tier": "MARKET_FEED",
+          "previous_source_tier": "OFFICIAL",
+          "reference_period": "2026-10",
+          "series_id": "EIUIR",
           "source": "FairEconomy/ForexFactory",
-          "source_tier": "MARKET_FEED",
-          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-          "verification_status": "MARKET_REPORTED"
+          "source_tier": "OFFICIAL",
+          "source_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/EIUIR?startyear=2025&endyear=2026",
+          "value_vintage": "LATEST_REVISION",
+          "verification_status": "VERIFIED_OFFICIAL_REVISED"
         }
       ]
     },
@@ -895846,7 +895834,7 @@
   "series_count": 439,
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-17",
-  "window_start": "2016-11-19",
+  "window_end": "2026-11-18",
+  "window_start": "2016-11-20",
   "window_years": 10
 }
