@@ -29,6 +29,35 @@ test('unverified NDX: top alert, NDX row is ? 검증 보류', () => {
   assert.equal(ndx.tag, '? 검증 보류');
 });
 
+test('trusted NDX provider bar displays reference and MEDIUM warning, never official', () => {
+  const fresh = { overall:'LIVE_WITH_WARNINGS', critical_bad:[],
+    warnings:['fedwatch','audit'], groups:{
+      market:{state:'LIVE',as_of:'2026-11-11',source:'observatory.json'},
+      fedwatch:{state:'LAGGING',as_of:'2026-11-10'},
+      audit:{state:'WARN',detail:'critical=0 · warnings=1'}
+    } };
+  const vm=viewModel({glance,brief,calendar,freshness:fresh},NOW);
+  const ndx=vm.groups[0].rows[0];
+  assert.equal(ndx.state,'ref');
+  assert.equal(ndx.tag,'◐ 참고·완료 일봉');
+  assert.equal(vm.alerts[0].level,'MID');
+  assert.match(vm.alerts[0].body,/완료 일봉 수집됨/);
+  assert.match(vm.tripod.verification,/공식 종가 미검증/);
+  const extra=vm.alerts.find(x=>x.title==='일부 데이터 확인 필요');
+  assert.match(extra.body,/FedWatch 2026-11-10/);
+  assert.match(extra.body,/추가 확인/);
+  assert.match(vm.noTrade,/자동주문 없음/);
+});
+test('mismatched or failed NDX source remains high-priority verification hold', () => {
+  const mismatch={groups:{market:{state:'LAGGING',as_of:'2026-11-10',source:'observatory.json'}}};
+  const vm=viewModel({glance,brief,calendar,freshness:mismatch},NOW);
+  assert.equal(vm.alerts[0].level,'HIGH');
+  assert.equal(vm.groups[0].rows[0].state,'delay');
+  const bad=structuredClone(glance);bad.consistency.status='MISALIGNED';
+  const live={groups:{market:{state:'LIVE',as_of:'2026-11-11',source:'observatory.json'}}};
+  assert.equal(viewModel({glance:bad,brief,calendar,freshness:live},NOW).groups[0].rows[0].state,'hold');
+});
+
 test('market compare view-model retains distinct 1D/1W/1M and absent data', () => {
   const g = structuredClone(glance);
   g.groups[0].items[0].m1_pct = 4.25;
