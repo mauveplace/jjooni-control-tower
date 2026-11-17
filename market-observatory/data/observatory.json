@@ -1,13 +1,13 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-11-17T13:20:11+09:00",
+  "generated_kst": "2026-11-18T01:52:20+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
   "us_completed_session_date": "2026-11-16",
   "latest": {
     "NASDAQ100": 27197.15234375,
-    "SOX": 9610.65234375,
+    "SOX": 9610.65039062,
     "SP500": 7416.58984375,
     "VIX": 22.90999985,
     "DXY": 103.51300049,
@@ -20,15 +20,15 @@
     "GOLD": 3870.80004883,
     "COPPER": 5.97049999,
     "US3M": 4.34,
-    "US5Y": 4.93499994,
-    "US10Y": 5.12099981,
-    "US30Y": 5.46700001,
-    "KR3Y": 3.743,
-    "KR5Y": 3.83,
-    "KR10Y": 3.981,
-    "KR20Y": 4.077,
-    "KR30Y": 4.05,
-    "KR_3S10S": 0.238,
+    "US5Y": 4.90199995,
+    "US10Y": 5.10299969,
+    "US30Y": 5.46000004,
+    "KR3Y": 3.725,
+    "KR5Y": 3.825,
+    "KR10Y": 3.966,
+    "KR20Y": 4.083,
+    "KR30Y": 4.055,
+    "KR_3S10S": 0.241,
     "US2Y": 4.83,
     "US5Y_OFFICIAL": 4.93,
     "US10Y_OFFICIAL": 5.12,
@@ -40,11 +40,11 @@
     "JP20Y": 3.779,
     "JP30Y": 4.062,
     "JP_2S10S": 1.049,
-    "KR_US_10Y": -1.139,
-    "BTCUSD": 64989.15,
-    "ETHUSD": 1828.74,
+    "KR_US_10Y": -1.154,
+    "BTCUSD": 63647.97,
+    "ETHUSD": 1774.53,
     "FEAR_GREED": 31.0,
-    "FEAR_GREED_RATING": "FEAR",
+    "FEAR_GREED_RATING": "EXTREME FEAR",
     "KOSPI": 5002.36,
     "KOSDAQ": 654.6,
     "RUSSELL2000": 2742.94116211,
@@ -6065,7 +6065,7 @@
       },
       {
         "date": "2026-11-16",
-        "value": 9610.65234375
+        "value": 9610.65039062
       }
     ],
     "SP500": [
@@ -46488,6 +46488,10 @@
       {
         "date": "2026-11-16",
         "value": 4.93499994
+      },
+      {
+        "date": "2026-11-17",
+        "value": 4.90199995
       }
     ],
     "US10Y": [
@@ -49558,6 +49562,10 @@
       {
         "date": "2026-11-16",
         "value": 5.12099981
+      },
+      {
+        "date": "2026-11-17",
+        "value": 5.10299969
       }
     ],
     "US30Y": [
@@ -52628,6 +52636,10 @@
       {
         "date": "2026-11-16",
         "value": 5.46700001
+      },
+      {
+        "date": "2026-11-17",
+        "value": 5.46000004
       }
     ],
     "KR3Y": [
@@ -53802,6 +53814,10 @@
       {
         "date": "2026-11-16",
         "value": 3.743
+      },
+      {
+        "date": "2026-11-17",
+        "value": 3.725
       }
     ],
     "KR5Y": [
@@ -54976,6 +54992,10 @@
       {
         "date": "2026-11-16",
         "value": 3.83
+      },
+      {
+        "date": "2026-11-17",
+        "value": 3.825
       }
     ],
     "KR10Y": [
@@ -56150,6 +56170,10 @@
       {
         "date": "2026-11-16",
         "value": 3.981
+      },
+      {
+        "date": "2026-11-17",
+        "value": 3.966
       }
     ],
     "KR20Y": [
@@ -57324,6 +57348,10 @@
       {
         "date": "2026-11-16",
         "value": 4.077
+      },
+      {
+        "date": "2026-11-17",
+        "value": 4.083
       }
     ],
     "KR30Y": [
@@ -58498,6 +58526,10 @@
       {
         "date": "2026-11-16",
         "value": 4.05
+      },
+      {
+        "date": "2026-11-17",
+        "value": 4.055
       }
     ],
     "KR_3S10S": [
@@ -59672,6 +59704,10 @@
       {
         "date": "2026-11-16",
         "value": 0.238
+      },
+      {
+        "date": "2026-11-17",
+        "value": 0.241
       }
     ],
     "US2Y": [
@@ -339171,20 +339207,18 @@
       },
       {
         "date": "2026-11-16",
-        "value": 65335.69,
-        "session_status": "IN_PROGRESS",
+        "value": 64855.84375,
+        "session_status": "COMPLETED",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-17T07:00:51+09:00",
-        "observation_type": "SPOT_SNAPSHOT",
-        "source": "Binance",
-        "quote_currency": "USDT"
+        "source": "Yahoo Finance USD daily",
+        "quote_currency": "USD"
       },
       {
         "date": "2026-11-17",
-        "value": 64989.15,
+        "value": 63647.97,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-17T13:20:30+09:00",
+        "observed_kst": "2026-11-18T01:52:42+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -348081,20 +348115,18 @@
       },
       {
         "date": "2026-11-16",
-        "value": 1830.88,
-        "session_status": "IN_PROGRESS",
+        "value": 1819.27587891,
+        "session_status": "COMPLETED",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-17T07:00:49+09:00",
-        "observation_type": "SPOT_SNAPSHOT",
-        "source": "Binance",
-        "quote_currency": "USDT"
+        "source": "Yahoo Finance USD daily",
+        "quote_currency": "USD"
       },
       {
         "date": "2026-11-17",
-        "value": 1828.74,
+        "value": 1774.53,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-17T13:20:29+09:00",
+        "observed_kst": "2026-11-18T01:52:43+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -375836,7 +375868,7 @@
     "drawdown_52w_pct": -12.897955573567444,
     "ma250": 27515.3937500002,
     "ndx": 27197.15234375,
-    "observed_at": "2026-11-17T13:26:46+09:00",
+    "observed_at": "2026-11-18T01:53:06+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -10.506920997742286,
     "previous_ma250": 27505.80482031272,
@@ -380988,9 +381020,9 @@
       "symbol": "BTCUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=BTCUSDT&limit=1",
-      "price": 64989.15,
-      "quote_as_of_kst": "2026-11-17T13:20:30+09:00",
-      "captured_kst": "2026-11-17T13:20:30+09:00",
+      "price": 63647.97,
+      "quote_as_of_kst": "2026-11-18T01:52:42+09:00",
+      "captured_kst": "2026-11-18T01:52:42+09:00",
       "status": "LIVE",
       "quote_age_seconds": 0,
       "quote_currency": "USDT",
@@ -381003,17 +381035,17 @@
       "previous_close_utc_date": "2026-11-16",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": 0.1638
+      "daily_change_pct": -1.9033
     },
     "ETHUSD": {
       "symbol": "ETHUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=ETHUSDT&limit=1",
-      "price": 1828.74,
-      "quote_as_of_kst": "2026-11-17T13:20:29+09:00",
-      "captured_kst": "2026-11-17T13:20:30+09:00",
+      "price": 1774.53,
+      "quote_as_of_kst": "2026-11-18T01:52:43+09:00",
+      "captured_kst": "2026-11-18T01:52:42+09:00",
       "status": "LIVE",
-      "quote_age_seconds": 1,
+      "quote_age_seconds": 0,
       "quote_currency": "USDT",
       "usd_proxy": true,
       "comparison_basis": "UTC_DAILY_CLOSE_NOT_ROLLING_24H",
@@ -381024,7 +381056,7 @@
       "previous_close_utc_date": "2026-11-16",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": 0.4432
+      "daily_change_pct": -2.5342
     }
   },
   "cross_market_freshness_quality": {
@@ -381033,7 +381065,7 @@
       "source": "BOK ECOS 817Y002 daily market rates",
       "stat_code": "817Y002",
       "item_code": "010200000",
-      "last_date": "2026-11-16",
+      "last_date": "2026-11-17",
       "age_days": 1,
       "verified_rows": 10,
       "api_mode": "registered",
@@ -381044,7 +381076,7 @@
       "source": "BOK ECOS 817Y002 daily market rates",
       "stat_code": "817Y002",
       "item_code": "010200001",
-      "last_date": "2026-11-16",
+      "last_date": "2026-11-17",
       "age_days": 1,
       "verified_rows": 10,
       "api_mode": "registered",
@@ -381055,7 +381087,7 @@
       "source": "BOK ECOS 817Y002 daily market rates",
       "stat_code": "817Y002",
       "item_code": "010210000",
-      "last_date": "2026-11-16",
+      "last_date": "2026-11-17",
       "age_days": 1,
       "verified_rows": 10,
       "api_mode": "registered",
@@ -381066,7 +381098,7 @@
       "source": "BOK ECOS 817Y002 daily market rates",
       "stat_code": "817Y002",
       "item_code": "010220000",
-      "last_date": "2026-11-16",
+      "last_date": "2026-11-17",
       "age_days": 1,
       "verified_rows": 10,
       "api_mode": "registered",
@@ -381077,7 +381109,7 @@
       "source": "BOK ECOS 817Y002 daily market rates",
       "stat_code": "817Y002",
       "item_code": "010230000",
-      "last_date": "2026-11-16",
+      "last_date": "2026-11-17",
       "age_days": 1,
       "verified_rows": 10,
       "api_mode": "registered",
@@ -381089,12 +381121,12 @@
       "api_mode": "registered",
       "fetch_succeeded": true,
       "last_dates": {
-        "KR3Y": "2026-11-16",
-        "KR5Y": "2026-11-16",
-        "KR10Y": "2026-11-16",
-        "KR20Y": "2026-11-16",
-        "KR30Y": "2026-11-16",
-        "KR_3S10S": "2026-11-16"
+        "KR3Y": "2026-11-17",
+        "KR5Y": "2026-11-17",
+        "KR10Y": "2026-11-17",
+        "KR20Y": "2026-11-17",
+        "KR30Y": "2026-11-17",
+        "KR_3S10S": "2026-11-17"
       },
       "refreshed_status": {
         "KR3Y": "LIVE",
@@ -381303,7 +381335,7 @@
       "status": "LIVE"
     }
   },
-  "kr_rates_refreshed_kst": "2026-11-17T13:20:11+09:00",
+  "kr_rates_refreshed_kst": "2026-11-18T01:52:20+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -381313,8 +381345,8 @@
     "fear_greed": {
       "state": "LIVE",
       "source": "CNN_FEAR_GREED_PUBLIC",
-      "observed_at": "2026-11-16T23:59:54+00:00",
-      "rating": "FEAR",
+      "observed_at": "2026-11-17T16:47:02+00:00",
+      "rating": "EXTREME FEAR",
       "error": null,
       "history_source": "DAILY_MARKET_PULSE_HISTORY",
       "contract": "CNN_PRIMARY_PUBLIC_SIDECAR_FALLBACK_V1"
@@ -381348,7 +381380,7 @@
   "today_strategy_contract": "TRIPOD_CANONICAL_DECISION_SUPPORT_V1",
   "freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-11-17T13:20:11+09:00",
+    "checked_kst": "2026-11-18T01:52:20+09:00",
     "market_date_us": "2026-11-16",
     "us_close_refresh_contract": "US_REGULAR_CLOSE_PLUS_10M_DST_AWARE",
     "scheduled_kst": "05:10_OR_06:10_DST_DEPENDENT",
@@ -381361,7 +381393,7 @@
   "history_base_generated_kst": "2026-09-13T00:12:30+09:00",
   "history_base_path": "./data/history-30y.json",
   "crypto_contract": "PRESERVED_USD_HISTORY_SEPARATE_USDT_REFERENCE_V3",
-  "crypto_enriched_kst": "2026-11-17T13:20:33+09:00",
+  "crypto_enriched_kst": "2026-11-18T01:52:45+09:00",
   "market_supplement_quality": {
     "KOSPI": {
       "status": "LIVE",
@@ -381402,7 +381434,7 @@
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
-  "equity_enriched_kst": "2026-11-17T13:20:34+09:00",
+  "equity_enriched_kst": "2026-11-18T01:52:46+09:00",
   "supplemental_refreshed_kst": "2026-11-17T13:13:41+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "us_rates_refreshed_kst": "2026-11-17T13:13:34+09:00"
