@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { model, enabled, rail, marketStrip, sectorChart } = require('../market-observatory/observatory-v3.js');
-const { build: briefDigest } = require('../market-observatory/brief-visual-digest-v1.js');
+const { build: briefDigest, render: renderBriefDigest, css: briefCss } = require('../market-observatory/brief-visual-digest-v1.js');
 const root = path.join(__dirname, '..', 'market-observatory');
 const read = p => JSON.parse(fs.readFileSync(path.join(root, 'data', p), 'utf8'));
 const fixture = () => ({glance:read('daily-glance.json'), freshness:read('freshness-status.json'),
@@ -87,4 +87,46 @@ test('V3 assets and script order: optional skin after V2, visual before morning 
  const skin=fs.readFileSync(path.join(root,'observatory-v3.css'),'utf8');
  assert.match(skin,/body\.obsV3/);
  assert.ok(!skin.includes('body.navV2:not('),'V3 must not override V2 outside opt-in');
+});
+
+test('V3 visual digest preserves red gains / blue losses and only mounts for explicit opt-in', () => {
+ const briefSrc=fs.readFileSync(path.join(root,'morning-brief-v1.js'),'utf8');
+ assert.match(briefSrc,/new URLSearchParams\(location\.search\)\.get\('ui'\)==='v3'/);
+ assert.match(briefCss,/\.bdVisual \.gain\{color:#ba322d\}/);
+ assert.match(briefCss,/\.bdVisual \.loss\{color:#2759a0\}/);
+ assert.match(briefCss,/\.bdSectorRow em\.loss\{background:#2759a0\}/);
+ assert.doesNotMatch(briefCss,/\.bdVisual \.gain\{color:#137c57\}/);
+});
+test('V3 brief digest derives the NDX stage from the actual TRI-POD ledger and formats signed distance', () => {
+ const f=fixture(),host={hidden:true,innerHTML:''};
+ f.glance.tripod.pod='TRIPOD';
+ const n=f.glance.tripod.lines.tripod_return+100;
+ f.glance.tripod.ndx=n;
+ f.glance.groups.flatMap(g=>g.items||[]).find(x=>x.key==='NASDAQ100').value=n;
+ f.pulse.raw.tradingview_cross_asset.ndx.value=n;
+ const m=renderBriefDigest(host,{brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
+  nowMs:Date.parse(f.glance.generated_kst)+60000});
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.pod,'TRIPOD');
+ assert.match(host.innerHTML,/현재 NDX · TRIPOD/);
+ assert.doesNotMatch(host.innerHTML,/현재 NDX · BIPOD/);
+ assert.ok(m.distances.tri<0);
+ assert.match(host.innerHTML,/TRIPOD 낙폭 조건선까지 -[0-9]/);
+ assert.doesNotMatch(host.innerHTML,/\+-[0-9]/);
+});
+test('V3 digest ages into an explicitly dated reference instead of implying fresh live prices', () => {
+ const f=fixture(),host={hidden:true,innerHTML:''};
+ const recent=briefDigest({brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
+  nowMs:Date.parse(f.glance.generated_kst)+60000});
+ assert.equal(recent.ready,true,recent.reason);
+ assert.equal(recent.freshnessCurrent,true);
+ const m=renderBriefDigest(host,{brief:f.brief,glance:f.glance,pulse:f.pulse,sector:f.sector,latest:true,
+  nowMs:Date.parse(f.glance.generated_kst)+7200001});
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.freshnessCurrent,false);
+ assert.equal(m.referenceOnly,true);
+ assert.equal(m.tradeEligible,false);
+ assert.match(host.innerHTML,/최신성 재확인 필요/);
+ assert.match(host.innerHTML,/마지막 게시 참고값/);
+ assert.match(host.innerHTML,/현재 신호·공식 Nasdaq 종가가 아닙니다/);
 });
