@@ -16,6 +16,24 @@ test('V3 is default while explicit V1/V2 remain available', () => {
  assert.equal(enabled(''), true);
  assert.equal(enabled('?ui=v1'), false);
 });
+test('V3 default does not mistake a verified integer official close for unverified', () => {
+ const f=fixture(),g=structuredClone(f.glance);
+ g.brief_check={
+  status:'MATCH',source_date:g.us_session,match_rule:'INTEGER_PART_EQUAL',
+  official_status:'VERIFIED',official_eod_verified:true,trade_signal_eligible:false
+ };
+ const m=model(g,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.officialVerified,true);
+ assert.equal(m.referenceOnly,false);
+ assert.equal(m.noTrade,true);
+ assert.match(rail(m),/Nasdaq 공식 종가/);
+ assert.match(rail(m),/정수자리 일치 검증 완료/);
+ assert.doesNotMatch(rail(m),/공식 종가 독립검증 대기/);
+ const stale=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(stale.officialVerified,false);
+ assert.match(rail(stale),/독립검증 대기/);
+});
 test('V3 threshold numbers from same-session published canonical, never generated', () => {
  const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.ready,true,m.reason);
