@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261117-OBS-V3-MOBILE-DATA-079",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Correct actual user-reported 390px Observatory V3 excessive mobile chrome and repeated data warnings without hiding actual stale upstream observations. Differentiate NDX same-session provider completed bar vs missing independent Nasdaq official EOD; preserve trade block. Resolve false FX mixed US/Asia-date audit warnings while retaining true FedWatch lag.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Inspect 390px mobile V3 screenshot behavior. TRI-POD four threshold rail must precede Market Close and bulky editorial cards; 5-tab nav stays single and fixed; header must be compact; all warnings visible or openable.",
+    "NDX independent official EOD proof absent must never become OFFICIAL_VERIFIED/eligible trading signal. Same-session aligned valid provider bar may be REFERENCE_ONLY with explicit nonurgent warning, otherwise HIGH when absent/stale/misaligned.",
+    "FX audit false warning: DXY US-close session 2026-11-16 and local Asia FX quotes 2026-11-17 should be valid when each exact dated source is preserved and nothing is future-dated. Future, missing, mismatched, stale foreign exchange must still warn.",
+    "FedWatch 2026-11-13 vs expected 2026-11-16 lag is a true source problem; keep LAGGING and display actual date. 'audit' may summarize warning, not a separate invented outage.",
+    "Check Python unit tests, Node model tests, 390/800/1363px Playwright E2E, source date/provenance, V2 default unaffected, 4 threshold and NO_TRADE source guard, with main integration conflicts including PR #516.",
+    "Review actual exact current head and actions; first-party ROY comments with ROY_OBS_V3_MOBILE_DATA_REVIEW=PASS|NEEDS_CHANGES|BLOCKED and source id and full reviewed SHA; do not create extra tickets for same head.",
+    "No auto merge/deploy without user authorization; read-only independent review; no repo secrets/credentials/accounts or trading."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User attached V3 mobile screenshot and instructed '이것 좀 확인해서 개선해라'; previous turn authorized fixes and deployment of Observatory V3. Owner remains final release gate.",
+  "forbidden": [
+    "Never assert official NDX independently verified from same provider reference",
+    "Never conceal FedWatch stale date",
+    "No trade, no automated order, no private financial account data",
+    "No new paid providers, permission changes, unattended infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "coordination_notes": "User asked repeated warning root cause. This task covers the V3 mobile clarity and same-session provider-vs-official-source status. Independent FedWatch collector recovery is a separate genuine source lag (2026-11-13 as_of; 2026-11-16 expected). Existing PR #516 overlaps some NDX source-clarity logic and remains merge-conflicted; coordinate after this new PR is finalized."
+}

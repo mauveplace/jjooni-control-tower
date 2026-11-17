@@ -38,6 +38,28 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   if(state.ready)assert.equal(state.thresholds,4,'all four thresholds with source guard');
   assert.ok(state.docWidth<=state.screenWidth+3,'V3 horizontal overflow '+width+': '+JSON.stringify(state));
   assert.match(state.v2Return||'',/ui=v2/);
+
+   const layout=await page.evaluate(()=>{
+     const today=document.querySelector('.todayV2'),rail=today.querySelector('#ov3TripodRail');
+     const market=today.querySelector('#ov3MarketStrip'),grid=today.querySelector('.tV2Grid');
+     return {
+       railBeforeMarket:!!(rail.compareDocumentPosition(market)&Node.DOCUMENT_POSITION_FOLLOWING),
+       marketBeforeGrid:!!(market.compareDocumentPosition(grid)&Node.DOCUMENT_POSITION_FOLLOWING),
+       guard:rail.textContent.includes('공식 종가 독립검증 대기')&&rail.textContent.includes('전환 확정 금지'),
+       headerHeight:document.querySelector('header.top').getBoundingClientRect().height,
+       refreshWidth:document.querySelector('#obsForceRefresh')?.getBoundingClientRect().width||0,
+       noticeDetails:!!today.querySelector('details.ov3StatusDetails'),
+       warningCount:(window.__JJOONI_TODAY_V2?.vm?.alerts||[]).filter(a=>a.level!=='HIGH').length
+     };
+   });
+   assert.ok(layout.railBeforeMarket,'TRI-POD rail must precede market summary');
+   assert.ok(layout.marketBeforeGrid,'market strip must precede large editorial cards');
+   if(state.ready)assert.ok(layout.guard,'official-EOD-unverified NO_TRADE guard visible');
+   if(width===390){
+     assert.ok(layout.headerHeight<245,'mobile header too tall: '+layout.headerHeight);
+     assert.ok(layout.refreshWidth<160,'refresh button must not take full mobile width: '+layout.refreshWidth);
+     if(layout.warningCount)assert.ok(layout.noticeDetails,'noncritical status details collapsed on mobile');
+   }
   await page.screenshot({path:'/tmp/obs-v3-home-'+width+'.png'});
   if(state.ready)await page.locator('#ov3TripodRail .ov3Rail').screenshot({path:'/tmp/obs-v3-tripod-'+width+'.png'});
   if(state.ready){

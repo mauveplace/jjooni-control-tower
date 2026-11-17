@@ -55,6 +55,7 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
 function rail(m){
  const points=Object.entries(m.points).map(([key,where])=>'<i class="ov3Mark '+key+'" style="left:'+where.toFixed(2)+'%" aria-hidden="true"></i>').join('');
  return '<section class="ov3Rail" aria-label="TRI-POD 지수 기준점">'
+  +'<div class="ov3DataGuard" role="note">제공자 완료 일봉 참고 · NDX 공식 종가 독립검증 대기 · 전환 확정 금지</div>'
   +(m.freshnessCurrent?'':'<p class="ov3Stale" role="status">최신성 재확인 필요 · 아래 수치는 '+escapeHtml(m.session)+' 완료일봉의 마지막 게시 참고값입니다.</p>')
   +'<div class="ov3RailHeading"><strong>전환 기준점 한눈에 보기</strong><small>미국 '+escapeHtml(m.session)+' 완료 일봉 참고 · 가격 간격 비례</small></div>'
   +'<div class="ov3Track" role="img" aria-label="하락 후보 '+fmt(m.axis.lower)+' 현재 '+fmt(m.axis.now)+' 상승 복귀 참고 '+fmt(m.axis.upper)+' TRIPOD 복귀 필요 '+fmt(m.axis.tri)+'"><span></span>'+points+'</div>'
@@ -91,15 +92,14 @@ function draw(m) {
   today.querySelector('#ov3MarketStrip')?.remove();
   today.querySelector('#ov3TripodRail')?.remove();
   today.querySelector('#ov3SectorChart')?.remove();
+  // Core decision rail belongs ABOVE the market board, not deep inside
+  // the existing V2 strategy card. Keep V2 data/guards untouched.
   const firstGrid=today.querySelector('.tV2Grid');
+  const tri=document.createElement('div');tri.id='ov3TripodRail';
+  tri.innerHTML=m.ready?rail(m):'<div class="ov3Pending">TRI-POD 기준점 검증 대기 · '+escapeHtml(m.reason)+'</div>';
   const top=document.createElement('div');top.id='ov3MarketStrip';
   top.innerHTML=m.ready?marketStrip(m):'<div class="ov3Pending">시장 지수 검증 대기 · '+escapeHtml(m.reason)+'</div>';
-  if(firstGrid)firstGrid.before(top);
-  const pods=today.querySelector('.tV2Pods');
-  if(pods){const r=document.createElement('div');r.id='ov3TripodRail';
-    r.innerHTML=m.ready?rail(m):'<div class="ov3Pending">TRI-POD 기준점 검증 대기 · '+escapeHtml(m.reason)+'</div>';
-    pods.after(r);
-  }
+  if(firstGrid){firstGrid.before(tri);tri.after(top);}else today.append(tri,top);
   const sector=today.querySelector('.tV2SectorBtns');
   if(sector){const r=document.createElement('div');r.id='ov3SectorChart';r.innerHTML=m.ready?sectorChart(m):'';
     sector.before(r);
@@ -126,7 +126,7 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261117-v3a';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261117-v3-mobile-data-r2';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
   const btn=e.target.closest('button[data-ov3-tab]');
