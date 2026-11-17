@@ -1,6 +1,6 @@
-/* Observatory v2 navigation — default UI rollout (issue #403, PR #471).
- * V2 is the default for new visits. Explicit ?ui=v1 persists a legacy
- * preference; ?ui=v2 restores the upgraded default. Both remain navigable.
+/* Observatory shared 5-tab navigation for V3 default and optional V2.
+ * V3 is the default for new visits. Explicit ?ui=v1 remains a legacy
+ * choice; ?ui=v2 restores V2. Both remain navigable.
  * All 13 original tabs stay in the DOM for module hooks and deep links.
  */
 (function (root) {
@@ -17,9 +17,9 @@
     const ui = new URLSearchParams(search || '').get('ui');
     if (ui === 'v2' || ui === 'v3') return true;
     if (ui === 'v1') return false;
-    return stored !== 'v1';
+    return true; // V3 default overrides stale V1 localStorage preference
   }
-  const api = { IA, groupOf, enabled, version: '2.0-default' };
+  const api = { IA, groupOf, enabled, version: '3.1-v3-default' };
   if (typeof module === 'object' && module.exports) { module.exports = api; return; }
   if (!root.document) return;
 
