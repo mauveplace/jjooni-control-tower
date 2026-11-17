@@ -61,6 +61,37 @@ def state_from_dates(dates,anchor=None,allow_lag_days=0):
     if lag>allow_lag_days:return 'LAGGING'
     return 'LIVE'
 
+def normalize_fx_regional_session(group, us_session, local_date):
+    """A newer *local FX* trading date isn't a failure of the US cash-close anchor.
+
+    Keep original per-series dates. Only accept DXY on the exact completed US
+    session, and all three currency pairs on one real local date no later than
+    the audited KST date; do not accept missing prices, mismatched latest, or
+    an arbitrarily future regional quote.
+    """
+    if group.get('state') != 'AHEAD_OF_ANCHOR' or not us_session:
+        return False
+    items = group.get('items') or {}
+    if group.get('missing') or group.get('latest_mismatch'):
+        return False
+    dxy = (items.get('DXY') or {}).get('last_date')
+    dates = [(items.get(k) or {}).get('last_date') for k in ('USDKRW', 'USDJPY', 'JPYKRW')]
+    if dxy != us_session or not all(dates) or len(set(dates)) != 1:
+        return False
+    regional = dates[0]
+    try:
+        ahead = (date.fromisoformat(regional) - date.fromisoformat(us_session)).days
+        local_gap = (date.fromisoformat(local_date) - date.fromisoformat(regional)).days
+    except (ValueError, TypeError):
+        return False
+    if not (1 <= ahead <= 4 and 0 <= local_gap <= 1):
+        return False
+    group['state'] = 'LIVE'
+    group['session_scope'] = 'US_CASH_DXY_PLUS_NEXT_ASIA_FX'
+    group['regional_fx_as_of'] = regional
+    group['mixed_session'] = True
+    return True
+
 def build():
     now=datetime.now(KST); now_et=now.astimezone(ET); today=now.date().isoformat()
     obs=load(DATA/'observatory.json');pulse=load(DATA/'daily-market-pulse.json');public=load(ROOT/'public-market-daily.json')
@@ -83,6 +114,7 @@ def build():
     # Reference only (regional comparison): never critical; local holidays differ.
     make_group('asia_equity',EXPECTED_SERIES['asia_equity'],today,4,False)
     make_group('fx',EXPECTED_SERIES['fx'],session,1,False)
+    normalize_fx_regional_session(groups['fx'], session, today)
     make_group('energy',EXPECTED_SERIES['energy'],session,1,False)
     make_group('metals',EXPECTED_SERIES['metals'],session,1,False)
     make_group('us_rates',EXPECTED_SERIES['us_rates'],session,3,False)
@@ -163,7 +195,7 @@ def build():
     if cal_state in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_ACTUAL_'+str(cal_state),'WARN',f'overdue_count={calendar_overdue_count} pending_count={calendar_pending_count}')
     if cal_collection.get('status') in {'DEGRADED','FAILED','ERROR','STALE'}:issue('CALENDAR_COLLECTION_'+str(cal_collection.get('status')),'WARN',f'failed_source_count={len(failed_calendar_sources)} sources='+','.join(str(x.get('source') or 'unknown') for x in failed_calendar_sources if isinstance(x,dict)))
     critical=[x for x in issues if x['severity']=='CRITICAL'];warnings=[x for x in issues if x['severity']=='WARN'];overall='FAIL' if critical else ('WARN' if warnings else 'PASS')
-    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V2','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'FX_ENERGY_METALS_MAY_LAG_CORE_BY_AT_MOST_1_CALENDAR_DAY','official_rates':'US_OFFICIAL_RATES_MAX_3_CALENDAR_DAYS_KR_MAX_4_JP_MAX_5','crypto':'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S','fedwatch':'CME_FED_FUNDS_HOLIDAY_AWARE_EXPECTED_TRADE_DATE','calendar':'USES_CANONICAL_OVERDUE_COUNT_AND_OVERDUE_EVENTS_PLUS_COLLECTION_HEALTH','no_account_data':True,'read_only':True},'read_only':True}
+    return {'schema':'JJOONI_OBSERVATORY_DATA_AUDIT_V2','generated_kst':now.isoformat(timespec='seconds'),'overall':overall,'critical_count':len(critical),'warning_count':len(warnings),'observatory_session':session,'file_status':file_status,'groups':groups,'crypto_status':crypto_status,'issues':issues,'contracts':{'completed_session':'CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION','continuous_daily':'REGIONAL_FX_NEXT_LOCAL_DATE_MAY_LEAD_US_CASH_DXY_WITH_ORIGINAL_DATES_PRESERVED;ENERGY_METALS_MAY_LAG_AT_MOST_1_DAY','official_rates':'US_OFFICIAL_RATES_MAX_3_CALENDAR_DAYS_KR_MAX_4_JP_MAX_5','crypto':'QUOTE_AGE_RECOMPUTED_AT_AUDIT_TIME_MAX_3600S','fedwatch':'CME_FED_FUNDS_HOLIDAY_AWARE_EXPECTED_TRADE_DATE','calendar':'USES_CANONICAL_OVERDUE_COUNT_AND_OVERDUE_EVENTS_PLUS_COLLECTION_HEALTH','no_account_data':True,'read_only':True},'read_only':True}
 
 def main():
     out=build();OUT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('OBSERVATORY_DATA_AUDIT='+out['overall']);print('critical_count='+str(out['critical_count']));print('warning_count='+str(out['warning_count']));print('session='+str(out['observatory_session']))
