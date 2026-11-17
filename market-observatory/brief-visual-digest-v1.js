@@ -79,7 +79,7 @@ function render(host,input){
  +bound('현재 NDX · '+m.pod,m.ndx,0,'현재 원장 상태')
  +bound('상승 복귀 참고선 · MA250×1.01',m.axis.up,m.distances.up,'하락 레짐 이후 상승 재진입 경계')
  +bound('TRIPOD 낙폭 조건선 · DD -9%',m.axis.tri,m.distances.tri,'상승 레짐 + VIX10<28도 필요')+'</div>'
- +'<p class="bdCall">현재 NDX에서 <b>하락 전환 후보까지 '+Math.abs(m.distances.lower).toFixed(2)+'%</b>, <b>TRIPOD 낙폭 조건선까지 '+pct(m.distances.tri)</b>. 단일 기준선 돌파만으로 단계가 확정되는 것이 아닙니다.</p>'
+ +'<p class="bdCall">현재 NDX에서 <b>하락 전환 후보까지 '+Math.abs(m.distances.lower).toFixed(2)+'%</b>, <b>TRIPOD 낙폭 조건선까지 '+pct(m.distances.tri)+'</b>. 단일 기준선 돌파만으로 단계가 확정되는 것이 아닙니다.</p>'
  +'<p class="bdHint">출처 '+esc(m.origin)+' · Observatory 동일 원장 완료 일봉 참고 · Nasdaq 공식 종가 독립검증은 별도 · 관찰용 NO_TRADE_REVIEW_ONLY</p></section>'
  +'<p class="bdHint">아래 8개 원문 분석은 최초 발행 기록입니다. 시각 요약만 동일 세션의 최신 공개 원장을 참조합니다.</p></div>';
  return m;
