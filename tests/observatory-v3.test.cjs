@@ -190,3 +190,25 @@ test('V3 digest treats a newly republished but stale original source as historic
  assert.match(host.innerHTML,/최신성 재확인 필요/);
  assert.match(host.innerHTML,/마지막 게시 참고값/);
 });
+
+test('V3 four colored interactive markers show signed point and percentage distance from NDX', () => {
+  const {distanceText}=require('../market-observatory/observatory-v3.js');
+  assert.equal(distanceText(26149.12,27001.79),'현재 대비 852.67pt 더 하락 (-3.16%)');
+  assert.equal(distanceText(27001.79,27001.79),'현재 위치 · 0.00pt (0.00%)');
+  assert.equal(distanceText(27800.64,27001.79),'현재 대비 798.85pt 더 상승 (+2.96%)');
+  assert.equal(distanceText(28414.27,27001.79),'현재 대비 1,412.48pt 더 상승 (+5.23%)');
+  assert.equal(distanceText(null,27001.79),'현재 대비 거리 확인 불가');
+  const f=fixture(), m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+  assert.equal(m.ready,true,m.reason);
+  const html=rail(m,'test');
+  for(const k of ['lower','now','upper','tri']){
+    assert.match(html,new RegExp('data-ov3-point="'+k+'"'));
+    assert.match(html,new RegExp('aria-controls="ov3Threshold-test-'+k+'"'));
+    assert.match(html,new RegExp('data-ov3-card="'+k+'"'));
+    assert.match(html,new RegExp('id="ov3Threshold-test-'+k+'"'));
+  }
+  assert.match(html,/aria-pressed="true"/);
+  assert.match(html,/data-ov3-selected/);
+  assert.match(html,/현재 대비 .*pt 더 (하락|상승)/);
+  assert.match(html,/공식 종가|Nasdaq/);
+});
