@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261118-OBS-V3-SECTOR-ZERO-083",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently review JJOONI's Observatory V3 sector histogram repair requested by owner: all sector return bars must originate at central 0% axis; negative daily returns left blue, positive right red, zeros no colored bar, one symmetric absolute-percentage scale, legible on Android phone without horizontal scroll. Existing 34 original sector data gate, 11 USA rows, daily session labels, no-trade and daily brief must remain unchanged.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "Review exact current PR HEAD's observatory-v3.js, observatory-v3.css, index.html, unit and Chromium E2E tests. Verify negative bar ends at central zero; positive starts at central zero; flat 0 has no colored bar and zero line persists.",
+    "Verify bar proportions use one abs-percent scale and do not invert or distort prices. Ensure all 11 original S&P500 sectors are present and old 'actual capital flow' disclaimer retained; no fake fund-flow or claims of official EOD.",
+    "Verify Korean positive-red negative-blue color mapping, contrast, 390/800/1363 px screenshot or real browser E2E, accessible text and no overflow; avoid introducing previous wrong left-edge fill or index cache stale.",
+    "Post exact evidence with ROY_OBS_V3_SECTOR_REVIEW=PASS|NEEDS_CHANGES|BLOCKED and the exact full reviewed HEAD; read-only review only. No fake Claude provenance."
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets/nonpublic user/account/customer/private data",
+    "No unauthorized branch edits, production merges, cloud deploys or trading",
+    "No new paid model API or Cloud infrastructure"
+  ],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "coordination_notes": "The user directly instructed JJOONI to collaborate with ROY and ship this precise UI correction; JJOONI owns implementation and CI. Existing owner delegation includes scoped production release when safe. Record authentic Claude run before claiming ROY PASS; default review request stage on new PR. No unrelated code/data changes."
+}
