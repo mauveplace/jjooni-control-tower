@@ -20,14 +20,20 @@ const distanceText=(target,now)=>{
  if(Math.abs(delta)<0.005)return '현재 위치 · 0.00pt (0.00%)';
  return '현재 대비 '+fmt(Math.abs(delta))+'pt 더 '+(delta>0?'상승':'하락')+' ('+pct(delta/now*100)+')';
 };
+const dailyMoveText = m => {
+ const rate=pct(m.ndxChangePct);
+ if(!finite(m.ndxChangePts))return '전일 대비 '+rate+' · 포인트 확인 대기';
+ return '전일 대비 '+(m.ndxChangePts>0?'+':'')+fmt(m.ndxChangePts)+'pt ('+rate+')';
+};
+const pointSummary=(key,m)=>key==='now'?dailyMoveText(m):distanceText(m.axis[key],m.axis.now);
 const pointLabel=(key,m)=>key==='now'?'현재 NDX · '+(m.pod||'—'):pointLabels[key];
 const note=(key,m,scope)=>{
  const on=selectedPoint===key;
  return '<div class="ov3Threshold '+key+(on?' selected':'')+'" id="ov3Threshold-'+scope+'-'+key+'" data-ov3-card="'+key+'">'
  +'<span>'+escapeHtml(pointLabel(key,m))+'</span><b>'+fmt(m.axis[key])+'</b>'
- +'<small class="ov3Distance">'+escapeHtml(distanceText(m.axis[key],m.axis.now))+'</small></div>';
+ +'<small class="ov3Distance">'+escapeHtml(pointSummary(key,m))+'</small></div>';
 };
-function model(glance, fresh, sectors, nowMs=Date.now()) {
+function model(glance, fresh, sectors, nowMs=Date.now(), publicDaily=null) {
  const t=glance?.tripod||{},line=t.lines||{},g=fresh?.groups?.market||{};
  const generated=Date.parse(fresh?.generated_kst||''),expected=fresh?.session_alignment?.expected_session;
  const age=nowMs-generated,maxAge=(fresh?.freshness_policy?.max_status_age_seconds||7200)*1000;
@@ -47,6 +53,20 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
   &&expected===glance.us_session;
  if(!ready)return {ready:false,reason:'완료 세션·NDX·TRI-POD·신선도 원장 정합성 확인 대기',
   session:glance?.us_session||'—'};
+ const ref=publicDaily?.market_context?.items?.NASDAQ100;
+ // Previous-close point change is only trusted when all exact daily records
+ // match; never infer points from the rounded daily-glance d1 percentage.
+ const refOk=publicDaily?.read_only===true
+  &&ref?.session_date===glance.us_session&&ref?.as_of_date===glance.us_session
+  &&ref?.basis==='LATEST_COMPLETED_DAILY_CLOSE_VS_PREVIOUS_CLOSE'
+  &&ref?.market_state==='COMPLETED_DAILY_REFERENCE'
+  &&finite(ref?.value)&&finite(ref?.prev_close)&&ref.prev_close>0
+  &&finite(ref?.change)&&finite(ref?.change_pct)
+  &&Math.abs(ref.value-ndx.value)<0.06
+  &&Math.abs(ref.value-ref.prev_close-ref.change)<0.06
+  &&Math.abs(ref.change_pct-ndx.d1_pct)<0.011;
+ const ndxChangePts=refOk?ref.change:null;
+ const ndxChangePct=refOk?ref.change_pct:ndx.d1_pct;
  const axis={lower:line.ma250_lower,upper:line.ma250_upper,tri:line.tripod_return,now:ndx.value};
  const span=axis.tri-axis.lower, min=Math.min(axis.lower,axis.now)-span*.12,max=Math.max(axis.tri,axis.now)+span*.12;
  const position=v=>Math.max(0,Math.min(100,(v-min)/(max-min)*100));
@@ -61,7 +81,7 @@ function model(glance, fresh, sectors, nowMs=Date.now()) {
   &&all.every(x=>x.status==='OK'&&x.current_session===sectors.completed_cutoffs[x.market]
     &&finite(x.current_return_pct));
  return {ready:true,session:glance.us_session,pod:t.pod,regime:t.regime,ma250:t.ma250,vix10:t.vix10,dd:t.drawdown_52w_pct,
-  ndx:axis.now,ndxPct:ndx.d1_pct,axis,points:Object.fromEntries(Object.entries(axis).map(([key,value])=>[key,position(value)])),
+  ndx:axis.now,ndxPct:ndx.d1_pct,ndxChangePts,ndxChangePct,axis,points:Object.fromEntries(Object.entries(axis).map(([key,value])=>[key,position(value)])),
   differences:{lower:dist(axis.lower),upper:dist(axis.upper),tri:dist(axis.tri)},
   us,sectorReady,sectors:sectorReady?[...rows.find(x=>x.key==='classic').rows].sort((a,b)=>b.current_return_pct-a.current_return_pct):[],
   generated:glance.generated_kst,freshnessGenerated:fresh.generated_kst,freshnessCurrent:statusOk,
@@ -74,7 +94,7 @@ function rail(m,scope='preview'){
    const where=m.points[key];
    return '<button type="button" class="ov3Mark '+key+(selectedPoint===key?' selected':'')+'" style="left:'+where.toFixed(2)+'%"'
     +' data-ov3-point="'+key+'" aria-pressed="'+(selectedPoint===key)+'" aria-controls="ov3Threshold-'+scope+'-'+key+'"'
-    +' title="'+escapeHtml(pointLabel(key,m))+'" aria-label="'+escapeHtml(pointLabel(key,m)+' · '+distanceText(m.axis[key],m.axis.now))+'"></button>';
+    +' title="'+escapeHtml(pointLabel(key,m))+'" aria-label="'+escapeHtml(pointLabel(key,m)+' · '+pointSummary(key,m))+'"></button>';
   }).join('');
  return '<section class="ov3Rail" aria-label="TRI-POD 지수 기준점">'
   +'<div class="ov3DataGuard" role="note">'+(m.officialVerified
@@ -84,7 +104,7 @@ function rail(m,scope='preview'){
   +'<div class="ov3RailHeading"><strong>전환 기준점 한눈에 보기</strong><small>미국 '+escapeHtml(m.session)+' 완료 일봉 참고 · 가격 간격 비례</small></div>'
   +'<div class="ov3Track" role="group" aria-label="기준점 선택 · 빨강 하락, 검정 현재, 파랑 상승, 초록 낙폭 조건"><span aria-hidden="true"></span>'+points+'</div>'
    +'<p class="ov3SelectedDistance" role="status" aria-live="polite" data-ov3-selected>'
-   +escapeHtml(pointLabel(selectedPoint,m)+' · '+distanceText(m.axis[selectedPoint],m.axis.now))+'</p>'
+   +escapeHtml(pointLabel(selectedPoint,m)+' · '+pointSummary(selectedPoint,m))+'</p>'
    +'<div class="ov3Thresholds">'+pointKeys.map(key=>note(key,m,scope)).join('')
    +'</div><p class="ov3RailNote">NDX '+fmt(m.ndx)+' · VIX10 '+fmt(m.vix10)+' · DD '+pct(m.dd)+' · '
   +'TRIPOD은 상승 레짐·DD -9% 이내·VIX10&lt;28을 함께 확인하며, NOPOD도 하락 레짐과 VIX10≥18 확인이 필요합니다.</p>'
@@ -117,7 +137,7 @@ function sectorChart(m){
     }).join('')+'</div>';
 }
 function queryData() {
- const paths=['./data/daily-glance.json','./data/freshness-status.json','./data/sector-rotation-brief.json'];
+ const paths=['./data/daily-glance.json','./data/freshness-status.json','./data/sector-rotation-brief.json','../public-market-daily.json'];
  return Promise.allSettled(paths.map(path=>fetch(path+'?cb='+Date.now(),{cache:'no-store'})
   .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}))).then(xs=>xs.map(x=>x.status==='fulfilled'?x.value:null));
 }
@@ -162,7 +182,7 @@ function draw(m) {
   r.innerHTML=m.ready?rail(m,'strategy'):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.1-default',model,rail,distanceText,marketStrip,sectorChart,enabled:isV3};
+const runtime={version:'3.1-default',model,rail,distanceText,dailyMoveText,pointSummary,marketStrip,sectorChart,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -188,7 +208,7 @@ function mount(){
  async function update(force=false){
   if(pending)return pending;
   if(!force&&current&&Date.now()-last<15000){draw(current);return}
-  pending=queryData().then(([g,f,s])=>{current=model(g,f,s);last=Date.now();draw(current)})
+  pending=queryData().then(([g,f,s,d])=>{current=model(g,f,s,Date.now(),d);last=Date.now();draw(current)})
    .catch(()=>{current={ready:false,reason:'공개 원장 조회 실패'};draw(current)})
    .finally(()=>{pending=null});
   return pending;
