@@ -98,10 +98,23 @@ function marketStrip(m){
   +'<div class="ov3StripData">'+picks.map(x=>'<div class="ov3StripTile"><span>'+escapeHtml(x.label)+'</span><strong>'+fmt(x.value)+'</strong><small class="'+changeClass(x.d1_pct)+'">'+pct(x.d1_pct)+'</small></div>').join('')+'</div></section>';
 }
 function sectorChart(m){
- if(!m.sectorReady)return '<p class="ov3Small">섹터 34종의 동일 완료세션 검증이 끝나지 않아 수익률 시각화를 보류합니다.</p>';
- const max=Math.max(1,...m.sectors.map(x=>Math.abs(x.current_return_pct)));
- return '<div class="ov3Sectors"><div class="ov3SectorsHead"><strong>미국 S&P500 업종 11개 · 전체 강약</strong><small>일간 수익률 · 실제 자금흐름 아님</small></div>'
- +m.sectors.map(x=>'<div class="ov3SectorLine"><span>'+escapeHtml(x.label)+'</span><div><i class="'+changeClass(x.current_return_pct)+'" style="width:'+(Math.abs(x.current_return_pct)/max*100).toFixed(1)+'%"></i></div><strong class="'+changeClass(x.current_return_pct)+'">'+pct(x.current_return_pct)+'</strong></div>').join('')+'</div>';
+  if(!m.sectorReady)return '<p class="ov3Small">섹터 34종의 동일 완료세션 검증이 끝나지 않아 수익률 시각화를 보류합니다.</p>';
+  // A shared absolute-percentage scale, with a real 0% midpoint for both sides.
+  const max=Math.max(1,...m.sectors.map(x=>Math.abs(x.current_return_pct)));
+  return '<div class="ov3Sectors" aria-label="미국 S&P500 섹터 · 0% 중앙 기준 수익률">'
+    +'<div class="ov3SectorsHead"><strong>미국 S&P500 업종 11개 · 전체 강약</strong>'
+    +'<small>일간 수익률 · <b class="loss">파랑 ← 하락</b> · <b>0%</b> · <b class="gain">상승 → 빨강</b> · 실제 자금흐름 아님</small></div>'
+    +m.sectors.map(x=>{
+      const value=x.current_return_pct;
+      const width=Math.min(100,Math.abs(value)/max*100).toFixed(1);
+      const left=value<0?width:'0.0',right=value>0?width:'0.0';
+      const direction=value<0?'하락 · 중앙 왼쪽':value>0?'상승 · 중앙 오른쪽':'보합 · 중앙 기준선';
+      return '<div class="ov3SectorLine" data-direction="'+changeClass(value)+'"><span>'+escapeHtml(x.label)+'</span>'
+        +'<div class="ov3SectorTrack" role="img" aria-label="'+escapeHtml(x.label+' '+pct(value)+' · '+direction)+'">'
+        +'<span class="ov3SectorHalf left"><i class="loss" style="width:'+left+'%"></i></span>'
+        +'<span class="ov3SectorHalf right"><i class="gain" style="width:'+right+'%"></i></span></div>'
+        +'<strong class="'+changeClass(value)+'">'+pct(value)+'</strong></div>';
+    }).join('')+'</div>';
 }
 function queryData() {
  const paths=['./data/daily-glance.json','./data/freshness-status.json','./data/sector-rotation-brief.json'];
@@ -163,7 +176,7 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261118-v3-threshold-tap-1';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261118-sector-zero-centered-1';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
    const marker=e.target.closest('button[data-ov3-point]');
