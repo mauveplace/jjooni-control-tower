@@ -1,6 +1,6 @@
 {
   "available_from": "2016-11-21",
-  "available_to": "2026-11-17",
+  "available_to": "2026-11-19",
   "backfill": {
     "canonical_rows_matched": 5,
     "checked_kst": "2026-11-16T08:10:44+09:00",
@@ -88,9 +88,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-18T21:57:10+09:00",
+  "generated_kst": "2026-11-19T03:43:23+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37830,
+  "row_count": 37832,
   "schema": "JJOONI_ECONOMIC_CALENDAR_HISTORY_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -871758,9 +871758,9 @@
     },
     "US::u-s-initial-jobless-claims": {
       "available_from": "2026-08-27",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-19",
       "category": "고용",
-      "count": 12,
+      "count": 13,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "event",
@@ -871768,11 +871768,11 @@
       "quality": {
         "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 10,
+        "consensus_count": 11,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 7,
         "rows_by_year": {
-          "2026": 12
+          "2026": 13
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -872027,14 +872027,32 @@
           "source_url": "https://oui.doleta.gov/press/2026/111226.pdf",
           "surprise": "actual_vs_consensus",
           "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": null,
+          "checked_kst": "2026-11-19T03:43:18+09:00",
+          "consensus": "198K",
+          "consensus_source": "FairEconomy/ForexFactory",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-19",
+          "datetime_kst": "2026-11-19T22:30+09:00",
+          "label": "U.S. Initial Jobless Claims",
+          "previous": "200K",
+          "previous_source": "FairEconomy/ForexFactory",
+          "previous_source_tier": "MARKET_FEED",
+          "reference_period": "weekly",
+          "source": "FairEconomy/ForexFactory",
+          "source_tier": "MARKET_FEED",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+          "verification_status": "MARKET_REPORTED"
         }
       ]
     },
     "US::u-s-initial-jobless-claims::initial_claims": {
       "available_from": "2016-11-23",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-19",
       "category": "고용",
-      "count": 517,
+      "count": 518,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "metric",
@@ -872043,7 +872061,7 @@
       "quality": {
         "actual_count": 517,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 514,
+        "consensus_count": 515,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 54,
         "rows_by_year": {
@@ -872057,7 +872075,7 @@
           "2023": 52,
           "2024": 52,
           "2025": 49,
-          "2026": 45
+          "2026": 46
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
@@ -884464,6 +884482,25 @@
           "source_timezone": "America/Chicago",
           "source_url": "https://oui.doleta.gov/press/2026/111226.pdf",
           "verification_status": "VERIFIED_OFFICIAL"
+        },
+        {
+          "actual": null,
+          "checked_kst": "2026-11-19T03:43:20+09:00",
+          "consensus": "198K",
+          "consensus_source": "FairEconomy/ForexFactory",
+          "consensus_source_tier": "MARKET_FEED",
+          "date": "2026-11-19",
+          "datetime_kst": "2026-11-19T22:30+09:00",
+          "label": "Initial Jobless Claims",
+          "metric_key": "initial_claims",
+          "previous": "200K",
+          "previous_source": "FairEconomy/ForexFactory",
+          "previous_source_tier": "MARKET_FEED",
+          "reference_period": "weekly",
+          "source": "FairEconomy/ForexFactory",
+          "source_tier": "MARKET_FEED",
+          "source_url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+          "verification_status": "MARKET_REPORTED"
         }
       ]
     },
@@ -895834,7 +895871,7 @@
   "series_count": 439,
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-18",
-  "window_start": "2016-11-20",
+  "window_end": "2026-11-19",
+  "window_start": "2016-11-21",
   "window_years": 10
 }

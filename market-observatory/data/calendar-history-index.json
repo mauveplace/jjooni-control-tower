@@ -1,6 +1,6 @@
 {
   "available_from": "2016-11-21",
-  "available_to": "2026-11-17",
+  "available_to": "2026-11-19",
   "backfill": {
     "canonical_rows_matched": 5,
     "checked_kst": "2026-11-16T08:10:44+09:00",
@@ -88,9 +88,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-18T21:57:10+09:00",
+  "generated_kst": "2026-11-19T03:43:23+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37830,
+  "row_count": 37832,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -14643,43 +14643,43 @@
     },
     "US::u-s-initial-jobless-claims": {
       "available_from": "2026-08-27",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-19",
       "category": "고용",
-      "count": 12,
+      "count": 13,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "event",
       "label": "U.S. Initial Jobless Claims",
-      "path": "./calendar-history/series/ef13c9cd0c91d3228d3fe09df96e4b0f665ac1a643847c0e2f44d5f11661f451.json",
+      "path": "./calendar-history/series/ac1f4225d4f1bef1d946d9765a0c6bb7927f31508561107377307e85a603a3bd.json",
       "quality": {
         "actual_count": 12,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 10,
+        "consensus_count": 11,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 7,
         "rows_by_year": {
-          "2026": 12
+          "2026": 13
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims",
-      "sha256": "ef13c9cd0c91d3228d3fe09df96e4b0f665ac1a643847c0e2f44d5f11661f451"
+      "sha256": "ac1f4225d4f1bef1d946d9765a0c6bb7927f31508561107377307e85a603a3bd"
     },
     "US::u-s-initial-jobless-claims::initial_claims": {
       "available_from": "2016-11-23",
-      "available_to": "2026-11-12",
+      "available_to": "2026-11-19",
       "category": "고용",
-      "count": 517,
+      "count": 518,
       "country": "US",
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "metric",
       "label": "Initial Jobless Claims",
       "metric_key": "initial_claims",
-      "path": "./calendar-history/series/7f05479ec7b55d864436d19a910a12dcb891836ff9e22ea43f0c1392ab3f36bd.json",
+      "path": "./calendar-history/series/995e35c66f208d57240884038237c2692edb83f40e0662937d83decfe25755bb.json",
       "quality": {
         "actual_count": 517,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 514,
+        "consensus_count": 515,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 54,
         "rows_by_year": {
@@ -14693,12 +14693,12 @@
           "2023": 52,
           "2024": 52,
           "2025": 49,
-          "2026": 45
+          "2026": 46
         },
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims::initial_claims",
-      "sha256": "7f05479ec7b55d864436d19a910a12dcb891836ff9e22ea43f0c1392ab3f36bd"
+      "sha256": "995e35c66f208d57240884038237c2692edb83f40e0662937d83decfe25755bb"
     },
     "US::u-s-international-trade-in-goods-and-services": {
       "available_from": "2026-10-06",
@@ -14846,11 +14846,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 439,
-  "snapshot_id": "95089f3b58d2c0a9156737d910a158fd7846238a778fd008ee998ccb59614a04",
-  "source_sha256": "95089f3b58d2c0a9156737d910a158fd7846238a778fd008ee998ccb59614a04",
+  "snapshot_id": "8c5ca428f05d57d1ed7e6d6f007e8709a087ed79d2be8a7318b6c9fc2832c1f2",
+  "source_sha256": "8c5ca428f05d57d1ed7e6d6f007e8709a087ed79d2be8a7318b6c9fc2832c1f2",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-18",
-  "window_start": "2016-11-20",
+  "window_end": "2026-11-19",
+  "window_start": "2016-11-21",
   "window_years": 10
 }
