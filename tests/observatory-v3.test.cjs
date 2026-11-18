@@ -258,3 +258,30 @@ test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',(
  assert.match(css,/\.ov3SectorHalf i\.loss\{background:#2759a0/);
  assert.match(css,/\.ov3SectorHalf i\.gain\{background:#ba322d/);
 });
+
+test('black NOW marker shows verified previous close change, never zero self-distance',()=>{
+ const f=fixture(),daily=JSON.parse(fs.readFileSync(path.join(root,'..','public-market-daily.json'),'utf8')),ref=daily.market_context.items.NASDAQ100;
+ const m=model(f.glance,f.freshness,f.sector,now(f.freshness),daily);
+ assert.equal(m.ready,true,m.reason);
+ assert.equal(m.ndxChangePts,ref.change);
+ assert.equal(m.ndxChangePct,ref.change_pct);
+ const {dailyMoveText,pointSummary}=require('../market-observatory/observatory-v3.js');
+ const points=(ref.change>0?'+':'')+ref.change.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
+ assert.equal(dailyMoveText(m),'전일 대비 '+points+'pt ('+(ref.change_pct>0?'+':'')+ref.change_pct.toFixed(2)+'%)');
+ const html=rail(m,'test');
+ assert.match(html,/data-ov3-card="now"/);
+ assert.ok(html.includes('전일 대비 '));
+ assert.ok(!html.includes('현재 위치 · 0.00pt (0.00%)'));
+ assert.match(html,/aria-label="현재 NDX · BIPOD · 전일 대비 /);
+ for(const key of ['lower','upper','tri'])assert.match(pointSummary(key,m),/^현재 대비 [0-9,.]+pt 더 (상승|하락)/);
+ const stale=structuredClone(daily);stale.market_context.items.NASDAQ100.session_date='1999-01-01';
+ const hold=model(f.glance,f.freshness,f.sector,now(f.freshness),stale);
+ assert.equal(hold.ready,true,'exact close is optional for rendering other thresholds');
+ assert.equal(hold.ndxChangePts,null);
+ assert.equal(hold.ndxChangePct,f.glance.groups.find(x=>x.name==='미국').items.find(x=>x.key==='NASDAQ100').d1_pct);
+ assert.match(dailyMoveText(hold),/^전일 대비 [+-]?[0-9.]+% · 포인트 확인 대기$/);
+ const wrong=structuredClone(daily);wrong.market_context.items.NASDAQ100.value+=100;
+ assert.equal(model(f.glance,f.freshness,f.sector,now(f.freshness),wrong).ndxChangePts,null);
+ assert.equal(model(f.glance,f.freshness,f.sector,now(f.freshness),null).ndxChangePts,null);
+ assert.equal(dailyMoveText({...m,ndxChangePts:-57.034,ndxChangePct:-0.21}),'전일 대비 -57.03pt (-0.21%)');
+});
