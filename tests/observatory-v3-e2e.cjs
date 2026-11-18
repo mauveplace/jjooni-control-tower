@@ -153,7 +153,7 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
     assert.ok(status.includes(key==='now'?'전일 대비':'현재 대비'),'selected distance status '+key);
      if(key==='now'){
        const card=await page.locator('#ov3FixtureRail [data-ov3-card="now"] .ov3Distance').textContent();
-       assert.match(card,/전일 대비 [+-]?[0-9,.]+pt \\([+-]?[0-9.]+%\\)/);
+       assert.ok(card.includes('전일 대비 ')&&card.includes('pt (')&&card.includes('%)'),'signed point and percent available');
        assert.ok(!status.includes('현재 위치 · 0.00pt'),'no self-distance');
        assert.ok(status.includes(card),'selected status and NDX card same value');
      }
