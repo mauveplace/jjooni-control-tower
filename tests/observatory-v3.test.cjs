@@ -227,3 +227,34 @@ test('visual digest rejects an older published brief against a newer US close',(
  assert.equal(m.ready,false);
  assert.match(m.reason,/동일 거래일|원장 시각/);
 });
+
+test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',()=>{
+ const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.sectorReady,true,'sector source complete');
+ const rows=structuredClone(m.sectors);
+ rows[0].current_return_pct=-4;
+ rows[1].current_return_pct=2;
+ rows[2].current_return_pct=0;
+ const html=sectorChart({...m,sectors:rows});
+ assert.match(html,/0% 중앙 기준 수익률/);
+ assert.match(html,/파랑 ← 하락/);
+ assert.match(html,/상승 → 빨강/);
+ const negative=html.slice(html.indexOf('data-direction="loss"'),html.indexOf('data-direction="loss"')+470);
+ const positive=html.slice(html.indexOf('data-direction="gain"'),html.indexOf('data-direction="gain"')+470);
+ const neutral=html.slice(html.indexOf('data-direction="neutral"'),html.indexOf('data-direction="neutral"')+470);
+ assert.match(negative,/class="ov3SectorHalf left"><i class="loss" style="width:100\.0%"/);
+ assert.match(negative,/class="ov3SectorHalf right"><i class="gain" style="width:0\.0%"/);
+ assert.match(positive,/class="ov3SectorHalf left"><i class="loss" style="width:0\.0%"/);
+ assert.match(positive,/class="ov3SectorHalf right"><i class="gain" style="width:50\.0%"/);
+ assert.match(neutral,/class="ov3SectorHalf left"><i class="loss" style="width:0\.0%"/);
+ assert.match(neutral,/class="ov3SectorHalf right"><i class="gain" style="width:0\.0%"/);
+ assert.match(negative,/중앙 왼쪽/);
+ assert.match(positive,/중앙 오른쪽/);
+ const css=fs.readFileSync(path.join(root,'observatory-v3.css'),'utf8');
+ assert.match(css,/\.ov3SectorTrack::after/);
+ assert.match(css,/left:50%/);
+ assert.match(css,/\.ov3SectorHalf\.left\{justify-content:flex-end/);
+ assert.match(css,/\.ov3SectorHalf\.right\{justify-content:flex-start/);
+ assert.match(css,/\.ov3SectorHalf i\.loss\{background:#2759a0/);
+ assert.match(css,/\.ov3SectorHalf i\.gain\{background:#ba322d/);
+});
