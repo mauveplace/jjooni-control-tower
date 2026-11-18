@@ -66,6 +66,42 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
      assert.ok(layout.refreshWidth<160,'refresh button must not take full mobile width: '+layout.refreshWidth);
      if(layout.warningCount)assert.ok(layout.noticeDetails,'noncritical status details collapsed on mobile');
    }
+   // Real browser coordinates: negative bars end at 0%, positive bars start at 0%.
+   // Synthetic positives are necessary when the entire source session is negative.
+   const geometry=await page.evaluate(([g,f,s])=>{
+     const api=window.__JJOONI_OBS_V3,m=api.model(g,f,s,Date.parse(f.generated_kst)+60000);
+     if(!m.ready||!m.sectorReady)return {ready:false,reason:m.reason};
+     const rows=m.sectors.map(x=>({...x}));
+     rows[0].current_return_pct=-4;
+     rows[1].current_return_pct=2;
+     rows[2].current_return_pct=0;
+     const wrap=document.createElement('section');
+     wrap.className='todayV2';wrap.id='ov3SectorTest';
+     wrap.innerHTML=api.sectorChart({...m,sectors:rows});
+     document.body.appendChild(wrap);
+     const metrics=[...wrap.querySelectorAll('.ov3SectorLine')].slice(0,3).map(el=>{
+       const track=el.querySelector('.ov3SectorTrack'),i=[...el.querySelectorAll('.ov3SectorHalf i')];
+       const box=track.getBoundingClientRect(),left=i[0].getBoundingClientRect(),right=i[1].getBoundingClientRect();
+       return {dir:el.dataset.direction,mid:box.left+box.width/2,negativeEnd:left.right,positiveStart:right.left,
+         negWidth:left.width,posWidth:right.width,negColor:getComputedStyle(i[0]).backgroundColor,
+         posColor:getComputedStyle(i[1]).backgroundColor};
+     });
+     const overflow=document.documentElement.scrollWidth-innerWidth;
+     wrap.remove();
+     return {ready:true,metrics,overflow};
+   },fixtureData);
+   assert.equal(geometry.ready,true,'synthetic source-aligned sector state: '+geometry.reason);
+   const [negative,positive,flat]=geometry.metrics;
+   assert.deepEqual([negative.dir,positive.dir,flat.dir],['loss','gain','neutral']);
+   assert.ok(Math.abs(negative.negativeEnd-negative.mid)<2,'loss must terminate at 0% center');
+   assert.ok(Math.abs(positive.positiveStart-positive.mid)<2,'gain must originate at 0% center');
+   assert.ok(negative.negWidth>0&&negative.posWidth===0,'negative LEFT only');
+   assert.ok(positive.posWidth>0&&positive.negWidth===0,'positive RIGHT only');
+   assert.ok(flat.negWidth===0&&flat.posWidth===0,'zero stays on central axis');
+   assert.equal(negative.negColor,'rgb(39, 89, 160)','negative is blue');
+   assert.equal(positive.posColor,'rgb(186, 50, 45)','positive is red');
+   assert.ok(geometry.overflow<=3,'bipolar chart must not overflow at '+width);
+
   await page.screenshot({path:'/tmp/obs-v3-home-'+width+'.png'});
   if(state.ready)await page.locator('#ov3TripodRail .ov3Rail').screenshot({path:'/tmp/obs-v3-tripod-'+width+'.png'});
   if(state.ready){
