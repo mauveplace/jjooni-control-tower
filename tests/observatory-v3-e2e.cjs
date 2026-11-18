@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const dataDir=path.join(__dirname,'..','market-observatory','data');
 const fixtureData=['daily-glance.json','freshness-status.json','sector-rotation-brief.json'].map(x=>JSON.parse(fs.readFileSync(path.join(dataDir,x),'utf8')));
+fixtureData.push(JSON.parse(fs.readFileSync(path.join(__dirname,'..','public-market-daily.json'),'utf8')));
 const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
 (async()=>{
  const browser=await chromium.launch();
@@ -124,9 +125,9 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   assert.ok(digest.includes('트라이팟')||digest.includes('확인 대기'),'morning brief has visual section or safe hold');
   // Independently force the published same-session fixture through the REAL browser model/rail.
   // Live state may legitimately HOLD; CI must still prove all four lines render when READY.
-  const fixture=await page.evaluate(([g,f,sec])=>{
+  const fixture=await page.evaluate(([g,f,sec,d])=>{
    const api=window.__JJOONI_OBS_V3;
-   const ready=api.model(g,f,sec,Date.parse(f.generated_kst)+60000);
+   const ready=api.model(g,f,sec,Date.parse(f.generated_kst)+60000,d);
    if(!ready.ready)return {ready:false,reason:ready.reason};
    const el=document.createElement('section');el.id='ov3FixtureRail';el.innerHTML=api.rail(ready);
    document.body.appendChild(el);
@@ -149,7 +150,13 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
     assert.equal(await page.locator('#ov3FixtureRail .ov3Threshold.selected').count(),1);
     assert.equal(await page.locator('#ov3FixtureRail .ov3Threshold.selected').getAttribute('data-ov3-card'),key);
     const status=await page.locator('#ov3FixtureRail [data-ov3-selected]').textContent();
-    assert.ok(status.includes(key==='now'?'현재 위치':'현재 대비'),'selected distance status '+key);
+    assert.ok(status.includes(key==='now'?'전일 대비':'현재 대비'),'selected distance status '+key);
+     if(key==='now'){
+       const card=await page.locator('#ov3FixtureRail [data-ov3-card="now"] .ov3Distance').textContent();
+       assert.match(card,/전일 대비 [+-]?[0-9,.]+pt \\([+-]?[0-9.]+%\\)/);
+       assert.ok(!status.includes('현재 위치 · 0.00pt'),'no self-distance');
+       assert.ok(status.includes(card),'selected status and NDX card same value');
+     }
   }
 
   await page.locator('#ov3FixtureRail').evaluate(el=>el.remove());
