@@ -64,6 +64,7 @@ jobs:
       should_run: ${{ steps.close.outputs.should_run }}
       ny_time: ${{ steps.close.outputs.ny_time }}
     steps:
+      - uses: actions/checkout@v4
       - id: close
         name: Gate US close refresh with scheduler delay tolerance
         shell: bash
