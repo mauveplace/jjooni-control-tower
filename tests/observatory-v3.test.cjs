@@ -260,7 +260,7 @@ test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',(
 });
 
 test('black NOW marker shows verified previous close change, never zero self-distance',()=>{
- const f=fixture(),daily=read('../public-market-daily.json'),ref=daily.market_context.items.NASDAQ100;
+ const f=fixture(),daily=JSON.parse(fs.readFileSync(path.join(root,'..','public-market-daily.json'),'utf8')),ref=daily.market_context.items.NASDAQ100;
  const m=model(f.glance,f.freshness,f.sector,now(f.freshness),daily);
  assert.equal(m.ready,true,m.reason);
  assert.equal(m.ndxChangePts,ref.change);
