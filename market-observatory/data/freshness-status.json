@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-18T11:54:45+09:00",
+  "generated_kst": "2026-11-18T12:12:08+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -40,7 +40,7 @@
     "kr_equity": {
       "label": "KR Equity",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:34+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-18",
       "detail": "KOSPI 2026-11-18 · KOSDAQ 2026-11-18",
       "source": "Naver Finance primary",
@@ -49,7 +49,7 @@
     "us_supplement": {
       "label": "US Supplement",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:34+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
       "detail": "RUSSELL2000 2026-11-17 · DOW 2026-11-17 · NASDAQCOMPOSITE 2026-11-17",
       "source": "Yahoo completed cash-session daily",
@@ -58,7 +58,7 @@
     "energy": {
       "label": "Energy",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
       "detail": "WTI 2026-11-17 · BRENT 2026-11-17 · NATGAS 2026-11-17",
       "source": "Yahoo CL=F / BZ=F / NG=F",
@@ -67,16 +67,16 @@
     "fx": {
       "label": "FX / DXY",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
-      "detail": "DXY 2026-11-17 · USDKRW 2026-11-18 · USDJPY 2026-11-18 · JPYKRW 2026-11-18",
+      "detail": "DXY 2026-11-17 · USDKRW 2026-11-17 · USDJPY 2026-11-17 · JPYKRW 2026-11-17",
       "source": "Yahoo DXY / FX daily",
       "critical": false
     },
     "metals": {
       "label": "Metals",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
       "detail": "GOLD 2026-11-17 · SILVER 2026-11-17 · COPPER 2026-11-17",
       "source": "Yahoo Gold / Silver / Copper",
@@ -94,7 +94,7 @@
     "kr_rates": {
       "label": "KR Rates",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:34+09:00",
       "as_of": "2026-11-17",
       "detail": "KR3Y 2026-11-17 · KR5Y 2026-11-17 · KR10Y 2026-11-17 · KR20Y 2026-11-17 · KR30Y 2026-11-17 · KR_3S10S 2026-11-17",
       "source": "BOK ECOS",
@@ -103,7 +103,7 @@
     "jp_rates": {
       "label": "JP Rates",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
       "detail": "JP2Y 2026-11-17 · JP5Y 2026-11-17 · JP10Y 2026-11-17 · JP20Y 2026-11-17 · JP30Y 2026-11-17 · JP_2S10S 2026-11-17",
       "source": "Japan MOF current JGB CSV",
@@ -111,20 +111,20 @@
     },
     "crypto": {
       "label": "Crypto fallback snapshot",
-      "state": "STALE",
-      "generated_kst": "2026-11-18T09:44:32+09:00",
+      "state": "LIVE",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=7815s · ETHUSD age=7818s",
+      "detail": "BTCUSD age=41s · ETHUSD age=40s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "STALE",
-          "quote_as_of_kst": "2026-11-18T09:44:30+09:00"
+          "status": "LIVE",
+          "quote_as_of_kst": "2026-11-18T12:11:27+09:00"
         },
         "ETHUSD": {
-          "status": "STALE",
-          "quote_as_of_kst": "2026-11-18T09:44:27+09:00"
+          "status": "LIVE",
+          "quote_as_of_kst": "2026-11-18T12:11:28+09:00"
         }
       },
       "max_age_seconds": 3600,
@@ -133,7 +133,7 @@
     "pulse": {
       "label": "Daily Pulse",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T11:51:09+09:00",
+      "generated_kst": "2026-11-18T12:12:07+09:00",
       "as_of": "2026-11-17",
       "detail": "snapshot=FINAL · Observatory session=2026-11-17",
       "source": "daily-market-pulse.json",
@@ -142,7 +142,7 @@
     "fear_greed": {
       "label": "Fear & Greed",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:15+09:00",
+      "generated_kst": "2026-11-18T12:11:30+09:00",
       "as_of": "2026-11-17",
       "detail": "25.2/100 · FEAR",
       "source": "CNN_FEAR_GREED_PUBLIC",
@@ -151,7 +151,7 @@
     "fedwatch": {
       "label": "FedWatch",
       "state": "LAGGING",
-      "generated_kst": "2026-11-18T09:44:16+09:00",
+      "generated_kst": "2026-11-18T12:11:35+09:00",
       "as_of": "2026-11-16",
       "detail": "expected=2026-11-17 · FOMC 2026-12-09",
       "source": "CME Fed Funds futures settlement-derived FedWatch conditional meeting probability matrix",
@@ -160,7 +160,7 @@
     "tripod": {
       "label": "TRI-POD",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T11:51:09+09:00",
+      "generated_kst": "2026-11-18T12:12:07+09:00",
       "as_of": "2026-11-17",
       "detail": "상승 · QQQ 50% + QLD 50%",
       "source": "public-market-daily.json + observatory.json",
@@ -169,7 +169,7 @@
     "sector": {
       "label": "Sector ETF",
       "state": "LIVE",
-      "generated_kst": "2026-11-18T09:44:34+09:00",
+      "generated_kst": "2026-11-18T12:11:49+09:00",
       "as_of": "2026-11-17",
       "detail": "priced=46",
       "source": "sector-etf.json",
@@ -210,7 +210,7 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-18T11:54:45+09:00",
+      "generated_kst": "2026-11-18T12:12:08+09:00",
       "as_of": "2026-11-17",
       "detail": "critical=0 · warnings=1",
       "source": "data-audit.json",
