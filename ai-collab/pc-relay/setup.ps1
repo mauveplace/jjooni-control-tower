@@ -31,11 +31,11 @@ if ($env:OPENAI_API_KEY -or $env:CODEX_API_KEY -or $env:ANTHROPIC_API_KEY -or $e
     throw "API key environment variable detected. Use subscription CLI sign-in for no metered API calls."
 }
 Write-Host "Verifying subscriptions and CLI login states..." -ForegroundColor Cyan
-& gh auth status *> $null
+& cmd.exe /d /c "gh auth status >nul 2>&1"
 if ($LASTEXITCODE -ne 0) { throw "Please run gh auth login before installing startup relay." }
-& codex login status *> $null
+& cmd.exe /d /c "codex login status >nul 2>&1"
 if ($LASTEXITCODE -ne 0) { throw "Please run codex login (ChatGPT account) before installing." }
-& claude auth status *> $null
+& cmd.exe /d /c "claude auth status >nul 2>&1"
 if ($LASTEXITCODE -ne 0) { throw "Please run claude auth login (Claude subscription) before installing." }
 $isolation = Read-Host "Is this a DEDICATED non-admin Windows user profile with NO bank/private files or accounts (Y/N)"
 if ($isolation -notin @("Y","y")) { throw "Install on a dedicated, non-admin Windows account only." }
