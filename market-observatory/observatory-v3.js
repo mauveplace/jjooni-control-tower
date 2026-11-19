@@ -120,6 +120,8 @@ function marketStripRows(m,getQuote=null,nowMs=Date.now()){
   try{quote=typeof getQuote==='function'?getQuote(key):null;}catch(_){/* Reference fallback only. */}
   const observed=Date.parse(quote?.observed_at||'');
   const quoteSession=String(quote?.session_date||'').slice(0,10);
+  // Session-date comparison rejects a quote older than published EOD; this
+  // avoids relying on the quote reader's optional publishedAt argument.
   const usable=quote?.key===key&&finite(quote?.value)&&quote.value>0
    &&Number.isFinite(observed)&&observed<=nowMs+120000
    &&/^\d{4}-\d{2}-\d{2}$/.test(quoteSession)
@@ -127,7 +129,8 @@ function marketStripRows(m,getQuote=null,nowMs=Date.now()){
   if(!usable&&!published)return null;
   const elapsed=usable?Math.max(0,nowMs-observed):null;
   const delayed=usable&&(quote?.refresh_status==='RETAINED'||quote?.quality==='STALE'
-   ||String(quote?.display_status||'').includes('지연')||elapsed>1200000);
+   ||/지연|유지/.test(String(quote?.display_status||''))
+   ||(['REGULAR','CONTINUOUS'].includes(quote?.market_state)&&elapsed>1200000));
   const observedKst=usable?new Date(observed+9*3600000).toISOString().slice(5,16).replace('T',' '):null;
   return {
    key,label:published?.label||labels[key],value:usable?quote.value:published.value,
