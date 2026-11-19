@@ -79,7 +79,7 @@ def pr_task(pr):
         return None
     task = read_task(tasks[0], sha)
     if (pr.get("user", {}).get("login") != OWNER or
-        pr.get("head", {}).get("repo", {}).get("full_name") != REPO or
+        (pr.get("head", {}).get("repo") or {}).get("full_name") != REPO or
         task.get("schema") != "JJOONI_COLLAB_V4" or
         task.get("repository") != REPO or
         task.get("base_branch") != "main" or
@@ -264,6 +264,9 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
                     f"- Source: #{num} comment {original}\n- HEAD: {sha}\n"
                     f"- Mode: LOCAL_CODEX_READ_ONLY (not hosted Work event)\n"
                     f"- Scope: independent analysis, not approval / deploy / merge\n\n{summary}")
+        fresh = gh_api(f"repos/{REPO}/pulls/{num}")
+        if fresh["head"]["sha"] != sha:
+            raise RuntimeError("STALE_HEAD_CHANGED_DURING_REVIEW")
         emit_once(num, key, response, ledger, False)
         log(f"HANDOFF posted PR #{num} from ROY source {original}")
         return
@@ -304,9 +307,13 @@ def once(repo_dir, simulate=False, enable_fallback=False):
     # Recent activity first; cap service work per cycle.
     eligible.sort(key=lambda p: p.get("updated_at", ""), reverse=True)
     for p in eligible[:6]:
+        error_key = f"JJOONI-PC-PR-ERROR pr={p.get('number')} head={p.get('head', {}).get('sha')}"
+        if retry_blocked(ledger, error_key):
+            continue
         try:
             handle_pr(p, repo_dir, ledger, simulate, enable_fallback)
         except (RuntimeError, ValueError, KeyError, OSError, subprocess.TimeoutExpired) as exc:
+            record_failure(ledger, error_key, exc)
             log(f"PR #{p.get('number')} BLOCKED: {exc}")
     handle_issues(repo_dir, ledger, simulate)
     save_ledger(ledger)
