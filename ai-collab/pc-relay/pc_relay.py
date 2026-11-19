@@ -135,7 +135,8 @@ def run_agent(actor, prompt, repo_dir, ledger):
     ledger["calls"][key] = ledger["calls"].get(key, 0) + 1
     save_ledger(ledger)
     if actor == "CODEX":
-        argv = [shutil.which("codex"), "exec", "--sandbox", "read-only", "-"]
+        argv = [shutil.which("codex"), "--disable", "shell_tool", "exec",
+                "--ignore-user-config", "--sandbox", "read-only", "-"]
         output = cmd(argv, cwd=repo_dir, timeout=420, stdin_text=prompt)
     elif actor == "CLAUDE":
         argv = [shutil.which("claude"), "-p", "--permission-mode", "plan",
