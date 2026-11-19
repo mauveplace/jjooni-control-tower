@@ -15,11 +15,11 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   page.on('pageerror',e=>errors.push(String(e)));
   if(width===390){
     await page.goto(BASE,{waitUntil:'networkidle'});
-    await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
+    await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.2-on-view-quotes');
     assert.equal(await page.locator('.navV2Main button[data-group]').count(),5,'root URL defaults to V3');
    }
    await page.goto(BASE+'?ui=v3',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
+  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.2-on-view-quotes');
   await page.waitForFunction(()=>document.querySelector('.todayV2')&&document.querySelector('#ov3MarketStrip'),null,{timeout:25000});
   const state=await page.evaluate(()=>({
    v3:document.body.classList.contains('obsV3'),
