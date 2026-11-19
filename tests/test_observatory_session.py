@@ -67,4 +67,24 @@ class CompletedSessionRecoveryTests(unittest.TestCase):
         self.assertEqual(expected_completed_session(datetime(2026,11,27,13,15,tzinfo=ET)),'2026-11-27')
 
 
+
+class WorkflowCheckoutRegressionTests(unittest.TestCase):
+    def test_us_close_gate_checkout_precedes_local_import(self):
+        # A scheduled Actions job gets a fresh runner workspace. Without checkout,
+        # 'tools/observatory_session.py' does not exist, even if it is in main.
+        workflow = (Path(__file__).resolve().parents[1] /
+                    '.github/workflows/market-observatory-daily.yml').read_text(encoding='utf-8')
+        self.assertIn('  us_close_gate:', workflow)
+        self.assertIn('  hourly_gate:', workflow)
+        gate = workflow.split('  us_close_gate:', 1)[1].split('  hourly_gate:', 1)[0]
+        import_marker = 'from observatory_session import readiness'
+        self.assertIn(import_marker, gate)
+        checkout = gate.find('      - uses: actions/checkout@v4')
+        gate_step = gate.find('      - id: close')
+        python_import = gate.find(import_marker)
+        self.assertGreaterEqual(checkout, 0, 'Scheduled US-close gate must check out the repository')
+        self.assertGreater(gate_step, checkout, 'Checkout must precede the close gate step')
+        self.assertGreater(python_import, gate_step, 'Local module import must remain inside the gate step')
+
+
 if __name__=='__main__':unittest.main()
