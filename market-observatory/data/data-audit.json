@@ -1,29 +1,29 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-19T13:09:41+09:00",
+  "generated_kst": "2026-11-19T13:36:17+09:00",
   "overall": "WARN",
   "critical_count": 0,
   "warning_count": 1,
   "observatory_session": "2026-11-18",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-11-19T07:26:11+09:00",
+      "generated_kst": "2026-11-19T13:35:27+09:00",
       "session": "2026-11-18",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-19T12:17:09+09:00",
+      "generated_kst": "2026-11-19T13:36:16+09:00",
       "session": "2026-11-18",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-19T12:17:09+09:00",
+      "generated_kst": "2026-11-19T13:36:16+09:00",
       "session": "2026-11-18",
       "ok": true,
       "target": "QQQ 50% + QLD 50%"
     },
     "fedwatch": {
-      "generated_kst": "2026-11-19T12:30:28+09:00",
+      "generated_kst": "2026-11-19T13:35:28+09:00",
       "source_kind": null,
       "source_as_of_kst": null,
       "market_data_as_of": "2026-11-17",
@@ -33,7 +33,7 @@
       "audit_state": "LAGGING"
     },
     "calendar": {
-      "generated_kst": "2026-11-19T12:48:47+09:00",
+      "generated_kst": "2026-11-19T13:35:36+09:00",
       "events": 199,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-19T11:52:10+09:00",
+      "generated_kst": "2026-11-19T13:35:48+09:00",
       "as_of_date": "2026-11-18",
       "priced_count": 46
     },
@@ -68,7 +68,7 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-19T13:09:41+09:00",
+      "generated_kst": "2026-11-19T13:36:11+09:00",
       "overall": "LIVE_WITH_WARNINGS",
       "critical_bad": [],
       "warnings": [
@@ -498,7 +498,7 @@
       "published_source_status": "LIVE"
     },
     "crypto": {
-      "state": "STALE",
+      "state": "LIVE",
       "anchor": null,
       "allow_lag_days": 0,
       "critical": false,
@@ -506,17 +506,17 @@
         "BTCUSD": {
           "count": 1115,
           "last_date": "2026-11-19",
-          "last_value": 62602.54,
+          "last_value": 63400.0,
           "group": "crypto",
-          "latest_value": 62602.54,
+          "latest_value": 63400.0,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1115,
           "last_date": "2026-11-19",
-          "last_value": 1769.67,
+          "last_value": 1797.57,
           "group": "crypto",
-          "latest_value": 1769.67,
+          "latest_value": 1797.57,
           "latest_matches": true
         }
       },
@@ -558,17 +558,17 @@
   },
   "crypto_status": {
     "BTCUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-19T11:52:00+09:00",
-      "current_quote_age_seconds": 4661,
+      "quote_as_of_kst": "2026-11-19T13:35:45+09:00",
+      "current_quote_age_seconds": 32,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
-      "status": "STALE",
+      "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-19T11:52:00+09:00",
-      "current_quote_age_seconds": 4661,
+      "quote_as_of_kst": "2026-11-19T13:35:46+09:00",
+      "current_quote_age_seconds": 31,
       "captured_quote_age_seconds": 0
     }
   },
@@ -577,16 +577,6 @@
       "code": "GROUP_FEDWATCH_LAGGING",
       "severity": "WARN",
       "detail": "anchor=2026-11-18 dates=FEDWATCH:2026-11-17"
-    },
-    {
-      "code": "CRYPTO_BTCUSD_STALE",
-      "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-19T11:52:00+09:00', 'current_quote_age_seconds': 4661, 'captured_quote_age_seconds': 0}"
-    },
-    {
-      "code": "CRYPTO_ETHUSD_STALE",
-      "severity": "INFO",
-      "detail": "{'status': 'STALE', 'producer_status': 'LIVE', 'quote_as_of_kst': '2026-11-19T11:52:00+09:00', 'current_quote_age_seconds': 4661, 'captured_quote_age_seconds': 0}"
     }
   ],
   "contracts": {
