@@ -74,7 +74,7 @@ if(!window.__JJOONI_INVESTOR_FLOW_BOOTSTRAPPED){
 if(!window.__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED){
  window.__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED=true;
  const d=document.createElement('script');
- d.src='tripod-daily-freshness-v35.js?v=35.1&_='+(window.__JJOONI_UI_RELEASE||'20261025-r3');
+ d.src='tripod-daily-freshness-v35.js?v=35.3-home-summary&_='+(window.__JJOONI_UI_RELEASE||'20261025-r3');
  d.async=false;
  d.onerror=()=>console.warn('CT TRI-POD daily freshness guard load failed');
  (document.head||document.documentElement).appendChild(d);

@@ -103,15 +103,27 @@ function overviewShortcut(report){
   if(anchor.nextElementSibling!==card)anchor.insertAdjacentElement('afterend',card);
  }else if(card.parentElement!==overview)overview.prepend(card);
  const info=card.querySelector('.ctRefNavOverviewInfo');
- if(report.ok){
-  info.textContent='실제 관측 '+report.rows.length+'일 · 투자수익률·손익 아님'+(report.gaps?' · 관측 공백 '+report.gaps+'일':'')+(report.stale?' · 최신 관측 지연':'');
+ const live=root.__JJOONI_LIVE_PAYLOAD||{};
+ const freshState=root.JjooniMetrics?.freshness?.(live)?.state||'UNKNOWN';
+ // A stale/unknown live source must block both the primary 4-account Hero
+ // and monetary figures in the Overview reference chart.
+ const sourceFresh=freshState==='LIVE'||freshState==='CLOSED';
+ const canPreview=report.ok&&report.rows.length>=7&&!report.stale&&sourceFresh;
+ const plot=card.querySelector('.ctRefNavOverviewChart');
+ if(canPreview){
+  const rows=report.rows,first=rows[0],last=rows[rows.length-1];
+  const min=Math.min(...rows.map(r=>r.nav)),max=Math.max(...rows.map(r=>r.nav));
+  const change=last.nav-first.nav;
+  info.textContent='최초 '+money(first.nav)+' → 최근 '+money(last.nav)+
+   ' · 차이 '+(change>=0?'+':'')+money(change)+' · 세로축 '+money(min)+' ~ '+money(max)+
+   ' (축약, 0원 기준 아님) · '+rows.length+'일 관측'+(report.gaps?' · 기록 공백 '+report.gaps+'일':'')+
+   ' · 입출금·환율 포함 / 투자수익률·손익 아님';
   card.dataset.ctReference='REFERENCE_ONLY';
-  const plot=card.querySelector('.ctRefNavOverviewChart');
-  if(plot){plot.replaceChildren(makeChart(report.rows));plot.hidden=false}
+  if(plot){plot.replaceChildren(makeChart(rows));plot.hidden=false}
  }else{
-  info.textContent='관측 NAV 그래프 표시 불가 · '+report.reason;
+  info.textContent='참고 NAV 미표시 · '+(!report.ok?report.reason:!sourceFresh?'현재 계좌 원천 최신성 검증 대기':report.stale?'최신 관측 지연':'관측 7일 미만')+
+   ' · 투자수익률·손익과 구분';
   card.dataset.ctReference='WAITING';
-  const plot=card.querySelector('.ctRefNavOverviewChart');
   if(plot){plot.replaceChildren();plot.hidden=true}
  }
 }
@@ -174,6 +186,9 @@ if(typeof document!=='undefined'){
  };
  document.addEventListener('jjooni:live-applied',schedule);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule()});
+ // The live freshness deadline may pass without any incoming data event.
+ // Keep the Home reference NAV synchronized with the primary Hero clock.
+ setInterval(()=>{if(!document.hidden)schedule()},60000);
  document.addEventListener('click',e=>{if(e.target.closest?.('.tab[data-tab],#ctHumanBottomV2,#ctHumanV2More'))schedule()});
  setTimeout(init,0);setTimeout(init,900);setTimeout(init,2300);
 }

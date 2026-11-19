@@ -33,7 +33,7 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=7'),'Human V2 cache version drift');
+ assert(rootHtml.includes('ct-human-v2.js?v=9-home-ux'),'Human V2 cache version drift');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');
@@ -43,17 +43,17 @@ function inspect(){
  assert(read('trade-review-loader.js').includes('humanV2.enforceNavigation()'),'legacy owner must delegate V2 visibility after tab mutations');
  assert(human.includes("attributeFilter:['class','style','aria-selected','data-tab']"),
    'Human V2 must reassert bottom-only nav after legacy inline style writes');
- assert(rootHtml.includes('ui-bootstrap-v1.js?v=4-single-navigation'),'entry must cache bust UI boot');
+ assert(rootHtml.includes('ui-bootstrap-v1.js?v=5-home-tripod'),'entry must cache bust UI boot');
  assert(read('ui-bootstrap-v1.js').includes('boot-coordinator-v33.js?v=33.2-single-navigation'),
    'UI boot must cache bust boot coordinator');
  assert(read('boot-coordinator-v33.js').includes('trade-review-loader.js?v=14.38-single-navigation'),
    'actual boot loader cache version must be bumped with nav handoff');
  assert(read('ui-refactor.js').includes('responsive-layout.css?v=1.8-single-navigation'),
    'secondary CSS injection fallback still exposes stale layout');
- assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=3'),'reference NAV module missing');
+ assert(rootHtml.includes('ct-reference-nav-history-v1.js?v=4-home-axis'),'reference NAV module missing');
  assert(rootHtml.includes('ct-performance-history-v1.js?v=3'),'verified P&L module missing');
  // Audit the actual fail-closed expression, not just its existence.
- assert(human.includes('const snapshotAligned=Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),
+ assert(human.includes('const snapshotAligned=isFresh&&Boolean(C.snapshot_id&&L?.snapshot_id)&&String(C.snapshot_id)===String(L.snapshot_id);'),
    'live or canonical missing snapshot IDs must block account figures');
  const primary=human.match(/const PRIMARY=(\[[^\n]+\]);/);
  assert(primary,'Human V2 primary tab source missing');
@@ -69,10 +69,10 @@ function inspect(){
  assert(humanCss.includes('min-height:52px'),'Human tap target protection missing');
  assert(reference.includes('function overviewShortcut(report)'),'reference NAV not discoverable from Overview');
  assert(reference.includes('상세 그래프 · 성과 탭'),'reference NAV details link unavailable');
- assert(reference.includes("plot.replaceChildren(makeChart(report.rows))")&&reference.includes("plot.replaceChildren();plot.hidden=true"),
+ assert(reference.includes("plot.replaceChildren(makeChart(rows))")&&reference.includes("plot.replaceChildren();plot.hidden=true"),
    'Overview reference plot must appear only for source-audited history and clear on mismatch');
  assert(human.includes("track.dataset.ctMetric='NAV_SHARE'")&&human.includes('navShareReady'),
-   'comparable NAV allocation fallback missing when P&L evidence cannot be reconciled');
+   'current NAV allocation must be independent of P&L period comparability');
  assert(performance.includes('ctPerfHistoryUnavailable')&&performance.includes('return;'),
    'unverified 3 charts must collapse into explicit evidence blocker');
  assert(reference.includes('REFERENCE_ONLY_NO_ATTESTED_BROKER_CLOSE'),'reference NAV mislabeled as profit');

@@ -20,7 +20,7 @@ test('public market, VIX authority and daily freshness guards are always bootstr
   assert.match(metrics,/__JJOONI_TRIPOD_VIX_AUTHORITY_BOOTSTRAPPED/);
   assert.match(metrics,/consultant-tab-hotfix-v31\.js\?v=31\.6/);
   assert.match(metrics,/__JJOONI_TRIPOD_DAILY_GUARD_BOOTSTRAPPED/);
-  assert.match(metrics,/tripod-daily-freshness-v35\.js\?v=35\.1/);
+  assert.match(metrics,/tripod-daily-freshness-v35\.js\?v=35\.3-home-summary/);
 });
 
 test('public sidecar is read-only market-only data with freshness validation',()=>{

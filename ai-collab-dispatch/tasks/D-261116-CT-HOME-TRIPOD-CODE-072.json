@@ -1,0 +1,34 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261116-CT-HOME-TRIPOD-CODE-072",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Owner approved decision-first Investment Control Tower Home with verified TRI-POD summary after ROY design review #505/#506/#507. JJOONI implemented source+tests in PR #508. ROY must independently challenge the ACTUAL CODE and CI, not repeat UX proposal or certify encrypted browser. Review current exact PR HEAD, all diff and relevant baseline.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ct_home_ux_tripod_final_source_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner 2026-11-16 17:34 KST explicitly: '좋아 저기에 트라이팟만 추가해서 넣어줘 로이판단받고 진행해'. ROY approved direction conditionally; final release still requires tests plus private authenticated UI smoke.",
+  "acceptance": [
+    "Inspect entire #508 changed source: ct-human-v2.js/css, tripod-daily-freshness-v35.js, ct-reference-nav-history-v1.js, index.html, ui-bootstrap-v1.js, tests/tripod-daily-v35.test.cjs, ct-human-v2-ui-e2e.cjs, strategy-books-e2e.cjs, audit tests. Confirm no fabricated data and no orders.",
+    "Specifically find P0 on single NAV hero DOM and trust: CSS hides .ctOvHero only in V2; is there ANY other overview amount still live or stale after snapshot mismatch? Is M.freshness gate correct and account list exactly physical four? Contrast source code vs actual encrypted DOM unverified.",
+    "Confirm trusted TRI-POD source publish does not depend on panel, requires nonempty target/regime/action, proper market-date equality and <=4-day source; once stale/missing it revokes prior target. Note that target is model output not actual positions. Confirm no influence on strategy order/execution.",
+    "Confirm source trust; price, NAV, reference NAV vs official investment P&L and 7 actual observed days chart, Y-axis min/max disclosure, hidden stale reference and no false continuous missing-day points. Validate simulated 360/390/599/767/820/1363 navigation and verified-to-blocked transition.",
+    "Scrutinize JS runtime races: MutationObserver, redundant CSS, cache versions, hidden legacy hero, responsive top/bottom, cross-module side effects, rollback ?ctui=v1. Look for caching, conflicts, core code not covered by mocks.",
+    "Run node tests/tripod-daily-v35.test.cjs, node --test tests/*.test.cjs, node tests/ct-human-v2-ui-e2e.cjs (Playwright if possible) and any targeted suite. Cross-check latest full HEAD CI with actual run results; don't claim pass if pending.",
+    "Leave one complete actual-code review on PR #508: ROY_CT_HOME_TRIPOD_CODE_REVIEW=PASS|NEEDS_CHANGES|BLOCKED with full 40-char reviewed_head, finding priority with file+line, tests/evidence, authenticated_screen=UNVERIFIED unless actually authenticated, user release gate. Do not merge/deploy."
+  ],
+  "forbidden": [
+    "No private account values/screenshots, keys/passwords or unpublished portfolio in public repo.",
+    "No orders, trading, strategy/indicator algorithm changes outside reviewed display contract; no new paid API or Cloud Run.",
+    "ROY must not modify code, merge/deploy, or claim verified private UI or triggered review without source provenance.",
+    "No duplicate self-comments or repeated review runs at same HEAD/task/stage."
+  ],
+  "coordination_notes": "One substantive ROY review of implementation, separate from previous #505 design reviews. Keep original PR #505 as design record. Independent source review cannot replace actual owner logged-in device acceptance. JJOONI to address findings and rerun CI."
+}
