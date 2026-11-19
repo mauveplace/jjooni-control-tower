@@ -74,7 +74,8 @@ class RelayTests(unittest.TestCase):
     def test_public_output_secret_guard(self):
         for token in ["ghp_" + "A" * 31, "github_pat_" + "a" * 28,
                       "sk-" + "q" * 31, "-----BEGIN PRIVATE KEY-----",
-                      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature12345"]:
+                      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature12345",
+                      "AKIA"+"A"*16, "xoxb-"+"123456abcdef"*2]:
             with self.assertRaisesRegex(RuntimeError, "PUBLIC_OUTPUT_BLOCKED"):
                 relay.guard_public_output("review findings: " + token)
         self.assertEqual(relay.guard_public_output("Public-only analysis referencing CODEX_API_KEY by name"), "Public-only analysis referencing CODEX_API_KEY by name")
