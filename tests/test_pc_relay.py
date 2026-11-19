@@ -35,10 +35,10 @@ class RelayTests(unittest.TestCase):
     def test_task_must_be_single_changed_active_json(self):
         pr = valid_pr()
         file = relay.TASK_ROOT + "TEST-PR-9999.json"
-        with patch.object(relay, "gh_api", return_value=[
+        with patch.object(relay, "gh_list", return_value=[
                 {"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
             self.assertEqual(relay.pr_task(pr)["task_id"], "TEST-PR-9999")
-        with patch.object(relay, "gh_api", return_value=[
+        with patch.object(relay, "gh_list", return_value=[
                 {"filename": file, "status": "added"},
                 {"filename": relay.TASK_ROOT+"OTHER.json", "status": "added"}]):
             self.assertIsNone(relay.pr_task(pr))
@@ -46,7 +46,7 @@ class RelayTests(unittest.TestCase):
     def test_task_rejects_write_mode(self):
         t = valid_task()
         t["mode"] = "PR_BRANCH_EDIT_APPROVED"
-        with patch.object(relay, "gh_api", return_value=[
+        with patch.object(relay, "gh_list", return_value=[
                 {"filename": relay.TASK_ROOT+"TEST-PR-9999.json", "status": "added"}]), patch.object(relay, "read_task", return_value=t):
             self.assertIsNone(relay.pr_task(valid_pr()))
 
@@ -55,7 +55,7 @@ class RelayTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             with patch.object(relay, "STATE_DIR", Path(td)), patch.object(relay, "STATE_FILE", Path(td)/"ledger.json"):
                 ledger = {"events": {}, "calls": {}}
-                with patch.object(relay, "gh_api", return_value=[{"body": "<!-- "+marker+" -->"}]) as api:
+                with patch.object(relay, "gh_list", return_value=[{"body": "<!-- "+marker+" -->"}]) as api:
                     self.assertFalse(relay.emit_once(9999, marker, "mock", ledger, False))
                     self.assertEqual(api.call_count, 1)
                     self.assertEqual(ledger["events"][marker]["status"], "DONE")
@@ -64,11 +64,11 @@ class RelayTests(unittest.TestCase):
         file = relay.TASK_ROOT + "TEST-PR-9999.json"
         pr = valid_pr()
         pr["head"]["repo"]["full_name"] = "untrusted/fork"
-        with patch.object(relay, "gh_api", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
+        with patch.object(relay, "gh_list", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
             self.assertIsNone(relay.pr_task(pr))
         pr = valid_pr()
         pr["user"]["login"] = "not-owner"
-        with patch.object(relay, "gh_api", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
+        with patch.object(relay, "gh_list", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
             self.assertIsNone(relay.pr_task(pr))
 
     def test_public_output_secret_guard(self):
@@ -101,7 +101,7 @@ class RelayTests(unittest.TestCase):
                 self.assertEqual(invoked.call_args.kwargs["stdin_text"], evil)
 
     def test_dry_run_never_posts(self):
-        with patch.object(relay, "gh_api", return_value=[]):
+        with patch.object(relay, "gh_list", return_value=[]):
             with patch.object(relay, "log"):
                 self.assertFalse(relay.emit_once(9999, "dry-key", "mock", {"events":{},"calls":{}}, True))
 
