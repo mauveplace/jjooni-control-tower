@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261119-ROY-PILOT-ROUTE-056",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Verify user's 2026-11-19 23:00 KST edit to installed ROY Pilot Review Routine: independently review a new non-draft [AI-COLLAB] PR from review/* branch and provide actual trigger/session provenance and exact-HEAD comment. No production changes.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "ai_collab_routine_automated_trigger_smoke",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User asked whether ROY actually started and shared that owner changed installed PR-opened Routine prompt; a new PR smoke test is required to verify and fix collaboration instead of waiting.",
+  "acceptance": [
+    "Inspect current PR files docs/ai-collab-pilot-route-smoke-20261119.md and this one task JSON on exact current full HEAD SHA.",
+    "Confirm current PR base main, title [AI-COLLAB], target repo, head review/* and required ROY; reject the former experiment/ai-collab- branch-prefix restriction.",
+    "Use genuine Claude first-party run/session metadata to distinguish event-fired, session-started, and manually requested work; this new PR must have actual pull_request.opened event provenance.",
+    "Leave at most one source-grounded ROY comment on this PR with marker JJOONI-COLLAB-V4 matching task and full HEAD plus literal ROY_PILOT_TRIGGER=PASS|NEEDS_CHANGES|BLOCKED; state triggering event/session and evidence.",
+    "Do not change files, push, merge, deploy or create paid resources. If triggered but skipped, explain without claiming E2E passed."
+  ],
+  "forbidden": [
+    "No GitHub branch edits/merge/deploy/write extension by ROY",
+    "No trading, account or nonpublic materials",
+    "No token/secret disclosure or new paid calls",
+    "No spoofed ROY session provenance"
+  ]
+}
