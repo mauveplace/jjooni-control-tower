@@ -17,6 +17,36 @@ const sameSessionFixture=()=>{
  f.brief={...f.brief,market_date_us:f.glance.us_session};
  return f;
 };
+// Visual tests must not depend on the instant at which independently published
+// sector and glance snapshots happen to cross a US/KR session boundary.
+// Keep the real published snapshots immutable; production alignment is checked
+// separately and the runtime still fails closed on any mismatch.
+const alignedVisualFixture=()=>{
+ const f=fixture();
+ f.sector=structuredClone(f.sector);
+ f.sector.completed_cutoffs={...f.sector.completed_cutoffs,US:f.glance.us_session,KR:f.glance.us_session};
+ for(const group of f.sector.groups||[]){
+  for(const row of group.rows||[]){
+   if(row.status==='OK')row.current_session=f.sector.completed_cutoffs[row.market];
+  }
+ }
+ return f;
+};
+test('published sector snapshot is either session-aligned or explicitly held by V3',()=>{
+ const f=fixture(),rows=(f.sector.groups||[]).flatMap(x=>x.rows||[]);
+ assert.equal(rows.length,34,'published sector board must retain 34 rows');
+ assert.equal(f.sector.groups.find(x=>x.key==='classic')?.rows?.length,11);
+ assert.equal(f.sector.groups.find(x=>x.key==='kr_sector')?.rows?.length,10);
+ const m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ if(m.ready){
+  const aligned=f.sector.completed_cutoffs?.US===f.glance.us_session
+   &&f.sector.completed_cutoffs?.KR===f.glance.us_session
+   &&rows.every(x=>x.status==='OK'&&x.current_session===f.sector.completed_cutoffs[x.market]
+     &&typeof x.current_return_pct==='number'&&Number.isFinite(x.current_return_pct));
+  assert.equal(m.sectorReady,aligned,'V3 must hold unaligned published sector data');
+  assert.equal(m.sectors.length,aligned?11:0);
+ }
+});
 // Build an explicit unverified-close scenario instead of assuming the live
 // fixture will forever be unverified. Nasdaq official evidence legitimately
 // changes daily; this is NOT a contract change and must never be rewritten by
@@ -54,7 +84,7 @@ test('V3 default does not mistake a verified integer official close for unverifi
  assert.match(rail(stale),/독립검증 대기/);
 });
 test('V3 threshold numbers from same-session published canonical, never generated', () => {
- const f=fixture();
+ const f=alignedVisualFixture();
  f.glance=unverifiedGlance(f.glance);
  const m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.ready,true,m.reason);
