@@ -27,7 +27,7 @@ MAX_DAILY_CALLS = 12
 POLL_SECONDS = 90
 CLOUD_GRACE_MINUTES = 10
 MAX_FAILURE_ATTEMPTS = 2
-SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{8,})", re.IGNORECASE)
+SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{8,})", re.IGNORECASE)
 
 def now():
     return dt.datetime.now(dt.timezone.utc)
