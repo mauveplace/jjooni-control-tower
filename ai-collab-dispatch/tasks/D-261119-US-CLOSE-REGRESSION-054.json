@@ -1,0 +1,29 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261119-US-CLOSE-REGRESSION-054",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Prevent recurrence of #538 scheduled us_close_gate ModuleNotFoundError by asserting actions/checkout precedes Python import of local observatory_session in the actual workflow; ROY independently verifies safe regression coverage.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "us_close_gate_bootstrap_regression",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User on 2026-11-19 instructed JJOONI to coordinate with ROY and carry improvements through deployment; this test-only PR requires current-HEAD CI and ROY independent review prior to merge.",
+  "acceptance": [
+    "Read #538 historical failure and compare current .github/workflows/market-observatory-daily.yml to the regression test.",
+    "Verify the test fails if checkout is removed from us_close_gate, and passes with checkout before the dependent import.",
+    "Confirm no production workflow, data, trade logic, secrets or permissions are changed in this PR.",
+    "Run python -m unittest discover -s tests -p test_observatory_session.py and verify exact HEAD CI. Post one independent factual ROY verdict PASS/NEEDS_CHANGES/BLOCKED with full HEAD and evidence."
+  ],
+  "forbidden": [
+    "No trading or private account values.",
+    "No production workflow mutation, CI weakening, token or secret changes.",
+    "ROY may not merge/deploy or claim a review it has not performed."
+  ]
+}
