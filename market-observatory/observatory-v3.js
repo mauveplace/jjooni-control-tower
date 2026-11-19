@@ -52,7 +52,7 @@ function model(glance, fresh, sectors, nowMs=Date.now(), publicDaily=null) {
   &&g.as_of===glance.us_session&&fresh?.session_alignment?.aligned===true
   &&expected===glance.us_session;
  if(!ready)return {ready:false,reason:'완료 세션·NDX·TRI-POD·신선도 원장 정합성 확인 대기',
-  session:glance?.us_session||'—'};
+  session:glance?.us_session||'—',us,noTrade:true};
  const ref=publicDaily?.market_context?.items?.NASDAQ100;
  // Previous-close point change is only trusted when all exact daily records
  // match; never infer points from the rounded daily-glance d1 percentage.
@@ -111,12 +111,50 @@ function rail(m,scope='preview'){
   +'<p class="ov3Small">하락 레짐 전환 후보와 NO-POD 과거 진입일 고정선·손절선은 다른 값입니다. '+(m.officialVerified?'Nasdaq 종가 정수자리 검증 완료':'공식 Nasdaq EOD 독립검증 전')+' · 완료세션 날짜 유지 · 주문 신호 아님</p>'
    +'<button class="ov3DetailLink" type="button" data-ov3-tab="jjooni-tripod">NO-POD 진입 고정 기준점·손절선 상세 보기</button></section>';
 }
-function marketStrip(m){
- const picks=['NASDAQ100','SP500','SOX','VIX'].map(k=>m.us.find(x=>x.key===k)).filter(x=>x&&finite(x.value)&&x.date===m.session);
- return '<section class="ov3MarketStrip" aria-label="오늘의 지수">'
-  +'<div class="ov3StripTitle"><strong>MARKET CLOSE</strong><small>미국 '+escapeHtml(m.session)+' · '+(m.freshnessCurrent?(m.officialVerified?'Nasdaq 공식 종가 정수자리 일치':'제공자 완료일봉 참고'):'상태 최신성 재확인 필요 · 마지막 게시 참고')+'</small></div>'
-  +'<div class="ov3StripData">'+picks.map(x=>'<div class="ov3StripTile"><span>'+escapeHtml(x.label)+'</span><strong>'+fmt(x.value)+'</strong><small class="'+changeClass(x.d1_pct)+'">'+pct(x.d1_pct)+'</small></div>').join('')+'</div></section>';
+// Quotes are display-only; NEVER feed observations into official EOD or TRI-POD.
+function marketStripRows(m,getQuote=null,nowMs=Date.now()){
+ const labels={NASDAQ100:'나스닥100',SP500:'S&P 500',SOX:'필라델피아 반도체',VIX:'VIX'};
+ return ['NASDAQ100','SP500','SOX','VIX'].map(key=>{
+  const published=(m.us||[]).find(x=>x.key===key);
+  let quote=null;
+  try{quote=typeof getQuote==='function'?getQuote(key):null;}catch(_){/* Reference fallback only. */}
+  const observed=Date.parse(quote?.observed_at||'');
+  const quoteSession=String(quote?.session_date||'').slice(0,10);
+  const usable=quote?.key===key&&finite(quote?.value)&&quote.value>0
+   &&Number.isFinite(observed)&&observed<=nowMs+120000
+   &&/^\d{4}-\d{2}-\d{2}$/.test(quoteSession)
+   &&(!published?.date||quoteSession>=published.date);
+  if(!usable&&!published)return null;
+  const elapsed=usable?Math.max(0,nowMs-observed):null;
+  const delayed=usable&&(quote?.refresh_status==='RETAINED'||quote?.quality==='STALE'
+   ||String(quote?.display_status||'').includes('지연')||elapsed>1200000);
+  const observedKst=usable?new Date(observed+9*3600000).toISOString().slice(5,16).replace('T',' '):null;
+  return {
+   key,label:published?.label||labels[key],value:usable?quote.value:published.value,
+   changePct:usable?(finite(quote.change_pct)?quote.change_pct:null):published.d1_pct,
+   session:usable?quoteSession:published.date,kind:usable?'QUOTE':'PUBLISHED',
+   source:usable?String(quote.source||'시세 API'):'게시 완료일봉',
+   status:usable?(delayed?'관측 지연·이전값':quote.market_state==='CLOSED'?'최근 마감 관측':'장중 관측 · 지연 가능'):'새 시세 미확인',
+   observedKst,delayed:Boolean(delayed)
+  };
+ }).filter(Boolean);
 }
+function marketStrip(m,getQuote=null,nowMs=Date.now()){
+ const rows=marketStripRows(m,getQuote,nowMs);
+ const liveCount=rows.filter(x=>x.kind==='QUOTE'&&!x.delayed).length;
+ const label=liveCount?'시세 API 조회 결과 · 각 지수의 관측일·시각 확인':'최신 시세 확인 대기 · 게시 일봉 참고';
+ return '<section class="ov3MarketStrip" aria-label="접속 시 조회한 지수 시세">'
+  +'<div class="ov3StripTitle"><strong>MARKET QUOTES · 접속 시 조회</strong>'
+  +'<small>'+escapeHtml(label)+' · TRI-POD 판단 기준은 미국 '+escapeHtml(m.session||'—')+' 완료일봉</small></div>'
+  +'<div class="ov3StripData">'+rows.map(x=>
+   '<div class="ov3StripTile" data-ov3-quote="'+escapeHtml(x.key)+'" data-quote-kind="'+x.kind+'">'
+   +'<span>'+escapeHtml(x.label)+' · '+escapeHtml(x.session||'기준일 확인 대기')+'</span>'
+   +'<strong>'+fmt(x.value)+'</strong>'
+   +'<small class="'+changeClass(x.changePct)+'">'+(finite(x.changePct)?pct(x.changePct):'등락률 확인 대기')+'</small>'
+   +'<small class="ov3QuoteMeta">'+escapeHtml(x.source)+' · '+escapeHtml(x.observedKst?x.observedKst+' KST':'관측 시각 미확인')+' · '+escapeHtml(x.status)+'</small></div>'
+  ).join('')+'</div></section>';
+}
+
 function sectorChart(m){
   if(!m.sectorReady)return '<p class="ov3Small">섹터 34종의 동일 완료세션 검증이 끝나지 않아 수익률 시각화를 보류합니다.</p>';
   // A shared absolute-percentage scale, with a real 0% midpoint for both sides.
@@ -168,7 +206,7 @@ function draw(m) {
   const tri=document.createElement('div');tri.id='ov3TripodRail';
   tri.innerHTML=m.ready?rail(m,'home'):'<div class="ov3Pending">TRI-POD 기준점 검증 대기 · '+escapeHtml(m.reason)+'</div>';
   const top=document.createElement('div');top.id='ov3MarketStrip';
-  top.innerHTML=m.ready?marketStrip(m):'<div class="ov3Pending">시장 지수 검증 대기 · '+escapeHtml(m.reason)+'</div>';
+  top.innerHTML=marketStrip(m,root.__JJOONI_OBSERVATORY_QUOTES?.get,Date.now());
   if(firstGrid){firstGrid.before(tri);tri.after(top);}else today.append(tri,top);
   const sector=today.querySelector('.tV2SectorBtns');
   if(sector){const r=document.createElement('div');r.id='ov3SectorChart';r.innerHTML=m.ready?sectorChart(m):'';
@@ -182,7 +220,7 @@ function draw(m) {
   r.innerHTML=m.ready?rail(m,'strategy'):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.1-default',model,rail,distanceText,dailyMoveText,pointSummary,marketStrip,sectorChart,enabled:isV3};
+const runtime={version:'3.2-on-view-quotes',model,rail,distanceText,dailyMoveText,pointSummary,marketStripRows,marketStrip,sectorChart,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -214,6 +252,7 @@ function mount(){
   return pending;
  }
  root.__JJOONI_OBS_V3.refresh=()=>update(true);
+ document.addEventListener('jjooni:observatory-quotes-updated',()=>{if(current)draw(current);});
  const observer=new MutationObserver(changes=>{
   if(!current)return;
   if(changes.some(c=>[...c.addedNodes].some(x=>x.nodeType===1&&
