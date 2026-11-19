@@ -27,7 +27,7 @@ MAX_DAILY_CALLS = 12
 POLL_SECONDS = 90
 CLOUD_GRACE_MINUTES = 10
 MAX_FAILURE_ATTEMPTS = 2
-SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|ANTHROPIC_AUTH_TOKEN|CODEX_API_KEY)", re.IGNORECASE)
+SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{8,})", re.IGNORECASE)
 
 def now():
     return dt.datetime.now(dt.timezone.utc)
@@ -73,7 +73,9 @@ def read_task(path, sha):
 
 def pr_task(pr):
     num, sha = pr["number"], pr["head"]["sha"]
-    if pr["base"]["ref"] != "main" or "[AI-COLLAB]" not in pr["title"]:
+    if (pr.get("user", {}).get("login") != OWNER or
+        (pr.get("head", {}).get("repo") or {}).get("full_name") != REPO or
+        pr["base"]["ref"] != "main" or "[AI-COLLAB]" not in pr["title"]):
         return None
     changed = gh_list(f"repos/{REPO}/pulls/{num}/files?per_page=100")
     tasks = [x["filename"] for x in changed if
@@ -85,9 +87,7 @@ def pr_task(pr):
     if len(tasks) != 1:
         return None
     task = read_task(tasks[0], sha)
-    if (pr.get("user", {}).get("login") != OWNER or
-        (pr.get("head", {}).get("repo") or {}).get("full_name") != REPO or
-        task.get("schema") != "JJOONI_COLLAB_V4" or
+    if (task.get("schema") != "JJOONI_COLLAB_V4" or
         task.get("repository") != REPO or
         task.get("base_branch") != "main" or
         task.get("mode") != "SYSTEM_REVIEW_ONLY" or
