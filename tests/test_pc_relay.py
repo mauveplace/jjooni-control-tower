@@ -15,7 +15,8 @@ spec.loader.exec_module(relay)
 HEAD = "a" * 40
 def valid_pr():
     return {"number": 9999, "title": "[AI-COLLAB] read-only review",
-            "head": {"sha": HEAD}, "base": {"ref": "main"},
+            "head": {"sha": HEAD, "repo": {"full_name": relay.REPO}},
+            "user": {"login": relay.OWNER}, "base": {"ref": "main"},
             "created_at": "2026-11-19T14:00:00Z"}
 
 def valid_task():
@@ -58,6 +59,46 @@ class RelayTests(unittest.TestCase):
                     self.assertFalse(relay.emit_once(9999, marker, "mock", ledger, False))
                     self.assertEqual(api.call_count, 1)
                     self.assertEqual(ledger["events"][marker]["status"], "DONE")
+
+    def test_fork_and_outside_author_blocked(self):
+        file = relay.TASK_ROOT + "TEST-PR-9999.json"
+        pr = valid_pr()
+        pr["head"]["repo"]["full_name"] = "untrusted/fork"
+        with patch.object(relay, "gh_api", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
+            self.assertIsNone(relay.pr_task(pr))
+        pr = valid_pr()
+        pr["user"]["login"] = "not-owner"
+        with patch.object(relay, "gh_api", return_value=[{"filename": file, "status": "added"}]), patch.object(relay, "read_task", return_value=valid_task()):
+            self.assertIsNone(relay.pr_task(pr))
+
+    def test_public_output_secret_guard(self):
+        for token in ["ghp_" + "A" * 31, "github_pat_" + "a" * 28,
+                      "sk-" + "q" * 31, "-----BEGIN PRIVATE KEY-----"]:
+            with self.assertRaisesRegex(RuntimeError, "PUBLIC_OUTPUT_BLOCKED"):
+                relay.guard_public_output("review findings: " + token)
+        self.assertEqual(relay.guard_public_output("Public-only analysis"), "Public-only analysis")
+
+    def test_retry_backoff_and_bounded_attempts(self):
+        with tempfile.TemporaryDirectory() as td:
+            with patch.object(relay, "STATE_DIR", Path(td)), patch.object(relay, "STATE_FILE", Path(td)/"ledger.json"):
+                ledger = {"events": {}, "calls": {}}
+                relay.record_failure(ledger, "my-task", "temporary")
+                self.assertTrue(relay.retry_blocked(ledger, "my-task"))
+                relay.record_failure(ledger, "my-task", "again")
+                self.assertEqual(ledger["events"]["my-task"]["attempts"], 2)
+                ledger["events"]["my-task"]["next_retry_epoch"] = 0
+                self.assertTrue(relay.retry_blocked(ledger, "my-task"))
+
+    def test_codex_stdin_not_untrusted_argv(self):
+        with tempfile.TemporaryDirectory() as td:
+            with patch.object(relay, "STATE_DIR", Path(td)), patch.object(relay, "STATE_FILE", Path(td)/"ledger.json"), patch.object(relay.shutil, "which", return_value="codex.cmd"), patch.object(relay, "cmd", return_value="local summary") as invoked:
+                ledger = {"events": {}, "calls": {}}
+                evil = 'bad & | % " <> $ prompt'
+                self.assertEqual(relay.run_agent("CODEX", evil, td, ledger), "local summary")
+                argv = invoked.call_args.args[0]
+                self.assertNotIn(evil, argv)
+                self.assertEqual(argv[-1], "-")
+                self.assertEqual(invoked.call_args.kwargs["stdin_text"], evil)
 
     def test_dry_run_never_posts(self):
         with patch.object(relay, "gh_api", return_value=[]):
