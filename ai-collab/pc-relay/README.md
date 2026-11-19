@@ -44,3 +44,12 @@ Logs: USERPROFILE\\.jjooni-pc-relay\\relay.log. Ledger: same folder ledger.json.
 ### Future gate
 
 Local code modification and branch push will require a separately reviewed writer policy, isolated worktree, verified least-privilege identity and a real end-to-end permission test. **Do not merge the unresolved #333 V1 writer design as a shortcut.**
+
+### 2026-11-19 independent ROY security findings incorporated
+
+- Installation now REQUIRES a dedicated non-admin Windows user profile without banking/private personal files; model read-only does **not** protect confidential file reads.
+- Public model-generated output is scanned for common GitHub/API token and PEM private-key patterns and blocked on match, with an explicit error. This scanner is defense-in-depth and cannot guarantee every secret encoding; keep this PC profile empty of sensitive files.
+- Only owner-authored same-repository PRs may cause local model work. Forked PRs are ignored.
+- Nontrusted PR/Issue text is passed on STDIN, not as Windows .cmd command arguments; Windows Codex shim resolves through PATH. Claude tools/MCP are disabled for noninteractive local reviews.
+- Retries are bounded with durable cooldown, daily per-model limits and Windows runner restart after process exit.
+- Local Claude fallback defaults to OFF; use run.ps1 -EnableLocalClaudeFallback only after the PC has passed the security and end-to-end checks. It never counts as official ROY Cloud Review.
