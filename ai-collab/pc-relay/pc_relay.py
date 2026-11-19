@@ -128,7 +128,7 @@ def run_agent(actor, prompt, repo_dir, ledger):
 def pr_diff(num):
     """Fetch the actual PR diff; do not mistake checked-out main for current PR HEAD."""
     return cmd(["gh", "pr", "diff", str(num), "--repo", REPO],
-               timeout=45)[:24000]
+               timeout=45)[:12000]
 
 def handle_issues(repo_dir, ledger, simulate):
     """Direct local JJOONI -> ROY -> JJOONI deliberation for owner-authored public tickets."""
@@ -238,7 +238,8 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
     if reviews or not enable_fallback:
         return
     created = dt.datetime.fromisoformat(pr["created_at"].replace("Z", "+00:00"))
-    if (now() - created).total_seconds() < CLOUD_GRACE_MINUTES * 60:
+    age = (now() - created).total_seconds()
+    if age < CLOUD_GRACE_MINUTES * 60 or age > 36 * 3600:
         return
     key = f"JJOONI-PC-LOCAL-ROY-V1 pr={num} task={task['task_id']} head={sha}"
     if key in ledger["events"]:
@@ -270,7 +271,7 @@ def once(repo_dir, simulate=False, enable_fallback=False):
     eligible = [p for p in prs if "[AI-COLLAB]" in p.get("title", "")]
     # Recent activity first; cap service work per cycle.
     eligible.sort(key=lambda p: p.get("updated_at", ""), reverse=True)
-    for p in eligible[:12]:
+    for p in eligible[:6]:
         try:
             handle_pr(p, repo_dir, ledger, simulate, enable_fallback)
         except (RuntimeError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:
