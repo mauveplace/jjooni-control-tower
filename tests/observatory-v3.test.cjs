@@ -259,7 +259,8 @@ test('visual digest rejects an older published brief against a newer US close',(
 });
 
 test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',()=>{
- const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ // Layout fixture must be aligned; live 34-sector updates can cross the NDX daily publication boundary.
+ const f=alignedVisualFixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.sectorReady,true,'sector source complete');
  const rows=structuredClone(m.sectors);
  rows[0].current_return_pct=-4;
