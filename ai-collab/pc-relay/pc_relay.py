@@ -58,6 +58,13 @@ def gh_api(endpoint, post_body=None):
         args.append(endpoint)
     return json.loads(cmd(args, timeout=40))
 
+def gh_list(endpoint):
+    """Fetch all GitHub pages and flatten arrays; protects source-ID dedup beyond 100."""
+    pages = json.loads(cmd(["gh", "api", "--paginate", "--slurp", endpoint], timeout=90))
+    if not isinstance(pages, list):
+        raise ValueError("GitHub pagination did not return an array")
+    return [item for page in pages if isinstance(page, list) for item in page]
+
 def read_task(path, sha):
     payload = gh_api(f"repos/{REPO}/contents/{path}?ref={sha}")
     if payload.get("encoding") != "base64":
@@ -68,7 +75,7 @@ def pr_task(pr):
     num, sha = pr["number"], pr["head"]["sha"]
     if pr["base"]["ref"] != "main" or "[AI-COLLAB]" not in pr["title"]:
         return None
-    changed = gh_api(f"repos/{REPO}/pulls/{num}/files?per_page=100")
+    changed = gh_list(f"repos/{REPO}/pulls/{num}/files?per_page=100")
     tasks = [x["filename"] for x in changed if
              x.get("status") != "removed" and
              x["filename"].startswith(TASK_ROOT) and
@@ -91,7 +98,15 @@ def pr_task(pr):
 
 def load_ledger():
     if STATE_FILE.exists():
-        return json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        try:
+            data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+            if not isinstance(data.get("events"), dict) or not isinstance(data.get("calls"), dict):
+                raise ValueError("invalid ledger shape")
+            return data
+        except (ValueError, AttributeError) as exc:
+            backup = STATE_DIR / ("ledger.corrupt." + now().strftime("%Y%m%d%H%M%S") + ".json")
+            STATE_FILE.replace(backup)
+            log(f"LEDGER_CORRUPT_BAK: {backup.name}; source-ID dedup rechecks GitHub")
     return {"events": {}, "calls": {}}
 
 def save_ledger(ledger):
@@ -163,7 +178,7 @@ def pr_diff(num):
 
 def handle_issues(repo_dir, ledger, simulate):
     """Direct local JJOONI -> ROY -> JJOONI deliberation for owner-authored public tickets."""
-    issues = gh_api(f"repos/{REPO}/issues?state=open&per_page=100")
+    issues = gh_list(f"repos/{REPO}/issues?state=open&per_page=100")
     for issue in issues:
         if issue.get("pull_request") or not issue.get("title", "").startswith("[PC-COLLAB]"):
             continue
@@ -176,7 +191,7 @@ def handle_issues(repo_dir, ledger, simulate):
         key = f"JJOONI-PC-DUAL-AGENT-V1 issue={num}"
         if ledger["events"].get(key, {}).get("status") == "DONE" or retry_blocked(ledger, key):
             continue
-        comments = gh_api(f"repos/{REPO}/issues/{num}/comments?per_page=100")
+        comments = gh_list(f"repos/{REPO}/issues/{num}/comments?per_page=100")
         if any(key in x.get("body", "") for x in comments):
             ledger["events"][key] = {"status": "DONE", "time": stamp()}
             save_ledger(ledger)
@@ -206,7 +221,7 @@ def handle_issues(repo_dir, ledger, simulate):
         return  # Bound to one new task per cycle to control subscription usage.
 
 def emit_once(pr_num, key, comment, ledger, simulate):
-    comments = gh_api(f"repos/{REPO}/issues/{pr_num}/comments?per_page=100")
+    comments = gh_list(f"repos/{REPO}/issues/{pr_num}/comments?per_page=100")
     if any(key in c.get("body", "") for c in comments):
         ledger["events"][key] = {"status": "DONE", "time": stamp(),
                                  "note": "existing comment, not repeated"}
@@ -303,7 +318,7 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
 
 def once(repo_dir, simulate=False, enable_fallback=False):
     ledger = load_ledger()
-    prs = gh_api(f"repos/{REPO}/pulls?state=open&per_page=100")
+    prs = gh_list(f"repos/{REPO}/pulls?state=open&per_page=100")
     eligible = [p for p in prs if "[AI-COLLAB]" in p.get("title", "")]
     # Recent activity first; cap service work per cycle.
     eligible.sort(key=lambda p: p.get("updated_at", ""), reverse=True)
