@@ -315,3 +315,37 @@ test('black NOW marker shows verified previous close change, never zero self-dis
  assert.equal(model(f.glance,f.freshness,f.sector,now(f.freshness),null).ndxChangePts,null);
  assert.equal(dailyMoveText({...m,ndxChangePts:-57.034,ndxChangePct:-0.21}),'전일 대비 -57.03pt (-0.21%)');
 });
+
+test('V3 prioritizes fetched index quotes, exposes session/time, keeps TRI-POD EOD immutable',()=>{
+ const {marketStripRows,marketStrip}=require('../market-observatory/observatory-v3.js');
+ const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true,m.reason);
+ const publishedNDX=m.ndx,oldSession=m.session,oldAxis=structuredClone(m.axis);
+ const newSession=new Date(Date.parse(oldSession+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+ const seen=Date.parse(newSession+'T21:00:00Z'),t=seen+600000;
+ const q={key:'NASDAQ100',value:26345.67,session_date:newSession,observed_at:new Date(seen).toISOString(),
+  change_pct:-2.84,source:'Test index quote provider',market_state:'CLOSED',quality:'LIVE',refresh_status:'FETCHED'};
+ const get=key=>key==='NASDAQ100'?q:null;
+ const r=marketStripRows(m,get,t),ndx=r.find(x=>x.key==='NASDAQ100'),sp=r.find(x=>x.key==='SP500');
+ assert.equal(ndx.kind,'QUOTE');assert.equal(ndx.value,26345.67);assert.equal(ndx.session,newSession);
+ assert.equal(sp.kind,'PUBLISHED');assert.equal(sp.session,oldSession);
+ assert.equal(ndx.status,'최근 마감 관측');
+ const html=marketStrip(m,get,t);
+ assert.match(html,/MARKET QUOTES · 접속 시 조회/);
+ assert.match(html,/26,345\.67/);
+ assert.match(html,/Test index quote provider/);
+ assert.match(html,/KST/);
+ assert.match(html,new RegExp('TRI-POD 판단 기준은 미국 '+oldSession));
+ assert.equal(m.ndx,publishedNDX);
+ assert.deepEqual(m.axis,oldAxis);
+ assert.equal(m.session,oldSession);
+ assert.equal(marketStripRows(m,()=>({...q,session_date:'2000-01-01'}),t).find(x=>x.key==='NASDAQ100').kind,'PUBLISHED');
+ assert.equal(marketStripRows(m,()=>({...q,observed_at:new Date(t+600000).toISOString()}),t).find(x=>x.key==='NASDAQ100').kind,'PUBLISHED');
+ const retained=marketStripRows(m,()=>({...q,refresh_status:'RETAINED'}),t).find(x=>x.key==='NASDAQ100');
+ assert.equal(retained.delayed,true);
+ assert.match(marketStrip(m,()=>({...q,refresh_status:'RETAINED'}),t),/관측 지연·이전값/);
+ const held=model(f.glance,{...f.freshness,groups:{...f.freshness.groups,market:{...f.freshness.groups.market,state:'STALE'}}},f.sector,now(f.freshness));
+ assert.equal(held.ready,false);
+ assert.equal(marketStripRows(held,get,t).find(x=>x.key==='NASDAQ100').kind,'QUOTE',
+  'current quotes are visible even when the dated TRI-POD verification is on HOLD');
+});
