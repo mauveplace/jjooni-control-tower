@@ -1,6 +1,6 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-20T01:33:19+09:00",
+ "generated_kst": "2026-11-20T01:46:34+09:00",
  "us_session": "2026-11-18",
  "source_generated_kst": "2026-11-20T01:32:36+09:00",
  "read_only": true,
@@ -42,7 +42,7 @@
      "key": "NASDAQ100",
      "label": "나스닥100",
      "date": "2026-11-18",
-     "value": 27116.2578,
+     "value": 27116.2598,
      "m1_base_date": "2026-10-16",
      "d1_pct": 0.42,
      "w1_pct": -4.43,
@@ -74,7 +74,7 @@
      "key": "NASDAQCOMPOSITE",
      "label": "나스닥종합",
      "date": "2026-11-18",
-     "value": 24429.8848,
+     "value": 24429.8809,
      "m1_base_date": "2026-10-16",
      "d1_pct": 0.42,
      "w1_pct": -4.07,
@@ -94,7 +94,7 @@
      "key": "RUSSELL2000",
      "label": "러셀2000",
      "date": "2026-11-18",
-     "value": 2714.3057,
+     "value": 2714.3101,
      "m1_base_date": "2026-10-16",
      "d1_pct": 0.46,
      "w1_pct": -4.64,
@@ -119,21 +119,21 @@
      "key": "KOSPI",
      "label": "코스피",
      "date": "2026-11-19",
-     "value": 4988.68,
+     "value": 5137.89,
      "m1_base_date": "2026-10-19",
-     "d1_pct": -1.55,
-     "w1_pct": -6.63,
-     "m1_pct": -13.51
+     "d1_pct": 1.39,
+     "w1_pct": -3.83,
+     "m1_pct": -10.92
     },
     {
      "key": "KOSDAQ",
      "label": "코스닥",
      "date": "2026-11-19",
-     "value": 654.07,
+     "value": 684.81,
      "m1_base_date": "2026-10-19",
-     "d1_pct": -1.32,
-     "w1_pct": -6.1,
-     "m1_pct": -19.14
+     "d1_pct": 3.32,
+     "w1_pct": -1.68,
+     "m1_pct": -15.34
     },
     {
      "key": "NIKKEI225",
@@ -184,9 +184,9 @@
      "key": "DXY",
      "label": "달러인덱스",
      "date": "2026-11-18",
-     "value": 103.854,
+     "value": 103.86,
      "m1_base_date": "2026-10-16",
-     "d1_pct": 0.35,
+     "d1_pct": 0.36,
      "w1_pct": 0.92,
      "m1_pct": 1.98
     },
@@ -228,42 +228,42 @@
     {
      "key": "FEAR_GREED",
      "label": "공포탐욕",
-     "date": "2026-11-18",
+     "date": "2026-11-19",
      "value": 24.6,
-     "m1_base_date": "2026-10-16",
-     "d1_pt": -1.4,
-     "m1_pt": 6.4
+     "m1_base_date": "2026-10-19",
+     "d1_pt": -5.3,
+     "m1_pt": 5.1
     },
     {
      "key": "GOLD",
      "label": "금",
      "date": "2026-11-18",
-     "value": 3739.5,
+     "value": 3741.8999,
      "m1_base_date": "2026-10-16",
-     "d1_pct": -3.23,
-     "w1_pct": -6.52,
-     "m1_pct": -10.56
+     "d1_pct": -3.16,
+     "w1_pct": -6.46,
+     "m1_pct": -10.5
     },
     {
      "key": "WTI",
      "label": "WTI",
      "date": "2026-11-18",
-     "value": 82.23,
+     "value": 83.26,
      "m1_base_date": "2026-10-16",
-     "d1_pct": -4.39,
-     "w1_pct": -4.97,
-     "m1_pct": -18.91
+     "d1_pct": -3.2,
+     "w1_pct": -3.78,
+     "m1_pct": -17.9
     },
     {
      "key": "BTCUSD",
      "label": "비트코인",
      "date": "2026-11-19",
-     "value": 63065.82,
+     "value": 63110.32,
      "quote_currency": "USDT",
      "source": "Binance Spot last trade / USDT",
-     "observed_kst": "2026-11-20T01:32:56+09:00",
+     "observed_kst": "2026-11-20T01:46:09+09:00",
      "comparison_status": "SAME_CURRENCY_COMPLETED",
-     "d1_pct": -0.0,
+     "d1_pct": 0.07,
      "w1_pct": null,
      "m1_pct": null,
      "m1_base_date": null
@@ -278,7 +278,7 @@
   },
   {
    "type": "FX",
-   "text": "원/달러 1,333.0원(-0.20%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
+   "text": "원/달러 1,333.0원(-0.20%) — 원화 강세와 주가 상승이 동시 — 외국인 유입형"
   }
  ],
  "brief_check": {
@@ -286,7 +286,7 @@
   "market_date_us": "2026-11-18",
   "status": "MATCH",
   "brief_ndx": 27116.26,
-  "pipeline_ndx": 27116.2578,
+  "pipeline_ndx": 27116.2598,
   "official_status": "VERIFIED",
   "official_eod_verified": true,
   "trade_signal_eligible": false,
