@@ -27,7 +27,7 @@ MAX_DAILY_CALLS = 12
 POLL_SECONDS = 90
 CLOUD_GRACE_MINUTES = 10
 MAX_FAILURE_ATTEMPTS = 2
-SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{8,})", re.IGNORECASE)
+SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{8,}|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{16,})", re.IGNORECASE)
 
 def now():
     return dt.datetime.now(dt.timezone.utc)
@@ -160,7 +160,7 @@ def run_agent(actor, prompt, repo_dir, ledger):
         raw = cmd(argv, cwd=repo_dir, timeout=420, stdin_text=prompt)
         try:
             parsed = json.loads(raw)
-            if parsed.get("is_error") or str(parsed.get("subtype", "")).startswith("error_"):
+            if not isinstance(parsed, dict) or parsed.get("is_error") or str(parsed.get("subtype", "")).startswith("error_"):
                 raise RuntimeError("CLAUDE_NON_SUCCESS_STATUS")
             output = parsed.get("result", raw)
         except ValueError:
@@ -241,7 +241,7 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
     task = pr_task(pr)
     if not task:
         return
-    comments = gh_api(f"repos/{REPO}/issues/{num}/comments?per_page=100")
+    comments = gh_list(f"repos/{REPO}/issues/{num}/comments?per_page=100")
     reviews = []
     for c in comments:
         body = c.get("body", "")
@@ -323,7 +323,7 @@ def once(repo_dir, simulate=False, enable_fallback=False):
     # Recent activity first; cap service work per cycle.
     eligible.sort(key=lambda p: p.get("updated_at", ""), reverse=True)
     for p in eligible[:6]:
-        error_key = f"JJOONI-PC-PR-ERROR pr={p.get('number')} head={p.get('head', {}).get('sha')}"
+        error_key = f"JJOONI-PC-PR-ERROR pr={p.get('number')} head={p.get('head', {}).get('sha')} updated={p.get('updated_at', '')}"
         if retry_blocked(ledger, error_key):
             continue
         try:
