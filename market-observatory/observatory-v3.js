@@ -143,9 +143,15 @@ function marketStrip(m,getQuote=null,nowMs=Date.now()){
  const rows=marketStripRows(m,getQuote,nowMs);
  const liveCount=rows.filter(x=>x.kind==='QUOTE'&&!x.delayed).length;
  const label=liveCount?'시세 API 조회 결과 · 각 지수의 관측일·시각 확인':'최신 시세 확인 대기 · 게시 일봉 참고';
+ const ndx=rows.find(x=>x.key==='NASDAQ100');
+ const gap=ndx?.kind==='QUOTE'&&ndx.status==='최근 마감 관측'
+  &&/^\d{4}-\d{2}-\d{2}$/.test(m.session||'')&&ndx.session>m.session;
+ const gapNotice=gap?'<div class="ov3QuoteLagNotice" role="status">NDX '+escapeHtml(ndx.session)
+  +' 장 마감 관측 확인 · TRI-POD '+escapeHtml(m.session)+' 완료일봉 업데이트 대기 · 현재 시세는 전략 판정에 미사용</div>':'';
  return '<section class="ov3MarketStrip" aria-label="접속 시 조회한 지수 시세">'
   +'<div class="ov3StripTitle"><strong>MARKET QUOTES · 접속 시 조회</strong>'
   +'<small>'+escapeHtml(label)+' · TRI-POD 판단 기준은 미국 '+escapeHtml(m.session||'—')+' 완료일봉</small></div>'
+  +gapNotice
   +'<div class="ov3StripData">'+rows.map(x=>
    '<div class="ov3StripTile" data-ov3-quote="'+escapeHtml(x.key)+'" data-quote-kind="'+x.kind+'">'
    +'<span>'+escapeHtml(x.label)+' · '+escapeHtml(x.session||'기준일 확인 대기')+'</span>'
@@ -234,7 +240,7 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261118-sector-zero-centered-1';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261120-observation-times-1';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
    const marker=e.target.closest('button[data-ov3-point]');
