@@ -27,7 +27,7 @@ if ($missing.Count -gt 0) {
     Write-Host "Restart terminal; then: gh auth login ; codex login ; claude"
     exit 1
 }
-if ($env:OPENAI_API_KEY -or $env:CODEX_API_KEY -or $env:ANTHROPIC_API_KEY) {
+if ($env:OPENAI_API_KEY -or $env:CODEX_API_KEY -or $env:ANTHROPIC_API_KEY -or $env:ANTHROPIC_AUTH_TOKEN -or $env:CLAUDE_CODE_USE_BEDROCK -or $env:CLAUDE_CODE_USE_VERTEX) {
     throw "API key environment variable detected. Use subscription CLI sign-in for no metered API calls."
 }
 Write-Host "Verifying subscriptions and CLI login states..." -ForegroundColor Cyan
@@ -37,6 +37,8 @@ if ($LASTEXITCODE -ne 0) { throw "Please run gh auth login before installing sta
 if ($LASTEXITCODE -ne 0) { throw "Please run codex login (ChatGPT account) before installing." }
 & claude auth status *> $null
 if ($LASTEXITCODE -ne 0) { throw "Please run claude auth login (Claude subscription) before installing." }
+$isolation = Read-Host "Is this a DEDICATED non-admin Windows user profile with NO bank/private files or accounts (Y/N)"
+if ($isolation -notin @("Y","y")) { throw "Install on a dedicated, non-admin Windows account only." }
 $confirmation = Read-Host "Install startup relay? It reads public PRs and posts GitHub agent handoffs (Y/N)"
 if ($confirmation -notin @("Y", "y")) { Write-Host "Cancelled"; exit 0 }
 $ws = New-Object -ComObject WScript.Shell
