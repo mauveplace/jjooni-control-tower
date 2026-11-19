@@ -30,6 +30,13 @@ if ($missing.Count -gt 0) {
 if ($env:OPENAI_API_KEY -or $env:CODEX_API_KEY -or $env:ANTHROPIC_API_KEY) {
     throw "API key environment variable detected. Use subscription CLI sign-in for no metered API calls."
 }
+Write-Host "Verifying subscriptions and CLI login states..." -ForegroundColor Cyan
+& gh auth status *> $null
+if ($LASTEXITCODE -ne 0) { throw "Please run gh auth login before installing startup relay." }
+& codex login status *> $null
+if ($LASTEXITCODE -ne 0) { throw "Please run codex login (ChatGPT account) before installing." }
+& claude auth status *> $null
+if ($LASTEXITCODE -ne 0) { throw "Please run claude auth login (Claude subscription) before installing." }
 $confirmation = Read-Host "Install startup relay? It reads public PRs and posts GitHub agent handoffs (Y/N)"
 if ($confirmation -notin @("Y", "y")) { Write-Host "Cancelled"; exit 0 }
 $ws = New-Object -ComObject WScript.Shell
