@@ -1,5 +1,5 @@
 {
-  "available_from": "2016-11-21",
+  "available_from": "2016-11-22",
   "available_to": "2026-11-19",
   "backfill": {
     "canonical_rows_matched": 5,
@@ -88,9 +88,9 @@
   "contract": "ROLLING_3650D_EVENT_AND_METRIC_HISTORY_PRESERVE_V2",
   "coverage_scope": "ARCHIVE_BOUNDARY_AND_FETCH_ERRORS_ONLY",
   "coverage_status": "FULL",
-  "generated_kst": "2026-11-19T21:51:06+09:00",
+  "generated_kst": "2026-11-20T03:55:35+09:00",
   "missing_policy": "Historical consensus/actual is shown only when captured or verified; values are never synthesized.",
-  "row_count": 37832,
+  "row_count": 37826,
   "schema": "JJOONI_CALENDAR_HISTORY_INDEX_V1",
   "series": {
     "FF::AU::aig-construction-index": {
@@ -2296,25 +2296,25 @@
       "sha256": "66b27a02572af007e03156356c3f2a5990edb91f77a183e6f72b8bcdc4b6c4f6"
     },
     "FF::CA::wholesale-sales-m-m": {
-      "available_from": "2016-11-21",
+      "available_from": "2016-12-20",
       "available_to": "2026-11-13",
       "canonical": false,
       "category": null,
-      "count": 121,
+      "count": 120,
       "country": "CA",
       "event_title": "Wholesale Sales m/m",
       "kind": "event",
       "label": "Wholesale Sales m/m",
       "metric_key": null,
-      "path": "./calendar-history/series/95f2f2a07e8bc37dce36400224d413a2a69a2e08ad14f0d5e1caa842c1b267c5.json",
+      "path": "./calendar-history/series/54c510696ca438c14f658bd5629a3d83330f9c2f58f751fda6b14e81284671ba.json",
       "quality": {
-        "actual_count": 121,
+        "actual_count": 120,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 121,
+        "consensus_count": 120,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 35,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -2329,7 +2329,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::CA::wholesale-sales-m-m",
-      "sha256": "95f2f2a07e8bc37dce36400224d413a2a69a2e08ad14f0d5e1caa842c1b267c5"
+      "sha256": "54c510696ca438c14f658bd5629a3d83330f9c2f58f751fda6b14e81284671ba"
     },
     "FF::CH::cpi-m-m": {
       "available_from": "2016-12-06",
@@ -2882,25 +2882,25 @@
       "sha256": "259c592d987653820929893da23aeaf42dedc0c475c03fe730b483ee2a160376"
     },
     "FF::CN::cb-leading-index-m-m": {
-      "available_from": "2016-11-21",
+      "available_from": "2016-12-20",
       "available_to": "2026-10-28",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "CN",
       "event_title": "CB Leading Index m/m",
       "kind": "event",
       "label": "CB Leading Index m/m",
       "metric_key": null,
-      "path": "./calendar-history/series/1796e3fcc90b0ebe2f93732e278c696a2205f1b064470499184369c101f42aaf.json",
+      "path": "./calendar-history/series/701ae6edb3b39fe682f6e823178357242292e362a46f1806e7fef571d177f5e1.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 41,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -2915,7 +2915,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::CN::cb-leading-index-m-m",
-      "sha256": "1796e3fcc90b0ebe2f93732e278c696a2205f1b064470499184369c101f42aaf"
+      "sha256": "701ae6edb3b39fe682f6e823178357242292e362a46f1806e7fef571d177f5e1"
     },
     "FF::CN::cpi-y-y": {
       "available_from": "2016-12-09",
@@ -8304,25 +8304,25 @@
       "sha256": "fd353ce8f07732aa3e2f8542ed2e2d9384cabe66555c05b102603d99f2ca9bf0"
     },
     "FF::JP::all-industries-activity-m-m": {
-      "available_from": "2016-11-21",
+      "available_from": "2016-12-21",
       "available_to": "2020-09-23",
       "canonical": false,
       "category": null,
-      "count": 47,
+      "count": 46,
       "country": "JP",
       "event_title": "All Industries Activity m/m",
       "kind": "event",
       "label": "All Industries Activity m/m",
       "metric_key": null,
-      "path": "./calendar-history/series/723308862ddfc0b078693d1c36046daba27fa13ebdebe1e5a47262bb6a0c0001.json",
+      "path": "./calendar-history/series/8ebae279d6f95f47954292c62c54d079e1d008a61125092f18f34ac98c0fd287.json",
       "quality": {
-        "actual_count": 47,
+        "actual_count": 46,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 47,
+        "consensus_count": 46,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 36,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -8331,7 +8331,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::JP::all-industries-activity-m-m",
-      "sha256": "723308862ddfc0b078693d1c36046daba27fa13ebdebe1e5a47262bb6a0c0001"
+      "sha256": "8ebae279d6f95f47954292c62c54d079e1d008a61125092f18f34ac98c0fd287"
     },
     "FF::JP::average-cash-earnings-y-y": {
       "available_from": "2016-12-06",
@@ -9448,25 +9448,25 @@
       "sha256": "94d5ab2896c84052294e42e978d9065c471625eee2f8eda167ffa09c44e61873"
     },
     "FF::JP::trade-balance": {
-      "available_from": "2016-11-21",
+      "available_from": "2016-12-19",
       "available_to": "2026-10-21",
       "canonical": false,
       "category": null,
-      "count": 120,
+      "count": 119,
       "country": "JP",
       "event_title": "Trade Balance",
       "kind": "event",
       "label": "Trade Balance",
       "metric_key": null,
-      "path": "./calendar-history/series/8855bf869bbbc4827a6911bb7e5896e1fd24e4863ced77fe1670bdbddaee5357.json",
+      "path": "./calendar-history/series/d7d77d1dfe33e8b422f54d865f18ce59f75b88c01177215d475c3491bd9c70c6.json",
       "quality": {
-        "actual_count": 120,
+        "actual_count": 119,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 120,
+        "consensus_count": 119,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 37,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -9481,7 +9481,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::JP::trade-balance",
-      "sha256": "8855bf869bbbc4827a6911bb7e5896e1fd24e4863ced77fe1670bdbddaee5357"
+      "sha256": "d7d77d1dfe33e8b422f54d865f18ce59f75b88c01177215d475c3491bd9c70c6"
     },
     "FF::JP::unemployment-rate": {
       "available_from": "2016-11-29",
@@ -9700,25 +9700,24 @@
       "sha256": "ba0ed7f3aa01bf3cec6174e4b57f0186818e9c351f43f2a3b7b84b182d9fe0e3"
     },
     "FF::NZ::core-retail-sales-q-q": {
-      "available_from": "2016-11-21",
+      "available_from": "2017-02-17",
       "available_to": "2026-08-24",
       "canonical": false,
       "category": null,
-      "count": 40,
+      "count": 39,
       "country": "NZ",
       "event_title": "Core Retail Sales q/q",
       "kind": "event",
       "label": "Core Retail Sales q/q",
       "metric_key": null,
-      "path": "./calendar-history/series/3cf421f45a374d0a62b7ef5683ade9559fa5ef7c7b41434aba202da7b50daba3.json",
+      "path": "./calendar-history/series/d5231d5ee45614c98a14ef9f21c33c28add4ca5bdfbe2fac17e5c7f845ff8097.json",
       "quality": {
-        "actual_count": 40,
+        "actual_count": 39,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
-        "consensus_count": 40,
+        "consensus_count": 39,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 101,
         "rows_by_year": {
-          "2016": 1,
           "2017": 4,
           "2018": 4,
           "2019": 4,
@@ -9733,7 +9732,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::NZ::core-retail-sales-q-q",
-      "sha256": "3cf421f45a374d0a62b7ef5683ade9559fa5ef7c7b41434aba202da7b50daba3"
+      "sha256": "d5231d5ee45614c98a14ef9f21c33c28add4ca5bdfbe2fac17e5c7f845ff8097"
     },
     "FF::NZ::cpi-q-q": {
       "available_from": "2017-01-26",
@@ -9771,25 +9770,25 @@
       "sha256": "2a37e1b451cd8209a3828926d044d4aa0a2d89fce6664c6ed6e87a9fe4294f52"
     },
     "FF::NZ::credit-card-spending-y-y": {
-      "available_from": "2016-11-21",
+      "available_from": "2016-12-21",
       "available_to": "2026-10-21",
       "canonical": false,
       "category": null,
-      "count": 119,
+      "count": 118,
       "country": "NZ",
       "event_title": "Credit Card Spending y/y",
       "kind": "event",
       "label": "Credit Card Spending y/y",
       "metric_key": null,
-      "path": "./calendar-history/series/e38e61b295656c65728b5afe4f5cd3347e21d9435f2e2ff9704b25a2cb609b83.json",
+      "path": "./calendar-history/series/fe7d52cc9b44ec0cc33abc49d8235611ef52cc27bff929db6442860620d10faf.json",
       "quality": {
-        "actual_count": 119,
+        "actual_count": 118,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 0,
         "frequency_validation": "NOT_VALIDATED",
         "max_observed_gap_days": 85,
         "rows_by_year": {
-          "2016": 2,
+          "2016": 1,
           "2017": 12,
           "2018": 12,
           "2019": 12,
@@ -9804,7 +9803,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "FF::NZ::credit-card-spending-y-y",
-      "sha256": "e38e61b295656c65728b5afe4f5cd3347e21d9435f2e2ff9704b25a2cb609b83"
+      "sha256": "fe7d52cc9b44ec0cc33abc49d8235611ef52cc27bff929db6442860620d10faf"
     },
     "FF::NZ::current-account": {
       "available_from": "2016-12-22",
@@ -14650,9 +14649,9 @@
       "event_title": "U.S. Initial Jobless Claims",
       "kind": "event",
       "label": "U.S. Initial Jobless Claims",
-      "path": "./calendar-history/series/257c820e00a15c438b14522f8422c92d8119d0e6e999be92fb50fc7d2a26e12f.json",
+      "path": "./calendar-history/series/eb5b13baf5269cc6d5cdae78023297aa278e9217c4c79a3facc7fed66ee2cb5b.json",
       "quality": {
-        "actual_count": 12,
+        "actual_count": 13,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 11,
         "frequency_validation": "NOT_VALIDATED",
@@ -14663,7 +14662,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims",
-      "sha256": "257c820e00a15c438b14522f8422c92d8119d0e6e999be92fb50fc7d2a26e12f"
+      "sha256": "eb5b13baf5269cc6d5cdae78023297aa278e9217c4c79a3facc7fed66ee2cb5b"
     },
     "US::u-s-initial-jobless-claims::initial_claims": {
       "available_from": "2016-11-23",
@@ -14675,9 +14674,9 @@
       "kind": "metric",
       "label": "Initial Jobless Claims",
       "metric_key": "initial_claims",
-      "path": "./calendar-history/series/3b4b203a91a9aabe17f2102bc8bdc04045714d4bf45c426ad9c69af299bdf647.json",
+      "path": "./calendar-history/series/d67e528023ea9c91ad6b6a3b046cc2730c2b4f6e66c3cd3b5412ac337f65a18b.json",
       "quality": {
-        "actual_count": 517,
+        "actual_count": 518,
         "backtest_policy": "AS_RELEASED_VINTAGE_REQUIRED",
         "consensus_count": 515,
         "frequency_validation": "NOT_VALIDATED",
@@ -14698,7 +14697,7 @@
         "status": "OBSERVED_ONLY_NOT_VALIDATED_COMPLETE"
       },
       "ref": "US::u-s-initial-jobless-claims::initial_claims",
-      "sha256": "3b4b203a91a9aabe17f2102bc8bdc04045714d4bf45c426ad9c69af299bdf647"
+      "sha256": "d67e528023ea9c91ad6b6a3b046cc2730c2b4f6e66c3cd3b5412ac337f65a18b"
     },
     "US::u-s-international-trade-in-goods-and-services": {
       "available_from": "2026-10-06",
@@ -14846,11 +14845,11 @@
   },
   "series_completeness_status": "NOT_VALIDATED",
   "series_count": 439,
-  "snapshot_id": "559171d198ee70badd93d15fc5e1a349d3da4f82263e50e41b755c170592553a",
-  "source_sha256": "559171d198ee70badd93d15fc5e1a349d3da4f82263e50e41b755c170592553a",
+  "snapshot_id": "5265eb92170b760e6ccc77f843cadf1083098c2d8a65d52e1325c4dab04225f9",
+  "source_sha256": "5265eb92170b760e6ccc77f843cadf1083098c2d8a65d52e1325c4dab04225f9",
   "timezone": "Asia/Seoul",
   "window_days": 3650,
-  "window_end": "2026-11-19",
-  "window_start": "2016-11-21",
+  "window_end": "2026-11-20",
+  "window_start": "2016-11-22",
   "window_years": 10
 }
