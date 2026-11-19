@@ -334,6 +334,8 @@ test('V3 prioritizes fetched index quotes, exposes session/time, keeps TRI-POD E
  assert.match(html,/MARKET QUOTES · 접속 시 조회/);
  assert.match(html,/26,345\.67/);
  assert.match(html,/Test index quote provider/);
+ assert.match(html,/장 마감 관측 확인/);
+ assert.match(html,/완료일봉 업데이트 대기/);
  assert.match(html,/KST/);
  assert.match(html,new RegExp('TRI-POD 판단 기준은 미국 '+oldSession));
  assert.equal(m.ndx,publishedNDX);
