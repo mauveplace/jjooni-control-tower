@@ -100,7 +100,7 @@ test('V3 threshold numbers from same-session published canonical, never generate
  assert.equal(m.noTrade,true);
  assert.match(rail(m),/NO.*TRADE|주문 신호 아님/);
  assert.match(rail(m),/NO-POD 진입 고정 기준점·손절선 상세 보기/);
- assert.match(marketStrip(m),/MARKET CLOSE/);
+ assert.match(marketStrip(m),/MARKET QUOTES/);
  assert.equal(m.sectors.length,11);
  assert.match(sectorChart(m),/자금흐름 아님/);
 });
@@ -330,6 +330,10 @@ test('V3 prioritizes fetched index quotes, exposes session/time, keeps TRI-POD E
  assert.equal(ndx.kind,'QUOTE');assert.equal(ndx.value,26345.67);assert.equal(ndx.session,newSession);
  assert.equal(sp.kind,'PUBLISHED');assert.equal(sp.session,oldSession);
  assert.equal(ndx.status,'최근 마감 관측');
+ const closed80=marketStripRows(m,get,seen+80*60000).find(x=>x.key==='NASDAQ100');
+ assert.equal(closed80.delayed,false,'CLOSED observed bar remains recent close, not intraday delay');
+ assert.equal(closed80.status,'최근 마감 관측');
+ assert.match(marketStrip(m,get,seen+80*60000),/시세 API 조회 결과/);
  const html=marketStrip(m,get,t);
  assert.match(html,/MARKET QUOTES · 접속 시 조회/);
  assert.match(html,/26,345\.67/);
