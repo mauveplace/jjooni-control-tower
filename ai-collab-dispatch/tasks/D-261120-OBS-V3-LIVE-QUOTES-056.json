@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261120-OBS-V3-LIVE-QUOTES-056",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independently audit PR #554: expose existing on-open index quote API in Observatory V3 market strip with actual observation date/time/source/status, while keeping historical daily-glance EOD and TRI-POD signal isolated. Verify fallback and mobile UX and original 2026-11-20 06:20 KST stale-session incident.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "observatory_v3_on_view_quote_truth",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "The user explicitly requested at 2026-11-20 06:20 KST that NASDAQ and major indices be fetched on each Observatory visit; prior project instructions authorize collaborating with ROY and deploying verified improvements without repeated decision requests.",
+  "acceptance": [
+    "Verify present main source daily-glance generated_kst=2026-11-20T01:46:34+09:00 yet us_session=2026-11-18; distinguish market quote observation 2026-11-19 from 2026-11-18 TRI-POD EOD.",
+    "Review PR #554 exact current HEAD. Check quote get observes session_date, observed_at, source, refresh_status and never substitutes a stale/older or future timestamp as fresh.",
+    "Run node --test tests/observatory-v3.test.cjs; test visual behavior with 390px mobile Playwright where possible; check no JS syntax error, event-handling loops, HTML escape regressions and wrong green/amber data status.",
+    "Confirm quote API on-open/visibility resume existing single-flight 60-second guard unchanged, no new polling, Cloud Run billing or secrets.",
+    "Confirm no write to EOD, official Nasdaq verification, TRI-POD rules/order/account data. Show TRI-POD dated 11/18 and index quote dated 11/19 when API is newer, with explicit label.",
+    "Reply with genuine PASS/NEEDS_CHANGES/BLOCKED on PR #554, reviewed HEAD SHA, P0/P1/P2 and evidence; if P0/P1 give smallest exact fix. Do not claim deployed before main CI and Pages evidence."
+  ],
+  "forbidden": [
+    "No trading, private account numbers, secrets or new cloud charges.",
+    "No weakening CI or disabling alerts.",
+    "ROY must not merge/deploy or claim a review it did not actually perform."
+  ]
+}
