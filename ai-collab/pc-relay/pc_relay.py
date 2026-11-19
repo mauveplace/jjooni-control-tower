@@ -26,6 +26,8 @@ V4 = re.compile(r"^<!-- JJOONI-COLLAB-V4 task=([A-Za-z0-9_-]+) actor=ROY stage=r
 MAX_DAILY_CALLS = 12
 POLL_SECONDS = 90
 CLOUD_GRACE_MINUTES = 10
+MAX_FAILURE_ATTEMPTS = 2
+SECRET_RE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|ANTHROPIC_AUTH_TOKEN|CODEX_API_KEY)", re.IGNORECASE)
 
 def now():
     return dt.datetime.now(dt.timezone.utc)
@@ -40,8 +42,8 @@ def log(msg):
     with LOG_FILE.open("a", encoding="utf-8") as fp:
         fp.write(line + "\n")
 
-def cmd(argv, cwd=None, timeout=120):
-    p = subprocess.run(argv, cwd=cwd, capture_output=True, text=True,
+def cmd(argv, cwd=None, timeout=120, stdin_text=None):
+    p = subprocess.run(argv, cwd=cwd, input=stdin_text, capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=timeout,
                        shell=False)
     if p.returncode:
@@ -76,7 +78,9 @@ def pr_task(pr):
     if len(tasks) != 1:
         return None
     task = read_task(tasks[0], sha)
-    if (task.get("schema") != "JJOONI_COLLAB_V4" or
+    if (pr.get("user", {}).get("login") != OWNER or
+        pr.get("head", {}).get("repo", {}).get("full_name") != REPO or
+        task.get("schema") != "JJOONI_COLLAB_V4" or
         task.get("repository") != REPO or
         task.get("base_branch") != "main" or
         task.get("mode") != "SYSTEM_REVIEW_ONLY" or
@@ -96,6 +100,29 @@ def save_ledger(ledger):
     tmp.write_text(json.dumps(ledger, indent=2, ensure_ascii=False), encoding="utf-8")
     tmp.replace(STATE_FILE)
 
+def guard_public_output(msg):
+    if SECRET_RE.search(msg):
+        raise RuntimeError("PUBLIC_OUTPUT_BLOCKED_SECRET_PATTERN")
+    if len(msg) > 9000:
+        raise RuntimeError("PUBLIC_OUTPUT_TOO_LONG")
+    return msg
+
+def retry_blocked(ledger, key):
+    record = ledger["events"].get(key, {})
+    if record.get("status") != "FAILED":
+        return False
+    if record.get("attempts", 0) >= MAX_FAILURE_ATTEMPTS:
+        return True
+    return record.get("next_retry_epoch", 0) > time.time()
+
+def record_failure(ledger, key, error):
+    before = ledger["events"].get(key, {})
+    attempts = before.get("attempts", 0) + 1
+    ledger["events"][key] = {"status": "FAILED", "attempts": attempts,
+                             "next_retry_epoch": time.time() + 180 * (2 ** (attempts - 1)),
+                             "last_error": str(error)[:250], "time": stamp()}
+    save_ledger(ledger)
+
 def allowed(ledger, actor):
     key = f"{now().date().isoformat()}:{actor}"
     return ledger["calls"].get(key, 0) < MAX_DAILY_CALLS
@@ -108,14 +135,17 @@ def run_agent(actor, prompt, repo_dir, ledger):
     ledger["calls"][key] = ledger["calls"].get(key, 0) + 1
     save_ledger(ledger)
     if actor == "CODEX":
-        argv = ["codex", "exec", "--sandbox", "read-only", prompt]
-        output = cmd(argv, cwd=repo_dir, timeout=420)
+        argv = [shutil.which("codex"), "exec", "--sandbox", "read-only", "-"]
+        output = cmd(argv, cwd=repo_dir, timeout=420, stdin_text=prompt)
     elif actor == "CLAUDE":
-        argv = ["claude", "-p", "--permission-mode", "plan",
-                "--max-turns", "4", "--output-format", "json", prompt]
-        raw = cmd(argv, cwd=repo_dir, timeout=420)
+        argv = [shutil.which("claude"), "-p", "--permission-mode", "plan",
+                "--tools", "", "--strict-mcp-config", "--max-turns", "4",
+                "--output-format", "json"]
+        raw = cmd(argv, cwd=repo_dir, timeout=420, stdin_text=prompt)
         try:
             parsed = json.loads(raw)
+            if parsed.get("is_error") or str(parsed.get("subtype", "")).startswith("error_"):
+                raise RuntimeError("CLAUDE_NON_SUCCESS_STATUS")
             output = parsed.get("result", raw)
         except ValueError:
             output = raw
@@ -123,7 +153,7 @@ def run_agent(actor, prompt, repo_dir, ledger):
         raise ValueError("Unknown actor")
     if not output or not str(output).strip():
         raise RuntimeError(f"{actor}_EMPTY_OUTPUT")
-    return str(output).strip()[:4400]
+    return guard_public_output(str(output).strip()[:4400])
 
 def pr_diff(num):
     """Fetch the actual PR diff; do not mistake checked-out main for current PR HEAD."""
@@ -143,7 +173,7 @@ def handle_issues(repo_dir, ledger, simulate):
             continue
         num = issue["number"]
         key = f"JJOONI-PC-DUAL-AGENT-V1 issue={num}"
-        if ledger["events"].get(key, {}).get("status") == "DONE":
+        if ledger["events"].get(key, {}).get("status") == "DONE" or retry_blocked(ledger, key):
             continue
         comments = gh_api(f"repos/{REPO}/issues/{num}/comments?per_page=100")
         if any(key in x.get("body", "") for x in comments):
@@ -170,6 +200,7 @@ def handle_issues(repo_dir, ledger, simulate):
             emit_once(num, key, result, ledger, False)
             log(f"DUAL_AGENT done Issue #{num}")
         except Exception as exc:
+            record_failure(ledger, key, exc)
             log(f"DUAL_AGENT issue #{num} blocked: {exc}")
         return  # Bound to one new task per cycle to control subscription usage.
 
@@ -180,6 +211,7 @@ def emit_once(pr_num, key, comment, ledger, simulate):
                                  "note": "existing comment, not repeated"}
         save_ledger(ledger)
         return False
+    guard_public_output(comment)
     if simulate:
         log(f"DRY_RUN would post {key} on PR #{pr_num}")
         return False
@@ -209,7 +241,7 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
     for c in reviews[-3:]:
         original = c["id"]
         key = f"JJOONI-PC-HANDOFF-V1 pr={num} comment={original} head={sha}"
-        if ledger["events"].get(key, {}).get("status") == "DONE":
+        if ledger["events"].get(key, {}).get("status") == "DONE" or retry_blocked(ledger, key):
             continue
         if any(key in x.get("body", "") for x in comments):
             ledger["events"][key] = {"status": "DONE", "time": stamp()}
@@ -242,7 +274,7 @@ def handle_pr(pr, repo_dir, ledger, simulate, enable_fallback):
     if age < CLOUD_GRACE_MINUTES * 60 or age > 36 * 3600:
         return
     key = f"JJOONI-PC-LOCAL-ROY-V1 pr={num} task={task['task_id']} head={sha}"
-    if key in ledger["events"]:
+    if ledger["events"].get(key, {}).get("status") == "DONE" or retry_blocked(ledger, key):
         return
     if any(key in x.get("body", "") for x in comments):
         ledger["events"][key] = {"status": "DONE", "time": stamp()}
@@ -274,7 +306,7 @@ def once(repo_dir, simulate=False, enable_fallback=False):
     for p in eligible[:6]:
         try:
             handle_pr(p, repo_dir, ledger, simulate, enable_fallback)
-        except (RuntimeError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:
+        except (RuntimeError, ValueError, KeyError, OSError, subprocess.TimeoutExpired) as exc:
             log(f"PR #{p.get('number')} BLOCKED: {exc}")
     handle_issues(repo_dir, ledger, simulate)
     save_ledger(ledger)
@@ -314,7 +346,9 @@ def main():
         if not shutil.which(exe):
             parser.error(f"Missing {exe} in PATH. Install and login first.")
     # Avoid unintended metered API-key billing.
-    if os.getenv("ANTHROPIC_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("CODEX_API_KEY"):
+    if (os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN") or
+        os.getenv("OPENAI_API_KEY") or os.getenv("CODEX_API_KEY") or
+        os.getenv("CLAUDE_CODE_USE_BEDROCK") or os.getenv("CLAUDE_CODE_USE_VERTEX")):
         parser.error("Refusing run while an API key env variable is present; use subscription CLI login")
     lock = single_instance()
     log(f"START repo={repo_dir} dry_run={args.dry_run} local_fallback={args.enable_local_claude_fallback}")
