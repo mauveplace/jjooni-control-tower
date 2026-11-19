@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_OBSERVATORY_FRESHNESS_STATUS_V2",
-  "generated_kst": "2026-11-19T08:16:02+09:00",
+  "generated_kst": "2026-11-19T10:53:57+09:00",
   "freshness_policy": {
     "max_status_age_seconds": 7200,
     "scope": "STATUS_ASSESSMENT_NOT_OBSERVATION_AGE",
@@ -9,6 +9,7 @@
   "overall": "LIVE_WITH_WARNINGS",
   "critical_bad": [],
   "warnings": [
+    "jp_rates",
     "fedwatch",
     "audit"
   ],
@@ -102,7 +103,7 @@
     },
     "jp_rates": {
       "label": "JP Rates",
-      "state": "LIVE",
+      "state": "LAGGING",
       "generated_kst": "2026-11-19T07:26:11+09:00",
       "as_of": "2026-11-17",
       "detail": "JP2Y 2026-11-17 · JP5Y 2026-11-17 · JP10Y 2026-11-17 · JP20Y 2026-11-17 · JP30Y 2026-11-17 · JP_2S10S 2026-11-17",
@@ -111,19 +112,19 @@
     },
     "crypto": {
       "label": "Crypto fallback snapshot",
-      "state": "LIVE",
+      "state": "STALE",
       "generated_kst": "2026-11-19T07:26:37+09:00",
       "as_of": null,
-      "detail": "BTCUSD age=2967s · ETHUSD age=2966s",
+      "detail": "BTCUSD age=12442s · ETHUSD age=12441s",
       "source": "BTCUSD: Binance Spot last trade / USDT · ETHUSD: Binance Spot last trade / USDT",
       "critical": false,
       "quotes": {
         "BTCUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-19T07:26:35+09:00"
         },
         "ETHUSD": {
-          "status": "LIVE",
+          "status": "STALE",
           "quote_as_of_kst": "2026-11-19T07:26:36+09:00"
         }
       },
@@ -210,9 +211,9 @@
     "audit": {
       "label": "Full Data Audit",
       "state": "WARN",
-      "generated_kst": "2026-11-19T08:16:02+09:00",
+      "generated_kst": "2026-11-19T10:53:57+09:00",
       "as_of": "2026-11-18",
-      "detail": "critical=0 · warnings=1",
+      "detail": "critical=0 · warnings=2",
       "source": "data-audit.json",
       "critical": true
     },
