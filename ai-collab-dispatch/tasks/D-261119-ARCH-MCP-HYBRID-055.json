@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261119-ARCH-MCP-HYBRID-055",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent adversarial ROY audit of whether user's Instagram-shared direct MCP/Claude Code collaboration is preferable to current GitHub PR/Issue + Claude Routine + ChatGPT Work setup; recommend smallest safe, actual E2E-proven collaboration architecture. Related issue #546.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "collaboration_architecture_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User explicitly requested on 2026-11-19 to consult ROY to determine whether AI-to-AI collaboration mechanism is optimal; review only, no release authorized.",
+  "acceptance": [
+    "Read docs/ai-collab-direct-vs-github-architecture-review-20261119.md at this PR exact HEAD, as well as main ai-collab/PROTOCOL.md, ROUTINES.md, JJOONI_FIRST.md and FOLLOWUP_ISSUE_DISPATCH.md.",
+    "Independently compare direct Windows MCP/Claude Code, existing GitHub-only, and hybrid, including trigger guarantee, run provenance, permissions, reliability, cost, manual setup, and failure recovery; challenge provisional preference.",
+    "Inspect actual conditions and missing evidence of automated ROY wake and automated JJOONI receipt/fix; distinguish a GitHub comment/PR from proof of Claude or Work execution.",
+    "Make one ROY review on current PR with literal ROY_ARCH_REVIEW=AGREE|AGREE_WITH_CHANGES|DISAGREE|BLOCKED plus evidence-based P0/P1 and real E2E criteria, with actual Claude run/session provenance.",
+    "Do not alter production, trading, strategy or automations and do not mark completed before authenticated ROY answer."
+  ],
+  "forbidden": [
+    "No coding outside this review, no merge/deploy/trade or local Windows shell access.",
+    "No private account, company or personal data and no secrets/tokens.",
+    "No new paid cloud/API services, broad permissions, remote PC tunnels or hidden recurring jobs.",
+    "No claiming chat request/comment itself caused an authenticated Claude run."
+  ]
+}
