@@ -1,6 +1,6 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-20T06:52:58+09:00",
+ "generated_kst": "2026-11-20T10:47:38+09:00",
  "us_session": "2026-11-19",
  "source_generated_kst": "2026-11-20T06:52:38+09:00",
  "read_only": true,
@@ -283,9 +283,19 @@
  ],
  "brief_check": {
   "report_date_kst": "2026-11-19",
-  "market_date_us": "2026-11-18",
-  "status": "NOT_SAME_SESSION",
-  "text": "아침 시황은 미국 2026-11-18 기준, 카드는 2026-11-19 기준입니다."
+  "market_date_us": "2026-11-19",
+  "status": "MATCH",
+  "brief_ndx": 26517.05,
+  "pipeline_ndx": 26517.0508,
+  "official_status": "VERIFIED",
+  "official_eod_verified": true,
+  "trade_signal_eligible": false,
+  "source_url": "https://indexes.nasdaqomx.com/Index/Overview/ndx",
+  "source_date": "2026-11-19",
+  "evidence_observed_kst": "2026-11-20T10:47:37+09:00",
+  "source_type": "NASDAQ_INDEXES_OFFICIAL",
+  "match_rule": "INTEGER_PART_EQUAL",
+  "text": "Nasdaq 공식 종가 26,517.05 / 제공자 완료일봉 26,517.05: 정수자리 26,517 / 26,517 일치(MATCH). 완료 종가 검증 결과이며 자동 주문 신호가 아닙니다."
  },
  "quality": {
   "missing": [],
