@@ -331,6 +331,26 @@ test('V3 prioritizes fetched index quotes, exposes session/time, keeps TRI-POD E
  assert.equal(ndx.kind,'QUOTE');assert.equal(ndx.value,26345.67);assert.equal(ndx.session,newSession);
  assert.equal(sp.kind,'PUBLISHED');assert.equal(sp.session,oldSession);
  assert.equal(ndx.status,'최근 마감 관측');
+ // Use the genuine quote reader's quality() labels; its nonstale normal quote
+ // intentionally contains "지연 가능" (a disclaimer, NOT a delayed status).
+ const Q=require('../market-observatory/intraday-quotes-v1.js');
+ for(const state of ['REGULAR','PRE','POST','CONTINUOUS']){
+  const onTime={...q,market_state:state,observed_at:new Date(t-60000).toISOString(),refresh_status:'FETCHED',quality:'LIVE'};
+  const withQuality={...onTime,display_status:Q.quality(onTime,t)};
+  assert.equal(withQuality.display_status,'장중 관측 · 지연 가능');
+  const live=marketStripRows(m,key=>key==='NASDAQ100'?withQuality:null,t).find(x=>x.key==='NASDAQ100');
+  assert.equal(live.delayed,false,state+' 1min must NOT be declared a delayed observation');
+  assert.equal(live.status,'장중 관측 · 지연 가능');
+  assert.match(marketStrip(m,key=>key==='NASDAQ100'?withQuality:null,t),/시세 API 조회 결과/);
+  const old={...withQuality,observed_at:new Date(t-21*60000).toISOString()};
+  const held=marketStripRows(m,key=>key==='NASDAQ100'?old:null,t).find(x=>x.key==='NASDAQ100');
+  assert.equal(held.delayed,['REGULAR','CONTINUOUS'].includes(state),state+' delay must follow market-state policy');
+ }
+ const stale={...q,market_state:'REGULAR',display_status:'관측 지연'};
+ assert.equal(marketStripRows(m,key=>key==='NASDAQ100'?stale:null,t)[0].delayed,true);
+ const retainedByReader={...q,display_status:'이전 관측 유지'};
+ assert.equal(marketStripRows(m,key=>key==='NASDAQ100'?retainedByReader:null,t)[0].delayed,true);
+
  const closed80=marketStripRows(m,get,seen+80*60000).find(x=>x.key==='NASDAQ100');
  assert.equal(closed80.delayed,false,'CLOSED observed bar remains recent close, not intraday delay');
  assert.equal(closed80.status,'최근 마감 관측');
