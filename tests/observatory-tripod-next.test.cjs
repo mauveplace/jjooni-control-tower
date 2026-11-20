@@ -15,7 +15,13 @@ test('compare transition prices across sessions rather than showing MA250 moveme
  const lastWeekStart=new Date(currentMonday);lastWeekStart.setUTCDate(lastWeekStart.getUTCDate()-7);
  const priorWeek=data.tripod_history.filter(x=>x.date>=lastWeekStart.toISOString().slice(0,10)&&x.date<currentMonday.toISOString().slice(0,10)).at(-1);
  assert(priorWeek,'Previous completed week must exist in fixture');
- const m=ctx.model(t,data.us_completed_session_date,prior,priorWeek),fall=m.gates.find(x=>x.key==='fall'),dd=m.gates.find(x=>x.key==='drawdown');
+ // In a real NOPOD (cash) regime, the UI intentionally shows only VIX/rise
+ // gates. Exercise historical fall/drawdown boundary math with an explicit
+ // synthetic TRIPOD-state test fixture, never mutate the live signal.
+ const probe={...t,regime:'상승',target:'TQQQ 100%',vix10:20,drawdown_52w_pct:-5};
+ const m=ctx.model(probe,data.us_completed_session_date,prior,priorWeek);
+ assert(m.available,'Synthetic comparison fixture must expose both boundaries');
+ const fall=m.gates.find(x=>x.key==='fall'),dd=m.gates.find(x=>x.key==='drawdown');
  assert.equal(fall.previousBoundary,t.previous_ma250*.95);
  assert(Math.abs((fall.boundary-fall.previousBoundary)-(t.ma250-t.previous_ma250)*.95)<1e-8);
  assert.equal(dd.previousBoundary,priorWeek.ndx/(1+priorWeek.drawdown_52w_pct/100)*.91);
