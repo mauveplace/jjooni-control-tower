@@ -62,11 +62,16 @@ const unverifiedGlance = glance => {
 test('V3 requests completed TRI-POD catchup after a newer-session quote',()=>{
  const {needsCompletedCatchup}=require('../market-observatory/observatory-v3.js');
  const old={session:'2026-11-19'},current={session:'2026-11-20'};
- assert.equal(needsCompletedCatchup({session_date:'2026-11-20'},old),true);
- assert.equal(needsCompletedCatchup({session_date:'2026-11-20'},current),false);
- assert.equal(needsCompletedCatchup({session_date:'2026-11-19'},current),false);
- assert.equal(needsCompletedCatchup({session_date:'2026-11-21'},null),false);
- assert.equal(needsCompletedCatchup({session_date:'invalid'},old),false);
+ const closed={market_state:'CLOSED',session_date:'2026-11-20'};
+ assert.equal(needsCompletedCatchup(closed,old),true);
+ assert.equal(needsCompletedCatchup(closed,current),false);
+ assert.equal(needsCompletedCatchup({...closed,session_date:'2026-11-19'},current),false);
+ assert.equal(needsCompletedCatchup({...closed,session_date:'2026-11-21'},null),false);
+ assert.equal(needsCompletedCatchup({...closed,session_date:'invalid'},old),false);
+ for(const market_state of ['REGULAR','PRE','POST','CONTINUOUS'])
+  assert.equal(needsCompletedCatchup({...closed,market_state},old),false,'no pre-close EOD polling in '+market_state);
+ assert.equal(needsCompletedCatchup({...closed,refresh_status:'RETAINED'},old),false);
+ assert.equal(needsCompletedCatchup({...closed,quality:'STALE'},old),false);
  const source=fs.readFileSync(path.join(root,'observatory-v3.js'),'utf8');
  assert.match(source,/jjooni:observatory-quotes-updated/);
  assert.match(source,/syncCatchUp\(\)/);
