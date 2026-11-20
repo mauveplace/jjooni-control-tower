@@ -71,6 +71,8 @@ test('V3 requests completed TRI-POD catchup after a newer-session quote',()=>{
  assert.match(source,/jjooni:observatory-quotes-updated/);
  assert.match(source,/syncCatchUp\(\)/);
  assert.match(source,/setTimeout\(/);
+ assert.match(source,/__JJOONI_OBSERVATORY_MARKET_REFRESH/);
+ assert.match(source,/button\[data-tab="tripod"\]/);
  assert.match(source,/button\[data-tab="jjooni-tripod"\]/);
 });
 test('V3 is default while explicit V1/V2 remain available', () => {
