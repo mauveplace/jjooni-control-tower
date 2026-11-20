@@ -260,6 +260,9 @@ function mount(){
    if(btn?.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
   });
  let current=null,pending=null,last=0,catchUpTimer=null,catchUpStartedAt=0,catchUpSession='';
+ // Legacy strategy cards/chart read observatory-recent DATA, unlike V3 Glance.
+ // Reconcile both published readers when a new completed EOD session arrives.
+ const refreshLegacy=()=>root.__JJOONI_OBSERVATORY_MARKET_REFRESH?.refresh?.(true);
  function stopCatchUp(){if(catchUpTimer!==null)clearTimeout(catchUpTimer);catchUpTimer=null;}
  function syncCatchUp(){
   const quote=root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100');
@@ -270,9 +273,10 @@ function mount(){
   if(Date.now()-catchUpStartedAt>=90*60*1000){stopCatchUp();return;}
   if(catchUpTimer===null)catchUpTimer=setTimeout(()=>{
    catchUpTimer=null;
-   if(!document.hidden&&needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current))
-    void update(true);
-   else syncCatchUp();
+   if(!document.hidden&&needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current)){
+    const prior=current?.session;
+    void update(true).then(()=>{if(current?.ready&&current.session!==prior)void refreshLegacy();});
+   }else syncCatchUp();
   },30000);
  }
  async function update(force=false){
@@ -286,9 +290,10 @@ function mount(){
  root.__JJOONI_OBS_V3.refresh=()=>update(true);
  document.addEventListener('jjooni:observatory-quotes-updated',()=>{
   if(current)draw(current);
-  if(needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current))
+  if(needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current)){
    void update(true);
-  else syncCatchUp();
+   void refreshLegacy();
+  }else syncCatchUp();
  });
  const observer=new MutationObserver(changes=>{
   if(!current)return;
@@ -302,6 +307,7 @@ function mount(){
  const tabs=document.getElementById('tabs');
  if(tabs)tabs.addEventListener('click',e=>{
   if(e.target.closest('button[data-tab="overview"],button[data-tab="tripod"],button[data-tab="jjooni-tripod"]'))void update();
+  if(e.target.closest('button[data-tab="tripod"],button[data-tab="jjooni-tripod"]'))void refreshLegacy();
  });
  document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){void update();syncCatchUp();}
