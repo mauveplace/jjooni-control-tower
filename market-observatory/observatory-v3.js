@@ -14,6 +14,14 @@ const changeClass = v => finite(v) ? (v>0?'gain':v<0?'loss':'neutral') : 'neutra
 const pointKeys=['lower','now','upper','tri'];
 const pointLabels={lower:'하락 전환 후보 · MA250×0.95',now:'현재 NDX',upper:'상승 복귀 참고 · MA250×1.01',tri:'TRIPOD 낙폭 조건 · DD -9%'};
 let selectedPoint='now';
+// Quote observations never determine trading signals. A newer quote session
+// only requests a bounded refresh of the completed-session published ledger.
+const needsCompletedCatchup=(quote,snapshot)=>{
+ const observed=String(quote?.session_date||'').slice(0,10);
+ const published=String(snapshot?.session||'').slice(0,10);
+ return /^\d{4}-\d{2}-\d{2}$/.test(observed)
+  &&/^\d{4}-\d{2}-\d{2}$/.test(published)&&observed>published;
+};
 const distanceText=(target,now)=>{
  if(!finite(target)||!finite(now)||now<=0)return '현재 대비 거리 확인 불가';
  const delta=target-now;
@@ -229,7 +237,7 @@ function draw(m) {
   r.innerHTML=m.ready?rail(m,'strategy'):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.2-on-view-quotes',model,rail,distanceText,dailyMoveText,pointSummary,marketStripRows,marketStrip,sectorChart,enabled:isV3};
+const runtime={version:'3.2-on-view-quotes',model,rail,distanceText,dailyMoveText,pointSummary,marketStripRows,marketStrip,sectorChart,needsCompletedCatchup,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -251,17 +259,37 @@ function mount(){
    const btn=e.target.closest('button[data-ov3-tab]');
    if(btn?.dataset.ov3Tab==='jjooni-tripod')document.querySelector('#tabs button[data-tab="jjooni-tripod"]')?.click();
   });
- let current=null,pending=null,last=0;
+ let current=null,pending=null,last=0,catchUpTimer=null,catchUpStartedAt=0,catchUpSession='';
+ function stopCatchUp(){if(catchUpTimer!==null)clearTimeout(catchUpTimer);catchUpTimer=null;}
+ function syncCatchUp(){
+  const quote=root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100');
+  if(document.hidden||!needsCompletedCatchup(quote,current)){stopCatchUp();return;}
+  const session=String(quote.session_date).slice(0,10);
+  if(session!==catchUpSession){catchUpSession=session;catchUpStartedAt=Date.now();}
+  // Finite published-source catch-up while the page is visible, not price polling.
+  if(Date.now()-catchUpStartedAt>=90*60*1000){stopCatchUp();return;}
+  if(catchUpTimer===null)catchUpTimer=setTimeout(()=>{
+   catchUpTimer=null;
+   if(!document.hidden&&needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current))
+    void update(true);
+   else syncCatchUp();
+  },30000);
+ }
  async function update(force=false){
   if(pending)return pending;
   if(!force&&current&&Date.now()-last<15000){draw(current);return}
   pending=queryData().then(([g,f,s,d])=>{current=model(g,f,s,Date.now(),d);last=Date.now();draw(current)})
    .catch(()=>{current={ready:false,reason:'공개 원장 조회 실패'};draw(current)})
-   .finally(()=>{pending=null});
+   .finally(()=>{pending=null;syncCatchUp();});
   return pending;
  }
  root.__JJOONI_OBS_V3.refresh=()=>update(true);
- document.addEventListener('jjooni:observatory-quotes-updated',()=>{if(current)draw(current);});
+ document.addEventListener('jjooni:observatory-quotes-updated',()=>{
+  if(current)draw(current);
+  if(needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current))
+   void update(true);
+  else syncCatchUp();
+ });
  const observer=new MutationObserver(changes=>{
   if(!current)return;
   if(changes.some(c=>[...c.addedNodes].some(x=>x.nodeType===1&&
@@ -273,9 +301,12 @@ function mount(){
  update(true);
  const tabs=document.getElementById('tabs');
  if(tabs)tabs.addEventListener('click',e=>{
-  if(e.target.closest('button[data-tab="overview"],button[data-tab="tripod"]'))update();
+  if(e.target.closest('button[data-tab="overview"],button[data-tab="tripod"],button[data-tab="jjooni-tripod"]'))void update();
  });
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
+ document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){void update();syncCatchUp();}
+  else stopCatchUp();
+ });
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })(typeof window==='object'?window:globalThis);
