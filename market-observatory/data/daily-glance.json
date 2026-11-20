@@ -1,34 +1,34 @@
 {
  "schema": "JJOONI_DAILY_GLANCE_V1",
- "generated_kst": "2026-11-21T01:21:50+09:00",
- "us_session": "2026-11-19",
- "source_generated_kst": "2026-11-21T01:06:57+09:00",
+ "generated_kst": "2026-11-21T06:37:04+09:00",
+ "us_session": "2026-11-20",
+ "source_generated_kst": "2026-11-21T06:36:40+09:00",
  "read_only": true,
  "contains_account_data": false,
  "no_trade": true,
- "headline": "BIPOD 유지 · NDX 26,517(-2.21%) · VIX10 22.2 · DD -15.1%",
+ "headline": "NOPOD 전환 · NDX 25,029(-5.61%) · VIX10 23.2 · DD -19.8%",
  "tripod": {
-  "session": "2026-11-19",
-  "pod": "BIPOD",
-  "target": "QQQ 50% + QLD 50%",
-  "regime": "상승",
-  "changed": false,
-  "ndx": 26517.05,
-  "ma250": 27545.14,
-  "drawdown_52w_pct": -15.08,
-  "vix10": 22.19,
+  "session": "2026-11-20",
+  "pod": "NOPOD",
+  "target": "현금 100%",
+  "regime": "하락",
+  "changed": true,
+  "ndx": 25028.98,
+  "ma250": 27548.3,
+  "drawdown_52w_pct": -19.84,
+  "vix10": 23.21,
   "lines": {
    "tripod_return": 28414.27,
-   "ma250_upper": 27820.59,
-   "ma250_lower": 26167.88
+   "ma250_upper": 27823.78,
+   "ma250_lower": 26170.88
   },
   "distance_pct": {
-   "tripod_return": 7.15,
-   "ma250_upper": 4.92,
-   "ma250_lower": -1.32
+   "tripod_return": 13.53,
+   "ma250_upper": 11.17,
+   "ma250_lower": 4.56
   },
-  "next_up": "TRIPOD 복귀선 NDX 28,414 (+7.15%)",
-  "next_down": "하락 레짐 전환선 26,168 (-1.32%), 이탈 시 VIX10 22.19 ≥ 18 → NOPOD"
+  "next_up": "상승 레짐 복귀선 NDX 27,824 (+11.17%)",
+  "next_down": "VIX10 23.21, 18 미만이면 BIPOD"
  },
  "consistency": {
   "status": "OK",
@@ -41,74 +41,74 @@
     {
      "key": "NASDAQ100",
      "label": "나스닥100",
-     "date": "2026-11-19",
-     "value": 26517.0508,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.21,
-     "w1_pct": -6.26,
-     "m1_pct": -10.2
+     "date": "2026-11-20",
+     "value": 25028.9824,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -5.61,
+     "w1_pct": -10.43,
+     "m1_pct": -15.13
     },
     {
      "key": "SOX",
      "label": "필라델피아 반도체 · Yahoo 참고",
-     "date": "2026-11-19",
-     "value": 9419.7197,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.41,
-     "w1_pct": -10.35,
-     "m1_pct": -16.76,
+     "date": "2026-11-20",
+     "value": 8408.5908,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -10.73,
+     "w1_pct": -17.13,
+     "m1_pct": -25.48,
      "comparison_status": "SAME_PREVIOUS_US_SESSION",
      "source": "Yahoo ^SOX completed daily (single provider)"
     },
     {
      "key": "SP500",
      "label": "S&P500",
-     "date": "2026-11-19",
-     "value": 7175.8301,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.02,
-     "w1_pct": -5.49,
-     "m1_pct": -6.7
+     "date": "2026-11-20",
+     "value": 6910.3901,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -3.7,
+     "w1_pct": -8.61,
+     "m1_pct": -10.4
     },
     {
      "key": "NASDAQCOMPOSITE",
      "label": "나스닥종합",
-     "date": "2026-11-19",
-     "value": 23879.1992,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.25,
-     "w1_pct": -5.86,
-     "m1_pct": -9.65
+     "date": "2026-11-20",
+     "value": 22617.7324,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -5.28,
+     "w1_pct": -10.02,
+     "m1_pct": -14.41
     },
     {
      "key": "DOW",
      "label": "다우",
-     "date": "2026-11-19",
-     "value": 49097.0586,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.19,
-     "w1_pct": -6.12,
-     "m1_pct": -5.52
+     "date": "2026-11-20",
+     "value": 48147.3281,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -1.93,
+     "w1_pct": -8.02,
+     "m1_pct": -8.28
     },
     {
      "key": "RUSSELL2000",
      "label": "러셀2000",
-     "date": "2026-11-19",
-     "value": 2655.1101,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -2.18,
-     "w1_pct": -5.14,
-     "m1_pct": -2.68
+     "date": "2026-11-20",
+     "value": 2581.7896,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -2.76,
+     "w1_pct": -7.48,
+     "m1_pct": -6.91
     },
     {
      "key": "VIX",
      "label": "VIX",
-     "date": "2026-11-19",
-     "value": 28.44,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": 15.8,
-     "w1_pct": 52.09,
-     "m1_pct": 54.23
+     "date": "2026-11-20",
+     "value": 35.89,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": 26.2,
+     "w1_pct": 85.96,
+     "m1_pct": 107.34
     }
    ]
   },
@@ -173,22 +173,22 @@
     {
      "key": "USDKRW",
      "label": "원/달러",
-     "date": "2026-11-19",
-     "value": 1330.4,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -0.2,
-     "w1_pct": -0.44,
-     "m1_pct": -0.23
+     "date": "2026-11-20",
+     "value": 1346.45,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": 1.21,
+     "w1_pct": 0.95,
+     "m1_pct": 1.24
     },
     {
      "key": "DXY",
      "label": "달러인덱스",
-     "date": "2026-11-19",
-     "value": 103.9,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": 0.04,
-     "w1_pct": 0.71,
-     "m1_pct": 1.88
+     "date": "2026-11-20",
+     "value": 103.89,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -0.01,
+     "w1_pct": 0.46,
+     "m1_pct": 2.12
     },
     {
      "key": "US10Y",
@@ -203,12 +203,12 @@
     {
      "key": "US2Y",
      "label": "미 2년물",
-     "date": "2026-11-19",
-     "value": 4.76,
-     "m1_base_date": "2026-10-19",
-     "d1_bp": -4.0,
-     "w1_bp": -10.0,
-     "m1_bp": -1.0
+     "date": "2026-11-20",
+     "value": 4.63,
+     "m1_base_date": "2026-10-20",
+     "d1_bp": -13.0,
+     "w1_bp": -25.0,
+     "m1_bp": -16.0
     },
     {
      "key": "KR3Y",
@@ -229,41 +229,41 @@
      "key": "FEAR_GREED",
      "label": "공포탐욕",
      "date": "2026-11-20",
-     "value": 11.8,
+     "value": 9.7,
      "m1_base_date": "2026-10-20",
-     "d1_pt": -4.1,
-     "m1_pt": -16.9
+     "d1_pt": -6.2,
+     "m1_pt": -19.0
     },
     {
      "key": "GOLD",
      "label": "금",
-     "date": "2026-11-19",
-     "value": 3685.5,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -1.51,
-     "w1_pct": -5.14,
-     "m1_pct": -11.41
+     "date": "2026-11-20",
+     "value": 3524.0,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": -4.38,
+     "w1_pct": -9.32,
+     "m1_pct": -14.93
     },
     {
      "key": "WTI",
      "label": "WTI",
-     "date": "2026-11-19",
-     "value": 83.21,
-     "m1_base_date": "2026-10-19",
-     "d1_pct": -0.06,
-     "w1_pct": -6.23,
-     "m1_pct": -19.73
+     "date": "2026-11-20",
+     "value": 83.75,
+     "m1_base_date": "2026-10-20",
+     "d1_pct": 0.65,
+     "w1_pct": -5.43,
+     "m1_pct": -17.72
     },
     {
      "key": "BTCUSD",
      "label": "비트코인",
      "date": "2026-11-20",
-     "value": 59426.42,
+     "value": 58802.9,
      "quote_currency": "USDT",
      "source": "Binance Spot last trade / USDT",
-     "observed_kst": "2026-11-21T01:21:27+09:00",
+     "observed_kst": "2026-11-21T06:36:44+09:00",
      "comparison_status": "SAME_CURRENCY_COMPLETED",
-     "d1_pct": -4.13,
+     "d1_pct": -5.14,
      "w1_pct": null,
      "m1_pct": null,
      "m1_base_date": null
@@ -274,28 +274,18 @@
  "cross_read": [
   {
    "type": "TIME_LAG",
-   "text": "한국 최근 종가(2026-11-20)는 미국 2026-11-19 장을 이미 반영했습니다."
+   "text": "한국 최근 종가(2026-11-20)는 미국 2026-11-20 장 이전입니다. 나스닥100 -5.61%는 다음 KRX 세션에 반영됩니다."
   },
   {
    "type": "FX",
-   "text": "원/달러 1,330.4원(-0.20%) — 환율과 주가 방향이 엇갈림 — 환율보다 업종 요인"
+   "text": "원/달러 1,346.5원(+1.21%) — 원화 약세와 주가 하락이 동시 — 외국인 이탈형"
   }
  ],
  "brief_check": {
   "report_date_kst": "2026-11-20",
   "market_date_us": "2026-11-19",
-  "status": "MATCH",
-  "brief_ndx": 26517.05,
-  "pipeline_ndx": 26517.0508,
-  "official_status": "VERIFIED",
-  "official_eod_verified": true,
-  "trade_signal_eligible": false,
-  "source_url": "https://indexes.nasdaqomx.com/Index/Overview/ndx",
-  "source_date": "2026-11-19",
-  "evidence_observed_kst": "2026-11-20T10:47:37+09:00",
-  "source_type": "NASDAQ_INDEXES_OFFICIAL",
-  "match_rule": "INTEGER_PART_EQUAL",
-  "text": "Nasdaq 공식 종가 26,517.05 / 제공자 완료일봉 26,517.05: 정수자리 26,517 / 26,517 일치(MATCH). 완료 종가 검증 결과이며 자동 주문 신호가 아닙니다."
+  "status": "NOT_SAME_SESSION",
+  "text": "아침 시황은 미국 2026-11-19 기준, 카드는 2026-11-20 기준입니다."
  },
  "quality": {
   "missing": [],

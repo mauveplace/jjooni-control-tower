@@ -1,6 +1,6 @@
 **송팀장 Sector Observatory · 전체 업종 강약**
 
-완료일봉 기준: 미국 2026-11-19 / 한국 2026-11-20 · 출처: 기존 옵저버토리 Sector ETF 원장 (2026-11-21T01:21:34+09:00)
+완료일봉 기준: 미국 2026-11-20 / 한국 2026-11-20 · 출처: 기존 옵저버토리 Sector ETF 원장 (2026-11-21T06:36:48+09:00)
 
 **수익률 기반 추정**이며 실제 펀드 자금 순유입·기관 순매수액이 아님. 관측된 상대 강약의 이동만 해석하며, 원장 결측은 미확인으로 남김.
 
@@ -8,17 +8,17 @@
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| 에너지 · XLE | -3.27% | -0.65% | +2.61%p | 약세 지속 |
-| 유틸리티 · XLU | +0.30% | -1.24% | -1.54%p | 하락 전환 |
-| 필수소비재 · XLP | -0.31% | -1.45% | -1.14%p | 약세 지속 |
-| 금융 · XLF | -1.14% | -1.49% | -0.35%p | 약세 지속 |
-| 부동산 · XLRE | +0.07% | -1.70% | -1.77%p | 하락 전환 |
-| 기술 · XLK | +0.34% | -1.90% | -2.24%p | 하락 전환 |
-| 산업재 · XLI | -0.05% | -2.00% | -1.95%p | 약세 지속 |
-| 헬스케어 · XLV | -2.20% | -2.05% | +0.15%p | 약세 지속 |
-| 소재 · XLB | -0.75% | -2.06% | -1.31%p | 약세 지속 |
-| 커뮤니케이션 · XLC | +0.30% | -2.67% | -2.97%p | 하락 전환 |
-| 경기소비재 · XLY | +1.79% | -2.79% | -4.58%p | 하락 전환 |
+| 필수소비재 · XLP | -1.45% | +0.67% | +2.12%p | 상승 전환 |
+| 헬스케어 · XLV | -2.05% | -0.12% | +1.92%p | 약세 지속 |
+| 에너지 · XLE | -0.65% | -0.62% | +0.03%p | 약세 지속 |
+| 유틸리티 · XLU | -1.24% | -0.74% | +0.50%p | 약세 지속 |
+| 부동산 · XLRE | -1.70% | -0.98% | +0.72%p | 약세 지속 |
+| 금융 · XLF | -1.49% | -1.82% | -0.33%p | 약세 지속 |
+| 소재 · XLB | -2.06% | -2.19% | -0.12%p | 약세 지속 |
+| 커뮤니케이션 · XLC | -2.67% | -2.66% | +0.01%p | 약세 지속 |
+| 경기소비재 · XLY | -2.79% | -2.95% | -0.17%p | 약세 지속 |
+| 산업재 · XLI | -2.00% | -3.09% | -1.09%p | 약세 지속 |
+| 기술 · XLK | -1.90% | -7.27% | -5.36%p | 약세 지속 |
 
 **한국 10개 섹터 ETF**
 
@@ -39,44 +39,44 @@
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| VanEck Semiconductor ETF · SMH | -0.12% | -2.62% | -2.50%p | 약세 지속 |
-| iShares Semiconductor ETF · SOXX | +0.28% | -2.75% | -3.03%p | 하락 전환 |
+| iShares Semiconductor ETF · SOXX | -2.75% | -10.55% | -7.80%p | 약세 지속 |
+| VanEck Semiconductor ETF · SMH | -2.62% | -10.60% | -7.97%p | 약세 지속 |
 
 **주요 테마 ETF · 소프트웨어·클라우드·사이버**
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| ETFMG Prime Cyber Security ETF · HACK | +6.12% | +1.37% | -4.75%p | 강세 지속 |
-| iShares Expanded Tech-Software Sector ETF · IGV | +1.25% | -0.87% | -2.12%p | 하락 전환 |
-| First Trust Cloud Computing ETF · SKYY | +1.17% | -2.14% | -3.31%p | 하락 전환 |
+| iShares Expanded Tech-Software Sector ETF · IGV | -0.87% | -4.62% | -3.75%p | 약세 지속 |
+| ETFMG Prime Cyber Security ETF · HACK | +1.37% | -4.90% | -6.27%p | 하락 전환 |
+| First Trust Cloud Computing ETF · SKYY | -2.14% | -4.94% | -2.80%p | 약세 지속 |
 
 **주요 테마 ETF · 바이오**
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| SPDR S&P Biotech ETF · XBI | -0.17% | -0.63% | -0.47%p | 약세 지속 |
+| SPDR S&P Biotech ETF · XBI | -0.63% | -2.73% | -2.10%p | 약세 지속 |
 
 **주요 테마 ETF · 지역은행**
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| SPDR S&P Regional Banking ETF · KRE | -0.47% | -1.79% | -1.32%p | 약세 지속 |
+| SPDR S&P Regional Banking ETF · KRE | -1.79% | -1.36% | +0.43%p | 약세 지속 |
 
 **주요 테마 ETF · 방산·인프라·에너지**
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| SPDR S&P Oil & Gas Exploration & Production ETF · XOP | -3.40% | -0.95% | +2.45%p | 약세 지속 |
-| iShares U.S. Aerospace & Defense ETF · ITA | -0.30% | -1.71% | -1.41%p | 약세 지속 |
-| SPDR S&P Aerospace & Defense ETF · XAR | -0.55% | -1.72% | -1.17%p | 약세 지속 |
-| Global X U.S. Infrastructure Development ETF · PAVE | +0.75% | -2.11% | -2.87%p | 하락 전환 |
+| SPDR S&P Oil & Gas Exploration & Production ETF · XOP | -0.95% | -1.11% | -0.16%p | 약세 지속 |
+| iShares U.S. Aerospace & Defense ETF · ITA | -1.71% | -2.98% | -1.26%p | 약세 지속 |
+| Global X U.S. Infrastructure Development ETF · PAVE | -2.11% | -3.77% | -1.65%p | 약세 지속 |
+| SPDR S&P Aerospace & Defense ETF · XAR | -1.72% | -4.47% | -2.75%p | 약세 지속 |
 
 **주요 테마 ETF · 로봇·자동화**
 
 | 업종 · ETF | 전일 수익률 | 당일 수익률 | 변화(%p) | 방향 |
 |---|---:|---:|---:|---|
-| ROBO Global Robotics and Automation Index ETF · ROBO | +0.12% | -2.09% | -2.20%p | 하락 전환 |
-| Global X Robotics & Artificial Intelligence ETF · BOTZ | +0.00% | -2.39% | -2.39%p | 하락 전환 |
+| Global X Robotics & Artificial Intelligence ETF · BOTZ | -2.39% | -5.72% | -3.33%p | 약세 지속 |
+| ROBO Global Robotics and Automation Index ETF · ROBO | -2.09% | -6.75% | -4.67%p | 약세 지속 |
 
 **업종 주도권 변화 · 원인과 다음 확인**
 
