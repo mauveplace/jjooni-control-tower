@@ -1,5 +1,9 @@
 name: Market Observatory TRI-POD Comparison Catchup
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/market-observatory-tripod-comparison-catchup.yml
   workflow_run:
     workflows: ["Market Observatory Close Freshness Watchdog"]
     types: [completed]
