@@ -129,7 +129,7 @@ function marketStripRows(m,getQuote=null,nowMs=Date.now()){
   if(!usable&&!published)return null;
   const elapsed=usable?Math.max(0,nowMs-observed):null;
   const delayed=usable&&(quote?.refresh_status==='RETAINED'||quote?.quality==='STALE'
-   ||/지연|유지/.test(String(quote?.display_status||''))
+   ||/^(관측 지연|이전 관측 유지)/.test(String(quote?.display_status||''))
    ||(['REGULAR','CONTINUOUS'].includes(quote?.market_state)&&elapsed>1200000));
   const observedKst=usable?new Date(observed+9*3600000).toISOString().slice(5,16).replace('T',' '):null;
   return {
