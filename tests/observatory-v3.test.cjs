@@ -59,6 +59,20 @@ const unverifiedGlance = glance => {
  };
  return g;
 };
+test('V3 requests completed TRI-POD catchup after a newer-session quote',()=>{
+ const {needsCompletedCatchup}=require('../market-observatory/observatory-v3.js');
+ const old={session:'2026-11-19'},current={session:'2026-11-20'};
+ assert.equal(needsCompletedCatchup({session_date:'2026-11-20'},old),true);
+ assert.equal(needsCompletedCatchup({session_date:'2026-11-20'},current),false);
+ assert.equal(needsCompletedCatchup({session_date:'2026-11-19'},current),false);
+ assert.equal(needsCompletedCatchup({session_date:'2026-11-21'},null),false);
+ assert.equal(needsCompletedCatchup({session_date:'invalid'},old),false);
+ const source=fs.readFileSync(path.join(root,'observatory-v3.js'),'utf8');
+ assert.match(source,/jjooni:observatory-quotes-updated/);
+ assert.match(source,/syncCatchUp\(\)/);
+ assert.match(source,/setTimeout\(/);
+ assert.match(source,/button\[data-tab="jjooni-tripod"\]/);
+});
 test('V3 is default while explicit V1/V2 remain available', () => {
  assert.equal(enabled('?ui=v3'), true);
  assert.equal(enabled('?ui=v2'), false);
@@ -94,7 +108,10 @@ test('V3 threshold numbers from same-session published canonical, never generate
  assert.equal(m.axis.upper,f.glance.tripod.lines.ma250_upper);
  assert.equal(m.axis.tri,f.glance.tripod.lines.tripod_return);
  assert.equal(m.ndx,f.glance.groups[0].items.find(x=>x.key==='NASDAQ100').value);
- assert.ok(m.points.lower<m.points.now&&m.points.now<m.points.upper&&m.points.upper<m.points.tri);
+ assert.ok(m.points.lower<m.points.upper&&m.points.upper<m.points.tri);
+ // True NOPOD means NDX may be below its lower regime threshold.
+ for(const key of ['lower','upper','tri'])
+  assert.equal(Math.sign(m.points[key]-m.points.now),Math.sign(m.axis[key]-m.axis.now));
  assert.equal(m.officialVerified,false);
  assert.equal(m.referenceOnly,true);
  assert.equal(m.noTrade,true);
@@ -303,7 +320,7 @@ test('black NOW marker shows verified previous close change, never zero self-dis
  assert.match(html,/data-ov3-card="now"/);
  assert.ok(html.includes('전일 대비 '));
  assert.ok(!html.includes('현재 위치 · 0.00pt (0.00%)'));
- assert.match(html,/aria-label="현재 NDX · BIPOD · 전일 대비 /);
+ assert.match(html,new RegExp('aria-label="현재 NDX · '+f.glance.tripod.pod+' · 전일 대비 '));
  for(const key of ['lower','upper','tri'])assert.match(pointSummary(key,m),/^현재 대비 [0-9,.]+pt 더 (상승|하락)/);
  const stale=structuredClone(daily);stale.market_context.items.NASDAQ100.session_date='1999-01-01';
  const hold=model(f.glance,f.freshness,f.sector,now(f.freshness),stale);
