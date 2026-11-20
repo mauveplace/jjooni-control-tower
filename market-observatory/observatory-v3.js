@@ -19,7 +19,9 @@ let selectedPoint='now';
 const needsCompletedCatchup=(quote,snapshot)=>{
  const observed=String(quote?.session_date||'').slice(0,10);
  const published=String(snapshot?.session||'').slice(0,10);
- return /^\d{4}-\d{2}-\d{2}$/.test(observed)
+ return quote?.market_state==='CLOSED'
+  &&quote?.refresh_status!=='RETAINED'&&quote?.quality!=='STALE'
+  &&/^\d{4}-\d{2}-\d{2}$/.test(observed)
   &&/^\d{4}-\d{2}-\d{2}$/.test(published)&&observed>published;
 };
 const distanceText=(target,now)=>{
