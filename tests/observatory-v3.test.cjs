@@ -100,7 +100,7 @@ test('V3 threshold numbers from same-session published canonical, never generate
  assert.equal(m.noTrade,true);
  assert.match(rail(m),/NO.*TRADE|주문 신호 아님/);
  assert.match(rail(m),/NO-POD 진입 고정 기준점·손절선 상세 보기/);
- assert.match(marketStrip(m),/MARKET CLOSE/);
+ assert.match(marketStrip(m),/MARKET QUOTES/);
  assert.equal(m.sectors.length,11);
  assert.match(sectorChart(m),/자금흐름 아님/);
 });
@@ -259,7 +259,8 @@ test('visual digest rejects an older published brief against a newer US close',(
 });
 
 test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',()=>{
- const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ // Layout fixture must be aligned; live 34-sector updates can cross the NDX daily publication boundary.
+ const f=alignedVisualFixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.sectorReady,true,'sector source complete');
  const rows=structuredClone(m.sectors);
  rows[0].current_return_pct=-4;
@@ -314,4 +315,64 @@ test('black NOW marker shows verified previous close change, never zero self-dis
  assert.equal(model(f.glance,f.freshness,f.sector,now(f.freshness),wrong).ndxChangePts,null);
  assert.equal(model(f.glance,f.freshness,f.sector,now(f.freshness),null).ndxChangePts,null);
  assert.equal(dailyMoveText({...m,ndxChangePts:-57.034,ndxChangePct:-0.21}),'전일 대비 -57.03pt (-0.21%)');
+});
+
+test('V3 prioritizes fetched index quotes, exposes session/time, keeps TRI-POD EOD immutable',()=>{
+ const {marketStripRows,marketStrip}=require('../market-observatory/observatory-v3.js');
+ const f=fixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true,m.reason);
+ const publishedNDX=m.ndx,oldSession=m.session,oldAxis=structuredClone(m.axis);
+ const newSession=new Date(Date.parse(oldSession+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+ const seen=Date.parse(newSession+'T21:00:00Z'),t=seen+600000;
+ const q={key:'NASDAQ100',value:26345.67,session_date:newSession,observed_at:new Date(seen).toISOString(),
+  change_pct:-2.84,source:'Test index quote provider',market_state:'CLOSED',quality:'LIVE',refresh_status:'FETCHED'};
+ const get=key=>key==='NASDAQ100'?q:null;
+ const r=marketStripRows(m,get,t),ndx=r.find(x=>x.key==='NASDAQ100'),sp=r.find(x=>x.key==='SP500');
+ assert.equal(ndx.kind,'QUOTE');assert.equal(ndx.value,26345.67);assert.equal(ndx.session,newSession);
+ assert.equal(sp.kind,'PUBLISHED');assert.equal(sp.session,oldSession);
+ assert.equal(ndx.status,'최근 마감 관측');
+ // Use the genuine quote reader's quality() labels; its nonstale normal quote
+ // intentionally contains "지연 가능" (a disclaimer, NOT a delayed status).
+ const Q=require('../market-observatory/intraday-quotes-v1.js');
+ for(const state of ['REGULAR','PRE','POST','CONTINUOUS']){
+  const onTime={...q,market_state:state,observed_at:new Date(t-60000).toISOString(),refresh_status:'FETCHED',quality:'LIVE'};
+  const withQuality={...onTime,display_status:Q.quality(onTime,t)};
+  assert.equal(withQuality.display_status,'장중 관측 · 지연 가능');
+  const live=marketStripRows(m,key=>key==='NASDAQ100'?withQuality:null,t).find(x=>x.key==='NASDAQ100');
+  assert.equal(live.delayed,false,state+' 1min must NOT be declared a delayed observation');
+  assert.equal(live.status,'장중 관측 · 지연 가능');
+  assert.match(marketStrip(m,key=>key==='NASDAQ100'?withQuality:null,t),/시세 API 조회 결과/);
+  const old={...withQuality,observed_at:new Date(t-21*60000).toISOString()};
+  const held=marketStripRows(m,key=>key==='NASDAQ100'?old:null,t).find(x=>x.key==='NASDAQ100');
+  assert.equal(held.delayed,['REGULAR','CONTINUOUS'].includes(state),state+' delay must follow market-state policy');
+ }
+ const stale={...q,market_state:'REGULAR',display_status:'관측 지연'};
+ assert.equal(marketStripRows(m,key=>key==='NASDAQ100'?stale:null,t)[0].delayed,true);
+ const retainedByReader={...q,display_status:'이전 관측 유지'};
+ assert.equal(marketStripRows(m,key=>key==='NASDAQ100'?retainedByReader:null,t)[0].delayed,true);
+
+ const closed80=marketStripRows(m,get,seen+80*60000).find(x=>x.key==='NASDAQ100');
+ assert.equal(closed80.delayed,false,'CLOSED observed bar remains recent close, not intraday delay');
+ assert.equal(closed80.status,'최근 마감 관측');
+ assert.match(marketStrip(m,get,seen+80*60000),/시세 API 조회 결과/);
+ const html=marketStrip(m,get,t);
+ assert.match(html,/MARKET QUOTES · 접속 시 조회/);
+ assert.match(html,/26,345\.67/);
+ assert.match(html,/Test index quote provider/);
+ assert.match(html,/장 마감 관측 확인/);
+ assert.match(html,/완료일봉 업데이트 대기/);
+ assert.match(html,/KST/);
+ assert.match(html,new RegExp('TRI-POD 판단 기준은 미국 '+oldSession));
+ assert.equal(m.ndx,publishedNDX);
+ assert.deepEqual(m.axis,oldAxis);
+ assert.equal(m.session,oldSession);
+ assert.equal(marketStripRows(m,()=>({...q,session_date:'2000-01-01'}),t).find(x=>x.key==='NASDAQ100').kind,'PUBLISHED');
+ assert.equal(marketStripRows(m,()=>({...q,observed_at:new Date(t+600000).toISOString()}),t).find(x=>x.key==='NASDAQ100').kind,'PUBLISHED');
+ const retained=marketStripRows(m,()=>({...q,refresh_status:'RETAINED'}),t).find(x=>x.key==='NASDAQ100');
+ assert.equal(retained.delayed,true);
+ assert.match(marketStrip(m,()=>({...q,refresh_status:'RETAINED'}),t),/관측 지연·이전값/);
+ const held=model(f.glance,{...f.freshness,groups:{...f.freshness.groups,market:{...f.freshness.groups.market,state:'STALE'}}},f.sector,now(f.freshness));
+ assert.equal(held.ready,false);
+ assert.equal(marketStripRows(held,get,t).find(x=>x.key==='NASDAQ100').kind,'QUOTE',
+  'current quotes are visible even when the dated TRI-POD verification is on HOLD');
 });

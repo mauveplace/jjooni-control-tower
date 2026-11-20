@@ -15,11 +15,11 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
   page.on('pageerror',e=>errors.push(String(e)));
   if(width===390){
     await page.goto(BASE,{waitUntil:'networkidle'});
-    await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
+    await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.2-on-view-quotes');
     assert.equal(await page.locator('.navV2Main button[data-group]').count(),5,'root URL defaults to V3');
    }
    await page.goto(BASE+'?ui=v3',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.1-default');
+  await page.waitForFunction(()=>document.body.classList.contains('obsV3')&&window.__JJOONI_OBS_V3?.version==='3.2-on-view-quotes');
   await page.waitForFunction(()=>document.querySelector('.todayV2')&&document.querySelector('#ov3MarketStrip'),null,{timeout:25000});
   const state=await page.evaluate(()=>({
    v3:document.body.classList.contains('obsV3'),
@@ -70,7 +70,15 @@ const BASE=process.env.URL||'http://127.0.0.1:8123/market-observatory/';
    // Real browser coordinates: negative bars end at 0%, positive bars start at 0%.
    // Synthetic positives are necessary when the entire source session is negative.
    const geometry=await page.evaluate(([g,f,s])=>{
-     const api=window.__JJOONI_OBS_V3,m=api.model(g,f,s,Date.parse(f.generated_kst)+60000);
+     // This is a visual geometry test, not a live data-quality assertion.
+     // Published sector and NDX cutoffs may roll over independently; align only
+     // a cloned scenario. Live data must still be held by production guards.
+     const sector=structuredClone(s),session=g.us_session;
+     sector.completed_cutoffs={...sector.completed_cutoffs,US:session,KR:session};
+     for(const group of sector.groups||[])for(const row of group.rows||[]){
+       if(row.status==='OK')row.current_session=sector.completed_cutoffs[row.market];
+     }
+     const api=window.__JJOONI_OBS_V3,m=api.model(g,f,sector,Date.parse(f.generated_kst)+60000);
      if(!m.ready||!m.sectorReady)return {ready:false,reason:m.reason};
      const rows=m.sectors.map(x=>({...x}));
      rows[0].current_return_pct=-4;
