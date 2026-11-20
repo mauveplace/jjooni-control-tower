@@ -280,6 +280,9 @@ test('V3 sector chart uses a zero-centered symmetric blue-loss/red-gain scale',(
  const f=alignedVisualFixture(),m=model(f.glance,f.freshness,f.sector,now(f.freshness));
  assert.equal(m.sectorReady,true,'sector source complete');
  const rows=structuredClone(m.sectors);
+ // Real market sessions can have losses greater than our -4% fixture.
+ // Neutralize unrelated sectors so the expected half-width is deterministic.
+ for(const row of rows)row.current_return_pct=0;
  rows[0].current_return_pct=-4;
  rows[1].current_return_pct=2;
  rows[2].current_return_pct=0;
