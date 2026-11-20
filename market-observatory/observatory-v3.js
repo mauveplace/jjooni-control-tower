@@ -264,7 +264,17 @@ function mount(){
  let current=null,pending=null,last=0,catchUpTimer=null,catchUpStartedAt=0,catchUpSession='';
  // Legacy strategy cards/chart read observatory-recent DATA, unlike V3 Glance.
  // Reconcile both published readers when a new completed EOD session arrives.
- const refreshLegacy=()=>root.__JJOONI_OBSERVATORY_MARKET_REFRESH?.refresh?.(true);
+ let legacyRefreshAttemptAt=0;
+ const refreshLegacy=(force=false)=>{
+  const legacy=root.__JJOONI_OBSERVATORY_MARKET_REFRESH;
+  if(typeof legacy?.refresh!=='function')return;
+  const now=Date.now();
+  // Tab switches can be rapid; a user-requested completed-session
+  // reconciliation is allowed once per minute, or on actual EOD roll.
+  if(!force&&now-legacyRefreshAttemptAt<60000)return;
+  legacyRefreshAttemptAt=now;
+  return legacy.refresh(true);
+ };
  function stopCatchUp(){if(catchUpTimer!==null)clearTimeout(catchUpTimer);catchUpTimer=null;}
  function syncCatchUp(){
   const quote=root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100');
@@ -277,7 +287,7 @@ function mount(){
    catchUpTimer=null;
    if(!document.hidden&&needsCompletedCatchup(root.__JJOONI_OBSERVATORY_QUOTES?.get?.('NASDAQ100'),current)){
     const prior=current?.session;
-    void update(true).then(()=>{if(current?.ready&&current.session!==prior)void refreshLegacy();});
+    void update(true).then(()=>{if(current?.ready&&current.session!==prior)void refreshLegacy(true);});
    }else syncCatchUp();
   },30000);
  }
