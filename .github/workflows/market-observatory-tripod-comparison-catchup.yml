@@ -7,6 +7,7 @@ on:
   workflow_run:
     workflows: ["Market Observatory Close Freshness Watchdog"]
     types: [completed]
+    branches: [main]
   workflow_dispatch:
   schedule:
     # 07:10 KST after US completed close (Friday UTC -> Saturday KST).
@@ -53,6 +54,9 @@ jobs:
       - name: Build comparison from completed ETF daily closes
         if: steps.gate.outputs.run == 'true'
         run: python tools/build_tripod_comparison.py
+      - name: Validate comparison simulation contract
+        if: steps.gate.outputs.run == 'true'
+        run: node --test tests/observatory-tripod-comparison.test.cjs
       - name: Verify comparison reached the current canonical session
         if: steps.gate.outputs.run == 'true'
         run: |
