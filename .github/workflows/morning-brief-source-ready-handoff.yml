@@ -1,12 +1,15 @@
 name: Morning Brief Source-Ready Handoff
 
-# GitHub schedule ticks were ~5h late on 2026-11-21.
+# GitHub schedule ticks were ~5h late on 2026-11-21. An additional workflow_run
+# check fires when any of the source jobs COMPLETES, including Daily Glance.
+# Source jobs are still partly cron-driven; this does not guarantee 06:30 SLO.
 # Existing authoring Work task remains the only source-backed editorial writer.
 on:
   workflow_run:
     workflows:
       - "Market Observatory Close Freshness Watchdog"
       - "Market Observatory Daily Pulse"
+      - "Market Observatory Daily Glance"
     types: [completed]
     branches: [main]
   push:
@@ -46,6 +49,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify holidays, early closes, idempotence and same-session source
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         run: |
           python -m unittest discover -s tests -p test_morning_source_ready_handoff.py -v
           python -m unittest discover -s tests -p test_check_morning_publication.py -v
