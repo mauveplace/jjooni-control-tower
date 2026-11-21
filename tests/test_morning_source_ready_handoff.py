@@ -118,11 +118,37 @@ class SourceReadyHandoff(unittest.TestCase):
         self.assertEqual(x["status"], "SOURCE_READY_UNPUBLISHED")
         self.assertTrue(x["needs_handoff"])
 
+    def test_null_source_fields_and_malformed_rows_fail_closed_without_crash(self):
+        fields = [
+            (1, "session_gate", None), (2, "tripod_signal", None),
+            (3, "tripod", None), (3, "consistency", None),
+            (4, "completed_cutoffs", None), (4, "groups", None)
+        ]
+        for index, key, value in fields:
+            with self.subTest(index=index, key=key):
+                source = case()
+                source[index][key] = value
+                state = self.state("2026-11-21T06:37:00+09:00", source)
+                self.assertEqual(state["status"], "SOURCE_PENDING")
+                self.assertFalse(state["needs_handoff"])
+        source = case()
+        source[4]["groups"][2]["rows"] = None
+        state = self.state("2026-11-21T06:37:00+09:00", source)
+        self.assertEqual(state["status"], "SOURCE_PENDING")
+        self.assertEqual(state["sector_rows"], 21)
+        source = case()
+        source[4]["groups"][2]["rows"] = {"bad": "dict"}
+        self.assertFalse(self.state("2026-11-21T06:37:00+09:00", source)["needs_handoff"])
+        source = case()
+        source[5] = None
+        self.assertTrue(self.state("2026-11-21T06:37:00+09:00", source)["needs_handoff"])
+
     def test_event_is_not_only_delayed_cron_and_same_date_issue_is_deduped(self):
         workflow = (ROOT / ".github/workflows/morning-brief-source-ready-handoff.yml").read_text()
         self.assertIn("workflow_run:", workflow)
         self.assertIn("Market Observatory Close Freshness Watchdog", workflow)
         self.assertIn("Market Observatory Daily Pulse", workflow)
+        self.assertIn("Market Observatory Daily Glance", workflow)
         self.assertIn("gh issue list", workflow)
         self.assertIn("--state all", workflow)
         self.assertIn("MORNING_BRIEF_HANDOFF=ALREADY_TRACKED", workflow)
