@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261109-ROY-FIRST-PR-PROBE-010",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "ROY-first event probe. ROY (Claude Code, user-directed session) opened this PR first. JJOONI must be woken by the GitHub pull_request.opened event in ChatGPT Work, independently verify the PR diff (documentation + this task file only, no runtime/production change), and post one independent-review comment. This task deliberately excludes ROY from required_reviewers so the ROY Pilot Review routine must skip it (no self-review).",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "JJANGGU"
+  ],
+  "optional_reviewers": [],
+  "acceptance": [
+    "JJOONI Work session started by the actual PR opened event (not a manual prompt); record event time vs PR creation time",
+    "JJOONI posts exactly one JJOONI-COLLAB-V4 actor=JJOONI stage=independent-review comment for the full current PR HEAD",
+    "ROY Pilot Review routine either does not fire or exits without commenting because ROY is not a required reviewer",
+    "Diff contains only ai-collab-dispatch/probes/ROY-FIRST-RETRY-20261109.md and this task file; no production, data, workflow or strategy change",
+    "JJANGGU is listed only because the V4 validator forbids JJOONI in required_reviewers; JJANGGU absence must not be reported as a probe failure"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No secrets or non-public company/account/customer data",
+    "No automated production deploy, merge or trade",
+    "No paid model API or new cloud infrastructure without explicit authorization"
+  ],
+  "origin": "USER_TO_ROY",
+  "work_type": "testing",
+  "coordination_notes": "Probe only. Close without merge after the result is recorded."
+}
