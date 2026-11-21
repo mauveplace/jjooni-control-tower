@@ -22,7 +22,7 @@ test('only actual dated Song live insights are published as read-only reference'
   assert.equal(x.evidence==='TRANSCRIPT'||x.evidence==='TRANSCRIPT_AND_MARKET_CROSSCHECK',true);
  }
  assert.match(data.items.find(x=>x.id==='signal').speaker,/No-Pod/);
- assert.match(data.items.find(x=>x.id==='new-method').caution,/규칙/);
+ assert.match(data.items.find(x=>x.id==='new-method').caution,/(규칙|룰)/);
  assert.match(data.items.find(x=>x.id==='allocation').caution,/개인 사례/);
 });
 test('do not leak private Plaud/Drive raw content or quietly change trading rules',()=>{
