@@ -1,4 +1,4 @@
-name: Observatory Song Word Study QA
+name: Observatory Song Learning + Live Note QA
 on:
   pull_request:
     branches: [main]
@@ -6,6 +6,10 @@ on:
       - 'market-observatory/index.html'
       - 'market-observatory/observatory-nav-v2.js'
       - 'market-observatory/song-word-study-v1.js'
+      - 'market-observatory/song-live-insights-v1.js'
+      - 'market-observatory/song-live-insights-v1.css'
+      - 'market-observatory/data/song-live-insights.json'
+      - 'tests/song-live-insights.test.cjs'
       - 'market-observatory/song-word-study-v1.css'
       - 'market-observatory/data/song-word-study.json'
       - 'tests/song-word-study.test.cjs'
@@ -18,6 +22,10 @@ on:
       - 'market-observatory/index.html'
       - 'market-observatory/observatory-nav-v2.js'
       - 'market-observatory/song-word-study-v1.js'
+      - 'market-observatory/song-live-insights-v1.js'
+      - 'market-observatory/song-live-insights-v1.css'
+      - 'market-observatory/data/song-live-insights.json'
+      - 'tests/song-live-insights.test.cjs'
       - 'market-observatory/song-word-study-v1.css'
       - 'market-observatory/data/song-word-study.json'
       - 'tests/song-word-study.test.cjs'
@@ -41,7 +49,8 @@ jobs:
       - name: Dataset and existing navigation contract
         run: |
           node --check market-observatory/song-word-study-v1.js
-          node --test tests/song-word-study.test.cjs tests/observatory-nav-v2.test.cjs
+          node --check market-observatory/song-live-insights-v1.js
+          node --test tests/song-word-study.test.cjs tests/song-live-insights.test.cjs tests/observatory-nav-v2.test.cjs
       - name: Chromium browser setup
         run: |
           npm install --no-save --silent playwright@1.55.0
