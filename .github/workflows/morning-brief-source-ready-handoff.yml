@@ -1,0 +1,77 @@
+name: Morning Brief Source-Ready Handoff
+
+# GitHub schedule ticks were ~5h late on 2026-11-21.
+# Existing authoring Work task remains the only source-backed editorial writer.
+on:
+  workflow_run:
+    workflows:
+      - "Market Observatory Close Freshness Watchdog"
+      - "Market Observatory Daily Pulse"
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/morning-brief-source-ready-handoff.yml
+      - tools/morning_source_ready_handoff.py
+      - tools/check_morning_publication.py
+  pull_request:
+    paths:
+      - .github/workflows/morning-brief-source-ready-handoff.yml
+      - tools/morning_source_ready_handoff.py
+      - tools/check_morning_publication.py
+      - tests/test_morning_source_ready_handoff.py
+      - tests/test_check_morning_publication.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: morning-brief-source-ready-handoff
+  cancel-in-progress: false
+
+jobs:
+  handoff:
+    if: ${ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Source readiness and report status are always read from main.
+          ref: ${ github.event_name == 'pull_request' && github.ref || 'main' }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify holidays, early closes, idempotence and same-session source
+        run: |
+          python -m unittest discover -s tests -p test_morning_source_ready_handoff.py -v
+          python -m unittest discover -s tests -p test_check_morning_publication.py -v
+      - name: Check source-ready-but-unpublished
+        id: source_gate
+        run: python tools/morning_source_ready_handoff.py
+
+      - name: Create exactly one existing-format missing-brief incident
+        if: ${ steps.source_gate.outputs.needed == 'true' && github.event_name != 'pull_request' }
+        env:
+          GH_TOKEN: ${ github.token }
+          REPORT_DAY: ${ steps.source_gate.outputs.report_day }
+          US_SESSION: ${ steps.source_gate.outputs.us_session }
+          SOURCE_STATUS: ${ steps.source_gate.outputs.status }
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REPORT_DAY" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || exit 1
+          [[ "$US_SESSION" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || exit 1
+          title="[MORNING-BRIEF][AUTO] $REPORT_DAY public US-session brief missing"
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 500 --json title --jq '.[].title' | grep -Fx "$title" >/dev/null; then
+            echo "MORNING_BRIEF_HANDOFF=ALREADY_TRACKED date=$REPORT_DAY"
+            exit 0
+          fi
+          sha="$(git rev-parse HEAD)"
+          body="$(printf 'US completed-session data arrived but the daily 8-section 34-sector public morning brief is still not published (SOURCE_READY_UNPUBLISHED).\n\n- Report KST date: %s\n- Completed US session: %s\n- Status: %s\n- Main checkout SHA: %s\n- Workflow source event: %s\n- GitHub Actions evidence: %s/%s/actions/runs/%s\n- Owner recovery: existing ChatGPT hourly JJOONI-ROY Work task id Automation_9f0e3128c01c8191ab0fa9c30d4aeb3d.\n\nCreating this incident is NOT equivalent to publication. The existing authoring owner must publish verified same-session report with actual clock via PR/CI/main/Pages and preserve NO_TRADE/official EOD gates. Never backdate to 06:30 or disclose private Song/Plaud data.\n' \
+            "$REPORT_DAY" "$US_SESSION" "$SOURCE_STATUS" "$sha" "$GITHUB_EVENT_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          echo "MORNING_BRIEF_HANDOFF=ISSUE_CREATED date=$REPORT_DAY us=$US_SESSION"
