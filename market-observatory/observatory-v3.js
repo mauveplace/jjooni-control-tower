@@ -283,7 +283,7 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261120-observation-times-1';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261121-cohort-breadth-1';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
    const marker=e.target.closest('button[data-ov3-point]');
