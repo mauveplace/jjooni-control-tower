@@ -6,6 +6,8 @@ on:
       - .github/workflows/observatory-v3-production-visual-audit.yml
       - market-observatory/latest-board-v1.js
       - market-observatory/index.html
+      - market-observatory/data/morning-brief/latest.json
+      - market-observatory/data/morning-brief/index.json
   push:
     branches: [main]
     paths:
@@ -13,6 +15,8 @@ on:
       - .github/workflows/observatory-v3-production-visual-audit.yml
       - market-observatory/latest-board-v1.js
       - market-observatory/index.html
+      - market-observatory/data/morning-brief/latest.json
+      - market-observatory/data/morning-brief/index.json
   workflow_dispatch:
 permissions:
   contents: read
