@@ -1,0 +1,46 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-KRX-ETF-TRIPOD-070",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent research: actual KRX historical trading of TIME 미국나스닥100액티브 426030 and TIGER 미국나스닥100 133690, RISE 368590, TIGER 2x 418660 for TRI-POD 250MA/VIX10 hysteresis signals; compare MON KRX 15:30 vs TUE KRX 15:30 sell after 2026-11-20 Fri US NOPOD; and evaluate whether TIME 426030 should remain strategic alpha core or be fully/partially market-timed as TRI-POD Lite.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "investment_public_etf_research",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner explicitly requests Korean ETF-specific backtest and independent ROY opinion; research only, NO portfolio writes/orders/trading changes.",
+  "acceptance": [
+    "Use truly historical KRX ETF unadjusted+total return adjusted closes, distributions, actual KR market holidays and precise US signal timestamps; for 426030 start 2022-05-11. Avoid same-US-close-as-KRX proxy. Document gaps and actual downloaded data coverage; show date-level evidence of real Korean prices.",
+    "Compare at least A buy-hold TIME, B buy-hold TIGER 133690, C TIME-only stage NAV 100/50/0 or 100/100/0 where justified, D TIME strategic-core (e.g. 70% core/30% signal-bound tactical) and E original 3x/1.5x/0 if executable only in non-pension brokerage with actual KRX ETF mapping. Handle signal changed vs no signal and spread/slippage, distributions, transaction costs, safe-cash yield, FX/no lookahead.",
+    "Event-study 2026-11-20 actual KRX close 426030 33,980 (-5.61%) vs 133690 155,220 (-4.44%) vs 418660 29,040 (-8.64%) and US 2026-11-20 Fri NDX 25,028.98 after KRX close; Nov 23/24 future fills not yet available as of Nov 21.",
+    "Compare Korean Mon 15:30 versus Tue 15:30 NOPOD sale after Friday US close across all applicable historical Friday NOPOD events in ETF lifespan, with annualized CAGR/MDD/turnover, execution fill realism and subperiod/OOS. If complete KRX historical data are inaccessible, explicitly record NO_VERIFIABLE_KRX_BACKTEST rather than using synthetic proxy.",
+    "Do not receive or publish user's personal position quantities or account secrets on public GitHub. Request private SSOT read through authorized private session only if tool available, and say no current holdings access if it is unavailable.",
+    "Respect retirement accounts: no levered ETFs in PENSION/IRP; IRP risky asset total 70% limit and broker-specific TDF classification; tax impact differs for TOSS/ISA/PENSION/IRP.",
+    "Challenge JJOONI's recommendation to split TIME strategic alpha core and timing tactical sleeve instead of mechanically 100% NOPOD. Does 0.80% annual fee and reported active benchmark 1Y +7.12pp as of Oct30 2026 justify hold, or can TRI-POD timing add risk-adjusted value? State clearly if cannot prove.",
+    "Reply on current exact PR HEAD with genuine authenticated independent ROY verdict, data provenance/date, disagreement and final proposal; no code changes or merge/deploy/trades, owner approval for rules."
+  ],
+  "references": {
+    "issuer_factsheet_date": "2026-10-30",
+    "ticker_426030": "TIME NASDAQ100 ACTIVE",
+    "broker_etf_codes": [
+      "426030",
+      "133690",
+      "368590",
+      "418660"
+    ],
+    "prior_review": "https://github.com/mauveplace/jjooni-control-tower/pull/568",
+    "signals": "public-market-daily.json and market-observatory/data/tripod-comparison.json"
+  },
+  "forbidden": [
+    "No orders, trading engine changes, deploy or merge",
+    "No claims of verified Korean series when absent",
+    "No user's private holdings or account information in public repository",
+    "Do not equate prior US ETF proxy to Korean returns"
+  ]
+}
