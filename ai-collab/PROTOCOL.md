@@ -8,6 +8,28 @@ Use the **balanced JJOONI-first track** in [JJOONI_FIRST.md](./JJOONI_FIRST.md):
 
 The V4 rules below remain strict **when the dual-agent track is opted into**, including task JSON validation, role provenance, review dedupe and release gates.
 
+## Mandatory review-start acknowledgment (owner directive 2026-11-16)
+
+**Both JJOONI and ROY must post the exact string `검토시작` as the first line of a new GitHub comment on the actual target issue/PR when beginning every independently assigned review, before examining source evidence or writing a verdict.** A request or @mention, issue creation, webhook delivery, and an unrelated agent's acknowledgment are **not** a review start.
+
+Required acknowledgment format (one per review actor + target revision + stage; keep comments concise):
+
+```text
+검토시작
+검토자: JJOONI | ROY
+대상: <issue or PR number> / <revision or document version>
+검토범위: <short non-confidential description>
+상태: IN_PROGRESS
+```
+
+1. Reviewer posts this personally in the original review thread as their **first review action**, before any substantive audit. Do not have JJOONI post it on ROY's behalf or vice versa. The actor named in the body is a claim, not independently authenticated provenance: GitHub `mauveplace` login may be shared; verify the actual Claude/Work execution if identity matters.
+2. If permissions, original material, audio playback, or external event delivery are unavailable, do **not** manufacture `검토시작`. Instead record `검토차단` and the blocker when a comment is permitted; leave status NOT_STARTED/BLOCKED and do not falsely claim work occurred.
+3. On conclusion post `검토완료` with verdict PASS / NEEDS_CHANGES and evidence references; for interrupted/failed reviews post `검토중단` or `검토차단`. The presence of a start comment alone does not prove active progress or completion.
+4. For confidential business documents, post only non-sensitive identifiers/status. Never attach private files, audio, transcripts, signed URLs, or private source contents to a public GitHub issue. Detailed findings use owner-authorized non-public channels.
+5. Do not add new review triggers, repeat event tickets, or assume an external Claude Routine/Work schedule was changed by this markdown rule. Ensure the **actual external executor** copies this policy into its installed instructions; test with a real review event and first-action comment. Existing owner approval, CI, dedupe and read-only gates remain unchanged.
+
+For confidential non-code reviews, use the separate [private-ticket workflow](./PRIVATE_TICKET_PROTOCOL.md). Never place private sources in public PR/Issue content; a ticket is not evidence of a ROY review start.
+
 ## Ownership and agents
 
 - **User:** owns objectives, budget constraints and final approval for main merges/deploys.
