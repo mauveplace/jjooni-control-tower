@@ -1,0 +1,35 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261108-CT-STRUCTURAL-008",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "origin": "USER_TO_JJOONI",
+  "work_type": "architecture",
+  "objective": "ROY independent source-only audit of JJOONI Control Tower architecture and Observatory integration; prioritize reproducible structural deficiencies and bounded low-risk repairs, avoiding inaccessible private account/runtime assumptions.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [
+    "JJANGGU"
+  ],
+  "acceptance": [
+    "Read docs/20261026-login-and-remediation-audit.md, docs/20261026-authenticated-screen-audit.md, tools/audit_control_tower_architecture.py and relevant root browser modules; separate previously fixed code defects from open work and prove which contracts do not cover operational risks",
+    "Audit multi-module startup, approved-device and encrypted shell lifecycle, duplicate event listeners/intervals, tab hit targets, lazy-loading and hidden stale data, noting current static graph is not measured runtime execution",
+    "Audit Control Tower source-of-truth lifecycle: snapshot_id, generated_kst, source freshness and session alignment, account-cost basis vs daily P&L, TRI-POD actual vs reference, decision gate/authorization boundaries and no public personal data",
+    "Review workflow structure (approximately 48 active workflows), concurrent publication, data/Pages separation, dependency chains, old reminder/error emails, test coverage and risk of noisy redundant status publishing; distinguish static possibility from confirmed defect",
+    "Check `market-observatory/data/market-regime.json` as potentially expired October consensus vs current Nov8 source, and fail closed on any trade decision sourced from outdated consensus; do not fabricate or refresh an approved regime",
+    "Provide a prioritized P0/P1/P2 list with exact file/line evidence, standalone acceptance tests, estimated risk and recommended work split; highlight quick wins without sweeping production rewrite",
+    "Post ROY independent report on exact current PR HEAD with actual Claude session evidence and avoid merges/edits/deployments/trading"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": null,
+  "forbidden": [
+    "No account or customer data, credentials, private Cloud Run snapshots in PR",
+    "No release, merge or deploy",
+    "No paid API/server, no autonomous trading",
+    "Do not treat unreadable encrypted source as verified runtime"
+  ]
+}
