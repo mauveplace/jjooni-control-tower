@@ -1,0 +1,38 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-TRIPOD-KRX-TIMING-057",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Independent ROY review: Monday 2026-11-23 15:30 KST domestic-listed Nasdaq ETF sale versus Tuesday 2026-11-24 15:30 KST sale following confirmed US Friday 2026-11-20 EOD TRI-POD NOPOD exit; compare both with source author's intended US Monday 2026-11-23 MOC (Tue 11/24 06:00 KST). Also evaluate repeatable historical timing and original system backtest caveats.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "independent_market_execution_timing_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner explicitly requests immediate ROY independent review of user-provided Song TRI-POD article screenshots versus Monday/Tuesday Korean exchange ETF execution. Research/coordination only: no source trading changes or orders.",
+  "references": {
+    "primary_issue": "https://github.com/mauveplace/jjooni-control-tower/issues/567",
+    "canonical_file": "public-market-daily.json",
+    "historic_proxy": "market-observatory/data/tripod-comparison.json"
+  },
+  "acceptance": [
+    "Authenticate that ROY is reviewing the current exact PR head and reply on this PR with ROY_REVIEW=PASS|NEEDS_CHANGES|BLOCKED and full reviewed SHA; no role impersonation.",
+    "Independently check source screenshots summarized on issue #567: Song explicitly intends US Monday regular-session MOC (KST Tuesday 06:00), order window KST Tuesday 05:45, not Monday KRX close at 15:30.",
+    "Build event-time decision table across US Friday EOD, Monday KRX close, Monday US MOC, Tuesday KRX close. Check US DST, holidays, official data timestamp, and strictly disallow look-ahead.",
+    "Compare executable KRX Nasdaq 100 ETF variants (nonleveraged/leveraged, FX-hedged/unhedged if relevant) using historic domestic close, FX, futures and NAV/premium data; label US QQQ/QLD/TQQQ close comparison as non-executable PROXY when domestic data are unavailable.",
+    "Challenge JJOONI's preliminary 2010-2026 proxy: 4219 sessions to 2026-11-18 only (STALE vs 11/20), 25 Friday transition cases, only 2 Friday to cash transitions; first-close proxy incorrectly assumes US same-session adjusted close for KRX execution.",
+    "Compute risk outcomes for Monday KR close vs Tuesday KR close vs Song US Monday close after a Friday NOPOD change; scenario U.S. Monday bull rebound versus continued cascade. Provide estimate limits, scenarios, transaction costs and historical robustness.",
+    "Report independent verdict and whether existing Monday-first KRX execution is defensible or whether waiting is materially better; distinguish evidence vs timing opinion. State that all-sliver reallocation is only within the approved TRI-POD sleeve, not entire holdings.",
+    "No code fixes, cloud release, paid services, private account/customer data, unauthorized actions or trades. Report ROY NOT_TRIGGERED if event not received."
+  ],
+  "forbidden": [
+    "No source/price claims without independent verification.",
+    "No source-code changes, trading or investment orders, merges or deployment.",
+    "No sharing private user account/position/company/customer data, credentials or private paid article text in public GitHub."
+  ]
+}
