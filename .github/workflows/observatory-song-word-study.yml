@@ -1,0 +1,58 @@
+name: Observatory Song Word Study QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'market-observatory/index.html'
+      - 'market-observatory/observatory-nav-v2.js'
+      - 'market-observatory/song-word-study-v1.js'
+      - 'market-observatory/song-word-study-v1.css'
+      - 'market-observatory/data/song-word-study.json'
+      - 'tests/song-word-study.test.cjs'
+      - 'tests/song-word-study-e2e.cjs'
+      - 'tests/observatory-nav-v2.test.cjs'
+      - '.github/workflows/observatory-song-word-study.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'market-observatory/index.html'
+      - 'market-observatory/observatory-nav-v2.js'
+      - 'market-observatory/song-word-study-v1.js'
+      - 'market-observatory/song-word-study-v1.css'
+      - 'market-observatory/data/song-word-study.json'
+      - 'tests/song-word-study.test.cjs'
+      - 'tests/song-word-study-e2e.cjs'
+      - 'tests/observatory-nav-v2.test.cjs'
+      - '.github/workflows/observatory-song-word-study.yml'
+permissions:
+  contents: read
+concurrency:
+  group: obs-song-word-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  study-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dataset and existing navigation contract
+        run: |
+          node --check market-observatory/song-word-study-v1.js
+          node --test tests/song-word-study.test.cjs tests/observatory-nav-v2.test.cjs
+      - name: Chromium browser setup
+        run: |
+          npm install --no-save --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Serve candidate Observatory
+        run: |
+          python3 -m http.server 8123 > /tmp/obs-song-word.log 2>&1 &
+          echo $! > /tmp/obs-song-word.pid
+          sleep 2
+      - name: Real UI exercises at 390px, 800px, 1365px
+        run: node tests/song-word-study-e2e.cjs
+      - name: Debug server on failure
+        if: failure()
+        run: tail -100 /tmp/obs-song-word.log || true
