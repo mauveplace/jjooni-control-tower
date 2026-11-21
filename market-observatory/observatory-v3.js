@@ -93,7 +93,7 @@ function model(glance, fresh, sectors, nowMs=Date.now(), publicDaily=null) {
  // Comparative breadth is independently gated. A current-return bar may be
  // valid while the prior close or the prior-session date is not.
  const breadthReady=sectorReady&&all.every(x=>finite(x.previous_return_pct)&&finite(x.change_pp)
-  &&/^\\d{4}-\\d{2}-\\d{2}$/.test(x.previous_session||'')
+  &&/^\d{4}-\d{2}-\d{2}$/.test(x.previous_session||'')
   &&x.previous_session<x.current_session
   &&Math.abs((x.current_return_pct-x.previous_return_pct)-x.change_pp)<0.04);
  const sectorBreadth=breadthReady?[
