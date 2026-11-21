@@ -1,6 +1,6 @@
 {
   "schema": "JJOONI_MARKET_OBSERVATORY_V1",
-  "generated_kst": "2026-11-21T15:50:27+09:00",
+  "generated_kst": "2026-11-21T16:05:12+09:00",
   "read_only": true,
   "contains_account_data": false,
   "us_market_session_contract": "COMMON_LAST_COMPLETED_US_SESSION_V1",
@@ -41,8 +41,8 @@
     "JP30Y": 4.03,
     "JP_2S10S": 1.017,
     "KR_US_10Y": -1.063,
-    "BTCUSD": 57744.75,
-    "ETHUSD": 1644.61,
+    "BTCUSD": 57937.34,
+    "ETHUSD": 1635.85,
     "FEAR_GREED": 9.7,
     "FEAR_GREED_RATING": "EXTREME FEAR",
     "KOSPI": 4869.96,
@@ -339641,10 +339641,10 @@
       },
       {
         "date": "2026-11-21",
-        "value": 57744.75,
+        "value": 57937.34,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-21T15:50:43+09:00",
+        "observed_kst": "2026-11-21T16:05:28+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -348583,10 +348583,10 @@
       },
       {
         "date": "2026-11-21",
-        "value": 1644.61,
+        "value": 1635.85,
         "session_status": "IN_PROGRESS",
         "date_basis": "UTC",
-        "observed_kst": "2026-11-21T15:50:44+09:00",
+        "observed_kst": "2026-11-21T16:05:28+09:00",
         "observation_type": "SPOT_SNAPSHOT",
         "source": "Binance",
         "quote_currency": "USDT"
@@ -376404,7 +376404,7 @@
     "drawdown_52w_pct": -19.841771987574287,
     "ma250": 27548.29975000016,
     "ndx": 25028.98242188,
-    "observed_at": "2026-11-21T15:51:04+09:00",
+    "observed_at": "2026-11-21T16:05:46+09:00",
     "ok": true,
     "previous_drawdown_52w_pct": -15.076059948710762,
     "previous_ma250": 27545.14210156264,
@@ -381582,9 +381582,9 @@
       "symbol": "BTCUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=BTCUSDT&limit=1",
-      "price": 57744.75,
-      "quote_as_of_kst": "2026-11-21T15:50:43+09:00",
-      "captured_kst": "2026-11-21T15:50:42+09:00",
+      "price": 57937.34,
+      "quote_as_of_kst": "2026-11-21T16:05:28+09:00",
+      "captured_kst": "2026-11-21T16:05:27+09:00",
       "status": "LIVE",
       "quote_age_seconds": 0,
       "quote_currency": "USDT",
@@ -381597,15 +381597,15 @@
       "previous_close_utc_date": "2026-11-20",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": -2.047
+      "daily_change_pct": -1.7203
     },
     "ETHUSD": {
       "symbol": "ETHUSDT",
       "source": "Binance Spot last trade / USDT",
       "source_url": "https://data-api.binance.vision/api/v3/trades?symbol=ETHUSDT&limit=1",
-      "price": 1644.61,
-      "quote_as_of_kst": "2026-11-21T15:50:44+09:00",
-      "captured_kst": "2026-11-21T15:50:42+09:00",
+      "price": 1635.85,
+      "quote_as_of_kst": "2026-11-21T16:05:28+09:00",
+      "captured_kst": "2026-11-21T16:05:27+09:00",
       "status": "LIVE",
       "quote_age_seconds": 0,
       "quote_currency": "USDT",
@@ -381618,7 +381618,7 @@
       "previous_close_utc_date": "2026-11-20",
       "previous_close_source": "Binance UTC 1d kline",
       "daily_change_safe": true,
-      "daily_change_pct": 1.3259
+      "daily_change_pct": 0.7862
     }
   },
   "cross_market_freshness_quality": {
@@ -381897,7 +381897,7 @@
       "status": "LIVE"
     }
   },
-  "kr_rates_refreshed_kst": "2026-11-21T15:50:27+09:00",
+  "kr_rates_refreshed_kst": "2026-11-21T16:05:12+09:00",
   "quality": {
     "kr_rates": {
       "state": "PASS",
@@ -381945,7 +381945,7 @@
   "today_strategy_contract": "TRIPOD_CANONICAL_DECISION_SUPPORT_V1",
   "freshness": {
     "status": "LIVE",
-    "checked_kst": "2026-11-21T15:50:27+09:00",
+    "checked_kst": "2026-11-21T16:05:12+09:00",
     "market_date_us": "2026-11-20",
     "us_close_refresh_contract": "US_REGULAR_CLOSE_PLUS_10M_DST_AWARE",
     "scheduled_kst": "05:10_OR_06:10_DST_DEPENDENT",
@@ -381958,7 +381958,7 @@
   "history_base_generated_kst": "2026-09-13T00:12:30+09:00",
   "history_base_path": "./data/history-30y.json",
   "crypto_contract": "PRESERVED_USD_HISTORY_SEPARATE_USDT_REFERENCE_V3",
-  "crypto_enriched_kst": "2026-11-21T15:50:45+09:00",
+  "crypto_enriched_kst": "2026-11-21T16:05:30+09:00",
   "market_supplement_quality": {
     "KOSPI": {
       "status": "LIVE",
@@ -381999,7 +381999,7 @@
   "equity_enrichment_contract": "KOSPI_KOSDAQ_DAILY_REFERENCE_V1",
   "equity_session_contract": "KR_TRADING_DATE_NAVER_PRIMARY_YAHOO_FALLBACK_V2",
   "market_supplement_contract": "US_SUPPLEMENT_MATCH_COMPLETED_CORE_SESSION_V3",
-  "equity_enriched_kst": "2026-11-21T15:50:46+09:00",
+  "equity_enriched_kst": "2026-11-21T16:05:30+09:00",
   "supplemental_refreshed_kst": "2026-11-21T11:52:54+09:00",
   "supplemental_refresh_contract": "ALL_MARKET_FAMILIES_COMPLETED_SESSION_PLUS_24X7_CRYPTO_V1",
   "us_rates_refreshed_kst": "2026-11-21T11:52:48+09:00"
