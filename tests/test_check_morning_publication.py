@@ -19,10 +19,10 @@ class MorningPublication(unittest.TestCase):
 
     def test_healthy_morning_passes(self):
         now = datetime(2026, 11, 12, 7, 7, tzinfo=KST)
-        self.assertEqual(decide(now, {'report_date_kst': '2026-11-12'}, {'us_completed_session_date': '2026-11-11'}), [])
+        self.assertEqual(decide(now, {'report_date_kst': '2026-11-12', 'market_date_us': '2026-11-11'}, {'us_completed_session_date': '2026-11-11'}), [])
 
     def test_before_deadline_only_checks_data(self):
-        now = datetime(2026, 11, 12, 6, 40, tzinfo=KST)
+        now = datetime(2026, 11, 12, 6, 20, tzinfo=KST)
         self.assertEqual(decide(now, {'report_date_kst': '2026-11-11'}, {'us_completed_session_date': '2026-11-11'}), [])
 
     def test_sunday_2026_11_15_does_not_raise_phantom_report(self):
@@ -68,6 +68,38 @@ class MorningPublication(unittest.TestCase):
         self.assertIn('gh issue list --repo', workflow)
         self.assertIn('gh issue create --repo', workflow)
         self.assertIn('MORNING_BRIEF_INCIDENT=ALREADY_TRACKED', workflow)
+
+    def test_at_0630_deadline_report_is_already_required(self):
+        now = datetime(2026, 11, 21, 6, 30, tzinfo=KST)
+        issues = decide(now, {'report_date_kst': '2026-11-20'},
+                        {'us_completed_session_date': '2026-11-19'})
+        self.assertTrue(any(x.startswith('BRIEF_MISSING expected=2026-11-21') for x in issues))
+        self.assertTrue(any(x.startswith('US_CLOSE_STALE') for x in issues))
+
+    def test_current_calendar_day_with_wrong_us_session_does_not_pass(self):
+        now = datetime(2026, 11, 21, 7, 7, tzinfo=KST)
+        latest = {'report_date_kst': '2026-11-21', 'market_date_us': '2026-11-19'}
+        issues = decide(now, latest, {'us_completed_session_date': '2026-11-20'})
+        self.assertEqual(len(issues), 1)
+        self.assertIn('WRONG_MARKET_SESSION', issues[0])
+        self.assertTrue(issues[0].startswith('BRIEF_MISSING expected=2026-11-21'))
+
+    def test_missing_or_conflicted_archive_fails_despite_correct_latest(self):
+        now = datetime(2026, 11, 21, 7, 7, tzinfo=KST)
+        latest = {'report_date_kst': '2026-11-21', 'market_date_us': '2026-11-20',
+                  'title': 'Report', 'generated_kst': '2026-11-21T06:35:00+09:00',
+                  'published_kst': '2026-11-21T06:36:00+09:00'}
+        head = dict(latest, path='20261121.json')
+        index = {'entries': [head]}
+        obs = {'us_completed_session_date': '2026-11-20'}
+        self.assertEqual(decide(now, latest, obs, index=index, archive=dict(latest)), [])
+        self.assertIn('ARCHIVE_MISMATCH_OR_MISSING',
+                      ' '.join(decide(now, latest, obs, index=index, archive={})))
+        self.assertIn('INDEX_OR_ARCHIVE_METADATA_MISMATCH',
+                      ' '.join(decide(now, latest, obs, index={'entries': []}, archive=latest)))
+        bad = dict(head, market_date_us='2026-11-19')
+        self.assertIn('INDEX_OR_ARCHIVE_METADATA_MISMATCH',
+                      ' '.join(decide(now, latest, obs, index={'entries': [bad]}, archive=latest)))
 
     def test_monday_brief_not_checked(self):
         now = datetime(2026, 11, 16, 7, 7, tzinfo=KST)  # Monday: separate edition

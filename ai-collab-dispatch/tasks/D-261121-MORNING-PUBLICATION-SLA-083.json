@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-MORNING-PUBLICATION-SLA-083",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Real ROY source-level independent review of morning publication sentinel and 06:30 same-US-session fail-closed archive/index consistency; prior 11/21 missing morning brief recovery and hourly fallback root cause.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "morning_publication_watchdog_sla_integrity",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-21 user authorized ROY collaboration, root cause fix, QA and deployment of 11/21 missed morning brief and ongoing recurrence.",
+  "acceptance": [
+    "Check true user's SLA 06:30 instead of previous 07:00, weekday holiday/NYSE early-close correctness.",
+    "Check decision fails when same KST report date but wrong US session, missing or malformed index, missing/modified same dated archive; no false PASS or duplicate issue creation.",
+    "Verify tests for normal/sunday/holiday, source stale, wrong US session, 06:30 exact boundary and atomic archive/index.",
+    "Root incident: 06:15 primary FAILED_AT_SOURCE Nov21, canonical later 06:36, fallback failed to publish by 07:30, no isolated backend no_update attribution. Existing hourlies now first prioritize missed due edition until KST midnight; do not claim next morning runtime verified.",
+    "Reviewer must post exact HEAD PASS/NEEDS_CHANGES/BLOCKED based on actual CI and changed source, with no fabricated ROY app attribution."
+  ],
+  "forbidden": [
+    "No new paid service, no extra noisy cron failures, no hiding alerts or widening false data acceptance.",
+    "No trading, account access, credentials, private Song or Plaud content.",
+    "ROY is auditor only, no merge or deploy."
+  ]
+}
