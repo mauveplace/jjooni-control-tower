@@ -57,7 +57,8 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     if(tc.name==='mobile390'||tc.name==='desktop1440'){
      console.log('AUDIT_IMAGE '+tc.name+'-overview '+(await page.screenshot({type:'jpeg',quality:47})).toString('base64'));
     }
-    await page.locator('#tabs [data-tab="tripod"]').click();
+    await page.locator('.navV2Main button[data-group="strategy"]').click();
+    await page.locator('.navV2Sub button[data-tab="tripod"]').click();
     await page.waitForSelector('#ov3TripodDetail .ov3Rail',{timeout:30000});
     const detail=await page.evaluate(()=>{
       const root=document.querySelector('#ov3TripodDetail .ov3Rail');
@@ -72,7 +73,7 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     assert(detail.docWidth<=tc.width+3,'TRI-POD tab horizontal overflow '+detail.docWidth);
     await page.screenshot({path:'artifacts/observatory-v3-live-screen/'+tc.name+'-tripod.png',fullPage:false});
     if(tc.name==='mobile390')console.log('AUDIT_IMAGE '+tc.name+'-tripod '+(await page.screenshot({type:'jpeg',quality:47})).toString('base64'));
-    await page.locator('#tabs [data-tab="jjooni-tripod"]').click();
+    await page.locator('.navV2Sub button[data-tab="jjooni-tripod"]').click();
     await page.waitForSelector('#tcBody:not([hidden])',{timeout:70000});
     const comparison=await page.evaluate(async()=>{
      const d=await (await fetch('./data/tripod-comparison.json?audit='+Date.now(),{cache:'no-store'})).json();
