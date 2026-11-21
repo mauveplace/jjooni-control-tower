@@ -67,7 +67,7 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     // On post-merge push, require Pages to serve the exact checked-in V3 asset.
     // Never hardcode a historical cache token: a legitimate release bumps it.
     const localHtml=fs.readFileSync('market-observatory/index.html','utf8');
-    const expectedV3=localHtml.match(/observatory-v3\\.js\\?v=([^"]+)/)?.[1];
+    const expectedV3=localHtml.match(/observatory-v3\.js\?v=([^"]+)/)?.[1];
     assert(expectedV3,'checked-in V3 asset lacks version');
     assert(model.currentVersion?.includes('observatory-v3.js?v='),'V3 Javascript not loaded/versioned');
     if(process.env.GITHUB_EVENT_NAME==='push'){
