@@ -1,3 +1,11 @@
+.songLiveGate{max-width:1080px;margin:16px auto 14px;border:1px solid #c5d4e1;border-radius:12px;background:#edf3f7;overflow:hidden}
+.songLiveGate>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:13px 15px;min-height:46px;font-weight:850;color:#1d3750;font-size:13px}
+.songLiveGate>summary span{font-weight:650;font-size:11px;color:#536e83}
+.songLiveGate[open]{background:#fff}
+.songLiveGate[open]>summary{border-bottom:1px solid #d9e1e9}
+.songLiveGate #song-live-insights{margin:0;border:0;border-radius:0}
+.songLiveGate>summary:focus-visible{outline:3px solid #c29b16;outline-offset:-2px}
+@media(max-width:620px){.songLiveGate>summary{font-size:12px;padding:12px 10px}.songLiveGate>summary span{font-size:10px}}
 /* Scoped educational 2026-11-21 live digest. No global UI changes. */
 #song-live-insights{max-width:1080px;margin:20px auto 0;border:1px solid #dee3e9;border-radius:17px;background:#fff;color:#1f2b38;overflow:hidden}
 #song-live-insights .songLiveTop{padding:20px 22px;background:#f5f6f7;border-bottom:1px solid #e3e7e9}
