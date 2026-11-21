@@ -16,6 +16,17 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
    const failuresReq=[];page.on('requestfailed',r=>failuresReq.push(r.url()+' '+r.failure()?.errorText));
    try{
     await page.goto(url+'?live_audit=20261121',{waitUntil:'domcontentloaded',timeout:90000});
+    // Post-merge main push may start before GitHub Pages publishes its HTML.
+    // Require the new board asset before assessing the mobile chip fit.
+    if(process.env.GITHUB_EVENT_NAME==='push'){
+     for(let attempt=0;attempt<18;attempt++){
+      const asset=await page.locator('script[src*="latest-board-v1.js"]').getAttribute('src');
+      if(asset?.includes('20261121-v3-mobile-ndx-full'))break;
+      assert(attempt<17,'Live Pages still has the old latest-board asset after bounded publication retry');
+      await page.waitForTimeout(7000);
+      await page.reload({waitUntil:'domcontentloaded',timeout:90000});
+     }
+    }
     await page.waitForFunction(()=>document.body.classList.contains('obsV3') && window.__JJOONI_OBS_V3?.enabled?.(location.search)===true,{timeout:45000});
     await page.waitForSelector('#ov3TripodRail .ov3Rail',{timeout:65000});
     await page.waitForSelector('#ov3MarketStrip [data-ov3-quote="NASDAQ100"]',{timeout:30000});
@@ -33,6 +44,7 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
       ledgerSession:g.us_session,ledgerPod:g.tripod.pod,ledgerNdx:g.tripod.ndx,sidecarSession:d.tripod_signal.date,sidecarPod:d.tripod_signal.target,
       sessionAligned:f.session_alignment.aligned,sourceGenerated:f.generated_kst,railText:rail.innerText.slice(0,950),
       stripText:strip.innerText.slice(0,750),marks,cards,tiles,
+      headerChips:[...document.querySelectorAll('header.top #pulse .chip')].map(e=>({text:e.textContent.trim(),clientWidth:e.clientWidth,scrollWidth:e.scrollWidth})),
       viewport:innerWidth,docWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,
       railBox:rect(rail),stripBox:rect(strip),currentVersion:document.querySelector('script[src*="observatory-v3.js"]')?.getAttribute('src'),
       chartJs:typeof window.Chart,extraWarn:[...document.querySelectorAll('.ov3Pending,.ov3Stale')].map(e=>e.textContent.slice(0,200))};
@@ -53,6 +65,10 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
       assert(o.rect.x>=-3&&o.rect.right<=tc.width+3,'card outside viewport '+JSON.stringify(o));
     }
     assert.equal(model.tiles.length,4,'NDX/S&P/SOX/VIX quote tiles are missing');
+    if(tc.width<=430 && process.env.GITHUB_EVENT_NAME==='push'){
+     assert(model.headerChips.some(x=>x.text.startsWith('NDX 25,028')||x.text.startsWith('NDX ')),'V3 mobile header must show compact NDX label');
+     assert(model.headerChips.every(x=>x.scrollWidth<=x.clientWidth+1),'Header pulse value truncated '+JSON.stringify(model.headerChips));
+    }
     const pageShot=await page.screenshot({path:'artifacts/observatory-v3-live-screen/'+tc.name+'-overview.png',fullPage:false});
     if(tc.name==='mobile390'||tc.name==='desktop1440'){
      console.log('AUDIT_IMAGE '+tc.name+'-overview '+(await page.screenshot({type:'jpeg',quality:47})).toString('base64'));

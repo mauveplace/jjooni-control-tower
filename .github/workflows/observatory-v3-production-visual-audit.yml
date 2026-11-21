@@ -4,11 +4,15 @@ on:
     paths:
       - tests/observatory-v3-live-screen-audit.cjs
       - .github/workflows/observatory-v3-production-visual-audit.yml
+      - market-observatory/latest-board-v1.js
+      - market-observatory/index.html
   push:
     branches: [main]
     paths:
       - tests/observatory-v3-live-screen-audit.cjs
       - .github/workflows/observatory-v3-production-visual-audit.yml
+      - market-observatory/latest-board-v1.js
+      - market-observatory/index.html
   workflow_dispatch:
 permissions:
   contents: read
