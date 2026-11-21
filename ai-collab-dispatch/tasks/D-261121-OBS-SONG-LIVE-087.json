@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-OBS-SONG-LIVE-087",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "Owner requested inspection of the newly uploaded 2026-11-21 Song YouTube live Plaud recording and implementation of justified improvements in Observatory within the ongoing investment project. Scope: educational OBS live insight, no strategy rule changes.",
+  "objective": "Add source-grounded 2026-11-21 Song live digest in collapsible top-of-morning-brief panel (existing 5 main tabs). 7 evidence-aware cards; clearly separate speaker opinion and JJOONI application, exclude private raw Plaud info; no trade logic.",
+  "acceptance": [
+    "Verify the exact PR HEAD against seven public-education paraphrase claims: NOPOD signal vs next-session execution, personal 60/20/20 allocation not adopted as user policy, MDD vs return, before60 capabilities as speaker statements not directly scraped site, new method research only, covered call not downside hedge, DCA vs lump-sum context.",
+    "VIX source ambiguity: Plaud STT 'VIX 11 평균' could mean 'VIX 10일 평균'; existing independent source and public-market-daily VIX10 must remain unchanged. Do not alter canonical TRI-POD or infer new indicator window.",
+    "Current published NOPOD from 2026-11-20 market context already exists; do not mutate market data or mark live as trade order. The talk's 2026-11-23 night/24 morning execution is speaker illustrative timing, not validated user order.",
+    "Ensure no private audio, transcript, signed audio URL, Plaud file IDs, personal audience data, Google Drive private URLs, holdings are shipped. Public digest is a concise paraphrase.",
+    "Check 2026-11-21 live is NOT a daily '오늘의 한 단어' session: no new terms inserted to 28-entry study dataset.",
+    "UI: collapsible header in existing 시황 → 아침 시황, daily report remains visible, existing 5 nav groups and 14 legacy destinations unchanged, no mobile horizontal overflow.",
+    "Evaluate full unit CI and Chromium responsive E2E on 390/800/1365, check no XSS (textContent) and no runtime errors; report PASS or NEEDS_CHANGES with current exact HEAD.",
+    "No merging or deployment as ROY; reviewer only. Owner approved education UI but no trades or new strategy rules."
+  ],
+  "forbidden": [
+    "Never copy private raw Plaud notes/transcripts or sensitive user info",
+    "No alteration of NOPOD, MA250, VIX10 thresholds, live market data, brokerage account, orders, or trade execution",
+    "No assertions that new regime-adaptive strategy has been proven or released"
+  ]
+}
