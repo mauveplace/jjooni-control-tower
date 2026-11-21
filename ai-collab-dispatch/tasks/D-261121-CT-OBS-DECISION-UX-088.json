@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-CT-OBS-DECISION-UX-088",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "2026-11-21 owner explicitly redirects work away from Windows/PC AI collaboration toward substantive Control Tower and Market Observatory improvements. This task makes bounded read-only UI improvements on a PR branch and does not assert final release approval.",
+  "objective": "Audit and improve two decision-first front-end gaps: Control Tower identifies which of 4 accounts lacks today PnL, and Observatory V3 summarizes validated 34-sector breadth/turns in 3 cohorts without inferring capital flow or changing calculation/trading.",
+  "acceptance": [
+    "Inspect exact current PR HEAD and diff; ensure source files are only CT/Observatory read-only UI, tests, cache versions and docs. Main and user account private data are untouched.",
+    "For the Control Tower, verify missing-account label appears only on aligned/fresh snapshots when PnL source absent, never display a false aggregate PnL; 4-account NAV guard and V1 rollback preserved. If all 4 values present but their PnL scopes differ, disclose period mismatch instead of a fake result.",
+    "For Observatory, require public 34 rows, read_only/no_trade, same completed session, finite previous/current returns and change_pp consistency; 11 US + 10 KR + 13 thematic ETF separate cohorts; current 1D bars remain available when previous comparison is held.",
+    "Use 2026-11-20 source facts as an example only: 1/11 US rise, 0/10 KR rise, 0/13 theme rise, 5 KR positive-to-negative transitions. Never call return-sign or change_pp flows, signed trading demand or portfolio allocation.",
+    "Independent Node regression and exact-head CI, Chromium V3 390/800/1440 tests for responsive/non-overflow and JS errors; CT synthetic browser tests for missing-account note and no NAV leakage.",
+    "Prevent duplicate panels, stale session, cross-market flow claims, or changed TRIPOD thresholds/strategy signal. Do not change PC relay, GitHub webhook, scheduler, user account, private data, autonomous orders, or publication alerts.",
+    "Publish a substantive ROY PASS/NEEDS_CHANGES/BLOCKED review tied to the exact full 40-character PR HEAD, with evidence, source comment and remaining authenticated-device caveat. Reviewer must not merge or deploy; owner release gate remains."
+  ],
+  "forbidden": [
+    "No access to private account/portfolio or Plaud/Gmail materials",
+    "No changes to automated trading, quotes, market collector, TRI-POD rules, release credentials or PC collaboration relay",
+    "Do not claim authenticated Control Tower device was verified by synthetic CI or inferred publication success"
+  ]
+}
