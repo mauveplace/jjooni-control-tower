@@ -25,28 +25,42 @@ def assess(now, observatory, pulse, public, glance, sectors, latest, index, arch
         and trading_day(now.date() - timedelta(days=1))
         and now.time() >= time(6, 30)
     )
+    source_data = [observatory, pulse, public, glance, sectors, latest, index, archive]
+    observatory, pulse, public, glance, sectors, latest, index, archive = [
+        value if isinstance(value, dict) else {} for value in source_data
+    ]
     report_problems = decide(now, latest, observatory, index=index, archive=archive)
     missing = [p for p in report_problems if p.startswith("BRIEF_MISSING")]
     signal = public.get("tripod_signal") or {}
+    if not isinstance(signal, dict):
+        signal = {}
     groups = sectors.get("groups") or []
-    sector_rows = [row for group in groups if isinstance(group, dict)
-                   for row in group.get("rows", []) if isinstance(row, dict)]
-    sector_keys = {g.get("key"): len(g.get("rows", [])) for g in groups if isinstance(g, dict)}
+    if not isinstance(groups, list):
+        groups = []
+    sector_rows, sector_keys = [], {}
+    for group in groups:
+        if not isinstance(group, dict):
+            continue
+        rows = group.get("rows") or []
+        if not isinstance(rows, list):
+            continue
+        sector_rows.extend(row for row in rows if isinstance(row, dict))
+        sector_keys[group.get("key")] = len(rows)
     source_ready = bool(
         observatory.get("us_completed_session_date") == expected
         and pulse.get("market_date_us") == expected
         and pulse.get("snapshot_status") == "FINAL"
-        and pulse.get("session_gate", {}).get("aligned") is True
+        and (pulse.get("session_gate") or {}).get("aligned") is True
         and pulse.get("read_only") is True
         and signal.get("date") == expected
         and signal.get("ok") is True
         and public.get("read_only") is True
         and glance.get("us_session") == expected
-        and glance.get("tripod", {}).get("session") == expected
-        and glance.get("consistency", {}).get("status") == "OK"
+        and (glance.get("tripod") or {}).get("session") == expected
+        and (glance.get("consistency") or {}).get("status") == "OK"
         and glance.get("read_only") is True
         and glance.get("no_trade") is True
-        and sectors.get("completed_cutoffs", {}).get("US") == expected
+        and (sectors.get("completed_cutoffs") or {}).get("US") == expected
         and len(sector_rows) == 34
         and sector_keys.get("classic") == 11
         and sector_keys.get("kr_sector") == 10
@@ -66,7 +80,7 @@ def assess(now, observatory, pulse, public, glance, sectors, latest, index, arch
             "pulse": pulse.get("market_date_us"),
             "tripod": signal.get("date"),
             "glance": glance.get("us_session"),
-            "sectors_us": sectors.get("completed_cutoffs", {}).get("US"),
+            "sectors_us": (sectors.get("completed_cutoffs") or {}).get("US"),
         },
         "sector_rows": len(sector_rows),
         "latest_date": latest.get("report_date_kst"),
