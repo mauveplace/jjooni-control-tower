@@ -1,0 +1,30 @@
+.songLiveGate{max-width:1080px;margin:16px auto 14px;border:1px solid #c5d4e1;border-radius:12px;background:#edf3f7;overflow:hidden}
+.songLiveGate>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:13px 15px;min-height:46px;font-weight:850;color:#1d3750;font-size:13px}
+.songLiveGate>summary span{font-weight:650;font-size:11px;color:#536e83}
+.songLiveGate[open]{background:#fff}
+.songLiveGate[open]>summary{border-bottom:1px solid #d9e1e9}
+.songLiveGate #song-live-insights{margin:0;border:0;border-radius:0}
+.songLiveGate>summary:focus-visible{outline:3px solid #c29b16;outline-offset:-2px}
+@media(max-width:620px){.songLiveGate>summary{font-size:12px;padding:12px 10px}.songLiveGate>summary span{font-size:10px}}
+/* Scoped educational 2026-11-21 live digest. No global UI changes. */
+#song-live-insights{max-width:1080px;margin:20px auto 0;border:1px solid #dee3e9;border-radius:17px;background:#fff;color:#1f2b38;overflow:hidden}
+#song-live-insights .songLiveTop{padding:20px 22px;background:#f5f6f7;border-bottom:1px solid #e3e7e9}
+#song-live-insights .songLiveKicker{color:#48627b;font-weight:850;font-size:11px;letter-spacing:.11em;text-transform:uppercase}
+#song-live-insights h2{font-size:clamp(20px,4vw,25px);letter-spacing:-.045em;margin:8px 0;color:#182331}
+#song-live-insights .songLiveIntro{font-size:13px;line-height:1.7;color:#536071;margin:0}
+#song-live-insights .songLiveStatus{margin-top:10px;font-size:12px;font-weight:700;color:#496078}
+#song-live-insights #songLiveCards{display:grid;gap:8px;padding:12px}
+#song-live-insights .songLiveItem{border-radius:11px;border:1px solid #dce2e8;background:#fff;overflow:hidden}
+#song-live-insights .songLiveItem[open]{border-color:#b9c7d5;box-shadow:0 4px 16px #1830490b}
+#song-live-insights .songLiveSummary{display:flex;align-items:center;flex-wrap:wrap;gap:11px;cursor:pointer;min-height:48px;padding:13px 14px;color:#243447;font-size:14px;font-weight:850;line-height:1.5}
+#song-live-insights .songLiveSummary::marker{color:#697c90}
+#song-live-insights .songLiveCat{display:inline-block;background:#eaf0f4;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:750;color:#324b60}
+#song-live-insights .songLiveBody{padding:0 15px 16px}
+#song-live-insights .songLiveDetail{border-top:1px solid #edf0f2;padding-top:12px;margin-top:10px}
+#song-live-insights .songLiveDetail strong{display:block;font-size:11px;color:#4c6379}
+#song-live-insights .songLiveDetail p{font-size:12px;line-height:1.8;margin:6px 0;color:#293848}
+#song-live-insights .songLiveDetail:last-child{border-left:3px solid #d6ad3e;background:#faf8ed;padding:10px 12px 11px;border-radius:6px}
+#song-live-insights .songLiveFooter{padding:0 22px 18px;font-size:11px;line-height:1.75;color:#687584}
+#song-live-insights a{color:#2d587f;text-underline-offset:3px}
+#song-live-insights summary:focus-visible{outline:3px solid #d2a600;outline-offset:-3px}
+@media(max-width:620px){#song-live-insights{margin:13px 0}#song-live-insights .songLiveTop{padding:16px}#song-live-insights .songLiveSummary{font-size:13px;padding:11px}#song-live-insights .songLiveFooter{padding:0 15px 15px}}

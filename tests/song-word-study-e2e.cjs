@@ -8,6 +8,14 @@ const base=process.env.OBS_AUDIT_BASE_URL||'http://127.0.0.1:8123/market-observa
   const page=await browser.newPage({viewport:{width:v.width,height:v.height}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'?ui=v3&songwordtest=1',{waitUntil:'domcontentloaded',timeout:120000});
+  await page.locator('#tabs button[data-tab="morning-brief"]').evaluate(el=>el.click());
+  assert.ok(await page.locator('#songLiveGate').isVisible(),v.name+' live note disclosure');
+  await page.locator('#songLiveGate > summary').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#songLiveCards .songLiveItem').length===7,{timeout:30000});
+  assert.equal(await page.locator('#songLiveCards .songLiveItem').count(),7,v.name+' seven actual live notes');
+  assert.match(await page.locator('#songLiveCards .songLiveItem').first().innerText(),/No-Pod/);
+  assert.equal(await page.locator('.navV2Main button').count(),5,'live note does not add main navigation');
+  await page.locator('#songLiveGate > summary').click();
   await page.locator('#tabs button[data-tab="song-terms"]').evaluate(el=>el.click());
   await page.waitForFunction(()=>document.querySelectorAll('#sw-item-list .sw-card').length>=25,{timeout:30000});
   const initial=await page.locator('#sw-item-list .sw-card').count();
