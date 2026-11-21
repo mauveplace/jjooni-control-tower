@@ -101,6 +101,18 @@ class MorningPublication(unittest.TestCase):
         self.assertIn('INDEX_OR_ARCHIVE_METADATA_MISMATCH',
                       ' '.join(decide(now, latest, obs, index={'entries': [bad]}, archive=latest)))
 
+    def test_malformed_index_must_be_missing_report_not_uncaught_exception(self):
+        now = datetime(2026, 11, 21, 7, 7, tzinfo=KST)
+        latest = {'report_date_kst': '2026-11-21', 'market_date_us': '2026-11-20',
+                  'title': 'test', 'generated_kst': '2026-11-21T06:50:00+09:00',
+                  'published_kst': '2026-11-21T06:51:00+09:00'}
+        obs = {'us_completed_session_date': '2026-11-20'}
+        for index in ({'entries': {'bad': 'not-a-list'}}, {'entries': ['bad-first-entry']}):
+            issues = decide(now, latest, obs, index=index, archive=latest)
+            self.assertEqual(len(issues), 1)
+            self.assertTrue(issues[0].startswith('BRIEF_MISSING expected=2026-11-21'))
+            self.assertIn('INDEX_OR_ARCHIVE_METADATA_MISMATCH', issues[0])
+
     def test_monday_brief_not_checked(self):
         now = datetime(2026, 11, 16, 7, 7, tzinfo=KST)  # Monday: separate edition
         p = decide(now, {'report_date_kst': '2026-11-15'}, {'us_completed_session_date': '2026-11-13'})
