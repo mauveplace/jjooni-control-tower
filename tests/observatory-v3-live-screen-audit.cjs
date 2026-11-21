@@ -132,8 +132,8 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
      });
      if(morning.report_date_kst>expected.report_date_kst)break; // newer edition superseded this run
      if(morning.report_date_kst===expected.report_date_kst
-         &&morning.body_markdown===expected.body_markdown
-         &&morning.revision_count===(expected.revisions?.length||0))break;
+         &&morning.revision_count >= (expected.revisions?.length||0)
+         &&(morning.revision_count > (expected.revisions?.length||0) || morning.body_markdown===expected.body_markdown))break;
      assert(attempt<17,'Pages latest morning report not published after bounded retry');
      await page.waitForTimeout(5500);
      await page.reload({waitUntil:'domcontentloaded',timeout:90000});
