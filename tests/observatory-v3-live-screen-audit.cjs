@@ -19,10 +19,15 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     // Post-merge main push may start before GitHub Pages publishes its HTML.
     // Require the new board asset before assessing the mobile chip fit.
     if(process.env.GITHUB_EVENT_NAME==='push'){
+     const localHtml=fs.readFileSync('market-observatory/index.html','utf8');
+     const expectedBoard=localHtml.match(/latest-board-v1\.js\?v=([^"]+)/)?.[1];
+     const expectedRegime=localHtml.match(/market-regime-v1\.js\?v=([^"]+)/)?.[1];
+     assert(expectedBoard&&expectedRegime,'Missing versioned live board/regime source in checked-in HTML');
      for(let attempt=0;attempt<18;attempt++){
-      const asset=await page.locator('script[src*="latest-board-v1.js"]').getAttribute('src');
-      if(asset?.includes('20261121-v3-mobile-ndx-full'))break;
-      assert(attempt<17,'Live Pages still has the old latest-board asset after bounded publication retry');
+      const board=await page.locator('script[src*="latest-board-v1.js"]').getAttribute('src');
+      const regime=await page.locator('script[src*="market-regime-v1.js"]').getAttribute('src');
+      if(board?.includes(expectedBoard)&&regime?.includes(expectedRegime))break;
+      assert(attempt<17,'Live Pages still has old board/regime asset after bounded publication retry');
       await page.waitForTimeout(7000);
       await page.reload({waitUntil:'domcontentloaded',timeout:90000});
      }
