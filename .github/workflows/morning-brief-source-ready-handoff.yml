@@ -34,14 +34,14 @@ concurrency:
 
 jobs:
   handoff:
-    if: ${ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           # Source readiness and report status are always read from main.
-          ref: ${ github.event_name == 'pull_request' && github.ref || 'main' }
+          ref: ${{ github.event_name == 'pull_request' && github.ref || 'main' }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -54,12 +54,12 @@ jobs:
         run: python tools/morning_source_ready_handoff.py
 
       - name: Create exactly one existing-format missing-brief incident
-        if: ${ steps.source_gate.outputs.needed == 'true' && github.event_name != 'pull_request' }
+        if: ${{ steps.source_gate.outputs.needed == 'true' && github.event_name != 'pull_request' }}
         env:
-          GH_TOKEN: ${ github.token }
-          REPORT_DAY: ${ steps.source_gate.outputs.report_day }
-          US_SESSION: ${ steps.source_gate.outputs.us_session }
-          SOURCE_STATUS: ${ steps.source_gate.outputs.status }
+          GH_TOKEN: ${{ github.token }}
+          REPORT_DAY: ${{ steps.source_gate.outputs.report_day }}
+          US_SESSION: ${{ steps.source_gate.outputs.us_session }}
+          SOURCE_STATUS: ${{ steps.source_gate.outputs.status }}
         shell: bash
         run: |
           set -euo pipefail
