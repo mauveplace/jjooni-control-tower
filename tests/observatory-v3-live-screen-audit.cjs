@@ -105,6 +105,51 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     assert(comparison.docWidth<=tc.width+3,'comparison panel horizontal overflow '+comparison.docWidth);
     await page.screenshot({path:'artifacts/observatory-v3-live-screen/'+tc.name+'-comparison.png',fullPage:false});
     if(tc.name==='mobile390')console.log('AUDIT_IMAGE '+tc.name+'-comparison '+(await page.screenshot({type:'jpeg',quality:43})).toString('base64'));
+    // Verify the REAL public morning report after the last published report
+    // changes; an unrelated V3/market green check is not publication proof.
+    const expected=JSON.parse(fs.readFileSync('market-observatory/data/morning-brief/latest.json','utf8'));
+    await page.locator('.navV2Main button[data-group="brief"]').click();
+    await page.waitForSelector('#briefArticle h2',{timeout:45000});
+    let morning=null;
+    for(let attempt=0;attempt<18;attempt++){
+     morning=await page.evaluate(async()=>{
+      const r=await fetch('./data/morning-brief/latest.json?audit='+Date.now(),{cache:'no-store'});
+      if(!r.ok)throw Error('Morning live latest HTTP '+r.status);
+      const d=await r.json();
+      const body=document.querySelector('#briefArticle');
+      const sel=document.querySelector('#briefHistory');
+      return {report_date_kst:d.report_date_kst,market_date_us:d.market_date_us,original_published_kst:d.published_kst,
+       body_markdown:d.body_markdown,revision_count:d.revisions?.length||0,
+       badge:document.querySelector('#briefBadge')?.textContent?.trim(),
+       meta:document.querySelector('#briefMeta')?.innerText?.slice(0,350),
+       title:document.querySelector('#briefTitle')?.textContent?.trim(),
+       sections:body?.querySelectorAll('h2')?.length||0,
+       tables:body?.querySelectorAll('table')?.length||0,
+       status:document.querySelector('#briefLoadStatus')?.textContent?.slice(0,240),
+       optionExists:[...sel?.options||[]].some(o=>o.textContent.includes(d.report_date_kst+' · 미국 '+d.market_date_us)&&!o.disabled),
+       todayUnpublished:[...sel?.options||[]].some(o=>o.textContent.includes(d.report_date_kst+' · 미게시')),
+       pageWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth};
+     });
+     if(morning.report_date_kst>expected.report_date_kst)break; // newer edition superseded this run
+     if(morning.report_date_kst===expected.report_date_kst
+         &&morning.revision_count >= (expected.revisions?.length||0)
+         &&(morning.revision_count > (expected.revisions?.length||0) || morning.body_markdown===expected.body_markdown))break;
+     assert(attempt<17,'Pages latest morning report not published after bounded retry');
+     await page.waitForTimeout(5500);
+     await page.reload({waitUntil:'domcontentloaded',timeout:90000});
+     await page.locator('.navV2Main button[data-group="brief"]').click();
+     await page.waitForSelector('#briefArticle h2',{timeout:45000});
+    }
+    assert(morning.report_date_kst>=expected.report_date_kst,'Pages report date regressed');
+    assert(morning.market_date_us>=expected.market_date_us,'Pages completed US market date regressed');
+    assert(morning.optionExists,'current published day must be selectable in report history');
+    assert(!morning.todayUnpublished,'selected published day must not appear as missing');
+    assert(morning.badge&& !morning.badge.includes('미게시'),'published morning badge still missing');
+    assert.equal(morning.sections,8,'published morning article must render 8 sections');
+    assert(morning.tables>=5,'5 market+sector tables missing from report article');
+    assert(morning.pageWidth<=tc.width+3 && morning.bodyWidth<=tc.width+3,'morning article overflows '+JSON.stringify(morning));
+    await page.screenshot({path:'artifacts/observatory-v3-live-screen/'+tc.name+'-brief.png',fullPage:false});
+    console.log('V3_MORNING_BRIEF_PUBLICATION_PASS '+JSON.stringify({viewport:tc.name,date:morning.report_date_kst,us:morning.market_date_us,badge:morning.badge,sections:morning.sections,tables:morning.tables,revisions:morning.revision_count}));
     assert.equal(pageerrors.length,0,'uncaught JS errors '+pageerrors.join('; '));
     console.log('V3_PRODUCTION_VISUAL_PASS '+JSON.stringify({viewport:tc,model,detail,comparison,pageerrors,failed_requests:failuresReq.slice(0,12)}));
    }catch(e){
