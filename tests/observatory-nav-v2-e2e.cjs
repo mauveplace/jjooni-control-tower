@@ -27,7 +27,7 @@ const BASE = process.env.URL || 'http://127.0.0.1:8123/market-observatory/';
         reached++;
       }
     }
-    assert.equal(reached, 13);
+    assert.equal(reached, 14);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     assert.ok(overflow <= 1, 'no horizontal overflow ' + overflow);
     const small = await page.evaluate(() => [...document.querySelectorAll('.navV2Main button')].filter(b => b.getBoundingClientRect().height < 44).length);
