@@ -1,0 +1,52 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-IRP-DCA-ROY-CONSENSUS-072",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "independent_IRP_monthly_DCA_strategy_convergence",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "objective": "Independent ROY review and joint JJOONI–ROY negotiated recommendation for retirement-account monthly inflow: passive 1x NDX ETF vs actively selected TIME 426030 vs qualified MIDAS TDF2060. Previous JJOONI tentative proposal 57% passive 1x NDX ETF +43% MIDAS TDF, versus all MIDAS or all TIME, not yet agreed. Apply user-provided fresh Song YouTube transcript: 37-year synthetic QQQ/QLD/TQQQ tests suggest 1x NDX monthly DCA without timing signals, and use long-term 250d NDX brake for 2x/3x levered sleeves; verify limits and avoid conflating with TRI-POD state.",
+  "public_context_only": {
+    "date": "2026-11-21",
+    "new_content": "User shared full subtitles of Song Team Lead's video on QLD/TQQQ accumulation, 37-year synthetic NDX indicator backtests, discussed in private chat; this public task summarizes only the broad thesis, not the private transcript.",
+    "claims_to_verify": [
+      "1x QQQ monthly unconditional DCA: RSI30/VIX25 or MA200 waited-entry harm returns; 37-year proxy rolling 10y principal shortfall 3% per video",
+      "2x QLD/3x TQQQ monthly accumulate but holding gated by NDX 250DMA; reported 10y principal-shortfall: QLD 27→3%, TQQQ 34→5%; these are author claims, not independently verified",
+      "VIX25 standalone as hold gate may increase underperformance; NDX 250DMA conditional trigger for levered exposure is distinct from established Tri-Pod NDX 250DMA hysteresis and VIX10",
+      "IRP disallows leveraged products; qualifying TDF can be risk-cap exempt under conditions, unlike 1x Nasdaq ETFs"
+    ],
+    "candidate_policies": [
+      "A: fully allocate new monthly inflows to qualified MIDAS TDF2060; existing risk portfolio remains unchanged",
+      "B: 57% new monthly inflow to 1x passive Korean Nasdaq100 ETF (new BUY-HOLD core), 43% to MIDAS qualified TDF2060; no forced sell under existing NOPOD; account risk eligibility and taxonomy checked",
+      "C: fully allocate new monthly inflows to existing active TIME Nasdaq100 ETF",
+      "D: combine existing TDF and TIME, or prefer lower-cost already-held 1x passive ETF versus opening an extra KODEX duplicate"
+    ],
+    "reference_pr_570": "https://github.com/mauveplace/jjooni-control-tower/pull/570",
+    "reference_signal": "2026-11-20 US NDX below MA250, established TRI-POD NOPOD new signal; this affects only pre-approved tactical sleeve, not a new buy-hold core unless existing user rules say otherwise."
+  },
+  "acceptance": [
+    "Review previously disputed ROY comments #7055158836 (NEEDS_CHANGES) and #7055161836 (PASS) on PR #570; reconcile strategy-level convergence versus task validity; identify any numeric disagreement needing withholding approval.",
+    "Independently challenge whether Song's 1x QQQ always-buy monthly DCA claim applies to ACTIVE stock-selection 426030; do not equate risk, CAGR, drawdown, or alpha without genuine Korean ETF evidence.",
+    "Compare A/B/C/D candidates on risk-adjusted return, concentration, fund costs, trading charges, distribution tax treatment inside IRP, liquidity, rebalancing and operational simplicity. No fabricated 10/20y CAGR from unavailable KR close backtest.",
+    "Review existing Korean listed ETF current product status, ticker and true total expense ratios especially KODEX NASDAQ100 379810 vs existing TIGER 133690 and RISE 368590, and qualified MIDAS TDF2060 C-PE2 effective fees and glidepath. Identify whether adding fourth Nasdaq holding is needless clutter.",
+    "Check IRP 70% risky-asset legal/broker limit with qualified TDF exemption and account's available order buying power before executable amounts. Reviewer should not claim account inspection; private SSOT unavailable in public GitHub task.",
+    "Separate buy-hold 1x retirement core from signal-bound tactical TRI-POD sleeve; critique whether treating NOPOD as no-buy applies only to tactical sleeve, and whether new core classification requires user authorization before first buy.",
+    "Challenge blind monthly automatic contribution to midas (fund is stock-heavy and may hide NDX overlap) and overconcentration in NDX/AI/semiconductors; compare 100% TDF vs split proposal including appropriate IRP glidepath for ~20yr horizon.",
+    "Propose concrete user-facing JOINT AGREEMENT: near-term pending action, monthly allocation percentage and contingencies; if disagreement, label dissent with proof and UNRESOLVED rather than fabrication.",
+    "Reply authentically as ROY on this PR for exact HEAD with ROY_REVIEW=PASS|NEEDS_CHANGES|BLOCKED, reviewed_head, independent evidence, contested claims and consensus proposal. No changes to live portfolio/rules without explicit user approval."
+  ],
+  "forbidden": [
+    "No private amounts, identities, account numbers, live holdings or uploaded transcript reproduced in public PR.",
+    "No trades/orders/merges/deployments/code/portfolio writes.",
+    "No pretending that webhook acknowledgement is independent ROY review.",
+    "No changing existing TRI-POD signal logic or rule registry."
+  ]
+}
