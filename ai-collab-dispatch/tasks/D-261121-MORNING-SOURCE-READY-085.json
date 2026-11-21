@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-MORNING-SOURCE-READY-085",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": "d9227a4bc4de37f1174c2a3ccc5b9c744793d581",
+  "objective": "Independent ROY review: recover morning brief source-ready issue handoff when GitHub scheduled cron delayed by 5h; detect correct same-session canonical 34-sector inputs after 06:30 without fabricating an editorial or spamming alerts.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "morning_source_ready_workflow_run_idempotent_incident",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User authorized end-to-end fix, ROY collaboration and release of repeated morning brief misses on KST 2026-11-21.",
+  "acceptance": [
+    "No new paid infrastructure: reuse GitHub existing workflow_run on successfully completed Market Observatory Close Freshness Watchdog and Daily Pulse, no trading or account access.",
+    "On KST Tue-Sat after 06:30 and only actual completed US session, fetch current main (not upstream HEAD); require Observatory/Pulse/Public TRI-POD/Glance same-session aligned and 34 sectors valid. Skip holidays/weekends and incomplete canonical.",
+    "Check correct latest US session AND index top matching AND archive==latest; incident exactly once per KST date using same title as existing watchdog, across state all, never duplicate daily alert.",
+    "When source-ready and unpublished log status and open actionable issue with evidence; workflow DOES NOT write source-backed 8-section editorial or claim Work has actually fired.",
+    "Review explicit Windows/Nov21 source late, 5h schedule delay, corrected 06:30 sentinel, correct Saturday Nov28 early-close; unit tests including malformed dict index must pass; CI exact HEAD.",
+    "No change to primary 06:15 / hourly :30 schedule, watchdog alerts still enabled; first real scheduled completion of next US market session is yet to be verified."
+  ],
+  "forbidden": [
+    "No new cloud spend, increased cron or scheduled GitHub action storms; no false live readiness, no fabricated ROY identity, official price verification or trade order.",
+    "ROY cannot merge or deploy or change scripts outside review."
+  ]
+}

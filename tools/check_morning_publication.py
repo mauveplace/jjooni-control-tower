@@ -43,7 +43,9 @@ def decide(now, latest, observatory, index=None, archive=None):
             problems.append(f"BRIEF_MISSING expected={today} latest={today} WRONG_MARKET_SESSION actual={latest.get('market_date_us')} required={expected}")
         elif index is not None:
             entries = index.get('entries', []) if isinstance(index, dict) else []
-            head = entries[0] if entries else {}
+            if not isinstance(entries, list):
+                entries = []
+            head = entries[0] if entries and isinstance(entries[0], dict) else {}
             expected_path = now.strftime('%Y%m%d') + '.json'
             if (not isinstance(head, dict)
                     or head.get('report_date_kst') != today
