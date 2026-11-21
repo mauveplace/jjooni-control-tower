@@ -1,0 +1,30 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-MORNING-BRIEF-RECOVERY-082",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": "c0b12fd375228c68bbd615a71b4cb17419a294db",
+  "objective": "Independent ROY review of 2026-11-21 post-close report recovery and root cause of missing 06:30 publication despite same-session canonical refresh.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "morning_brief_p0_recovery_and_missed_sla_root_review",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User explicitly asked immediate ROY collaboration, morning report miss correction and deployment without waiting for discretionary choices on Nov21.",
+  "acceptance": [
+    "Verify all 8 report sections, complete 34-ETF board and same US Nov20 session under pinned main source SHA.",
+    "Validate 5 core indicators match canonical, NDX/SOX never falsely marked independently Nasdaq official verified, and Reuters/AP event claims are supported.",
+    "Inspect 06:15 run FAILED_AT_SOURCE (source stale), data recovered later, and missed 07:30 fallback despite source available. Recommend deterministic actual publication recovery and explicit failure states.",
+    "Review PR exact current HEAD, CI green, no personal data, no trading, and posted clock not backdated.",
+    "Post single unambiguous review PASS/NEEDS_CHANGES/BLOCKED with full HEAD and evidence; no merge or deploy."
+  ],
+  "forbidden": [
+    "No account/SSOT/credential/private Song or Plaud material in public repo.",
+    "No disabling real GitHub alerts, weakening validator, claiming unverified official Nasdaq close or 06:30 deadline success.",
+    "Do not merge, deploy or place trades from ROY review."
+  ]
+}
