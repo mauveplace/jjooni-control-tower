@@ -1,0 +1,31 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-OBS-TRIPOD-EOD-081",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "ROY independent review of PR #561: synchronize Observatory V3 TRI-POD published EOD after newer NDX on-demand quote, repair NOPOD-sensitive regression fixtures, add canonical-session-gated historical QQQ/QLD/TQQQ comparison catchup. No trading changes.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "observatory_tripod_eod_catchup_and_comparison",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User urgently requested root cause correction of Observatory TRI-POD lag despite upper NDX display on 2026-11-21 KST. Existing project instructions authorize independently implementing/validating low-risk UI/collector repairs and coordinating with ROY; never execute account orders.",
+  "acceptance": [
+    "Examine exact PR #561 CURRENT HEAD; independently verify source main 2026-11-20 US completed canonical NDX 25,028.9824 and NOPOD cash 100%; browser quote and canonical tripod must use distinct sources and dated values.",
+    "Verify bounded V3 same-session EOD catchup when newer quote arrives; never recalculate TRI-POD using intraday quote, and no unbounded polling. Check visibility/back-navigation race and HTML cache bust.",
+    "Inspect new GitHub Actions comparison catchup: main-branch workflow_run/schedule plus initial self-file push; token write only for published comparison, source session equality and stable historical coverage, completed daily ETF bars, failure leaves previous published data intact.",
+    "Review NOPOD-dependent tests and 390px browser/desktop screenshots; exact HEAD 10 public CI checks success; new historical file passes workflow syntax or report gaps.",
+    "Reply PR #561 with exact reviewed HEAD, authenticated ROY status PASS/NEEDS_CHANGES/BLOCKED, numbered P0/P1/P2 and evidence.",
+    "Confirm code does not touch trading, private account SSOT, credentials or market signal rules."
+  ],
+  "forbidden": [
+    "No trading/order placement, private accounts, secrets, or new cloud services.",
+    "No relaxing CI guard, no silencing alert emails, no fabricated independent Nasdaq certification.",
+    "ROY must not merge or deploy or claim review without actual authenticated ROY completion."
+  ]
+}

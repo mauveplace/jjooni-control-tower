@@ -1,0 +1,119 @@
+name: Market Observatory TRI-POD Comparison Catchup
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/market-observatory-tripod-comparison-catchup.yml
+  workflow_run:
+    workflows: ["Market Observatory Close Freshness Watchdog"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # 07:10 KST after US completed close (Friday UTC -> Saturday KST).
+    - cron: '10 22 * * 1-5'
+permissions:
+  contents: read
+concurrency:
+  group: observatory-tripod-comparison-catchup
+  cancel-in-progress: false
+jobs:
+  catchup:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Gate against the published same-session TRI-POD signal
+        id: gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          base=Path('market-observatory/data')
+          obs=json.loads((base/'observatory.json').read_text())
+          sidecar=json.loads(Path('public-market-daily.json').read_text())
+          output=base/'tripod-comparison.json'
+          prior=json.loads(output.read_text()) if output.exists() else {}
+          session=obs.get('us_completed_session_date')
+          signal=sidecar.get('tripod_signal') or {}
+          aligned=bool(session and signal.get('ok') is True and signal.get('date')==session)
+          needed=aligned and (prior.get('session') or '')<session
+          print('TRIPOD_COMPARISON_GATE', json.dumps({'session':session,'signal_date':signal.get('date'),'last_comparison':prior.get('session'),'source_aligned':aligned,'needs_catchup':needed}))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fh:
+              fh.write('run='+('true' if needed else 'false')+'\n')
+          if not aligned:
+              print('::warning::Canonical TRI-POD completion not aligned; refusing comparison publication')
+          PY
+      - name: Probe completed ETF daily close before costly history rebuild
+        id: etf
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          from build_tripod_comparison import ETFS, yahoo_daily
+          expected=json.loads(Path('market-observatory/data/observatory.json').read_text())['us_completed_session_date']
+          available={}
+          for symbol in ETFS:
+              try:
+                  available[symbol]=expected in yahoo_daily(symbol, adjusted=True, range='1mo')
+              except (OSError, RuntimeError, ValueError) as exc:
+                  available[symbol]=False
+                  print(f'ETF_PROBE {symbol} source not ready: {exc}')
+          ready=all(available.values())
+          print('TRIPOD_ETF_PROBE',json.dumps({'session':expected,'available':available,'ready':ready}))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fh:
+              fh.write('ready='+('true' if ready else 'false')+'\n')
+          if not ready:
+              print('::warning::TRIPOD_COMPARISON_PENDING_ETF: ' + str(available) + ' ; preserved previous verified comparison; will retry on schedule')
+              if os.environ.get('GITHUB_EVENT_NAME')=='schedule':
+                  raise SystemExit('TRIPOD_COMPARISON_ETF_NOT_READY_AT_RETRY_DEADLINE')
+          PY
+      - name: Build comparison from completed ETF daily closes
+        if: steps.gate.outputs.run == 'true' && steps.etf.outputs.ready == 'true'
+        run: python tools/build_tripod_comparison.py
+      - name: Validate freshly built comparison simulation contract
+        if: steps.gate.outputs.run == 'true' && steps.etf.outputs.ready == 'true'
+        run: |
+          python3 -m py_compile tools/build_tripod_comparison.py
+          node --test tests/observatory-tripod-comparison.test.cjs
+          node - <<'JS'
+          const core=require('./market-observatory/tripod-comparison-core.js');
+          const official=require('./market-observatory/jjooni-tripod-v1.js');
+          const payload=require('./market-observatory/data/tripod-comparison.json');
+          const rows=core.simulate(payload,official);
+          if(rows.length<2||rows.at(-1).date!==payload.session)
+            throw Error('TRIPOD_COMPARISON_INCOMPLETE_SIMULATION');
+          console.log('TRIPOD_COMPARISON_ACCEPTANCE=PASS',rows[0].date,payload.session,rows.length);
+          JS
+      - name: Verify comparison reached the current canonical session
+        if: steps.gate.outputs.run == 'true' && steps.etf.outputs.ready == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          base=Path('market-observatory/data')
+          obs=json.loads((base/'observatory.json').read_text())
+          comparison=json.loads((base/'tripod-comparison.json').read_text())
+          expected=obs['us_completed_session_date']
+          assert comparison['session']==expected, f'ETF_DAILY_PENDING expected={expected} got={comparison["session"]}'
+          assert comparison['canonical_session']==expected
+          assert comparison['rows'][-1][0]==expected
+          print('TRIPOD_COMPARISON_CURRENT=PASS session='+expected)
+          PY
+      - name: Publish verified comparison without overwriting other market sources
+        if: steps.gate.outputs.run == 'true' && steps.etf.outputs.ready == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python tools/publish_observatory_data.py --message \
+            'data(observatory): sync TRI-POD historical comparison after US close' \
+            market-observatory/data/tripod-comparison.json
