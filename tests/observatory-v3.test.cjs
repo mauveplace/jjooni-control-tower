@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { model, enabled, rail, marketStrip, sectorChart } = require('../market-observatory/observatory-v3.js');
+const { model, enabled, rail, marketStrip, sectorChart, breadthDigest } = require('../market-observatory/observatory-v3.js');
 const { build: briefDigest, render: renderBriefDigest, css: briefCss } = require('../market-observatory/brief-visual-digest-v1.js');
 const root = path.join(__dirname, '..', 'market-observatory');
 const read = p => JSON.parse(fs.readFileSync(path.join(root, 'data', p), 'utf8'));
@@ -32,6 +32,34 @@ const alignedVisualFixture=()=>{
  }
  return f;
 };
+test('V3 displays source-verified 34-sector cohort breadth without claiming money flow',()=>{
+ const f=alignedVisualFixture();
+ const m=model(f.glance,f.freshness,f.sector,now(f.freshness));
+ assert.equal(m.ready,true);
+ assert.equal(m.sectorReady,true);
+ assert.deepEqual(m.sectorBreadth.map(x=>x.total),[11,10,13]);
+ const rendered=breadthDigest(m);
+ assert.match(rendered,/34개 업종 강약 확산도/);
+ assert.match(rendered,/실제 자금 이동 아님/);
+ assert.match(rendered,/상승→하락/);
+ assert.match(rendered,/하락→상승/);
+ assert.equal((rendered.match(/class="ov3BreadthCard"/g)||[]).length,3);
+ for(const cohort of m.sectorBreadth){
+   assert(cohort.up+cohort.down<=cohort.total,'flat rows are not falsely counted as advancing or declining');
+   assert(cohort.turnedDown<=cohort.down);
+   assert(cohort.turnedUp<=cohort.up);
+ }
+ const missing=structuredClone(f.sector);
+ missing.groups.find(g=>g.key==='classic').rows[0].previous_return_pct=null;
+ const kept=model(f.glance,f.freshness,missing,now(f.freshness));
+ assert.equal(kept.sectorReady,true,'valid current 1D bars remain available');
+ assert.equal(kept.sectorBreadth,null,'missing previous close blocks comparisons');
+ assert.match(sectorChart(kept),/전일 비교 원장 확인 대기/);
+ assert.doesNotMatch(breadthDigest(kept),/상승→하락/);
+ const mismatched=structuredClone(f.sector);
+ mismatched.groups.find(g=>g.key==='classic').rows[0].change_pp+=1.0;
+ assert.equal(model(f.glance,f.freshness,mismatched,now(f.freshness)).sectorBreadth,null,'bad change_pp must not fabricate breadth');
+});
 test('published sector snapshot is either session-aligned or explicitly held by V3',()=>{
  const f=fixture(),rows=(f.sector.groups||[]).flatMap(x=>x.rows||[]);
  assert.equal(rows.length,34,'published sector board must retain 34 rows');

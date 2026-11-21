@@ -160,6 +160,18 @@ body.obsV3 .ov3StripTile .ov3QuoteMeta{font-size:10px;font-weight:600;color:#647
 body.obsV3 .ov3QuoteLagNotice{border:1px solid #edce7e;background:#fff8df;color:#6d4800;font-size:11px;line-height:1.55;padding:8px 11px;font-weight:750}
 body.obsV3 .ov3MarketStrip .gain,body.obsV3 .ov3SectorLine .gain{color:#ba322d}
 body.obsV3 .ov3MarketStrip .loss,body.obsV3 .ov3SectorLine .loss{color:#2759a0}
+body.obsV3 .ov3Breadth{margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #e1e5ed;border-radius:10px}
+body.obsV3 .ov3BreadthTitle{display:flex;flex-wrap:wrap;gap:5px 12px;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+body.obsV3 .ov3BreadthTitle strong{font-size:13px;color:#17191c}
+body.obsV3 .ov3BreadthTitle small{font-size:11px;color:#677587;line-height:1.45}
+body.obsV3 .ov3BreadthGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body.obsV3 .ov3BreadthCard{min-width:0;display:grid;gap:7px;padding:10px;border:1px solid #e7e9ed;border-radius:8px;background:#fcfcfd}
+body.obsV3 .ov3BreadthCard>strong{font-size:12px;overflow-wrap:anywhere}
+body.obsV3 .ov3BreadthCard>span{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
+body.obsV3 .ov3BreadthCard .gain{color:#ba322d}
+body.obsV3 .ov3BreadthCard .loss{color:#2759a0}
+body.obsV3 .ov3BreadthCard>small{font-size:11px;color:#5c6878;line-height:1.4}
+@media(max-width:600px){body.obsV3 .ov3BreadthGrid{grid-template-columns:1fr}body.obsV3 .ov3BreadthCard{grid-template-columns:minmax(0,1fr) auto;align-items:center}body.obsV3 .ov3BreadthCard>small{grid-column:1/-1}}
 body.obsV3 .ov3Sectors{border-top:1px solid #e5e7ed;margin:13px 0;padding-top:10px}
 body.obsV3 .ov3SectorsHead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:9px}
 body.obsV3 .ov3SectorsHead strong{font-size:13px}

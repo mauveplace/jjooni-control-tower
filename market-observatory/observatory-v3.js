@@ -90,10 +90,26 @@ function model(glance, fresh, sectors, nowMs=Date.now(), publicDaily=null) {
   &&rows.find(x=>x.key==='kr_sector')?.rows?.length===10
   &&all.every(x=>x.status==='OK'&&x.current_session===sectors.completed_cutoffs[x.market]
     &&finite(x.current_return_pct));
+ // Comparative breadth is independently gated. A current-return bar may be
+ // valid while the prior close or the prior-session date is not.
+ const breadthReady=sectorReady&&all.every(x=>finite(x.previous_return_pct)&&finite(x.change_pp)
+  &&/^\d{4}-\d{2}-\d{2}$/.test(x.previous_session||'')
+  &&x.previous_session<x.current_session
+  &&Math.abs((x.current_return_pct-x.previous_return_pct)-x.change_pp)<0.04);
+ const sectorBreadth=breadthReady?[
+  {label:'미국 S&P500',rows:rows.find(x=>x.key==='classic').rows},
+  {label:'한국 업종',rows:rows.find(x=>x.key==='kr_sector').rows},
+  {label:'테마 ETF',rows:rows.filter(x=>!['classic','kr_sector'].includes(x.key)).flatMap(x=>x.rows||[])}
+ ].map(group=>({label:group.label,total:group.rows.length,
+   up:group.rows.filter(x=>x.current_return_pct>0).length,
+   down:group.rows.filter(x=>x.current_return_pct<0).length,
+   turnedDown:group.rows.filter(x=>x.previous_return_pct>0&&x.current_return_pct<0).length,
+   turnedUp:group.rows.filter(x=>x.previous_return_pct<0&&x.current_return_pct>0).length
+ })):null;
  return {ready:true,session:glance.us_session,pod:t.pod,regime:t.regime,ma250:t.ma250,vix10:t.vix10,dd:t.drawdown_52w_pct,
   ndx:axis.now,ndxPct:ndx.d1_pct,ndxChangePts,ndxChangePct,axis,points:Object.fromEntries(Object.entries(axis).map(([key,value])=>[key,position(value)])),
   differences:{lower:dist(axis.lower),upper:dist(axis.upper),tri:dist(axis.tri)},
-  us,sectorReady,sectors:sectorReady?[...rows.find(x=>x.key==='classic').rows].sort((a,b)=>b.current_return_pct-a.current_return_pct):[],
+  us,sectorReady,sectorBreadth,sectors:sectorReady?[...rows.find(x=>x.key==='classic').rows].sort((a,b)=>b.current_return_pct-a.current_return_pct):[],
   generated:glance.generated_kst,freshnessGenerated:fresh.generated_kst,freshnessCurrent:statusOk,
   officialVerified:glance?.brief_check?.status==='MATCH' && glance.brief_check.official_eod_verified===true
    && glance.brief_check.source_date===glance.us_session && glance.brief_check.match_rule==='INTEGER_PART_EQUAL',
@@ -174,11 +190,25 @@ function marketStrip(m,getQuote=null,nowMs=Date.now()){
   ).join('')+'</div></section>';
 }
 
+function breadthDigest(m){
+ if(!m.sectorReady)return '';
+ if(!Array.isArray(m.sectorBreadth)||m.sectorBreadth.length!==3||
+    m.sectorBreadth.reduce((n,x)=>n+x.total,0)!==34)
+  return '<p class="ov3Small">34개 업종 전일 비교 원장 확인 대기 · 당일 막대만 표시합니다.</p>';
+ return '<section class="ov3Breadth" aria-label="34개 업종 전일 대비 강약 확산">'
+  +'<div class="ov3BreadthTitle"><strong>34개 업종 강약 확산도</strong>'
+  +'<small>각 시장의 전 거래일 대비 · 등락 종목 수 · 실제 자금 이동 아님</small></div>'
+  +'<div class="ov3BreadthGrid">'+m.sectorBreadth.map(g=>'<div class="ov3BreadthCard">'
+   +'<strong>'+escapeHtml(g.label)+' · '+g.total+'개</strong>'
+   +'<span><b class="gain">상승 '+g.up+'</b><b class="loss">하락 '+g.down+'</b></span>'
+   +'<small>상승→하락 '+g.turnedDown+' · 하락→상승 '+g.turnedUp+'</small>'
+   +'</div>').join('')+'</div></section>';
+}
 function sectorChart(m){
   if(!m.sectorReady)return '<p class="ov3Small">섹터 34종의 동일 완료세션 검증이 끝나지 않아 수익률 시각화를 보류합니다.</p>';
   // A shared absolute-percentage scale, with a real 0% midpoint for both sides.
   const max=Math.max(1,...m.sectors.map(x=>Math.abs(x.current_return_pct)));
-  return '<div class="ov3Sectors" aria-label="미국 S&P500 섹터 · 0% 중앙 기준 수익률">'
+  return breadthDigest(m)+'<div class="ov3Sectors" aria-label="미국 S&P500 섹터 · 0% 중앙 기준 수익률">'
     +'<div class="ov3SectorsHead"><strong>미국 S&P500 업종 11개 · 전체 강약</strong>'
     +'<small>일간 수익률 · <b class="loss">파랑 ← 하락</b> · <b>0%</b> · <b class="gain">상승 → 빨강</b> · 실제 자금흐름 아님</small></div>'
     +m.sectors.map(x=>{
@@ -239,7 +269,7 @@ function draw(m) {
   r.innerHTML=m.ready?rail(m,'strategy'):'<div class="ov3Pending">TRI-POD 기준점 확인 대기 · '+escapeHtml(m.reason)+'</div>';
  }
 }
-const runtime={version:'3.2-on-view-quotes',model,rail,distanceText,dailyMoveText,pointSummary,marketStripRows,marketStrip,sectorChart,needsCompletedCatchup,enabled:isV3};
+const runtime={version:'3.2-on-view-quotes',model,rail,distanceText,dailyMoveText,pointSummary,marketStripRows,marketStrip,sectorChart,breadthDigest,needsCompletedCatchup,enabled:isV3};
 if(typeof module==='object'&&module.exports){module.exports=runtime;return;}
 root.__JJOONI_OBS_V3=runtime;
 function mount(){
@@ -253,7 +283,7 @@ function mount(){
  document.body.classList.add('obsV3');
  if(brand&&!brand.querySelector('.ov3Back')){
   const a=document.createElement('a');a.className='ov3Back';a.href='?ui=v2'+(location.hash||'');a.textContent='V2로 돌아가기';brand.appendChild(a);}
- const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261120-observation-times-1';css.id='observatoryV3Skin';document.head.appendChild(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./observatory-v3.css?v=20261121-cohort-breadth-1';css.id='observatoryV3Skin';document.head.appendChild(css);
  const shell=document.querySelector('main.wrap');if(!shell)return;
  document.addEventListener('click',e=>{
    const marker=e.target.closest('button[data-ov3-point]');

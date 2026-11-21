@@ -141,6 +141,8 @@ const fixture='<!doctype html><html data-ct-layout="mobile-first"><head><meta ch
    assert.match(await page.locator('#ctHumanQuickV2').innerText(),/이전 수집 기준/);
    assert.doesNotMatch(await page.locator('#ctHumanQuickV2').innerText(),/\+₩100/,'no stale performance amount');
    await page.evaluate(()=>{window.__JJOONI_LIVE_PAYLOAD.stale_after_kst=new Date(Date.now()+600000).toISOString();document.dispatchEvent(new Event('jjooni:live-applied'))});
+   await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2')?.textContent.includes('손익 미확인: IRP'));
+   assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2QuickMetric small').first().innerText(),/손익 미확인: IRP/,'show actionable missing account not just 3\/4');
    await page.waitForFunction(()=>document.querySelector('#ctHumanQuickV2 .ctHumanV2DriverTrack[data-ct-metric="NAV_SHARE"]'));
    assert.equal(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverTrack[data-ct-metric="NAV_SHARE"]').count(),4);
    assert.match(await page.locator('#ctHumanQuickV2 .ctHumanV2DriverRow').first().innerText(),/25\.0%/);

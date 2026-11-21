@@ -254,7 +254,13 @@ function ensureQuickView(){
  const comparable=snapshotAligned&&m.known_day===4&&m.day_quality?.comparable_period&&m.day!=null;
  const dayText=comparable?formattedAmount(m.day):'합산 확인 대기';
  const dayTrust={BROKER_MEASURED:'증권사 실측',MODELED:'계산값',MIXED:'실측·계산 혼합',UNKNOWN:'원천 신뢰도 확인 필요'}[m.day_quality?.state]||'원천 검증 대기';
- const dayNote=!snapshotAligned?'현재 계좌 스냅샷 정합성 확인 대기':comparable?('동일 기간 4계좌 · '+dayTrust):('확인 '+m.known_day+'/4계좌 · 기준기간 대사 필요');
+ const accountLabels={TOSS:'Toss',ISA:'ISA',PENSION:'연금저축',IRP:'IRP'};
+ const missingDay=IDS.filter(id=>M.number(C.accounts[id]?.today_pnl)==null).map(id=>accountLabels[id]);
+ const dayNote=!snapshotAligned?'현재 계좌 스냅샷 정합성 확인 대기'
+  :comparable?('동일 기간 4계좌 · '+dayTrust)
+  :missingDay.length?('확인 '+m.known_day+'/4계좌 · 손익 미확인: '+missingDay.join('·'))
+  :!m.day_quality?.comparable_period?'4계좌 손익 기준기간 불일치 · 합산 보류'
+  :'4계좌 당일손익 검증 대기';
  const flowText=!snapshotAligned||m.flow==null?'확인 대기':formattedAmount(m.flow);
  const accounts=IDS.map((id,index)=>{
   const a=C.accounts[id]||{},day=snapshotAligned?M.number(a.today_pnl):null;

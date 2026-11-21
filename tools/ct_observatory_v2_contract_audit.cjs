@@ -33,7 +33,8 @@ function inspect(){
  assert(obsSource.includes('overflow-x:auto'),'mobile secondary tab scrolling missing');
  assert(obsSource.includes('safe-area-inset-bottom'),'bottom navigation must account for safe area');
 
- assert(rootHtml.includes('ct-human-v2.js?v=9-home-ux'),'Human V2 cache version drift');
+ const humanAsset=rootHtml.match(/ct-human-v2\.js\?v=(\d+)-[a-z0-9-]+/);
+ assert(humanAsset&&Number(humanAsset[1])>=9,'Human V2 asset must keep a versioned cache-bust (v9+)');
  assert(rootHtml.includes('responsive-layout.css?v=1.8-single-navigation'),'legacy responsive cache version drift');
  assert(human.includes('function syncNavigationOwner()')&&human.includes("force(tabs,'none')")&&human.includes("force(bottom,'none')"),
    'single-nav viewport arbiter missing');

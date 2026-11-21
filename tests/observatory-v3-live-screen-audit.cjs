@@ -22,12 +22,14 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
      const localHtml=fs.readFileSync('market-observatory/index.html','utf8');
      const expectedBoard=localHtml.match(/latest-board-v1\.js\?v=([^"]+)/)?.[1];
      const expectedRegime=localHtml.match(/market-regime-v1\.js\?v=([^"]+)/)?.[1];
-     assert(expectedBoard&&expectedRegime,'Missing versioned live board/regime source in checked-in HTML');
+     const expectedV3ForDeploy=localHtml.match(/observatory-v3\.js\?v=([^"]+)/)?.[1];
+     assert(expectedBoard&&expectedRegime&&expectedV3ForDeploy,'Missing versioned live board/regime/V3 source in checked-in HTML');
      for(let attempt=0;attempt<18;attempt++){
       const board=await page.locator('script[src*="latest-board-v1.js"]').getAttribute('src');
       const regime=await page.locator('script[src*="market-regime-v1.js"]').getAttribute('src');
-      if(board?.includes(expectedBoard)&&regime?.includes(expectedRegime))break;
-      assert(attempt<17,'Live Pages still has old board/regime asset after bounded publication retry');
+      const v3=await page.locator('script[src*="observatory-v3.js"]').getAttribute('src');
+      if(board?.includes(expectedBoard)&&regime?.includes(expectedRegime)&&v3?.includes(expectedV3ForDeploy))break;
+      assert(attempt<17,'Live Pages still has old board/regime/V3 asset after bounded publication retry');
       await page.waitForTimeout(7000);
       await page.reload({waitUntil:'domcontentloaded',timeout:90000});
      }
@@ -63,7 +65,17 @@ function box(e){if(!e)return null;const r=e.getBoundingClientRect();return {x:+r
     assert.equal(model.marks.length,4);
     assert(model.railText.includes(model.session),'TRI-POD rail date not visibly shown');
     assert(model.railText.includes(model.pod),'TRI-POD rail pod not visible');
-    assert(model.currentVersion?.includes('20261121-closed-eod-3'),'old V3 Javascript cached');
+    // PR CI audits the *already deployed* public site, not the unmerged PR.
+    // On post-merge push, require Pages to serve the exact checked-in V3 asset.
+    // Never hardcode a historical cache token: a legitimate release bumps it.
+    const localHtml=fs.readFileSync('market-observatory/index.html','utf8');
+    const expectedV3=localHtml.match(/observatory-v3\.js\?v=([^"]+)/)?.[1];
+    assert(expectedV3,'checked-in V3 asset lacks version');
+    assert(model.currentVersion?.includes('observatory-v3.js?v='),'V3 Javascript not loaded/versioned');
+    if(process.env.GITHUB_EVENT_NAME==='push'){
+      assert(model.currentVersion.includes(expectedV3),
+        'Pages V3 JS release asset differs from merged source; deployment not yet verified');
+    }
     assert(model.docWidth<=tc.width+3,'V3 homepage horizontal overflow '+model.docWidth);
     assert(model.bodyWidth<=tc.width+3,'V3 homepage body overflow '+model.bodyWidth);
     for(const o of [...model.cards,...model.tiles]){
