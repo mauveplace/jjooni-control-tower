@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261121-OBS-SONG-WORD-STUDY-086",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "origin": "USER_TO_JJOONI",
+  "work_type": "frontend",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User explicitly requested putting the source-verified Song Team Lead daily '오늘의 한 단어' study content into Observatory, 2026-11-21; limited approval to educational UI only.",
+  "objective": "Independently assess the Observatory Song One Word study panel: source-verified educational paraphrase dataset (28 dates), client-side searchable glossary, study cards, quiz, local-only progress, 5-tab V3 navigation unaffected, privacy and source accuracy, mobile responsive 390/800/1365. Owner requests public page deployment; reviewer only reviews (no merge).",
+  "acceptance": [
+    "Inspect exact current PR HEAD, diff, CI green on tests/song-word-study.test.cjs, tests/observatory-nav-v2.test.cjs and tests/song-word-study-e2e.cjs; independent code and mobile UX review.",
+    "Confirm 28 genuine '오늘의 한 단어' source dates, education paraphrases with separate speaker_context, avoid false claim that arbitrary missing daily files have a term. No private raw scripts or links in public dataset.",
+    "UI: existing 5 primary V3 navigation tabs preserved, new '오늘의 한 단어' under 시황 second level, no duplicate top and bottom tabs, no mobile overflow/hidden click or XSS; verify V1/V2 regression and deep-link if feasible.",
+    "Check search and category select, learned state local storage, flip card and multiple-choice scoring; keyboard/focus/ARIA, error and empty states.",
+    "Check future ingestion policy: initial historical snapshot only, never claim auto update from Google Drive unless a real approved ingestion job exists.",
+    "Read-only, educational only, no signal order, no TRI-POD rules or brokerage changes. Return ROY_OBS_WORD_REVIEW=PASS|NEEDS_CHANGES with reviewed_head and reproducible evidence and issues.",
+    "Do not merge or deploy as ROY. Owner asked JJOONI to implement/deploy public educational feature; code reviewer is independent only."
+  ],
+  "forbidden": [
+    "Do not publish private source audio/transcripts or full quotations",
+    "No account/customer/private info",
+    "Do not change trading rules, orders, automations, CI security or cloud resource billing."
+  ]
+}

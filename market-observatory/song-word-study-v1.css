@@ -1,0 +1,57 @@
+/* Song '오늘의 한 단어' · Observatory study tab. Scoped: no global nav/layout changes. */
+#song-terms{color:var(--text,#1b252f);--sw-ink:#17191c;--sw-yellow:#f5cf25;--sw-muted:#5e6978}
+#song-terms .sw-shell{max-width:1080px;margin:0 auto}
+#song-terms .sw-hero{position:relative;background:#181b21;border-radius:18px;padding:28px 28px 24px;color:#fff;overflow:hidden;border-bottom:5px solid var(--sw-yellow);margin-bottom:16px}
+#song-terms .sw-eyebrow{font-size:11px;letter-spacing:.12em;font-weight:850;color:#eed960}
+#song-terms h1{font-size:clamp(24px,4.5vw,37px);letter-spacing:-.05em;line-height:1.23;margin:9px 0 10px;color:#fff}
+#song-terms .sw-hero p{margin:0;max-width:750px;color:#d6dce6;font-size:13px;line-height:1.8}
+#song-terms .sw-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+#song-terms .sw-hero-badges span{border:1px solid #626b75;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:750}
+#song-terms .sw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+#song-terms .sw-stat{background:white;border:1px solid #e4e7ec;border-radius:12px;padding:15px}
+#song-terms .sw-stat small{display:block;color:#6c7581;font-size:11px}
+#song-terms .sw-stat b{display:block;margin-top:6px;font-size:23px;font-variant-numeric:tabular-nums}
+#song-terms .sw-head{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:20px}
+#song-terms .sw-mode{display:flex;gap:5px;padding:4px;background:#e9ebee;border-radius:12px}
+#song-terms .sw-mode button{border:0;background:transparent;color:#495362;min-height:42px;padding:0 15px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer}
+#song-terms .sw-mode button[aria-pressed="true"]{background:#fff;color:#17191c;box-shadow:0 2px 8px #14171d12}
+#song-terms .sw-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}
+#song-terms .sw-controls input,#song-terms .sw-controls select{border:1px solid #d6dce3;border-radius:10px;background:#fff;color:#182532;min-height:44px;padding:9px 11px;font-size:13px}
+#song-terms .sw-controls input{flex:1 1 245px;min-width:0}
+#song-terms .sw-controls select{flex:0 1 185px;min-width:130px}
+#song-terms .sw-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#song-terms .sw-card{background:#fff;border:1px solid #e2e6eb;border-radius:13px;padding:17px;min-width:0}
+#song-terms .sw-card-head{display:flex;align-items:start;justify-content:space-between;gap:7px}
+#song-terms .sw-date{color:#637183;font-size:11px;font-weight:700}
+#song-terms .sw-cat{display:inline-flex;margin-left:7px;padding:4px 7px;background:#f2f3f5;border-radius:6px;color:#394150;font-size:10px;font-weight:750}
+#song-terms .sw-card h3{font-size:19px;letter-spacing:-.04em;margin:10px 0 4px}
+#song-terms .sw-english{font-size:12px;color:#6d7682;line-height:1.5;overflow-wrap:anywhere}
+#song-terms .sw-def{margin:11px 0;font-size:13px;line-height:1.75;color:#263343;min-height:65px}
+#song-terms .sw-detail{border-top:1px solid #edf0f2;padding-top:12px;margin-top:10px;display:none}
+#song-terms .sw-card.expanded .sw-detail{display:block}
+#song-terms .sw-detail strong{font-size:11px;color:#596677}
+#song-terms .sw-detail p{font-size:12px;line-height:1.7;margin:4px 0 12px;color:#303c4a}
+#song-terms .sw-warn{background:#f7f7ee;border-left:3px solid #d7b63e;padding:11px 12px;border-radius:4px}
+#song-terms .sw-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+#song-terms button.sw-btn{min-height:42px;border:1px solid #cfd5dd;border-radius:9px;padding:8px 12px;background:#fff;color:#233448;font-size:12px;font-weight:800;cursor:pointer}
+#song-terms button.sw-btn.sw-primary{background:#191b1f;color:#fff;border-color:#191b1f}
+#song-terms button.sw-btn.sw-done{background:#e8f5ee;border-color:#9bcfb2;color:#11603b}
+#song-terms .sw-blank{background:#fff;padding:38px 15px;text-align:center;color:#6f7884;border:1px dashed #b8c1ca;border-radius:12px;grid-column:1/-1}
+#song-terms .sw-flash-shell{max-width:690px;margin:20px auto}
+#song-terms .sw-flash{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:19px;border:2px solid #dce2e8;background:white;box-shadow:0 8px 34px #172d4410;padding:25px;cursor:pointer;width:100%;color:#212d3c}
+#song-terms .sw-flash small{color:#687786;font-size:12px;font-weight:700}
+#song-terms .sw-flash b{font-size:clamp(25px,6vw,38px);letter-spacing:-.04em;margin:17px 0}
+#song-terms .sw-flash span{color:#596979;font-size:13px;line-height:1.8}
+#song-terms .sw-flash-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px;justify-content:center}
+#song-terms .sw-quiz-box{max-width:760px;margin:18px auto;background:#fff;border:1px solid #e0e4e8;border-radius:14px;padding:25px}
+#song-terms .sw-quiz-prompt{font-size:19px;line-height:1.7;font-weight:800;margin:15px 0}
+#song-terms .sw-options{display:grid;gap:10px}
+#song-terms .sw-option{text-align:left;border:1px solid #d2d8e0;border-radius:10px;min-height:49px;padding:12px 15px;background:#fff;font-size:14px;font-weight:700;color:#2b3542;cursor:pointer}
+#song-terms .sw-option:disabled{cursor:default}
+#song-terms .sw-option.correct{background:#e8f6ed;border-color:#32815b}
+#song-terms .sw-option.wrong{background:#fff0ef;border-color:#bd554b}
+#song-terms .sw-feedback{margin-top:14px;padding:13px;background:#f3f6f8;border-radius:9px;font-size:13px;line-height:1.7}
+#song-terms button:focus-visible,#song-terms input:focus-visible,#song-terms select:focus-visible{outline:3px solid #c49b00;outline-offset:2px}
+#song-terms .sw-smallnote{color:#6a7481;font-size:11px;line-height:1.7;margin-top:14px}
+@media(max-width:720px){#song-terms .sw-hero{padding:20px 17px}#song-terms .sw-hero p{font-size:12px}#song-terms .sw-items{grid-template-columns:1fr}#song-terms .sw-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#song-terms .sw-stat{padding:10px}#song-terms .sw-stat b{font-size:18px}#song-terms .sw-card{padding:15px}#song-terms .sw-def{min-height:0}#song-terms .sw-mode{width:100%}#song-terms .sw-mode button{flex:1;white-space:nowrap;padding:0 8px}#song-terms .sw-quiz-box{padding:16px}#song-terms .sw-flash{min-height:280px}}
+@media(prefers-reduced-motion:reduce){#song-terms *{animation:none!important;transition:none!important}}

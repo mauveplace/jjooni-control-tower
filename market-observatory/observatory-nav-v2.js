@@ -10,7 +10,7 @@
     { id: 'market', label: '시장', tabs: ['indices', 'official-macro', 'rates', 'fx', 'energy', 'sectors'] },
     { id: 'strategy', label: '전략', tabs: ['tripod', 'jjooni-tripod', 'regime'] },
     { id: 'calendar', label: '일정', tabs: ['calendar'] },
-    { id: 'brief', label: '시황', tabs: ['morning-brief', 'analysis-lab'] }
+    { id: 'brief', label: '시황', tabs: ['morning-brief', 'song-terms', 'analysis-lab'] }
   ];
   function groupOf(tab) { return IA.find(g => g.tabs.includes(tab)) || null; }
   function enabled(search, stored) {

@@ -7,7 +7,7 @@ const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 const read=name=>fs.readFileSync(path.join(ROOT,name),'utf8');
 const OBS_TABS=['overview','indices','official-macro','rates','fx','energy','sectors',
- 'tripod','jjooni-tripod','regime','calendar','morning-brief','analysis-lab'];
+ 'tripod','jjooni-tripod','regime','calendar','morning-brief','song-terms','analysis-lab'];
 const OBS_LABELS=['오늘','시장','전략','일정','시황'];
 
 function inspect(){
@@ -22,7 +22,7 @@ function inspect(){
 
  assert.deepEqual(obsNav.IA.map(x=>x.label),OBS_LABELS,'V2 5-group contract drift');
  const flattened=obsNav.IA.flatMap(x=>x.tabs);
- assert.equal(new Set(flattened).size,13,'duplicate or missing Observatory tabs');
+ assert.equal(new Set(flattened).size,14,'duplicate or missing Observatory tabs');
  assert.deepEqual([...flattened].sort(),[...OBS_TABS].sort(),'all old destinations must remain reachable');
  for(const tab of OBS_TABS)assert(obsNav.groupOf(tab),'orphan Observatory destination '+tab);
  assert.equal(obsNav.enabled('',null),true,'new visitors must default to V2');

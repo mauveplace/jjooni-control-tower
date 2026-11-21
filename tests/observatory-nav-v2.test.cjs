@@ -9,8 +9,8 @@ const staticTabs = [...html.matchAll(/data-tab="([^"]+)"/g)].map(m => m[1]);
 // Inserted at runtime by analysis-lab-v1.js and index-explorer-v1.js.
 const LEGACY = [...new Set([...staticTabs, 'analysis-lab', 'indices'])];
 
-test('13 legacy tabs, every one mapped to exactly one v2 tab (0 deletions)', () => {
-  assert.equal(LEGACY.length, 13, LEGACY.join(','));
+test('14 legacy tabs, every one mapped to exactly one v2 tab (0 deletions)', () => {
+  assert.equal(LEGACY.length, 14, LEGACY.join(','));
   for (const tab of LEGACY) {
     const owners = IA.filter(g => g.tabs.includes(tab));
     assert.equal(owners.length, 1, tab);
@@ -42,4 +42,12 @@ test('V3 default navigation; explicit V1/V2 override old localStorage', () => {
 test('module is loaded after the legacy runtime', () => {
   const nav = html.indexOf('observatory-nav-v2.js');
   assert.ok(nav > html.indexOf('latest-board-v1.js') && nav > html.indexOf('analysis-lab-v1.js'));
+});
+
+test('Song word-study stays under 시황 group without sixth primary nav', () => {
+  assert.equal(IA.length,5);
+  assert.equal(groupOf('song-terms').id,'brief');
+  assert.ok(LEGACY.includes('song-terms'));
+  assert.match(html, /id="song-terms"/);
+  assert.match(html, /song-word-study-v1\.js/);
 });
