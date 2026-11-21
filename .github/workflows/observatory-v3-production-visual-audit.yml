@@ -1,0 +1,40 @@
+name: Observatory V3 Production Visual Audit
+on:
+  pull_request:
+    paths:
+      - tests/observatory-v3-live-screen-audit.cjs
+      - .github/workflows/observatory-v3-production-visual-audit.yml
+  push:
+    branches: [main]
+    paths:
+      - tests/observatory-v3-live-screen-audit.cjs
+      - .github/workflows/observatory-v3-production-visual-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-v3-visual:
+    name: Live Pages TRI-POD actual browser 390/800/1440
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Chromium for isolated live UI measurement
+        run: |
+          npm install --no-save --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Measure public deployed V3, TRI-POD and historical comparison
+        run: node tests/observatory-v3-live-screen-audit.cjs
+        env:
+          OBS_AUDIT_BASE_URL: https://mauveplace.github.io/jjooni-control-tower/market-observatory/
+      - name: Preserve production screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-v3-live-visual-390-800-1440
+          path: artifacts/observatory-v3-live-screen/
+          if-no-files-found: warn
+          retention-days: 14
