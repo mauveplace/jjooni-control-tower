@@ -22,7 +22,12 @@ function render(d){
   const pulse=el('#pulse');
   if(pulse && !el('#mrPulse')){
     const x=document.createElement('span'); x.id='mrPulse'; x.className='chip';
-    x.textContent=(state==='ACTIVE'?'REGIME ':'과거 REGIME · '+state+' ')+(d.regime?.code||'—').replaceAll('_',' ');
+    const full=(state==='ACTIVE'?'REGIME ':'과거 REGIME · '+state+' ')+(d.regime?.code||'—').replaceAll('_',' ');
+    const mobileV3=document.body.classList.contains('obsV3')&&window.innerWidth<=600;
+    const short={ACTIVE:'합의 레짐 · 유효',EXPIRED:'과거 레짐 · 만료',
+      PENDING:'레짐 · 대기',PROVISIONAL:'레짐 · 잠정',UNKNOWN:'레짐 · 미확인'};
+    x.textContent=mobileV3?(short[state]||'레짐 · 확인'):full;
+    x.title=full;
     pulse.appendChild(x);
   }
   const bond=t.bond_stress||{}, actions=d.actions||{};
