@@ -1,0 +1,32 @@
+{
+  "schema": "JJOONI_COLLAB_V4",
+  "task_id": "D-261119-WINDOWS-PC-DUAL-AGENT-057",
+  "repository": "mauveplace/jjooni-control-tower",
+  "base_branch": "main",
+  "source_sha": null,
+  "objective": "Build Windows PC-backed local Codex CLI + Claude Code CLI relay for direct JJOONI↔ROY collaboration with GitHub audited handoff, persistent dedupe/restart and no paid infra. Independently review permissions, public-only scope, failure recovery and script correctness before release.",
+  "mode": "SYSTEM_REVIEW_ONLY",
+  "privacy": "PUBLIC_DATA_ONLY",
+  "required_reviewers": [
+    "ROY"
+  ],
+  "optional_reviewers": [],
+  "origin": "USER_TO_JJOONI",
+  "work_type": "local_windows_pc_agent_orchestration",
+  "release_gate": "USER_APPROVAL_REQUIRED",
+  "owner_approval_evidence": "User 2026-11-19 explicitly instructed JJOONI to stop GitHub-only tests and implement reliable cooperation using their Windows PC.",
+  "acceptance": [
+    "Read and independently review actual new ai-collab/pc-relay/*.py, *.ps1, README and tests on exact PR HEAD. Compare with documented current cloud Routines, ensure local Codex/Claude execution is REAL and not falsely called hosted ChatGPT Work.",
+    "Check Windows PowerShell 5.1 syntax, startup shortcut, dependency detection, login requirements, CLI flags with official sources, cost gate and no API-key billing.",
+    "Review GitHub source validation, current-HEAD matching, V4 task path validation, source-comment ID dedupe, trust boundaries and the PC-COLLAB public-issue contract.",
+    "Identify correctness/security defects including command injection, state races, private data leakage, broad permission, uncontrolled model calls, PR diff/checkout confusion, stale PR, retries and PC reboot/offline.",
+    "Verify tests/test_pc_relay.py independently, run tests where available, recommend exact minimal patches; state actual ROY verdict ROY_PC_RELAY_CODE_REVIEW=PASS|NEEDS_CHANGES|BLOCKED with full HEAD and firsthand evidence.",
+    "Do not claim installation on the user's Windows machine or production operation until the user performs one-time setup and observed live roundtrip."
+  ],
+  "forbidden": [
+    "No deployment, trading, live account data or secret changes.",
+    "No Windows remote tunnel, new paid Cloud/API services, admin scope or GitHub permissions widening.",
+    "ROY is read-only reviewer; no edits, push or merge by ROY under existing writer policy.",
+    "Do not conflate local Claude Code with authenticated Cloud ROY Routine or local Codex with hosted Work execution."
+  ]
+}
