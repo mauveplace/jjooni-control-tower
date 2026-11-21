@@ -1,39 +1,39 @@
 {
   "schema": "JJOONI_OBSERVATORY_DATA_AUDIT_V2",
-  "generated_kst": "2026-11-21T12:27:11+09:00",
-  "overall": "WARN",
+  "generated_kst": "2026-11-21T15:33:23+09:00",
+  "overall": "PASS",
   "critical_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "observatory_session": "2026-11-20",
   "file_status": {
     "observatory": {
-      "generated_kst": "2026-11-21T06:36:40+09:00",
+      "generated_kst": "2026-11-21T15:32:48+09:00",
       "session": "2026-11-20",
       "schema": "JJOONI_MARKET_OBSERVATORY_V1"
     },
     "daily_pulse": {
-      "generated_kst": "2026-11-21T12:09:35+09:00",
+      "generated_kst": "2026-11-21T15:33:23+09:00",
       "session": "2026-11-20",
       "snapshot_status": "FINAL"
     },
     "public_tripod": {
-      "generated_kst": "2026-11-21T12:09:35+09:00",
+      "generated_kst": "2026-11-21T15:33:23+09:00",
       "session": "2026-11-20",
       "ok": true,
       "target": "현금 100%"
     },
     "fedwatch": {
-      "generated_kst": "2026-11-21T12:14:51+09:00",
+      "generated_kst": "2026-11-21T15:32:49+09:00",
       "source_kind": null,
       "source_as_of_kst": null,
-      "market_data_as_of": "2026-11-19",
+      "market_data_as_of": "2026-11-20",
       "expected_market_data_date": "2026-11-20",
       "audit_expected_market_data_date": "2026-11-20",
-      "declared_freshness": "LAGGING",
-      "audit_state": "LAGGING"
+      "declared_freshness": "LIVE",
+      "audit_state": "LIVE"
     },
     "calendar": {
-      "generated_kst": "2026-11-21T12:26:15+09:00",
+      "generated_kst": "2026-11-21T15:32:54+09:00",
       "events": 200,
       "actual_freshness": "LIVE",
       "overdue_count": 0,
@@ -43,7 +43,7 @@
       "failed_sources": []
     },
     "sector": {
-      "generated_kst": "2026-11-21T11:53:06+09:00",
+      "generated_kst": "2026-11-21T15:33:05+09:00",
       "as_of_date": "2026-11-20",
       "priced_count": 46
     },
@@ -68,13 +68,10 @@
       "monitoring_scope": "INVESTMENT_BOARD_REFERENCE_ONLY"
     },
     "freshness": {
-      "generated_kst": "2026-11-21T12:27:11+09:00",
-      "overall": "LIVE_WITH_WARNINGS",
+      "generated_kst": "2026-11-21T15:33:20+09:00",
+      "overall": "LIVE",
       "critical_bad": [],
-      "warnings": [
-        "fedwatch",
-        "audit"
-      ]
+      "warnings": []
     },
     "watchdog": {
       "checked_kst": "2026-11-21T10:37:09+09:00",
@@ -506,17 +503,17 @@
         "BTCUSD": {
           "count": 1117,
           "last_date": "2026-11-21",
-          "last_value": 58681.96,
+          "last_value": 56240.01,
           "group": "crypto",
-          "latest_value": 58681.96,
+          "latest_value": 56240.01,
           "latest_matches": true
         },
         "ETHUSD": {
           "count": 1117,
           "last_date": "2026-11-21",
-          "last_value": 1619.24,
+          "last_value": 1571.56,
           "group": "crypto",
-          "latest_value": 1619.24,
+          "latest_value": 1571.56,
           "latest_matches": true
         }
       },
@@ -542,13 +539,13 @@
       "latest_mismatch": []
     },
     "fedwatch": {
-      "state": "LAGGING",
+      "state": "LIVE",
       "anchor": "2026-11-20",
       "allow_lag_days": 0,
       "critical": false,
       "items": {
         "FEDWATCH": {
-          "last_date": "2026-11-19",
+          "last_date": "2026-11-20",
           "last_value": null
         }
       },
@@ -560,25 +557,19 @@
     "BTCUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-21T11:52:52+09:00",
-      "current_quote_age_seconds": 2059,
+      "quote_as_of_kst": "2026-11-21T15:33:03+09:00",
+      "current_quote_age_seconds": 20,
       "captured_quote_age_seconds": 0
     },
     "ETHUSD": {
       "status": "LIVE",
       "producer_status": "LIVE",
-      "quote_as_of_kst": "2026-11-21T11:52:52+09:00",
-      "current_quote_age_seconds": 2059,
+      "quote_as_of_kst": "2026-11-21T15:33:03+09:00",
+      "current_quote_age_seconds": 20,
       "captured_quote_age_seconds": 0
     }
   },
-  "issues": [
-    {
-      "code": "GROUP_FEDWATCH_LAGGING",
-      "severity": "WARN",
-      "detail": "anchor=2026-11-20 dates=FEDWATCH:2026-11-19"
-    }
-  ],
+  "issues": [],
   "contracts": {
     "completed_session": "CORE_US_AND_US_SUPPLEMENT_MUST_MATCH_OBSERVATORY_SESSION",
     "continuous_daily": "REGIONAL_FX_NEXT_LOCAL_DATE_MAY_LEAD_US_CASH_DXY_WITH_ORIGINAL_DATES_PRESERVED;ENERGY_METALS_MAY_LAG_AT_MOST_1_DAY",
